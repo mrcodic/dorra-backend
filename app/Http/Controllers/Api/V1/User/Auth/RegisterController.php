@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Api\User\V1\Auth;
+namespace App\Http\Controllers\Api\V1\User\Auth;
+
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterUserRequest;

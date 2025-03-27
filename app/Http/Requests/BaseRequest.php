@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\Http;
+use App\Enums\HttpEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -34,7 +34,7 @@ class BaseRequest extends FormRequest
     {
         if ($this->wantsJson()) {
             throw new HttpResponseException(
-            Response::api(Http::UNPROCESSABLE_ENTITY,message:"Validation error",errors: $validator->errors())
+            Response::api(HttpEnum::UNPROCESSABLE_ENTITY,message:"Validation error",errors: $validator->errors())
         );
 
         }

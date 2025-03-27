@@ -1,6 +1,6 @@
 <?php
 namespace App\Enums;
-enum Http: int
+enum HttpEnum: int
 {
     case OK = 200;
     case CREATED = 201;

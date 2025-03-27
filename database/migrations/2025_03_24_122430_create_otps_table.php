@@ -12,11 +12,15 @@ return new class extends Migration {
     {
         Schema::create('otps', function (Blueprint $table) {
             $table->id();
-            $table->string('identifier');
+            $table->morphs('otpable');
+            $table->string('identifier')->nullable();
             $table->string('otp');
+            $table->tinyInteger('type');
             $table->timestamp('expires_at');
             $table->timestamps();
+            $table->index(['otpable_id', 'otpable_type']);
         });
+
     }
 
     /**

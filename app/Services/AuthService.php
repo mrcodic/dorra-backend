@@ -31,8 +31,7 @@ class AuthService
     public function login($validatedData): ?User
     {
         $user = $this->userRepository->findByEmail($validatedData['email']);
-        $expiresAt = isset($validatedData['remember']) && $validatedData['remember'] ? now()->addDays(30)
-            : now()->addHours(5);
+        $expiresAt = ($validatedData['remember'] ?? false) ? now()->addDays(30) : now()->addHours(5);
         $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
         $user->token = $plainTextToken;
         return $user;

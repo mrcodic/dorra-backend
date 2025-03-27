@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Enums\Http;
+use App\Enums\HttpEnum;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
@@ -22,10 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Response::macro('api',function ($statusCode = Http::OK , $message = "success", $data = [], $errors = []) {
+        Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "success", $data = [], $errors = []) {
             $response = [
                 'status' => $statusCode->value,
-                'success' => $statusCode->value < Http::BAD_REQUEST->value,
+                'success' => $statusCode->value < HttpEnum::BAD_REQUEST->value,
                 'message' => $message,
             ];
             if (!empty($errors)) {

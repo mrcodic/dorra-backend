@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Api\User\V1\Auth;
+namespace App\Http\Controllers\Api\V1\User\Auth;
 
-use App\Enums\Http;
+use App\Enums\HttpEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
@@ -27,7 +27,7 @@ class LoginController extends Controller
     {
         $user = $this->authService->loginWithGoogle($request);
         if (!$user) {
-            return Response::api(Http::UNAUTHORIZED, message: "Google authentication failed",
+            return Response::api(HttpEnum::UNAUTHORIZED, message: "Google authentication failed",
                 errors: [
                     'token' => ['Invalid or expired Google token. Please try again.']
                 ]);
