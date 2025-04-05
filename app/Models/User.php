@@ -3,16 +3,19 @@
 namespace App\Models;
 
 // use Illuminate\Interfaces\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo,HasMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -20,12 +23,12 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-            'first_name',
-            'last_name',
-            'email',
-            'phone_number',
-            'password',
-            'country_code_id',
+        'first_name',
+        'last_name',
+        'email',
+        'phone_number',
+        'password',
+        'country_code_id',
         'status',
         'last_login_ip',
         'last_login_at',
@@ -44,6 +47,16 @@ class User extends Authenticatable
         'status' => 1,
     ];
 
+    public function countryCode(): BelongsTo
+    {
+        return $this->belongsTo(CountryCode::class);
+    }
+
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -57,14 +70,12 @@ class User extends Authenticatable
         ];
     }
 
-    public function countryCode(): BelongsTo
+    protected function image(): Attribute
     {
-        return $this->belongsTo(CountryCode::class);
+        return Attribute::make(
+            get: fn(?string $value) => $this->getFirstMediaUrl('users') ?: asset('images/default-user.png')
+        );
     }
 
-    public function socialAccounts(): HasMany
-    {
-        return $this->hasMany(SocialAccount::class);
-    }
 
 }

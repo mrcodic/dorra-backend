@@ -16,13 +16,14 @@ class AuthService
     public SocialAccountRepository $socialAccountRepository){}
 
 
-    public function register($validatedData)
+    public function register($validatedData): false|User
     {
         if (!$this->verifyOtp($validatedData['email'],$validatedData['otp'])){
             return false;
         }
         $validatedData['email_verified_at'] = now();
         $user = $this->userRepository->create($validatedData);
+        if (!empty($validatedData['image'])){handleMediaUploads($validatedData['image'],$user);}
         $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
         $user->token = $plainTextToken;
         return $user;
@@ -38,7 +39,7 @@ class AuthService
 
     }
 
-    public function loginWithGoogle($request)
+    public function loginWithGoogle($request): false|User|null
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->token);

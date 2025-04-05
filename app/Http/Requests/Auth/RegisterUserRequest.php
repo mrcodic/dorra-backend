@@ -30,6 +30,7 @@ class RegisterUserRequest extends BaseRequest
             'password' => ['required', 'string', 'confirmed',Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'otp' =>['required','numeric','digits:6'],
             'country_code_id' => ['required', 'exists:country_codes,id'],
+            'image' => ['nullable', 'image' , 'mimes:jpeg,png,jpg,svg'],
         ];
     }
 

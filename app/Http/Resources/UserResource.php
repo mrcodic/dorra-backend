@@ -19,8 +19,10 @@ class UserResource extends JsonResource
             'last_name' => $this->last_name,
             'email' => $this->email,
             'phone_number' => $this->phone_number,
+            'image' => $this->image,
             'country_details' => CountryCodeResource::make($this->whenLoaded('countryCode')),
-            'token' => $this->token,
+            'connected_accounts' => SocialAccountResource::collection($this->whenLoaded('socialAccounts')),
+            'token' => $this->when($this->token, $this->token),
         ];
     }
 }

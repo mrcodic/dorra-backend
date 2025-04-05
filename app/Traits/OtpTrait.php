@@ -2,10 +2,13 @@
 
 namespace App\Traits;
 
+use App\Enums\OtpTypeEnum;
 use App\Mail\OtpMail;
 use App\Models\Otp;
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Response;
 
 trait OtpTrait
 {
@@ -69,4 +72,18 @@ trait OtpTrait
     {
         Cache::forget('password_reset_' . $resetToken);
     }
+    protected function sendOtpResponse(string $email, OtpTypeEnum $type, User $user = null)
+    {
+        $otp = $this->generateOtp($email, $type, $user);
+        $now = now();
+        $expiresAt = $otp->expires_at;
+        $diff = $now->diff($expiresAt);
+
+        return Response::api(message: "Otp has been sent to your email", data: [
+            'current_time' => $now,
+            'otp_expires_at' => $expiresAt,
+            'remaining_time' => $diff->i . ' minutes and ' . $diff->s . ' seconds',
+        ]);
+    }
+
 }

@@ -3,7 +3,8 @@
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\OtpController,
     Auth\RegisterController,
-    Auth\ResetPasswordController};
+    Auth\ResetPasswordController,
+    Profile\ProfileController};
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('register')->group(function () {
@@ -28,10 +29,10 @@ Route::prefix('login')->controller(LoginController::class)->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('test', function () {
-        return 'test';
+    Route::group(['prefix' => 'profile', 'controller' => ProfileController::class],function () {
+        Route::get('/', 'show');
+        Route::put('/', 'update');
     });
-
 });
 
 
