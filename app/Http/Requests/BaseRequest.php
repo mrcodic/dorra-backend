@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Response;
 class BaseRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Determine if the v1 is authorized to make this request.
      */
     public function authorize(): bool
     {

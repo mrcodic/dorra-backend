@@ -4,12 +4,11 @@ namespace App\Http\Controllers\Api\V1\User\Auth;
 
 use App\Enums\HttpEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\User\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller
 {

@@ -15,13 +15,18 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'email' => $this->email,
             'phone_number' => $this->phone_number,
-            'image' => $this->image,
+            'password_last_updated_at' => $this->password_updated_at?->toDateString(),
+            'is_mobile_notifications_enabled' => $this->is_mobile_notifications_enabled,
+            'is_email_notifications_enabled' => $this->is_email_notifications_enabled,
+            'image' => MediaResource::make($this->image),
             'country_details' => CountryCodeResource::make($this->whenLoaded('countryCode')),
             'connected_accounts' => SocialAccountResource::collection($this->whenLoaded('socialAccounts')),
+            'notification_types' => NotificationTypeResource::collection($this->whenLoaded('notificationTypes')),
             'token' => $this->when($this->token, $this->token),
         ];
     }

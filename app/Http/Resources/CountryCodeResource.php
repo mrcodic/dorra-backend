@@ -15,6 +15,7 @@ class CountryCodeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'name' => $this->country_name,
             'iso_code' => $this->iso_code,
             'phone_code' => $this->phone_code,

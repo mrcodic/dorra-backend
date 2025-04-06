@@ -28,8 +28,11 @@ class User extends Authenticatable implements HasMedia
         'email',
         'phone_number',
         'password',
+        'password_updated_at',
         'country_code_id',
         'status',
+        'is_email_notifications_enabled',
+        'is_mobile_notifications_enabled',
         'last_login_ip',
         'last_login_at',
     ];
@@ -46,6 +49,26 @@ class User extends Authenticatable implements HasMedia
     protected $attributes = [
         'status' => 1,
     ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password_updated_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => $this->getFirstMedia('users')
+        );
+    }
 
     public function countryCode(): BelongsTo
     {
@@ -57,25 +80,14 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(SocialAccount::class);
     }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function notificationTypes()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsToMany(NotificationType::class)
+            ->withPivot('enabled')
+            ->withTimestamps();
     }
 
-    protected function image(): Attribute
-    {
-        return Attribute::make(
-            get: fn(?string $value) => $this->getFirstMediaUrl('users') ?: asset('images/default-user.png')
-        );
-    }
+
 
 
 }

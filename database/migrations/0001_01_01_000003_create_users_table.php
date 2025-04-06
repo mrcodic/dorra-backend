@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('phone_number');
             $table->string('password');
+            $table->timestamp('password_updated_at')->nullable();
             $table->unsignedTinyInteger('status');
             $table->foreignIdFor(CountryCode::class)->constrained()->cascadeOnDelete();
             $table->string('last_login_ip', 45)->nullable();

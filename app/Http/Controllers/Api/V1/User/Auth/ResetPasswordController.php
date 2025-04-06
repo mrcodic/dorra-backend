@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\User\Auth;
 
 use App\Enums\HttpEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\User\Auth\ResetPasswordRequest;
 use App\Models\User;
 use App\Traits\OtpTrait;
 use Illuminate\Support\Facades\Response;

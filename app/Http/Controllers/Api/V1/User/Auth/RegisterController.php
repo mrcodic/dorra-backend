@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\User\Auth;
 
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\RegisterUserRequest;
+use App\Http\Requests\User\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Services\AuthService;
@@ -19,7 +19,7 @@ class RegisterController extends Controller
      * Handle the incoming request.
      * @throws ValidationException
      */
-    public function __invoke(RegisterUserRequest $request)
+    public function __invoke(RegisterRequest $request)
     {
        $user = $this->authService->register($request->validated());
        if (!$user) {

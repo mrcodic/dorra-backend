@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\User\Auth;
 
 use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rules\Password;
 
-class RegisterUserRequest extends BaseRequest
+class RegisterRequest extends BaseRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Determine if the v1 is authorized to make this request.
      */
     public function authorize(): bool
     {

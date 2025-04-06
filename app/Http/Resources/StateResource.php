@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class SocialAccountResource extends JsonResource
+class StateResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,7 +16,8 @@ class SocialAccountResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'provider' => $this->provider,
+            'name' => $this->name,
+            'country' => CountryResource::make($this->whenLoaded('country')),
         ];
     }
 }

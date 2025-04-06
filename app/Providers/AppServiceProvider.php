@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "success", $data = [], $errors = []) {
+        Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "Request completed successfully", $data = [], $errors = []) {
             $response = [
                 'status' => $statusCode->value,
                 'success' => $statusCode->value < HttpEnum::BAD_REQUEST->value,

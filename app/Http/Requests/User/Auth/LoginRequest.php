@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\User\Auth;
 
 use App\Http\Requests\BaseRequest;
 use Illuminate\Support\Facades\Auth;
@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends BaseRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Determine if the v1 is authorized to make this request.
      */
     public function authorize(): bool
     {

@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\User\Auth;
 
 use App\Http\Requests\BaseRequest;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
 class ResetPasswordRequest extends BaseRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Determine if the v1 is authorized to make this request.
      */
     public function authorize(): bool
     {
@@ -37,7 +36,7 @@ class ResetPasswordRequest extends BaseRequest
         return [
             'email.required' => 'Email is required.',
             'email.email' => 'Invalid email format.',
-            'email.exists' => 'No user found with this email.',
+            'email.exists' => 'No v1 found with this email.',
             'otp.required' => 'OTP is required.',
             'otp.digits' => 'OTP must be exactly 6 digits.',
             'password.required' => 'Password is required.',
