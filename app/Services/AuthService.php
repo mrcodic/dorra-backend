@@ -12,18 +12,23 @@ use Laravel\Socialite\Facades\Socialite;
 class AuthService
 {
     use OtpTrait;
+
     public function __construct(public UserRepositoryInterface $userRepository,
-    public SocialAccountRepository $socialAccountRepository){}
+                                public SocialAccountRepository $socialAccountRepository)
+    {
+    }
 
 
     public function register($validatedData): false|User
     {
-        if (!$this->verifyOtp($validatedData['email'],$validatedData['otp'])){
+        if (!$this->verifyOtp($validatedData['email'], $validatedData['otp'])) {
             return false;
         }
         $validatedData['email_verified_at'] = now();
         $user = $this->userRepository->create($validatedData);
-        if (!empty($validatedData['image'])){handleMediaUploads($validatedData['image'],$user);}
+        if (!empty($validatedData['image'])) {
+            handleMediaUploads($validatedData['image'], $user);
+        }
         $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
         $user->token = $plainTextToken;
         return $user;
@@ -39,13 +44,19 @@ class AuthService
 
     }
 
-    public function loginWithGoogle($request): false|User|null
+    public function redirectToGoogle($request)
+    {
+        return Socialite::driver('google')->stateless()->redirect();
+
+    }
+
+    public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->token);
+            $googleUser = Socialite::driver('google')->stateless()->user();
             $user = $this->userRepository->findByEmail($googleUser->getEmail());
-            if(!$user){
-                $nameParts = explode(' ',$googleUser->getName());
+            if (!$user) {
+                $nameParts = explode(' ', $googleUser->getName());
                 $firstName = $nameParts[0] ?? '';
                 $lastName = $nameParts[1] ?? '';
                 $user = $this->userRepository->create([
@@ -56,22 +67,16 @@ class AuthService
                     'email_verified_at' => now(),
                 ]);
             }
-            $this->socialAccountRepository->updateOrCreate(['user_id'=>$user->id, 'provider' => 'google',],[
+            $this->socialAccountRepository->updateOrCreate(['user_id' => $user->id, 'provider' => 'google',], [
                 'provider_id' => $googleUser->getId(),
             ]);
             $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
             $user->token = $plainTextToken;
             return $user;
 
-        }catch (Exception $exception){
+        } catch (Exception $exception) {
             return false;
         }
-
-    }
-
-    public function loginWithApple()
-    {
-
     }
 
 }

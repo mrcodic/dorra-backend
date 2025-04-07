@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.18",
         "laravel/tinker": "^2.9",
+        "propaganistas/laravel-phone": "^5.3",
         "spatie/laravel-medialibrary": "^11.12",
         "spatie/laravel-query-builder": "^6.3"
     },

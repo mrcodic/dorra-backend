@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('phone_number');
+            $table->string('phone_number')->nullable();
             $table->string('password');
             $table->timestamp('password_updated_at')->nullable();
             $table->unsignedTinyInteger('status');
-            $table->foreignIdFor(CountryCode::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(CountryCode::class)->constrained()->nullOnDelete();
             $table->string('last_login_ip', 45)->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->rememberToken();

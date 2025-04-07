@@ -14,5 +14,10 @@ class ShippingAddressRepository extends BaseRepository implements ShippingAddres
     {
         parent::__construct($shippingAddress);
     }
+    public function getShippingAddressesForUser($user)
+    {
+        return $user->shippingAddresses->load('state');
+    }
+
 
 }

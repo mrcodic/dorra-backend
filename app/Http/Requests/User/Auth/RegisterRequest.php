@@ -3,7 +3,9 @@
 namespace App\Http\Requests\User\Auth;
 
 use App\Http\Requests\BaseRequest;
+use App\Models\CountryCode;
 use Illuminate\Validation\Rules\Password;
+use Propaganistas\LaravelPhone\Rules\Phone;
 
 class RegisterRequest extends BaseRequest
 {
@@ -22,11 +24,12 @@ class RegisterRequest extends BaseRequest
      */
     public function rules(): array
     {
+        $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'phone_number' => ['required', 'string', 'min:10', 'max:15', 'unique:users,phone_number'],
+            'phone_number' => ['required', 'string', 'min:10', 'max:15', 'unique:users,phone_number', new Phone($isoCode),],
             'password' => ['required', 'string', 'confirmed',Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'otp' =>['required','numeric','digits:6'],
             'country_code_id' => ['required', 'exists:country_codes,id'],
@@ -41,6 +44,11 @@ class RegisterRequest extends BaseRequest
             'phone_number.unique' => 'This phone number is already in use.',
             'password.confirmed' => 'Passwords do not match.',
             'country_code_id.exists' => 'Selected country is invalid.',
+            'phone_number.required' => 'The phone number is required.',
+            'phone_number.min' => 'The phone number must be at least 10 characters.',
+            'phone_number.max' => 'The phone number must be at most 15 characters.',
+            'phone_number.phone' => 'The phone number is not valid. Please provide a valid phone number, including the country code (e.g., +201234567890 for Egypt).',
         ];
     }
+
 }

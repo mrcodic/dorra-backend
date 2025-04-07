@@ -5,7 +5,7 @@ namespace App\Models;
 // use Illuminate\Interfaces\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany};
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -59,8 +59,18 @@ class User extends Authenticatable implements HasMedia
         return [
             'email_verified_at' => 'datetime',
             'password_updated_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function ($user) {
+           $user->last_login_ip = request()->ip();
+           $user->last_login_at = now();
+        });
+        parent::booted();
     }
 
     protected function image(): Attribute
@@ -80,7 +90,12 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(SocialAccount::class);
     }
 
-    public function notificationTypes()
+    public function shippingAddresses(): HasMany
+    {
+        return $this->hasMany(ShippingAddress::class);
+    }
+
+    public function notificationTypes(): BelongsToMany
     {
         return $this->belongsToMany(NotificationType::class)
             ->withPivot('enabled')

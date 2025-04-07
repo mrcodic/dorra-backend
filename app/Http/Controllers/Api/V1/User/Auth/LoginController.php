@@ -19,19 +19,23 @@ class LoginController extends Controller
     public function __invoke(LoginRequest $request)
     {
         $user = $this->authService->login($request->validated());
-        return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode')));
+        return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode', 'socialAccounts', 'notificationTypes')));
     }
 
-    public function loginWithGoogle(Request $request)
+    public function redirectToGoogle(Request $request)
     {
-        $user = $this->authService->loginWithGoogle($request);
+        return $this->authService->redirectToGoogle($request);
+    }
+
+    public function handleGoogleCallback(Request $request)
+    {
+        $user = $this->authService->handleGoogleCallback();
         if (!$user) {
-            return Response::api(HttpEnum::UNAUTHORIZED, message: "Google authentication failed",
-                errors: [
-                    'token' => ['Invalid or expired Google token. Please try again.']
-                ]);
+            return Response::api(HttpEnum::BAD_REQUEST, message: "Bad Request", errors: ['message' => 'something went wrong, please try again.']);
 
         }
-        return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode')));
+        return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode', 'socialAccounts', 'notificationTypes')));
+
+
     }
 }
