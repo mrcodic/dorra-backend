@@ -26,6 +26,7 @@ class UserResource extends JsonResource
             'last_login_ip' => $this->last_login_ip,
             'last_login_at' => $this->last_login_at?->format('j M Y'),
             'joined_at' => $this->created_at->format('j M Y'),
+            'status' => $this->status,
             'image' => MediaResource::make($this->image),
             'country_details' => CountryCodeResource::make($this->whenLoaded('countryCode')),
             'connected_accounts' => SocialAccountResource::collection($this->whenLoaded('socialAccounts')),

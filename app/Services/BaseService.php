@@ -9,6 +9,7 @@ class BaseService
     protected array $relations = [];
     public function __construct(public BaseRepositoryInterface $repository){}
 
+
     public function getAll(bool $paginate = false, $columns = ['*'])
     {
         return $this->repository->all($paginate, $columns, $this->relations);

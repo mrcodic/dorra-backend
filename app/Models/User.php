@@ -46,9 +46,7 @@ class User extends Authenticatable implements HasMedia
         'password',
         'remember_token',
     ];
-    protected $attributes = [
-        'status' => 1,
-    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -71,6 +69,11 @@ class User extends Authenticatable implements HasMedia
            $user->last_login_at = now();
         });
         parent::booted();
+    }
+
+    public function status(): Attribute
+    {
+        return Attribute::get(fn(bool $value) => $value == 0 ? 'Blocked' : 'Active');
     }
 
     protected function image(): Attribute
