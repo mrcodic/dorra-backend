@@ -2,48 +2,37 @@
 .ql-toolbar .ql-font span[data-label="Sailec Light"]::before {
   font-family: "Sailec Light";
 }
-
 .ql-toolbar .ql-font span[data-label="Sofia Pro"]::before {
   font-family: "Sofia";
 }
-
 .ql-toolbar .ql-font span[data-label="Slabo 27px"]::before {
   font-family: "Slabo 27px";
 }
-
 .ql-toolbar .ql-font span[data-label="Roboto Slab"]::before {
   font-family: "Roboto Slab";
 }
-
 .ql-toolbar .ql-font span[data-label=Inconsolata]::before {
   font-family: "Inconsolata";
 }
-
 .ql-toolbar .ql-font span[data-label="Ubuntu Mono"]::before {
   font-family: "Ubuntu Mono";
 }
-
 /* Set content font-families */
 .ql-font-sofia {
   font-family: "Sofia";
 }
-
 .ql-font-slabo {
   font-family: "Slabo 27px";
 }
-
 .ql-font-roboto {
   font-family: "Roboto Slab";
 }
-
 .ql-font-inconsolata {
   font-family: "Inconsolata";
 }
-
 .ql-font-ubuntu {
   font-family: "Ubuntu Mono";
 }
-
 .ql-toolbar {
   border-color: #d8d6de !important;
 }
@@ -79,7 +68,6 @@
 .ql-toolbar .ql-formats .ql-picker-options .ql-active {
   color: #7367f0 !important;
 }
-
 .ql-bubble .ql-picker {
   color: #fff !important;
 }
@@ -89,48 +77,39 @@
 .ql-bubble .ql-fill {
   fill: #fff !important;
 }
-
 .ql-container {
   border-color: #d8d6de !important;
   font-family: "Montserrat", Helvetica, Arial, serif;
 }
-
 .ql-editor a {
   color: #7367f0;
 }
-
 .ql-picker {
   color: #5e5873 !important;
 }
-
 .ql-stroke {
   stroke: #5e5873 !important;
 }
-
 .ql-active .ql-stroke {
   stroke: #7367f0 !important;
 }
 .ql-active .ql-fill {
   fill: #7367f0 !important;
 }
-
 .ql-fill {
   fill: #5e5873 !important;
 }
-
 .ql-toolbar,
 .ql-container {
   border-top-right-radius: 0.357rem;
   border-top-left-radius: 0.357rem;
 }
-
 .ql-toolbar + .ql-container, .ql-container + .ql-toolbar {
   border-bottom-right-radius: 0.357rem;
   border-bottom-left-radius: 0.357rem;
   border-top-right-radius: unset;
   border-top-left-radius: unset;
 }
-
 .dark-layout .quill-toolbar,
 .dark-layout .ql-toolbar {
   background-color: #283046;
@@ -180,7 +159,6 @@
 .dark-layout .ql-editor.ql-blank:before {
   color: #b4b7bd;
 }
-
 [data-textdirection=rtl] .ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) i,
 [data-textdirection=rtl] .ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) svg {
   left: auto !important;

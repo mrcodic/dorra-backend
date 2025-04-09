@@ -79,11 +79,9 @@
 .apexcharts-canvas .apexcharts-gridline {
   stroke: #ebe9f1;
 }
-
 .apexcharts-legend.position-bottom {
   bottom: 3rem;
 }
-
 .dark-layout .apexcharts-canvas .apexcharts-xaxis-tick,
 .dark-layout .apexcharts-canvas line {
   stroke: #3b4253;

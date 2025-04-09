@@ -10,11 +10,9 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .blog-detail-wrapper .blog-detail-share .dropdown-menu {
   min-width: auto;
 }
-
 .blog-sidebar .blog-recent-posts img {
   -o-object-fit: cover;
      object-fit: cover;
@@ -27,7 +25,6 @@
   line-height: 23px;
   letter-spacing: 0;
 }
-
 .blog-edit-wrapper .border {
   border-color: #d8d6de !important;
 }

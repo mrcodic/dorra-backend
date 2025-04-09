@@ -363,7 +363,6 @@
          column-gap: 2rem;
   }
 }
-
 @media (max-width: 1199.98px) {
   .ecommerce-application .ecommerce-header-items .btn-group {
     align-items: center;

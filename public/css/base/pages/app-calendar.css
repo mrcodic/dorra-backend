@@ -187,7 +187,6 @@
 .fc .fc-list .fc-list-event td {
   border-color: #ebe9f1;
 }
-
 .app-calendar {
   position: relative;
   border-radius: 0.428rem;
@@ -300,15 +299,12 @@
     background-color: transparent;
   }
 }
-
 .event-sidebar .select2-selection__choice__remove:before {
   top: 40% !important;
 }
-
 .horizontal-layout .app-calendar {
   margin-bottom: 1rem;
 }
-
 @media (max-width: 992px) {
   .fc .fc-sidebarToggle-button {
     font-size: 0;

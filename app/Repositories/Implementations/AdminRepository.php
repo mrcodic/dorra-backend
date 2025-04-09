@@ -12,4 +12,8 @@ class AdminRepository extends BaseRepository implements AdminRepositoryInterface
     {
         parent::__construct($admin);
     }
+    public function findByEmail(string $email): ?Admin
+    {
+        return Admin::firstWhere('email', $email);
+    }
 }

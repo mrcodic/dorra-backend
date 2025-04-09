@@ -24,7 +24,6 @@
 .context-menu-list .context-menu-item:focus {
   outline: 0;
 }
-
 .dark-layout .context-menu-list {
   background-color: #161d31;
   border-color: #3b4253;
@@ -41,7 +40,6 @@
 .dark-layout .context-menu-list .context-menu-item.context-menu-submenu:after {
   border-color: transparent transparent transparent #b4b7bd;
 }
-
 [data-textdirection=rtl] .context-menu-list {
   z-index: 1031 !important;
 }

@@ -15304,7 +15304,6 @@
   align-items: center;
   justify-content: space-between;
 }
-
 @media (max-width: 991.98px) {
   .email-application .content-area-wrapper .sidebar-left {
     position: relative;

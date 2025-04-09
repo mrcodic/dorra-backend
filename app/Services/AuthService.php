@@ -44,13 +44,13 @@ class AuthService
 
     }
 
-    public function redirectToGoogle($request)
+    public function redirectToGoogle()
     {
         return Socialite::driver('google')->stateless()->redirect();
 
     }
 
-    public function handleGoogleCallback()
+    public function handleGoogleCallback(): false|User|null
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();

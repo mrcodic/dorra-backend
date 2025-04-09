@@ -18,7 +18,6 @@ form .select2.error + .select2-container--classic .select2-selection--multiple,
 form .select2.error + .select2-container--default .select2-selection--multiple {
   border-color: #ea5455 !important;
 }
-
 .was-validated .form-select:invalid:not([multiple]):not([size]),
 .was-validated .form-select:invalid:not([multiple])[size="1"],
 .form-select.is-invalid:not([multiple]):not([size]),

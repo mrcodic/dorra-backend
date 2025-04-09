@@ -196,7 +196,6 @@
   border-bottom: 2px solid #7367f0;
   background-color: #313c50;
 }
-
 .horizontal-layout.navbar-floating .header-navbar-shadow {
   height: 80px;
 }
@@ -395,7 +394,6 @@
   width: 1rem;
   font-size: 1rem;
 }
-
 @media (max-width: 1199.98px) {
   .horizontal-layout.horizontal-menu .horizontal-menu-wrapper .header-navbar {
     display: none;

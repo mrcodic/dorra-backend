@@ -6,6 +6,7 @@ use App\Enums\HttpEnum;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\Fortify;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Fortify::loginView(fn () => view('dashboard.auth.login'));
+
         Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "Request completed successfully", $data = [], $errors = []) {
             $response = [
                 'status' => $statusCode->value,

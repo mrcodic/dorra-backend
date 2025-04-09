@@ -22,9 +22,9 @@ class LoginController extends Controller
         return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode', 'socialAccounts', 'notificationTypes')));
     }
 
-    public function redirectToGoogle(Request $request)
+    public function redirectToGoogle()
     {
-        return $this->authService->redirectToGoogle($request);
+        return $this->authService->redirectToGoogle();
     }
 
     public function handleGoogleCallback(Request $request)

@@ -71,7 +71,6 @@
   text-decoration: none;
   color: #e42728;
 }
-
 @media (max-width: 576px) {
   .dropzone .dz-message {
     font-size: 1.5rem;

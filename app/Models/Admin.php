@@ -29,4 +29,7 @@ class Admin extends Authenticatable implements HasMedia
             'password' => 'hashed',
         ];
     }
+    protected $attributes = [
+        'status' => 1,
+    ];
 }

@@ -90,12 +90,10 @@
   font-size: 0.6rem;
   top: -3px;
 }
-
 /* Number Type Input Box Scss for Touchspin - Remove arrow for firefox */
 .bootstrap-touchspin.input-group input[type=number] {
   -moz-appearance: textfield;
 }
-
 .dark-layout .bootstrap-touchspin.input-group .form-control {
   background-color: #161d31;
 }

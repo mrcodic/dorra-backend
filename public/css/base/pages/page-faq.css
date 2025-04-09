@@ -5,11 +5,9 @@
 .faq-search .faq-search-input .input-group:focus-within {
   box-shadow: none;
 }
-
 .faq-contact .faq-contact-card {
   background-color: rgba(186, 191, 199, 0.12);
 }
-
 @media (min-width: 992px) {
   .faq-search .card-body {
     padding: 8rem !important;

@@ -97,7 +97,6 @@
   bottom: 0;
   right: 0.14rem;
 }
-
 @media (min-width: 1200px) {
   .auth-wrapper.auth-cover .auth-card {
     width: 400px;
@@ -112,11 +111,9 @@
 .auth-wrapper .auth-bg {
   background-color: #fff;
 }
-
 .dark-layout .auth-wrapper .auth-bg {
   background-color: #283046;
 }
-
 @media (max-height: 825px) and (max-width: 991.98px) {
   .dark-layout .auth-wrapper .auth-inner {
     background-color: #283046;

@@ -26,6 +26,51 @@
       "navheader": "Apps & Pages",
       "slug": ""
     },
+      {
+          "name": "User",
+          "icon": "user",
+          "slug": "",
+          "submenu": [
+              {
+                  "url": "/users",
+                  "name": "List",
+                  "icon": "circle",
+                  "slug": "app-user-list"
+              },
+              {
+                  "name": "View",
+                  "icon": "circle",
+                  "slug": "",
+                  "submenu": [
+                      {
+                          "url": "app/user/view/account",
+                          "name": "Account",
+                          "slug": "app-user-view-account"
+                      },
+                      {
+                          "url": "app/user/view/security",
+                          "name": "Security",
+                          "slug": "app-user-view-security"
+                      },
+                      {
+                          "url": "app/user/view/billing",
+                          "name": "Billings & Plans",
+                          "slug": "app-user-view-billing"
+                      },
+                      {
+                          "url": "app/user/view/notifications",
+                          "name": "Notifications",
+                          "slug": "app-user-view-notifications"
+                      },
+                      {
+                          "url": "app/user/view/connections",
+                          "name": "Connections",
+                          "slug": "app-user-view-connections"
+                      }
+                  ]
+              }
+          ]
+      },
     {
       "url": "app/email",
       "name": "Email",
@@ -143,51 +188,7 @@
         }
       ]
     },
-    {
-      "name": "User",
-      "icon": "user",
-      "slug": "",
-      "submenu": [
-        {
-          "url": "app/user/list",
-          "name": "List",
-          "icon": "circle",
-          "slug": "app-user-list"
-        },
-        {
-          "name": "View",
-          "icon": "circle",
-          "slug": "",
-          "submenu": [
-            {
-              "url": "app/user/view/account",
-              "name": "Account",
-              "slug": "app-user-view-account"
-            },
-            {
-              "url": "app/user/view/security",
-              "name": "Security",
-              "slug": "app-user-view-security"
-            },
-            {
-              "url": "app/user/view/billing",
-              "name": "Billings & Plans",
-              "slug": "app-user-view-billing"
-            },
-            {
-              "url": "app/user/view/notifications",
-              "name": "Notifications",
-              "slug": "app-user-view-notifications"
-            },
-            {
-              "url": "app/user/view/connections",
-              "name": "Connections",
-              "slug": "app-user-view-connections"
-            }
-          ]
-        }
-      ]
-    },
+
     {
       "name": "Pages",
       "icon": "file-text",

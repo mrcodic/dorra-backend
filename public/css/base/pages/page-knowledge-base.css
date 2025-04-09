@@ -5,19 +5,16 @@
 .knowledge-base-bg .kb-search-input .input-group:focus-within {
   box-shadow: none;
 }
-
 .kb-search-content-info .kb-search-content .card-img-top {
   background-color: #fcfcfc;
 }
 .kb-search-content-info .no-result.no-items {
   display: none;
 }
-
 .kb-title {
   display: flex;
   align-items: center;
 }
-
 @media (min-width: 768px) {
   .knowledge-base-bg .kb-search-input .input-group {
     width: 576px;

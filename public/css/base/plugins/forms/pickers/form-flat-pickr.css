@@ -47,18 +47,15 @@
 .flatpickr-calendar .flatpickr-current-month span.cur-month {
   font-weight: 300;
 }
-
 .flatpickr-time {
   height: 2.714rem;
 }
-
 .flatpickr-time input:hover,
 .flatpickr-time .flatpickr-am-pm:hover,
 .flatpickr-time input:focus,
 .flatpickr-time .flatpickr-am-pm:focus {
   background: #fff;
 }
-
 .dark-layout .flatpickr-calendar {
   background: #161d31;
   border-color: #161d31;
@@ -121,18 +118,15 @@
 .dark-layout .flatpickr-time .flatpickr-am-pm:focus {
   background: #161d31;
 }
-
 .flatpickr-input[readonly],
 .flatpickr-input ~ .form-control[readonly],
 .flatpickr-human-friendly[readonly] {
   background-color: inherit;
   opacity: 1 !important;
 }
-
 .flatpickr-weekdays {
   margin-top: 8px;
 }
-
 .flatpickr-current-month .flatpickr-monthDropdown-months {
   -webkit-appearance: none;
 }

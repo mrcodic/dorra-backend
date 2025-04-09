@@ -254,7 +254,6 @@
   top: 1rem;
   left: 1rem;
 }
-
 @media screen and (max-width: 1200px) {
   .file-manager-application .content-right {
     width: 100%;

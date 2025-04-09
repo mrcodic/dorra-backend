@@ -118,11 +118,9 @@
   text-align: right;
   border-top: 0;
 }
-
 .kanban-item.gu-mirror .item-dropdown .dropdown-toggle:after {
   display: none;
 }
-
 .kanban-board.gu-mirror {
   height: -moz-fit-content !important;
   height: fit-content !important;

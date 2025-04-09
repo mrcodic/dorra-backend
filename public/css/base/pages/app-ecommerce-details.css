@@ -199,7 +199,6 @@
 .ecommerce-application .product-color-options .b-info .filloption {
   box-shadow: 0 2px 4px 0 rgba(0, 207, 232, 0.4);
 }
-
 @media (max-width: 767.98px) {
   .ecommerce-application .swiper-responsive-breakpoints.swiper-container .swiper-slide {
     padding: 1rem;

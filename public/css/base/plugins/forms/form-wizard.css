@@ -120,14 +120,12 @@
   border-radius: 0.5rem;
   box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
 }
-
 .horizontal-wizard,
 .vertical-wizard,
 .modern-horizontal-wizard,
 .modern-vertical-wizard {
   margin-bottom: 2.2rem;
 }
-
 .dark-layout .bs-stepper {
   background-color: #283046;
   box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.24);
@@ -173,7 +171,6 @@
   background-color: #283046;
   box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.24);
 }
-
 html[data-textdirection=rtl] .btn-prev,
 html[data-textdirection=rtl] .btn-next {
   display: flex;
@@ -184,7 +181,6 @@ html[data-textdirection=rtl] .btn-next i,
 html[data-textdirection=rtl] .btn-next svg {
   transform: rotate(-180deg);
 }
-
 @media (max-width: 992px) {
   .bs-stepper .bs-stepper-header {
     flex-direction: column;

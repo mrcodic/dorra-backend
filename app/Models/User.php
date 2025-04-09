@@ -65,8 +65,8 @@ class User extends Authenticatable implements HasMedia
     protected static function booted(): void
     {
         static::creating(function ($user) {
-           $user->last_login_ip = request()->ip();
-           $user->last_login_at = now();
+            $user->last_login_ip = request()->ip();
+            $user->last_login_at = now();
         });
         parent::booted();
     }

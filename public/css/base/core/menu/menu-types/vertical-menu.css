@@ -169,7 +169,6 @@
 .vertical-layout.vertical-menu-modern .collapse-toggle-icon:focus {
   outline: none;
 }
-
 @media (min-width: 992px) {
   .vertical-layout.vertical-menu-modern .main-menu {
     width: 260px;

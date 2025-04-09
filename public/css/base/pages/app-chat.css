@@ -226,7 +226,6 @@
   height: calc(100% - 200px);
   padding: 0 2rem 1.5rem;
 }
-
 @media (max-width: 991.98px) {
   .content-right {
     width: 100%;
