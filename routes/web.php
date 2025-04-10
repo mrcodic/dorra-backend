@@ -8,4 +8,6 @@ Route::get('/', function () {
 });
 
 Route::view('/dashboard', 'dashboard.index')->name('dashboard');
+
+Route::get('users/data',[UserController::class,'getData'])->name('users.data');
 Route::resource('users', UserController::class);

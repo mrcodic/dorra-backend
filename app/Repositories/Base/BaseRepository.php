@@ -32,4 +32,9 @@ class BaseRepository implements BaseRepositoryInterface
     {
        return $this->model->findOrFail($id)->delete();
     }
+
+    public function query($columns = ['*'])
+    {
+        return $this->model->select($columns);
+    }
 }

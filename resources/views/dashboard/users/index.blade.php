@@ -86,6 +86,8 @@
             <div class="card-body border-bottom">
                 <h4 class="card-title">Search & Filter</h4>
                 <div class="row">
+                    <div class="col-md-4 user_role"></div>
+                    <div class="col-md-4 user_plan"></div>
                     <div class="col-md-4 user_status"></div>
                 </div>
             </div>
@@ -95,9 +97,9 @@
                     <tr>
                         <th></th>
                         <th>Name</th>
-                        <th>email</th>>
+                        <th>Email</th>
                         <th>Status</th>
-                        <th>Join Date</th>
+                        <th>Joined Date</th>
                         <th>Orders Count</th>
                         <th>Actions</th>
                     </tr>
@@ -107,30 +109,31 @@
             <!-- Modal to add new user starts-->
             <div class="modal modal-slide-in new-user-modal fade" id="modals-slide-in">
                 <div class="modal-dialog">
-                    <form class="add-new-user modal-content pt-0">
+                    <form class="add-new-user modal-content pt-0" method="post" action="{{ route("users.store") }}">
+                        @csrf
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                         <div class="modal-header mb-1">
                             <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
                         </div>
                         <div class="modal-body flex-grow-1">
                             <div class="mb-1">
-                                <label class="form-label" for="basic-icon-default-fullname">Full Name</label>
+                                <label class="form-label" for="basic-icon-default-fullname">First Name</label>
                                 <input
                                     type="text"
                                     class="form-control dt-full-name"
                                     id="basic-icon-default-fullname"
-                                    placeholder="John Doe"
-                                    name="user-fullname"
+                                    placeholder="John"
+                                    name="first_name"
                                 />
                             </div>
                             <div class="mb-1">
-                                <label class="form-label" for="basic-icon-default-uname">Username</label>
+                                <label class="form-label" for="basic-icon-default-fullname">Last Name</label>
                                 <input
                                     type="text"
-                                    id="basic-icon-default-uname"
-                                    class="form-control dt-uname"
-                                    placeholder="Web Developer"
-                                    name="user-name"
+                                    class="form-control dt-full-name"
+                                    id="basic-icon-default-fullname"
+                                    placeholder="Doe"
+                                    name="last_name"
                                 />
                             </div>
                             <div class="mb-1">
@@ -140,80 +143,91 @@
                                     id="basic-icon-default-email"
                                     class="form-control dt-email"
                                     placeholder="john.doe@example.com"
-                                    name="user-email"
+                                    name="email"
                                 />
                             </div>
                             <div class="mb-1">
-                                <label class="form-label" for="basic-icon-default-contact">Contact</label>
-                                <input
-                                    type="text"
-                                    id="basic-icon-default-contact"
-                                    class="form-control dt-contact"
-                                    placeholder="+1 (609) 933-44-22"
-                                    name="user-contact"
-                                />
+                                <label class="form-label" for="basic-icon-default-contact">Phone Number</label>
+                                <div class="input-group">
+                                    <!-- Phone Code Select -->
+                                    <select class="form-select" id="phone-code" name="phone_code">
+                                        <option value="+1">+1 (USA)</option>
+                                        <option value="+44">+44 (UK)</option>
+                                        <option value="+91">+91 (India)</option>
+                                        <!-- Add more countries as needed -->
+                                    </select>
+
+                                    <!-- Phone Number Input -->
+                                    <input
+                                        type="text"
+                                        id="basic-icon-default-contact"
+                                        class="form-control dt-contact"
+                                        placeholder="(609) 933-44-22"
+                                        name="phone_number"
+                                    />
+                                </div>
                             </div>
+
                             <div class="mb-1">
-                                <label class="form-label" for="basic-icon-default-company">Company</label>
+                                <label class="form-label" for="basic-icon-default-company">Password</label>
                                 <input
-                                    type="text"
+                                    type="password"
                                     id="basic-icon-default-company"
                                     class="form-control dt-contact"
-                                    placeholder="PIXINVENT"
-                                    name="user-company"
+                                    placeholder="**********"
+                                    name="password"
                                 />
                             </div>
                             <div class="mb-1">
-                                <label class="form-label" for="country">Country</label>
-                                <select id="country" class="select2 form-select">
-                                    <option value="Australia">USA</option>
-                                    <option value="Bangladesh">Bangladesh</option>
-                                    <option value="Belarus">Belarus</option>
-                                    <option value="Brazil">Brazil</option>
-                                    <option value="Canada">Canada</option>
-                                    <option value="China">China</option>
-                                    <option value="France">France</option>
-                                    <option value="Germany">Germany</option>
-                                    <option value="India">India</option>
-                                    <option value="Indonesia">Indonesia</option>
-                                    <option value="Israel">Israel</option>
-                                    <option value="Italy">Italy</option>
-                                    <option value="Japan">Japan</option>
-                                    <option value="Korea">Korea, Republic of</option>
-                                    <option value="Mexico">Mexico</option>
-                                    <option value="Philippines">Philippines</option>
-                                    <option value="Russia">Russian Federation</option>
-                                    <option value="South Africa">South Africa</option>
-                                    <option value="Thailand">Thailand</option>
-                                    <option value="Turkey">Turkey</option>
-                                    <option value="Ukraine">Ukraine</option>
-                                    <option value="United Arab Emirates">United Arab Emirates</option>
-                                    <option value="United Kingdom">United Kingdom</option>
-                                    <option value="United States">United States</option>
-                                </select>
+                                <label class="form-label" for="basic-icon-default-company">Confirm Password</label>
+                                <input
+                                    type="password"
+                                    id="basic-icon-default-company"
+                                    class="form-control dt-contact"
+                                    placeholder="**********"
+                                    name="password_confirmation"
+                                />
                             </div>
-                            <div class="mb-1">
-                                <label class="form-label" for="user-role">User Role</label>
-                                <select id="user-role" class="select2 form-select">
-                                    <option value="subscriber">Subscriber</option>
-                                    <option value="editor">Editor</option>
-                                    <option value="maintainer">Maintainer</option>
-                                    <option value="author">Author</option>
-                                    <option value="admin">Admin</option>
-                                </select>
+                            <div id="address-repeater" class="mb-1">
+                                <label class="form-label">Addresses</label>
+                                <div data-repeater-list="addresses">
+                                    <div data-repeater-item class="row g-2 mb-4 align-items-end border p-2 rounded">
+                                        <div class="col-md-10">
+                                            <!-- Add margin-bottom to the inputs for spacing -->
+                                            <input type="text" name="label" class="form-control mb-1" placeholder="Enter Address Label" />
+                                            <input type="text" name="line" class="form-control mb-1" placeholder="Enter Address Line" />
+
+                                            <!-- Country select with margin-bottom -->
+                                            <select name="country" class="form-control mb-1" id="country-select">
+                                                <option value="">Select Country</option>
+                                                <option value="USA">USA</option>
+                                                <option value="Canada">Canada</option>
+                                            </select>
+
+                                            <!-- State select with margin-bottom -->
+                                            <select name="state" class="form-control mb-1" id="state-select">
+                                                <option value="">Select State</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" data-repeater-delete class="btn btn-outline-danger">
+                                                <i data-feather="trash-2"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" data-repeater-create class="btn btn-outline-primary">
+                                    <i class="fas fa-plus"></i> Add Address
+                                </button>
                             </div>
-                            <div class="mb-2">
-                                <label class="form-label" for="user-plan">Select Plan</label>
-                                <select id="user-plan" class="select2 form-select">
-                                    <option value="basic">Basic</option>
-                                    <option value="enterprise">Enterprise</option>
-                                    <option value="company">Company</option>
-                                    <option value="team">Team</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary me-1 data-submit">Submit</button>
-                            <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+
+
+                            <button type="submit" class="btn btn-primary me-1 mt-2 data-submit">Submit</button>
+                            <button type="reset" class="btn btn-outline-secondary mt-2" data-bs-dismiss="modal">Cancel</button>
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -244,29 +258,88 @@
 @endsection
 
 @section('page-script')
- <script>
-     $.ajaxSetup({
-         headers: {
-             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-         }
-     });
+    <script>
+        const usersDataUrl = "{{ route('users.data') }}";
+    </script>
+    <script src="{{ asset(mix('js/scripts/pages/app-user-list.js')) }}"></script>
+    <!-- jQuery Repeater JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.repeater/1.2.1/jquery.repeater.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(document).ready(function () {
+                $('.add-new-user').submit(function (event) {
+                    event.preventDefault();
+
+                    var form = $(this);
+                    var actionUrl = form.attr('action');
+
+                    $('.alert-danger').remove();
+
+                    $.ajax({
+                        url: actionUrl,
+                        type: 'POST',
+                        data: form.serialize(),
+                        success: function (response) {
+                            if (response.success) {
+                                form[0].reset();
+                                $('#modals-slide-in').modal('hide');
+                                alert('User added successfully!');
+                            }
+                        },
+                        error: function (xhr) {
+                            var errors = xhr.responseJSON.errors;
+
+                            for (var key in errors) {
+                                if (errors.hasOwnProperty(key)) {
+                                    var inputField = $('#' + key);
+
+                                    var errorMessage = '<div class="alert alert-danger mt-1">' + errors[key][0] + '</div>';
+
+                                    inputField.after(errorMessage);
+                                }
+                            }
+                        }
+                    });
+                });
+
+                // Initialize the address repeater plugin (for adding more addresses)
+                $('#address-repeater').repeater({
+                    initEmpty: false,
+                    defaultValues: {
+                        'address': ''
+                    },
+                    show: function () {
+                        $(this).slideDown();
+                        feather.replace(); // Re-render Feather icons after adding new elements
+                    },
+                    hide: function (deleteElement) {
+                        $(this).slideUp(deleteElement);
+                    }
+                });
+
+                feather.replace();  // Re-render Feather icons on page load
+            });
 
 
-     var dt_user = dt_user_table.DataTable({
-         processing: true,
-         serverSide: true,
-         ajax: {
-             url: baseUrl + 'users',
-             dataSrc: function (json) {
-                 ids = 0;
-                 return json.data;
-             }
-         },
+            $('#address-repeater').repeater({
+                initEmpty: false,
+                defaultValues: {
+                    'address': ''
+                },
+                show: function () {
+                    $(this).slideDown();
+                    feather.replace(); // Re-render Feather icons
+                },
+                hide: function (deleteElement) {
+                        $(this).slideUp(deleteElement);
+                }
+            });
 
-         return data ? $('<table class="table"/><tbody />').append(data) : false;
+            // Also run once on page load, just to be safe
+            feather.replace();
+        });
 
-     }
-     });
- </script>
+    </script>
 
 @endsection

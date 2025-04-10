@@ -83,6 +83,11 @@ class User extends Authenticatable implements HasMedia
         );
     }
 
+    public function name(): Attribute
+    {
+       return Attribute::get(fn()=> $this->first_name.' '.$this->last_name);
+    }
+
     public function countryCode(): BelongsTo
     {
         return $this->belongsTo(CountryCode::class);

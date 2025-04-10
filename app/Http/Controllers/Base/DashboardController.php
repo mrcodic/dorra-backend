@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\{Factory, View};
 use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 
 
 class DashboardController extends Controller
@@ -48,12 +49,11 @@ class DashboardController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $validatedData = $request->validate($this->storeRequestClass->rules());
         $model = $this->service->storeResource($validatedData);
-        return to_route(self::BASE_FOLDER . "{$this->indexView}")
-            ->with('success', $this->successMessage);
+        return Response::api();
     }
 
     /**

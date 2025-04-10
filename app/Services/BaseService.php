@@ -3,11 +3,15 @@
 namespace App\Services;
 
 use App\Repositories\Base\BaseRepositoryInterface;
+use Illuminate\Http\UploadedFile;
 
 class BaseService
 {
     protected array $relations = [];
-    public function __construct(public BaseRepositoryInterface $repository){}
+
+    public function __construct(public BaseRepositoryInterface $repository)
+    {
+    }
 
 
     public function getAll(bool $paginate = false, $columns = ['*'])
@@ -22,13 +26,14 @@ class BaseService
 
     }
 
-    public function storeResource($request)
+    public function storeResource($validatedData)
     {
-        $model = $this->repository->create($request->validated());
+        $model = $this->repository->create($validatedData);
         $model->load($this->relations);
-        $files = $request->allFiles();
-        if ($files) {
-            handleMediaUploads($files, $model);
+        if (collect($validatedData)->contains(function ($value) {
+            return $value instanceof UploadedFile;
+        })) {
+            handleMediaUploads($validatedData, $model);
         }
         return $model;
     }
@@ -39,7 +44,7 @@ class BaseService
         $model->load($this->relations);
         $files = $request->allFiles();
         if ($files) {
-            handleMediaUploads($files, $model,clearExisting: true);
+            handleMediaUploads($files, $model, clearExisting: true);
         }
         return $model;
     }
@@ -52,8 +57,6 @@ class BaseService
         }
         return $model->delete();
     }
-
-
 
 
 }
