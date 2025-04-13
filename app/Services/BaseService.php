@@ -9,9 +9,8 @@ class BaseService
 {
     protected array $relations = [];
 
-    public function __construct(public BaseRepositoryInterface $repository)
-    {
-    }
+
+    public function __construct(public BaseRepositoryInterface $repository){}
 
 
     public function getAll(bool $paginate = false, $columns = ['*'])
@@ -26,11 +25,17 @@ class BaseService
 
     }
 
-    public function storeResource($validatedData)
+    public function storeResource($validatedData, $relationsToStore = [])
     {
+        dd($validatedData);
         $model = $this->repository->create($validatedData);
         $model->load($this->relations);
+
+        collect($relationsToStore)->map(function ($relation) use ($validatedData, $model) {
+            $model->{$relation}()->createMany($validatedData[$relation]);
+        });
         if (collect($validatedData)->contains(function ($value) {
+            dd($value);
             return $value instanceof UploadedFile;
         })) {
             handleMediaUploads($validatedData, $model);

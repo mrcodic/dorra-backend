@@ -129,6 +129,7 @@ return [
     'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
+    'phone' => 'The :attribute field must be a valid number.',
 
     /*
     |--------------------------------------------------------------------------
@@ -142,10 +143,20 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'addresses.*.label' => [
+            'required' => 'Each address must have a label (e.g., Home, Work).',
+            'min' => 'The address label must be at least :min characters.',
+        ],
+        'addresses.*.line' => [
+            'required' => 'Each address must have a street or line value.',
+            'min' => 'The address line must be at least :min characters.',
+        ],
+        'addresses.*.state_id' => [
+            'required' => 'Each address must have a valid state selected.',
+            'exists' => 'The selected state is not valid.',
         ],
     ],
+
 
     /*
     |--------------------------------------------------------------------------

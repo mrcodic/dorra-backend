@@ -21,6 +21,7 @@ class DashboardController extends Controller
     protected $editView;
     protected $showView;
     protected $assoiciatedData = [];
+    protected $relationsToStore = [];
     protected $usePagination = false;
     protected $successMessage;
 
@@ -35,7 +36,8 @@ class DashboardController extends Controller
     public function index(): View|Factory|Application
     {
         $data = $this->service->getAll($this->usePagination);
-        return view(self::BASE_FOLDER . "$this->indexView", compact('data'));
+        $associatedData = $this->assoiciatedData['index'] ?? [];
+        return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());
     }
 
     /**
@@ -52,7 +54,7 @@ class DashboardController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate($this->storeRequestClass->rules());
-        $model = $this->service->storeResource($validatedData);
+        $this->service->storeResource($validatedData,$this->relationsToStore);
         return Response::api();
     }
 
@@ -88,10 +90,10 @@ class DashboardController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): RedirectResponse
+    public function destroy(string $id)
     {
         $this->service->deleteResource($id);
-        return to_route(self::BASE_FOLDER . "{$this->indexView}")
-            ->with('success', $this->successMessage);
+        return Response::api();
+
     }
 }

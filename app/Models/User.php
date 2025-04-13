@@ -73,7 +73,7 @@ class User extends Authenticatable implements HasMedia
 
     public function status(): Attribute
     {
-        return Attribute::get(fn(bool $value) => $value == 0 ? 'Blocked' : 'Active');
+        return Attribute::get(fn(?bool $value) => $value == 0 ? 'Blocked' : 'Active');
     }
 
     protected function image(): Attribute
@@ -98,7 +98,7 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(SocialAccount::class);
     }
 
-    public function shippingAddresses(): HasMany
+    public function addresses(): HasMany
     {
         return $this->hasMany(ShippingAddress::class);
     }
