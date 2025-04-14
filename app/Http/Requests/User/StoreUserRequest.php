@@ -48,7 +48,7 @@ class StoreUserRequest extends BaseRequest
             'full_phone_number' => ['nullable', 'string', new Phone($isoCode)],
             'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'country_code_id' => ['required', 'exists:country_codes,id'],
-            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
             'addresses' => ['required', 'array', 'min:1'],
             'addresses.*.label' => ['required', 'string', 'min:3'],
             'addresses.*.line' => ['required', 'string', 'min:3'],

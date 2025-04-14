@@ -179,9 +179,8 @@
                                 <input
                                     type="file"
                                     id="image"
-                                    class="form-control"
                                     name="image"
-                                />
+                                    class="form-control"/>
                             </div>
 
                             <div class="mb-1">
@@ -316,7 +315,7 @@
 
 
     </script>
-    <script src="{{ asset('js/scripts/pages/app-user-list.js') }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-user-list.js') }}?v={{ time() }}"></script>
 
 
 

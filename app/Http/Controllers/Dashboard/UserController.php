@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Base\DashboardController;
 use App\Models\CountryCode;
-use App\Repositories\Interfaces\CategoryRepositoryInterface;
-use App\Repositories\Interfaces\CountryRepositoryInterface;
-use Illuminate\Http\JsonResponse;
-use App\Http\Requests\User\{StoreUserRequest, UpdateUserRequest};
+use App\Models\User;
 use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Foundation\Application;
+use Illuminate\Contracts\View\{Factory, View};
+use App\Http\Controllers\Base\DashboardController;
+use App\Repositories\Interfaces\CountryRepositoryInterface;
+use App\Http\Requests\User\{StoreUserRequest, UpdateUserRequest};
 
 
 class UserController extends DashboardController
@@ -21,7 +23,10 @@ class UserController extends DashboardController
         $this->assoiciatedData['index'] = [
             'country_codes' => CountryCode::all(),
             'countries' => $this->countryRepository->all(),
-            ];
+        ];
+        $this->assoiciatedData['show'] = [
+            'country_codes' => CountryCode::all(),
+        ];
         $this->relationsToStore = ['addresses'];
         $this->indexView = 'users.index';
         $this->createView = 'users.create';
@@ -34,5 +39,12 @@ class UserController extends DashboardController
     public function getData(): JsonResponse
     {
         return $this->userService->getData();
+    }
+
+    public function billing(User $user): View|Factory|Application
+    {
+        $countries = $this->countryRepository->all(columns : ['id', 'name']);
+
+        return view('dashboard.users.billing', get_defined_vars());
     }
 }

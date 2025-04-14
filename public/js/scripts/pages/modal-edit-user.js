@@ -49,3 +49,39 @@ $(function () {
     });
   }
 });
+
+$(document).ready(function (){
+   $(document).on('submit','#editUserForm',function (e){
+       e.preventDefault();
+       var form = $(this);
+       var actionUrl = form.attr('action');
+       let formData = new FormData(form[0]);
+
+      $.ajax({
+          url:actionUrl,
+          processData: false,
+          contentType: false,
+          data: formData,
+          success: function (response) {
+              console.log(response)
+          },
+          error: function (xhr) {
+              var errors = xhr.responseJSON.errors;
+
+              for (var key in errors) {
+                  if (errors.hasOwnProperty(key)) {
+                      Toastify({
+                          text: errors[key][0],
+                          duration: 4000,
+                          gravity: "top",
+                          position: "right",
+                          backgroundColor: "#EA5455", // red for errors
+                          close: true
+                      }).showToast();
+                  }
+              }
+          }
+      })
+   })
+
+});

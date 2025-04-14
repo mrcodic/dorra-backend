@@ -4,11 +4,27 @@ namespace App\Http\Requests\User;
 
 use App\Http\Requests\BaseRequest;
 use App\Models\CountryCode;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Propaganistas\LaravelPhone\Rules\Phone;
 
 class UpdateUserRequest extends BaseRequest
 {
+    protected function prepareForValidation()
+    {
+        if ($this->has(['country_code_id', 'phone_number'])) {
+            $countryCode = CountryCode::find($this->country_code_id);
+
+            if ($countryCode) {
+                $cleanedPhone = preg_replace('/\D+/', '', $this->phone_number);
+                if ($cleanedPhone) {
+                    $this->merge([
+                        'full_phone_number' => '+' . $countryCode->phone_code . $cleanedPhone,
+                    ]);
+                }
+            }
+        }
+    }
     /**
      * Determine if the v1 is authorized to make this request.
      */
@@ -21,19 +37,22 @@ class UpdateUserRequest extends BaseRequest
     /**
      * Get the validation rules that apply to the request.
      *
+     * @param int $id
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules($id): array
     {
         $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
             'first_name' => ['sometimes', 'string', 'max:255'],
             'last_name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', 'unique:users,email'],
-            'phone_number' => ['sometimes', 'string', 'min:10', 'max:15', 'unique:users,phone_number', new Phone($isoCode),],
+            'email' => ['sometimes', 'email', Rule::unique('users','email')->ignore($id)],
+            'phone_number' => ['sometimes', 'string', 'min:10', 'max:15', Rule::unique('users','phone_number')->ignore($id),],
+            'full_phone_number' => ['nullable', 'string', new Phone($isoCode)],
+
             'password' => ['sometimes', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'country_code_id' => ['sometimes', 'exists:country_codes,id'],
-            'image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],];
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],];
     }
 
 

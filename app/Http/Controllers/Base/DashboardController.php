@@ -64,7 +64,8 @@ class DashboardController extends Controller
     public function show(string $id): View|Application|Factory
     {
         $model = $this->service->showResource($id);
-        return view(self::BASE_FOLDER . "{$this->showView}", compact("model"));
+        $associatedData = $this->assoiciatedData['show'] ?? [];
+        return view(self::BASE_FOLDER . "{$this->showView}", get_defined_vars());
     }
 
     /**
@@ -79,12 +80,12 @@ class DashboardController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id): RedirectResponse
+    public function update(Request $request, string $id)
     {
         $validatedData = $request->validate($this->updateRequestClass->rules($id));
         $this->service->updateResource($id, $validatedData);
-        return to_route(self::BASE_FOLDER . "{$this->indexView}")
-            ->with('success', $this->successMessage);
+        return Response::api();
+
     }
 
     /**

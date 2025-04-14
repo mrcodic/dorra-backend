@@ -9,5 +9,10 @@ Route::get('/', function () {
 
 Route::view('/dashboard', 'dashboard.index')->name('dashboard');
 
-Route::get('users/data',[UserController::class,'getData'])->name('users.data');
-Route::resource('users', UserController::class);
+Route::prefix('/users')->as('users')->group(function () {
+    Route::get('/data',[UserController::class,'getData'])->name('.data');
+    Route::get('/billing/{user}', [UserController::class,'billing'])->name('.billing');
+
+
+});
+Route::resource('/users', UserController::class);

@@ -27,27 +27,24 @@ class BaseService
 
     public function storeResource($validatedData, $relationsToStore = [])
     {
-        dd($validatedData);
         $model = $this->repository->create($validatedData);
         $model->load($this->relations);
 
         collect($relationsToStore)->map(function ($relation) use ($validatedData, $model) {
             $model->{$relation}()->createMany($validatedData[$relation]);
         });
-        if (collect($validatedData)->contains(function ($value) {
-            dd($value);
-            return $value instanceof UploadedFile;
-        })) {
-            handleMediaUploads($validatedData, $model);
+        if (request()->allFiles()) {
+            handleMediaUploads(request()->allFiles(), $model);
         }
         return $model;
     }
 
-    public function updateResource($request, $id)
+    public function updateResource($id, $validatedData)
     {
-        $model = $this->repository->update($request->validated(), $id);
+
+        $model = $this->repository->update($validatedData, $id);
         $model->load($this->relations);
-        $files = $request->allFiles();
+        $files = request()->allFiles();
         if ($files) {
             handleMediaUploads($files, $model, clearExisting: true);
         }

@@ -13,4 +13,9 @@ class ShippingAddress extends Model
     {
         return $this->belongsTo(State::class);
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

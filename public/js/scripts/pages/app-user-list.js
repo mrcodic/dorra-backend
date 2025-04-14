@@ -145,17 +145,27 @@ $(document).ready(function () {
             var actionUrl = form.attr('action');
 
             $('.alert-danger').remove();
-
+            let formData = new FormData(form[0]);
             $.ajax({
                 url: actionUrl,
                 type: 'POST',
-                data: form.serialize(),
+                data: formData,
+                processData: false,  // Add this!
+                contentType: false,  // Add this!
                 success: function (response) {
                     console.log(response)
                     if (response.success) {
                         form[0].reset();
                         $('#modals-slide-in').modal('hide');
-                        alert('User added successfully!');
+                        Toastify({
+                            text: "User added successfully!",
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28a745",
+                            close: true
+                        }).showToast();
+
                     }
                 },
                 error: function (xhr) {
