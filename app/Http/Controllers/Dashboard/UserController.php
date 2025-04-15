@@ -29,11 +29,8 @@ class UserController extends DashboardController
         ];
         $this->relationsToStore = ['addresses'];
         $this->indexView = 'users.index';
-        $this->createView = 'users.create';
-        $this->editView = 'users.edit';
         $this->showView = 'users.show';
         $this->usePagination = true;
-        $this->successMessage = 'Process success';
     }
 
     public function getData(): JsonResponse

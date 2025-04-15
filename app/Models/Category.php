@@ -11,7 +11,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Category extends Model implements HasMedia
 {
     use InteractsWithMedia;
-    protected $fillable = ['name', 'parent_id'];
+    protected $fillable = ['name','description', 'parent_id'];
 
     public function parent(): BelongsTo
     {
