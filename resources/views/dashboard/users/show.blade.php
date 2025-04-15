@@ -75,11 +75,11 @@
                                 </li>
                                 <li class="mb-75">
                                     <span class="fw-bolder me-25">PhoneNumber:</span>
-                                    <span>{{ $model->phone_number }}</span>
+                                    <span>{{ $model->countryCode->phone_code.$model->phone_number }}</span>
                                 </li>
                                 <li class="mb-75">
                                     <span class="fw-bolder me-25">Status:</span>
-                                    <span class="badge bg-light-success"> {{ $model->status }}</span>
+                                    <span class="badge {{$model->status == "Active" ? 'bg-light-success' : 'bg-danger'}}"> {{ $model->status }}</span>
                                 </li>
 
                                 <li class="mb-75">
@@ -273,6 +273,9 @@
 @endsection
 
 @section('page-script')
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     {{-- Page js files --}}
     <script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>

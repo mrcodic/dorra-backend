@@ -41,7 +41,6 @@ class BaseService
 
     public function updateResource($id, $validatedData)
     {
-
         $model = $this->repository->update($validatedData, $id);
         $model->load($this->relations);
         $files = request()->allFiles();

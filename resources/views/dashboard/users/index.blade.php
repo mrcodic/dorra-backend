@@ -157,7 +157,7 @@
                                     <!-- Phone Code Select -->
                                     <select class="form-select" id="phone-code" name="country_code_id">
                                         @foreach($associatedData['country_codes'] as $countryCode)
-                                            <option value="{{ $countryCode->id }}">{{ $countryCode->phone_code }} ({{ $countryCode->iso_code }})</option>
+                                            <option value="{{ $countryCode->id }}"  data-phone-code="{{ $countryCode->phone_code }}">{{ $countryCode->phone_code }} ({{ $countryCode->iso_code }})</option>
                                         @endforeach
 
                                         <!-- Add more countries as needed -->
@@ -295,6 +295,7 @@
 
     <script>
         const usersDataUrl = "{{ route('users.data') }}";
+
         $('#address-repeater').repeater({
             initEmpty: false,
             defaultValues: {
@@ -312,7 +313,6 @@
             }
         });
         feather.replace();
-
 
     </script>
     <script src="{{ asset('js/scripts/pages/app-user-list.js') }}?v={{ time() }}"></script>

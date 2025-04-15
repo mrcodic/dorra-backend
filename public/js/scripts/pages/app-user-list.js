@@ -32,9 +32,7 @@ var dt_user_table = $('.user-list-table').DataTable({
              <a href="/users/${data}" class="dropdown-item">
                 <i data-feather="file-text"></i> Details
               </a>
-              <a href="/users/${data}/edit" class="dropdown-item">
-                <i data-feather="edit"></i> Edit
-              </a>
+
 
               <a href="#" class="dropdown-item text-danger delete-user" data-id="${data}">
                 <i data-feather="trash-2"></i> Delete
@@ -137,10 +135,11 @@ $(document).ready(function () {
             form.find('input[name="status"]').remove();
             form.append('<input type="hidden" name="status" value="' + status + '">');
 
-            // var phoneCode = $('#phone-code').val();  // Get the selected phone code ID
-            // var phoneNumber = $('#phone_number').val(); // Get the raw phone number entered
-            // var fullPhoneNumber = "+" + phoneCode + phoneNumber.replace(/\D/g, '');
-            // $('#full_phone_number').val(fullPhoneNumber);
+            var selectedOption = $('#phone-code option:selected');
+            var phoneCode = selectedOption.data('phone-code');
+            var phoneNumber = $('#phone_number').val();
+            var fullPhoneNumber =  phoneCode + phoneNumber.replace(/\D/g, '');
+            $('#full_phone_number').val(fullPhoneNumber);
 
             var actionUrl = form.attr('action');
 
@@ -165,6 +164,7 @@ $(document).ready(function () {
                             backgroundColor: "#28a745",
                             close: true
                         }).showToast();
+
 
                     }
                 },

@@ -56,14 +56,29 @@ $(document).ready(function (){
        var form = $(this);
        var actionUrl = form.attr('action');
        let formData = new FormData(form[0]);
-
+       console.log(actionUrl)
       $.ajax({
           url:actionUrl,
+          method: "POST",
           processData: false,
           contentType: false,
           data: formData,
-          success: function (response) {
-              console.log(response)
+              success: function (response) {
+                  if (response.success) {
+                      $('#editUser').modal('hide');
+                      Toastify({
+                          text: "User updated successfully!",
+                          duration: 1500,
+                          gravity: "top",
+                          position: "right",
+                          backgroundColor: "#28a745",
+                          close: true
+                      }).showToast();
+
+                      setTimeout(function () {
+                          location.reload();
+                      }, 1600);
+                  }
           },
           error: function (xhr) {
               var errors = xhr.responseJSON.errors;

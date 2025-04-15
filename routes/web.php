@@ -7,7 +7,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::view('/dashboard', 'dashboard.index')->name('dashboard');
+Route::view('/', 'dashboard.index')->name('dashboard');
 
 Route::prefix('/users')->as('users')->group(function () {
     Route::get('/data',[UserController::class,'getData'])->name('.data');
