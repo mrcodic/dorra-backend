@@ -31,7 +31,7 @@ class UpdateUserRequest extends BaseRequest
             'first_name' => ['sometimes', 'string', 'max:255'],
             'last_name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', Rule::unique('users', 'email')->ignore($id)],
-            'phone_number' => ['sometimes', 'string', 'min:10', 'max:15', Rule::unique('users', 'phone_number')->ignore($id),],
+            'phone_number' => ['sometimes', 'string', Rule::unique('users', 'phone_number')->ignore($id),],
             'full_phone_number' => ['nullable', 'string', new Phone($isoCode)],
             'status' => ['required', 'boolean'],
             'password' => ['sometimes', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],

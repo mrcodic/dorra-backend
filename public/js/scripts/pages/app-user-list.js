@@ -1,9 +1,3 @@
-$.ajaxSetup({
-    headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    }
-});
-
 var dt_user_table = $('.user-list-table').DataTable({
     processing: true,
     serverSide: true,
@@ -22,18 +16,15 @@ var dt_user_table = $('.user-list-table').DataTable({
             data: 'id',
             orderable: false,
             render: function (data, type, row, meta) {
-                console.log(data)
                 return `
           <div class="dropdown">
             <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
               <i data-feather="more-vertical"></i>
             </button>
             <div class="dropdown-menu">
-             <a href="/users/${data}" class="dropdown-item">
-                <i data-feather="file-text"></i> Details
+              <a href="/users/${data}/edit" class="dropdown-item">
+                <i data-feather="edit"></i> Edit
               </a>
-
-
               <a href="#" class="dropdown-item text-danger delete-user" data-id="${data}">
                 <i data-feather="trash-2"></i> Delete
               </a>
@@ -122,138 +113,4 @@ var dt_user_table = $('.user-list-table').DataTable({
             next: '&nbsp;'
         }
     }
-});
-
-$(document).ready(function () {
-    $(document).ready(function () {
-        $('.add-new-user').submit(function (event) {
-            event.preventDefault();
-
-            var form = $(this);
-            var isChecked = $('#status').is(':checked')
-            var status = isChecked ?1 :0;
-            form.find('input[name="status"]').remove();
-            form.append('<input type="hidden" name="status" value="' + status + '">');
-
-            var selectedOption = $('#phone-code option:selected');
-            var phoneCode = selectedOption.data('phone-code');
-            var phoneNumber = $('#phone_number').val();
-            var fullPhoneNumber =  phoneCode + phoneNumber.replace(/\D/g, '');
-            $('#full_phone_number').val(fullPhoneNumber);
-
-            var actionUrl = form.attr('action');
-
-            $('.alert-danger').remove();
-            let formData = new FormData(form[0]);
-            $.ajax({
-                url: actionUrl,
-                type: 'POST',
-                data: formData,
-                processData: false,  // Add this!
-                contentType: false,  // Add this!
-                success: function (response) {
-                    console.log(response)
-                    if (response.success) {
-                        form[0].reset();
-                        $('#modals-slide-in').modal('hide');
-                        Toastify({
-                            text: "User added successfully!",
-                            duration: 4000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#28a745",
-                            close: true
-                        }).showToast();
-
-
-                    }
-                },
-                error: function (xhr) {
-                    var errors = xhr.responseJSON.errors;
-
-                    for (var key in errors) {
-                        if (errors.hasOwnProperty(key)) {
-                            Toastify({
-                                text: errors[key][0],
-                                duration: 4000,
-                                gravity: "top",
-                                position: "right",
-                                backgroundColor: "#EA5455", // red for errors
-                                close: true
-                            }).showToast();
-                        }
-                    }
-                }
-
-            });
-        });
-    });
-
-
-    $(document).on('change','.country-select',function (){
-        const countryId = $(this).val();
-        const stateSelect = $(this).closest('[data-repeater-item]').find('.state-select');
-        const baseUrl = $('#state-url').data('url');
-        if (countryId)
-        {
-            $.ajax({
-                url:`${baseUrl}?filter[country_id]=${countryId}`,
-                method: "GET",
-                success: function (response) {
-                    stateSelect.empty().append('<option value="">Select State</option>');
-                    $.each(response.data, function (index, state) {
-                        stateSelect.append(`<option value="${state.id}">${state.name}</option>`);
-                    });
-                },
-                error: function () {
-                    stateSelect.empty().append('<option value="">Error loading states</option>');
-                }
-            })
-
-        }else {
-            stateSelect.empty().append('<option value="">Select State</option>');
-        }
-    })
-
-
-    $(document).on('click', '.delete-user', function (e) {
-        e.preventDefault();
-
-        var $table = $('.user-list-table').DataTable();
-        var $row = $(this).closest('tr');
-        var rowData = $table.row($row).data();
-
-        var userId = $(this).data('id');
-        var userName = rowData.name;
-
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `You are about to delete user "${userName}". This action cannot be undone.`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it!',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/users/${userId}`,
-                    method: 'DELETE',
-                    success: function (res) {
-                        Swal.fire('Deleted!', 'User has been deleted.', 'success');
-                        $table.ajax.reload();
-                    },
-                    error: function () {
-                        Swal.fire('Failed', 'Could not delete user.', 'error');
-                    }
-                });
-            }
-        });
-    });
-
-
-
-
-
 });
