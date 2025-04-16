@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -24,7 +25,7 @@ if (!function_exists('handleMediaUploads')) {
         if ($clearExisting) {
             $modelData->clearMediaCollection($collectionName);
         }
-        $files = is_array($files) ? $files : [$files];
+        $files = is_array($files) ? Arr::flatten($files) : [$files];
 
         $uploaded = collect($files)->map(function ($file) use ($modelData, $collectionName, $customProperties) {
             $mediaAdder = $modelData->addMedia($file);

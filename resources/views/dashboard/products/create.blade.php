@@ -17,7 +17,7 @@
                         <h4 class="card-title">Add New Product</h4>
                     </div>
                     <div class="card-body">
-                        <form class="form" action="{{ route('products.store') }}" method="POST"
+                        <form id="product-form" class="form" action="{{ route('products.store') }}" method="POST"
                               enctype="multipart/form-data">
                             @csrf
                             <div class="row">
@@ -258,6 +258,7 @@
                                         <div class="col-md-12 col-12 mb-2">
                                             <div class="mb-1">
                                                 <div class="form-check form-switch">
+                                                    <input type="hidden" name="is_free_shipping" value="0">
                                                     <input type="checkbox" class="form-check-input" id="free-shipping"
                                                            name="is_free_shipping" value="1">
                                                     <label class="form-check-label" for="free-shipping">Product
@@ -291,11 +292,19 @@
 @endsection
 
 @section('page-script')
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         $(document).ready(function () {
-            // Show/hide price sections
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            // Toggle price section visibility
             $('input[name="has_custom_prices"]').on('change', function () {
-                if ($(this).val() === 1) {
+                if ($(this).val() === '1') {
                     $('#custom-price-section').show();
                     $('#default-price-section').hide();
                 } else {
@@ -308,7 +317,7 @@
             $('.invoice-repeater').repeater({
                 show: function () {
                     $(this).slideDown();
-                    if (feather) feather.replace({width: 14, height: 14});
+                    if (feather) feather.replace({ width: 14, height: 14 });
                 },
                 hide: function (deleteElement) {
                     $(this).slideUp(deleteElement);
@@ -318,29 +327,69 @@
             // Init Select2
             $('.select2').select2();
 
-            //subcategory select
-            $(document).on('change','.category-select',function (){
+            // Handle subcategory population
+            $('.category-select').on('change', function () {
                 const categoryId = $(this).val();
                 const $subCategorySelect = $('.sub-category-select');
                 const subCategoryUrl = $subCategorySelect.data('sub-category-url');
+
                 $.ajax({
                     url: `${subCategoryUrl}?filter[parent_id]=${categoryId}`,
                     method: "GET",
-                    success:function (response){
+                    success: function (response) {
                         $subCategorySelect.empty().append('<option value="">Select subcategory</option>');
-                        $.each(response.data,function (index, subCategory) {
-                            $subCategorySelect.append(<option value="${subCategory.id}">${subCategory.name}</option>)
-
-                        })
-
+                        $.each(response.data, function (index, subCategory) {
+                            $subCategorySelect.append(`<option value="${subCategory.id}">${subCategory.name}</option>`);
+                        });
                     },
-                    error: function (errors) {
-                        console.log(errors)
+                    error: function (err) {
+                        console.error(err);
                         $subCategorySelect.empty().append('<option value="">Error loading Subcategories</option>');
                     }
-                })
+                });
+            });
 
-            })
+
+            $(document).on('submit','#product-form',function (e){
+                e.preventDefault();
+                const actionUrl = $(this).attr('action');
+                var form = $(this);
+                let formData = new FormData(form[0]);
+                $.ajax({
+                    url: actionUrl,
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success)
+                        {
+                            sessionStorage.setItem('product_added', 'true');
+                            window.location.href = '/products';
+                        }
+                    },
+                    error: function (xhr) {
+                        var errors = xhr.responseJSON.errors;
+
+                        for (var key in errors) {
+                            if (errors.hasOwnProperty(key)) {
+                                Toastify({
+                                    text: errors[key][0],
+                                    duration: 4000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455", // red for errors
+                                    close: true
+                                }).showToast();
+                            }
+                        }
+                    }
+
+                });
+            });
         });
     </script>
+
+
 @endsection
+

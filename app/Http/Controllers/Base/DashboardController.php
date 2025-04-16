@@ -35,6 +35,7 @@ class DashboardController extends Controller
      */
     public function index(): View|Factory|Application
     {
+
         $data = $this->service->getAll($this->usePagination);
         $associatedData = $this->assoiciatedData['index'] ?? [];
         return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());

@@ -13,6 +13,7 @@ class ProductController extends DashboardController
 {
    public function __construct(public ProductService $productService, public CategoryRepositoryInterface $categoryRepository)
    {
+
        parent::__construct($productService);
        $this->storeRequestClass = new StoreProductRequest();
        $this->updateRequestClass = new UpdateProductRequest();
