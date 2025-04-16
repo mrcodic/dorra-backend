@@ -37,6 +37,7 @@ class DashboardController extends Controller
     {
         $data = $this->service->getAll($this->usePagination);
         $associatedData = $this->assoiciatedData['index'] ?? [];
+        dd("dd");
         return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());
     }
 
@@ -45,7 +46,8 @@ class DashboardController extends Controller
      */
     public function create(): View|Application|Factory
     {
-        return view(self::BASE_FOLDER . "{$this->createView}");
+        $associatedData = $this->assoiciatedData['create'] ?? [];
+        return view(self::BASE_FOLDER . "{$this->createView}",get_defined_vars());
     }
 
     /**

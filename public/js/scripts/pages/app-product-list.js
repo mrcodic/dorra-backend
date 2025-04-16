@@ -1,3 +1,4 @@
+console.log(productsDataUrl)
 $.ajaxSetup({
     headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -8,16 +9,17 @@ var dt_user_table = $('.user-list-table').DataTable({
     processing: true,
     serverSide: true,
     ajax: {
-        url: usersDataUrl,
+        url: productsDataUrl,
         type: 'GET'
     },
     columns: [
         { data: null, defaultContent: '', orderable: false },
         { data: 'name' },
-        { data: 'email' },
-        { data: 'status' },
-        { data: 'joined_date' },
-        { data: 'orders_count' },
+        { data: 'category' },
+        { data: 'tags' },
+        { data: 'no_of_purchas' },
+        { data: 'added_date' },
+        { data: 'rating' },
         {
             data: 'id',
             orderable: false,
@@ -99,16 +101,16 @@ var dt_user_table = $('.user-list-table').DataTable({
             }
         },
         {
-            text: 'Add New User',
+            text: 'Add New Product',
             className: 'add-new btn btn-primary',
-            attr: {
-                'data-bs-toggle': 'modal',
-                'data-bs-target': '#modals-slide-in'
+            action: function (e, dt, node, config) {
+                window.location.href = productsCreateUrl;
             },
             init: function (api, node, config) {
                 $(node).removeClass('btn-secondary');
             }
         }
+
     ],
     drawCallback: function () {
         feather.replace();
@@ -124,7 +126,7 @@ var dt_user_table = $('.user-list-table').DataTable({
     }
 });
 
-$(document).ready(function () {
+$(document).ready(function ()   {
     $(document).ready(function () {
         $('.add-new-user').submit(function (event) {
             event.preventDefault();

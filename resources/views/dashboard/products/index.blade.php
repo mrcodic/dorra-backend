@@ -1,6 +1,6 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'User List')
+@section('title', 'Product List')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -247,6 +247,11 @@
 @endsection
 
 @section('page-script')
+   <script>
+       const productsDataUrl = "{{ route('products.data') }}";
+       const productsCreateUrl = "{{ route('products.create') }}";
+   </script>
+
     {{-- Page js files --}}
     <script src="{{ asset('js/scripts/pages/app-product-list.js') }}?v={{ time() }}"></script>
 @endsection

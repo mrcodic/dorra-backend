@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Product;
 
+use App\Enums\Product\StatusEnum;
 use App\Http\Requests\BaseRequest;
 use App\Models\CountryCode;
 
@@ -23,11 +24,19 @@ class StoreProductRequest extends BaseRequest
      */
     public function rules(): array
     {
-        $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
-            'parent_id' => ['nullable', 'integer', 'exists:categories,id'],
+            'name'             => ['required', 'string', 'max:255'],
+            'description'      => ['nullable', 'string'],
+            'image'            => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'images'            => ['nullable', 'array'],
+            'images.*'          => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'category_id'      => ['required', 'integer', 'exists:categories,id'],
+            'sub_category_id'  => ['nullable', 'integer', 'exists:sub_categories,id'],
+            'tags'              => ['nullable', 'array'],
+            'has_custom_prices'=> ['required', 'boolean'],
+            'is_free_shipping' => ['required', 'boolean'],
+//            'base_price'       => ['required', 'numeric', 'min:0'],
+            'status'           => ['nullable','in:',StatusEnum::values()],
         ];
 
     }
