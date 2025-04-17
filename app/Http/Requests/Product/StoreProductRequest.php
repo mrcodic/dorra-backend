@@ -26,23 +26,42 @@ class StoreProductRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name'             => ['required', 'string', 'max:255'],
-            'description'      => ['nullable', 'string'],
-            'image'            => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'images'            => ['nullable', 'array'],
-            'images.*'          => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'category_id'      => ['required', 'integer', 'exists:categories,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'category_id' => ['required', 'integer', 'exists:categories,id'],
             'sub_category_id' => ['nullable', 'integer', 'exists:categories,id', function ($attribute, $value, $fail) {
                 $category = Category::find($value);
                 if (is_null($category->parent_id)) {
                     $fail('The selected category is a parent category, not a subcategory. Please select a valid subcategory.');
                 }
             }],
-            'tags'              => ['nullable', 'array'],
-            'has_custom_prices'=> ['required', 'boolean'],
+            'tags' => ['nullable', 'array'],
+            'has_custom_prices' => ['required', 'boolean'],
+            'base_price' => [
+                'required_if:has_custom_prices,false',
+                'prohibited_if:has_custom_prices,true',
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+            'prices' => [
+                'array',
+                'required_if:has_custom_prices,true',
+                'prohibited_if:has_custom_prices,false',
+            ],
+            'prices.*.quantity' => ['required', 'integer', 'min:0'],
+            'prices.*.price' => ['required', 'integer', 'min:0'],
+            'specifications' => ['required', 'array'],
+            'specifications.*.name' => ['required', 'string', 'max:255'],
+            'specifications.*.specification_options' => ['required', 'array', 'min:1'],
+            'specifications.*.specification_options.*.value' => ['required', 'string', 'max:255'],
+            'specifications.*.specification_options.*.price' => ['nullable', 'numeric', 'min:0'],
+            'specifications.*.specification_options.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'is_free_shipping' => ['required', 'boolean'],
-//            'base_price'       => ['required', 'numeric', 'min:0'],
-            'status'           => ['nullable','in:',StatusEnum::values()],
+            'status' => ['nullable', 'in:', StatusEnum::values()],
         ];
 
     }

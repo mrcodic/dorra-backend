@@ -8,7 +8,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function all(bool $paginate = false, $columns = ['*'], $relations = [])
     {
-       return $paginate ? $this->model->with($relations)->paginate() : $this->model->get($columns);
+       return $paginate ? $this->model->with($relations)->paginate() : $this->model->with($relations)->get($columns);
     }
 
     public function find($id)

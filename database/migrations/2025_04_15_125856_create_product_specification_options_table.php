@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('product_specification_options', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(ProductSpecification::class)->constrained()->cascadeOnDelete();
+            $table->string('value');
             $table->decimal('price')->nullable();
             $table->timestamps();
         });

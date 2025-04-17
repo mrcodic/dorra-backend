@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Enums\Product\StatusEnum;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, MorphToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough, MorphToMany};
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -41,12 +41,22 @@ class Product extends Model implements HasMedia
 
     public function tags(): MorphToMany
     {
-        return $this->morphToMany(Tag::class, 'taggable');
+        return $this->morphToMany(Tag::class, 'taggable')
+            ->withPivot([
+                'taggable_id',
+                'taggable_type',
+            ])
+            ->withTimestamps();
     }
 
     public function specifications(): HasMany
     {
         return $this->hasMany(ProductSpecification::class);
+    }
+    public function specificationOptions(): HasManyThrough
+    {
+        return $this->hasManyThrough(ProductSpecificationOption::class, ProductSpecification::class,
+            'product_id', 'product_specification_id', 'id', 'id');
     }
 
     public function prices(): HasMany
