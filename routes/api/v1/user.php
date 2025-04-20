@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\OtpController,
     Auth\RegisterController,
     Auth\ResetPasswordController,
+    Category\CategoryController,
     General\MainController,
     Profile\PasswordController,
     Profile\ProfileController,
@@ -12,7 +14,8 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('register')->group(function () {
-    Route::post('/send-otp', [OtpController::class, 'sendRegistrationOtp']);
+    Route::post('/otp/send', [OtpController::class, 'sendRegistrationOtp']);
+    Route::post('/otp/expiration-time', [OtpController::class, 'getExpirationTimeOtp']);
     Route::post('/', RegisterController::class);
 });
 
@@ -43,6 +46,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notification-types',UserNotificationTypeController::class);
 
     Route::apiResource('shipping-addresses', ShippingAddressController::class)->except('show');
+    Route::apiResource('products',ProductController::class)->only(['index','show']);
+    Route::apiResource('categories',CategoryController::class)->only(['index','show']);
 
 
 });

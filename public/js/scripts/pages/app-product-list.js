@@ -31,8 +31,11 @@ var dt_user_table = $('.product-list-table').DataTable({
               <i data-feather="more-vertical"></i>
             </button>
             <div class="dropdown-menu">
-             <a href="/users/${data}" class="dropdown-item">
+             <a href="/products/${data}" class="dropdown-item">
                 <i data-feather="file-text"></i> Details
+              </a>
+               <a href="/products/${data}/edit" class="dropdown-item">
+                <i data-feather="edit"></i> Edit
               </a>
 
 

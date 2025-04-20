@@ -13,23 +13,24 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Add New Product</h4>
+                        <h4 class="card-title">Edit Product</h4>
                     </div>
                     <div class="card-body">
-                        <form id="product-form" class="form" action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+                        <form id="product-form" class="form" action="{{ route('products.update',$model->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
+                            @method("PUT")
                             <div class="row">
                                 <!-- Product Name EN/AR -->
                                 <div class="col-md-6">
                                     <div class="mb-1">
                                         <label class="form-label" for="product-name-en">Product Name (EN)</label>
-                                        <input type="text" id="product-name-en" class="form-control" name="name[en]" placeholder="Product Name (EN)"/>
+                                        <input type="text" id="product-name-en" class="form-control" name="name[en]" value="{{ $model->getTranslation('name','en') }}"  placeholder="Product Name (EN)"/>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-1">
                                         <label class="form-label" for="product-name-ar">Product Name (AR)</label>
-                                        <input type="text" id="product-name-ar" class="form-control" name="name[ar]" placeholder="Product Name (AR)"/>
+                                        <input type="text" id="product-name-ar" class="form-control" name="name[ar]" value="{{ $model->getTranslation('name','ar') }}" placeholder="Product Name (AR)"/>
                                     </div>
                                 </div>
 
@@ -37,13 +38,13 @@
                                 <div class="col-md-6">
                                     <div class="mb-1">
                                         <label class="form-label" for="description-en">Product Description (EN)</label>
-                                        <textarea name="description[en]" id="description-en" class="form-control" placeholder="Product Description (EN)"></textarea>
+                                        <textarea name="description[en]"  id="description-en" class="form-control" placeholder="Product Description (EN)">{{ $model->getTranslation('name','en') }}</textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-1">
                                         <label class="form-label" for="description-ar">Product Description (AR)</label>
-                                        <textarea name="description[ar]" id="description-ar" class="form-control" placeholder="Product Description (AR)"></textarea>
+                                        <textarea name="description[ar]"  id="description-ar" class="form-control" placeholder="Product Description (AR)">{{ $model->getTranslation('name','ar') }}</textarea>
                                     </div>
                                 </div>
 
@@ -51,7 +52,7 @@
                                 <div class="col-md-12">
                                     <div class="mb-1">
                                         <label class="form-label" for="product-image-main">Product Image (main)*</label>
-                                        <input type="file" name="image" id="product-image-main" class="form-control" required>
+                                        <input type="file" name="image" id="product-image-main" class="form-control">
                                     </div>
                                 </div>
 
@@ -70,7 +71,7 @@
                                         <select name="category_id" id="category" class="form-control category-select">
                                             <option value="">Select category</option>
                                             @foreach($associatedData['categories'] as $category)
-                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                <option value="{{ $category->id }}" @selected($category->id == $model->category?->id)>{{ $category->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -91,7 +92,7 @@
                                         <label class="form-label" for="tags">Tags</label>
                                         <select name="tags[]" id="tags" class="select2 form-select" multiple>
                                             @foreach($associatedData['tags'] as $tag)
-                                                <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                                <option value="{{ $tag->id }}" @if(in_array($tag->id, $model->tags->pluck('id')->toArray())) selected @endif >{{ $tag->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -126,18 +127,21 @@
                                                 <div data-repeater-list="prices">
                                                     <div data-repeater-item>
                                                         <div class="row d-flex align-items-end">
-                                                            <div class="col-md-4">
-                                                                <div class="mb-1">
-                                                                    <label class="form-label">Quantity</label>
-                                                                    <input type="number" name="prices[][quantity]" class="form-control" placeholder="Add Quantity"/>
+                                                            @foreach ($model->prices as $index => $price)
+                                                                <div class="col-md-4">
+                                                                    <div class="mb-1">
+                                                                        <label class="form-label">Quantity</label>
+                                                                        <input type="number" name="prices[{{ $index }}][quantity]" value="{{ $price->quantity }}" class="form-control" placeholder="Add Quantity"/>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="mb-1">
-                                                                    <label class="form-label">Price</label>
-                                                                    <input type="text" name="prices[][price]" class="form-control" placeholder="Add Price"/>
+                                                                <div class="col-md-4">
+                                                                    <div class="mb-1">
+                                                                        <label class="form-label">Price</label>
+                                                                        <input type="text" name="prices[{{ $index }}][price]" value="{{ $price->price }}" class="form-control" placeholder="Add Price"/>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            @endforeach
+
                                                             <div class="col-md-4">
                                                                 <div class="mb-1">
                                                                     <button type="button" class="btn btn-outline-danger text-nowrap px-1" data-repeater-delete>
@@ -165,7 +169,7 @@
                                 <div class="col-md-12" id="default-price-section" style="display: none;">
                                     <div class="mb-1">
                                         <label class="form-label" for="base_price">Original Price</label>
-                                        <input type="text" id="base_price" name="base_price" class="form-control" placeholder="Original Price"/>
+                                        <input type="text" id="base_price" name="base_price" value="{{ $model->base_price }}" class="form-control" placeholder="Original Price"/>
                                     </div>
                                 </div>
 
@@ -177,6 +181,8 @@
                                             <div class="card-body">
                                                 <!-- Outer Repeater for Specifications -->
                                                 <div class="outer-repeater">
+                                                    @foreach($model->specifications as $specification)
+
                                                     <div data-repeater-list="specifications">
                                                         <div data-repeater-item>
                                                             <div class="row">
@@ -184,7 +190,7 @@
                                                                 <div class="col-md-6">
                                                                     <div class="mb-1">
                                                                         <label class="form-label">Specification Name (EN)</label>
-                                                                        <input type="text" name="name_en" class="form-control" placeholder="Specification Name (EN)"/>
+                                                                        <input type="text" name="specifications[{{$loop->index}}][name_en]" value="{{ $specification->getTranslation('name','ar') }}"  class="form-control" placeholder="Specification Name (EN)"/>
                                                                     </div>
                                                                 </div>
 
@@ -192,31 +198,36 @@
                                                                 <div class="col-md-6">
                                                                     <div class="mb-1">
                                                                         <label class="form-label">Specification Name (AR)</label>
-                                                                        <input type="text" name="name_ar" class="form-control" placeholder="Specification Name (AR)"/>
+                                                                        <input type="text" name="specifications[{{$loop->index}}][name_ar]" value="{{ $specification->getTranslation('name','ar') }}" class="form-control" placeholder="Specification Name (AR)"/>
                                                                     </div>
                                                                 </div>
 
                                                                 <!-- Inner Repeater for Specification Options -->
                                                                 <div class="inner-repeater">
+                                                                    @foreach($specification->options as $option)
                                                                     <div data-repeater-list="specification_options">
                                                                         <div data-repeater-item>
                                                                             <div class="row d-flex align-items-end mt-2">
                                                                                 <!-- Option Name (English) -->
                                                                                 <div class="col-md-3">
                                                                                     <label>Option (EN)</label>
-                                                                                    <input type="text" name="value_en" class="form-control" placeholder="Option (EN)"/>
+                                                                                    <input type="text" name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][value_en]"
+                                                                                           value="{{ $option->getTranslation('value','ar') }}"
+                                                                                           class="form-control" placeholder="Option (EN)"/>
                                                                                 </div>
 
                                                                                 <!-- Option Name (Arabic) -->
                                                                                 <div class="col-md-3">
                                                                                     <label>Option (AR)</label>
-                                                                                    <input type="text" name="value_ar" class="form-control" placeholder="Option (AR)"/>
+                                                                                    <input type="text" name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][value_ar]"
+                                                                                           value="{{ $option->getTranslation('value','ar') }}"
+                                                                                           class="form-control" placeholder="Option (AR)"/>
                                                                                 </div>
 
                                                                                 <!-- Option Price -->
                                                                                 <div class="col-md-2">
                                                                                     <label>Price</label>
-                                                                                    <input type="text" name="price" class="form-control" placeholder="Price"/>
+                                                                                    <input type="text" name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][price]" value="{{ $option->price }}" class="form-control" placeholder="Price"/>
                                                                                 </div>
 
                                                                                 <!-- Option Image -->
@@ -227,6 +238,7 @@
                                                                             </div>
                                                                         </div>
                                                                     </div>
+                                                                    @endforeach
 
                                                                     <!-- Add Option Button -->
                                                                     <div class="row">
@@ -249,7 +261,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
+                                                    @endforeach
                                                     <!-- Add Specification Button -->
                                                     <div class="row">
                                                         <div class="col-12">

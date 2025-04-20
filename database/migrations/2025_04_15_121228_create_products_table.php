@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->longText('description')->nullable();
+            $table->json('name');
+            $table->json('description')->nullable();
             $table->foreignIdFor(Category::class)->nullable()->constrained()->nullOnDelete();
             $table->foreignId('sub_category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->boolean('has_custom_prices')->default(false);

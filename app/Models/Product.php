@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough, MorphToMany};
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Translatable\HasTranslations;
 
 class Product extends Model implements HasMedia
 {
-    use InteractsWithMedia;
+    use InteractsWithMedia, HasTranslations;
     protected $fillable = [
         'name',
         'description',
@@ -21,6 +22,8 @@ class Product extends Model implements HasMedia
         'base_price',
         'status',
     ];
+
+    public $translatable = ['name','description',];
 
     protected function casts()
     {

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Services\BaseService;
 use Illuminate\Contracts\View\{Factory, View};
 use Illuminate\Foundation\Application;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
@@ -28,6 +27,7 @@ class DashboardController extends Controller
     public function __construct(public BaseService $service)
     {
 
+
     }
 
     /**
@@ -46,7 +46,7 @@ class DashboardController extends Controller
      */
     public function create(): View|Application|Factory
     {
-        $associatedData = $this->assoiciatedData['create'] ?? [];
+        $associatedData = $this->assoiciatedData['shared'] ?? [];
         return view(self::BASE_FOLDER . "{$this->createView}",get_defined_vars());
     }
 
@@ -76,7 +76,9 @@ class DashboardController extends Controller
     public function edit(string $id): View|Application|Factory
     {
         $model = $this->service->showResource($id);
-        return view(self::BASE_FOLDER . "{$this->editView}", compact('model'));
+        $associatedData = $this->assoiciatedData['shared'] ?? [];
+
+        return view(self::BASE_FOLDER . "{$this->editView}", get_defined_vars());
     }
 
     /**

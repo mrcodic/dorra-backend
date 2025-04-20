@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use Illuminate\Http\UploadedFile;
@@ -12,6 +13,7 @@ class ProductService extends BaseService
 
     public BaseRepositoryInterface $repository;
     protected array $relations;
+
     public function __construct(ProductRepositoryInterface $repository)
     {
         $this->relations = ['category'];
@@ -20,13 +22,16 @@ class ProductService extends BaseService
 
     public function getData()
     {
-        $products = $this->repository->query(['id', 'name', 'created_at'])->with(['category', 'tags',]);
+        $products = $this->repository->query(['id', 'name', 'category_id', 'created_at'])->with(['category', 'tags',])->latest();
         return DataTables::of($products)
+            ->addColumn('name', function (Product $product) {
+                return $product->getTranslation('name', app()->getLocale());
+            })
             ->addColumn('added_date', function ($product) {
                 return $product->created_at?->format('j/n/Y');
             })
             ->addColumn('category', function ($product) {
-                return $product->category?->name;
+                return $product->category?->name ?? 'uncategorized';
             })
             ->addColumn('tags', function ($product) {
                 return $product->tags?->pluck('name');
@@ -47,11 +52,25 @@ class ProductService extends BaseService
         $product->prices()->createMany($validatedData['prices'] ?? []);
 
         collect($validatedData['specifications'])->map(function ($specification) use ($product) {
-            $productSpecification = $product->specifications()->create(['name' => $specification['name']]);
-            $productOptions = $productSpecification->options()->createMany($specification['specification_options'] ?? []);
-            collect($specification['specification_options'])->each(function ($option, $index) use ($productOptions) {
+            $productSpecification = $product->specifications()->create([
+                'name' => [
+                    'en' => $specification['name_en'],
+                    'ar' => $specification['name_ar'],
+                ],
+            ]);
+
+
+            collect($specification['specification_options'])->each(function ($option, $index) use ($productSpecification) {
+
+                $productOption = $productSpecification->options()->create([
+                    'value' => [
+                        'en' => $option['value_en'],
+                        'ar' => $option['value_ar'],
+                    ],
+                    'price' => $option['price'],
+                ]);
+
                 if (isset($option['image'])) {
-                    $productOption = $productOptions[$index];
                     if ($option['image'] instanceof UploadedFile) {
                         handleMediaUploads([$option['image']], $productOption);
                     }

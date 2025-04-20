@@ -26,8 +26,10 @@ class StoreProductRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'name.en' => ['required', 'string', 'max:255'],
+            'name.ar' => ['required', 'string', 'max:255'],
+            'description.en' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'images' => ['nullable', 'array'],
             'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
@@ -55,9 +57,11 @@ class StoreProductRequest extends BaseRequest
             'prices.*.quantity' => ['required', 'integer', 'min:0'],
             'prices.*.price' => ['required', 'integer', 'min:0'],
             'specifications' => ['required', 'array'],
-            'specifications.*.name' => ['required', 'string', 'max:255'],
+            'specifications.*.name_en' => 'nullable|string|max:255',
+            'specifications.*.name_ar' => 'nullable|string|max:255',
             'specifications.*.specification_options' => ['required', 'array', 'min:1'],
-            'specifications.*.specification_options.*.value' => ['required', 'string', 'max:255'],
+            'specifications.*.specification_options.*.value_en' => 'required|string|max:255',
+            'specifications.*.specification_options.*.value_ar' => 'required|string|max:255',
             'specifications.*.specification_options.*.price' => ['nullable', 'numeric', 'min:0'],
             'specifications.*.specification_options.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'is_free_shipping' => ['required', 'boolean'],

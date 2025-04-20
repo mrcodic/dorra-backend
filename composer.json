@@ -17,6 +17,7 @@
         "spatie/laravel-medialibrary": "^11.12",
         "spatie/laravel-permission": "^6.16",
         "spatie/laravel-query-builder": "^6.3",
+        "spatie/laravel-translatable": "^6.11",
         "yajra/laravel-datatables-oracle": "11.0"
     },
     "require-dev": {
