@@ -16,12 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
         apiPrefix: 'api/v1/user',
-        then: function () {
-            Route::middleware('api')
-                ->prefix('api/v1/dropdowns')
-                ->group(base_path('routes/api/v1/dropdowns.php'));
-
-        },
     )
     ->withMiddleware(function (Middleware $middleware) {
     })

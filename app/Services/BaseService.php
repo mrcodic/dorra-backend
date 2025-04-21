@@ -33,6 +33,7 @@ class BaseService
         collect($relationsToStore)->map(function ($relation) use ($validatedData, $model) {
             $model->{$relation}()->createMany($validatedData[$relation]);
         });
+
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }

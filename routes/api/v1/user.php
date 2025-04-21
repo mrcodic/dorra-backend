@@ -1,27 +1,29 @@
 <?php
 
-use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\OtpController,
     Auth\RegisterController,
     Auth\ResetPasswordController,
     Category\CategoryController,
     General\MainController,
+    Product\ProductController,
     Profile\PasswordController,
     Profile\ProfileController,
     Profile\UserNotificationTypeController,
     ShippingAddress\ShippingAddressController};
 use Illuminate\Support\Facades\Route;
 
+Route::get('country-codes',[MainController::class, 'countryCodes']);
+
+Route::post('/otp/expiration-time', [OtpController::class, 'getExpirationTimeOtp']);
 Route::prefix('register')->group(function () {
     Route::post('/otp/send', [OtpController::class, 'sendRegistrationOtp']);
-    Route::post('/otp/expiration-time', [OtpController::class, 'getExpirationTimeOtp']);
     Route::post('/', RegisterController::class);
 });
 
 Route::prefix('password')->group(function () {
-    Route::post('/send-otp', [OtpController::class, 'sendPasswordResetOtp']);
-    Route::post('/confirm-otp', [OtpController::class, 'confirmPasswordResetOtp']);
+    Route::post('/otp/send', [OtpController::class, 'sendPasswordResetOtp']);
+    Route::post('/otp/confirm', [OtpController::class, 'confirmPasswordResetOtp']);
     Route::post('reset', ResetPasswordController::class);
 });
 
@@ -47,9 +49,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('shipping-addresses', ShippingAddressController::class)->except('show');
     Route::apiResource('products',ProductController::class)->only(['index','show']);
+
+    Route::get('sub-categories',[MainController::class, 'subCategories']);
     Route::apiResource('categories',CategoryController::class)->only(['index','show']);
 
-
+    Route::get('states',[MainController::class, 'states']);
+    Route::get('countries',[MainController::class, 'countries']);
 });
 
 

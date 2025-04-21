@@ -2,10 +2,15 @@
 
 namespace App\Services;
 
+use App\Filters\RateFilter;
+use App\Filters\SubCategoryFilter;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 use Yajra\DataTables\Facades\DataTables;
 
 class ProductService extends BaseService
@@ -42,6 +47,19 @@ class ProductService extends BaseService
             ->addColumn('no_of_purchas', function ($product) {
                 return 5;
             })->make();
+    }
+
+    public function getAll(bool $paginate = false, $columns = ['*']): LengthAwarePaginator
+    {
+        return QueryBuilder::for(Product::class)->select($columns)
+            ->with($this->relations)
+            ->allowedFilters([
+                AllowedFilter::partial('category.id'),
+                AllowedFilter::custom('sub_categories', new SubCategoryFilter()),
+                AllowedFilter::scope('with_review_rating'),
+            ])
+            ->paginate();
+
     }
 
     public function storeResource($validatedData, $relationsToStore = [])
