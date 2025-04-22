@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\User\Auth;
 
-use App\Http\Requests\BaseRequest;
+use App\Http\Requests\Base\BaseRequest;
 use Illuminate\Validation\Rules\Password;
 
 class ResetPasswordRequest extends BaseRequest

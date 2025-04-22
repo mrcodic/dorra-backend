@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests\User\Auth;
 
-use App\Http\Requests\BaseRequest;
+use App\Http\Requests\Base\BaseRequest;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 

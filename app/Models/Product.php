@@ -86,6 +86,11 @@ class Product extends Model implements HasMedia
         return $this->hasMany(Review::class);
     }
 
+    public function users(): MorphToMany
+    {
+        return $this->morphToMany(User::class, 'savable');
+    }
+
 
 
 }

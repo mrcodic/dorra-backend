@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Http\Requests\BaseRequest;
+use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
 use Illuminate\Validation\Rules\Password;
 use Propaganistas\LaravelPhone\Rules\Phone;

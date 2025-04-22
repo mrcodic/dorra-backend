@@ -86,27 +86,6 @@ trait OtpTrait
         ]);
     }
 
-    public function getOtpExpirationTime($identifier,$otp)
-    {
-        $now = now();
-        $expiresAt = $otp->expires_at;
-        $diff = $now->diff($expiresAt);
-        $otpRecord = Otp::where([
-            ['identifier', $identifier],
-            ['otp', $otp],
-            ['otpable_id', $otpable?->id ?? 0],
-            ['otpable_type', $otpable ? get_class($otpable) : 'App\Models\User'],
-            ['expires_at', '>', now()]
-        ])->first();
-        if (!$otpRecord)
-        {
-            return false;
-        }
-        return [
-            'current_time' => $now,
-            'otp_expires_at' => $expiresAt,
-            'remaining_time' => $diff->i . ' minutes and ' . $diff->s . ' seconds',
-        ];
-    }
+
 
 }

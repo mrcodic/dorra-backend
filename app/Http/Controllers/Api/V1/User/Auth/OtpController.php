@@ -46,21 +46,4 @@ class OtpController extends Controller
             'reset_token' => $resetToken,
         ]);
     }
-
-    public function getExpirationTimeOtp(Request $request)
-    {
-        $validatedData = $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'otp' => 'required|digits:6'
-        ]);
-        $result = $this->getOtpExpirationTime($validatedData['email'],$validatedData['otp']);
-        if (!$result)
-        {
-            return Response::api(HttpEnum::BAD_REQUEST, message: "Bad Request", errors: [
-                'otp' => ["wrong or invalid otp"]
-            ]);
-        }
-        return Response::api(data: $result);
-
-    }
 }

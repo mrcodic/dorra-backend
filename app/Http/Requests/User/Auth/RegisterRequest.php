@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\User\Auth;
 
-use App\Http\Requests\BaseRequest;
+use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
 use Illuminate\Validation\Rules\Password;
 use Propaganistas\LaravelPhone\Rules\Phone;
@@ -29,11 +29,8 @@ class RegisterRequest extends BaseRequest
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'phone_number' => ['required', 'string', 'min:10', 'max:15', 'unique:users,phone_number', new Phone($isoCode),],
             'password' => ['required', 'string', 'confirmed',Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'otp' =>['required','numeric','digits:6'],
-            'country_code_id' => ['required', 'exists:country_codes,id'],
-            'image' => ['nullable', 'image' , 'mimes:jpeg,png,jpg,svg'],
         ];
     }
 

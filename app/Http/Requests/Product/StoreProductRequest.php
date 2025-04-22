@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Product;
 
 use App\Enums\Product\StatusEnum;
-use App\Http\Requests\BaseRequest;
+use App\Http\Requests\Base\BaseRequest;
 use App\Models\Category;
-use App\Models\CountryCode;
 
 class StoreProductRequest extends BaseRequest
 {

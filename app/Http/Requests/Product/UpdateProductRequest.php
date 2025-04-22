@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Product;
 
-use App\Http\Requests\BaseRequest;
+use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
 
 class UpdateProductRequest extends BaseRequest
