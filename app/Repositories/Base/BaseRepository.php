@@ -14,9 +14,9 @@ class BaseRepository implements BaseRepositoryInterface
     }
 
 
-    public function find($id)
+    public function find($id,$relations = [])
     {
-        return $this->model->findOrFail($id);
+        return $this->model->with($relations)->findOrFail($id);
     }
 
     public function create(array $data)

@@ -35,14 +35,26 @@ class DeleteSaveRequest extends BaseRequest
         $validator->after(function ($validator) {
             $type = $this->input('savable_type');
             $ids = $this->input('savable_ids');
+
             $modelMap = [
                 'product' => Product::class,
-//                'project' => Project::class,
+                // 'project' => \App\Models\Project::class,
             ];
+
+            if (!isset($modelMap[$type])) {
+                return;
+            }
             $model = $modelMap[$type];
-           if (!$model::whereIn($ids)->exists()) {
-               $validator->errors()->add('saveable_ids', ucfirst($type) . ' not found.');
-           }
+            $existingIds = $model::whereIn('id', $ids)->pluck('id')->all();
+            $missingIds = array_diff($ids, $existingIds);
+
+            if (!empty($missingIds)) {
+                $validator->errors()->add(
+                    'savable_ids',
+                    ucfirst($type) . ' ID(s) not found: ' . implode(', ', $missingIds)
+                );
+            }
         });
+
     }
 }

@@ -8,6 +8,7 @@ return [
     "eCommerce" => "eCommerce",
     "Apps" => "Apps",
     "Products" => "Products",
+    "Categories" => "Categories",
     "Forms & Tables" => "Forms & Tables",
     "Pages" => "Pages",
     "Charts & Maps" => "Charts & Maps",

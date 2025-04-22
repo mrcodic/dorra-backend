@@ -20,7 +20,7 @@ class BaseService
 
     public function showResource($id)
     {
-        $model = $this->repository->find($id);
+        $model = $this->repository->find($id,$this->relations);
         return $model;
 
     }
