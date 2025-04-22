@@ -90,6 +90,16 @@
             "submenu": [
                 {
                     "url": "/categories",
+                    "name": "categories",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },{
+                    "url": "/categories",
+                    "name": "categories",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },{
+                    "url": "/categories",
                     "name": "List",
                     "icon": "circle",
                     "slug": "app-user-list"
