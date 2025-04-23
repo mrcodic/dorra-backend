@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\Product\StatusEnum;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough, MorphToMany};
 use Spatie\MediaLibrary\HasMedia;
@@ -32,6 +34,18 @@ class Product extends Model implements HasMedia
         ];
     }
 
+    public function rating(): Attribute
+    {
+        return Attribute::get(fn(?int $value) => $this->reviews?->pluck('rating')->avg());
+    }
+
+    public function scopeWithReviewRating(Builder $builder,$rates): Builder
+    {
+        $rates = is_array($rates) ? $rates : explode(',', $rates);
+       return $builder->whereHas('reviews',function ($query) use ($rates){
+            $query->whereIn('rating',$rates);
+        });
+    }
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class)->withDefault(['name' => 'uncategorized']);
@@ -65,6 +79,16 @@ class Product extends Model implements HasMedia
     public function prices(): HasMany
     {
         return $this->hasMany(ProductPrice::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function users(): MorphToMany
+    {
+        return $this->morphToMany(User::class, 'savable');
     }
 
 

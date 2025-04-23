@@ -5,7 +5,7 @@ namespace App\Models;
 // use Illuminate\Interfaces\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, MorphToMany};
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -109,6 +109,16 @@ class User extends Authenticatable implements HasMedia
             ->withPivot('enabled')
             ->withTimestamps();
     }
+
+    public function savedProducts(): MorphToMany
+    {
+        return $this->morphedByMany(Product::class, 'savable','saves')->withTimestamps();
+    }
+
+/*    public function savedProjects(): MorphToMany
+    {
+        return $this->morphedByMany(Project::class, 'savable','saves')->withTimestamps();
+    }*/
 
 
 

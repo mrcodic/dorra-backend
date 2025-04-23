@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 use Spatie\Translatable\HasTranslations;
 
+
 class ProductSpecification extends Model
 {
     use HasTranslations;

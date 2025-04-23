@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Services\CategoryService;
+use Illuminate\Http\JsonResponse;
 use App\Http\Requests\Category\{StoreCategoryRequest, UpdateCategoryRequest};
 
 
 class CategoryController extends DashboardController
 {
-   public function __construct(CategoryService $categoryService)
+   public function __construct(public CategoryService $categoryService)
    {
        parent::__construct($categoryService);
        $this->storeRequestClass = new StoreCategoryRequest();
@@ -21,4 +22,8 @@ class CategoryController extends DashboardController
        $this->usePagination = true;
        $this->successMessage = 'Process success';
    }
+    public function getData(): JsonResponse
+    {
+        return $this->categoryService->getData();
+    }
 }

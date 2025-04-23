@@ -6,14 +6,17 @@ class BaseRepository implements BaseRepositoryInterface
 {
     public function __construct(public $model){}
 
-    public function all(bool $paginate = false, $columns = ['*'], $relations = [])
+    public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc')
     {
-       return $paginate ? $this->model->with($relations)->paginate() : $this->model->with($relations)->get($columns);
+        $query = $this->model->with($relations)->orderBy($orderBy, $direction);
+
+        return $paginate ? $query->paginate() : $query->get($columns);
     }
 
-    public function find($id)
+
+    public function find($id,$relations = [])
     {
-        return $this->model->findOrFail($id);
+        return $this->model->with($relations)->findOrFail($id);
     }
 
     public function create(array $data)

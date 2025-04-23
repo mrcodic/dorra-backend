@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Product;
 
 use App\Enums\Product\StatusEnum;
-use App\Http\Requests\BaseRequest;
+use App\Http\Requests\Base\BaseRequest;
 use App\Models\Category;
-use App\Models\CountryCode;
 
 class StoreProductRequest extends BaseRequest
 {
@@ -30,9 +29,9 @@ class StoreProductRequest extends BaseRequest
             'name.ar' => ['required', 'string', 'max:255'],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png'],
             'images' => ['nullable', 'array'],
-            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'sub_category_id' => ['nullable', 'integer', 'exists:categories,id', function ($attribute, $value, $fail) {
                 $category = Category::find($value);

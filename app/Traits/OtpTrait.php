@@ -18,7 +18,7 @@ trait OtpTrait
             ->where('type', $type)
             ->delete();
         $otp = rand(100000, 999999);
-        Mail::to($identifier)->send(new OtpMail($otp));
+//        Mail::to($identifier)->send(new OtpMail($otp));
         return Otp::create([
             'identifier' => $identifier,
             'otp' => $otp,
@@ -80,10 +80,13 @@ trait OtpTrait
         $diff = $now->diff($expiresAt);
 
         return Response::api(message: "Otp has been sent to your email", data: [
+            'otp' => $otp->otp,
             'current_time' => $now,
             'otp_expires_at' => $expiresAt,
             'remaining_time' => $diff->i . ' minutes and ' . $diff->s . ' seconds',
         ]);
     }
+
+
 
 }

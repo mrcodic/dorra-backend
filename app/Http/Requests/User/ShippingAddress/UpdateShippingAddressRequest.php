@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\User\ShippingAddress;
 
-use App\Http\Requests\BaseRequest;
+use App\Http\Requests\Base\BaseRequest;
 
 
 class UpdateShippingAddressRequest extends BaseRequest

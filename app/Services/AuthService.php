@@ -31,7 +31,7 @@ class AuthService
         }
         $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
         $user->token = $plainTextToken;
-        return $user;
+        return $user->refresh();
     }
 
     public function login($validatedData): ?User

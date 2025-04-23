@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware('auth')->group(function () {
+    Route::get('states',[MainController::class, 'states'])->name('states');
     Route::view('/', 'dashboard.index')->name('dashboard');
 
     Route::prefix('/users')->as('users')->group(function () {
@@ -27,5 +28,5 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('states',[MainController::class, 'states'])->name('states');
-    Route::get('sub-categories',[MainController::class, 'subCategories']);
+    Route::get('sub-categories',[MainController::class, 'subCategories'])->name('sub-categories');
 });

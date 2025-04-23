@@ -1,27 +1,30 @@
 <?php
 
-use App\Http\Controllers\Dashboard\ProductController;
+use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\OtpController,
     Auth\RegisterController,
     Auth\ResetPasswordController,
     Category\CategoryController,
     General\MainController,
+    Product\ProductController,
     Profile\PasswordController,
     Profile\ProfileController,
     Profile\UserNotificationTypeController,
+    SaveController,
     ShippingAddress\ShippingAddressController};
 use Illuminate\Support\Facades\Route;
 
+Route::get('country-codes',[MainController::class, 'countryCodes']);
+
 Route::prefix('register')->group(function () {
     Route::post('/otp/send', [OtpController::class, 'sendRegistrationOtp']);
-    Route::post('/otp/expiration-time', [OtpController::class, 'getExpirationTimeOtp']);
     Route::post('/', RegisterController::class);
 });
 
 Route::prefix('password')->group(function () {
-    Route::post('/send-otp', [OtpController::class, 'sendPasswordResetOtp']);
-    Route::post('/confirm-otp', [OtpController::class, 'confirmPasswordResetOtp']);
+    Route::post('/otp/send', [OtpController::class, 'sendPasswordResetOtp']);
+    Route::post('/otp/confirm', [OtpController::class, 'confirmPasswordResetOtp']);
     Route::post('reset', ResetPasswordController::class);
 });
 
@@ -46,10 +49,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notification-types',UserNotificationTypeController::class);
 
     Route::apiResource('shipping-addresses', ShippingAddressController::class)->except('show');
+
     Route::apiResource('products',ProductController::class)->only(['index','show']);
+    Route::controller(SaveController::class)->group(function () {
+        Route::post('toggle-save','toggleSave');
+        Route::delete('bulk-delete-saved','destroyBulk');
+    });
+
+
     Route::apiResource('categories',CategoryController::class)->only(['index','show']);
+    Route::get('sub-categories',[MainController::class, 'subCategories']);
 
-
+    Route::get('states',[MainController::class, 'states']);
+    Route::get('countries',[MainController::class, 'countries']);
 });
 
 

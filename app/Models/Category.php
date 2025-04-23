@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Translatable\HasTranslations;
 
 class Category extends Model implements HasMedia
 {
-    use InteractsWithMedia;
+    use InteractsWithMedia, HasTranslations;
     protected $fillable = ['name','description', 'parent_id'];
+    public $translatable = ['name','description'];
 
     public function parent(): BelongsTo
     {
@@ -21,6 +23,11 @@ class Category extends Model implements HasMedia
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
     }
 
 }

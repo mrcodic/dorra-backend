@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests\User\Auth;
 
-use App\Http\Requests\BaseRequest;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Base\BaseRequest;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends BaseRequest
 {
+
     /**
      * Determine if the v1 is authorized to make this request.
      */
@@ -47,7 +49,8 @@ class LoginRequest extends BaseRequest
     protected function passedValidation(): void
     {
         $credentials = $this->only('email', 'password');
-        if (!Auth::attempt($credentials)) {
+        $user = User::whereEmail($credentials['email'])->first();
+        if (!$user && !Hash::check($credentials['password'],$user?->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);

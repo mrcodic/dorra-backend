@@ -20,7 +20,7 @@ class BaseService
 
     public function showResource($id)
     {
-        $model = $this->repository->find($id);
+        $model = $this->repository->find($id,$this->relations);
         return $model;
 
     }
@@ -33,6 +33,7 @@ class BaseService
         collect($relationsToStore)->map(function ($relation) use ($validatedData, $model) {
             $model->{$relation}()->createMany($validatedData[$relation]);
         });
+
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }

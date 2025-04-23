@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests\Category;
 
-use App\Http\Requests\BaseRequest;
+use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
-use Illuminate\Validation\Rules\Password;
-use Propaganistas\LaravelPhone\Rules\Phone;
 
 class StoreCategoryRequest extends BaseRequest
 {
@@ -25,11 +23,12 @@ class StoreCategoryRequest extends BaseRequest
      */
     public function rules(): array
     {
-        $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name.en' => ['required', 'string', 'max:255'],
+            'name.ar' => ['required', 'string', 'max:255'],
+            'description.en' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
-            'parent_id' => ['nullable', 'integer', 'exists:categories,id'],
         ];
 
     }

@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
-    
 
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -26,6 +25,7 @@
 @section('content')
     <!-- users list start -->
     <section class="app-user-list">
+
         <!-- list and filter start -->
         <div class="card">
             <div class="card-body border-bottom">
@@ -37,16 +37,14 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive pt-0">
-                <table class="product-list-table table">
+                <table class="category-list-table table">
                     <thead class="table-light">
                     <tr>
                         <th></th>
                         <th>Name</th>
-                        <th>Category</th>
-                        <th>Tags</th>
-                        <th>NO.of Purchas</th>
+                        <th>SubCategories</th>
+                        <th>NO.of Products</th>
                         <th>Added Date</th>
-                        <th>Rating</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -195,10 +193,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
    <script>
-       const productsDataUrl = "{{ route('products.data') }}";
-       const productsCreateUrl = "{{ route('products.create') }}";
+       const categoriesDataUrl = "{{ route('categories.data') }}";
+       const categoriesCreateUrl = "{{ route('categories.create') }}";
    </script>
 
     {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-product-list.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-category-list.js') }}?v={{ time() }}"></script>
 @endsection
