@@ -46,7 +46,7 @@
     <div class="header-navbar-shadow"></div>
 
     <div class="content-wrapper">
-      <div class="content-body">
+      <div class="content-body bg-white">
 
         {{-- Include Startkit Content --}}
         @yield('content')

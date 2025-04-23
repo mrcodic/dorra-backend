@@ -17273,8 +17273,16 @@ footer.footer-border {
 .main-menu .navbar-header .navbar-brand .brand-logo img {
   max-width: 36px;
 }
+.brand-text {
+  color: #121212;
+font-size: 40px;
+font-weight: 500;}
+.login-card-text{
+  font-size: 24px;
+  color: #424746;
+}
 .main-menu .navbar-header .navbar-brand .brand-text {
-  color: #24B094;
+  color: #121212;
   padding-left: 1rem;
   margin-bottom: 0;
   font-weight: 600;
