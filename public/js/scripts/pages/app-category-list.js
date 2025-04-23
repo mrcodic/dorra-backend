@@ -16,6 +16,7 @@ var dt_user_table = $('.category-list-table').DataTable({
         { data: null, defaultContent: '', orderable: false },
         { data: 'name' },
         { data: 'sub_categories' },
+        { data: 'sub_categories' },
         { data: 'no_of_products' },
         { data: 'added_date' },
 
@@ -23,14 +24,22 @@ var dt_user_table = $('.category-list-table').DataTable({
             data: 'id',
             orderable: false,
             render: function (data, type, row, meta) {
-                console.log(data)
                 return `
           <div class="dropdown">
             <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
               <i data-feather="more-vertical"></i>
             </button>
             <div class="dropdown-menu">
-             <a href="/products/${data}" class="dropdown-item">
+              <a href="#"
+                 class="dropdown-item view-details"
+                 data-bs-toggle="modal"
+                 data-bs-target="#modals-slide-in"
+                 data-id="${data}"
+                 data-name="${row.name}"
+                 data-description="${row.description}"
+                 data-subcategories="${row.sub_categories}"
+                 data-products="${row.no_of_products}"
+                 data-added="${row.added_date}">
                 <i data-feather="file-text"></i> Details
               </a>
                <a href="/products/${data}/edit" class="dropdown-item">
@@ -184,6 +193,30 @@ $(document).ready(function ()   {
             }
         });
     });
+    $(document).on('click', '.view-details', function (e) {
+        e.preventDefault();
+
+        // Get the data from attributes
+        const categoryName = $(this).data('name');
+        const subCategories = $(this).data('subcategories');
+        const products = $(this).data('products');
+        const addedDate = $(this).data('added');
+        const description = $(this).data('description');
+        console.log(description)
+
+        console.log(subCategories)
+        // Populate modal
+        $('#showCategoryModal #category-name').val(categoryName);
+        $('#showCategoryModal #category-subcategories').val(subCategories);
+        $('#showCategoryModal #category-products').val(products);
+        $('#showCategoryModal #category-date').val(addedDate);
+        $('#showCategoryModal #category-description').val(description);
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('showCategoryModal'));
+        modal.show();
+    });
+
 
 
 

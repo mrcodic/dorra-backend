@@ -9,7 +9,7 @@
 <!-- END: Vendor CSS-->
 
 <!-- BEGIN: Theme CSS-->
-<link rel="stylesheet" href="{{ asset(mix('css/core.css')) }}" />
+<link rel="stylesheet" href="{{ asset('css/core.css') }}?v={{ time() }}" />
 <link rel="stylesheet" href="{{ asset(mix('css/base/themes/dark-layout.css')) }}" />
 <link rel="stylesheet" href="{{ asset(mix('css/base/themes/bordered-layout.css')) }}" />
 <link rel="stylesheet" href="{{ asset(mix('css/base/themes/semi-dark-layout.css')) }}" />

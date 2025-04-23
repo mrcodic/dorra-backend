@@ -71,17 +71,17 @@
             "submenu": [
                 {
                     "url": "/categories",
-                    "name": "categories",
+                    "name": "Categories",
                     "icon": "circle",
                     "slug": "app-user-list"
                 },{
-                    "url": "/categories",
-                    "name": "categories",
+                    "url": "/sub-categories",
+                    "name": "Subcategories",
                     "icon": "circle",
                     "slug": "app-user-list"
                 },{
-                    "url": "/categories",
-                    "name": "List",
+                    "url": "/tags",
+                    "name": "Tags",
                     "icon": "circle",
                     "slug": "app-user-list"
                 }

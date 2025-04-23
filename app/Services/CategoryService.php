@@ -39,6 +39,9 @@ class CategoryService extends BaseService
             ->addColumn('name', function ($category) {
                 return $category->getTranslation('name', app()->getLocale());
             })
+            ->addColumn('description', function ($category) {
+                return $category->getTranslation('description', app()->getLocale());
+            })
             ->addColumn('added_date', function ($category) {
                 return $category->created_at?->format('j/n/Y');
             })

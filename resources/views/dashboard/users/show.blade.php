@@ -246,7 +246,6 @@
     </section>
 
     @include('modals/modal-edit-user',['user'=>$model , 'countryCodes' => $associatedData['country_codes']])
-    @include('modals/modal-upgrade-plan')
 @endsection
 
 @section('vendor-script')

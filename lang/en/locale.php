@@ -9,6 +9,8 @@ return [
     "Apps" => "Apps",
     "Products" => "Products",
     "Categories" => "Categories",
+    "Subcategories" => "Subcategories",
+    "Tags" => "Tags",
     "Forms & Tables" => "Forms & Tables",
     "Pages" => "Pages",
     "Charts & Maps" => "Charts & Maps",

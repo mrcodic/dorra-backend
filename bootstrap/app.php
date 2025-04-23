@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api/v1/user',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->redirectUsersTo('/');
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
