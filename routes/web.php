@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\User\General\MainController;
-use App\Http\Controllers\Dashboard\{ProductController, UserController, CategoryController};
+use App\Http\Controllers\Dashboard\{ProductController, TagController, UserController, CategoryController};
 use Illuminate\Support\Facades\Route;
 
 
@@ -20,10 +20,20 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/categories', CategoryController::class);
 
+    Route::prefix('/sub-categories')->as('sub-categories')->group(function () {
+        Route::get('/data',[CategoryController::class,'getData'])->name('.data');
+    });
+    Route::resource('/sub-categories', CategoryController::class);
+
     Route::prefix('/products')->as('products')->group(function () {
         Route::get('/data',[ProductController::class,'getData'])->name('.data');
     });
     Route::resource('/products', ProductController::class);
+
+    Route::prefix('/tags')->as('tags')->group(function () {
+        Route::get('/data',[TagController::class,'getData'])->name('.data');
+    });
+    Route::resource('/products', TagController::class);
 
 
 
