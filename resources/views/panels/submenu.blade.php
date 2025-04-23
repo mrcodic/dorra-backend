@@ -2,7 +2,12 @@
 <ul class="menu-content">
   @if (isset($menu))
     @foreach ($menu as $submenu)
-      <li @if ($submenu->slug === Route::currentRouteName()) class="active" @endif>
+      @php
+        $submenuUrl = isset($submenu->url) ? ltrim(parse_url($submenu->url, PHP_URL_PATH), '/') : '';
+        $isSubmenuActive = Request::is($submenuUrl) || Request::is($submenuUrl . '/*');
+      @endphp
+
+      <li class="{{ $isSubmenuActive ? 'active' : '' }}">
         <a href="{{ isset($submenu->url) ? url($submenu->url) : 'javascript:void(0)' }}" class="d-flex align-items-center"
           target="{{ isset($submenu->newTab) && $submenu->newTab === true ? '_blank' : '_self' }}">
           @if (isset($submenu->icon))
