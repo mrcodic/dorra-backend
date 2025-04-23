@@ -13989,13 +13989,14 @@ ul.list-inline.list-inline-pipe > li + li:before {
 }
 .modal-slide-in .modal-dialog {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  top: 15px;
+  right: 15px;
+  bottom: 15px;
   left: auto;
   margin: 0;
   max-width: none;
   width: 20rem;
+  border-radius: 16px;
 }
 .modal-slide-in .modal-dialog .modal-content {
   padding-bottom: 1.8875rem;

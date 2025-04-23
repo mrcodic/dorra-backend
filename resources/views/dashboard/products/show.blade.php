@@ -215,7 +215,10 @@
                                 <div class="d-flex gap-2 justify-content-end w-100">
 
                                     <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete</button>
-                                    <button class="btn btn-primary ">Reply</button>
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modals-slide-in">
+                                        Reply
+                                    </button>
+
                                 </div>
                             </div>
 
@@ -227,6 +230,34 @@
             </div>
         </div>
     </div>
+
+
+    <!-- Modal to add new user starts-->
+
+            <div class="modal modal-slide-in new-user-modal fade" id="modals-slide-in">
+                <div class="modal-dialog">
+                    <form id="replyForm" class="add-new-user modal-content pt-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                        <div class="modal-header mb-1">
+                            <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
+                        </div>
+                        <div class="modal-body flex-grow-1">
+                        <div class="mb-3">
+                            <label for="replyImage" class="form-label">Upload Image</label>
+                            <input class="form-control" type="file" id="replyImage" name="replyImage">
+                        </div>
+                        <div class="mb-3">
+                            <label for="replyText" class="form-label">Your Reply</label>
+                            <textarea class="form-control" id="replyText" rows="4" name="replyText" placeholder="Write your reply here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Reply</button>
+                        </div>
+                     
+                    </form>
+                </div>
+            </div>
+
+
 </div>
 
 
@@ -300,8 +331,26 @@
     };
 </script>
 <script>
+    document.getElementById('replyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
 
+        const image = document.getElementById('replyImage').files[0];
+        const replyText = document.getElementById('replyText').value;
+
+        console.log("Reply:", {
+            image,
+            replyText
+        });
+
+        // Hide modal after submission
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modals-slide-in'));
+        modal.hide();
+
+        // Reset form
+        this.reset();
+    });
 </script>
+
 
 
 
