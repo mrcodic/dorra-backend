@@ -30,16 +30,18 @@
 
         <!-- Main Preview Image -->
         <p class="label-text">Product Image (main)</p>
+        <div class="w-100 d-flex justify-content-center">
         <img id="mainPreview" src="{{ asset('images/banner/banner-1.jpg') }}" alt="Preview" class="img-fluid mb-2"
-            style="max-height: 300px;" />
-
+            style="height: 256px;width: 256px" />
+            </div>
         <p class="label-text">Product Images</p>
 
         <!-- Custom Slider -->
         <div class="position-relative mb-3">
             <!-- Left Arrow -->
             <button
-                class="btn btn-outline-secondary p-0 position-absolute top-50 start-0 translate-middle-y zindex-sticky"
+                class="btn btn-outline-secondary  position-absolute top-50 start-0 translate-middle-y zindex-sticky"
+                style="padding: 5px;"
                 onclick="moveSlide(-1)">
                 <i data-feather="chevron-left"></i>
             </button>
@@ -57,7 +59,8 @@
 
             <!-- Right Arrow -->
             <button
-                class="btn btn-outline-secondary p-0 position-absolute top-50 end-0 translate-middle-y zindex-sticky"
+                class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y zindex-sticky"
+                style="padding: 5px;"
                 onclick="moveSlide(1)">
                 <i data-feather="chevron-right"></i>
             </button>
@@ -95,16 +98,16 @@
 
 
     <!-- Right Section -->
-    <div class="col-md-8 ">
+    <div class="col-md-8 py-1">
         <div class="">
             <div class="">
                 <!-- Tabs -->
-                <ul class="nav nav-tabs mb-2" id="tabContent">
+                <ul class="nav nav-tabs mb-3" id="tabContent">
                     <li class="nav-item">
-                        <a class="nav-link active " id="tab1-tab" data-bs-toggle="tab" href="#tab1">Product Information</a>
+                        <a class="tab-button active " id="tab1-tab" data-bs-toggle="tab" href="#tab1">Product Information</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="tab2-tab" data-bs-toggle="tab" href="#tab2">Reviews</a>
+                        <a class="tab-button" id="tab2-tab" data-bs-toggle="tab" href="#tab2">Reviews</a>
                     </li>
                 </ul>
 
@@ -190,7 +193,10 @@
                     <div class="tab-pane fade" id="tab2">
                         <!-- Total Reviews Section -->
                         <div class="">
-                            <div class="d-flex justify-content-between mb-2"><span class="text-small">Total Reviews:</span><span class="label-text">421 Reviews</span></div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-small">Total Reviews:</span>
+                                <span class="label-text">421 Reviews</span>
+                            </div>
 
                             <!-- Single Review -->
                             <div class="">
@@ -213,17 +219,39 @@
                                 </div>
 
                                 <div class="d-flex gap-2 justify-content-end w-100">
-
                                     <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete</button>
                                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modals-slide-in">
                                         Reply
                                     </button>
-
                                 </div>
                             </div>
 
-                            <!-- Repeat .border div for each review -->
+                            <!-- Divider -->
+                            <hr class="my-2">
+
+                            <!-- Comment Reply -->
+                            <div class="">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="d-flex align-items-center gap-1 ">
+                                    <img src="{{ asset('images/logo-reply.png') }}" alt="Avatar" class="rounded-circle" width="48" height="48">
+                                
+                                        <div class="fw-bold text-primary">Reply from Dorra Team</div>
+                                        
+                                    
+                                </div>
+                                <div class="text-small">2024-04-23</div>
+                                </div>
+                           
+                                <div class="mb-2 label-text mx-5">
+                                    Thank you for your kind words! We're happy you loved the product.
+                                </div>
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete Comment</button>
+                                    <button class="btn btn-outline-secondary">Delete Reply</button>
+                                </div>
+                            </div>
                         </div>
+
 
                     </div>
                 </div>
@@ -234,28 +262,28 @@
 
     <!-- Modal to add new user starts-->
 
-            <div class="modal modal-slide-in new-user-modal fade" id="modals-slide-in">
-                <div class="modal-dialog">
-                    <form id="replyForm" class="add-new-user modal-content pt-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
-                        <div class="modal-header mb-1">
-                            <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
-                        </div>
-                        <div class="modal-body flex-grow-1">
-                        <div class="mb-3">
-                            <label for="replyImage" class="form-label">Upload Image</label>
-                            <input class="form-control" type="file" id="replyImage" name="replyImage">
-                        </div>
-                        <div class="mb-3">
-                            <label for="replyText" class="form-label">Your Reply</label>
-                            <textarea class="form-control" id="replyText" rows="4" name="replyText" placeholder="Write your reply here..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Send Reply</button>
-                        </div>
-                     
-                    </form>
+    <div class="modal modal-slide-in new-user-modal fade" id="modals-slide-in">
+        <div class="modal-dialog">
+            <form id="replyForm" class="add-new-user modal-content pt-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                <div class="modal-header mb-1">
+                    <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
                 </div>
-            </div>
+                <div class="modal-body flex-grow-1">
+                    <div class="mb-3">
+                        <label for="replyImage" class="form-label">Upload Image</label>
+                        <input class="form-control" type="file" id="replyImage" name="replyImage">
+                    </div>
+                    <div class="mb-3">
+                        <label for="replyText" class="form-label">Your Reply</label>
+                        <textarea class="form-control" id="replyText" rows="4" name="replyText" placeholder="Write your reply here..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send Reply</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
 
 
 </div>

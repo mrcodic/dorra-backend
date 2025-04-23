@@ -24,3 +24,15 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
 .text-small{
 	font-size: 12px;
 }
+.tab-button{
+	background-color:transparent ;
+	border-radius: 12px;
+	color: #424746;
+	padding: 16px;
+}
+.tab-button.active{
+	background-color:#24B094 ;
+	border-radius: 12px;
+	color: white;
+	padding: 16px;
+}
