@@ -9,3 +9,18 @@ NOTE:
 ------
 PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
 WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
+
+.disabled-field{
+    background-color: #FCF9FC;
+    padding: 7px;
+    border-radius: 12px;
+	color: #121212;
+}
+.label-text{
+	color: #121212;
+	font-weight: 500;
+	font-size: 16px;
+}
+.text-small{
+	font-size: 12px;
+}
