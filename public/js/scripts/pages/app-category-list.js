@@ -4,7 +4,6 @@ $.ajaxSetup({
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
 });
-
 var dt_user_table = $('.category-list-table').DataTable({
     processing: true,
     serverSide: true,
@@ -16,7 +15,6 @@ var dt_user_table = $('.category-list-table').DataTable({
         { data: null, defaultContent: '', orderable: false },
         { data: 'name' },
         { data: 'sub_categories' },
-        { data: 'sub_categories' },
         { data: 'no_of_products' },
         { data: 'added_date' },
 
@@ -24,20 +22,31 @@ var dt_user_table = $('.category-list-table').DataTable({
             data: 'id',
             orderable: false,
             render: function (data, type, row, meta) {
+                console.log(row)
+                const childNames = Array.isArray(row.children)
+                    ? row.children
+                        .map(child => {
+                            // child.name is an object like { en: 'Foo', ar: 'بار' }
+                            return (child.name && child.name[locale]) || '';
+                        })
+                        .filter(n => n)          // drop empty strings
+                        .join(', ')
+                    : '';
+
                 return `
           <div class="dropdown">
             <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
               <i data-feather="more-vertical"></i>
             </button>
             <div class="dropdown-menu">
-              <a href="#"
+              <a href="/categories/${data}"
                  class="dropdown-item view-details"
                  data-bs-toggle="modal"
                  data-bs-target="#modals-slide-in"
-                 data-id="${data}"
+                 data-id=""
                  data-name="${row.name}"
                  data-description="${row.description}"
-                 data-subcategories="${row.sub_categories}"
+                 data-subcategories="${row.children}"
                  data-products="${row.no_of_products}"
                  data-added="${row.added_date}">
                 <i data-feather="file-text"></i> Details
@@ -163,13 +172,12 @@ $(document).ready(function ()   {
         var $table = $('.category-list-table').DataTable();
         var $row = $(this).closest('tr');
         var rowData = $table.row($row).data();
-
         var categoryId = $(this).data('id');
         var categoryName = rowData.name;
 
         Swal.fire({
             title: `Are you sure?`,
-            text: `You are about to delete user "${categoryName}". This action cannot be undone.`,
+            text: `You are about to delete category "${categoryName}". This action cannot be undone.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -195,10 +203,22 @@ $(document).ready(function ()   {
     });
     $(document).on('click', '.view-details', function (e) {
         e.preventDefault();
-
+        $.ajax({
+            url: $(this).attr('href'),
+            method: 'GET',
+            success: function (res) {
+                console.log(res)
+            },
+            error: function (xhr) {
+                var errors = xhr.responseJSON.errors;
+                console.log(errors)
+            }
+        });
+        console.log()
         // Get the data from attributes
         const categoryName = $(this).data('name');
         const subCategories = $(this).data('subcategories');
+        console.log(subCategories)
         const products = $(this).data('products');
         const addedDate = $(this).data('added');
         const description = $(this).data('description');

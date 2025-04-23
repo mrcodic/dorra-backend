@@ -84,6 +84,7 @@
    <script>
        const categoriesDataUrl = "{{ route('categories.data') }}";
        const categoriesCreateUrl = "{{ route('categories.create') }}";
+       const locale = "{{ app()->getLocale() }}";
    </script>
 
     {{-- Page js files --}}

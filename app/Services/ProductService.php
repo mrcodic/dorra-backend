@@ -32,6 +32,7 @@ class ProductService extends BaseService
             ->addColumn('name', function (Product $product) {
                 return $product->getTranslation('name', app()->getLocale());
             })
+
             ->addColumn('added_date', function ($product) {
                 return $product->created_at?->format('j/n/Y');
             })

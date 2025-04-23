@@ -27,7 +27,7 @@
 
                 <!-- Subcategories -->
                 <div class="mb-3">
-                    <label class="form-label">Subcategories</label>
+                    <label class="form-label" id="category-subcategories">Subcategories</label>
                     <div class="d-flex flex-wrap gap-2">
                         <span class="badge bg-light text-dark border">Modern</span>
                         <span class="badge bg-light text-dark border">Fun</span>
