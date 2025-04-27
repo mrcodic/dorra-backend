@@ -30,6 +30,8 @@ class UserController extends DashboardController
         $this->relationsToStore = ['addresses'];
         $this->indexView = 'users.index';
         $this->showView = 'users.show';
+        $this->createView = 'users.create';
+        $this->editView = 'users.edit';
         $this->usePagination = true;
     }
 

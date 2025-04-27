@@ -8,14 +8,12 @@
   flex-wrap: wrap;
   border-bottom: 1px solid rgba(34, 41, 47, 0.08);
   margin: 0;
-  justify-content: center;
-  align-items: center;
 }
 .bs-stepper .bs-stepper-header .line {
   flex: 0;
   min-width: auto;
-  min-height: 2px;
-  background-color: #CED5D4;
+  min-height: auto;
+  background-color: transparent;
   margin: 0;
   padding: 0 1.75rem;
   color: #6e6b7b;
@@ -29,22 +27,18 @@
   flex-wrap: nowrap;
   padding: 0;
   font-weight: normal;
-  display: flex;
-  flex-flow: column;
-  min-width: 108px;
 }
 .bs-stepper .bs-stepper-header .step .step-trigger .bs-stepper-box {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   padding: 0.5em 0;
   font-weight: 500;
-  color: #424746;
-  border: 1px dashed #CED5D4 ;
-  border-radius: 1rem;
-  font-size: 20px;
+  color: #babfc7;
+  background-color: rgba(186, 191, 199, 0.12);
+  border-radius: 0.35rem;
 }
 .bs-stepper .bs-stepper-header .step .step-trigger .bs-stepper-label {
   text-align: left;
@@ -54,11 +48,10 @@
 }
 .bs-stepper .bs-stepper-header .step .step-trigger .bs-stepper-label .bs-stepper-title {
   display: inherit;
-  color: #424746;
-  font-weight: 500;
+  color: #6e6b7b;
+  font-weight: 600;
   line-height: 1rem;
   margin-bottom: 0rem;
-  font-size: 16px;
 }
 .bs-stepper .bs-stepper-header .step .step-trigger .bs-stepper-label .bs-stepper-subtitle {
   font-weight: 400;
@@ -69,25 +62,22 @@
   background-color: transparent;
 }
 .bs-stepper .bs-stepper-header .step.active .step-trigger .bs-stepper-box {
-  background-color: #24B094;
+  background-color: #7367f0;
   color: #fff;
-  border: none;
-  box-shadow: 0 3px 6px 0 rgba(36, 176, 148, 0.4);
+  box-shadow: 0 3px 6px 0 rgba(115, 103, 240, 0.4);
 }
 .bs-stepper .bs-stepper-header .step.active .step-trigger .bs-stepper-label .bs-stepper-title {
-  color: #24B094;
+  color: #7367f0;
 }
 .bs-stepper .bs-stepper-header .step.crossed .step-trigger .bs-stepper-box {
-  background-color: #24B094 ;
-  color: #fff!important;
-  border: none;
+  background-color: rgba(115, 103, 240, 0.12);
+  color: #7367f0 !important;
 }
 .bs-stepper .bs-stepper-header .step.crossed .step-trigger .bs-stepper-label .bs-stepper-title {
-  color: #121212;
+  color: #b9b9c3;
 }
 .bs-stepper .bs-stepper-header .step.crossed + .line {
-  color: #24B094;
-  background-color:#24B094 ;
+  color: #7367f0;
 }
 .bs-stepper .bs-stepper-content {
   padding: 1.5rem 1.5rem;
@@ -145,7 +135,6 @@
 }
 .dark-layout .bs-stepper .bs-stepper-header .line {
   color: #b4b7bd;
-  background-color: #b4b7bd;
 }
 .dark-layout .bs-stepper .bs-stepper-header .step .step-trigger .bs-stepper-box {
   color: #babfc7;
@@ -157,12 +146,12 @@
   color: #676d7d;
 }
 .dark-layout .bs-stepper .bs-stepper-header .step.active .step-trigger .bs-stepper-box {
-  background-color: #24B094;
+  background-color: #7367f0;
   color: #fff;
   box-shadow: 0 3px 6px 0 rgba(115, 103, 240, 0.4);
 }
 .dark-layout .bs-stepper .bs-stepper-header .step.active .step-trigger .bs-stepper-label .bs-stepper-title {
-  color: #24B094;
+  color: #7367f0;
 }
 .dark-layout .bs-stepper .bs-stepper-header .step.crossed .step-trigger .bs-stepper-label,
 .dark-layout .bs-stepper .bs-stepper-header .step.crossed .step-trigger .bs-stepper-title {

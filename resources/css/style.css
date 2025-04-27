@@ -1,0 +1,153 @@
+@font-face {
+	font-family: 'HvDTrial Brandon Grotesque';
+	src: url('{{ asset("fonts/ArbFONTS-4_F4.ttf") }}') format('ttf'),
+	url('{{ asset("fonts/ArbFONTS-4_F5.ttf") }}') format('ttf'),
+	url('{{ asset("fonts/ArbFONTS-BR.ttf") }}') format('ttf'),
+	url('{{ asset("fonts/ArbFONTS-riyad-bank-Bold.ttf") }}') format('ttf'),
+	url('{{ asset("fonts/ArbFONTS-riyad-bank-Regular.ttf") }}') format('ttf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+
+.disabled-field {
+	background-color: #FCF9FC;
+	padding: 7px;
+	border-radius: 12px;
+	color: #121212;
+}
+
+.label-text {
+	color: #121212;
+	font-weight: 500;
+	font-size: 16px;
+}
+
+.text-small {
+	font-size: 12px;
+}
+
+.tab-button {
+	background-color: transparent;
+	border-radius: 12px;
+	color: #424746;
+	padding: 16px;
+}
+
+.tab-button.active {
+	background-color: #24B094;
+	border-radius: 12px;
+	color: white;
+	padding: 16px;
+}
+
+.primary-text-color {
+	color: #24B094;
+}
+
+.stepper-container {
+	max-width: 600px;
+	margin: 0 auto;
+}
+
+.stepper {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.step {
+
+	text-align: center;
+	position: relative;
+	width: 48px;
+	height: 48px;
+}
+
+.step-header {
+	padding: 4px;
+	border-radius: 16px;
+	background-color: #fff;
+	border: 2px dashed #CED5D4;
+	position: relative;
+	cursor: pointer;
+	width: 48px;
+	height: 48px;
+	justify-content: center;
+	display: flex;
+	align-items: center;
+
+}
+
+.step-header.active {
+	background-color: #24B094;
+	/* bg-primary */
+	color: white;
+}
+
+.step-header.active::after {
+	content: '';
+	position: absolute;
+	bottom: -7px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 80%;
+	height: 4px;
+	background-color: #24B094;
+	opacity: 1;
+}
+
+.step-content {
+	display: none;
+	margin-top: 20px;
+}
+
+.step-content-item {
+	display: none;
+}
+
+.step-content-item.active {
+	display: block;
+}
+
+.step-number {
+	font-weight: bold;
+	margin-right: 5px;
+}
+
+.step-input {
+	width: 100%;
+	padding: 8px;
+	margin-top: 10px;
+}
+
+.stepper-buttons {
+	margin-top: 20px;
+	text-align: center;
+}
+
+.stepper-buttons button:disabled {
+	background-color: #ccc;
+	cursor: not-allowed;
+}
+
+/* Separator between steps */
+.separator {
+	width: 80px;
+	height: 2px;
+	/* Adjust height to match step headers */
+	background-color: #24B094;
+	/* primary color */
+	margin: 0 10px;
+}
+
+.step-header+.separator {
+	border-left: 2px dashed #24B094;
+	/* Dashed line between step headers */
+}
+
+.step-header.active+.separator {
+	border-left: 2px solid #24B094;
+	/* Solid line for active step */
+}

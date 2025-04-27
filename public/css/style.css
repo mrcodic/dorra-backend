@@ -1,42 +1,56 @@
-/*================================================================================
-	Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
-	Version: 2.0
-	Author: PIXINVENT
-	Author URL: http://www.themeforest.net/user/pixinvent
-================================================================================
+@font-face {
+	font-family: 'HvDTrial Brandon Grotesque';
+	src: url('{{ asset("fonts/ArbFONTS-4_F4.ttf") }}') format('ttf'),
+	url('{{ asset("fonts/ArbFONTS-4_F5.ttf") }}') format('ttf'),
+	url('{{ asset("fonts/ArbFONTS-BR.ttf") }}') format('ttf'),
+	url('{{ asset("fonts/ArbFONTS-riyad-bank-Bold.ttf") }}') format('ttf'),
+	url('{{ asset("fonts/ArbFONTS-riyad-bank-Regular.ttf") }}') format('ttf');
+	font-weight: normal;
+	font-style: normal;
+}
 
-NOTE:
-------
-PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
-WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
 
-.disabled-field{
-    background-color: #FCF9FC;
-    padding: 7px;
-    border-radius: 12px;
+.disabled-field {
+	background-color: #FCF9FC;
+	padding: 7px;
+	border-radius: 12px;
 	color: #121212;
 }
-.label-text{
+
+.label-text {
 	color: #121212;
 	font-weight: 500;
 	font-size: 16px;
 }
-.text-small{
+
+.text-small {
 	font-size: 12px;
 }
-.tab-button{
-	background-color:transparent ;
+
+.tab-button {
+	background-color: transparent;
 	border-radius: 12px;
 	color: #424746;
 	padding: 16px;
 }
-.tab-button.active{
-	background-color:#24B094 ;
+
+.tab-button.active {
+	background-color: #24B094;
 	border-radius: 12px;
 	color: white;
 	padding: 16px;
 }
 
-.primary-text-color{
+.primary-text-color {
 	color: #24B094;
 }
+.active-label{
+	background-color:#D7EEDD; 
+}
+.status-label{
+	font-size: 14px;
+	font-weight: 500;
+	width: 74px; ;
+	height: 24px;
+}
+
