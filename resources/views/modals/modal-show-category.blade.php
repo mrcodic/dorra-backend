@@ -6,43 +6,49 @@
                 <h5 class="modal-title" id="exampleModalLabel">Show Category</h5>
             </div>
             <div class="modal-body flex-grow-1">
-                <!-- Image Upload -->
-                <div class="mb-4 text-center border border-dashed border-secondary rounded p-3">
-                    <input type="file" class="form-control d-none" id="imageUpload" />
-                    <label for="imageUpload" class="text-muted small d-block cursor-pointer">Drag images here to upload</label>
-                    <div class="text-muted small mt-1">image.jpg • 32.00 KB</div>
+                <!-- Image Upload with Preview -->
+                <div id="imagePreviewContainer" class="mt-2 d-flex justify-content-between ">
+                    <label for="imageUpload" class="text-black small d-block cursor-pointer">Category Image</label>
+                    <img id="imagePreview" class="img-fluid rounded" style="max-width: 64px;" />
+                </div>
+                <input type="hidden" id="category-id">
+                <div class="text-muted small mt-1" id="imageDetails" style="display: none;">image.jpg • 32.00 KB</div>
+
+                <!-- Name in Arabic and English -->
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Name (EN)</label>
+                        <input type="text" class="form-control" id="category-name-en" disabled />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Name (AR)</label>
+                        <input type="text" class="form-control" id="category-name-ar" disabled />
+                    </div>
                 </div>
 
-                <!-- Name -->
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" id="category-name" disabled />
-                </div>
-
-                <!-- Description -->
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" id="category-description" rows="2"></textarea>
+                <!-- Description in Arabic and English -->
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Description (EN)</label>
+                        <textarea class="form-control" id="category-description-en" rows="2" disabled></textarea>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Description (AR)</label>
+                        <textarea class="form-control" id="category-description-ar" rows="2" disabled></textarea>
+                    </div>
                 </div>
 
                 <!-- Subcategories -->
                 <div class="mb-3">
                     <label class="form-label" id="category-subcategories">Subcategories</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-light text-dark border">Modern</span>
-                        <span class="badge bg-light text-dark border">Fun</span>
-                        <span class="badge bg-light text-dark border">Clean</span>
-                        <span class="badge bg-light text-dark border">Simple</span>
-                        <span class="badge bg-light text-dark border">Bold</span>
-                    </div>
+                    <div id="subcategories-container" class="d-flex flex-wrap gap-2"></div>
                 </div>
 
                 <!-- Number of Products -->
                 <div class="mb-3">
                     <label class="form-label">Number of Products</label>
-                    <input type="number" id="category-products" class="form-control"/>
+                    <input type="number" id="category-products" class="form-control" disabled />
                 </div>
-
 
                 <!-- Added Date -->
                 <div class="mb-4">
@@ -53,10 +59,8 @@
 
             <div class="modal-footer border-top-0">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success">Edit</button>
+                <button type="button" class="btn btn-success" id="editButton">Edit</button>
             </div>
-        </div>
-
         </div>
     </div>
 </div>

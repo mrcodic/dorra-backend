@@ -52,6 +52,7 @@
             </div>
             @include('modals/modal-show-category')
             @include('modals/modal-edit-category')
+            @include('modals/modal-add-category')
 
         </div>
         <!-- list and filter end -->
