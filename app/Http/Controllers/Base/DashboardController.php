@@ -24,11 +24,7 @@ class DashboardController extends Controller
     protected $usePagination = false;
     protected $successMessage;
 
-    public function __construct(public BaseService $service)
-    {
-
-
-    }
+    public function __construct(public BaseService $service){}
 
     /**
      * Display a listing of the resource.

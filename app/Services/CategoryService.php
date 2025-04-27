@@ -30,7 +30,7 @@ class CategoryService extends BaseService
     public function getData()
     {
         $categories = $this->repository
-            ->query(['id', 'name', 'created_at'])
+            ->query(['id', 'name', 'description', 'created_at'])
             ->with(['products', 'children'])
             ->withCount(['children', 'products'])
             ->whereNull('parent_id')
@@ -39,11 +39,26 @@ class CategoryService extends BaseService
             ->addColumn('name', function ($category) {
                 return $category->getTranslation('name', app()->getLocale());
             })
-            ->addColumn('description', function ($category) {
-                return $category->getTranslation('description', app()->getLocale());
+            ->addColumn('name_en', function ($category) {
+                return $category->getTranslation('name', 'en');
+            })
+            ->addColumn('name_ar', function ($category) {
+                return $category->getTranslation('name', 'ar');
+            })
+            ->addColumn('description_en', function ($category) {
+                return $category->getTranslation('description', 'en');
+            })
+            ->addColumn('description_ar', function ($category) {
+                return $category->getTranslation('description', 'ar');
+            })
+            ->addColumn('image', function ($category) {
+                return $category->getFirstMediaUrl('categories');
             })
             ->addColumn('added_date', function ($category) {
-                return $category->created_at?->format('j/n/Y');
+                return $category->created_at?->format('d/n/Y');
+            })
+            ->addColumn('show_date', function ($category) {
+                return $category->created_at?->format('Y-m-d');
             })
             ->addColumn('sub_categories', function ($category) {
                 return $category->children_count;

@@ -149,8 +149,8 @@ $(document).ready(function () {
                 url: actionUrl,
                 type: 'POST',
                 data: formData,
-                processData: false,  // Add this!
-                contentType: false,  // Add this!
+                processData: false,
+                contentType: false,
                 success: function (response) {
                     console.log(response)
                     if (response.success) {

@@ -27,13 +27,12 @@ class UpdateCategoryRequest extends BaseRequest
     {
         $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
-            'first_name' => ['sometimes', 'string', 'max:255'],
-            'last_name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', 'unique:users,email'],
-            'phone_number' => ['sometimes', 'string', 'min:10', 'max:15', 'unique:users,phone_number', new Phone($isoCode),],
-            'password' => ['sometimes', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
-            'country_code_id' => ['sometimes', 'exists:country_codes,id'],
-            'image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],];
+            'name.en' => ['required', 'string', 'max:255'],
+            'name.ar' => ['required', 'string', 'max:255'],
+            'description.en' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
+        ];
     }
 
 

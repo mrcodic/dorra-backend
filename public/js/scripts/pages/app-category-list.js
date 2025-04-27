@@ -1,4 +1,3 @@
-
 $.ajaxSetup({
     headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -12,49 +11,37 @@ var dt_user_table = $('.category-list-table').DataTable({
         type: 'GET'
     },
     columns: [
-        { data: null, defaultContent: '', orderable: false },
-        { data: 'name' },
-        { data: 'sub_categories' },
-        { data: 'no_of_products' },
-        { data: 'added_date' },
+        {data: null, defaultContent: '', orderable: false},
+        {data: 'name'},
+        {data: 'sub_categories'},
+        {data: 'no_of_products'},
+        {data: 'added_date'},
 
         {
             data: 'id',
             orderable: false,
             render: function (data, type, row, meta) {
-                console.log(row)
-                const childNames = Array.isArray(row.children)
-                    ? row.children
-                        .map(child => {
-                            // child.name is an object like { en: 'Foo', ar: 'بار' }
-                            return (child.name && child.name[locale]) || '';
-                        })
-                        .filter(n => n)          // drop empty strings
-                        .join(', ')
-                    : '';
-
                 return `
           <div class="dropdown">
             <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
               <i data-feather="more-vertical"></i>
             </button>
             <div class="dropdown-menu">
-              <a href="/categories/${data}"
+              <a href=""
                  class="dropdown-item view-details"
                  data-bs-toggle="modal"
                  data-bs-target="#modals-slide-in"
-                 data-id=""
-                 data-name="${row.name}"
-                 data-description="${row.description}"
-                 data-subcategories="${row.children}"
+                 data-id="${data}"
+                 data-name_ar="${row.name_ar}"
+                 data-name_en="${row.name_en}"
+                 data-image="${row.image}"
+                 data-description_en="${row.description_en}"
+                 data-description_ar="${row.description_ar}"
+                data-subcategories="${row.children.map(child => child.name)}"
                  data-products="${row.no_of_products}"
-                 data-added="${row.added_date}">
+                 data-showdate="${row.show_date}">
                 <i data-feather="file-text"></i> Details
               </a>
-               <a href="/products/${data}/edit" class="dropdown-item">
-                <i data-feather="edit"></i> Edit
-              </a>
-
 
               <a href="#" class="dropdown-item text-danger delete-category" data-id="${data}">
                 <i data-feather="trash-2"></i> Delete
@@ -79,37 +66,37 @@ var dt_user_table = $('.category-list-table').DataTable({
         {
             extend: 'collection',
             className: 'btn btn-outline-secondary dropdown-toggle me-2',
-            text: feather.icons['external-link'].toSvg({ class: 'font-small-4 me-50' }) + 'Export',
+            text: feather.icons['external-link'].toSvg({class: 'font-small-4 me-50'}) + 'Export',
             buttons: [
                 {
                     extend: 'print',
-                    text: feather.icons['printer'].toSvg({ class: 'font-small-4 me-50' }) + 'Print',
+                    text: feather.icons['printer'].toSvg({class: 'font-small-4 me-50'}) + 'Print',
                     className: 'dropdown-item',
-                    exportOptions: { columns: [1, 2, 3, 4, 5] }
+                    exportOptions: {columns: [1, 2, 3, 4, 5]}
                 },
                 {
                     extend: 'csv',
-                    text: feather.icons['file-text'].toSvg({ class: 'font-small-4 me-50' }) + 'Csv',
+                    text: feather.icons['file-text'].toSvg({class: 'font-small-4 me-50'}) + 'Csv',
                     className: 'dropdown-item',
-                    exportOptions: { columns: [1, 2, 3, 4, 5] }
+                    exportOptions: {columns: [1, 2, 3, 4, 5]}
                 },
                 {
                     extend: 'excel',
-                    text: feather.icons['file'].toSvg({ class: 'font-small-4 me-50' }) + 'Excel',
+                    text: feather.icons['file'].toSvg({class: 'font-small-4 me-50'}) + 'Excel',
                     className: 'dropdown-item',
-                    exportOptions: { columns: [1, 2, 3, 4, 5] }
+                    exportOptions: {columns: [1, 2, 3, 4, 5]}
                 },
                 {
                     extend: 'pdf',
-                    text: feather.icons['clipboard'].toSvg({ class: 'font-small-4 me-50' }) + 'Pdf',
+                    text: feather.icons['clipboard'].toSvg({class: 'font-small-4 me-50'}) + 'Pdf',
                     className: 'dropdown-item',
-                    exportOptions: { columns: [1, 2, 3, 4, 5] }
+                    exportOptions: {columns: [1, 2, 3, 4, 5]}
                 },
                 {
                     extend: 'copy',
-                    text: feather.icons['copy'].toSvg({ class: 'font-small-4 me-50' }) + 'Copy',
+                    text: feather.icons['copy'].toSvg({class: 'font-small-4 me-50'}) + 'Copy',
                     className: 'dropdown-item',
-                    exportOptions: { columns: [1, 2, 3, 4, 5] }
+                    exportOptions: {columns: [1, 2, 3, 4, 5]}
                 }
             ],
             init: function (api, node, config) {
@@ -123,8 +110,9 @@ var dt_user_table = $('.category-list-table').DataTable({
         {
             text: 'Add New Category',
             className: 'add-new btn btn-primary',
-            action: function (e, dt, node, config) {
-                window.location.href = categoriesCreateUrl;
+            attr: {
+                'data-bs-toggle': 'modal',
+                'data-bs-target': '#addCategoryModal'
             },
             init: function (api, node, config) {
                 $(node).removeClass('btn-secondary');
@@ -146,7 +134,7 @@ var dt_user_table = $('.category-list-table').DataTable({
     }
 });
 
-$(document).ready(function ()   {
+$(document).ready(function () {
 
     $(document).ready(function () {
         // Check if the product was added successfully
@@ -202,43 +190,224 @@ $(document).ready(function ()   {
         });
     });
     $(document).on('click', '.view-details', function (e) {
-        e.preventDefault();
-        $.ajax({
-            url: $(this).attr('href'),
-            method: 'GET',
-            success: function (res) {
-                console.log(res)
-            },
-            error: function (xhr) {
-                var errors = xhr.responseJSON.errors;
-                console.log(errors)
-            }
-        });
-        console.log()
         // Get the data from attributes
-        const categoryName = $(this).data('name');
-        const subCategories = $(this).data('subcategories');
-        console.log(subCategories)
-        const products = $(this).data('products');
-        const addedDate = $(this).data('added');
-        const description = $(this).data('description');
-        console.log(description)
+        var $table = $('.category-list-table').DataTable();
+        var $row = $(this).closest('tr');
+        var rowData = $table.row($row).data();
+        const subCategories = rowData.children.map(function(child) {
+            return child['name'][locale];
+        });
+        const categoryNameAR = $(this).data('name_ar');
+        const categoryNameEn = $(this).data('name_en');
 
-        console.log(subCategories)
+
+        const products = $(this).data('products');
+        const addedDate = $(this).data('showdate');
+        const descriptionAr = $(this).data('description_ar');
+        const descriptionEn = $(this).data('description_en');
+        const image = $(this).data('image');
+        const id = $(this).data('id');
         // Populate modal
-        $('#showCategoryModal #category-name').val(categoryName);
-        $('#showCategoryModal #category-subcategories').val(subCategories);
+        $('#showCategoryModal #category-name-ar').val(categoryNameAR);
+        $('#showCategoryModal #category-name-en').val(categoryNameEn);
         $('#showCategoryModal #category-products').val(products);
         $('#showCategoryModal #category-date').val(addedDate);
-        $('#showCategoryModal #category-description').val(description);
+        $('#showCategoryModal #category-description-ar').val(descriptionAr);
+        $('#showCategoryModal #category-description-en').val(descriptionEn);
+        $('#showCategoryModal #imagePreview').attr('src',image);
+        $('#showCategoryModal #category-id').val(id);
+
+        // Create badges for subcategories
+        let badgesHtml = '';
+        subCategories.forEach(function (subcategory) {
+            badgesHtml += `<span class="badge bg-light text-dark border">${subcategory}</span>`;
+        });
+
+        // Set the badges HTML in the modal
+        $('#subcategories-container').html(badgesHtml);
 
         // Show modal
         const modal = new bootstrap.Modal(document.getElementById('showCategoryModal'));
         modal.show();
     });
 
+    $('#editButton').on('click', function () {
+
+        var nameEN = $('#category-name-en').val();
+        var nameAR = $('#category-name-ar').val();
+        var descEN = $('#category-description-en').val();
+        var descAR = $('#category-description-ar').val();
+        var id = $('#category-id').val();
+
+        $('#edit-category-name-en').val(nameEN);
+        $('#edit-category-name-ar').val(nameAR);
+        $('#edit-category-description-en').val(descEN);
+        $('#edit-category-description-ar').val(descAR);
+        $('#edit-category-id').val(id);
+
+        $('#editCategoryModal').modal('show');
+
+    });
+
+    $('#editCategoryForm').on('submit', function (e) {
+        e.preventDefault(); // prevent default form submission
+        var categoryId = $(this).find('#edit-category-id').val();
+        $.ajax({
+            url: `categories/${categoryId}`,
+            type: 'POST', // IMPORTANT: Laravel expects POST + method spoofing (@method('PUT'))
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                console.log(response);
+
+                Toastify({
+                    text: "Category updated successfully!",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F", // green for success
+                    close: true
+                }).showToast();
+
+                // Close modal
+                $('#editCategoryModal').modal('hide');
+
+                // Optional: Clear form fields
+                $('#editCategoryForm')[0].reset();
+
+                // Optional: Remove uploaded image preview
+                $('#edit-image-preview-container').hide();
+                $('#edit-image-preview').attr('src', '');
+                $('#edit-image-details').hide();
+
+                // Optional: Reload your table or page
+                // location.reload();
+                // OR if you use DataTables, you can do:
+                // $('#yourTableId').DataTable().ajax.reload();
+
+            },
+            error: function (xhr) {
+                var errors = xhr.responseJSON.errors;
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        Toastify({
+                            text: errors[key][0],
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455", // red
+                            close: true
+                        }).showToast();
+                    }
+                }
+            }
+        });
+    });
 
 
+    $('#edit-image-upload').on('change', function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#edit-image-preview').attr('src', e.target.result);
+                $('#edit-image-preview-container').show();
+
+                // Show file name and size
+                const fileSize = (file.size / 1024).toFixed(2); // size in KB
+                $('#edit-image-details').text(`${file.name} • ${fileSize} KB`).show();
+            };
+
+            reader.readAsDataURL(file); // Read the file as DataURL for preview
+        }
+    });
+
+    // Delete the selected image
+    $('#delete-image-button').on('click', function () {
+        $('#edit-image-upload').val(''); // clear the file input
+        $('#edit-image-preview-container').hide(); // hide preview container
+        $('#edit-image-preview').attr('src', ''); // clear the img src
+        $('#edit-image-details').hide(); // hide file details
+    });
+
+
+
+    $('#add-image-upload').on('change', function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#add-image-preview').attr('src', e.target.result);
+                $('#add-image-preview-container').show();
+
+                // Show file name and size
+                const fileSize = (file.size / 1024).toFixed(2); // size in KB
+                $('#add-image-details').text(`${file.name} • ${fileSize} KB`).show();
+            };
+
+            reader.readAsDataURL(file); // Read the file as DataURL for preview
+        }
+    });
+
+    // Delete the selected image
+    $('#delete-image').on('click', function () {
+        $('#add-image-upload').val(''); // clear the file input
+        $('#add-image-preview-container').hide(); // hide preview container
+        $('#add-image-preview').attr('src', ''); // clear the img src
+        $('#add-image-details').hide(); // hide file details
+    });
+
+
+    $('#addCategoryForm').on('submit', function (e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+
+        $.ajax({
+            url: $(this).attr('action'), // dynamic action URL
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                Toastify({
+                    text: "Category added successfully!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F",
+                    close: true
+                }).showToast();
+
+
+
+                $('#addCategoryForm')[0].reset();
+                $('#addCategoryModal').modal('hide');
+
+                $('.category-list-table').DataTable().ajax.reload(); // reload your table
+            },
+            error: function (xhr) {
+                var errors = xhr.responseJSON.errors;
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        Toastify({
+                            text: errors[key][0],
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true
+                        }).showToast();
+                    }
+                }
+            }
+        });
+    });
 
 
 });
