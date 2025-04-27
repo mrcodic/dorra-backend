@@ -5,6 +5,10 @@ use App\Http\Controllers\Dashboard\{ProductController, TagController, UserContro
 use Illuminate\Support\Facades\Route;
 
 
+
+Route::view('/login/social','dashboard.auth.social-login');
+Route::view('confirm-password','dashboard.auth.confirm-password');
+
 Route::middleware('auth')->group(function () {
     Route::get('states',[MainController::class, 'states'])->name('states');
     Route::view('/', 'dashboard.index')->name('dashboard');

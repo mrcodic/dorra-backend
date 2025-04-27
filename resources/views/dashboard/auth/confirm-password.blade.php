@@ -1,6 +1,6 @@
 @extends('layouts.fullLayoutMaster')
 
-@section('title', 'Login Page')
+@section('title', 'Confirm Password Page')
 
 @section('page-style')
 {{-- Page Css files --}}
@@ -21,29 +21,16 @@
                 </div>
 
 
-                <h2 class="brand-text  text-center">Welcome Back!</h2>
+                <h2 class="brand-text  text-center">Reset Password</h2>
 
 
-                <p class="login-card-text mb-2 text-center">Enter your information to sign in to your account</p>
+                <p class="login-card-text mb-2 text-center">Set your new password and confirm it</p>
 
                 <form class="auth-login-form mt-3" action="{{ route('login') }}" method="post">
                     @csrf
                     <div class="mb-1">
-                        <label for="login-email" class="form-label label-text">Email Address</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="login-email"
-                            name="email"
-                            placeholder="john@example.com"
-                            aria-describedby="login-email"
-                            tabindex="1"
-                            autofocus />
-                    </div>
-
-                    <div class="mb-1">
-                        <div class="d-flex justify-content-between">
-                            <label class="form-label label-text" for="login-password">Password</label>
+                    <div class="d-flex justify-content-between">
+                            <label class="form-label label-text" for="login-password">New Password</label>
 
                         </div>
                         <div class="input-group input-group-merge form-password-toggle">
@@ -53,23 +40,33 @@
                                 id="login-password"
                                 name="password"
                                 tabindex="2"
-                                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                placeholder="Enter your new password"
                                 aria-describedby="login-password" />
                             <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
                         </div>
                     </div>
-                    <div class="mb-1 d-flex justify-content-between">
-                        <div class="form-check">
-                            <input class="form-check-input" name="remember_token" type="checkbox" id="remember-me" tabindex="3" />
-                            <label class="form-check-label" for="remember-me"> Remember Me </label>
+
+                    <div class="mb-1">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label label-text" for="login-password">Confirm Password</label>
+
                         </div>
-                        <a href="{{url('/forgot-password')}}">
-                            <small>Forgot Password?</small>
-                        </a>
+                        <div class="input-group input-group-merge form-password-toggle">
+                            <input
+                                type="password"
+                                class="form-control form-control-merge"
+                                id="login-password"
+                                name="confirm-password"
+                                tabindex="2"
+                                placeholder="Confirm your password"
+                                aria-describedby="login-password" />
+                            <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
+                        </div>
                     </div>
-                    <button class="btn btn-primary w-100" tabindex="4">Sign in</button>
-                </form>
               
+                    <button class="btn btn-primary w-100 mt-3" tabindex="4">Confirm</button>
+                </form>
+                <a href="{{ route('login') }}" class="btn btn-outline-secondary  w-100 mt-2 mb-5 text-dark d-flex justify-items-center justify-content-center" tabindex="4"><i data-feather="chevron-left"></i><span>Back to sign in</span></a>
 
 
 
