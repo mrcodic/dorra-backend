@@ -3,17 +3,18 @@
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
 });
-var dt_user_table = $('.sub-category-list-table').DataTable({
+var dt_user_table = $('.tag-list-table').DataTable({
     processing: true,
     serverSide: true,
     ajax: {
-        url: subCategoriesDataUrl,
+        url: tagsDataUrl,
         type: 'GET'
     },
     columns: [
         {data: null, defaultContent: '', orderable: false},
         {data: 'name'},
         {data: 'no_of_products'},
+        {data: 'no_of_templates'},
         {data: 'added_date'},
 
         {
@@ -29,17 +30,16 @@ var dt_user_table = $('.sub-category-list-table').DataTable({
               <a href=""
                  class="dropdown-item view-details"
                  data-bs-toggle="modal"
-                 data-bs-target="#showSubCategoryModal"
+                 data-bs-target="#showTagModal"
                  data-id="${data}"
                  data-name_ar="${row.name_ar}"
                  data-name_en="${row.name_en}"
                  data-products="${row.no_of_products}"
-                 data-showdate="${row.show_date}"
-                 data-parent="${row.parent_name}">
+                 data-showdate="${row.show_date}">
                 <i data-feather="file-text"></i> Details
               </a>
 
-              <a href="#" class="dropdown-item text-danger delete-category" data-id="${data}">
+              <a href="#" class="dropdown-item text-danger delete-tag" data-id="${data}">
                 <i data-feather="trash-2"></i> Delete
               </a>
             </div>
@@ -51,7 +51,6 @@ var dt_user_table = $('.sub-category-list-table').DataTable({
     order: [[1, 'asc']],
     dom:
         '<"d-flex justify-content-between align-items-center header-actions mx-2 row mt-75"' +
-        '<"col-sm-12 col-lg-4 d-flex justify-content-center justify-content-lg-start" l>' +
         '<"col-sm-12 col-lg-8 ps-xl-75 ps-0"<"dt-action-buttons d-flex align-items-center justify-content-center justify-content-lg-end flex-lg-nowrap flex-wrap"<"me-1"f>B>>' +
         '>t' +
         '<"d-flex justify-content-between mx-2 row mb-1"' +
@@ -60,55 +59,11 @@ var dt_user_table = $('.sub-category-list-table').DataTable({
         '>',
     buttons: [
         {
-            extend: 'collection',
-            className: 'btn btn-outline-secondary dropdown-toggle me-2',
-            text: feather.icons['external-link'].toSvg({class: 'font-small-4 me-50'}) + 'Export',
-            buttons: [
-                {
-                    extend: 'print',
-                    text: feather.icons['printer'].toSvg({class: 'font-small-4 me-50'}) + 'Print',
-                    className: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                },
-                {
-                    extend: 'csv',
-                    text: feather.icons['file-text'].toSvg({class: 'font-small-4 me-50'}) + 'Csv',
-                    className: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                },
-                {
-                    extend: 'excel',
-                    text: feather.icons['file'].toSvg({class: 'font-small-4 me-50'}) + 'Excel',
-                    className: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                },
-                {
-                    extend: 'pdf',
-                    text: feather.icons['clipboard'].toSvg({class: 'font-small-4 me-50'}) + 'Pdf',
-                    className: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                },
-                {
-                    extend: 'copy',
-                    text: feather.icons['copy'].toSvg({class: 'font-small-4 me-50'}) + 'Copy',
-                    classNamef: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                }
-            ],
-            init: function (api, node, config) {
-                $(node).removeClass('btn-secondary');
-                $(node).parent().removeClass('btn-group');
-                setTimeout(function () {
-                    $(node).closest('.dt-buttons').removeClass('btn-group').addClass('d-inline-flex mt-50');
-                }, 50);
-            }
-        },
-        {
-            text: 'Add New SubCategory',
+            text: 'Add New Tag',
             className: 'add-new btn btn-primary',
             attr: {
                 'data-bs-toggle': 'modal',
-                'data-bs-target': '#addSubCategoryModal'
+                'data-bs-target': '#addTagModal'
             },
             init: function (api, node, config) {
                 $(node).removeClass('btn-secondary');
@@ -137,7 +92,7 @@ $(document).ready(function () {
         if (sessionStorage.getItem('Category_added') == 'true') {
             // Show the success Toastify message
             Toastify({
-                text: "Subcategory added successfully!",
+                text: "Tag added successfully!",
                 duration: 4000,
                 gravity: "top",
                 position: "right",
@@ -150,18 +105,17 @@ $(document).ready(function () {
         }
     });
 
-    $(document).on('click', '.delete-category', function (e) {
+    $(document).on('click', '.delete-tag', function (e) {
         e.preventDefault();
-
-        var $table = $('.sub-category-list-table').DataTable();
+        var $table = $('.tag-list-table').DataTable();
         var $row = $(this).closest('tr');
         var rowData = $table.row($row).data();
-        var categoryId = $(this).data('id');
-        var categoryName = rowData.name;
+        var tagId = $(this).data('id');
+        var tagName = rowData.name;
 
         Swal.fire({
             title: `Are you sure?`,
-            text: `You are about to delete category "${categoryName}". This action cannot be undone.`,
+            text: `You are about to delete tag "${tagName}". This action cannot be undone.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -172,51 +126,51 @@ $(document).ready(function () {
             if (result.isConfirmed) {
 
                 $.ajax({
-                    url: `/categories/${categoryId}`,
+                    url: `/tags/${tagId}`,
                     method: 'DELETE',
                     success: function (res) {
-                        Swal.fire('Deleted!', 'Category has been deleted.', 'success');
+                        Swal.fire('Deleted!', 'Tag has been deleted.', 'success');
                         $table.ajax.reload();
                     },
                     error: function () {
-                        Swal.fire('Failed', 'Could not delete category.', 'error');
+                        Swal.fire('Failed', 'Could not delete tag.', 'error');
                     }
                 });
             }
         });
     });
     $(document).on('click', '.view-details', function (e) {
-        const categoryNameAR = $(this).data('name_ar');
-        const categoryNameEn = $(this).data('name_en');
+        const tagNameAR = $(this).data('name_ar');
+        const tagNameEn = $(this).data('name_en');
         const products = $(this).data('products');
         const addedDate = $(this).data('showdate');
         const id = $(this).data('id');
-        const parentName = $(this).data('parent');
+        console.log(tagNameEn)
         // Populate modal
-        $('#showSubCategoryModal #sub-category-name-ar').val(categoryNameAR);
-        $('#showSubCategoryModal #sub-category-name-en').val(categoryNameEn);
-        $('#showSubCategoryModal #sub-category-products').val(products);
-        $('#showSubCategoryModal #sub-category-date').val(addedDate);
-        $('#showSubCategoryModal #sub-category-id').val(id);
-        $('#showSubCategoryModal #parent-name').val(parentName);
+        $('#showTagModal #tag-name-ar').val(tagNameAR);
+        $('#showTagModal #tag-name-en').val(tagNameEn);
+        $('#showTagModal #tag-products').val(products);
+        $('#showTagModal #tag-date').val(addedDate);
+        $('#showTagModal #tag-id').val(id);
+
 
         // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('showSubCategoryModal'));
+        const modal = new bootstrap.Modal(document.getElementById('showTagModal'));
         modal.show();
     });
 
     $('#editButton').on('click', function () {
 
-        var nameEN = $('#sub-category-name-en').val();
-        var nameAR = $('#sub-category-name-ar').val();
-        var id = $('#sub-category-id').val();
-        console.log(id)
+        var nameEN = $('#tag-name-en').val();
+        var nameAR = $('#tag-name-ar').val();
+        var id = $('#tag-id').val();
+        console.log(nameAR)
 
-        $('#edit-sub-category-name-en').val(nameEN);
-        $('#edit-sub-category-name-ar').val(nameAR);
-        $('#edit-sub-category-id').val(id);
+        $('#edit-tag-name-en').val(nameEN);
+        $('#edit-tag-name-ar').val(nameAR);
+        $('#edit-tag-id').val(id);
 
-        $('#editSubCategoryModal').modal('show');
+        $('#editTagModal').modal('show');
 
     });
 
@@ -274,7 +228,7 @@ $(document).ready(function () {
 
 
 
-    $('#addSubCategoryForm').on('submit', function (e) {
+    $('#addTagForm').on('submit', function (e) {
         e.preventDefault();
 
         var formData = new FormData(this);
@@ -287,7 +241,7 @@ $(document).ready(function () {
             contentType: false,
             success: function (response) {
                 Toastify({
-                    text: "Category added successfully!",
+                    text: "Tag added successfully!",
                     duration: 2000,
                     gravity: "top",
                     position: "right",
@@ -297,10 +251,10 @@ $(document).ready(function () {
 
 
 
-                $('#addSubCategoryForm')[0].reset();
-                $('#addSubCategoryModal').modal('hide');
+                $('#addTagForm')[0].reset();
+                $('#addTagModal').modal('hide');
 
-                $('.sub-category-list-table').DataTable().ajax.reload(); // reload your table
+                $('.tag-list-table').DataTable().ajax.reload(); // reload your table
             },
             error: function (xhr) {
                 var errors = xhr.responseJSON.errors;
