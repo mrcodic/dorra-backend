@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -32,4 +33,17 @@ class Admin extends Authenticatable implements HasMedia
     protected $attributes = [
         'status' => 1,
     ];
+
+    public function name(): Attribute
+    {
+        return Attribute::get(fn()=> $this->first_name.' '.$this->last_name);
+    }
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => $this->getFirstMedia('admins')
+        );
+    }
+
 }
