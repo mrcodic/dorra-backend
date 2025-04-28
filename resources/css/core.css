@@ -16513,7 +16513,6 @@ html .content .content-wrapper .content-header-title {
   font-weight: 500;
   color: #636363;
   padding-right: 1rem;
-  border-right: 1px solid #d6dce1;
 }
 html .content .content-wrapper .content-header-right .dropdown-toggle::after {
   display: none;

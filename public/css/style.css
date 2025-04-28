@@ -101,3 +101,9 @@
     height: 5px;
     margin-top: 8px;
 }
+
+.bread-crumb-title{
+	font-weight: 500;
+    color: #121212;
+	font-size: 18px;
+}

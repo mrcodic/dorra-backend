@@ -2262,8 +2262,10 @@ progress {
   opacity: 1;
 }
 .form-control:disabled, .form-control[readonly] {
-  background-color: #efefef;
+  background-color: #FCF8FC;
+  color: #121212;
   opacity: 1;
+  border: none;
 }
 .form-control::file-selector-button {
   padding: 0.571rem 1rem;
@@ -5224,10 +5226,9 @@ textarea.form-control-lg {
   height: 0.75rem;
   padding: 0.25em 0.25em;
   color: currentColor;
-  background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='currentColor'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/0.75rem auto no-repeat;
   border: 0;
   border-radius: 0.357rem;
-  opacity: 0.4;
+
 }
 .btn-close:hover {
   color: currentColor;
@@ -5387,6 +5388,7 @@ textarea.form-control-lg {
 .modal-title {
   margin-bottom: 0;
   line-height: 1.45;
+  color: #121212;
 }
 .modal-body {
   position: relative;
@@ -13933,9 +13935,6 @@ ul.list-inline.list-inline-pipe > li + li:before {
   font-size: 0.857rem;
   min-width: 2rem;
 }
-.modal .modal-header {
-  background-color: #f8f8f8;
-}
 .modal .modal-header .btn-close {
   padding: 0.8rem;
   box-shadow: 0 5px 20px 0 rgba(34, 41, 47, 0.1);
@@ -14025,9 +14024,16 @@ ul.list-inline.list-inline-pipe > li + li:before {
 }
 @media (min-width: 576px) {
   .modal-slide-in .modal-dialog {
-    width: 28rem;
+    width: 35rem;
   }
 }
+@media (min-width: 1050px) {
+  .modal-slide-in .modal-dialog {
+    width: 50rem;
+  }
+}
+
+
 .modal-slide-in .modal-dialog.sidebar-sm {
   width: 25rem;
 }
@@ -16513,7 +16519,6 @@ html .content .content-wrapper .content-header-title {
   font-weight: 500;
   color: #636363;
   padding-right: 1rem;
-  border-right: 1px solid #d6dce1;
 }
 html .content .content-wrapper .content-header-right .dropdown-toggle::after {
   display: none;
@@ -19468,15 +19473,20 @@ div.dataTables_wrapper div.dataTables_filter label,
 div.dataTables_wrapper div.dataTables_length label {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
+  width: 100%;
+}
+div.dataTables_wrapper div.dataTables_filter {
+  width: 100% !important;
 }
 div.dataTables_wrapper div.dataTables_filter select,
 div.dataTables_wrapper div.dataTables_length select {
   background-position: calc(100% - 3px) 11px, calc(100% - 20px) 13px, 100% 0;
-  width: 5rem;
+
   margin: 0 0.5rem;
 }
 div.dataTables_wrapper div.dataTables_filter input {
   margin-left: 0.75rem;
+  width: 100%;
 }
 div.dataTables_wrapper div.dataTables_paginate ul.pagination {
   margin-top: 1rem;

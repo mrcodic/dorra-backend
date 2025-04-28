@@ -1,24 +1,24 @@
 $.ajaxSetup({
     headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    }
+        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+    },
 });
-var dt_user_table = $('.category-list-table').DataTable({
+var dt_user_table = $(".category-list-table").DataTable({
     processing: true,
     serverSide: true,
     ajax: {
         url: categoriesDataUrl,
-        type: 'GET'
+        type: "GET",
     },
     columns: [
-        {data: null, defaultContent: '', orderable: false},
-        {data: 'name'},
-        {data: 'sub_categories'},
-        {data: 'no_of_products'},
-        {data: 'added_date'},
+        { data: null, defaultContent: "", orderable: false },
+        { data: "name" },
+        { data: "sub_categories" },
+        { data: "no_of_products" },
+        { data: "added_date" },
 
         {
-            data: 'id',
+            data: "id",
             orderable: false,
             render: function (data, type, row, meta) {
                 return `
@@ -37,7 +37,7 @@ var dt_user_table = $('.category-list-table').DataTable({
                  data-image="${row.image}"
                  data-description_en="${row.description_en}"
                  data-description_ar="${row.description_ar}"
-                data-subcategories="${row.children.map(child => child.name)}"
+                data-subcategories="${row.children.map((child) => child.name)}"
                  data-products="${row.no_of_products}"
                  data-showdate="${row.show_date}">
                 <i data-feather="file-text"></i> Details
@@ -49,212 +49,181 @@ var dt_user_table = $('.category-list-table').DataTable({
             </div>
           </div>
         `;
-            }
-        }
+            },
+        },
     ],
-    order: [[1, 'asc']],
+    order: [[1, "asc"]],
     dom:
-        '<"d-flex justify-content-between align-items-center header-actions mx-2 row mt-75"' +
-        '<"col-sm-12 col-lg-4 d-flex justify-content-center justify-content-lg-start" l>' +
-        '<"col-sm-12 col-lg-8 ps-xl-75 ps-0"<"dt-action-buttons d-flex align-items-center justify-content-center justify-content-lg-end flex-lg-nowrap flex-wrap"<"me-1"f>B>>' +
-        '>t' +
-        '<"d-flex justify-content-between mx-2 row mb-1"' +
+        '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
+        '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
+        '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
+        '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
+        ">" +
+        ">t" +
+        '<"d-flex  mx-2 row mb-1"' +
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
-        '>',
+        ">",
     buttons: [
         {
-            extend: 'collection',
-            className: 'btn btn-outline-secondary dropdown-toggle me-2',
-            text: feather.icons['external-link'].toSvg({class: 'font-small-4 me-50'}) + 'Export',
-            buttons: [
-                {
-                    extend: 'print',
-                    text: feather.icons['printer'].toSvg({class: 'font-small-4 me-50'}) + 'Print',
-                    className: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                },
-                {
-                    extend: 'csv',
-                    text: feather.icons['file-text'].toSvg({class: 'font-small-4 me-50'}) + 'Csv',
-                    className: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                },
-                {
-                    extend: 'excel',
-                    text: feather.icons['file'].toSvg({class: 'font-small-4 me-50'}) + 'Excel',
-                    className: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                },
-                {
-                    extend: 'pdf',
-                    text: feather.icons['clipboard'].toSvg({class: 'font-small-4 me-50'}) + 'Pdf',
-                    className: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                },
-                {
-                    extend: 'copy',
-                    text: feather.icons['copy'].toSvg({class: 'font-small-4 me-50'}) + 'Copy',
-                    className: 'dropdown-item',
-                    exportOptions: {columns: [1, 2, 3, 4, 5]}
-                }
-            ],
-            init: function (api, node, config) {
-                $(node).removeClass('btn-secondary');
-                $(node).parent().removeClass('btn-group');
-                setTimeout(function () {
-                    $(node).closest('.dt-buttons').removeClass('btn-group').addClass('d-inline-flex mt-50');
-                }, 50);
-            }
+            text: '<input type="date" class="form-control" style="width: 120px;" />',
+            className: "btn border-0",
+            action: function (e, dt, node, config) {
+                e.preventDefault();
+            },
         },
         {
-            text: 'Add New Category',
-            className: 'add-new btn btn-primary',
+            text: "Add New Category",
+            className: "add-new btn btn-outline-primary",
             attr: {
-                'data-bs-toggle': 'modal',
-                'data-bs-target': '#addCategoryModal'
+                "data-bs-toggle": "modal",
+                "data-bs-target": "#addCategoryModal",
             },
             init: function (api, node, config) {
-                $(node).removeClass('btn-secondary');
-            }
-        }
-
+                $(node).removeClass("btn-secondary");
+            },
+        },
     ],
     drawCallback: function () {
         feather.replace();
     },
     language: {
-        sLengthMenu: 'Show _MENU_',
-        search: 'Search',
-        searchPlaceholder: 'Search..',
+        sLengthMenu: "Show _MENU_",
+        search: "",
+        searchPlaceholder: "Search..",
         paginate: {
-            previous: '&nbsp;',
-            next: '&nbsp;'
-        }
-    }
+            previous: "&nbsp;",
+            next: "&nbsp;",
+        },
+    },
 });
 
 $(document).ready(function () {
-
     $(document).ready(function () {
         // Check if the product was added successfully
-        if (sessionStorage.getItem('Category_added') == 'true') {
+        if (sessionStorage.getItem("Category_added") == "true") {
             // Show the success Toastify message
             Toastify({
                 text: "Category added successfully!",
                 duration: 4000,
                 gravity: "top",
                 position: "right",
-                backgroundColor: "#28a745",  // Green for success
-                close: true
+                backgroundColor: "#28a745", // Green for success
+                close: true,
             }).showToast();
 
             // Remove the flag after showing the Toastify message
-            sessionStorage.removeItem('Category_added');
+            sessionStorage.removeItem("Category_added");
         }
     });
 
-    $(document).on('click', '.delete-category', function (e) {
+    $(document).on("click", ".delete-category", function (e) {
         e.preventDefault();
 
-        var $table = $('.category-list-table').DataTable();
-        var $row = $(this).closest('tr');
+        var $table = $(".category-list-table").DataTable();
+        var $row = $(this).closest("tr");
         var rowData = $table.row($row).data();
-        var categoryId = $(this).data('id');
+        var categoryId = $(this).data("id");
         var categoryName = rowData.name;
 
         Swal.fire({
             title: `Are you sure?`,
             text: `You are about to delete category "${categoryName}". This action cannot be undone.`,
-            icon: 'warning',
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it!',
-            reverseButtons: true
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete it!",
+            reverseButtons: true,
         }).then((result) => {
             if (result.isConfirmed) {
-
                 $.ajax({
                     url: `/categories/${categoryId}`,
-                    method: 'DELETE',
+                    method: "DELETE",
                     success: function (res) {
-                        Swal.fire('Deleted!', 'Category has been deleted.', 'success');
+                        Swal.fire(
+                            "Deleted!",
+                            "Category has been deleted.",
+                            "success"
+                        );
                         $table.ajax.reload();
                     },
                     error: function () {
-                        Swal.fire('Failed', 'Could not delete category.', 'error');
-                    }
+                        Swal.fire(
+                            "Failed",
+                            "Could not delete category.",
+                            "error"
+                        );
+                    },
                 });
             }
         });
     });
-    $(document).on('click', '.view-details', function (e) {
+    $(document).on("click", ".view-details", function (e) {
         // Get the data from attributes
-        var $table = $('.category-list-table').DataTable();
-        var $row = $(this).closest('tr');
+        var $table = $(".category-list-table").DataTable();
+        var $row = $(this).closest("tr");
         var rowData = $table.row($row).data();
-        const subCategories = rowData.children.map(function(child) {
-            return child['name'][locale];
+        const subCategories = rowData.children.map(function (child) {
+            return child["name"][locale];
         });
-        const categoryNameAR = $(this).data('name_ar');
-        const categoryNameEn = $(this).data('name_en');
+        const categoryNameAR = $(this).data("name_ar");
+        const categoryNameEn = $(this).data("name_en");
 
-
-        const products = $(this).data('products');
-        const addedDate = $(this).data('showdate');
-        const descriptionAr = $(this).data('description_ar');
-        const descriptionEn = $(this).data('description_en');
-        const image = $(this).data('image');
-        const id = $(this).data('id');
+        const products = $(this).data("products");
+        const addedDate = $(this).data("showdate");
+        const descriptionAr = $(this).data("description_ar");
+        const descriptionEn = $(this).data("description_en");
+        const image = $(this).data("image");
+        const id = $(this).data("id");
         // Populate modal
-        $('#showCategoryModal #category-name-ar').val(categoryNameAR);
-        $('#showCategoryModal #category-name-en').val(categoryNameEn);
-        $('#showCategoryModal #category-products').val(products);
-        $('#showCategoryModal #category-date').val(addedDate);
-        $('#showCategoryModal #category-description-ar').val(descriptionAr);
-        $('#showCategoryModal #category-description-en').val(descriptionEn);
-        $('#showCategoryModal #imagePreview').attr('src',image);
-        $('#showCategoryModal #category-id').val(id);
+        $("#showCategoryModal #category-name-ar").val(categoryNameAR);
+        $("#showCategoryModal #category-name-en").val(categoryNameEn);
+        $("#showCategoryModal #category-products").val(products);
+        $("#showCategoryModal #category-date").val(addedDate);
+        $("#showCategoryModal #category-description-ar").val(descriptionAr);
+        $("#showCategoryModal #category-description-en").val(descriptionEn);
+        $("#showCategoryModal #imagePreview").attr("src", image);
+        $("#showCategoryModal #category-id").val(id);
 
         // Create badges for subcategories
-        let badgesHtml = '';
+        let badgesHtml = "";
         subCategories.forEach(function (subcategory) {
             badgesHtml += `<span class="badge bg-light text-dark border">${subcategory}</span>`;
         });
 
         // Set the badges HTML in the modal
-        $('#subcategories-container').html(badgesHtml);
+        $("#subcategories-container").html(badgesHtml);
 
         // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('showCategoryModal'));
+        const modal = new bootstrap.Modal(
+            document.getElementById("showCategoryModal")
+        );
         modal.show();
     });
 
-    $('#editButton').on('click', function () {
+    $("#editButton").on("click", function () {
+        var nameEN = $("#category-name-en").val();
+        var nameAR = $("#category-name-ar").val();
+        var descEN = $("#category-description-en").val();
+        var descAR = $("#category-description-ar").val();
+        var id = $("#category-id").val();
 
-        var nameEN = $('#category-name-en').val();
-        var nameAR = $('#category-name-ar').val();
-        var descEN = $('#category-description-en').val();
-        var descAR = $('#category-description-ar').val();
-        var id = $('#category-id').val();
+        $("#edit-category-name-en").val(nameEN);
+        $("#edit-category-name-ar").val(nameAR);
+        $("#edit-category-description-en").val(descEN);
+        $("#edit-category-description-ar").val(descAR);
+        $("#edit-category-id").val(id);
 
-        $('#edit-category-name-en').val(nameEN);
-        $('#edit-category-name-ar').val(nameAR);
-        $('#edit-category-description-en').val(descEN);
-        $('#edit-category-description-ar').val(descAR);
-        $('#edit-category-id').val(id);
-
-        $('#editCategoryModal').modal('show');
-
+        $("#editCategoryModal").modal("show");
     });
 
-    $('#editCategoryForm').on('submit', function (e) {
+    $("#editCategoryForm").on("submit", function (e) {
         e.preventDefault(); // prevent default form submission
-        var categoryId = $(this).find('#edit-category-id').val();
+        var categoryId = $(this).find("#edit-category-id").val();
         $.ajax({
             url: `categories/${categoryId}`,
-            type: 'POST', // IMPORTANT: Laravel expects POST + method spoofing (@method('PUT'))
+            type: "POST", // IMPORTANT: Laravel expects POST + method spoofing (@method('PUT'))
             data: new FormData(this),
             processData: false,
             contentType: false,
@@ -267,25 +236,24 @@ $(document).ready(function () {
                     gravity: "top",
                     position: "right",
                     backgroundColor: "#28C76F", // green for success
-                    close: true
+                    close: true,
                 }).showToast();
 
                 // Close modal
-                $('#editCategoryModal').modal('hide');
+                $("#editCategoryModal").modal("hide");
 
                 // Optional: Clear form fields
-                $('#editCategoryForm')[0].reset();
+                $("#editCategoryForm")[0].reset();
 
                 // Optional: Remove uploaded image preview
-                $('#edit-image-preview-container').hide();
-                $('#edit-image-preview').attr('src', '');
-                $('#edit-image-details').hide();
+                $("#edit-image-preview-container").hide();
+                $("#edit-image-preview").attr("src", "");
+                $("#edit-image-details").hide();
 
                 // Optional: Reload your table or page
                 // location.reload();
                 // OR if you use DataTables, you can do:
                 // $('#yourTableId').DataTable().ajax.reload();
-
             },
             error: function (xhr) {
                 var errors = xhr.responseJSON.errors;
@@ -297,28 +265,29 @@ $(document).ready(function () {
                             gravity: "top",
                             position: "right",
                             backgroundColor: "#EA5455", // red
-                            close: true
+                            close: true,
                         }).showToast();
                     }
                 }
-            }
+            },
         });
     });
 
-
-    $('#edit-image-upload').on('change', function (event) {
+    $("#edit-image-upload").on("change", function (event) {
         const file = event.target.files[0];
 
         if (file) {
             const reader = new FileReader();
 
             reader.onload = function (e) {
-                $('#edit-image-preview').attr('src', e.target.result);
-                $('#edit-image-preview-container').show();
+                $("#edit-image-preview").attr("src", e.target.result);
+                $("#edit-image-preview-container").show();
 
                 // Show file name and size
                 const fileSize = (file.size / 1024).toFixed(2); // size in KB
-                $('#edit-image-details').text(`${file.name} • ${fileSize} KB`).show();
+                $("#edit-image-details")
+                    .text(`${file.name} • ${fileSize} KB`)
+                    .show();
             };
 
             reader.readAsDataURL(file); // Read the file as DataURL for preview
@@ -326,28 +295,28 @@ $(document).ready(function () {
     });
 
     // Delete the selected image
-    $('#delete-image-button').on('click', function () {
-        $('#edit-image-upload').val(''); // clear the file input
-        $('#edit-image-preview-container').hide(); // hide preview container
-        $('#edit-image-preview').attr('src', ''); // clear the img src
-        $('#edit-image-details').hide(); // hide file details
+    $("#delete-image-button").on("click", function () {
+        $("#edit-image-upload").val(""); // clear the file input
+        $("#edit-image-preview-container").hide(); // hide preview container
+        $("#edit-image-preview").attr("src", ""); // clear the img src
+        $("#edit-image-details").hide(); // hide file details
     });
 
-
-
-    $('#add-image-upload').on('change', function (event) {
+    $("#add-image-upload").on("change", function (event) {
         const file = event.target.files[0];
 
         if (file) {
             const reader = new FileReader();
 
             reader.onload = function (e) {
-                $('#add-image-preview').attr('src', e.target.result);
-                $('#add-image-preview-container').show();
+                $("#add-image-preview").attr("src", e.target.result);
+                $("#add-image-preview-container").show();
 
                 // Show file name and size
                 const fileSize = (file.size / 1024).toFixed(2); // size in KB
-                $('#add-image-details').text(`${file.name} • ${fileSize} KB`).show();
+                $("#add-image-details")
+                    .text(`${file.name} • ${fileSize} KB`)
+                    .show();
             };
 
             reader.readAsDataURL(file); // Read the file as DataURL for preview
@@ -355,22 +324,21 @@ $(document).ready(function () {
     });
 
     // Delete the selected image
-    $('#delete-image').on('click', function () {
-        $('#add-image-upload').val(''); // clear the file input
-        $('#add-image-preview-container').hide(); // hide preview container
-        $('#add-image-preview').attr('src', ''); // clear the img src
-        $('#add-image-details').hide(); // hide file details
+    $("#delete-image").on("click", function () {
+        $("#add-image-upload").val(""); // clear the file input
+        $("#add-image-preview-container").hide(); // hide preview container
+        $("#add-image-preview").attr("src", ""); // clear the img src
+        $("#add-image-details").hide(); // hide file details
     });
 
-
-    $('#addCategoryForm').on('submit', function (e) {
+    $("#addCategoryForm").on("submit", function (e) {
         e.preventDefault();
 
         var formData = new FormData(this);
 
         $.ajax({
-            url: $(this).attr('action'), // dynamic action URL
-            type: 'POST',
+            url: $(this).attr("action"), // dynamic action URL
+            type: "POST",
             data: formData,
             processData: false,
             contentType: false,
@@ -381,15 +349,13 @@ $(document).ready(function () {
                     gravity: "top",
                     position: "right",
                     backgroundColor: "#28C76F",
-                    close: true
+                    close: true,
                 }).showToast();
 
+                $("#addCategoryForm")[0].reset();
+                $("#addCategoryModal").modal("hide");
 
-
-                $('#addCategoryForm')[0].reset();
-                $('#addCategoryModal').modal('hide');
-
-                $('.category-list-table').DataTable().ajax.reload(); // reload your table
+                $(".category-list-table").DataTable().ajax.reload(); // reload your table
             },
             error: function (xhr) {
                 var errors = xhr.responseJSON.errors;
@@ -401,13 +367,11 @@ $(document).ready(function () {
                             gravity: "top",
                             position: "right",
                             backgroundColor: "#EA5455",
-                            close: true
+                            close: true,
                         }).showToast();
                     }
                 }
-            }
+            },
         });
     });
-
-
 });

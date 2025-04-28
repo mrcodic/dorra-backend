@@ -1,6 +1,8 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', '')
+@section('title', 'Show Product')
+@section('main-page', 'Products')
+@section('sub-page', 'Show Product')
 
 @section('vendor-style')
 {{-- Page Css files --}}
