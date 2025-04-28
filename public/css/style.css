@@ -54,3 +54,50 @@
 	height: 24px;
 }
 
+
+#multi-upload-content,#upload-content {
+    display: flex;
+	justify-content: center;
+    align-items: center;
+	gap: 5px;
+}
+
+.upload-card {
+    border: 2px dashed #CED5D4;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s;
+}
+
+.upload-card:hover {
+    background: #f8f9fa;
+}
+
+.upload-card.dragover {
+    background-color: #e9ecef;
+}
+
+.image-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+
+.file-info {
+    flex-grow: 1;
+}
+
+
+.progress {
+    height: 5px;
+    margin-top: 8px;
+}
