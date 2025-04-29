@@ -50,17 +50,24 @@ var dt_user_table = $('.tag-list-table').DataTable({
     ],
     order: [[1, 'asc']],
     dom:
-        '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
-        '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
-        '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
-        ">" +
-        ">t" +
-        '<"d-flex  mx-2 row mb-1"' +
-        '<"col-sm-12 col-md-6"i>' +
-        '<"col-sm-12 col-md-6"p>' +
-        ">",
+    '<"d-flex align-items-center header-actions mx-2 row mb-2"' +
+    '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
+    '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
+    '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
+    ">" +
+    ">t" +
+    '<"d-flex  mx-2 row mb-1"' +
+    '<"col-sm-12 col-md-6"i>' +
+    '<"col-sm-12 col-md-6"p>' +
+    ">",
     buttons: [
+        {
+            text: '<input type="date" class="form-control" style="width: 120px;" />',
+            className: "btn border-0",
+            action: function (e, dt, node, config) {
+                e.preventDefault();
+            },
+        },
         {
             text: 'Add New Tag',
             className: 'add-new btn btn-primary',
@@ -81,7 +88,7 @@ var dt_user_table = $('.tag-list-table').DataTable({
     },
     language: {
         sLengthMenu: 'Show _MENU_',
-        search: 'Search',
+        search: '',
         searchPlaceholder: 'Search..',
         paginate: {
             previous: '&nbsp;',
