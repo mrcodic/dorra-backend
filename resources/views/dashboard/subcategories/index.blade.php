@@ -1,6 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
 @section('title', 'SubCategory List')
+@section('main-page', 'Subcategories')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -28,8 +29,7 @@
 
         <!-- list and filter start -->
         <div class="card">
-            <div class="card-body border-bottom">
-                <h4 class="card-title">Search & Filter</h4>
+            <div class="card-body ">
                 <div class="row">
                     <div class="col-md-4 user_role"></div>
                     <div class="col-md-4 user_plan"></div>

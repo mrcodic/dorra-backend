@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="showCategoryModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close">×</button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
             <div class="modal-header mb-1">
                 <h5 class="modal-title fs-3" id="exampleModalLabel">Show Category</h5>
             </div>

@@ -15,17 +15,17 @@
                     <input type="hidden" id="edit-sub-category-id">
 
                     <div class="mb-3">
-                        <label for="edit-sub-category-name-en" class="form-label">Name (EN)</label>
+                        <label for="edit-sub-category-name-en" class="form-label label-text">Name (EN)</label>
                         <input type="text" class="form-control" id="edit-sub-category-name-en" name="name[en]">
                     </div>
 
                     <div class="mb-3">
-                        <label for="edit-sub-category-name-ar" class="form-label">Name (AR)</label>
+                        <label for="edit-sub-category-name-ar" class="form-label label-text">Name (AR)</label>
                         <input type="text" class="form-control" id="edit-sub-category-name-ar" name="name[ar]">
                     </div>
 
                     <div class="mb-3">
-                        <label for="edit-sub-category-parent-id" class="form-label">Main Category</label>
+                        <label for="edit-sub-category-parent-id" class="form-label label-text">Main Category</label>
                         <select name="parent_id"  class="form-select">
                             <option value="">Choose Main Category</option>
                             @foreach($associatedData['categories'] as $category)
@@ -36,8 +36,8 @@
                 </div>
 
                 <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="saveChangesButton">Save Changes</button>
+                    <button type="button" class="btn btn-outline-secondary " data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary " id="saveChangesButton">Save Changes</button>
                 </div>
 
             </form>

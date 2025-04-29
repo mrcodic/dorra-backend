@@ -4,7 +4,7 @@
             <form id="editCategoryForm" enctype="multipart/form-data" action="">
                 @csrf
                 @method("PUT")
-                <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close">×</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
                     <h5 class="modal-title fs-3" id="exampleModalLabel">Edit Category</h5>
                 </div>

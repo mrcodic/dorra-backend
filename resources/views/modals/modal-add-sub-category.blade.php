@@ -13,12 +13,12 @@
                     <!-- Name in Arabic and English -->
                     <div class="row mb-3">
                         <div class="col-6">
-                            <label class="form-label">Name (EN)</label>
+                            <label class="form-label label-text">Name (EN)</label>
                             <input type="text" class="form-control" placeholder="Enter Category Name(En)"
                                    id="add-category-name-en" name="name[en]"/>
                         </div>
                         <div class="col-6">
-                            <label class="form-label">Name (AR)</label>
+                            <label class="form-label label-text">Name (AR)</label>
                             <input type="text" class="form-control" placeholder="Enter Category Name(Ar)"
                                    id="add-category-name-ar" name="name[ar]"/>
                         </div>
@@ -27,8 +27,8 @@
 
                     <div class="row mb-3">
                         <div class="col-12">
-                            <label class="form-label">Main Category</label>
-                            <select name="parent_id" class="form-control" id="">
+                            <label class="form-label label-text">Category</label>
+                            <select name="parent_id" class="form-select" id="">
                                 <option value="">Choose Main Category</option>
                                 @foreach($associatedData['categories'] as $category)
                                     <option
