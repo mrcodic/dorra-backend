@@ -11,7 +11,9 @@ var dt_user_table = $(".category-list-table").DataTable({
         type: "GET",
     },
     columns: [
-        { data: null, defaultContent: "", orderable: false },
+        { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
+            return `<input type="checkbox" class="category-checkbox" value="${data}">`;
+        } },
         { data: "name" },
         { data: "sub_categories" },
         { data: "no_of_products" },
@@ -83,9 +85,12 @@ var dt_user_table = $(".category-list-table").DataTable({
                 $(node).removeClass("btn-secondary");
             },
         },
+       
+        
     ],
     drawCallback: function () {
         feather.replace();
+        $('#select-all-checkbox').prop('checked', false);
     },
     language: {
         sLengthMenu: "Show _MENU_",
@@ -96,6 +101,30 @@ var dt_user_table = $(".category-list-table").DataTable({
             next: "&nbsp;",
         },
     },
+});
+// Listen to checkbox change
+$(document).on("change", ".category-checkbox", function () {
+    let checkedCount = $(".category-checkbox:checked").length;
+    $("#bulk-delete-container").toggle(checkedCount > 0);
+});
+// Select All functionality
+$(document).on('change', '#select-all-checkbox', function () {
+    const isChecked = $(this).is(':checked');
+    $('.category-checkbox').prop('checked', isChecked).trigger('change');
+});
+// Update "Select All" checkbox based on individual selections
+$(document).on('change', '.category-checkbox', function () {
+    const all = $('.category-checkbox').length;
+    const checked = $('.category-checkbox:checked').length;
+
+    $('#select-all-checkbox').prop('checked', all === checked);
+    $('#bulk-delete-container').toggle(checked > 0);
+});
+
+
+// Optional: Hide button when table is redrawn
+dt_user_table.on("draw", function () {
+    $("#bulk-delete-container").hide();
 });
 
 $(document).ready(function () {

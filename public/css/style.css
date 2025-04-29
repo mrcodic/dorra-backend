@@ -107,3 +107,24 @@
     color: #121212;
 	font-size: 18px;
 }
+.bulk-delete-container{
+	display: flex;
+	justify-content: center;
+	padding: 5px;
+
+
+}
+
+.delete-container{
+	
+	border: 1px solid #CED5D4;
+	border-radius: 16px;
+	width: 65%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-top: 24px;
+	padding-bottom: 24px;
+	padding-right: 16px;
+	padding-left: 16px;
+}

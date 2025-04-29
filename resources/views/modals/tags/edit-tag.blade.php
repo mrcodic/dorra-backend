@@ -4,7 +4,7 @@
             <form id="editTagForm" enctype="multipart/form-data" action="">
                 @csrf
                 @method("PUT")
-                <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close">×</button>
+                <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
                     <h5 class="modal-title fs-3" id="exampleModalLabel">Edit Tag</h5>
                 </div>
@@ -14,7 +14,7 @@
 
 
                     <!-- Name in Arabic and English -->
-                    <div class="row my-3">
+                    <div class="row mb-3">
                         <div class="col-6">
                             <label class="form-label label-text">Name (EN)</label>
                             <input type="text" class="form-control" id="edit-tag-name-en" name="name[en]" />

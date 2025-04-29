@@ -1,6 +1,8 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Checkout')
+@section('title', 'Create User')
+@section('main-page', 'Users')
+@section('sub-page', 'Add New User')
 
 @section('vendor-style')
 <!-- Vendor css files -->
@@ -179,6 +181,12 @@
                         </div>
                     </div>
                     <!-- Checkout Customer Address Right ends -->
+                </div>
+                <!-- Buttons -->
+                <div class="d-flex gap-1 justify-content-end mt-2">
+                    <button type="button" class="btn btn-outline-secondary btn-prev place-order">Back</button>
+                    <button type="button" class="btn btn-primary btn-next place-order">Next</button>
+                
                 </div>
             </div>
             <!-- Checkout Customer Address Ends -->
