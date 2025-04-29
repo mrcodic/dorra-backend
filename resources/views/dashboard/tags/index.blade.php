@@ -51,7 +51,7 @@
                 </table>
             </div>
             @include('modals.tags.show-tag')
-            @include('modals/modal-edit-category')
+            @include('modals.tags.edit-tag')
             @include('modals.tags.add-tag')
 
         </div>

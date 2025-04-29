@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="editTagModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="editCategoryForm" enctype="multipart/form-data" action="">
+            <form id="editTagForm" enctype="multipart/form-data" action="">
                 @csrf
                 @method("PUT")
                 <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close">×</button>

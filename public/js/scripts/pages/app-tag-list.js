@@ -145,7 +145,6 @@ $(document).ready(function () {
         const products = $(this).data('products');
         const addedDate = $(this).data('showdate');
         const id = $(this).data('id');
-        console.log(tagNameEn)
         // Populate modal
         $('#showTagModal #tag-name-ar').val(tagNameAR);
         $('#showTagModal #tag-name-en').val(tagNameEn);
@@ -155,33 +154,31 @@ $(document).ready(function () {
 
 
         // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('showTagModal'));
-        modal.show();
+        $('#showTagModal').modal('show');
+
     });
 
     $('#editButton').on('click', function () {
-
         var nameEN = $('#tag-name-en').val();
         var nameAR = $('#tag-name-ar').val();
         var id = $('#tag-id').val();
-        console.log(nameAR)
+
 
         $('#edit-tag-name-en').val(nameEN);
         $('#edit-tag-name-ar').val(nameAR);
         $('#edit-tag-id').val(id);
-
+        console.log(id)
         $('#editTagModal').modal('show');
 
     });
 
-    $('#editSubCategoryForm').on('submit', function (e) {
+    $('#editTagForm').on('submit', function (e) {
         console.log("D")
-        e.preventDefault(); // prevent default form submission
-        var categoryId = $(this).find('#edit-sub-category-id').val();
-        console.log(categoryId)
+        e.preventDefault();
+        var tagId = $(this).find('#edit-tag-id').val();
         $.ajax({
-            url: `sub-categories/${categoryId}`,
-            type: 'POST', // IMPORTANT: Laravel expects POST + method spoofing (@method('PUT'))
+            url: `tags/${tagId}`,
+            type: 'POST',
             data: new FormData(this),
             processData: false,
             contentType: false,
@@ -189,18 +186,18 @@ $(document).ready(function () {
                 console.log(response);
 
                 Toastify({
-                    text: "Subcategory updated successfully!",
+                    text: "Tag updated successfully!",
                     duration: 3000,
                     gravity: "top",
                     position: "right",
-                    backgroundColor: "#28C76F", // green for success
+                    backgroundColor: "#28C76F",
                     close: true
                 }).showToast();
 
                 // Close modal
-                $('#editSubCategoryModal').modal('hide');
-                $('#showSubCategoryModal').modal('hide');
-                $('#sub-category-list-table').DataTable().ajax.reload();
+                $('#editTagModal').modal('hide');
+                $('#showTagModal').modal('hide');
+                $('#tag-list-table').DataTable().ajax.reload();
 
 
 

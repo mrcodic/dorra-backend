@@ -6,6 +6,7 @@
                 <h5 class="modal-title fs-3" id="exampleModalLabel">Show Tag</h5>
             </div>
             <div class="modal-body flex-grow-1">
+                <input type="hidden" id="tag-id">
                 <!-- Name in Arabic and English -->
                 <div class="row my-3">
                     <div class="col-6">
