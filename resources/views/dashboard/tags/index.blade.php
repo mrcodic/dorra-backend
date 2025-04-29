@@ -49,9 +49,10 @@
                     </thead>
                 </table>
             </div>
+            @include('modals.tags.add-tag')
             @include('modals.tags.show-tag')
             @include('modals.tags.edit-tag')
-            @include('modals.tags.add-tag')
+
 
         </div>
         <!-- list and filter end -->
@@ -79,6 +80,7 @@
 @endsection
 
 @section('page-script')
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
