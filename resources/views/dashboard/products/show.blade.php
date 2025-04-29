@@ -14,15 +14,12 @@
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
 <link rel="stylesheet" href="{{ asset('vendors/fonts/fontawesome.css') }}">
-<link rel="stylesheet" href="../../assets//vendor/fonts/iconify-icons.css" />
 @endsection
 
 @section('page-style')
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
-<link rel="stylesheet" href="../../assets//vendor/fonts/iconify-icons.css" />
-
 @endsection
 
 @section('content')
@@ -33,7 +30,7 @@
         <!-- Main Preview Image -->
         <p class="label-text">Product Image (main)</p>
         <div class="w-100 d-flex justify-content-center">
-        <img id="mainPreview" src="{{ asset('images/banner/banner-1.jpg') }}" alt="Preview" class="img-fluid mb-2"
+        <img id="mainPreview" src="{{ $model->getFirstMediaUrl('product_main_image') }}" alt="Preview" class="img-fluid mb-2"
             style="height: 256px;width: 256px" />
             </div>
         <p class="label-text">Product Images</p>
@@ -236,14 +233,14 @@
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                 <div class="d-flex align-items-center gap-1 ">
                                     <img src="{{ asset('images/logo-reply.png') }}" alt="Avatar" class="rounded-circle" width="48" height="48">
-                                
+
                                         <div class="fw-bold text-primary">Reply from Dorra Team</div>
-                                        
-                                    
+
+
                                 </div>
                                 <div class="text-small">2024-04-23</div>
                                 </div>
-                           
+
                                 <div class="mb-2 label-text mx-5">
                                     Thank you for your kind words! We're happy you loved the product.
                                 </div>
