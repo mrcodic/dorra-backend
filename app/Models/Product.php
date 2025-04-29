@@ -91,6 +91,20 @@ class Product extends Model implements HasMedia
         return $this->morphToMany(User::class, 'savable');
     }
 
+    public function getAllProductImages()
+    {
+        return $this->getMedia('product_extra_images')
+            ->merge($this->getMedia('product_main_image'));
+    }
 
+    public function getMainImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('product_main_image');
+    }
+
+    public function getExtraImagesUrl(): string
+    {
+        return $this->getFirstMediaUrl('product_extra_images');
+    }
 
 }

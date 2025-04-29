@@ -50,13 +50,16 @@ var dt_user_table = $('.tag-list-table').DataTable({
     ],
     order: [[1, 'asc']],
     dom:
-        '<"d-flex justify-content-between align-items-center header-actions mx-2 row mt-75"' +
-        '<"col-sm-12 col-lg-8 ps-xl-75 ps-0"<"dt-action-buttons d-flex align-items-center justify-content-center justify-content-lg-end flex-lg-nowrap flex-wrap"<"me-1"f>B>>' +
-        '>t' +
-        '<"d-flex justify-content-between mx-2 row mb-1"' +
+        '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
+        '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
+        '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
+        '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
+        ">" +
+        ">t" +
+        '<"d-flex  mx-2 row mb-1"' +
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
-        '>',
+        ">",
     buttons: [
         {
             text: 'Add New Tag',
@@ -70,7 +73,9 @@ var dt_user_table = $('.tag-list-table').DataTable({
             }
         }
 
+
     ],
+
     drawCallback: function () {
         feather.replace();
     },

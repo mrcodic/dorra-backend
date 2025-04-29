@@ -27,10 +27,12 @@ class ProductController extends DashboardController
         $this->createView = 'products.create';
         $this->editView = 'products.edit';
         $this->showView = 'products.show';
-        $this->assoiciatedData['shared'] = [
-            'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
-            'tags' => $this->tagRepository->all(columns: ['id', 'name']),
-       ];
+        $this->assoiciatedData = [
+            'shared' => [
+                'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
+                'tags' => $this->tagRepository->all(columns: ['id', 'name']),
+            ],
+        ];
         $this->usePagination = true;
     }
 

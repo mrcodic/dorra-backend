@@ -30,9 +30,10 @@
         <!-- Main Preview Image -->
         <p class="label-text">Product Image (main)</p>
         <div class="w-100 d-flex justify-content-center">
-        <img id="mainPreview" src="{{ $model->getFirstMediaUrl('product_main_image') }}" alt="Preview" class="img-fluid mb-2"
+        <img id="mainPreview" src="{{$model->getMainImageUrl() }}" alt="Preview" class="img-fluid mb-2"
             style="height: 256px;width: 256px" />
             </div>
+        @if($model->getMedia('product_extra_images')->isNotEmpty())
         <p class="label-text">Product Images</p>
 
         <!-- Custom Slider -->
@@ -48,8 +49,9 @@
             <!-- Visible Thumbnails (4 at a time) -->
             <div class="d-flex overflow-hidden" style="width: 260px; margin: 0 auto;">
                 <div id="sliderTrack" class="d-flex transition" style="gap: 0.5rem;">
-                    @foreach (['banner/banner-2.jpg', 'banner/banner-1.jpg', 'banner/banner-2.jpg', 'banner/banner-3.jpg', 'banner/banner-2.jpg', 'banner/banner-2.jpg', 'banner/banner-1.jpg'] as $img)
-                    <img src="{{ asset("images/$img") }}" class="img-thumbnail thumb"
+
+                    @foreach ($model->getAllProductImages() as $media)
+                    <img src="{{ $media->getUrl() }}" class="img-thumbnail thumb"
                         style="width: 60px; height: 60px; flex: 0 0 auto; cursor: pointer;"
                         onclick="updatePreview(this)">
                     @endforeach
@@ -64,13 +66,13 @@
                 <i data-feather="chevron-right"></i>
             </button>
         </div>
-
+        @endif
         <!-- Info Section -->
 
         <p class="mb-1 fw-bold  label-text">Rate</p>
         <div class="d-flex justify-content-start align-items-center gap-1 disabled-field">
             <img src="{{ asset('images/star-rate.svg') }}" alt="Star" width="18" />
-            <span class=" fw-bold">4.5</span>
+            <span class=" fw-bold">{{ $model->rating ?? 0 }}</span>
 
         </div>
 
@@ -79,7 +81,7 @@
         <div class="my-3 d-flex justify-content-between">
             <div class="d-flex flex-column ">
                 <span class="mb-1 fw-bold  label-text">Added Date:</span>
-                <span class="fw-semibold disabled-field">2024-04-22</span>
+                <span class="fw-semibold disabled-field">{{ $model->created_at->format('Y-m-d') }}</span>
             </div>
             <div class="d-flex flex-column  justify-content-between">
                 <span class="mb-1 fw-bold  label-text">Purchase Times:</span>
@@ -353,9 +355,7 @@
     }
 
     // Initialize first image as selected
-    window.onload = () => {
-        updatePreview(thumbs[0]);
-    };
+
 </script>
 <script>
     document.getElementById('replyForm').addEventListener('submit', function(e) {
