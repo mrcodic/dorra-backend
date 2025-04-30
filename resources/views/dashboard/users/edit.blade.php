@@ -257,7 +257,10 @@
                                 <!-- Buttons -->
                                 <div class="d-flex gap-1 justify-content-end mt-2">
                                     <button type="button" class="btn bg-white text-danger  place-order fs-16">Remove</button>
-                                    <button type="button" class="btn btn-outline-secondary place-order fs-16">Show</button>
+                                    <button type="button" class="btn btn-outline-secondary place-order fs-16" data-bs-toggle="modal" data-bs-target="#teamAccessModal">
+                                        Show
+                                    </button>
+
                                 </div>
                             </div>
                         </div>
@@ -271,6 +274,77 @@
 
     <!--/ User Content -->
     </div>
+
+
+    <div class="modal fade" id="teamAccessModal" tabindex="-1" aria-labelledby="teamAccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content px-2 pb-2">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+            
+                    <h5 class="modal-title fw-bold" id="teamAccessModalLabel">John Doe’s Team</h5>
+
+               
+
+                <!-- Invite input -->
+                <div class=" mb-2 d-flex justify-content-between">
+                    <input type="email" class="form-control w-75" placeholder="Add people by their email address">
+                    <button class="btn btn-primary" type="button">Invite</button>
+                </div>
+
+                <!-- Who has access -->
+                <h5 class="fw-semibold fs-16">Who has access to this file</h5>
+
+                <!-- Members list -->
+                <div>
+                    <!-- Owner -->
+                    <div class="d-flex justify-content-between align-items-center  py-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <img src="{{asset('images/avatar.png')}}" class="rounded-circle" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;">
+                            <div>
+                                <div class="fw-semibold text-black fs-5">John Doe</div>
+                                <small class="">john@example.com</small>
+                            </div>
+                        </div>
+                        <span class="border rounded-3 px-3 py-1">Creator</span>
+                    </div>
+
+                    <!-- Other Members -->
+                    <div class="d-flex justify-content-between align-items-center  py-2">
+                        <div class="d-flex align-items-start gap-2 w-75">
+                            <img src="{{asset('images/avatar.png')}}" class="rounded-circle" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;">
+                            <div>
+                                <div class="fw-semibold text-black fs-5">Jane Smith</div>
+                                <small class="">jane@example.com</small>
+                            </div>
+                        </div>
+                        <select class="form-select" style="width: 17%">
+                            <option value="view">View</option>
+                            <option value="edit">Edit</option>
+                        </select>
+                    </div>
+
+                    <!-- Add more members here as needed -->
+                </div>
+
+                <!-- General access -->
+                <div class="mt-4">
+                    <h6 class="fw-semibold">General access</h6>
+                    <select class="form-select mb-3">
+                        <option>Anyone with the link can view this file</option>
+                        <option>Anyone with the link can edit this file</option>
+                        <option>Restricted</option>
+                    </select>
+                </div>
+
+                <!-- Footer buttons -->
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-outline-secondary d-flex justify-content-center align-items-center text-dark gap-1"><i data-feather="link-2"></i>Copy Link</button>
+                    <button class="btn btn-primary">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </section>
 
 
