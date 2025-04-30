@@ -28,7 +28,7 @@ class UserService extends BaseService
                 return $user->created_at?->format('j/n/Y');
             })
             ->addColumn('orders_count', function ($user) {
-                return 5;
+                return 0;
             })->make();
     }
 

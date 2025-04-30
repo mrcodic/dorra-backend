@@ -53,22 +53,13 @@
                             <li class="nav-item"><a class="nav-link menu-toggle" href="javascript:void(0);"><i
                                         class="ficon"
                                         data-feather="menu"></i></a></li>
-                                        
+
                         </ul>
                         <ul class="nav navbar-nav bookmark-icons">
-                        <li class="nav-item nav-search"><a class="nav-link nav-link-search"><i class="ficon"
-                                                                                               data-feather="search"></i></a>
-                            <div class="search-input">
-                                <div class="search-input-icon"><i data-feather="search"></i></div>
-                                <input class="form-control input" type="text" placeholder="Explore Vuexy..."
-                                       tabindex="-1" data-search="search">
-                                <div class="search-input-close"><i data-feather="x"></i></div>
-                                <ul class="search-list search-list-main"></ul>
-                            </div>
-                        </li>
+
                         </ul>
-                
-             
+
+
                     </div>
                     <ul class="nav navbar-nav align-items-center ms-auto">
                         <li class="nav-item dropdown dropdown-language">
@@ -81,20 +72,14 @@
                                 <a class="dropdown-item" href="{{ url('lang/en') }}" data-language="en">
                                     <i class="flag-icon flag-icon-us"></i> English
                                 </a>
-                                <a class="dropdown-item" href="{{ url('lang/fr') }}" data-language="fr">
-                                    <i class="flag-icon flag-icon-fr"></i> French
-                                </a>
-                                <a class="dropdown-item" href="{{ url('lang/de') }}" data-language="de">
-                                    <i class="flag-icon flag-icon-de"></i> German
-                                </a>
-                                <a class="dropdown-item" href="{{ url('lang/pt') }}" data-language="pt">
-                                    <i class="flag-icon flag-icon-pt"></i> Portuguese
+                                <a class="dropdown-item" href="{{ url('lang/ar') }}" data-language="ar">
+                                    <i class="flag-icon flag-icon-eg"></i> Arabic
                                 </a>
                             </div>
                         </li>
-                        
-                
-                      
+
+
+
                         <li class="nav-item dropdown dropdown-notification me-25">
                             <a class="nav-link" href="javascript:void(0);" data-bs-toggle="dropdown">
                                 <i class="ficon" data-feather="bell"></i>
@@ -243,7 +228,7 @@
                                 <h6 class="dropdown-header">Manage Profile</h6>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item"
-                                   href="{{ Route::has('profile.show') ? route('profile.show') : 'javascript:void(0)' }}">
+                                   href="javascript:void(0)">
                                     <i class="me-50" data-feather="user"></i> Profile
                                 </a>
                                 @if (Auth::check() && Laravel\Jetstream\Jetstream::hasApiFeatures())

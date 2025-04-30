@@ -194,7 +194,7 @@
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="mb-1">
-                                                                <button type="button" class="btn btn-outline-danger text-nowrap px-1" data-repeater-delete>
+                                                                <button type="button" class="btn btn-outline-danger text-nowrap px-1" style="display: none" data-repeater-delete>
                                                                     <i data-feather="x" class="me-25"></i> <span>Delete</span>
                                                                 </button>
                                                             </div>
@@ -233,8 +233,8 @@
                                             <div class="outer-repeater">
                                                 <div data-repeater-list="specifications">
                                                     <div data-repeater-item>
+                                                        <!-- Specification Fields -->
                                                         <div class="row mt-1">
-                                                            <!-- Specification Name (English) -->
                                                             <div class="col-md-6">
                                                                 <div class="mb-1">
                                                                     <label class="form-label label-text">Name (EN)</label>
@@ -242,7 +242,6 @@
                                                                 </div>
                                                             </div>
 
-                                                            <!-- Specification Name (Arabic) -->
                                                             <div class="col-md-6">
                                                                 <div class="mb-1">
                                                                     <label class="form-label label-text">Name (AR)</label>
@@ -254,14 +253,14 @@
                                                             <div class="inner-repeater">
                                                                 <div data-repeater-list="specification_options">
                                                                     <div data-repeater-item>
-                                                                        <div class="row d-flex align-items-end mt-2 ">
-                                                                            <!-- Option Name (English) -->
+                                                                        <div class="row d-flex align-items-end mt-2">
+                                                                            <!-- Option Name (EN) -->
                                                                             <div class="col">
                                                                                 <label class="form-label label-text">Value (Required) (EN)</label>
                                                                                 <input type="text" name="value_en" class="form-control" placeholder="Option (EN)" />
                                                                             </div>
 
-                                                                            <!-- Option Name (Arabic) -->
+                                                                            <!-- Option Name (AR) -->
                                                                             <div class="col">
                                                                                 <label class="form-label label-text">Value (Required) (AR)</label>
                                                                                 <input type="text" name="value_ar" class="form-control" placeholder="Option (AR)" />
@@ -272,8 +271,6 @@
                                                                                 <label class="form-label label-text">Price (EGP) (Optional)</label>
                                                                                 <input type="text" name="price" class="form-control" placeholder="Price" />
                                                                             </div>
-
-
                                                                         </div>
                                                                         <div class="row d-flex align-items-end mt-2">
                                                                             <!-- Option Image -->
@@ -281,49 +278,48 @@
                                                                                 <label class="form-label label-text">Option Image</label>
 
                                                                                 <!-- Hidden real input -->
-                                                                                <input type="file" id="option-image-input" name="image" class="form-control d-none" accept="image/*">
+                                                                                <!-- Hidden real input -->
+                                                                                <input type="file" name="image" class="form-control d-none option-image-input" accept="image/*">
 
                                                                                 <!-- Custom Upload Card -->
-                                                                                <div id="option-upload-area" class="upload-card">
-                                                                                    <div id="option-upload-content" class="d-flex justify-content-center align-items-center gap-1">
+                                                                                <div class="upload-card option-upload-area">
+                                                                                    <div class="d-flex justify-content-center align-items-center gap-1">
                                                                                         <i data-feather="upload" class="mb-2"></i>
                                                                                         <p>Drag image here to upload</p>
                                                                                     </div>
                                                                                 </div>
 
                                                                                 <!-- Progress Bar -->
-                                                                                <div id="option-upload-progress" class="progress mt-2 d-none w-50">
+                                                                                <div class="progress mt-2 d-none w-50 option-upload-progress">
                                                                                     <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                                                                                 </div>
 
                                                                                 <!-- Uploaded Image Preview -->
-                                                                                <div id="option-uploaded-image" class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                                                                    <img src="" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                                <div class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2 option-uploaded-image">
+                                                                                    <img src="" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
                                                                                     <div class="file-details">
-                                                                                        <div class="file-name fw-bold"></div>
-                                                                                        <div class="file-size text-muted small"></div>
+                                                                                        <div class="file-name fw-bold option-file-name"></div>
+                                                                                        <div class="file-size text-muted small option-file-size"></div>
                                                                                     </div>
-                                                                                    <button type="button" id="option-remove-image" class="btn btn-sm position-absolute text-danger" style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                                                    <button type="button" class="btn btn-sm position-absolute text-danger option-remove-image" style="top: 5px; right: 5px; background-color: #FFEEED">
                                                                                         <i data-feather="trash"></i>
                                                                                     </button>
                                                                                 </div>
+
                                                                                 <div class="col-12 text-end mt-1 mb-2">
-                                                                                    <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                                    <button type="button" class="btn btn-outline-danger" style="display: none" data-repeater-delete>
                                                                                         <i data-feather="x" class="me-25"></i> Delete Value
                                                                                     </button>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-
-                                                                        <!-- Main Image Upload -->
-
                                                                     </div>
                                                                 </div>
 
                                                                 <!-- Add Option Button -->
                                                                 <div class="row">
                                                                     <div class="col-12">
-                                                                        <button type="button" class="btn primary-text-color bg-white mt-2 text-decoration-underline" style="padding: 0px;" data-repeater-create>
+                                                                        <button type="button" class="btn primary-text-color bg-white mt-2" data-repeater-create>
                                                                             <i data-feather="plus"></i> <span> Add New Value</span>
                                                                         </button>
                                                                     </div>
@@ -333,7 +329,7 @@
 
                                                             <!-- Delete Specification Button -->
                                                             <div class="col-12 text-end mt-1 mb-2">
-                                                                <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                <button type="button" class="btn btn-outline-danger" style="display: none" data-repeater-delete>
                                                                     <i data-feather="x" class="me-25"></i> Delete Spec
                                                                 </button>
                                                             </div>
@@ -342,29 +338,28 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Add Specification Button -->
+                                                <!-- Add New Specification Button -->
                                                 <div class="row">
                                                     <div class="col-12">
-                                                        <button type="button" class="w-100  rounded-3 p-1 text-dark" style="border:2px dashed #CED5D4;background-color:#EBEFEF" data-repeater-create>
+                                                        <button type="button" class="w-100 rounded-3 p-1 text-dark" style="border: 2px dashed #CED5D4; background-color: #EBEFEF" data-repeater-create>
                                                             <i data-feather="plus" class="me-25"></i> <span>Add New Spec</span>
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Free Shipping -->
-                                <div class="col-md-12 col-12 mb-2">
-                                    <div class="form-check form-switch">
-                                        <input type="hidden" name="is_free_shipping" value="0">
-                                        <input type="checkbox" class="form-check-input" id="free-shipping" name="is_free_shipping" value="1">
-                                        <label class="form-check-label" for="free-shipping">Product available for free shipping</label>
-                                    </div>
-                                </div>
-                            </div>
+{{--                                <div class="col-md-12 col-12 mb-2">--}}
+{{--                                    <div class="form-check form-switch">--}}
+{{--                                        <input type="hidden" name="is_free_shipping" value="0">--}}
+{{--                                        <input type="checkbox" class="form-check-input" id="free-shipping" name="is_free_shipping" value="1">--}}
+{{--                                        <label class="form-check-label" for="free-shipping">Product available for free shipping</label>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
 
                             <!-- Submit -->
                             <div class="col-12 d-flex justify-content-end gap-1">
@@ -664,30 +659,126 @@
             show: function() {
                 $(this).slideDown();
                 feather && feather.replace();
+
+                // Recalculate delete button visibility when an item is shown
+                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                items.each(function(index) {
+                    // Hide delete button for the first item (index 0) and show for others
+                    if (index === 0) {
+                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
+                    } else {
+                        $(this).find('[data-repeater-delete]').show(); // Show delete button for others
+                    }
+                });
             },
             hide: function(deleteElement) {
                 $(this).slideUp(deleteElement);
+
+                // Recalculate delete button visibility after an item is removed
+                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                items.each(function(index) {
+                    // Hide delete button for the first item (index 0) and show for others
+                    if (index === 0) {
+                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
+                    } else {
+                        $(this).find('[data-repeater-delete]').show(); // Show delete button for others
+                    }
+                });
             }
         });
+
+
+
+        function updateDeleteButtons(containerSelector) {
+            $(containerSelector).find('[data-repeater-list]').each(function () {
+                var items = $(this).find('[data-repeater-item]');
+                items.each(function (index) {
+                    if (index === 0) {
+                        $(this).find('[data-repeater-delete]').hide();
+                    } else {
+                        $(this).find('[data-repeater-delete]').show();
+                        feather.replace();
+                    }
+                });
+            });
+        }
+
+        function initializeImageUploaders(context) {
+            $(context).find('.option-upload-area').each(function () {
+                const uploadArea = $(this);
+                const input = uploadArea.closest('.col-md-12').find('.option-image-input');
+                const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
+                const imagePreview = previewContainer.find('.option-image-preview');
+                const fileNameLabel = previewContainer.find('.option-file-name');
+                const fileSizeLabel = previewContainer.find('.option-file-size');
+                const removeButton = previewContainer.find('.option-remove-image');
+
+                uploadArea.off('click').on('click', function () {
+                    input.trigger('click');
+                });
+
+                input.off('change').on('change', function () {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            imagePreview.attr('src', e.target.result);
+                            fileNameLabel.text(file.name);
+                            fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
+                            previewContainer.removeClass('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                removeButton.off('click').on('click', function () {
+                    input.val('');
+                    previewContainer.addClass('d-none');
+                });
+            });
+        }
 
         $('.outer-repeater').repeater({
             repeaters: [{
                 selector: '.inner-repeater',
-                show: function() {
+                show: function () {
                     $(this).slideDown();
+                    updateDeleteButtons($(this).closest('.outer-repeater'));
+                    initializeImageUploaders(this);
+                    feather.replace();
                 },
-                hide: function(deleteElement) {
+                hide: function (deleteElement) {
                     $(this).slideUp(deleteElement);
+                    updateDeleteButtons($(this).closest('.outer-repeater'));
                 },
                 nestedInputName: 'specification_options'
             }],
-            show: function() {
+            show: function () {
                 $(this).slideDown();
+                updateDeleteButtons($('.outer-repeater'));
+                initializeImageUploaders(this);
+                feather.replace();
             },
-            hide: function(deleteElement) {
+            hide: function (deleteElement) {
                 $(this).slideUp(deleteElement);
+                updateDeleteButtons($('.outer-repeater'));
+            },
+            afterAdd: function () {
+                updateDeleteButtons($('.outer-repeater'));
+                initializeImageUploaders($('.outer-repeater'));
+                feather.replace();
+            },
+            afterDelete: function () {
+                updateDeleteButtons($('.outer-repeater'));
             }
         });
+
+// Initialize on page load for already existing items
+        $(document).ready(function () {
+            updateDeleteButtons($('.outer-repeater'));
+            initializeImageUploaders($('.outer-repeater'));
+        });
+
 
         $('.select2').select2();
 

@@ -198,12 +198,12 @@
 
                             <p class="label-text">Product Specs</p>
                             @foreach($model->specifications as $specification)
-                                <div class="border rounded p-1">
+                                <div class="border rounded p-1 mb-2">
                                     <div class="d-flex flex-column w-100">
                                         <span class="mb-1 fw-bold label-text">Name</span>
                                         <span class="fw-semibold disabled-field">{{ $specification->name }}</span>
                                     </div>
-                                    @foreach($specification->options as $option) @endforeach
+                                    @foreach($specification->options as $index => $option) @endforeach
                                     <div class="my-3 d-flex justify-content-between gap-2">
                                         <div class="d-flex flex-column w-100">
                                             <span class="mb-1 fw-bold label-text">Value</span>
@@ -216,8 +216,8 @@
                                         <div class="d-flex flex-column  justify-content-between w-100">
                                             <span class="mb-1 fw-bold label-text">Photo</span>
                                             <span class="fw-semibold disabled-field">
-                                                @if ($option->getFirstMediaUrl())
-                                                    <img src="{{ $option->getFirstMediaUrl() }}" width="32px"
+                                                @if ($option->media)
+                                                    <img src="{{ $option->media[$index]->getUrl() }}" width="32px"
                                                          height="32px"/>
                                                 @endif
                                             </span>

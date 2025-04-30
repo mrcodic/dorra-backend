@@ -4,18 +4,11 @@ $configData = Helper::applClasses();
 <div
   class="main-menu menu-fixed {{ $configData['theme'] === 'dark' || $configData['theme'] === 'semi-dark' ? 'menu-dark' : 'menu-light' }} menu-accordion menu-shadow"
   data-scroll-to-active="true">
-  <div class="navbar-header">
-    <ul class="nav navbar-nav flex-row">
-      <li class="nav-item mx-auto">
+  <div class="navbar-header" >
+    <ul class="nav navbar-nav flex-row" >
+      <li class="nav-item mx-auto" >
         <a class="navbar-brand" href="{{ url('/') }}">
-          <img id="logo" src="{{ asset('images/dorra-logo.svg') }}" alt="logo" style="width: 92px;" />
-        </a>
-      </li>
-      <li class="nav-item nav-toggle">
-        <a class="nav-link modern-nav-toggle pe-0" data-toggle="collapse">
-          <i class="d-block d-xl-none text-primary toggle-icon font-medium-4" data-feather="x"></i>
-          <i class="d-none d-xl-block collapse-toggle-icon font-medium-4 text-primary" data-feather="disc"
-            data-ticon="disc"></i>
+          <img id="logo" src="{{ asset('images/dorra-logo.svg') }}" alt="logo" style="width: 92px; " />
         </a>
       </li>
     </ul>
@@ -39,7 +32,7 @@ $configData = Helper::applClasses();
       $custom_classes = $menu->classlist;
       }
       @endphp
-      
+
       @php
       $isActive = '';
       if (isset($menu->url)) {

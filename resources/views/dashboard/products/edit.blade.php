@@ -254,11 +254,11 @@
                                                 <div data-repeater-list="prices">
                                                     <div data-repeater-item>
                                                         <div class="row d-flex align-items-end">
+                                                            <!-- Loop through prices -->
                                                             @foreach ($model->prices as $index => $price)
                                                                 <div class="col-md-4">
                                                                     <div class="mb-1">
-                                                                        <label
-                                                                            class="form-label label-text">Quantity</label>
+                                                                        <label class="form-label label-text">Quantity</label>
                                                                         <input type="number"
                                                                                name="prices[{{ $index }}][quantity]"
                                                                                value="{{ $price->quantity }}"
@@ -268,8 +268,7 @@
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <div class="mb-1">
-                                                                        <label
-                                                                            class="form-label label-text">Price</label>
+                                                                        <label class="form-label label-text">Price</label>
                                                                         <input type="text"
                                                                                name="prices[{{ $index }}][price]"
                                                                                value="{{ $price->price }}"
@@ -279,11 +278,12 @@
                                                                 </div>
                                                             @endforeach
 
+                                                            <!-- Delete button for each item -->
                                                             <div class="col-md-4">
                                                                 <div class="mb-1">
                                                                     <button type="button"
-                                                                            class="btn btn-outline-danger text-nowrap px-1"
-                                                                            data-repeater-delete>
+                                                                            class="btn btn-outline-danger text-nowrap px-1 delete-btn"
+                                                                            data-repeater-delete style="display: none;">
                                                                         <i data-feather="x" class="me-25"></i> <span>Delete</span>
                                                                     </button>
                                                                 </div>
@@ -292,10 +292,11 @@
                                                         <hr/>
                                                     </div>
                                                 </div>
+
+                                                <!-- Add New Button -->
                                                 <div class="row">
                                                     <div class="col-12">
-                                                        <button type="button" class="btn btn-icon btn-primary"
-                                                                data-repeater-create>
+                                                        <button  type="button" class="add-new-button btn btn-icon btn-primary" data-repeater-create>
                                                             <i data-feather="plus" class="me-25"></i>
                                                             <span>Add New</span>
                                                         </button>
@@ -326,9 +327,9 @@
                                             <div class="">
                                                 <!-- Outer Repeater for Specifications -->
                                                 <div class="outer-repeater">
-                                                    @foreach($model->specifications as $specification)
+                                                    <div data-repeater-list="specifications">
 
-                                                        <div data-repeater-list="specifications">
+                                                    @foreach($model->specifications as $specification)
                                                             <div data-repeater-item>
                                                                 <div class="row">
                                                                     <!-- Specification Name (English) -->
@@ -359,9 +360,8 @@
 
                                                                     <!-- Inner Repeater for Specification Options -->
                                                                     <div class="inner-repeater">
+                                                                        <div data-repeater-list="specification_options">
                                                                         @foreach($specification->options as $option)
-                                                                            <div
-                                                                                data-repeater-list="specification_options">
                                                                                 <div data-repeater-item>
                                                                                     <div
                                                                                         class="row d-flex align-items-end mt-2">
@@ -402,109 +402,65 @@
                                                                                         class="row d-flex align-items-end mt-2">
                                                                                         <!-- Option Image -->
                                                                                         <div class="col-md-12">
-                                                                                            <label
-                                                                                                class="form-label label-text">Option
-                                                                                                Image</label>
+                                                                                            <label class="form-label label-text">Option Image</label>
 
                                                                                             <!-- Hidden real input -->
-                                                                                            <input type="file"
-                                                                                                   id="option-image-input"
-                                                                                                   name="image"
-                                                                                                   class="form-control d-none"
-                                                                                                   accept="image/*">
+                                                                                            <input type="file" name="image" class="form-control d-none option-image-input" accept="image/*">
 
                                                                                             <!-- Custom Upload Card -->
-                                                                                            <div id="option-upload-area"
-                                                                                                 class="upload-card">
-                                                                                                <div
-                                                                                                    id="option-upload-content"
-                                                                                                    class="d-flex justify-content-center align-items-center gap-1">
-                                                                                                    <i data-feather="upload"
-                                                                                                       class="mb-2"></i>
-                                                                                                    <p>Drag image here
-                                                                                                        to upload</p>
+                                                                                            <div class="option-upload-area upload-card">
+                                                                                                <div class="option-upload-content d-flex justify-content-center align-items-center gap-1">
+                                                                                                    <i data-feather="upload" class="mb-2"></i>
+                                                                                                    <p>Drag image here to upload</p>
                                                                                                 </div>
                                                                                             </div>
 
                                                                                             <!-- Progress Bar -->
-                                                                                            <div
-                                                                                                id="option-upload-progress"
-                                                                                                class="progress mt-2 d-none w-50">
-                                                                                                <div
-                                                                                                    class="progress-bar progress-bar-striped progress-bar-animated"
-                                                                                                    style="width: 0%"></div>
+                                                                                            <div class="option-upload-progress progress mt-2 d-none w-50">
+                                                                                                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                                                                                             </div>
 
                                                                                             <!-- Uploaded Image Preview -->
-                                                                                            <div
-                                                                                                id="option-uploaded-image"
-                                                                                                class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                                                                                <img src=""
-                                                                                                     alt="Uploaded"
-                                                                                                     class="img-fluid rounded"
-                                                                                                     style="width: 50px; height: 50px; object-fit: cover;">
-                                                                                                <div
-                                                                                                    class="file-details">
-                                                                                                    <div
-                                                                                                        class="file-name fw-bold"></div>
-                                                                                                    <div
-                                                                                                        class="file-size text-muted small"></div>
+                                                                                            <div class="option-uploaded-image uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                                                                                <img src="" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                                                <div class="file-details">
+                                                                                                    <div class="file-name fw-bold option-file-name"></div>
+                                                                                                    <div class="file-size text-muted small option-file-size"></div>
                                                                                                 </div>
-                                                                                                @php $image = $option->getFirstMedia('productSpecificationOptions') @endphp
-                                                                                                @if($image)
-                                                                                                    <div
-                                                                                                        class="uploaded-image  position-relative mt-1 d-flex align-items-center gap-2">
-                                                                                                        <img
-                                                                                                            src="{{ $image?->getUrl() }}"
-                                                                                                            alt="Uploaded"
-                                                                                                            class="img-fluid rounded"
-                                                                                                            style="width: 50px; height: 50px; object-fit: cover;">
-                                                                                                        <div
-                                                                                                            class="file-details">
-                                                                                                            <div
-                                                                                                                class="file-name fw-bold">{{ $image?->file_name }}</div>
-                                                                                                            <div
-                                                                                                                class="file-size text-muted small">{{ number_format($image?->size / 1024, 1) }}
-                                                                                                                KB
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <button type="button"
-                                                                                                                class="btn btn-sm position-absolute text-danger remove-old-image"
-                                                                                                                data-image-id="{{ $image?->id }}"
-                                                                                                                style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                                                                            <i data-feather="trash"></i>
-                                                                                                        </button>
-                                                                                                    </div>
-                                                                                                @endif
-                                                                                                <button type="button"
-                                                                                                        id="option-remove-image"
-                                                                                                        class="btn btn-sm position-absolute text-danger"
-                                                                                                        style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                                                                <button type="button" class="btn btn-sm position-absolute text-danger option-remove-image" style="top: 5px; right: 5px; background-color: #FFEEED">
                                                                                                     <i data-feather="trash"></i>
-                                                                                                </button>
-                                                                                            </div>
-                                                                                            <div
-                                                                                                class="col-12 text-end mt-1 mb-2">
-                                                                                                <button type="button"
-                                                                                                        class="btn btn-outline-danger"
-                                                                                                        data-repeater-delete>
-                                                                                                    <i data-feather="x"
-                                                                                                       class="me-25"></i>
-                                                                                                    Delete Value
                                                                                                 </button>
                                                                                             </div>
                                                                                         </div>
 
+
                                                                                     </div>
+                                                                                    <!-- Uploaded Image Preview -->
+                                                                                    <div class="option-uploaded-image uploaded-image position-relative mt-1 d-flex align-items-center gap-2 {{ $option->image ? '' : 'd-none' }}">
+                                                                                        <img src="{{ asset('storage/' . $option->image) }}" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                                        <div class="file-details">
+                                                                                            <div class="file-name fw-bold option-file-name">
+                                                                                                {{ pathinfo($option->image, PATHINFO_BASENAME) }}
+                                                                                            </div>
+                                                                                            <div class="file-size text-muted small option-file-size">
+                                                                                                {{-- لا توجد طريقة مباشرة لحجم الملف هنا، إلا إذا مررته من الـ controller --}}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <button type="button" class="btn btn-sm position-absolute text-danger option-remove-image" style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                                                            <i data-feather="trash"></i>
+                                                                                        </button>
+                                                                                    </div>
+
                                                                                 </div>
-                                                                            </div>
                                                                         @endforeach
+                                                                        </div>
+
 
                                                                         <!-- Add Option Button -->
                                                                         <div class="row">
                                                                             <div class="col-12">
                                                                                 <button type="button"
-                                                                                        class="btn primary-text-color bg-white mt-2 text-decoration-underline"
+                                                                                        class="add-new-button btn primary-text-color bg-white mt-2 text-decoration-underline"
                                                                                         style="padding: 0px;"
                                                                                         data-repeater-create>
                                                                                     <i data-feather="plus"></i> <span> Add New Value</span>
@@ -517,7 +473,7 @@
                                                                     <!-- Delete Specification Button -->
                                                                     <div class="col-12 text-end mt-1 mb-2">
                                                                         <button type="button"
-                                                                                class="btn btn-outline-danger"
+                                                                                class="delete-btn btn btn-outline-danger"
                                                                                 data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
@@ -526,12 +482,13 @@
 
                                                                 </div>
                                                             </div>
-                                                        </div>
                                                     @endforeach
+                                                    </div>
+
                                                     <!-- Add Specification Button -->
                                                     <div class="row">
                                                         <div class="col-12">
-                                                            <button type="button" class="w-100  rounded-3 p-1 text-dark"
+                                                            <button type="button" class="w-100  rounded-3 p-1 text-dark add-new-button"
                                                                     style="border:2px dashed #CED5D4;background-color:#EBEFEF"
                                                                     data-repeater-create>
                                                                 <i data-feather="plus" class="me-25"></i> <span>Add New Spec</span>
@@ -545,15 +502,15 @@
                                     </div>
 
                                     <!-- Free Shipping -->
-                                    <div class="col-md-12 col-12 mb-2">
-                                        <div class="form-check form-switch">
-                                            <input type="hidden" name="is_free_shipping" value="0">
-                                            <input type="checkbox" class="form-check-input" id="free-shipping"
-                                                   name="is_free_shipping" value="1">
-                                            <label class="form-check-label" for="free-shipping">Product available for
-                                                free shipping</label>
-                                        </div>
-                                    </div>
+{{--                                    <div class="col-md-12 col-12 mb-2">--}}
+{{--                                        <div class="form-check form-switch">--}}
+{{--                                            <input type="hidden" name="is_free_shipping" value="0">--}}
+{{--                                            <input type="checkbox" class="form-check-input" id="free-shipping"--}}
+{{--                                                   name="is_free_shipping" value="1">--}}
+{{--                                            <label class="form-check-label" for="free-shipping">Product available for--}}
+{{--                                                free shipping</label>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
                                 </div>
 
                                 <!-- Submit -->
@@ -579,6 +536,37 @@
 @section('page-script')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script !src="">
+        $(document).ready(function () {
+            // Function to show delete button for newly added items, except for the first one
+            function updateDeleteButtonVisibility() {
+                // Hide delete button for the first item, show for the rest
+                $('[data-repeater-item]').each(function (index) {
+                    if (index === 0) {
+                        // Hide the delete button for the first item
+                        $(this).find('.delete-btn').hide();
+                    } else {
+                        // Show the delete button for all other items
+                        $(this).find('.delete-btn').show();
+                    }
+                });
+            }
+
+            // Initialize delete button visibility when the page loads
+            updateDeleteButtonVisibility();
+
+            // Reinitialize visibility after adding a new item
+            $('.add-new-button').on('click', function () {
+                setTimeout(updateDeleteButtonVisibility, 100); // Delay to allow new item to be added
+            });
+
+            // Reinitialize visibility after deleting an item
+            $(document).on('click', '[data-repeater-delete]', function () {
+                setTimeout(updateDeleteButtonVisibility, 100); // Delay to allow item to be removed
+            });
+        });
+
+    </script>
     <script>
         $(document).ready(function () {
             $.ajaxSetup({
@@ -605,26 +593,88 @@
                 }
             });
 
+            //Repeater
+            function updateDeleteButtons(containerSelector) {
+                $(containerSelector).find('[data-repeater-list]').each(function () {
+                    var items = $(this).find('[data-repeater-item]');
+                    items.each(function (index) {
+                        if (index === 0) {
+                            $(this).find('[data-repeater-delete]').hide();
+                        } else {
+                            $(this).find('[data-repeater-delete]').show();
+                            feather.replace();
+                        }
+                    });
+                });
+            }
+
+            function initializeImageUploaders(context) {
+                $(context).find('.option-upload-area').each(function () {
+                    const uploadArea = $(this);
+                    const input = uploadArea.closest('.col-md-12').find('.option-image-input');
+                    const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
+                    const imagePreview = previewContainer.find('.option-image-preview');
+                    const fileNameLabel = previewContainer.find('.option-file-name');
+                    const fileSizeLabel = previewContainer.find('.option-file-size');
+                    const removeButton = previewContainer.find('.option-remove-image');
+
+                    uploadArea.off('click').on('click', function () {
+                        input.trigger('click');
+                    });
+
+                    input.off('change').on('change', function () {
+                        const file = this.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                imagePreview.attr('src', e.target.result);
+                                fileNameLabel.text(file.name);
+                                fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
+                                previewContainer.removeClass('d-none');
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    removeButton.off('click').on('click', function () {
+                        input.val('');
+                        previewContainer.addClass('d-none');
+                    });
+                });
+            }
+
             $('.outer-repeater').repeater({
                 repeaters: [{
                     selector: '.inner-repeater',
                     show: function () {
                         $(this).slideDown();
+                        updateDeleteButtons($(this).closest('.outer-repeater'));
+                        initializeImageUploaders(this);
+                        feather.replace();
                     },
                     hide: function (deleteElement) {
-                        if (confirm('Are you sure you want to delete this value?')) {
-                            $(this).slideUp(deleteElement);
-                        }
+                        $(this).slideUp(deleteElement);
+                        updateDeleteButtons($(this).closest('.outer-repeater'));
                     },
                     nestedInputName: 'specification_options'
                 }],
                 show: function () {
                     $(this).slideDown();
+                    updateDeleteButtons($('.outer-repeater'));
+                    initializeImageUploaders(this);
+                    feather.replace();
                 },
                 hide: function (deleteElement) {
-                    if (confirm('Are you sure you want to delete this specification?')) {
-                        $(this).slideUp(deleteElement);
-                    }
+                    $(this).slideUp(deleteElement);
+                    updateDeleteButtons($('.outer-repeater'));
+                },
+                afterAdd: function () {
+                    updateDeleteButtons($('.outer-repeater'));
+                    initializeImageUploaders($('.outer-repeater'));
+                    feather.replace();
+                },
+                afterDelete: function () {
+                    updateDeleteButtons($('.outer-repeater'));
                 }
             });
 
@@ -881,64 +931,60 @@
     </script>
     <script>
         $(document).ready(function () {
-            let optionInput = $('#option-image-input');
-            let optionUploadArea = $('#option-upload-area');
-            let optionProgress = $('#option-upload-progress');
-            let optionProgressBar = $('#option-upload-progress .progress-bar');
-            let optionUploadedImage = $('#option-uploaded-image');
-            let optionRemoveButton = $('#option-remove-image');
-
-            // Click to open file input
-            optionUploadArea.on('click', function () {
-                optionInput.click();
+            // Handle click event to trigger file input
+            $(document).on('click', '.option-upload-area', function () {
+                $(this).find('.option-image-input').click();
             });
 
-            // Handle input change
-            optionInput.on('change', function (e) {
-                handleOptionFiles(e.target.files);
+            // Handle file input change
+            $(document).on('change', '.option-image-input', function (e) {
+                let parentElement = $(this).closest('.inner-repeater');
+                handleOptionFiles(e.target.files, parentElement);
             });
 
-            // Drag and Drop
-            optionUploadArea.on('dragover', function (e) {
+            // Drag and drop events for file upload
+            $(document).on('dragover', '.option-upload-area', function (e) {
                 e.preventDefault();
-                optionUploadArea.addClass('dragover');
+                $(this).addClass('dragover');
             });
 
-            optionUploadArea.on('dragleave', function (e) {
+            $(document).on('dragleave', '.option-upload-area', function (e) {
                 e.preventDefault();
-                optionUploadArea.removeClass('dragover');
+                $(this).removeClass('dragover');
             });
 
-            optionUploadArea.on('drop', function (e) {
+            $(document).on('drop', '.option-upload-area', function (e) {
                 e.preventDefault();
-                optionUploadArea.removeClass('dragover');
-                handleOptionFiles(e.originalEvent.dataTransfer.files);
+                $(this).removeClass('dragover');
+                let parentElement = $(this).closest('.inner-repeater');
+                handleOptionFiles(e.originalEvent.dataTransfer.files, parentElement);
             });
 
-            function handleOptionFiles(files) {
+            // Handle the file upload process
+            function handleOptionFiles(files, parentElement) {
                 if (files.length > 0) {
                     let file = files[0];
 
-                    optionProgress.removeClass('d-none');
-                    optionProgressBar.css('width', '0%');
+                    parentElement.find('.option-upload-progress').removeClass('d-none');
+                    parentElement.find('.option-upload-progress .progress-bar').css('width', '0%');
 
                     let fakeProgress = 0;
                     let interval = setInterval(function () {
                         fakeProgress += 10;
-                        optionProgressBar.css('width', fakeProgress + '%');
+                        parentElement.find('.option-upload-progress .progress-bar').css('width', fakeProgress + '%');
 
                         if (fakeProgress >= 100) {
                             clearInterval(interval);
 
                             let reader = new FileReader();
                             reader.onload = function (e) {
-                                optionUploadedImage.find('img').attr('src', e.target.result);
-                                optionUploadedImage.removeClass('d-none');
-                                optionProgress.addClass('d-none');
+                                parentElement.find('.option-uploaded-image img').attr('src', e.target.result);
+                                parentElement.find('.option-uploaded-image').removeClass('d-none');
+                                parentElement.find('.option-upload-progress').addClass('d-none');
 
                                 // Show file name and size
-                                $('#option-uploaded-image .file-name').text(file.name);
-                                $('#option-uploaded-image .file-size').text((file.size / 1024).toFixed(2) + ' KB');
+                                parentElement.find('.option-uploaded-image .file-name').text(file.name);
+                                parentElement.find('.option-uploaded-image .file-size').text((file.size / 1024).toFixed(2) + ' KB');
                             }
                             reader.readAsDataURL(file);
                         }
@@ -946,15 +992,33 @@
                 }
             }
 
-            // Remove image
-            optionRemoveButton.on('click', function () {
-                optionUploadedImage.addClass('d-none');
-                optionInput.val('');
+            // Handle the removal of uploaded image
+            $(document).on('click', '.option-remove-image', function () {
+                let parentElement = $(this).closest('.inner-repeater');
+                parentElement.find('.option-uploaded-image').addClass('d-none');
+                parentElement.find('.option-image-input').val(''); // Reset the file input
 
-                // Also clear file name and size
-                $('#option-uploaded-image .file-name').text('');
-                $('#option-uploaded-image .file-size').text('');
+                // Also clear the file name and size from the preview
+                parentElement.find('.option-uploaded-image .file-name').text('');
+                parentElement.find('.option-uploaded-image .file-size').text('');
+            });
+
+            // Initialize the repeater if not initialized yet (in case new ones are dynamically added)
+            function initializeRepeater() {
+                if (typeof $.fn.repeater !== 'undefined') {
+                    // Initialize repeater functionality (only if repeater plugin is present)
+                    $('.outer-repeater').repeater();
+                }
+            }
+
+            // Call initializeRepeater when the page loads and after dynamically adding new items
+            initializeRepeater();
+
+            // Reinitialize repeater on dynamic content addition
+            $(document).on('click', '[data-repeater-create]', function () {
+                setTimeout(initializeRepeater, 100);
             });
         });
     </script>
+
 @endsection
