@@ -2750,8 +2750,9 @@ textarea.form-control-lg {
 }
 
 .form-check-input {
-  width: 1.285rem;
-  height: 1.285rem;
+  cursor: pointer;
+  width: 1.11rem;
+  height: 1.11rem;
   margin-top: 0.0825rem;
   vertical-align: top;
   background-color: #fff;
@@ -13833,9 +13834,7 @@ textarea.form-control-lg {
   opacity: 1;
 }
 
-.form-check-input:not(:disabled):checked {
-  box-shadow: 0 2px 4px 0 rgba(115, 103, 240, 0.4);
-}
+
 
 .form-check-input:not(:disabled):indeterminate {
   background-size: 85%;
@@ -15650,7 +15649,8 @@ select:-webkit-autofill {
   color: #6e6b7b;
   border: none;
   min-width: auto;
-  font-weight: 450;
+  font-weight: 500;
+  font-size: 1.3rem;
   padding: 0.61rem 1.2rem;
   border-radius: 0;
   position: relative;
@@ -17478,7 +17478,6 @@ input:focus~.bg-dark {
 .form-check-dark .form-check-input:not(:disabled):checked,
 .form-check-dark .form-check-input:not(:disabled):focus {
   border-color: #4b4b4b;
-  box-shadow: 0 2px 4px 0 rgba(75, 75, 75, 0.4);
 }
 
 .select2-dark .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -17827,7 +17826,6 @@ input:focus~.bg-primary {
 .form-check-primary .form-check-input:not(:disabled):checked,
 .form-check-primary .form-check-input:not(:disabled):focus {
   border-color: #24B094;
-  box-shadow: 0 2px 4px 0 rgba(115, 103, 240, 0.4);
 }
 
 .select2-primary .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -18136,7 +18134,6 @@ input:focus~.bg-secondary {
 .form-check-secondary .form-check-input:not(:disabled):checked,
 .form-check-secondary .form-check-input:not(:disabled):focus {
   border-color: #82868b;
-  box-shadow: 0 2px 4px 0 rgba(130, 134, 139, 0.4);
 }
 
 .select2-secondary .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -18445,7 +18442,6 @@ input:focus~.bg-success {
 .form-check-success .form-check-input:not(:disabled):checked,
 .form-check-success .form-check-input:not(:disabled):focus {
   border-color: #28c76f;
-  box-shadow: 0 2px 4px 0 rgba(40, 199, 111, 0.4);
 }
 
 .select2-success .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -18754,7 +18750,6 @@ input:focus~.bg-info {
 .form-check-info .form-check-input:not(:disabled):checked,
 .form-check-info .form-check-input:not(:disabled):focus {
   border-color: #00cfe8;
-  box-shadow: 0 2px 4px 0 rgba(0, 207, 232, 0.4);
 }
 
 .select2-info .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -19063,7 +19058,6 @@ input:focus~.bg-warning {
 .form-check-warning .form-check-input:not(:disabled):checked,
 .form-check-warning .form-check-input:not(:disabled):focus {
   border-color: #ff9f43;
-  box-shadow: 0 2px 4px 0 rgba(255, 159, 67, 0.4);
 }
 
 .select2-warning .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -19372,7 +19366,6 @@ input:focus~.bg-danger {
 .form-check-danger .form-check-input:not(:disabled):checked,
 .form-check-danger .form-check-input:not(:disabled):focus {
   border-color: #ea5455;
-  box-shadow: 0 2px 4px 0 rgba(234, 84, 85, 0.4);
 }
 
 .select2-danger .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -23250,8 +23243,10 @@ body:after {
 
 .select2-container--classic .select2-results__option[aria-selected=true],
 .select2-container--default .select2-results__option[aria-selected=true] {
-  background-color: #24B094 !important;
-  color: #fff !important;
+  background-color: #24B09420 !important;
+  color: #6E6B7B !important;
+  margin-top:2px ;
+  margin-bottom: 2px;
 }
 
 .select2-container--classic .select2-results__option i,

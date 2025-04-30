@@ -46,7 +46,7 @@
                     <div class="d-flex flex-column gap-1 my-1">
                         <div class="d-flex align-items-center gap-1">
 
-                            <i data-feather="check" class="font-medium-2"></i>
+                            <i data-feather="calendar" class="font-medium-2"></i>
                             <h4 class="mb-0">Joined 13 Oct 2024</h4>
                         </div>
                         <div class="d-flex align-items-center gap-1">
@@ -56,30 +56,30 @@
                     </div>
                     <div class="w-100 d-flex flex-column gap-1">
                         <div class="fw-semibold disabled-field w-100 p-1 text-center">Last Login:13 Oct 2024</div>
-                        <div class="w-100 rounded-3 border p-1 d-flex justify-content-center align-items-center gap-1"> <i data-feather="check" class="font-medium-2"></i><span>user1@gmail.com</span></div>
-                        <div class="w-100 rounded-3 border p-1 d-flex justify-content-center align-items-center gap-1"> <i data-feather="check" class="font-medium-2"></i><span>+20 123 456 7895</span></div>
+                        <div class="w-100 rounded-3 border p-1 d-flex justify-content-center align-items-center gap-1"> <i data-feather="at-sign" class="font-medium-2"></i><span>user1@gmail.com</span></div>
+                        <div class="w-100 rounded-3 border p-1 d-flex justify-content-center align-items-center gap-1"> <i data-feather="smartphone" class="font-medium-2"></i><span>+20 123 456 7895</span></div>
                     </div>
 
                     <div class="info-container">
                         <h2 class="text-black my-1">Teams</h2>
                         <div class="card border rounded p-1 my-2">
                             <div class="d-flex justify-content-between align-items-start">
-                       
+
 
                                 <!-- left: Icon and Info -->
-                                 <div class="d-flex gap-2 align-items-center">
-                                 <div class="">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <div class="">
                                         <i data-feather="users" class="text-primary"></i> <!-- User icon -->
                                     </div>
                                     <div class="text-center flex-grow-1">
-                                
-                                <h5 >John Doe’s Team</h5>
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i data-feather="calendar" > </i> Joined 13 Oct 2024
+
+                                        <h5>John Doe’s Team</h5>
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <i data-feather="calendar"> </i> Joined 13 Oct 2024
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                                 </div>
-                               
+
 
                                 <!-- Right: Actions Dropdown -->
                                 <div class="dropdown">
@@ -119,146 +119,149 @@
 
         <!-- User Content -->
         <div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1">
-            <!-- User Pills -->
-            <ul class="nav nav-pills mb-2">
-                <li class="nav-item">
-                    <a class="nav-link active" href="{{asset('app/user/view/account')}}">
-                        <i data-feather="user" class="font-medium-3 me-50"></i>
-                        <span class="fw-bold">Account</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{asset('app/user/view/security')}}">
-                        <i data-feather="lock" class="font-medium-3 me-50"></i>
-                        <span class="fw-bold">Security</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route("users.billing",$model) }}">
-                        <i data-feather="bookmark" class="font-medium-3 me-50"></i>
-                        <span class="fw-bold">Billing & Plans</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{asset('app/user/view/notifications')}}">
-                        <i data-feather="bell" class="font-medium-3 me-50"></i><span
-                            class="fw-bold">Notifications</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{asset('app/user/view/connections')}}">
-                        <i data-feather="link" class="font-medium-3 me-50"></i><span
-                            class="fw-bold">Connections</span>
-                    </a>
-                </li>
-            </ul>
-            <!--/ User Pills -->
-
-            <!-- Project table -->
             <div class="card">
-                <h4 class="card-header">User's Projects List</h4>
-                <div class="table-responsive">
-                    <table class="table datatable-project">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Project</th>
-                                <th class="text-nowrap">Total Task</th>
-                                <th>Progress</th>
-                                <th>Hours</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-            </div>
-            <!-- /Project table -->
-
-            <!-- Activity Timeline -->
-            <div class="card">
-                <h4 class="card-header">User Activity Timeline</h4>
-                <div class="card-body pt-1">
-                    <ul class="timeline ms-50">
-                        <li class="timeline-item">
-                            <span class="timeline-point timeline-point-indicator"></span>
-                            <div class="timeline-event">
-                                <div class="d-flex justify-content-between flex-sm-row flex-column mb-sm-0 mb-1">
-                                    <h6>User login</h6>
-                                    <span class="timeline-event-time me-1">12 min ago</span>
-                                </div>
-                                <p>User login at 2:12pm</p>
-                            </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs border-bottom-0">
+                        <li class="nav-item">
+                            <a class="nav-link active custom-tab" data-bs-toggle="tab" href="#tab1">Orders</a>
                         </li>
-                        <li class="timeline-item">
-                            <span class="timeline-point timeline-point-warning timeline-point-indicator"></span>
-                            <div class="timeline-event">
-                                <div class="d-flex justify-content-between flex-sm-row flex-column mb-sm-0 mb-1">
-                                    <h6>Meeting with john</h6>
-                                    <span class="timeline-event-time me-1">45 min ago</span>
-                                </div>
-                                <p>React Project meeting with john @10:15am</p>
-                                <div class="d-flex flex-row align-items-center mb-50">
-                                    <div class="avatar me-50">
-                                        <img
-                                            src="{{asset('images/portrait/small/avatar-s-7.jpg')}}"
-                                            alt="Avatar"
-                                            width="38"
-                                            height="38" />
-                                    </div>
-                                    <div class="user-info">
-                                        <h6 class="mb-0">Leona Watkins (Client)</h6>
-                                        <p class="mb-0">CEO of pixinvent</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="timeline-item">
-                            <span class="timeline-point timeline-point-info timeline-point-indicator"></span>
-                            <div class="timeline-event">
-                                <div class="d-flex justify-content-between flex-sm-row flex-column mb-sm-0 mb-1">
-                                    <h6>Create a new react project for client</h6>
-                                    <span class="timeline-event-time me-1">2 day ago</span>
-                                </div>
-                                <p>Add files to new design folder</p>
-                            </div>
-                        </li>
-                        <li class="timeline-item">
-                            <span class="timeline-point timeline-point-danger timeline-point-indicator"></span>
-                            <div class="timeline-event">
-                                <div class="d-flex justify-content-between flex-sm-row flex-column mb-sm-0 mb-1">
-                                    <h6>Create Invoices for client</h6>
-                                    <span class="timeline-event-time me-1">12 min ago</span>
-                                </div>
-                                <p class="mb-0">Create new Invoices and send to Leona Watkins</p>
-                                <div class="d-flex flex-row align-items-center mt-50">
-                                    <img class="me-1" src="{{asset('images/icons/pdf.png')}}" alt="data.json"
-                                        height="25" />
-                                    <h6 class="mb-0">Invoices.pdf</h6>
-                                </div>
-                            </div>
+                        <li class="nav-item">
+                            <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab2">Reviews</a>
                         </li>
                     </ul>
+                    <div class="tab-content mt-3">
+                        <!-- tab 1 content -->
+                        <div class="tab-pane fade show active" id="tab1">
+                            <!-- Pills -->
+                            <ul class="nav nav-pills mb-3" id="order-status-pills">
+                                <li class="nav-item">
+                                    <button class="tab-button btn active text-white" data-status="all">All</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="tab-button btn" data-status="placed">Placed</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="tab-button btn" data-status="canceled">Canceled</button>
+                                </li>
+                            </ul>
+
+                            <!-- Order Card -->
+                            <div class="card border rounded-3 p-1 mb-2">
+                                <!-- Order Header -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0 fs-16"><span class="fs-5">Order Number:</span> #12345</h6>
+                                    <span class=" fs-16 rounded-pill px-1 py-50" style="background-color: #FCF8FC;color:#4E2775">Cancelled</span>
+                                </div>
+
+                                <!-- Total Price -->
+                                <p class="mb-2 fw-bold fs-16"><span class="fs-5">Total Price:</span> $150.00</p>
+
+                                <!-- Order Items -->
+                                <div class="mb-2">
+                                    <h3 class="fs-16 text-black">Items</h3>
+                                    <!-- Item 1 -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-start gap-2">
+                                            <img src="{{$model->image?->getUrl() ?? asset('images/portrait/small/avatar-s-2.jpg')}}" class="rounded" alt="Item" style="max-width: 55px;" />
+                                            <div>
+                                                <div class="text-black fss-16">Car Wash</div>
+                                                <small class="fs-5">Qty: 2</small>
+                                            </div>
+                                        </div>
+                                        <div class="fw-bold text-black">$50.00</div>
+                                    </div>
+
+                                    <!-- Item 2 -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-start gap-2">
+                                            <img src="{{$model->image?->getUrl() ?? asset('images/portrait/small/avatar-s-2.jpg')}}" class="rounded" alt="Item" style="max-width: 55px;" />
+                                            <div>
+                                                <div class="text-black fss-16">Car Wash</div>
+                                                <small class="fs-5">Qty: 2</small>
+                                            </div>
+                                        </div>
+                                        <div class="fw-bold text-black">$50.00</div>
+                                    </div>
+                                </div>
+
+                                <!-- Show Order Button -->
+                                <div class="d-flex justify-content-end">
+                                    <button class="btn btn-primary mb-1">Show Order</button>
+                                </div>
+
+
+                                <!-- Divider -->
+                                <hr />
+                            </div>
+                        </div>
+                        <!-- tab 2 content -->
+                        <div class="tab-pane fade" id="tab2"> <!-- Total Reviews Section -->
+                            <div class="">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-small">Total Reviews:</span>
+                                    <span class="label-text">421 Reviews</span>
+                                </div>
+
+                                <!-- Single Review -->
+                                <div class="">
+                                    <div class="d-flex align-items-center gap-1 mb-2">
+                                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Avatar" class="rounded-circle" width="50" height="50">
+                                        <div>
+                                            <div class="fw-bold text-dark fs-4">John Doe</div>
+                                            <div class="text-small">2024-04-22</div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2 label-text">
+                                        This product is really great, highly recommend!
+                                    </div>
+                                    <div class="mb-2">
+                                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Review Image" class="img-fluid rounded">
+                                    </div>
+                                    <div class="mb-2 d-flex align-items-center gap-2">
+                                        <div class="rating-stars text-warning" data-rating="4.1"></div>
+                                        <span class="fs-6">Placed 27/09/2024</span>
+                                    </div>
+
+                                    <div class="d-flex gap-2 justify-content-end w-100">
+                                        <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete</button>
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modals-slide-in">
+                                            Reply
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Divider -->
+                                <hr class="my-2">
+
+                                <!-- Comment Reply -->
+                                <div class="">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="d-flex align-items-center gap-1 ">
+                                            <img src="{{ asset('images/logo-reply.png') }}" alt="Avatar" class="rounded-circle" width="48" height="48">
+
+                                            <div class="fw-bold text-primary">Reply from Dorra Team</div>
+
+
+                                        </div>
+                                        <div class="text-small">2024-04-23</div>
+                                    </div>
+
+                                    <div class="mb-2 label-text mx-5">
+                                        Thank you for your kind words! We're happy you loved the product.
+                                    </div>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete Comment</button>
+                                        <button class="btn btn-outline-secondary">Delete Reply</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- /Activity Timeline -->
 
-            <!-- Invoice table -->
-            <div class="card">
-                <table class="invoice-table table text-nowrap">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>#ID</th>
-                            <th><i data-feather="trending-up"></i></th>
-                            <th>TOTAL Paid</th>
-                            <th class="text-truncate">Issued Date</th>
-                            <th class="cell-fit">Actions</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-            <!-- /Invoice table -->
+            <!--/ User Content -->
         </div>
-        <!--/ User Content -->
-    </div>
 </section>
 
 @include('modals/modal-edit-user',['user'=>$model , 'countryCodes' => $associatedData['country_codes']])

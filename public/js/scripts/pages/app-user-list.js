@@ -4,6 +4,8 @@ $.ajaxSetup({
     },
 });
 
+let dateSortOrder = "asc";
+
 var dt_user_table = $(".user-list-table").DataTable({
     processing: true,
     serverSide: true,
@@ -12,7 +14,9 @@ var dt_user_table = $(".user-list-table").DataTable({
         type: "GET",
     },
     columns: [
-        { data: null, defaultContent: "", orderable: false },
+        { data: null, defaultContent: "", orderable: false,render: function (data, type, row, meta) {
+            return `<input type="checkbox" class="category-checkbox form-check-input" value="${data}">`;
+        }  },
         { data: "name" },
         { data: "email" },
         { data: "status" },
@@ -57,10 +61,11 @@ var dt_user_table = $(".user-list-table").DataTable({
         ">",
     buttons: [
         {
-            text: '<input type="date" class="form-control" style="width: 120px;" />',
-            className: "btn border-0",
+            text: "Sort by Date",
+            className: "btn btn-outline-secondary mx-1",
             action: function (e, dt, node, config) {
-                e.preventDefault();
+                dateSortOrder = dateSortOrder === "asc" ? "desc" : "asc";
+                dt.order([[4, dateSortOrder]]).draw();
             },
         },
         {
@@ -77,6 +82,7 @@ var dt_user_table = $(".user-list-table").DataTable({
     ],
     drawCallback: function () {
         feather.replace();
+        $('#select-all-checkbox').prop('checked', false);
     },
     language: {
         sLengthMenu: "Show _MENU_",
@@ -87,6 +93,25 @@ var dt_user_table = $(".user-list-table").DataTable({
             next: "&nbsp;",
         },
     },
+});
+
+// Listen to checkbox change
+$(document).on("change", ".category-checkbox", function () {
+    let checkedCount = $(".category-checkbox:checked").length;
+    $("#bulk-delete-container").toggle(checkedCount > 0);
+});
+// Select All functionality
+$(document).on('change', '#select-all-checkbox', function () {
+    const isChecked = $(this).is(':checked');
+    $('.category-checkbox').prop('checked', isChecked).trigger('change');
+});
+// Update "Select All" checkbox based on individual selections
+$(document).on('change', '.category-checkbox', function () {
+    const all = $('.category-checkbox').length;
+    const checked = $('.category-checkbox:checked').length;
+
+    $('#select-all-checkbox').prop('checked', all === checked);
+    $('#bulk-delete-container').toggle(checked > 0);
 });
 
 $(document).ready(function () {
