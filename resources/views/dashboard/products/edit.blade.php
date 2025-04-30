@@ -151,7 +151,8 @@
                                     <div class="row gap-2 " style="margin: 2px;">
                                         <div class="col border rounded-3 p-1">
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="has_custom_prices" id="customPrice" value="1">
+                                                <input class="form-check-input" type="radio" name="has_custom_prices" id="customPrice" value="1"
+                                                    @checked($model->has_custom_prices == 1)>
                                                 <div>
                                                     <label class="form-check-label label-text d-block" for="customPrice">Add Quantity Manually</label>
                                                     <label class="form-check-label text-dark" for="customPrice">Custom Prices</label>
@@ -161,7 +162,8 @@
                                         </div>
                                         <div class="col border rounded-3 p-1">
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input " type="radio" name="has_custom_prices" id="defaultPrice" value="0">
+                                                <input class="form-check-input " type="radio" name="has_custom_prices" id="defaultPrice" value="0"
+                                                    @checked($model->has_custom_prices == 0)>
                                                 <div>
                                                     <label class="form-check-label label-text d-block" for="customPrice">Default Quantity</label>
                                                     <label class="form-check-label text-dark" for="defaultPrice">Default Price</label>
@@ -173,7 +175,7 @@
                             </div>
 
                             <!-- Custom Prices -->
-                            <div class="col-md-12" id="custom-price-section" style="display: none;">
+                            <div class="col-md-12" id="custom-price-section" style="{{ $model->has_custom_prices == 1 ? '' : 'display:none;' }}">
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="invoice-repeater">
@@ -219,7 +221,7 @@
                             </div>
 
                             <!-- Default Price -->
-                            <div class="col-md-12" id="default-price-section" style="display: none;">
+                            <div class="col-md-12" id="default-price-section" style="{{ $model->has_custom_prices == 0 ? '' : 'display:none;' }}">
                                 <div class="mb-1">
                                     <label class="form-label label-text" for="base_price">Original Price (EGP) (Per Item)</label>
                                     <input type="text" id="base_price" name="base_price" value="{{ $model->base_price }}" class="form-control" placeholder="Original Price" />
@@ -344,7 +346,7 @@
                                                                     <i data-feather="x" class="me-25"></i> Delete Spec
                                                                 </button>
                                                             </div>
-                                                          
+
                                                         </div>
                                                     </div>
                                                 </div>
