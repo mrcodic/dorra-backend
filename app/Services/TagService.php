@@ -43,7 +43,7 @@ class TagService extends BaseService
 
             })
             ->addColumn('no_of_templates', function ($category) {
-                return 5;
+                return 0;
 //                return $category->templates_count;
 
             })->make();

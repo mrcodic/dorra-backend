@@ -20,6 +20,7 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
             data: "id",
             orderable: false,
             render: function (data, type, row, meta) {
+                console.log(row.parent.id)
                 return `
           <div class="dropdown">
             <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -35,7 +36,8 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
                  data-name_en="${row.name_en}"
                  data-products="${row.no_of_products}"
                  data-showdate="${row.show_date}"
-                 data-parent="${row.parent_name}">
+                 data-parent="${row.parent_name}"
+                 data-parent_id="${row.parent.id}">
                 <i data-feather="file-text"></i> Details
               </a>
 
@@ -155,6 +157,7 @@ $(document).ready(function () {
             }
         });
     });
+
     $(document).on("click", ".view-details", function (e) {
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
@@ -162,6 +165,7 @@ $(document).ready(function () {
         const addedDate = $(this).data("showdate");
         const id = $(this).data("id");
         const parentName = $(this).data("parent");
+        const parentId = $(this).data("parent_id");
         // Populate modal
         $("#showSubCategoryModal #sub-category-name-ar").val(categoryNameAR);
         $("#showSubCategoryModal #sub-category-name-en").val(categoryNameEn);
@@ -169,7 +173,7 @@ $(document).ready(function () {
         $("#showSubCategoryModal #sub-category-date").val(addedDate);
         $("#showSubCategoryModal #sub-category-id").val(id);
         $("#showSubCategoryModal #parent-name").val(parentName);
-
+        $("#showSubCategoryModal #parent-id").val(parentId);
         // Show modal
         $("#showSubCategoryModal").modal("show");
     });
@@ -178,12 +182,12 @@ $(document).ready(function () {
         var nameEN = $("#sub-category-name-en").val();
         var nameAR = $("#sub-category-name-ar").val();
         var id = $("#sub-category-id").val();
-        console.log(id);
+        var parentId = $("#parent-id").val();
 
         $("#edit-sub-category-name-en").val(nameEN);
         $("#edit-sub-category-name-ar").val(nameAR);
         $("#edit-sub-category-id").val(id);
-
+        $("select[name='parent_id']").val(parentId);
         $("#editSubCategoryModal").modal("show");
     });
 

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Filters\RateFilter;
 use App\Filters\SubCategoryFilter;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -32,7 +31,6 @@ class ProductService extends BaseService
             ->addColumn('name', function (Product $product) {
                 return $product->getTranslation('name', app()->getLocale());
             })
-
             ->addColumn('added_date', function ($product) {
                 return $product->created_at?->format('j/n/Y');
             })
@@ -43,10 +41,10 @@ class ProductService extends BaseService
                 return $product->tags?->pluck('name');
             })
             ->addColumn('rating', function ($product) {
-                return $product->reviews?->pluck('rating')->avg();
+                return $product->reviews?->pluck('rating')->avg() ?? 0;
             })
             ->addColumn('no_of_purchas', function ($product) {
-                return 5;
+                return 0;
             })->make();
     }
 
@@ -54,6 +52,7 @@ class ProductService extends BaseService
     {
         return QueryBuilder::for(Product::class)->select($columns)
             ->with($this->relations)
+            ->withCount('reviews')
             ->allowedFilters([
                 AllowedFilter::partial('category.id'),
                 AllowedFilter::custom('sub_categories', new SubCategoryFilter()),
@@ -100,6 +99,59 @@ class ProductService extends BaseService
         });
 
         handleMediaUploads($validatedData['image'], $product, 'product_main_image');
+        if (isset($validatedData['images'])) {
+            handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
+
+        }
+
+        return $product;
+    }
+
+    public function updateResource($id, $validatedData)
+    {
+        $product = $this->repository->update($validatedData, $id);
+        $product->load($this->relations);
+        $product->tags()->sync($validatedData['tags'] ?? []);
+        if (isset($validatedData['prices'])) {
+            collect($validatedData['prices'])->each(function ($price) use ($product) {
+                $product->prices()->update($price);
+            });
+
+        }
+        collect($validatedData['specifications'])->map(function ($specification) use ($product) {
+            $productSpecification = tap($product->specifications()->first(), function ($spec) use ($specification) {
+                $spec->update([
+                    'name' => [
+                        'en' => $specification['name_en'],
+                        'ar' => $specification['name_ar'],
+                    ],
+                ]);
+            });
+
+
+            collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
+                $productOption = tap($productSpecification->options()->first(),function ($spec) use ($option){
+                    $spec->update([
+                        'value' => [
+                            'en' => $option['value_en'],
+                            'ar' => $option['value_ar'],
+                        ],
+                        'price' => $option['price'],
+                    ]);
+                });
+
+                if (isset($option['image'])) {
+                    if ($option['image'] instanceof UploadedFile) {
+                        handleMediaUploads([$option['image']], $productOption);
+                    }
+                }
+            });
+
+
+        });
+        if (isset($validatedData['image'])) {
+            handleMediaUploads($validatedData['image'], $product, 'product_main_image', clearExisting: true);
+        }
         if (isset($validatedData['images'])) {
             handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
 

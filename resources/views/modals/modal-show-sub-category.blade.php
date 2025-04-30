@@ -7,6 +7,7 @@
             </div>
             <div class="modal-body flex-grow-1">
                 <input type="hidden" name="" id="sub-category-id">
+                <input type="hidden" name="" id="parent-id">
                 <!-- Name in Arabic and English -->
                 <div class="row mb-3">
                     <div class="col-6">

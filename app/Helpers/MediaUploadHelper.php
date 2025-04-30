@@ -56,11 +56,9 @@ if (!function_exists('deleteMediaById')) {
     function deleteMediaById($uuid): void
     {
         $media = Media::findByUuid($uuid);
-
-        $media?->delete();
         if ($media) {
-            Storage::disk($media?->disk)->delete($media?->getPathRelativeToRoot());
-
+            $media->delete();
+            Storage::disk($media->disk)->delete($media->getPathRelativeToRoot());
         }
 
 

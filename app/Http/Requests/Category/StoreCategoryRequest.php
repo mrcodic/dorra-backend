@@ -4,6 +4,7 @@ namespace App\Http\Requests\Category;
 
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
+use Illuminate\Validation\Rule;
 
 class StoreCategoryRequest extends BaseRequest
 {
@@ -24,8 +25,18 @@ class StoreCategoryRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name.en' => ['required', 'string', 'max:255'],
-            'name.ar' => ['required', 'string', 'max:255'],
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name->en'),
+            ],
+            'name.ar' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name->ar'),
+            ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],

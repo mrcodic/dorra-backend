@@ -25,8 +25,9 @@ class ProductResource extends JsonResource
             'base_price' => $this->base_price,
             'custom_prices' =>ProductPriceResource::collection($this->whenLoaded('prices')),
             'rating' => $this->rating,
+            'reviews_count' => $this->reviews_count,
             'main_image' => MediaResource::make($this->getFirstMedia('product_main_image')),
-            'extra_images' => MediaResource::collection($this->getMedia('product_extra_images')),
+            'all_product_images' => MediaResource::collection($this->getAllProductImages()),
         ];
     }
 }

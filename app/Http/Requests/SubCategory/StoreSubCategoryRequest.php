@@ -4,6 +4,7 @@ namespace App\Http\Requests\SubCategory;
 
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
+use Illuminate\Validation\Rule;
 
 class StoreSubCategoryRequest extends BaseRequest
 {
@@ -24,8 +25,18 @@ class StoreSubCategoryRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name.en' => ['required', 'string', 'max:255'],
-            'name.ar' => ['required', 'string', 'max:255'],
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name->en'),
+            ],
+            'name.ar' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name->ar'),
+            ],
             'parent_id' => ['required', 'integer', 'exists:categories,id'],
         ];
 

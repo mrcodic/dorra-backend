@@ -4,6 +4,7 @@ namespace App\Http\Requests\Category;
 
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Propaganistas\LaravelPhone\Rules\Phone;
 
@@ -23,12 +24,22 @@ class UpdateCategoryRequest extends BaseRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules($id): array
     {
         $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
-            'name.en' => ['required', 'string', 'max:255'],
-            'name.ar' => ['required', 'string', 'max:255'],
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name->en')->ignore($id),
+            ],
+            'name.ar' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name->ar')->ignore($id),
+            ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
