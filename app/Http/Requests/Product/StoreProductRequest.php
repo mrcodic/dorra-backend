@@ -5,6 +5,7 @@ namespace App\Http\Requests\Product;
 use App\Enums\Product\StatusEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\Category;
+use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends BaseRequest
 {
@@ -25,8 +26,18 @@ class StoreProductRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name.en' => ['required', 'string', 'max:255'],
-            'name.ar' => ['required', 'string', 'max:255'],
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('products', 'name->en'),
+            ],
+            'name.ar' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('products', 'name->ar'),
+            ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png'],

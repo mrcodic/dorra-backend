@@ -102,9 +102,9 @@ class Product extends Model implements HasMedia
         return $this->getFirstMediaUrl('product_main_image');
     }
 
+
     public function getExtraImagesUrl(): string
     {
         return $this->getFirstMediaUrl('product_extra_images');
     }
-
 }

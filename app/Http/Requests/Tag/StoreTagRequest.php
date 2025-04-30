@@ -4,6 +4,7 @@ namespace App\Http\Requests\Tag;
 
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
+use Illuminate\Validation\Rule;
 
 class StoreTagRequest extends BaseRequest
 {
@@ -24,8 +25,18 @@ class StoreTagRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name.en' => ['required', 'string', 'max:255'],
-            'name.ar' => ['required', 'string', 'max:255'],
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('tags', 'name->en'),
+            ],
+            'name.ar' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name->ar'),
+            ],
         ];
 
     }

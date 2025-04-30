@@ -5,7 +5,8 @@ use App\Http\Controllers\Dashboard\{ProductController,
     SubCategoryController,
     TagController,
     UserController,
-    CategoryController};
+    CategoryController
+};
 use Illuminate\Support\Facades\Route;
 
 
@@ -44,8 +45,11 @@ Route::middleware('auth')->group(function () {
 
 
     Route::prefix('/api')->group(function () {
-        Route::get('states', [MainController::class, 'states'])->name('states');
-        Route::get('sub-categories', [MainController::class, 'subCategories'])->name('sub-categories');
+        Route::controller(MainController::class)->group(function () {
+            Route::get('states', 'states')->name('states');
+            Route::get('sub-categories', 'subCategories')->name('sub-categories');
+            Route::delete('/media/{media}', 'removeMedia')->name('remove-media');
+        });
     });
 
 });

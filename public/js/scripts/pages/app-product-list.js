@@ -1,4 +1,3 @@
-console.log(productsDataUrl);
 $.ajaxSetup({
     headers: {
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -16,7 +15,31 @@ var dt_user_table = $(".product-list-table").DataTable({
         { data: null, defaultContent: "", orderable: false },
         { data: "name" },
         { data: "category" },
-        { data: "tags" },
+        {
+            data: "tags",
+            render: function (data, type, row) {
+                if (!Array.isArray(JSON.parse(data))) return '';
+                return `
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${JSON.parse(data)
+                    .map(
+                        tag => `
+                        <span style="
+                            background-color: #f8f0ff;
+                            color: #000;
+                            padding: 6px 12px;
+                            border-radius: 12px;
+                            font-size: 14px;
+                            display: inline-block;
+                        ">
+                            ${tag}
+                        </span>`
+                    )
+                    .join("")}
+            </div>
+        `;
+            },
+        },
         { data: "no_of_purchas" },
         { data: "added_date" },
         { data: "rating" },
@@ -24,7 +47,6 @@ var dt_user_table = $(".product-list-table").DataTable({
             data: "id",
             orderable: false,
             render: function (data, type, row, meta) {
-                console.log(data);
                 return `
           <div class="dropdown">
             <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -109,6 +131,20 @@ $(document).ready(function () {
 
             // Remove the flag after showing the Toastify message
             sessionStorage.removeItem("product_added");
+        }
+        if (sessionStorage.getItem("product_updated") == "true") {
+            // Show the success Toastify message
+            Toastify({
+                text: "Product updated successfully!",
+                duration: 4000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#28a745", // Green for success
+                close: true,
+            }).showToast();
+
+            // Remove the flag after showing the Toastify message
+            sessionStorage.removeItem("product_updated");
         }
     });
 

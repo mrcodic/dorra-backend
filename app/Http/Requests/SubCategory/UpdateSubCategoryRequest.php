@@ -4,6 +4,7 @@ namespace App\Http\Requests\SubCategory;
 
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Propaganistas\LaravelPhone\Rules\Phone;
 
@@ -23,11 +24,21 @@ class UpdateSubCategoryRequest extends BaseRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules($id): array
     {
         return [
-            'name.en' => ['sometimes', 'string', 'max:255'],
-            'name.ar' => ['sometimes', 'string', 'max:255'],
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name->en')->ignore($id),
+            ],
+            'name.ar' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name->ar')->ignore($id),
+            ],
             'parent_id' => ['sometimes', 'integer', 'exists:categories,id'],
         ];
     }

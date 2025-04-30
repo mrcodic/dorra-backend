@@ -2,8 +2,12 @@
 
 namespace App\Http\Requests\Product;
 
+use App\Enums\Product\StatusEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Category;
 use App\Models\CountryCode;
+use App\Models\Product;
+use Illuminate\Validation\Rule;
 
 class UpdateProductRequest extends BaseRequest
 {
@@ -21,14 +25,65 @@ class UpdateProductRequest extends BaseRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules($id): array
     {
-        $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
-            'parent_id' => ['nullable', 'integer', 'exists:categories,id'],
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('products', 'name->en'),
+            ],
+            'name.ar' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('products', 'name->ar'),
+            ],
+            'description.en' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
+            'image' => ['image', 'mimes:jpg,jpeg,png',
+                Rule::requiredIf(function () use($id){
+                   return !Product::find($id)->getFirstMedia("product_main_image");
+                })
+                ],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png'],
+            'category_id' => ['required', 'integer', 'exists:categories,id'],
+            'sub_category_id' => ['nullable', 'integer', 'exists:categories,id', function ($attribute, $value, $fail) {
+                $category = Category::find($value);
+                if (is_null($category->parent_id)) {
+                    $fail('The selected category is a parent category, not a subcategory. Please select a valid subcategory.');
+                }
+            }],
+            'tags' => ['nullable', 'array'],
+            'has_custom_prices' => ['required', 'boolean'],
+            'base_price' => [
+                'required_if:has_custom_prices,false',
+                'prohibited_if:has_custom_prices,true',
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+            'prices' => [
+                'array',
+                'required_if:has_custom_prices,true',
+                'prohibited_if:has_custom_prices,false',
+            ],
+            'prices.*.quantity' => ['required', 'integer', 'min:0'],
+            'prices.*.price' => ['required', 'integer', 'min:0'],
+            'specifications' => ['required', 'array'],
+            'specifications.*.name_en' => 'nullable|string|max:255',
+            'specifications.*.name_ar' => 'nullable|string|max:255',
+            'specifications.*.specification_options' => ['required', 'array', 'min:1'],
+            'specifications.*.specification_options.*.value_en' => 'required|string|max:255',
+            'specifications.*.specification_options.*.value_ar' => 'required|string|max:255',
+            'specifications.*.specification_options.*.price' => ['nullable', 'numeric', 'min:0'],
+            'specifications.*.specification_options.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'is_free_shipping' => ['required', 'boolean'],
+            'status' => ['nullable', 'in:', StatusEnum::values()],
         ];
+
 
     }
 
