@@ -32,7 +32,7 @@
             <div class="row">
                 <div class="col-md-4 user_role"></div>
                 <div class="col-md-4 user_plan"></div>
-                <div class="col-md-4 user_status"></div>
+                <div class="col-md-4 user_status bg-succes"></div>
             </div>
         </div>
         <div class="card-datatable table-responsive pt-0">

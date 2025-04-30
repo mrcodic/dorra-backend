@@ -8973,7 +8973,7 @@ fieldset:disabled .btn {
 
 .text-success {
   --bs-text-opacity: 1;
-  color: rgba(var(--bs-success-rgb), var(--bs-text-opacity)) !important;
+  color: #30A84D !important;
 }
 
 .text-info {

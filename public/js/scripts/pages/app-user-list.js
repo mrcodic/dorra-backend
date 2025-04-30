@@ -14,12 +14,43 @@ var dt_user_table = $(".user-list-table").DataTable({
         type: "GET",
     },
     columns: [
-        { data: null, defaultContent: "", orderable: false,render: function (data, type, row, meta) {
-            return `<input type="checkbox" class="category-checkbox form-check-input" value="${data}">`;
-        }  },
+        {
+            data: null,
+            defaultContent: "",
+            orderable: false,
+            render: function (data, type, row, meta) {
+                return `<input type="checkbox" class="category-checkbox form-check-input" value="${data}">`;
+            },
+        },
         { data: "name" },
         { data: "email" },
-        { data: "status" },
+        {
+            data: "status",
+            render: function (data, type, row, meta) {
+                let textColor = "";
+                let bgColor = "";
+
+                switch (data.toLowerCase()) {
+                    case "active":
+                        textColor = "text-success";
+                        bgColor = "#D7EEDD"; // light green
+                        break;
+                    case "inactive":
+                        textColor = "text-secondary";
+                        bgColor = "#F0F0F0"; // light gray
+                        break;
+                    case "pending":
+                        textColor = "text-warning";
+                        bgColor = "#FFF3CD"; // light yellow
+                        break;
+                    default:
+                        textColor = "text-muted";
+                        bgColor = "#E9ECEF"; // default gray
+                }
+
+                return `<span class="badge rounded-pill ${textColor} px-1" style="background-color: ${bgColor};">${data}</span>`;
+            },
+        },
         { data: "joined_date" },
         { data: "orders_count" },
         {
@@ -28,20 +59,18 @@ var dt_user_table = $(".user-list-table").DataTable({
             render: function (data, type, row, meta) {
                 console.log(data);
                 return `
-          <div class="dropdown">
-            <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-              <i data-feather="more-vertical"></i>
-            </button>
-            <div class="dropdown-menu">
-             <a href="/users/${data}" class="dropdown-item">
-                <i data-feather="file-text"></i> Details
+        <div class="d-flex gap-1">
+             <a href="/users/${data}" class="">
+                <i data-feather="eye"></i> 
+              </a>
+              <a href="/users/${data}/edit" class="">
+                <i data-feather="edit-3"></i> 
               </a>
 
-
-              <a href="#" class="dropdown-item text-danger delete-user" data-id="${data}">
-                <i data-feather="trash-2"></i> Delete
+              <a href="#" class=" text-danger delete-user" data-id="${data}">
+                <i data-feather="trash-2"></i> 
               </a>
-            </div>
+      
           </div>
         `;
             },
@@ -82,7 +111,7 @@ var dt_user_table = $(".user-list-table").DataTable({
     ],
     drawCallback: function () {
         feather.replace();
-        $('#select-all-checkbox').prop('checked', false);
+        $("#select-all-checkbox").prop("checked", false);
     },
     language: {
         sLengthMenu: "Show _MENU_",
@@ -101,17 +130,17 @@ $(document).on("change", ".category-checkbox", function () {
     $("#bulk-delete-container").toggle(checkedCount > 0);
 });
 // Select All functionality
-$(document).on('change', '#select-all-checkbox', function () {
-    const isChecked = $(this).is(':checked');
-    $('.category-checkbox').prop('checked', isChecked).trigger('change');
+$(document).on("change", "#select-all-checkbox", function () {
+    const isChecked = $(this).is(":checked");
+    $(".category-checkbox").prop("checked", isChecked).trigger("change");
 });
 // Update "Select All" checkbox based on individual selections
-$(document).on('change', '.category-checkbox', function () {
-    const all = $('.category-checkbox').length;
-    const checked = $('.category-checkbox:checked').length;
+$(document).on("change", ".category-checkbox", function () {
+    const all = $(".category-checkbox").length;
+    const checked = $(".category-checkbox:checked").length;
 
-    $('#select-all-checkbox').prop('checked', all === checked);
-    $('#bulk-delete-container').toggle(checked > 0);
+    $("#select-all-checkbox").prop("checked", all === checked);
+    $("#bulk-delete-container").toggle(checked > 0);
 });
 
 $(document).ready(function () {

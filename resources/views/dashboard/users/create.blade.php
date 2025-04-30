@@ -25,7 +25,7 @@
     <form id="checkout-form" class="bs-stepper checkout-tab-steps" enctype="multipart/form-data">
         <!-- Wizard starts -->
         <div class="bs-stepper-header">
-            <div class="step" data-target="#step-cart" role="tab" id="step-cart-trigger">
+            <div class="step" data-target="#step-info" role="tab" id="step-info-trigger">
                 <button type="button" class="step-trigger">
                     <span class="bs-stepper-box">
                         01
@@ -36,10 +36,8 @@
                     </span>
                 </button>
             </div>
-            <div class="line">
-
-            </div>
-            <div class="step" data-target="#step-address" role="tab" id="step-address-trigger">
+            <div class="line"></div>
+            <div class="step" data-target="#step-password" role="tab" id="step-password-trigger">
                 <button type="button" class="step-trigger">
                     <span class="bs-stepper-box">
                         02
@@ -49,9 +47,7 @@
                     </span>
                 </button>
             </div>
-            <div class="line">
-
-            </div>
+            <div class="line"></div>
             <div class="step" data-target="#step-payment" role="tab" id="step-payment-trigger">
                 <button type="button" class="step-trigger">
                     <span class="bs-stepper-box">
@@ -62,12 +58,23 @@
                     </span>
                 </button>
             </div>
+            <div class="line"></div>
+            <div class="step" data-target="#step-address" role="tab" id="step-address-trigger">
+                <button type="button" class="step-trigger">
+                    <span class="bs-stepper-box">
+                        04
+                    </span>
+                    <span class="bs-stepper-label">
+                        <span class="bs-stepper-title">Address</span>
+                    </span>
+                </button>
+            </div>
         </div>
         <!-- Wizard ends -->
 
         <div class="bs-stepper-content">
-            <!-- Checkout Place order starts -->
-            <div id="step-cart" class="content" role="tabpanel" aria-labelledby="step-cart-trigger">
+            <!-- step 1 -->
+            <div id="step-info" class="content" role="tabpanel" aria-labelledby="step-info-trigger">
 
                 <!-- Avatar Upload -->
                 <div class="mb-2 text-center">
@@ -76,7 +83,7 @@
 
                     <!-- Clickable avatar card -->
                     <div id="avatarCard" style="width: 150px; margin: auto; cursor: pointer;">
-                        <img id="avatarPreview" src="https://via.placeholder.com/100x100.png?text=Avatar" alt="Avatar" class="rounded-circle border" style="width: 100px; height: 100px; object-fit: cover;">
+                        <img id="avatarPreview" src="{{asset('images/avatar.png')}}" alt="Avatar" class="rounded-circle border" style="width: 48px; height: 48px; object-fit: cover;">
                         <div id="avatarName" class="mt-2 " style="width: 150px; margin: auto; cursor: pointer; border: 1px solid #ccc; border-radius: 10px; padding: 10px;">
                             Upload Photo
                         </div>
@@ -138,10 +145,8 @@
 
             </div>
 
-            <!-- Checkout Place order Ends -->
-
-            <!-- Checkout Customer Address Starts -->
-            <div id="step-address" class="content" role="tabpanel" aria-labelledby="step-address-trigger">
+            <!-- step 2 -->
+            <div id="step-password" class="content" role="tabpanel" aria-labelledby="step-password-trigger">
                 <div id="checkout-address" class="list-view product-checkout">
 
                     <!-- Checkout Customer Address Right starts -->
@@ -186,23 +191,87 @@
                 <div class="d-flex gap-1 justify-content-end mt-2">
                     <button type="button" class="btn btn-outline-secondary btn-prev place-order">Back</button>
                     <button type="button" class="btn btn-primary btn-next place-order">Next</button>
-                
+
                 </div>
             </div>
-            <!-- Checkout Customer Address Ends -->
-            <!-- Checkout Payment Starts -->
+            <!-- step 3 -->
             <div id="step-payment" class="content" role="tabpanel" aria-labelledby="step-payment-trigger">
-                <form id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">
+                <div id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">
+                    <!-- Cardholder Name (Optional) Label -->
+                    <div class="mb-1">
+                        <label class="form-label">Cardholder Name (Optional)</label>
+                        <input type="text" name="label" id="addresses.*.label" class="form-control" placeholder="Enter cardholder name" />
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label">Card Number</label>
+                        <input type="text" name="label" id="addresses.*.label" class="form-control" placeholder="Enter Card Number" />
+                    </div>
+                    <!-- Country and State -->
+                    <div class="d-flex justify-content-between gap-1 mb-1">
+                        <div class="w-50">
+                            <label class="form-label">Expiration Date</label>
+                            <input type="date" name="label" id="addresses.*.label" class="form-control" placeholder="Expiration Date" />
+                        </div>
+                        <div class="w-50">
+                            <label class="form-label">CVV</label>
+                            <input type="text" name="label" id="addresses.*.label" class="form-control" placeholder="Enter CVV" />
+                        </div>
+                    </div>
+
+                    <!-- Address Line -->
+                    <div class="mb-1">
+                        <label for="addresses.*.line" class="form-label">Email Address</label>
+                        <input type="text" name="line" id="addresses.*.line" class="form-control" placeholder="Enter email address" />
+                    </div>
+
                     <div class="d-flex gap-1 justify-content-end">
                         <button type="button" class="btn btn-outline-secondary  btn-prev place-order">Back</button>
                         <button type="button" class="btn btn-primary  btn-next place-order">Next</button>
 
                     </div>
-                </form>
+                </div>
             </div>
-            <!-- Checkout Payment Ends -->
-            <!-- </div> -->
-        </div>
+            <!-- step 4 -->
+            <div id="step-address" class="content" role="tabpanel" aria-labelledby="step-address-trigger">
+                <div id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">
+                    <!-- Address Label -->
+                    <div class="mb-1">
+                        <label for="addresses.*.label" class="form-label">Address Label</label>
+                        <input type="text" name="label" id="addresses.*.label" class="form-control" placeholder="Enter Address Label" />
+                    </div>
+
+                    <!-- Country and State -->
+                    <div class="d-flex justify-content-between gap-1 mb-1">
+                        <div class="w-50">
+                            <label for="country-select" class="form-label">Country</label>
+                            <select id="country-select" class="form-select country-select">
+                                <option value="">Select Country</option>
+                                <option>name</option>
+                            </select>
+                        </div>
+                        <div class="w-50">
+                            <label for="addresses.*.state_id" class="form-label">State</label>
+                            <select name="state_id" id="addresses.*.state_id" class="form-select state-select">
+                                <option value="">Select State</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Address Line -->
+                    <div class="mb-1">
+                        <label for="addresses.*.line" class="form-label">Address Line</label>
+                        <input type="text" name="line" id="addresses.*.line" class="form-control" placeholder="Enter Address Line" />
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex gap-1 justify-content-end mt-2">
+                        <button type="button" class="btn btn-outline-secondary btn-prev place-order">Back</button>
+                        <button type="submit" class="btn btn-primary btn-next place-order">Add New User</button>
+                    </div>
+                </div>
+
+
+            </div>
     </form>
 </div>
 
