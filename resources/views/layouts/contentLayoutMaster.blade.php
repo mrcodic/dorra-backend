@@ -39,3 +39,4 @@ $configData = Helper::applClasses();
   @extends((( $configData["mainLayoutType"] === 'horizontal') ? 'layouts.horizontalLayoutMaster' :
   'layouts.verticalLayoutMaster' ))
 @endisset
+<script src="https://unpkg.com/feather-icons"></script>
