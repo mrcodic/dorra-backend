@@ -431,26 +431,40 @@
                                                                                                     <i data-feather="trash"></i>
                                                                                                 </button>
                                                                                             </div>
+
                                                                                         </div>
 
 
                                                                                     </div>
                                                                                     <!-- Uploaded Image Preview -->
-                                                                                    <div class="option-uploaded-image uploaded-image position-relative mt-1 d-flex align-items-center gap-2 {{ $option->image ? '' : 'd-none' }}">
-                                                                                        <img src="{{ asset('storage/' . $option->image) }}" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                                    <div class="uploaded-image position-relative mt-1 d-flex align-items-center gap-2 {{ $option->image ? '' : 'd-none' }}">
+                                                                                        <img src="{{ $option->image->getUrl() }}" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
                                                                                         <div class="file-details">
                                                                                             <div class="file-name fw-bold option-file-name">
-                                                                                                {{ pathinfo($option->image, PATHINFO_BASENAME) }}
+                                                                                                {{ $option->image->file_name }}
                                                                                             </div>
                                                                                             <div class="file-size text-muted small option-file-size">
-                                                                                                {{-- لا توجد طريقة مباشرة لحجم الملف هنا، إلا إذا مررته من الـ controller --}}
+                                                                                                {{ number_format($option->image->size / 1024, 1) }}
+                                                                                                KB
+
                                                                                             </div>
                                                                                         </div>
-                                                                                        <button type="button" class="btn btn-sm position-absolute text-danger option-remove-image" style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                                                            <i data-feather="trash"></i>
+                                                                                        <form action="" method="post" style="display: none">
+                                                                                            @csrf
+                                                                                            @method("DELETE")
+                                                                                            <button type="button"
+                                                                                                    class="btn btn-sm position-absolute text-danger remove-old-image"
+                                                                                                    data-image-id="{{ $option->image->id }}"
+                                                                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                                                                <i data-feather="trash"></i>
+                                                                                            </button>
+                                                                                        </form>
+                                                                                    </div>
+                                                                                    <div class="col-12 text-end mt-1 mb-2">
+                                                                                        <button type="button" class="btn btn-outline-danger" style="display: none" data-repeater-delete>
+                                                                                            <i data-feather="x" class="me-25"></i> Delete Value
                                                                                         </button>
                                                                                     </div>
-
                                                                                 </div>
                                                                         @endforeach
                                                                         </div>
@@ -536,37 +550,98 @@
 @section('page-script')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script !src="">
-        $(document).ready(function () {
-            // Function to show delete button for newly added items, except for the first one
-            function updateDeleteButtonVisibility() {
-                // Hide delete button for the first item, show for the rest
-                $('[data-repeater-item]').each(function (index) {
+    <script>
+        function updateDeleteButtons(containerSelector) {
+            $(containerSelector).find('[data-repeater-list]').each(function () {
+                var items = $(this).find('[data-repeater-item]');
+                items.each(function (index) {
                     if (index === 0) {
-                        // Hide the delete button for the first item
-                        $(this).find('.delete-btn').hide();
+                        $(this).find('[data-repeater-delete]').hide();
                     } else {
-                        // Show the delete button for all other items
-                        $(this).find('.delete-btn').show();
+                        $(this).find('[data-repeater-delete]').show();
+                        feather.replace();
                     }
                 });
+            });
+        }
+
+        function initializeImageUploaders(context) {
+            $(context).find('.option-upload-area').each(function () {
+                const uploadArea = $(this);
+                const input = uploadArea.closest('.col-md-12').find('.option-image-input');
+                const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
+                const imagePreview = previewContainer.find('.option-image-preview');
+                const fileNameLabel = previewContainer.find('.option-file-name');
+                const fileSizeLabel = previewContainer.find('.option-file-size');
+                const removeButton = previewContainer.find('.option-remove-image');
+
+                uploadArea.off('click').on('click', function () {
+                    input.trigger('click');
+                });
+
+                input.off('change').on('change', function () {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            imagePreview.attr('src', e.target.result);
+                            fileNameLabel.text(file.name);
+                            fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
+                            previewContainer.removeClass('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                removeButton.off('click').on('click', function () {
+                    input.val('');
+                    previewContainer.addClass('d-none');
+                });
+            });
+        }
+
+        $('.outer-repeater').repeater({
+            repeaters: [{
+                selector: '.inner-repeater',
+                show: function () {
+                    $(this).slideDown();
+                    updateDeleteButtons($(this).closest('.outer-repeater'));
+                    initializeImageUploaders(this);
+                    feather.replace();
+                },
+                hide: function (deleteElement) {
+                    $(this).slideUp(deleteElement);
+                    updateDeleteButtons($(this).closest('.outer-repeater'));
+                },
+                nestedInputName: 'specification_options'
+            }],
+            show: function () {
+                $(this).slideDown();
+                updateDeleteButtons($('.outer-repeater'));
+                initializeImageUploaders(this);
+                feather.replace();
+            },
+            hide: function (deleteElement) {
+                $(this).slideUp(deleteElement);
+                updateDeleteButtons($('.outer-repeater'));
+            },
+            afterAdd: function () {
+                updateDeleteButtons($('.outer-repeater'));
+                initializeImageUploaders($('.outer-repeater'));
+                feather.replace();
+            },
+            afterDelete: function () {
+                updateDeleteButtons($('.outer-repeater'));
             }
-
-            // Initialize delete button visibility when the page loads
-            updateDeleteButtonVisibility();
-
-            // Reinitialize visibility after adding a new item
-            $('.add-new-button').on('click', function () {
-                setTimeout(updateDeleteButtonVisibility, 100); // Delay to allow new item to be added
-            });
-
-            // Reinitialize visibility after deleting an item
-            $(document).on('click', '[data-repeater-delete]', function () {
-                setTimeout(updateDeleteButtonVisibility, 100); // Delay to allow item to be removed
-            });
         });
 
+        // Initialize on page load for already existing items
+        $(document).ready(function () {
+            updateDeleteButtons($('.outer-repeater'));
+            initializeImageUploaders($('.outer-repeater'));
+        });
     </script>
+
     <script>
         $(document).ready(function () {
             $.ajaxSetup({
@@ -584,99 +659,37 @@
 
             // Repeater
             $('.invoice-repeater').repeater({
-                show: function () {
+                show: function() {
                     $(this).slideDown();
                     feather && feather.replace();
-                },
-                hide: function (deleteElement) {
-                    $(this).slideUp(deleteElement);
-                }
-            });
 
-            //Repeater
-            function updateDeleteButtons(containerSelector) {
-                $(containerSelector).find('[data-repeater-list]').each(function () {
-                    var items = $(this).find('[data-repeater-item]');
-                    items.each(function (index) {
+                    // Recalculate delete button visibility when an item is shown
+                    var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                    items.each(function(index) {
+                        // Hide delete button for the first item (index 0) and show for others
                         if (index === 0) {
-                            $(this).find('[data-repeater-delete]').hide();
+                            $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
                         } else {
-                            $(this).find('[data-repeater-delete]').show();
-                            feather.replace();
+                            $(this).find('[data-repeater-delete]').show(); // Show delete button for others
                         }
                     });
-                });
-            }
-
-            function initializeImageUploaders(context) {
-                $(context).find('.option-upload-area').each(function () {
-                    const uploadArea = $(this);
-                    const input = uploadArea.closest('.col-md-12').find('.option-image-input');
-                    const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
-                    const imagePreview = previewContainer.find('.option-image-preview');
-                    const fileNameLabel = previewContainer.find('.option-file-name');
-                    const fileSizeLabel = previewContainer.find('.option-file-size');
-                    const removeButton = previewContainer.find('.option-remove-image');
-
-                    uploadArea.off('click').on('click', function () {
-                        input.trigger('click');
-                    });
-
-                    input.off('change').on('change', function () {
-                        const file = this.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = function (e) {
-                                imagePreview.attr('src', e.target.result);
-                                fileNameLabel.text(file.name);
-                                fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
-                                previewContainer.removeClass('d-none');
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    });
-
-                    removeButton.off('click').on('click', function () {
-                        input.val('');
-                        previewContainer.addClass('d-none');
-                    });
-                });
-            }
-
-            $('.outer-repeater').repeater({
-                repeaters: [{
-                    selector: '.inner-repeater',
-                    show: function () {
-                        $(this).slideDown();
-                        updateDeleteButtons($(this).closest('.outer-repeater'));
-                        initializeImageUploaders(this);
-                        feather.replace();
-                    },
-                    hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
-                        updateDeleteButtons($(this).closest('.outer-repeater'));
-                    },
-                    nestedInputName: 'specification_options'
-                }],
-                show: function () {
-                    $(this).slideDown();
-                    updateDeleteButtons($('.outer-repeater'));
-                    initializeImageUploaders(this);
-                    feather.replace();
                 },
-                hide: function (deleteElement) {
+                hide: function(deleteElement) {
                     $(this).slideUp(deleteElement);
-                    updateDeleteButtons($('.outer-repeater'));
-                },
-                afterAdd: function () {
-                    updateDeleteButtons($('.outer-repeater'));
-                    initializeImageUploaders($('.outer-repeater'));
-                    feather.replace();
-                },
-                afterDelete: function () {
-                    updateDeleteButtons($('.outer-repeater'));
+
+                    // Recalculate delete button visibility after an item is removed
+                    var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                    items.each(function(index) {
+                        // Hide delete button for the first item (index 0) and show for others
+                        if (index === 0) {
+                            $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
+                        } else {
+                            $(this).find('[data-repeater-delete]').show(); // Show delete button for others
+                        }
+                    });
                 }
             });
+
 
             $('.select2').select2();
 
@@ -1003,21 +1016,7 @@
                 parentElement.find('.option-uploaded-image .file-size').text('');
             });
 
-            // Initialize the repeater if not initialized yet (in case new ones are dynamically added)
-            function initializeRepeater() {
-                if (typeof $.fn.repeater !== 'undefined') {
-                    // Initialize repeater functionality (only if repeater plugin is present)
-                    $('.outer-repeater').repeater();
-                }
-            }
 
-            // Call initializeRepeater when the page loads and after dynamically adding new items
-            initializeRepeater();
-
-            // Reinitialize repeater on dynamic content addition
-            $(document).on('click', '[data-repeater-create]', function () {
-                setTimeout(initializeRepeater, 100);
-            });
         });
     </script>
 
