@@ -140,3 +140,19 @@
 	font-size: 16px;
 }
 
+.profile-tab{
+	border-radius: 0;
+	background-color: white;
+	border-left: 4px solid #9EA4A3;
+	text-align: start;
+	padding-left: 8px;
+	font-size: 18px;
+}
+.profile-tab.active{
+	border-radius: 0;
+	background-color: white;
+	border-left: 4px solid #24B094;
+	color: #121212;
+	padding-left: 8px;
+	
+}

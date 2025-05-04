@@ -5,10 +5,11 @@ use App\Http\Controllers\Dashboard\{ProductController,
     SubCategoryController,
     TagController,
     UserController,
-    CategoryController
+    CategoryController,
+    ProfileController
 };
 use Illuminate\Support\Facades\Route;
-
+use Laravel\Jetstream\Rules\Role;
 
 Route::view('/login/social', 'dashboard.auth.social-login');
 Route::view('confirm-password', 'dashboard.auth.confirm-password');
@@ -42,6 +43,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [TagController::class, 'getData'])->name('.data');
     });
     Route::resource('/tags', TagController::class);
+
+    Route::resource('/profile',ProfileController::class)->only(['index','update']);
 
 
     Route::prefix('/api')->group(function () {
