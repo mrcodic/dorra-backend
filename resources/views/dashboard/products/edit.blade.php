@@ -325,191 +325,191 @@
                                         <label class="form-label label-text">Product Specs</label>
                                         <div class="">
                                             <div class="">
-                                                <!-- Outer Repeater for Specifications -->
-                                                <div class="outer-repeater">
+                                                <!-- Outer Repeater for Spe                                                <div class="outer-repeater">
                                                     <div data-repeater-list="specifications">
 
                                                     @foreach($model->specifications as $specification)
-                                                            <div data-repeater-item>
-                                                                <div class="row">
-                                                                    <!-- Specification Name (English) -->
-                                                                    <div class="col-md-6">
-                                                                        <div class="mb-1">
-                                                                            <label class="form-label label-text">Specification
-                                                                                Name (EN)</label>
-                                                                            <input type="text"
-                                                                                   name="specifications[{{$loop->index}}][name_en]"
-                                                                                   value="{{ $specification->getTranslation('name','ar') }}"
-                                                                                   class="form-control"
-                                                                                   placeholder="Specification Name (EN)"/>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <!-- Specification Name (Arabic) -->
-                                                                    <div class="col-md-6">
-                                                                        <div class="mb-1">
-                                                                            <label class="form-label label-text">Specification
-                                                                                Name (AR)</label>
-                                                                            <input type="text"
-                                                                                   name="specifications[{{$loop->index}}][name_ar]"
-                                                                                   value="{{ $specification->getTranslation('name','ar') }}"
-                                                                                   class="form-control"
-                                                                                   placeholder="Specification Name (AR)"/>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <!-- Inner Repeater for Specification Options -->
-                                                                    <div class="inner-repeater">
-                                                                        <div data-repeater-list="specification_options">
-                                                                        @foreach($specification->options as $option)
-                                                                                <div data-repeater-item>
-                                                                                    <div
-                                                                                        class="row d-flex align-items-end mt-2">
-                                                                                        <!-- Option Name (English) -->
-                                                                                        <div class="col">
-                                                                                            <label class="label-text">Option
-                                                                                                (EN)</label>
-                                                                                            <input type="text"
-                                                                                                   name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][value_en]"
-                                                                                                   value="{{ $option->getTranslation('value','ar') }}"
-                                                                                                   class="form-control"
-                                                                                                   placeholder="Option (EN)"/>
-                                                                                        </div>
-
-                                                                                        <!-- Option Name (Arabic) -->
-                                                                                        <div class="col">
-                                                                                            <label class="label-text">Option
-                                                                                                (AR)</label>
-                                                                                            <input type="text"
-                                                                                                   name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][value_ar]"
-                                                                                                   value="{{ $option->getTranslation('value','ar') }}"
-                                                                                                   class="form-control"
-                                                                                                   placeholder="Option (AR)"/>
-                                                                                        </div>
-
-                                                                                        <!-- Option Price -->
-                                                                                        <div class="col">
-                                                                                            <label class="label-text">Price</label>
-                                                                                            <input type="text"
-                                                                                                   name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][price]"
-                                                                                                   value="{{ $option->price }}"
-                                                                                                   class="form-control"
-                                                                                                   placeholder="Price"/>
-                                                                                        </div>
-
-                                                                                    </div>
-                                                                                    <div
-                                                                                        class="row d-flex align-items-end mt-2">
-                                                                                        <!-- Option Image -->
-                                                                                        <div class="col-md-12">
-                                                                                            <label class="form-label label-text">Option Image</label>
-
-                                                                                            <!-- Hidden real input -->
-                                                                                            <input type="file" name="image" class="form-control d-none option-image-input" accept="image/*">
-
-                                                                                            <!-- Custom Upload Card -->
-                                                                                            <div class="option-upload-area upload-card">
-                                                                                                <div class="option-upload-content d-flex justify-content-center align-items-center gap-1">
-                                                                                                    <i data-feather="upload" class="mb-2"></i>
-                                                                                                    <p>Drag image here to upload</p>
-                                                                                                </div>
-                                                                                            </div>
-
-                                                                                            <!-- Progress Bar -->
-                                                                                            <div class="option-upload-progress progress mt-2 d-none w-50">
-                                                                                                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                                                                                            </div>
-
-                                                                                            <!-- Uploaded Image Preview -->
-                                                                                            <div class="option-uploaded-image uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                                                                                <img src="" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
-                                                                                                <div class="file-details">
-                                                                                                    <div class="file-name fw-bold option-file-name"></div>
-                                                                                                    <div class="file-size text-muted small option-file-size"></div>
-                                                                                                </div>
-                                                                                                <button type="button" class="btn btn-sm position-absolute text-danger option-remove-image" style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                                                                    <i data-feather="trash"></i>
-                                                                                                </button>
-                                                                                            </div>
-
-                                                                                        </div>
-
-
-                                                                                    </div>
-                                                                                    <!-- Uploaded Image Preview -->
-                                                                                    <div class="uploaded-image position-relative mt-1 d-flex align-items-center gap-2 {{ $option->image ? '' : 'd-none' }}">
-                                                                                        <img src="{{ $option->image->getUrl() }}" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
-                                                                                        <div class="file-details">
-                                                                                            <div class="file-name fw-bold option-file-name">
-                                                                                                {{ $option->image->file_name }}
-                                                                                            </div>
-                                                                                            <div class="file-size text-muted small option-file-size">
-                                                                                                {{ number_format($option->image->size / 1024, 1) }}
-                                                                                                KB
-
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <form action="" method="post" style="display: none">
-                                                                                            @csrf
-                                                                                            @method("DELETE")
-                                                                                            <button type="button"
-                                                                                                    class="btn btn-sm position-absolute text-danger remove-old-image"
-                                                                                                    data-image-id="{{ $option->image->id }}"
-                                                                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                                                                <i data-feather="trash"></i>
-                                                                                            </button>
-                                                                                        </form>
-                                                                                    </div>
-                                                                                    <div class="col-12 text-end mt-1 mb-2">
-                                                                                        <button type="button" class="btn btn-outline-danger" style="display: none" data-repeater-delete>
-                                                                                            <i data-feather="x" class="me-25"></i> Delete Value
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </div>
-                                                                        @endforeach
-                                                                        </div>
-
-
-                                                                        <!-- Add Option Button -->
-                                                                        <div class="row">
-                                                                            <div class="col-12">
-                                                                                <button type="button"
-                                                                                        class="add-new-button btn primary-text-color bg-white mt-2 text-decoration-underline"
-                                                                                        style="padding: 0px;"
-                                                                                        data-repeater-create>
-                                                                                    <i data-feather="plus"></i> <span> Add New Value</span>
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <!-- End of Inner Repeater -->
-
-                                                                    <!-- Delete Specification Button -->
-                                                                    <div class="col-12 text-end mt-1 mb-2">
-                                                                        <button type="button"
-                                                                                class="delete-btn btn btn-outline-danger"
-                                                                                data-repeater-delete>
-                                                                            <i data-feather="x" class="me-25"></i>
-                                                                            Delete Spec
-                                                                        </button>
-                                                                    </div>
-
-                                                                </div>
-                                                            </div>
-                                                    @endforeach
-                                                    </div>
-
-                                                    <!-- Add Specification Button -->
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <button type="button" class="w-100  rounded-3 p-1 text-dark add-new-button"
-                                                                    style="border:2px dashed #CED5D4;background-color:#EBEFEF"
-                                                                    data-repeater-create>
-                                                                <i data-feather="plus" class="me-25"></i> <span>Add New Spec</span>
-                                                            </button>
+                                                    <div data-repeater-item>
+                                                        <div class="row">
+<!-- Specification Name (English) -->
+                                                    <div class="col-md-6">
+                                                        <div class="mb-1">
+                                                            <label class="form-label label-text">Specification
+                                                                Name (EN)</label>
+                                                            <input type="text"
+                                                                   name="specifications[{{$loop->index}}][name_en]"
+                                                                   value="{{ $specification->getTranslation('name','ar') }}"
+                                                                   class="form-control"
+                                                                   placeholder="Specification Name (EN)"/>
                                                         </div>
                                                     </div>
-                                                </div>
+
+                                                    <!-- Specification Name (Arabic) -->
+                                                    <div class="col-md-6">
+                                                        <div class="mb-1">
+                                                            <label class="form-label label-text">Specification
+                                                                Name (AR)</label>
+                                                            <input type="text"
+                                                                   name="specifications[{{$loop->index}}][name_ar]"
+                                                                   value="{{ $specification->getTranslation('name','ar') }}"
+                                                                   class="form-control"
+                                                                   placeholder="Specification Name (AR)"/>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Inner Repeater for Specification Options -->
+                                                    <div class="inner-repeater">
+                                                        <div data-repeater-list="specification_options">
+                                                            @foreach($specification->options as $option)
+                                                                <div data-repeater-item>
+                                                                    <div
+                                                                        class="row d-flex align-items-end mt-2">
+                                                                        <!-- Option Name (English) -->
+                                                                        <div class="col">
+                                                                            <label class="label-text">Option
+                                                                                (EN)</label>
+                                                                            <input type="text"
+                                                                                   name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][value_en]"
+                                                                                   value="{{ $option->getTranslation('value','ar') }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Option (EN)"/>
+                                                                        </div>
+
+                                                                        <!-- Option Name (Arabic) -->
+                                                                        <div class="col">
+                                                                            <label class="label-text">Option
+                                                                                (AR)</label>
+                                                                            <input type="text"
+                                                                                   name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][value_ar]"
+                                                                                   value="{{ $option->getTranslation('value','ar') }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Option (AR)"/>
+                                                                        </div>
+
+                                                                        <!-- Option Price -->
+                                                                        <div class="col">
+                                                                            <label class="label-text">Price</label>
+                                                                            <input type="text"
+                                                                                   name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][price]"
+                                                                                   value="{{ $option->price }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Price"/>
+                                                                        </div>
+
+                                                                    </div>
+                                                                    <div
+                                                                        class="row d-flex align-items-end mt-2">
+                                                                        <!-- Option Image -->
+                                                                        <div class="col-md-12">
+                                                                            <label class="form-label label-text">Option Image</label>
+
+                                                                            <!-- Hidden real input -->
+                                                                            <input type="file" name="image" class="form-control d-none option-image-input" accept="image/*">
+
+                                                                            <!-- Custom Upload Card -->
+                                                                            <div class="option-upload-area upload-card">
+                                                                                <div class="option-upload-content d-flex justify-content-center align-items-center gap-1">
+                                                                                    <i data-feather="upload" class="mb-2"></i>
+                                                                                    <p>Drag image here to upload</p>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <!-- Progress Bar -->
+                                                                            <div class="option-upload-progress progress mt-2 d-none w-50">
+                                                                                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                                                                            </div>
+
+                                                                            <!-- Uploaded Image Preview -->
+                                                                            <div class="option-uploaded-image uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                                                                <img src="" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                                <div class="file-details">
+                                                                                    <div class="file-name fw-bold option-file-name"></div>
+                                                                                    <div class="file-size text-muted small option-file-size"></div>
+                                                                                </div>
+                                                                                <button type="button" class="btn btn-sm position-absolute text-danger option-remove-image" style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                                                    <i data-feather="trash"></i>
+                                                                                </button>
+                                                                            </div>
+
+                                                                        </div>
+
+
+                                                                    </div>
+                                                                    <!-- Uploaded Image Preview -->
+                                                                    <div class="uploaded-image position-relative mt-1 d-flex align-items-center gap-2 {{ $option->image ? '' : 'd-none' }}">
+                                                                        <img src="{{ $option->image?->getUrl() }}" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                        <div class="file-details">
+                                                                            <div class="file-name fw-bold option-file-name">
+                                                                                {{ $option->image?->file_name }}
+                                                                            </div>
+                                                                            <div class="file-size text-muted small option-file-size">
+                                                                                {{ number_format($option->image?->size / 1024, 1) }}
+                                                                                KB
+
+                                                                            </div>
+                                                                        </div>
+                                                                        <form action="" method="post" style="display: none">
+                                                                            @csrf
+                                                                            @method("DELETE")
+                                                                            <button type="button"
+                                                                                    class="btn btn-sm position-absolute text-danger remove-old-image"
+                                                                                    data-image-id="{{ $option->image?->id }}"
+                                                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                                                <i data-feather="trash"></i>
+                                                                            </button>
+                                                                        </form>
+                                                                    </div>
+                                                                    <div class="col-12 text-end mt-1 mb-2">
+                                                                        <button type="button" class="btn btn-outline-danger" style="display: none" data-repeater-delete>
+                                                                            <i data-feather="x" class="me-25"></i> Delete Value
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+
+
+                                                        <!-- Add Option Button -->
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <button type="button"
+                                                                        class="add-new-button btn primary-text-color bg-white mt-2 text-decoration-underline"
+                                                                        style="padding: 0px;"
+                                                                        data-repeater-create>
+                                                                    <i data-feather="plus"></i> <span> Add New Value</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- End of Inner Repeater -->
+
+                                                    <!-- Delete Specification Button -->
+                                                    <div class="col-12 text-end mt-1 mb-2">
+                                                        <button type="button"
+                                                                class="delete-btn btn btn-outline-danger"
+                                                                data-repeater-delete>
+                                                            <i data-feather="x" class="me-25"></i>
+                                                            Delete Spec
+                                                        </button>
+                                                    </div>
+
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+
+                                    <!-- Add Specification Button -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <button type="button" class="w-100  rounded-3 p-1 text-dark add-new-button"
+                                                    style="border:2px dashed #CED5D4;background-color:#EBEFEF"
+                                                    data-repeater-create>
+                                                <i data-feather="plus" class="me-25"></i> <span>Add New Spec</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                cifications -->
 
                                             </div>
                                         </div>

@@ -22,7 +22,7 @@ class ProfileController extends Controller
         $request->user()->update($validated);
         if ($request->hasFile('image'))
         {
-            handleMediaUploads($request->file('image'),$request->user());
+            handleMediaUploads($request->file('image'),$request->user(), clearExisting: true);
         }
         if (!empty($validated['notification_types']))
         {
