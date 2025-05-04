@@ -50,7 +50,7 @@ class LoginRequest extends BaseRequest
     {
         $credentials = $this->only('email', 'password');
         $user = User::whereEmail($credentials['email'])->first();
-        if (!$user && !Hash::check($credentials['password'],$user?->password)) {
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
