@@ -25,7 +25,7 @@ var dt_user_table = $(".product-list-table").DataTable({
                     .map(
                         tag => `
                         <span style="
-                            background-color: #f8f0ff;
+                            background-color: #FCF8FC;
                             color: #000;
                             padding: 6px 12px;
                             border-radius: 12px;

@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use App\Repositories\Base\BaseRepository;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Repositories\Implementations\PermissionRepository;
+use App\Repositories\Implementations\RoleRepository;
+use App\Repositories\Interfaces\PermissionRepositoryInterface;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
@@ -20,6 +24,8 @@ class RepositoryServiceProvider extends ServiceProvider
             $this->app->bind("App\\Repositories\\Interfaces\\{$model}RepositoryInterface",
                 "App\\Repositories\\Implementations\\{$model}Repository");
         }
+        $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
+        $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
     }
 
     /**

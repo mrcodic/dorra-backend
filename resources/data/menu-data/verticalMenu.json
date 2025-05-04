@@ -26,20 +26,47 @@
                 {
                     "url": "/categories",
                     "name": "Categories",
-                    "icon": "circle",
+                    "icon": "",
                     "slug": "app-user-list"
-                },{
+                },
+                {
                     "url": "/sub-categories",
                     "name": "Subcategories",
-                    "icon": "circle",
+                    "icon": "",
                     "slug": "app-user-list"
-                },{
+                },
+                {
                     "url": "/tags",
                     "name": "Tags",
-                    "icon": "circle",
+                    "icon": "",
                     "slug": "app-user-list"
                 }
             ]
+        },
+        {
+            "name": "Roles",
+            "icon": "grid",
+            "slug": "",
+            "submenu": [
+                {
+                    "url": "/permissions",
+                    "name": "Permissions",
+                    "icon": "",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/roles",
+                    "name": "Roles",
+                    "icon": "",
+                    "slug": "app-user-list"
+                }
+            ]
+        },
+        {
+            "name": "Orders",
+            "icon": "grid",
+            "slug": "",
+            "url": "/orders"
         }
     ]
 }

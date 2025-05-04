@@ -1,13 +1,15 @@
 <?php
 
 use App\Http\Controllers\Api\V1\User\General\MainController;
-use App\Http\Controllers\Dashboard\{ProductController,
+use App\Http\Controllers\Dashboard\{OrderController,
+    PermissionController,
+    ProductController,
+    RoleController,
     SubCategoryController,
     TagController,
     UserController,
     CategoryController,
-    ProfileController
-};
+    ProfileController};
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Rules\Role;
 
@@ -43,6 +45,21 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [TagController::class, 'getData'])->name('.data');
     });
     Route::resource('/tags', TagController::class);
+
+    Route::prefix('/roles')->as('roles')->group(function () {
+        Route::get('/data', [RoleController::class, 'getData'])->name('.data');
+    });
+    Route::resource('/roles', RoleController::class)->except(['show']);
+
+    Route::prefix('/permissions')->as('permissions')->group(function () {
+        Route::get('/data', [PermissionController::class, 'getData'])->name('.data');
+    });
+    Route::resource('/permissions', PermissionController::class)->except(['show']);
+
+    Route::prefix('/orders')->as('orders')->group(function () {
+        Route::get('/data', [OrderController::class, 'getData'])->name('.data');
+    });
+    Route::resource('/orders', OrderController::class)->except(['show']);
 
     Route::resource('/profile',ProfileController::class)->only(['index','update']);
 
