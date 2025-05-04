@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -17,4 +18,9 @@ class ProductSpecificationOption extends Model implements HasMedia
     ];
 
     protected $translatable = ['value'];
+    public function image(): Attribute
+    {
+        return Attribute::get(fn () => $this->getFirstMedia('productSpecificationOptions'));
+    }
+
 }

@@ -146,7 +146,7 @@
                                 <div class="d-flex flex-column  justify-content-between w-50">
                                     <span class="mb-1 fw-bold label-text">Subcategory</span>
                                     <span
-                                        class="fw-semibold disabled-field">{{ $model->subCategory?->name ?? "N/A" }}</span>
+                                        class="fw-semibold disabled-field">{{ $model->subCategory?->name ?? "-" }}</span>
                                 </div>
                             </div>
                             <div class="my-3 d-flex justify-content-between gap-2">
@@ -216,9 +216,11 @@
                                         <div class="d-flex flex-column  justify-content-between w-100">
                                             <span class="mb-1 fw-bold label-text">Photo</span>
                                             <span class="fw-semibold disabled-field">
-                                                @if ($option->media)
-                                                    <img src="{{ $option->media[$index]->getUrl() }}" width="32px"
+                                                @if ($option->media->isNotEmpty())
+                                                    <img src="{{ $option->getFirstMediaUrl('productSpecificationOptions') }}" width="32px"
                                                          height="32px"/>
+                                                @else
+                                                    -
                                                 @endif
                                             </span>
                                         </div>

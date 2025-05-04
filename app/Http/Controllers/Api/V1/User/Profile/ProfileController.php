@@ -20,6 +20,10 @@ class ProfileController extends Controller
     {
         $validated = $request->validated();
         $request->user()->update($validated);
+        if ($request->hasFile('image'))
+        {
+            handleMediaUploads($request->file('image'),$request->user());
+        }
         if (!empty($validated['notification_types']))
         {
             $request->user()->notificationTypes()->sync($validated['notification_types']);

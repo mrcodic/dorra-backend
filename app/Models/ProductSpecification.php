@@ -26,4 +26,6 @@ class ProductSpecification extends Model
     {
         return $this->hasMany(ProductSpecificationOption::class);
     }
+
+
 }

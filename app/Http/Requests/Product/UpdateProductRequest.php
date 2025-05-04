@@ -32,13 +32,13 @@ class UpdateProductRequest extends BaseRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('products', 'name->en'),
+                Rule::unique('products', 'name->en')->ignore($id),
             ],
             'name.ar' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('products', 'name->ar'),
+                Rule::unique('products', 'name->ar')->ignore($id),
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
@@ -80,7 +80,7 @@ class UpdateProductRequest extends BaseRequest
             'specifications.*.specification_options.*.value_ar' => 'required|string|max:255',
             'specifications.*.specification_options.*.price' => ['nullable', 'numeric', 'min:0'],
             'specifications.*.specification_options.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'is_free_shipping' => ['required', 'boolean'],
+//            'is_free_shipping' => ['required', 'boolean'],
             'status' => ['nullable', 'in:', StatusEnum::values()],
         ];
 
