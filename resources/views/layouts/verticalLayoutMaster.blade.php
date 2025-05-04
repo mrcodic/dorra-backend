@@ -62,15 +62,18 @@ data-asset-path="{{ asset('/')}}">
 
   {{-- include default scripts --}}
   @include('panels/scripts')
-
   <script type="text/javascript">
-    $(window).on('load', function() {
-      if (feather) {
-        feather.replace({
-          width: 14, height: 14
-        });
-      }
-    })
+      $(window).on('load', function() {
+          if (typeof feather !== 'undefined') {
+              feather.replace({
+                  width: 14, // Set the width of icons
+                  height: 14 // Set the height of icons
+              });
+          } else {
+              console.error("Feather icons are not loaded correctly.");
+          }
+      });
   </script>
+
 </body>
 </html>

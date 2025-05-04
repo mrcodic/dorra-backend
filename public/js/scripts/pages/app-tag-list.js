@@ -11,7 +11,9 @@ var dt_user_table = $('.tag-list-table').DataTable({
         type: 'GET'
     },
     columns: [
-        {data: null, defaultContent: '', orderable: false},
+        { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
+                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
+            } },
         {data: 'name'},
         {data: 'no_of_products'},
         {data: 'no_of_templates'},
@@ -283,5 +285,57 @@ $(document).ready(function () {
         });
     });
 
+
+    $(document).on("submit", "#bulk-delete-form", function (e) {
+        e.preventDefault();
+        const selectedIds = $(".category-checkbox:checked").map(function () {
+            return $(this).val();
+        }).get();
+
+        if (selectedIds.length === 0) return;
+
+        Swal.fire({
+            title: `Are you sure?`,
+            text: `You're about to delete ${selectedIds.length} tags.`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete them!",
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "tags/bulk-delete",
+                    method: "POST",
+                    data: {
+                        ids: selectedIds,
+                        _token: $('meta[name="csrf-token"]').attr("content"),
+                    },
+                    success: function (response) {
+                        Toastify({
+                            text: "Selected tags deleted successfully!",
+                            duration: 1500,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28a745",
+                            close: true,
+                        }).showToast();
+
+                        // Reload DataTable
+
+                        $('#bulk-delete-container').hide();
+                        $('.category-checkbox').prop('checked', false);
+                        $('#select-all-checkbox').prop('checked', false);
+                        $(".tag-list-table").DataTable().ajax.reload(null, false);
+
+                    },
+                    error: function () {
+                        Swal.fire("Error", "Could not delete selected tags.", "error");
+                    },
+                });
+            }
+        });
+    });
 
 });

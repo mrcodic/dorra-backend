@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Products')
-@section('main-page', 'Products')
+@section('title', 'Orders')
+@section('main-page', 'Orders')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -51,10 +51,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
    <script>
-       const productsDataUrl = "{{ route('products.data') }}";
-       const productsCreateUrl = "{{ route('products.create') }}";
+       const ordersDataUrl = "{{ route('orders.data') }}";
+       const ordersCreateUrl = "{{ route('orders.create') }}";
    </script>
 
     {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-product-list.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-order-list.js') }}?v={{ time() }}"></script>
 @endsection

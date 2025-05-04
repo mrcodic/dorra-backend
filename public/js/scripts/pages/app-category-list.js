@@ -12,7 +12,7 @@ var dt_user_table = $(".category-list-table").DataTable({
     },
     columns: [
         { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
-            return `<input type="checkbox" class="category-checkbox" value="${data}">`;
+            return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
         } },
         { data: "name" },
         { data: "sub_categories" },
@@ -48,6 +48,7 @@ var dt_user_table = $(".category-list-table").DataTable({
               <a href="#" class="dropdown-item text-danger delete-category" data-id="${data}">
                 <i data-feather="trash-2"></i> Delete
               </a>
+
             </div>
           </div>
         `;
@@ -85,8 +86,8 @@ var dt_user_table = $(".category-list-table").DataTable({
                 $(node).removeClass("btn-secondary");
             },
         },
-       
-        
+
+
     ],
     drawCallback: function () {
         feather.replace();
@@ -403,4 +404,58 @@ $(document).ready(function () {
             },
         });
     });
+
+    $(document).on("submit", "#bulk-delete-form", function (e) {
+        e.preventDefault();
+        const selectedIds = $(".category-checkbox:checked").map(function () {
+            return $(this).val();
+        }).get();
+
+        if (selectedIds.length === 0) return;
+
+        Swal.fire({
+            title: `Are you sure?`,
+            text: `You're about to delete ${selectedIds.length} categories.`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete them!",
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "categories/bulk-delete",
+                    method: "POST",
+                    data: {
+                        ids: selectedIds,
+                        _token: $('meta[name="csrf-token"]').attr("content"),
+                    },
+                    success: function (response) {
+                        Toastify({
+                            text: "Selected categories deleted successfully!",
+                            duration: 1500,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28a745",
+                            close: true,
+                        }).showToast();
+
+                        // Reload DataTable
+
+                        $('#bulk-delete-container').hide();
+                        $('.category-checkbox').prop('checked', false);
+                        $('#select-all-checkbox').prop('checked', false);
+                        $(".category-list-table").DataTable().ajax.reload(null, false);
+
+                    },
+                    error: function () {
+                        Swal.fire("Error", "Could not delete selected categories.", "error");
+                    },
+                });
+            }
+        });
+    });
+
+
 });

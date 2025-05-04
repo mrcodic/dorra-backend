@@ -23,6 +23,8 @@ class DashboardController extends Controller
     protected $relationsToStore = [];
     protected $usePagination = false;
     protected $successMessage;
+    protected string $resourceTable;
+
 
     public function __construct(public BaseService $service){}
 
@@ -94,6 +96,17 @@ class DashboardController extends Controller
     public function destroy(string $id)
     {
         $this->service->deleteResource($id);
+        return Response::api();
+
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:'.$this->resourceTable.',id'
+        ]);
+        $this->service->bulkDeleteResources($request->ids);
         return Response::api();
 
     }

@@ -34,6 +34,7 @@ class ProductController extends DashboardController
             ],
         ];
         $this->usePagination = true;
+        $this->resourceTable = 'products';
     }
 
     public function store(Request $request)

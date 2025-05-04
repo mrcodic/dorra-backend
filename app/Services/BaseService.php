@@ -59,5 +59,11 @@ class BaseService
         return $model->delete();
     }
 
+    public function bulkDeleteResources($ids)
+    {
+        return $this->repository->query()->whereIn('id',$ids)->delete();
+
+    }
+
 
 }

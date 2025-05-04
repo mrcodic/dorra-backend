@@ -9,7 +9,8 @@ use App\Http\Controllers\Dashboard\{OrderController,
     TagController,
     UserController,
     CategoryController,
-    ProfileController};
+    ProfileController
+};
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Rules\Role;
 
@@ -26,42 +27,52 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/users', UserController::class);
 
-    Route::prefix('/categories')->as('categories')->group(function () {
-        Route::get('/data', [CategoryController::class, 'getData'])->name('.data');
+    Route::group(['prefix' => 'categories', 'as' => 'categories.', 'controller' => CategoryController::class,], function () {
+        Route::get('/data', 'getData')->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
+    Route::delete('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
+
     Route::resource('/categories', CategoryController::class);
 
-    Route::prefix('/sub-categories')->as('sub-categories')->group(function () {
-        Route::get('/data', [SubCategoryController::class, 'getData'])->name('.data');
+    Route::group(['prefix' => 'sub-categories', 'as' => 'sub-categories.', 'controller' => SubCategoryController::class,],function () {
+        Route::get('/data', 'getData')->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/sub-categories', SubCategoryController::class);
 
-    Route::prefix('/products')->as('products')->group(function () {
-        Route::get('/data', [ProductController::class, 'getData'])->name('.data');
-    });
+    Route::group(['prefix' => 'products', 'as' => 'products.', 'controller' => ProductController::class,],(function () {
+        Route::get('/data', [ProductController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    }));
     Route::resource('/products', ProductController::class);
 
-    Route::prefix('/tags')->as('tags')->group(function () {
-        Route::get('/data', [TagController::class, 'getData'])->name('.data');
-    });
+    Route::group(['prefix' => 'tags', 'as' => 'tags.', 'controller' => TagController::class,],(function () {
+        Route::get('/data', [TagController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    }));
     Route::resource('/tags', TagController::class);
 
-    Route::prefix('/roles')->as('roles')->group(function () {
-        Route::get('/data', [RoleController::class, 'getData'])->name('.data');
+    Route::group(['prefix' => 'roles', 'as' => 'roles.', 'controller' => RoleController::class,],function () {
+        Route::get('/data', [RoleController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/roles', RoleController::class)->except(['show']);
 
-    Route::prefix('/permissions')->as('permissions')->group(function () {
-        Route::get('/data', [PermissionController::class, 'getData'])->name('.data');
+    Route::group(['prefix' => 'permissions', 'as' => 'permissions.', 'controller' => PermissionController::class,],function () {
+        Route::get('/data', [PermissionController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+
     });
     Route::resource('/permissions', PermissionController::class)->except(['show']);
 
-    Route::prefix('/orders')->as('orders')->group(function () {
-        Route::get('/data', [OrderController::class, 'getData'])->name('.data');
+    Route::group(['prefix' => 'orders', 'as' => 'orders.', 'controller' => OrderController::class,],function () {
+        Route::get('/data', [OrderController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/orders', OrderController::class)->except(['show']);
 
-    Route::resource('/profile',ProfileController::class)->only(['index','update']);
+    Route::resource('/profile', ProfileController::class)->only(['index', 'update']);
 
 
     Route::prefix('/api')->group(function () {

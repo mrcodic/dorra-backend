@@ -40,7 +40,9 @@
                 <table class="sub-category-list-table table">
                     <thead class="table-light">
                     <tr>
-                        <th></th>
+                        <th>
+                            <input type="checkbox" id="select-all-checkbox" >
+                        </th>
                         <th>Name</th>
                         <th>NO.of Products</th>
                         <th>Added Date</th>
@@ -48,6 +50,19 @@
                     </tr>
                     </thead>
                 </table>
+                <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                    <div class="delete-container">
+                        <p id="selected-count-text">0 Categories are selected</p>
+                        <form id="bulk-delete-form" method="POST" action="{{ route('categories.bulk-delete') }}">
+                            @csrf
+                            <button type="submit" id="delete-selected-btn"
+                                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                                <i data-feather="trash-2"></i> Delete Selected
+                            </button>
+                        </form>
+
+
+                    </div>
             </div>
             @include('modals/modal-show-sub-category')
             @include('modals/modal-edit-sub-category')
@@ -88,4 +103,53 @@
 
     {{-- Page js files --}}
     <script src="{{ asset('js/scripts/pages/app-sub-category-list.js') }}?v={{ time() }}"></script>
+    <script>
+        $(document).ready(function () {
+            // Select all toggle
+            $('#select-all-checkbox').on('change', function () {
+                $('.category-checkbox').prop('checked', this.checked);
+                updateBulkDeleteVisibility();
+            });
+
+            // When individual checkbox changes
+            $(document).on('change', '.category-checkbox', function () {
+                // If any is unchecked, uncheck "Select All"
+                if (!this.checked) {
+                    $('#select-all-checkbox').prop('checked', false);
+                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
+                    $('#select-all-checkbox').prop('checked', true);
+                }
+                updateBulkDeleteVisibility();
+            });
+
+
+            // On table redraw (e.g. pagination, search)
+            $(document).on('draw.dt', function () {
+                $('#bulk-delete-container').hide();
+                $('#select-all-checkbox').prop('checked', false);
+            });
+
+            // Close bulk delete container
+            $(document).on('click', '#close-bulk-delete', function () {
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+            });
+
+            // Update the bulk delete container visibility
+            function updateBulkDeleteVisibility() {
+                const selectedCheckboxes = $('.category-checkbox:checked');
+                const count = selectedCheckboxes.length;
+
+                if (count > 0) {
+                    $('#selected-count-text').text(`${count} Category${count > 1 ? 's' : ''} are selected`);
+                    $('#bulk-delete-container').show();
+                } else {
+                    $('#bulk-delete-container').hide();
+                }
+            }
+
+        });
+    </script>
+
 @endsection

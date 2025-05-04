@@ -20,6 +20,8 @@ class TagController extends DashboardController
         $this->createView = 'tags.create';
         $this->editView = 'tags.edit';
         $this->usePagination = true;
+        $this->resourceTable = 'tags';
+
     }
     public function getData(): JsonResponse
     {
