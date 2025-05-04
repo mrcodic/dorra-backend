@@ -228,7 +228,7 @@
                                 <h6 class="dropdown-header">Manage Profile</h6>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item"
-                                   href="javascript:void(0)">
+                                   href="/profile">
                                     <i class="me-50" data-feather="user"></i> Profile
                                 </a>
                                 @if (Auth::check() && Laravel\Jetstream\Jetstream::hasApiFeatures())

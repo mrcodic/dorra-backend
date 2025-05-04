@@ -52,15 +52,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex flex-column gap-1">
-                        <a href="javascript:;" class="btn btn-primary me-1 w-100" data-bs-target="#editUser"
-                            data-bs-toggle="modal">
-                            Edit User
-                        </a>
-                        <button class="btn btn-outline-danger me-1 w-100">
-                            Delete User
-                        </button>
-                    </div>
+
                 </div>
             </div>
             <!-- /User Card -->
@@ -136,6 +128,12 @@
                                     <label for="phone_number" class="form-label label-text ">Phone Number</label>
                                     <input type="tel" id="phone_number" name="phone_number" class="form-control" placeholder="Enter phone number" required>
                                 </div>
+                            </div>
+                            <!-- Buttons -->
+                            <div class="d-flex gap-1 justify-content-end mt-2">
+                                <button type="button" class="btn btn-outline-secondary  place-order fs-16">Cancel</button>
+                                <button type="button" class="btn btn-primary  place-order fs-16">Save</button>
+
                             </div>
                         </div>
                         <!-- Tab 2 content -->
@@ -280,10 +278,10 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content px-2 pb-2">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
-            
-                    <h5 class="modal-title fw-bold" id="teamAccessModalLabel">John Doe’s Team</h5>
 
-               
+                <h5 class="modal-title fw-bold" id="teamAccessModalLabel">John Doe’s Team</h5>
+
+
 
                 <!-- Invite input -->
                 <div class=" mb-2 d-flex justify-content-between">
