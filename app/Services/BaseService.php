@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Repositories\Base\BaseRepositoryInterface;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 
 class BaseService
 {
     protected array $relations = [];
+    protected array $filters = [];
 
 
     public function __construct(public BaseRepositoryInterface $repository){}
@@ -15,7 +17,7 @@ class BaseService
 
     public function getAll(bool $paginate = false, $columns = ['*'])
     {
-        return $this->repository->all($paginate, $columns, $this->relations);
+        return $this->repository->all($paginate, $columns, $this->relations , filters: $this->filters);
     }
 
     public function showResource($id)
@@ -31,7 +33,7 @@ class BaseService
         $model->load($this->relations);
 
         collect($relationsToStore)->map(function ($relation) use ($validatedData, $model) {
-            $model->{$relation}()->createMany($validatedData[$relation]);
+                $model->{$relation}()->createMany($validatedData[$relation]);
         });
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);

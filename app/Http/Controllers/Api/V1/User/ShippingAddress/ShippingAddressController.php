@@ -22,7 +22,7 @@ class ShippingAddressController extends Controller
 
     public function store(StoreShippingAddressRequest $request)
     {
-        $shippingAddress = $this->shippingAddressService->storeResource($request);
+        $shippingAddress = $this->shippingAddressService->storeResource($request->validated());
         return Response::api(data: ShippingAddressResource::make($shippingAddress));
     }
 

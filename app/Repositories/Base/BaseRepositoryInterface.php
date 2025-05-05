@@ -4,7 +4,7 @@ namespace App\Repositories\Base;
 
 interface BaseRepositoryInterface
 {
-    public function buildQuery($filters, $relations, $orderBy, $direction);
+    public function buildQuery($filters, $relations, $orderBy, $direction, $columns = ['*']);
     public function query($columns = ['*']);
     public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc',$filters = []);
     public function find($id);

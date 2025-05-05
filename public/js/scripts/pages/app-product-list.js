@@ -10,6 +10,20 @@ var dt_user_table = $(".product-list-table").DataTable({
     ajax: {
         url: productsDataUrl,
         type: "GET",
+        data: function (d) {
+            console.log(d.search.value)
+            if (d.search && d.search.value) {
+                d['filter[name]'] = d.search.value;
+            }
+            delete d.columns;
+            delete d.search;
+            delete d.order;
+            return d;
+        },
+        dataSrc: function (json) {
+            console.log("Returned JSON:", json); // Add this!
+            return json.data;
+        }
     },
     columns: [
         { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {

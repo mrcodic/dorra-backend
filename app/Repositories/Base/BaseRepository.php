@@ -12,10 +12,11 @@ class BaseRepository implements BaseRepositoryInterface
 {
     public function __construct(public $model){}
 
-    public function buildQuery($filters, $relations, $orderBy, $direction)
+    public function buildQuery($filters = [], $relations = [], $orderBy='created_at', $direction='asc', $columns = ['*'])
     {
         return QueryBuilder::for(get_class($this->model))
             ->allowedFilters($filters)
+            ->select($columns)
             ->with($relations)
             ->orderBy($orderBy, $direction);
     }

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
+use App\Models\Product;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\TagRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 use App\Http\Requests\Product\{StoreProductRequest, UpdateProductRequest};
 use App\Services\ProductService;
 
@@ -46,6 +49,18 @@ class ProductController extends DashboardController
 
     public function getData(): JsonResponse
     {
+        $products = QueryBuilder::for(Product::class)
+            ->select(['id', 'name', 'category_id', 'created_at'])
+            ->with([])
+            ->allowedFilters([
+                AllowedFilter::callback('name', function ($query, $value) {
+                    $locale = app()->getLocale();
+                    $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')) LIKE ?", ["%{$value}%"]);
+                }),
+            ])
+            ->withCount(['category', 'tags',])
+            ->get();
+        dd($products);
         return $this->productService->getData();
     }
 }

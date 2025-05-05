@@ -16,7 +16,7 @@ class ShippingAddressRepository extends BaseRepository implements ShippingAddres
     }
     public function getShippingAddressesForUser($user)
     {
-        return $user->shippingAddresses->load('state');
+        return $user->addresses ? $user->addresses->load('state') : [];
     }
 
 

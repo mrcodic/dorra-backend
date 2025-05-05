@@ -33,7 +33,10 @@ class DashboardController extends Controller
      */
     public function index(): View|Factory|Application
     {
-
+        if (request()->ajax()) {
+            dd("Dd");
+            return $this->service->getData();
+        }
         $data = $this->service->getAll($this->usePagination);
         $associatedData = $this->assoiciatedData['index'] ?? [];
         return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());
