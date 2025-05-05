@@ -2,14 +2,25 @@
 
 namespace App\Repositories\Base;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
+
 class BaseRepository implements BaseRepositoryInterface
 {
     public function __construct(public $model){}
 
-    public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc')
+    public function buildQuery($filters, $relations, $orderBy, $direction)
     {
-        $query = $this->model->with($relations)->orderBy($orderBy, $direction);
-
+        return QueryBuilder::for($this->model)
+            ->allowedFilters($filters)
+            ->with($relations)
+            ->orderBy($orderBy, $direction);
+    }
+    public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc',$filters = []): Collection|LengthAwarePaginator
+    {
+        $query =  $this->buildQuery($filters, $relations, $orderBy, $direction);
         return $paginate ? $query->paginate() : $query->get($columns);
     }
 
