@@ -19,7 +19,7 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
     public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc',$filters = []): \Illuminate\Database\Eloquent\Collection|\Illuminate\Pagination\LengthAwarePaginator
     {
 
-        $query =  $this->buildQuery($filters, $relations, $orderBy, $direction)->whereNull('parent_id');
+        $query =  parent::buildQuery($filters, $relations, $orderBy, $direction)->whereNull('parent_id');
         return $paginate ? $query->paginate() : $query->get($columns);
     }
     public function getWithFilters(): Collection
