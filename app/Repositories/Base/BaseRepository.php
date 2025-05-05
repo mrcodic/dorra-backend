@@ -2,10 +2,11 @@
 
 namespace App\Repositories\Base;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+
 
 class BaseRepository implements BaseRepositoryInterface
 {
@@ -13,7 +14,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function buildQuery($filters, $relations, $orderBy, $direction)
     {
-        return QueryBuilder::for($this->model)
+        return QueryBuilder::for(get_class($this->model))
             ->allowedFilters($filters)
             ->with($relations)
             ->orderBy($orderBy, $direction);
