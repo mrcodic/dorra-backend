@@ -4,11 +4,11 @@ $.ajaxSetup({
     },
 });
 
-var dt_user_table = $(".product-list-table").DataTable({
+var dt_user_table = $(".order-list-table").DataTable({
     processing: true,
     serverSide: true,
     ajax: {
-        url: productsDataUrl,
+        url: ordersDataUrl,
         type: "GET",
     },
     columns: [
@@ -53,10 +53,10 @@ var dt_user_table = $(".product-list-table").DataTable({
               <i data-feather="more-vertical"></i>
             </button>
             <div class="dropdown-menu">
-             <a href="/products/${data}" class="dropdown-item">
+             <a href="/orders/${data}" class="dropdown-item">
                 <i data-feather="file-text"></i> Details
               </a>
-               <a href="/products/${data}/edit" class="dropdown-item">
+               <a href="/orders/${data}/edit" class="dropdown-item">
                 <i data-feather="edit"></i> Edit
               </a>
 
@@ -91,10 +91,10 @@ var dt_user_table = $(".product-list-table").DataTable({
             },
         },
         {
-            text: "Add New Product",
+            text: "Add New Order",
             className: "add-new btn btn-outline-primary",
             action: function (e, dt, node, config) {
-                window.location.href = productsCreateUrl;
+                window.location.href = ordersCreateUrl;
             },
             init: function (api, node, config) {
                 $(node).removeClass("btn-secondary");

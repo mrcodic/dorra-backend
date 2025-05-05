@@ -70,7 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [OrderController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
-    Route::resource('/orders', OrderController::class)->except(['show']);
+    Route::resource('/orders', OrderController::class);
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);
 
