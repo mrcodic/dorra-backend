@@ -195,3 +195,10 @@
     align-items: center;
     justify-content: center;
 }
+ .lined-btn{
+	background:white;
+	border: none;
+	color: #24B094;
+	text-decoration: underline;
+
+ }
