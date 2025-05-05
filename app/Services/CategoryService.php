@@ -16,12 +16,6 @@ class CategoryService extends BaseService
 
     }
 
-    public function getAll(bool $paginate = false, $columns = ['*'])
-    {
-        return $this->repository->query($columns)->with($this->relations)
-            ->whereNull('parent_id')
-            ->get();
-    }
 
     public function getSubCategories()
     {
