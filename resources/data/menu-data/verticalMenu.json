@@ -26,47 +26,47 @@
                 {
                     "url": "/categories",
                     "name": "Categories",
-                    "icon": "",
+                    "icon": "circle",
                     "slug": "app-user-list"
                 },
                 {
                     "url": "/sub-categories",
                     "name": "Subcategories",
-                    "icon": "",
+                    "icon": "circle",
                     "slug": "app-user-list"
                 },
                 {
                     "url": "/tags",
                     "name": "Tags",
-                    "icon": "",
+                    "icon": "circle",
                     "slug": "app-user-list"
                 }
             ]
+        },   
+        {
+            "name": "Orders",
+            "icon": "file-text",
+            "slug": "",
+            "url": "/orders"
         },
         {
             "name": "Roles",
-            "icon": "grid",
+            "icon": "lock",
             "slug": "",
             "submenu": [
                 {
                     "url": "/permissions",
                     "name": "Permissions",
-                    "icon": "",
+                    "icon": "circle",
                     "slug": "app-user-list"
                 },
                 {
                     "url": "/roles",
                     "name": "Roles",
-                    "icon": "",
+                    "icon": "circle",
                     "slug": "app-user-list"
                 }
             ]
-        },
-        {
-            "name": "Orders",
-            "icon": "grid",
-            "slug": "",
-            "url": "/orders"
         }
     ]
 }

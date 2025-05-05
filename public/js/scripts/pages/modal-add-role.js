@@ -20,11 +20,23 @@
   });
 
   // Select All checkbox click
-  const selectAll = document.querySelector('#selectAll'),
-    checkboxList = document.querySelectorAll('[type="checkbox"]');
-  selectAll.addEventListener('change', t => {
-    checkboxList.forEach(e => {
-      e.checked = t.target.checked;
+    const selectAllGlobal = document.getElementById('selectAllGlobal');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
+
+    // Global "Select All"
+    selectAllGlobal.addEventListener('change', function () {
+      const checked = this.checked;
+      rowCheckboxes.forEach(row => row.checked = checked);
+      permissionCheckboxes.forEach(cb => cb.checked = checked);
     });
-  });
+
+    // Row-level select all
+    rowCheckboxes.forEach(rowCb => {
+      rowCb.addEventListener('change', function () {
+        const prefix = this.getAttribute('data-row');
+        const checkboxes = document.querySelectorAll(`.${prefix}-checkbox`);
+        checkboxes.forEach(cb => cb.checked = this.checked);
+      });
+    });
 })();
