@@ -51,7 +51,7 @@
         },
         {
             "name": "Roles",
-            "icon": "lock",
+            "icon": "shield",
             "slug": "",
             "submenu": [
                 {
