@@ -52,7 +52,8 @@
 
                 <input type="date" class="form-control border rounded-3" style="width: 120px; height: 38px;" />
 
-                <a class="btn btn-outline-primary ms-2" href="{{ route('categories.create') }}">Add New Category</a>
+                <a class="btn btn-outline-primary ms-2"  data-bs-toggle = "modal"
+                   data-bs-target= "#addCategoryModal">Add New Category</a>
             </div>
 
             <table class="category-list-table table">

@@ -9,6 +9,10 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
     ajax: {
         url: subCategoriesDataUrl,
         type: "GET",
+        data: function (d) {
+            d.search_value = $('#search-sub-category-form').val(); // get from input
+            return d;
+        }
     },
     columns: [
         { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
@@ -56,34 +60,12 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
     dom:
         '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
         '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
-        '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
         ">" +
         ">t" +
         '<"d-flex  mx-2 row mb-1"' +
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
         ">",
-    buttons: [
-        {
-            text: '<input type="date" class="form-control" style="width: 120px;" />',
-            className: "btn border-0",
-            action: function (e, dt, node, config) {
-                e.preventDefault();
-            },
-        },
-        {
-            text: "Add New Subcategory",
-            className: "add-new btn btn-outline-primary",
-            attr: {
-                "data-bs-toggle": "modal",
-                "data-bs-target": "#addSubCategoryModal",
-            },
-            init: function (api, node, config) {
-                $(node).removeClass("btn-secondary");
-            },
-        },
-    ],
     drawCallback: function () {
         feather.replace();
     },
@@ -97,7 +79,13 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
         },
     },
 });
-
+let searchTimeout;
+$('#search-sub-category-form').on('keyup', function () {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        dt_user_table.draw();
+    }, 300);
+});
 $(document).ready(function () {
     $(document).ready(function () {
         // Check if the product was added successfully

@@ -80,6 +80,11 @@ class CategoryService extends BaseService
             ->with(['parent'])
             ->withCount(['products'])
             ->whereNotNull('parent_id')
+            ->when(request()->filled('search_value'), function ($query) {
+                $locale = app()->getLocale();
+                $search = request('search_value');
+                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            })
             ->latest();
         return DataTables::of($categories)
             ->addColumn('name', function ($category) {
