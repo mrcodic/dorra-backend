@@ -41,7 +41,7 @@ class BaseService
         return $model;
     }
 
-    public function updateResource($id, $validatedData)
+    public function updateResource($validatedData, $id)
     {
         $model = $this->repository->update($validatedData, $id);
         $model->load($this->relations);
