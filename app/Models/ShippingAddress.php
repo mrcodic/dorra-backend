@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class ShippingAddress extends Model
 {
@@ -13,6 +14,7 @@ class ShippingAddress extends Model
     {
         return $this->belongsTo(State::class);
     }
+
 
     public function user(): BelongsTo
     {
