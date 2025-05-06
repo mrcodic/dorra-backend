@@ -37,6 +37,23 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive pt-0">
+                <div class="d-flex justify-content-between align-items-center gap-1 px-1">
+                    <form action="" method="get" class="flex-grow-1 me-1 position-relative" style="max-width: 75%;">
+                        <i data-feather="search" class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
+                        <input
+                            type="text"
+                            class="form-control ps-5 border rounded-3"
+                            name="search_value"
+                            id="search-product-form"
+                            placeholder="Search product..."
+                            style="height: 38px;">
+                    </form>
+
+                    <input type="date" class="form-control border rounded-3" style="width: 120px; height: 38px;" />
+
+                    <a class="btn btn-outline-primary ms-2" href="{{ route('products.create') }}">Add New Product</a>
+                </div>
+
                 <table class="product-list-table table">
                     <thead class="table-light">
                     <tr>

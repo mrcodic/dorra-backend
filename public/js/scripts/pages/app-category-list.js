@@ -66,17 +66,16 @@ const dt_user_table = $(".category-list-table").DataTable({
     dom:
         '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
         '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        '<"d-flex align-items-center flex-grow-1 me-2"f>' +
-        '<"d-flex align-items-center gap-1"B>' +
         ">" +
         ">t" +
         '<"d-flex mx-2 row mb-1"' +
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
         ">",
-    buttons: [
+    drawCallback: function () {
+        feather.replace();
+    },
 
-    ],
     language: {
         sLengthMenu: "Show _MENU_",
         search: "",

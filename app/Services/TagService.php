@@ -16,35 +16,40 @@ class TagService extends BaseService
 
     public function getData(): JsonResponse
     {
-        $categories = $this->repository
+        $tags = $this->repository
             ->query(['id', 'name','created_at'])
 //            ->withCount(['templates', 'products'])
             ->withCount(['products'])
+            ->when(request()->filled('search_value'), function ($query) {
+                $locale = app()->getLocale();
+                $search = request('search_value');
+                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            })
             ->latest();
-        return DataTables::of($categories)
-            ->addColumn('name', function ($category) {
-                return $category->getTranslation('name', app()->getLocale());
+        return DataTables::of($tags)
+            ->addColumn('name', function ($tag) {
+                return $tag->getTranslation('name', app()->getLocale());
             })
-            ->addColumn('name_en', function ($category) {
-                return $category->getTranslation('name', 'en');
+            ->addColumn('name_en', function ($tag) {
+                return $tag->getTranslation('name', 'en');
             })
-            ->addColumn('name_ar', function ($category) {
-                return $category->getTranslation('name', 'ar');
+            ->addColumn('name_ar', function ($tag) {
+                return $tag->getTranslation('name', 'ar');
             })
-            ->addColumn('added_date', function ($category) {
-                return $category->created_at?->format('d/n/Y');
+            ->addColumn('added_date', function ($tag) {
+                return $tag->created_at?->format('d/n/Y');
             })
-            ->addColumn('show_date', function ($category) {
-                return $category->created_at?->format('Y-m-d');
+            ->addColumn('show_date', function ($tag) {
+                return $tag->created_at?->format('Y-m-d');
             })
 
-            ->addColumn('no_of_products', function ($category) {
-                return $category->products_count;
+            ->addColumn('no_of_products', function ($tag) {
+                return $tag->products_count;
 
             })
-            ->addColumn('no_of_templates', function ($category) {
+            ->addColumn('no_of_templates', function ($tag) {
                 return 0;
-//                return $category->templates_count;
+//                return $tag->templates_count;
 
             })->make();
     }

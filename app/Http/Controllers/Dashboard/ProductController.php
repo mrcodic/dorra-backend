@@ -60,7 +60,6 @@ class ProductController extends DashboardController
             ])
             ->withCount(['category', 'tags',])
             ->get();
-        dd($products);
         return $this->productService->getData();
     }
 }

@@ -22,31 +22,23 @@ class ProductService extends BaseService
     {
         $this->relations = ['category', 'tags', 'reviews'];
 
-//        $this->filters = [
-//            AllowedFilter::callback('name', function ($query, $value) {
-//                $locale = app()->getLocale();
-//                $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')) LIKE ?", ["%{$value}%"]);
-//            }),
-//        ];
-
         parent::__construct($repository);
     }
 
 
     public function getData()
     {
-        $products = QueryBuilder::for(Product::class)
+        $products = $this->repository
+            ->query()
             ->with($this->relations)
             ->withCount(['category', 'tags',])
-            ->allowedFilters([
-                AllowedFilter::callback('name',function ($query, $value){
-                        $locale = app()->getLocale();
-                        $query->where("name->{$locale}", 'LIKE', "%{$value}%");
-                }),
+            ->when(request()->filled('search_value'), function ($query) {
+                $locale = app()->getLocale();
+                $search = request('search_value');
+                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            })
+            ->latest();
 
-            ])
-            ->latest()
-            ->get();
         return DataTables::of($products)
             ->addColumn('name', function (Product $product) {
                 return $product->getTranslation('name', app()->getLocale());
