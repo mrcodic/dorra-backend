@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\V1\User\General\MainController;
-use App\Http\Controllers\Dashboard\{AdminController, OrderController,
+use App\Http\Controllers\Dashboard\{AdminController,
+    InvoiceController,
+    OrderController,
     PermissionController,
     ProductController,
     RoleController,
@@ -9,8 +11,7 @@ use App\Http\Controllers\Dashboard\{AdminController, OrderController,
     TagController,
     UserController,
     CategoryController,
-    ProfileController
-};
+    ProfileController};
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Rules\Role;
 
@@ -76,6 +77,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/orders', OrderController::class);
+
+    Route::group(['prefix' => 'invoices', 'as' => 'invoices.', 'controller' => InvoiceController::class,],function () {
+        Route::get('/data', [InvoiceController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::resource('/invoices', OrderController::class)->except('show');
+
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);
 

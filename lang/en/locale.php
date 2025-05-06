@@ -7,6 +7,7 @@ return [
     "Analytics" => "Analytics",
     "eCommerce" => "eCommerce",
     "Apps" => "Apps",
+    "Invoices" => "Invoices",
     "Admins" => "Admins",
     "Products" => "Products",
     "Permissions" => "Permissions",

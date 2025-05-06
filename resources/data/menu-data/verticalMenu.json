@@ -72,6 +72,12 @@
                     "slug": "app-user-list"
                 }
             ]
+        },
+        {
+            "name": "Invoices",
+            "icon": "file-text",
+            "slug": "",
+            "url": "/invoices"
         }
     ]
 }
