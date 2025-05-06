@@ -35,6 +35,8 @@ class CategoryService extends BaseService
                 $locale = app()->getLocale();
                 $search = request('search_value');
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            })->when(request()->filled('created_at'), function ($query) {
+                $query->orderBy('created_at', request('created_at'));
             })
             ->latest();
 
@@ -84,6 +86,8 @@ class CategoryService extends BaseService
                 $locale = app()->getLocale();
                 $search = request('search_value');
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            })->when(request()->filled('created_at'), function ($query) {
+                $query->orderBy('created_at', request('created_at'));
             })
             ->latest();
         return DataTables::of($categories)

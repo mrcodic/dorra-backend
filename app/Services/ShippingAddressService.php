@@ -11,7 +11,7 @@ class ShippingAddressService extends BaseService
     public function __construct(ShippingAddressRepositoryInterface $repository)
     {
         parent::__construct($repository);
-        $this->relations = ['state'];
+        $this->relations = ['state', 'state.country'];
     }
 
     public function getUserShippingAddresses($user)
