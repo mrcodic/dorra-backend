@@ -38,6 +38,9 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive pt-0">
+                <form action="" method="get">
+                    <input type="text" class="w-100 " name="search_value" id="search-category-form">
+                </form>
                 <table class="category-list-table table">
                     <thead class="table-light">
                     <tr>
@@ -152,6 +155,21 @@
                     $('#bulk-delete-container').hide();
                 }
             }
+
+
+            $(document).on('change','#search-category-form',function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: {{ route("categories.data") }},
+                    method: "GET",
+                    success:function (response) {
+                        console.log(response)
+                    }
+                })
+
+            })
+
+
 
         });
     </script>
