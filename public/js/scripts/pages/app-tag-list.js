@@ -12,6 +12,8 @@ var dt_user_table = $('.tag-list-table').DataTable({
         type: 'GET',
         data: function (d) {
             d.search_value = $('#search-tag-form').val();
+            d.created_at = $('.filter-date').val();
+
             return d;
         }
     },
@@ -85,6 +87,10 @@ var dt_user_table = $('.tag-list-table').DataTable({
         searchTimeout = setTimeout(() => {
             dt_user_table.draw();
         }, 300);
+    });
+
+    $('.filter-date').on('change', function () {
+        dt_user_table.draw();
     });
 $(document).ready(function () {
 

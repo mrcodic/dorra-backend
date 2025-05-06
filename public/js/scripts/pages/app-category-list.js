@@ -12,6 +12,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         type: "GET",
         data: function (d) {
             d.search_value = $('#search-category-form').val(); // get from input
+            d.created_at = $('.filter-date').val();
             return d;
         }
     },
@@ -95,6 +96,13 @@ $('#search-category-form').on('keyup', function () {
         dt_user_table.draw();
     }, 300);
 });
+
+// Custom search with debounce
+
+$('.filter-date').on('change', function () {
+    dt_user_table.draw();
+});
+
 
 // Checkbox select all
 $('#select-all-checkbox').on('change', function () {

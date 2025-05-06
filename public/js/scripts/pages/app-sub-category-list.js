@@ -11,6 +11,7 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
         type: "GET",
         data: function (d) {
             d.search_value = $('#search-sub-category-form').val(); // get from input
+            d.created_at = $('.filter-date').val();
             return d;
         }
     },
@@ -86,6 +87,11 @@ $('#search-sub-category-form').on('keyup', function () {
         dt_user_table.draw();
     }, 300);
 });
+
+$('.filter-date').on('change', function () {
+    dt_user_table.draw();
+});
+
 $(document).ready(function () {
     $(document).ready(function () {
         // Check if the product was added successfully

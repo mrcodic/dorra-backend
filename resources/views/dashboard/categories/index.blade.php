@@ -46,14 +46,14 @@
                             type="text"
                             class="form-control ps-5 border rounded-3"
                             name="search_value"
-                            id="search-product-form"
+                            id="search-category-form"
                             placeholder="Search product..."
                             style="height: 38px;">
                     </form>
                 </div>
 
                 <div class="col-6 col-md-1 col-lg-2">
-                    <select name="created_at" class="form-select category-select">
+                    <select name="created_at" class="form-select filter-date">
                         <option value="">Date</option>
                             <option value="asc">asc</option>
                             <option value="desc">desc</option>

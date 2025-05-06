@@ -37,23 +37,34 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive pt-0">
-                <div class="d-flex justify-content-between align-items-center gap-1 px-1">
-                    <form action="" method="get" class="flex-grow-1 me-1 position-relative" style="max-width: 75%;">
-                        <i data-feather="search" class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
-                        <input
-                            type="text"
-                            class="form-control ps-5 border rounded-3"
-                            name="search_value"
-                            id="search-sub-category-form"
-                            placeholder="Search subCategory..."
-                            style="height: 38px;">
-                    </form>
+                <div class="row gx-2 gy-2 align-items-center px-1">
+                    <div class="col-12 col-md-6">
+                        <form action="" method="get" class="position-relative">
+                            <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                            <input
+                                type="text"
+                                class="form-control ps-5 border rounded-3"
+                                name="search_value"
+                                id="search-sub-category-form"
+                                placeholder="Search subcategory..."
+                                style="height: 38px;">
+                        </form>
+                    </div>
 
-                    <input type="date" class="form-control border rounded-3" style="width: 120px; height: 38px;" />
+                    <div class="col-6 col-md-1 col-lg-2">
+                        <select name="created_at" class="form-select filter-date">
+                            <option value="">Date</option>
+                            <option value="asc">asc</option>
+                            <option value="desc">desc</option>
+                        </select>
+                    </div>
 
-                    <a class="btn btn-outline-primary ms-2"  data-bs-toggle = "modal"
-                    data-bs-target= "#addSubCategoryModal">Add New subcategory</a>
+                    <div class="col-12 col-md-2 text-md-end">
+                        <a class="btn btn-outline-primary ms-2"  data-bs-toggle = "modal"
+                           data-bs-target= "#addSubCategoryModal">Add New subcategory</a>
+                    </div>
                 </div>
+
                 <table class="sub-category-list-table table">
                     <thead class="table-light">
                     <tr>
