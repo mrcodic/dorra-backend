@@ -36,6 +36,32 @@
             </div>
         </div>
         <div class="card-datatable table-responsive pt-0">
+            <div class="row gx-2 gy-2 align-items-center px-1">
+                <div class="col-12 col-md-6">
+                    <form action="" method="get" class="position-relative">
+                        <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                        <input
+                            type="text"
+                            class="form-control ps-5 border rounded-3"
+                            name="search_value"
+                            id="search-user-form"
+                            placeholder="Search user..."
+                            style="height: 38px;">
+                    </form>
+                </div>
+
+                <div class="col-6 col-md-1 col-lg-2">
+                    <select name="created_at" class="form-select filter-date">
+                        <option value="">Date</option>
+                        <option value="asc">asc</option>
+                        <option value="desc">desc</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-2 text-md-end">
+                    <a class="btn btn-outline-primary ms-2" href="{{ route("users.create") }}">Add New User</a>
+                </div>
+            </div>
             <table class="user-list-table table">
                 <thead class="table-light">
                     <tr>
