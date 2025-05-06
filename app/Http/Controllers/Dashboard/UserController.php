@@ -22,11 +22,9 @@ class UserController extends DashboardController
         $this->updateRequestClass = new UpdateUserRequest();
         $this->mergeSharedVariables = true;
         $this->assoiciatedData = [
-            'index' => [
-                'countries' => $this->countryRepository->all(),
-            ],
             'shared' => [
                 'country_codes' => CountryCode::all(),
+                'countries' => $this->countryRepository->all(),
             ],
         ];
 

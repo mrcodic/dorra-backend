@@ -22,7 +22,7 @@
 
 @section('content')
 <div class="bs-stepper checkout-tab-steps">
-    <form id="checkout-form" class="bs-stepper checkout-tab-steps" enctype="multipart/form-data">
+    <form id="checkout-form" class="bs-stepper checkout-tab-steps" enctype="multipart/form-data" action="{{ route("users.store") }}">
         <!-- Wizard starts -->
         <div class="bs-stepper-header">
             <div class="step" data-target="#step-info" role="tab" id="step-info-trigger">
@@ -79,7 +79,7 @@
                 <!-- Avatar Upload -->
                 <div class="mb-2 text-center">
                     <!-- Hidden input -->
-                    <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;" />
+                    <input type="file" id="avatarInput" name="image" accept="image/*" style="display: none;" />
 
                     <!-- Clickable avatar card -->
                     <div id="avatarCard" style="width: 150px; margin: auto; cursor: pointer;">
@@ -114,9 +114,9 @@
                     <div class="col-md-4">
                         <label for="country_code" class="form-label label-text ">Country Code</label>
                         <select id="country_code" name="country_code" class="form-select" required>
-                            <option value="+1">🇺🇸 +1</option>
-                            <option value="+44">🇬🇧 +44</option>
-                            <option value="+20">🇪🇬 +20</option>
+                            @foreach($associatedData['country_codes'] as $countryCode)
+                                <option value="{{ $countryCode->id }}" data-phone-code="{{ $countryCode->phone_code }}">{{ $countryCode->phone_code }} ({{ $countryCode->iso_code }})</option>
+                            @endforeach
                             <!-- Add more countries as needed -->
                         </select>
                     </div>
@@ -134,7 +134,7 @@
                             <span class="active-label rounded-3 status-label primary-text-color text-center d-flex justify-content-center align-items-center">Active</span>
                         </div>
 
-                        <input class="form-check-input" type="checkbox" id="account_status" name="account_status" checked>
+                        <input class="form-check-input" type="checkbox" id="account_status" name="status" checked>
                     </div>
                 </div>
                 <!-- Buttons -->
@@ -178,7 +178,7 @@
                                 type="password"
                                 class="form-control form-control-merge"
                                 id="login-password"
-                                name="confirm-password"
+                                name="password_confirmation"
                                 tabindex="2"
                                 placeholder="Confirm Password"
                                 aria-describedby="login-password" />
@@ -246,7 +246,9 @@
                             <label for="country-select" class="form-label">Country</label>
                             <select id="country-select" class="form-select country-select">
                                 <option value="">Select Country</option>
-                                <option>name</option>
+                                @foreach($associatedData['countries'] as $country)
+                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="w-50">

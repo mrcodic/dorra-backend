@@ -9,9 +9,15 @@ let dateSortOrder = "asc";
 var dt_user_table = $(".user-list-table").DataTable({
     processing: true,
     serverSide: true,
+    searching: false,
     ajax: {
         url: usersDataUrl,
         type: "GET",
+        data: function (d) {
+            d.search_value = $('#search-user-form').val(); // get from input
+            d.created_at = $('.filter-date').val();
+            return d;
+        }
     },
     columns: [
         {
@@ -61,16 +67,16 @@ var dt_user_table = $(".user-list-table").DataTable({
                 return `
         <div class="d-flex gap-1">
              <a href="/users/${data}" class="">
-                <i data-feather="eye"></i> 
+                <i data-feather="eye"></i>
               </a>
               <a href="/users/${data}/edit" class="">
-                <i data-feather="edit-3"></i> 
+                <i data-feather="edit-3"></i>
               </a>
 
               <a href="#" class=" text-danger delete-user" data-id="${data}">
-                <i data-feather="trash-2"></i> 
+                <i data-feather="trash-2"></i>
               </a>
-      
+
           </div>
         `;
             },
@@ -80,35 +86,12 @@ var dt_user_table = $(".user-list-table").DataTable({
     dom:
         '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
         '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
-        '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
         ">" +
         ">t" +
         '<"d-flex  mx-2 row mb-1"' +
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
         ">",
-    buttons: [
-        {
-            text: "Sort by Date",
-            className: "btn btn-outline-secondary mx-1",
-            action: function (e, dt, node, config) {
-                dateSortOrder = dateSortOrder === "asc" ? "desc" : "asc";
-                dt.order([[4, dateSortOrder]]).draw();
-            },
-        },
-        {
-            text: "Add New User",
-            className: "add-new btn btn-primary",
-            attr: {
-                "data-bs-toggle": "modal",
-                "data-bs-target": "#modals-slide-in",
-            },
-            init: function (api, node, config) {
-                $(node).removeClass("btn-secondary");
-            },
-        },
-    ],
     drawCallback: function () {
         feather.replace();
         $("#select-all-checkbox").prop("checked", false);
@@ -122,6 +105,21 @@ var dt_user_table = $(".user-list-table").DataTable({
             next: "&nbsp;",
         },
     },
+});
+
+// Custom search with debounce
+let searchTimeout;
+$('#search-user-form').on('keyup', function () {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        dt_user_table.draw();
+    }, 300);
+});
+
+// Custom search with debounce
+
+$('.filter-date').on('change', function () {
+    dt_user_table.draw();
 });
 
 // Listen to checkbox change
