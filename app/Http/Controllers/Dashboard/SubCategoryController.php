@@ -21,8 +21,10 @@ class SubCategoryController extends DashboardController
         $this->storeRequestClass = new StoreSubCategoryRequest();
         $this->updateRequestClass = new UpdateSubCategoryRequest();
         $this->indexView = 'subcategories.index';
-        $this->assoiciatedData['index'] = [
-            'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
+        $this->assoiciatedData = [
+            'index' => [
+                'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
+            ],
         ];
         $this->usePagination = true;
         $this->resourceTable = 'categories';

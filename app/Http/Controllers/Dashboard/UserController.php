@@ -20,13 +20,16 @@ class UserController extends DashboardController
         parent::__construct($userService);
         $this->storeRequestClass = new StoreUserRequest();
         $this->updateRequestClass = new UpdateUserRequest();
-        $this->assoiciatedData['index'] = [
-            'country_codes' => CountryCode::all(),
-            'countries' => $this->countryRepository->all(),
+        $this->mergeSharedVariables = true;
+        $this->assoiciatedData = [
+            'index' => [
+                'countries' => $this->countryRepository->all(),
+            ],
+            'shared' => [
+                'country_codes' => CountryCode::all(),
+            ],
         ];
-        $this->assoiciatedData['show'] = [
-            'country_codes' => CountryCode::all(),
-        ];
+
         $this->relationsToStore = ['addresses'];
         $this->indexView = 'users.index';
         $this->showView = 'users.show';

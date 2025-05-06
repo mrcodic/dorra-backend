@@ -24,21 +24,26 @@ class DashboardController extends Controller
     protected $usePagination = false;
     protected $successMessage;
     protected string $resourceTable;
+    protected bool $mergeSharedVariables = true;
 
 
     public function __construct(public BaseService $service){}
+
+    protected function getAssociatedData(string $context = 'shared'): array
+    {
+        $shared = $this->assoiciatedData['shared'] ?? [];
+        $custom = $this->assoiciatedData[$context] ?? [];
+        return $this->mergeSharedVariables ? array_merge($shared, $custom) : $custom;
+
+    }
 
     /**
      * Display a listing of the resource.
      */
     public function index(): View|Factory|Application
     {
-        if (request()->ajax()) {
-            dd("Dd");
-            return $this->service->getData();
-        }
         $data = $this->service->getAll($this->usePagination);
-        $associatedData = $this->assoiciatedData['index'] ?? [];
+        $associatedData = $this->getAssociatedData('index');
         return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());
     }
 
@@ -47,7 +52,7 @@ class DashboardController extends Controller
      */
     public function create(): View|Application|Factory
     {
-        $associatedData = $this->assoiciatedData['shared'] ?? [];
+        $associatedData = $this->getAssociatedData('create');
         return view(self::BASE_FOLDER . "{$this->createView}",get_defined_vars());
     }
 
@@ -64,10 +69,14 @@ class DashboardController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id): View|Application|Factory
+    public function show(string $id)
     {
+
         $model = $this->service->showResource($id);
-        $associatedData = $this->assoiciatedData['show'] ?? [];
+        $associatedData = $this->getAssociatedData('show');
+        if (request()->ajax()) {
+            return Response::api(data: $model);
+        }
         return view(self::BASE_FOLDER . "{$this->showView}", get_defined_vars());
     }
 
@@ -77,8 +86,7 @@ class DashboardController extends Controller
     public function edit(string $id): View|Application|Factory
     {
         $model = $this->service->showResource($id);
-        $associatedData = $this->assoiciatedData['shared'] ?? [];
-
+        $associatedData = $this->getAssociatedData('edit');
         return view(self::BASE_FOLDER . "{$this->editView}", get_defined_vars());
     }
 

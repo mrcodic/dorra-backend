@@ -13,14 +13,20 @@ var dt_user_table = $(".product-list-table").DataTable({
         type: "GET",
         data: function (d) {
             d.search_value = $('#search-product-form').val(); // get from input
+            d.category_id = $('.category-select').val();
+            d.tag_id = $('.tag-select').val();
             return d;
         }
     },
     columns: [
-        { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
-                console.log(data.id)
+        {
+            data: null,
+            defaultContent: "",
+            orderable: false,
+            render: function (data, type, row, meta) {
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            } },
+            }
+        },
         { data: "name" },
         { data: "category" },
         {
@@ -28,25 +34,14 @@ var dt_user_table = $(".product-list-table").DataTable({
             render: function (data, type, row) {
                 if (!Array.isArray(JSON.parse(data))) return '';
                 return `
-            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                ${JSON.parse(data)
-                    .map(
-                        tag => `
-                        <span style="
-                            background-color: #FCF8FC;
-                            color: #000;
-                            padding: 6px 12px;
-                            border-radius: 12px;
-                            font-size: 14px;
-                            display: inline-block;
-                        ">
-                            ${tag}
-                        </span>`
-                    )
-                    .join("")}
-            </div>
-        `;
-            },
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        ${JSON.parse(data).map(tag => `
+                            <span style="background-color: #FCF8FC; color: #000; padding: 6px 12px; border-radius: 12px; font-size: 14px;">
+                                ${tag}
+                            </span>`).join("")}
+                    </div>
+                `;
+            }
         },
         { data: "no_of_purchas" },
         { data: "added_date" },
@@ -56,31 +51,28 @@ var dt_user_table = $(".product-list-table").DataTable({
             orderable: false,
             render: function (data, type, row, meta) {
                 return `
-          <div class="dropdown">
-            <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-              <i data-feather="more-vertical"></i>
-            </button>
-            <div class="dropdown-menu">
-             <a href="/products/${data}" class="dropdown-item">
-                <i data-feather="file-text"></i> Details
-              </a>
-               <a href="/products/${data}/edit" class="dropdown-item">
-                <i data-feather="edit"></i> Edit
-              </a>
-
-
-              <a href="#" class="dropdown-item text-danger delete-product" data-id="${data}">
-                <i data-feather="trash-2"></i> Delete
-              </a>
-            </div>
-          </div>
-        `;
-            },
-        },
+                    <div class="dropdown">
+                        <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i data-feather="more-vertical"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="/products/${data}" class="dropdown-item">
+                                <i data-feather="file-text"></i> Details
+                            </a>
+                            <a href="/products/${data}/edit" class="dropdown-item">
+                                <i data-feather="edit"></i> Edit
+                            </a>
+                            <a href="#" class="dropdown-item text-danger delete-product" data-id="${data}">
+                                <i data-feather="trash-2"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
     ],
     order: [[1, "asc"]],
-    dom:
-        '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
+    dom: '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
         '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
         ">" +
         ">t" +
@@ -89,9 +81,8 @@ var dt_user_table = $(".product-list-table").DataTable({
         '<"col-sm-12 col-md-6"p>' +
         ">",
     drawCallback: function () {
-        feather.replace();
+        feather.replace(); // Re-initialize feather icons
     },
-
     language: {
         sLengthMenu: "Show _MENU_",
         search: "",
@@ -102,6 +93,8 @@ var dt_user_table = $(".product-list-table").DataTable({
         },
     },
 });
+
+// Search input with timeout (for better performance)
 let searchTimeout;
 $('#search-product-form').on('keyup', function () {
     clearTimeout(searchTimeout);
@@ -109,6 +102,25 @@ $('#search-product-form').on('keyup', function () {
         dt_user_table.draw();
     }, 300);
 });
+
+// Category select with timeout (corrected to use 'change' event)
+let categoryFilterTimeout;
+$('.category-select').on('change', function () {
+    clearTimeout(categoryFilterTimeout);
+    categoryFilterTimeout = setTimeout(() => {
+        dt_user_table.draw(); // Trigger table redraw
+    }, 300);
+});
+
+// TAg select with timeout (corrected to use 'change' event)
+let tagFilterTimeout;
+$('.tag-select').on('change', function () {
+    clearTimeout(tagFilterTimeout);
+    tagFilterTimeout = setTimeout(() => {
+        dt_user_table.draw(); // Trigger table redraw
+    }, 300);
+});
+
 $(document).ready(function () {
     $(document).ready(function () {
         // Check if the product was added successfully

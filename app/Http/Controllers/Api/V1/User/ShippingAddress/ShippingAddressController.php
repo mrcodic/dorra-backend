@@ -26,6 +26,12 @@ class ShippingAddressController extends Controller
         return Response::api(data: ShippingAddressResource::make($shippingAddress));
     }
 
+    public function show($id)
+    {
+        $shippingAddress = $this->shippingAddressService->showResource($id);
+        return Response::api(data: ShippingAddressResource::make($shippingAddress));
+    }
+
     public function update(UpdateShippingAddressRequest $request, ShippingAddress $shippingAddress)
     {
         $shippingAddress = $this->shippingAddressService->updateResource($request, $shippingAddress->id);

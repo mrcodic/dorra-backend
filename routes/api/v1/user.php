@@ -48,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('password/update', PasswordController::class);
     Route::get('notification-types',UserNotificationTypeController::class);
 
-    Route::apiResource('shipping-addresses', ShippingAddressController::class)->except('show');
+    Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
     Route::apiResource('products',ProductController::class)->only(['index','show']);
     Route::controller(SaveController::class)->group(function () {

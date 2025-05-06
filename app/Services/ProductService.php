@@ -37,6 +37,14 @@ class ProductService extends BaseService
                 $search = request('search_value');
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
             })
+            ->when(request()->filled('category_id'), function ($query) {
+                $query->whereCategoryId(request()->get('category_id'));
+            })
+            ->when(request()->filled('tag_id'), function ($query) {
+                $query->whereHas('tags', function ($query) {
+                    $query->whereKey(request('tag_id'));
+                });
+            })
             ->latest();
 
         return DataTables::of($products)

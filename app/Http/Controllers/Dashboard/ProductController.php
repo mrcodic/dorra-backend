@@ -49,17 +49,6 @@ class ProductController extends DashboardController
 
     public function getData(): JsonResponse
     {
-        $products = QueryBuilder::for(Product::class)
-            ->select(['id', 'name', 'category_id', 'created_at'])
-            ->with([])
-            ->allowedFilters([
-                AllowedFilter::callback('name', function ($query, $value) {
-                    $locale = app()->getLocale();
-                    $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')) LIKE ?", ["%{$value}%"]);
-                }),
-            ])
-            ->withCount(['category', 'tags',])
-            ->get();
         return $this->productService->getData();
     }
 }
