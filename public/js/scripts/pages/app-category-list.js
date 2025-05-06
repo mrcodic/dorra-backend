@@ -75,23 +75,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         '<"col-sm-12 col-md-6"p>' +
         ">",
     buttons: [
-        {
-            text: '<input type="date" class="form-control" style="width: 120px;" />',
-            className: "btn border-0",
-            action: function (e) {
-                e.preventDefault();
-            }
-        },
-        {
-            text: "Add New Product",
-            className: "add-new btn btn-outline-primary",
-            action: function () {
-                window.location.href = categoriesCreateUrl;
-            },
-            init: function (api, node) {
-                $(node).removeClass("btn-secondary");
-            }
-        }
+
     ],
     language: {
         sLengthMenu: "Show _MENU_",
