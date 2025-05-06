@@ -7,6 +7,11 @@
             "url": "/"
         },
         {
+            "name": "Admins",
+            "icon": "users",
+            "url": "/admins"
+        },
+        {
             "name": "Users",
             "icon": "users",
             "slug": "",
@@ -42,7 +47,7 @@
                     "slug": "app-user-list"
                 }
             ]
-        },   
+        },
         {
             "name": "Orders",
             "icon": "file-text",

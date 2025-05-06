@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\User\General\MainController;
-use App\Http\Controllers\Dashboard\{OrderController,
+use App\Http\Controllers\Dashboard\{AdminController, OrderController,
     PermissionController,
     ProductController,
     RoleController,
@@ -26,6 +26,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/billing/{user}', [UserController::class, 'billing'])->name('.billing');
     });
     Route::resource('/users', UserController::class);
+
+    Route::prefix('/admins')->as('admins')->group(function () {
+        Route::get('/data', [AdminController::class, 'getData'])->name('.data');
+    });
+    Route::resource('/admins', AdminController::class);
 
     Route::group(['prefix' => 'categories', 'as' => 'categories.', 'controller' => CategoryController::class,], function () {
         Route::get('/data', 'getData')->name('data');

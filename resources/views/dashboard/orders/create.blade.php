@@ -10,7 +10,7 @@
 @endsection
 
 @section('content')
-<div class="container bg-white " style="min-height: 100vh;padding-top:160px;padding-left:146px;padding-right:146px">
+<div class="container bg-white rounded-3 " style="min-height: 100vh;padding-top:160px;padding-left:146px;padding-right:146px">
     <!-- Step 1 -->
     <!-- Step 1 -->
     <div id="step-1">

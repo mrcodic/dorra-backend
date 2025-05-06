@@ -16,10 +16,6 @@ class AdminController extends DashboardController
        $this->storeRequestClass = new StoreAdminRequest();
        $this->updateRequestClass = new UpdateAdminRequest();
        $this->indexView = 'admins.index';
-       $this->createView = 'admins.create';
-       $this->editView = 'admins.edit';
-       $this->showView = 'admins.show';
        $this->usePagination = true;
-       $this->successMessage = 'Process success';
    }
 }
