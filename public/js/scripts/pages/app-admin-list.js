@@ -43,7 +43,10 @@ const dt_user_table = $(".category-list-table").DataTable({
                 <i data-feather="edit-3"></i> 
               </a>
 
-              <a href="#" class=" text-danger delete-user" data-id="${data}">
+              <a  class=" text-danger delete-user" 
+                  href=""
+                 data-bs-toggle="modal"
+                 data-bs-target="#deleteModal">
                 <i data-feather="trash-2"></i> 
               </a>
       

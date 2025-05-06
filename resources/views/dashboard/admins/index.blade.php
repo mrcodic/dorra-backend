@@ -89,6 +89,7 @@
         </div>
         @include('modals/admins/add-admin')
         @include('modals/admins/edit-admin')
+        @include('modals/delete')
 
 
     </div>
