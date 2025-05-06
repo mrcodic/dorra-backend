@@ -82,7 +82,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [InvoiceController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
-    Route::resource('/invoices', OrderController::class)->except('show');
+    Route::resource('/invoices', InvoiceController::class)->except('show');
 
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);
