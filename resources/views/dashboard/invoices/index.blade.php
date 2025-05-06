@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Orders')
-@section('main-page', 'Orders')
+@section('title', 'Invoices')
+@section('main-page', 'Invoices')
 
 @section('vendor-style')
 {{-- Page Css files --}}
@@ -26,151 +26,82 @@
 
 @section('content')
 <div class="container card p-1">
+    <div class="row mb-3">
+        @php
+        $stats = [
+        ['icon' => 'images/users.svg', 'title' => 'Clients', 'count' => 1280, 'label' => 'Clients'],
+        ['icon' => 'images/file.svg', 'title' => 'Invoices', 'count' => 342, 'label' => 'Invoices'],
+        ['icon' => 'images/success.svg', 'title' => 'Paid', 'count' => '12,500', 'label' => 'EGP'],
+        ['icon' => 'images/warning-duo-orange.svg', 'title' => 'Pending', 'count' => 218, 'label' => 'EGP'],
+        ['icon' => 'images/warning-duo-red.svg', 'title' => 'Unpaid', 'count' => 218, 'label' => 'EGP'],
+        ];
+        @endphp
 
-    <!-- Newest Orders -->
-    <div class=" mb-2">
-        <div class=" d-flex  align-items-center collapsed-toggle" data-bs-toggle="collapse" data-bs-target="#newestOrders" aria-expanded="true" style="cursor: pointer;">
-            <i data-feather="chevron-up" class="toggle-icon" data-target="#newestOrders"></i>
-            <h4 class="mb-0 text-black">Newest Orders</h4>
-        </div>
-        <div id="newestOrders" class="collapse show">
-            <div class="row m-1">
-                <div class=" col-md-6  shadow rounded  p-1">
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div class="d-flex justify-content-start align-items-center">
-                            <!-- Images section -->
-                            <div class="d-flex flex-column align-items-start me-1">
-                                <div class="d-flex">
-                                    <img src="{{asset('images/portrait/small/avatar-s-2.jpg') }}" class="order-img me-1 mb-1" alt="Product 1">
-                                    <img src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}" class="order-img me-1 mb-1" alt="Product 2">
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <img src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}" class="order-img me-1" alt="Product 3">
-                                    <div class="more-images-box">+2</div>
-                                </div>
-                            </div>
-
-                            <!-- Order details -->
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-1">Order #1234</h6>
-                                <p class="mb-1 text-muted">Items: Shampoo, Conditioner, Towel</p>
-                                <p class="mb-1 fw-semibold">Total: $45.00</p>
-                                <p class="text-muted small">Placed on: 2025-05-03</p>
-                            </div>
-                        </div>
-
-                        <!-- Status -->
-
-                        <div class="d-flex align-items-center status-pill justify-content-center">
-                            <div class="status-icon me-1">
-                                <i data-feather="box"></i> <!-- Change icon based on status -->
-                            </div>
-                            <span class="status-text">Placed</span>
-                        </div>
-                    </div>
+        @foreach ($stats as $stat)
+        <div class="col border rounded-3 mx-1 ">
+            <div class="card p-1 shadow-sm text-center h-100 d-flex flex-coloumn justify-content-between ">
+                <div class="d-flex align-items-center justify-content-start gap-1 mb-1">
+                    <img src="{{ asset($stat['icon']) }}" alt="{{ $stat['title'] }}" width="28" height="28">
+                    <h6 class="mb-0">{{ $stat['title'] }}</h6>
                 </div>
-
+                <div class="d-flex justify-content-start align-items-baseline">
+                    <p class=" me-1  fs-2 text-black fw-bolder">{{ $stat['count'] }}</p>
+                    <p class="fs-16 text-black">{{ $stat['label'] }}</p>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Delivered Orders -->
-    <div class=" mb-2">
-        <div class=" d-flex align-items-center collapsed-toggle" data-bs-toggle="collapse" data-bs-target="#deliveredOrders" aria-expanded="false" style="cursor: pointer;">
-            <i data-feather="chevron-down" class="toggle-icon" data-target="#deliveredOrders"></i>
-            <h4 class="mb-0 text-black"> Delivered Orders</h4>
-        </div>
-        <div id="deliveredOrders" class="collapse">
-            <div class="row m-1">
-                <div class=" col-md-6  shadow rounded  p-1">
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div class="d-flex justify-content-start align-items-center">
-                            <!-- Images section -->
-                            <div class="d-flex flex-column align-items-start me-1">
-                                <div class="d-flex">
-                                    <img src="{{asset('images/portrait/small/avatar-s-2.jpg') }}" class="order-img me-1 mb-1" alt="Product 1">
-                                    <img src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}" class="order-img me-1 mb-1" alt="Product 2">
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <img src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}" class="order-img me-1" alt="Product 3">
-                                    <div class="more-images-box">+2</div>
-                                </div>
-                            </div>
-
-                            <!-- Order details -->
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-1">Order #1234</h6>
-                                <p class="mb-1 text-muted">Items: Shampoo, Conditioner, Towel</p>
-                                <p class="mb-1 fw-semibold">Total: $45.00</p>
-                                <p class="text-muted small">Placed on: 2025-05-03</p>
-                            </div>
-                        </div>
-
-                        <!-- Status -->
-
-                        <div class="d-flex align-items-center status-pill justify-content-center">
-                            <div class="status-icon me-1">
-                                <i data-feather="truck"></i> <!-- Change icon based on status -->
-                            </div>
-                            <span class="status-text">Delivered</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+        @endforeach
     </div>
 
 
     <!-- users list start -->
-<section class="app-user-list">
+    <section class="app-user-list">
 
-<!-- list and filter start -->
-<div class="card">
-    <div class="card-body ">
-
-        <div class="row">
-            <div class="col-md-4 user_role"></div>
-            <div class="col-md-4 user_plan"></div>
-            <div class="col-md-4 user_status"></div>
-        </div>
-    </div>
-    <div class="card-datatable table-responsive pt-0">
-        <table class="order-list-table table">
-            <thead class="table-light">
-                <tr>
-                    <th>
-                        <input type="checkbox" id="select-all-checkbox">
-                    </th>
-                    <th>Order Number</th>
-                    <th>Customer</th>
-                    <th>Items</th>
-                    <th>Price</th>
-                    <th>Order Status</th>
-                    <th>Added Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-        </table>
-        <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-            <div class="delete-container">
-                <p id="selected-count-text">0 Products are selected</p>
-                <button id="delete-selected-btn" class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
-                        <i data-feather="trash-2"></i> Delete Selected
-                    </button>
+        <!-- list and filter start -->
+        <div class="card">
+            <div class="card-body ">
+                <div class="row">
+                    <div class="col-md-4 user_role"></div>
+                    <div class="col-md-4 user_plan"></div>
+                    <div class="col-md-4 user_status"></div>
+                </div>
             </div>
+            <div class="card-datatable table-responsive pt-0">
+                <table class="order-list-table table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="select-all-checkbox">
+                            </th>
+                            <th>Order Number</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Price</th>
+                            <th>Order Status</th>
+                            <th>Added Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                    <div class="delete-container">
+                        <p id="selected-count-text">0 Products are selected</p>
+                        <button id="delete-selected-btn" class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
+                            <i data-feather="trash-2"></i> Delete Selected
+                        </button>
+                    </div>
+                </div>
+
+
+            </div>
+            @include('modals/modal-show-category')
+            @include('modals/modal-edit-category')
+            @include('modals/modal-add-category')
+
         </div>
-
-
-    </div>
-    @include('modals/modal-show-category')
-    @include('modals/modal-edit-category')
-    @include('modals/modal-add-category')
-
-</div>
-<!-- list and filter end -->
-</section>
-<!-- users list ends -->
+        <!-- list and filter end -->
+    </section>
+    <!-- users list ends -->
 </div>
 
 @endsection
