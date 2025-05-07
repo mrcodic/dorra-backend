@@ -75,9 +75,23 @@
         },
         {
             "name": "Invoices",
-            "icon": "file-text",
+            "icon": "dollar-sign",
             "slug": "",
             "url": "/invoices"
+        },
+        {
+            "name": "Discount",
+            "icon": "percent",
+            "slug": "",
+            "submenu": [
+                {
+                    "name": "DiscountCodes",
+                    "icon": "circle",
+                    "slug": "",
+                    "url": "/discount-codes"
+                }
+            ]
         }
+        
     ]
 }
