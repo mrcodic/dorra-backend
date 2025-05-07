@@ -9,8 +9,6 @@ use App\Repositories\Interfaces\TagRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 use App\Http\Requests\Product\{StoreProductRequest, UpdateProductRequest};
 use App\Services\ProductService;
 

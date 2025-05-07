@@ -127,31 +127,34 @@ class ProductService extends BaseService
         return $product;
     }
 
-    public function updateResource($id, $validatedData)
+    public function updateResource($validatedData, $id)
     {
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
         if (isset($validatedData['prices'])) {
             collect($validatedData['prices'])->each(function ($price) use ($product) {
-                $product->prices()->update($price);
+                $product->prices()->updateOrCreate([
+                    'product_id' => $product->id,
+                ],$price);
             });
 
         }
         collect($validatedData['specifications'])->map(function ($specification) use ($product) {
+            dd($specification);
             $productSpecification = tap($product->specifications()->first(), function ($spec) use ($specification) {
-                $spec->update([
+                $spec->updateOrCreate([
                     'name' => [
                         'en' => $specification['name_en'],
                         'ar' => $specification['name_ar'],
                     ],
-                ]);
+                ],[]);
             });
 
 
             collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
                 $productOption = tap($productSpecification->options()->first(),function ($spec) use ($option){
-                    $spec->update([
+                    $spec->updateOrCreate([
                         'value' => [
                             'en' => $option['value_en'],
                             'ar' => $option['value_ar'],
@@ -176,7 +179,6 @@ class ProductService extends BaseService
             handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
 
         }
-
         return $product;
     }
 

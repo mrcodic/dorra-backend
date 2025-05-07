@@ -12,17 +12,19 @@ class BaseService
     protected array $filters = [];
 
 
-    public function __construct(public BaseRepositoryInterface $repository){}
+    public function __construct(public BaseRepositoryInterface $repository)
+    {
+    }
 
 
     public function getAll(bool $paginate = false, $columns = ['*'])
     {
-        return $this->repository->all($paginate, $columns, $this->relations , filters: $this->filters);
+        return $this->repository->all($paginate, $columns, $this->relations, filters: $this->filters);
     }
 
     public function showResource($id)
     {
-        $model = $this->repository->find($id,$this->relations);
+        $model = $this->repository->find($id, $this->relations);
         return $model;
 
     }
@@ -31,9 +33,11 @@ class BaseService
     {
         $model = $this->repository->create($validatedData);
         $model->load($this->relations);
-
         collect($relationsToStore)->map(function ($relation) use ($validatedData, $model) {
+            if (isset($validatedData[$relation])) {
                 $model->{$relation}()->createMany($validatedData[$relation]);
+            }
+            $model->{$relation}()->create($validatedData);;
         });
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
@@ -63,7 +67,7 @@ class BaseService
 
     public function bulkDeleteResources($ids)
     {
-        return $this->repository->query()->whereIn('id',$ids)->delete();
+        return $this->repository->query()->whereIn('id', $ids)->delete();
 
     }
 

@@ -312,6 +312,19 @@
         $('#bulk-delete-container').hide();
         $('.category-checkbox').prop('checked', false); // uncheck all
     });
+
+    if (localStorage.getItem("userAdded") === 1) {
+        Toastify({
+            text: "User added successfully!",
+            duration: 4000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#28a745",
+            close: true,
+        }).showToast();
+
+        localStorage.removeItem("userAdded"); // Clear it so it doesn't show again
+    }
 </script>
 
 

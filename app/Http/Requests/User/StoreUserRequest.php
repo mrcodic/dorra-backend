@@ -49,24 +49,14 @@ class StoreUserRequest extends BaseRequest
             'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'country_code_id' => ['required', 'exists:country_codes,id'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
-            'addresses' => ['required', 'array', 'min:1'],
-            'addresses.*.label' => ['required', 'string', 'min:3'],
-            'addresses.*.line' => ['required', 'string', 'min:3'],
-            'addresses.*.state_id' => ['required', 'integer', 'exists:states,id'],];
+            'label' => ['required', 'string', 'min:3'],
+            'line' => ['required', 'string', 'min:3'],
+            'state_id' => ['required', 'integer', 'exists:states,id'],];
 
 
     }
 
-    public function messages(): array
-    {
-        return [
-            'addresses.*.label.required' => 'Each address must have a label (e.g., Home, Work).',
-            'addresses.*.label.min' => 'Address label must be at least :min characters.',
-            'addresses.*.line.required' => 'Each address must have a street or line value.',
-            'addresses.*.state_id.required' => 'Each address must have a valid state selected.',
-            'addresses.*.state_id.exists' => 'The selected state is not valid.',
-        ];
-    }
+
 
 
 

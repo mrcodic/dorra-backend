@@ -22,7 +22,8 @@
 
 @section('content')
 <div class="bs-stepper checkout-tab-steps">
-    <form id="checkout-form" class="bs-stepper checkout-tab-steps" method="post" enctype="multipart/form-data" action="{{ route("users.store") }}">
+    <form id="checkout-form" class="bs-stepper checkout-tab-steps add-new-user" method="post" enctype="multipart/form-data" action="{{ route("users.store") }}">
+        @csrf
         <!-- Wizard starts -->
         <div class="bs-stepper-header">
             <div class="step" data-target="#step-info" role="tab" id="step-info-trigger">
@@ -113,7 +114,7 @@
                 <div class="row mb-2">
                     <div class="col-md-4">
                         <label for="country_code" class="form-label label-text ">Country Code</label>
-                        <select id="country_code" name="country_code" class="form-select" required>
+                        <select id="country_code" name="country_code_id" class="form-select" required>
                             @foreach($associatedData['country_codes'] as $countryCode)
                                 <option value="{{ $countryCode->id }}" data-phone-code="{{ $countryCode->phone_code }}">{{ $countryCode->phone_code }} ({{ $countryCode->iso_code }})</option>
                             @endforeach
@@ -200,28 +201,28 @@
                     <!-- Cardholder Name (Optional) Label -->
                     <div class="mb-1">
                         <label class="form-label">Cardholder Name (Optional)</label>
-                        <input type="text" name="label" id="addresses.*.label" class="form-control" placeholder="Enter cardholder name" />
+                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter cardholder name" />
                     </div>
                     <div class="mb-1">
                         <label class="form-label">Card Number</label>
-                        <input type="text" name="label" id="addresses.*.label" class="form-control" placeholder="Enter Card Number" />
+                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter Card Number" />
                     </div>
                     <!-- Country and State -->
                     <div class="d-flex justify-content-between gap-1 mb-1">
                         <div class="w-50">
                             <label class="form-label">Expiration Date</label>
-                            <input type="date" name="label" id="addresses.*.label" class="form-control" placeholder="Expiration Date" />
+                            <input type="date" name="label" id="label" class="form-control" placeholder="Expiration Date" />
                         </div>
                         <div class="w-50">
                             <label class="form-label">CVV</label>
-                            <input type="text" name="label" id="addresses.*.label" class="form-control" placeholder="Enter CVV" />
+                            <input type="text" name="label" id="label" class="form-control" placeholder="Enter CVV" />
                         </div>
                     </div>
 
                     <!-- Address Line -->
                     <div class="mb-1">
-                        <label for="addresses.*.line" class="form-label">Email Address</label>
-                        <input type="text" name="line" id="addresses.*.line" class="form-control" placeholder="Enter email address" />
+                        <label for="line" class="form-label">Email Address</label>
+                        <input type="text" name="line" id="line" class="form-control" placeholder="Enter email address" />
                     </div>
 
                     <div class="d-flex gap-1 justify-content-end">
@@ -236,8 +237,8 @@
                 <div id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">
                     <!-- Address Label -->
                     <div class="mb-1">
-                        <label for="addresses.*.label" class="form-label">Address Label</label>
-                        <input type="text" name="label" id="addresses.*.label" class="form-control" placeholder="Enter Address Label" />
+                        <label for="label" class="form-label">Address Label</label>
+                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter Address Label" />
                     </div>
 
                     <!-- Country and State -->
@@ -252,8 +253,8 @@
                             </select>
                         </div>
                         <div class="w-50">
-                            <label for="addresses.*.state_id" class="form-label">State</label>
-                            <select name="state_id" id="addresses.*.state_id" class="form-select state-select">
+                            <label for="state_id" class="form-label">State</label>
+                            <select name="state_id" id="state_id" class="form-select state-select">
                                 <option value="">Select State</option>
                             </select>
                         </div>
@@ -261,8 +262,8 @@
 
                     <!-- Address Line -->
                     <div class="mb-1">
-                        <label for="addresses.*.line" class="form-label">Address Line</label>
-                        <input type="text" name="line" id="addresses.*.line" class="form-control" placeholder="Enter Address Line" />
+                        <label for="line" class="form-label">Address Line</label>
+                        <input type="text" name="line" id="line" class="form-control" placeholder="Enter Address Line" />
                     </div>
 
                     <!-- Buttons -->
@@ -320,8 +321,7 @@
     $(document).on("change", ".country-select", function () {
 
         const countryId = $(this).val();
-        const stateSelect = $(this)
-            .find(".state-select");
+        const stateSelect = $(".state-select");
         if (countryId) {
             $.ajax({
                 url: "{{ route('states') }}",  // Make sure this is wrapped in quotes for the URL
@@ -351,6 +351,45 @@
                 .empty()
                 .append('<option value="">Select State</option>');
         }
+    });
+
+    $(".add-new-user").submit(function (event) {
+        event.preventDefault();
+
+        var form = $(this);
+        var actionUrl = form.attr("action");
+
+        let formData = new FormData(form[0]);
+        $.ajax({
+            url: actionUrl,
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    localStorage.setItem('UserAdded',1);
+                    window.location.href = "/users";
+
+                }
+            },
+            error: function (xhr) {
+                var errors = xhr.responseJSON.errors;
+
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        Toastify({
+                            text: errors[key][0],
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455", // red for errors
+                            close: true,
+                        }).showToast();
+                    }
+                }
+            },
+        });
     });
 
 </script>

@@ -1,7 +1,8 @@
 @extends('layouts/contentLayoutMaster')
+
 @section('title', 'Edit Products')
 @section('main-page', 'Products')
-@section('sub-page', 'Edit Product')
+@section('sub-page', 'Edit New Product')
 
 @section('vendor-style')
     <!-- Vendor CSS Files -->
@@ -15,46 +16,35 @@
                 <div class="card">
 
                     <div class="card-body">
-                        <form id="product-form" class="form" action="{{ route('products.update',$model->id) }}"
-                              method="POST" enctype="multipart/form-data">
+                        <form id="product-form" class="form" action="{{ route('products.update',$model->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method("PUT")
                             <div class="row">
                                 <!-- Product Name EN/AR -->
                                 <div class="col-md-6">
                                     <div class="mb-1">
-                                        <label class="form-label label-text" for="product-name-en">Product Name
-                                            (EN)</label>
-                                        <input type="text" id="product-name-en" class="form-control" name="name[en]"
-                                               value="{{ $model->getTranslation('name','en') }}"
-                                               placeholder="Product Name (EN)"/>
+                                        <label class="form-label label-text" for="product-name-en">Product Name (EN)</label>
+                                        <input type="text" id="product-name-en"  value="{{ $model->getTranslation('name','en') }}" class="form-control" name="name[en]" placeholder="Product Name (EN)" />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-1">
-                                        <label class="form-label label-text" for="product-name-ar">Product Name
-                                            (AR)</label>
-                                        <input type="text" id="product-name-ar" class="form-control" name="name[ar]"
-                                               value="{{ $model->getTranslation('name','ar') }}"
-                                               placeholder="Product Name (AR)"/>
+                                        <label class="form-label label-text" for="product-name-ar">Product Name (AR)</label>
+                                        <input type="text" id="product-name-ar"  value="{{ $model->getTranslation('name','ar') }}" class="form-control" name="name[ar]" placeholder="Product Name (AR)" />
                                     </div>
                                 </div>
 
                                 <!-- Description EN/AR -->
                                 <div class="col-md-6">
                                     <div class="mb-1">
-                                        <label class="form-label label-text" for="description-en">Product Description
-                                            (EN)</label>
-                                        <textarea name="description[en]" id="description-en" class="form-control"
-                                                  placeholder="Product Description (EN)">{{ $model->getTranslation('name','en') }}</textarea>
+                                        <label class="form-label label-text" for="description-en">Product Description (EN)</label>
+                                        <textarea name="description[en]" id="description-en" class="form-control" placeholder="Product Description (EN)">{{ $model->getTranslation('description','en') }}</textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-1">
-                                        <label class="form-label label-text" for="description-ar">Product Description
-                                            (AR)</label>
-                                        <textarea name="description[ar]" id="description-ar" class="form-control"
-                                                  placeholder="Product Description (AR)">{{ $model->getTranslation('name','ar') }}</textarea>
+                                        <label class="form-label label-text" for="description-ar">Product Description (AR)</label>
+                                        <textarea name="description[ar]" id="description-ar" class="form-control" placeholder="Product Description (AR)">{{ $model->getTranslation('description','ar') }}</textarea>
                                     </div>
                                 </div>
 
@@ -86,16 +76,19 @@
 
 
                                             <!-- Uploaded Image Preview -->
+                                            @php $image = $model->getFirstMedia('product_main_image') @endphp
+
                                             <div id="uploaded-image"
-                                                 class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                                <img src="" alt="Uploaded" class="img-fluid rounded"
+                                                 class="uploaded-image {{$image ? '' :'d-none '}}position-relative mt-1 d-flex align-items-center gap-2">
+                                                <img src="{{ $image?->getUrl() }}" alt="Uploaded" class="img-fluid rounded"
                                                      style="width: 50px; height: 50px; object-fit: cover;">
                                                 <div id="file-details" class="file-details">
-                                                    <div class="file-name fw-bold"></div>
-                                                    <div class="file-size text-muted small"></div>
+                                                    <div class="file-name fw-bold">{{ $image?->file_name }}</div>
+                                                    <div class="file-size text-muted small">{{ number_format($image?->size / 1024, 1) }}KB</div>
                                                 </div>
                                                 <button type="button" id="remove-image"
                                                         class="btn btn-sm position-absolute text-danger"
+                                                        data-image-id="{{ $image?->id }}"
                                                         style="top: 5px; right: 5px; background-color: #FFEEED">
                                                     <i data-feather="trash"></i>
                                                 </button>
@@ -103,24 +96,6 @@
 
                                         </div>
                                     </div>
-                                </div>
-                                <div class="uploaded-image position-relative d-flex align-items-center gap-2 mb-2">
-                                    @php $image = $model->getFirstMedia('product_main_image') @endphp
-                                    <img src="{{ $image?->getUrl() }}" alt="Uploaded" class="img-fluid rounded"
-                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                    <div class="file-details">
-                                        <div class="file-name fw-bold">{{ $image?->file_name }}</div>
-                                        <div
-                                            class="file-size text-muted small">{{ number_format($image?->size / 1024, 1) }}
-                                            KB
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                            class="btn btn-sm position-absolute text-danger remove-old-image"
-                                            data-image-id="{{ $image?->id }}"
-                                            style="top: 5px; right: 5px; background-color: #FFEEED">
-                                        <i data-feather="trash"></i>
-                                    </button>
                                 </div>
                                 <!-- Multiple Images Upload -->
                                 <div class="col-md-12">
@@ -145,28 +120,25 @@
                                 </div>
                                 @if($model->getMedia('product_extra_images')->isNotEmpty())
                                     @foreach($model->getMedia('product_extra_images') as $image)
-                                        <div
-                                            class="uploaded-image position-relative d-flex align-items-center gap-2 mb-2">
+                                        <div class="uploaded-image position-relative d-flex align-items-center gap-2 mb-2">
                                             <img src="{{ $image->getUrl() }}" alt="Uploaded" class="img-fluid rounded"
                                                  style="width: 50px; height: 50px; object-fit: cover;">
                                             <div class="file-details">
                                                 <div class="file-name fw-bold">{{ $image->file_name }}</div>
-                                                <div
-                                                    class="file-size text-muted small">{{ number_format($image->size / 1024, 1) }}
-                                                    KB
-                                                </div>
+                                                <div class="file-size text-muted small">{{ number_format($image->size / 1024, 1) }} KB</div>
                                             </div>
-                                            <form action="" method="post" style="display: none">
+
+                                            <!-- Delete Form & Button -->
+                                            <form method="POST" action="" class="delete-image-form">
                                                 @csrf
-                                                @method("DELETE")
-                                                <button type="button"
-                                                        class="btn btn-sm position-absolute text-danger remove-old-image"
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        class="btn btn-sm position-absolute text-danger"
                                                         data-image-id="{{ $image->id }}"
                                                         style="top: 5px; right: 5px; background-color: #FFEEED">
                                                     <i data-feather="trash"></i>
                                                 </button>
                                             </form>
-
                                         </div>
                                     @endforeach
                                 @endif
@@ -216,28 +188,20 @@
                                         <div class="row gap-2 " style="margin: 2px;">
                                             <div class="col border rounded-3 p-1">
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio"
-                                                           name="has_custom_prices" id="customPrice" value="1"
-                                                        @checked($model->has_custom_prices == 1)>
+                                                    <input class="form-check-input" type="radio" name="has_custom_prices" id="customPrice" value="1" @checked($model->has_custom_prices == 1)>
                                                     <div>
-                                                        <label class="form-check-label label-text d-block"
-                                                               for="customPrice">Add Quantity Manually</label>
-                                                        <label class="form-check-label text-dark" for="customPrice">Custom
-                                                            Prices</label>
+                                                        <label class="form-check-label label-text d-block" for="customPrice">Add Quantity Manually</label>
+                                                        <label class="form-check-label text-dark" for="customPrice">Custom Prices</label>
                                                     </div>
 
                                                 </div>
                                             </div>
                                             <div class="col border rounded-3 p-1">
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input " type="radio"
-                                                           name="has_custom_prices" id="defaultPrice" value="0"
-                                                        @checked($model->has_custom_prices == 0)>
+                                                    <input class="form-check-input " type="radio" name="has_custom_prices" id="defaultPrice" value="0" @checked($model->has_custom_prices == 0)>
                                                     <div>
-                                                        <label class="form-check-label label-text d-block"
-                                                               for="customPrice">Default Quantity</label>
-                                                        <label class="form-check-label text-dark" for="defaultPrice">Default
-                                                            Price</label>
+                                                        <label class="form-check-label label-text d-block" for="customPrice">Default Quantity</label>
+                                                        <label class="form-check-label text-dark" for="defaultPrice">Default Price</label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -245,67 +209,52 @@
                                     </div>
                                 </div>
 
-                                <!-- Custom Prices -->
-                                <div class="col-md-12" id="custom-price-section"
-                                     style="{{ $model->has_custom_prices == 1 ? '' : 'display:none;' }}">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="invoice-repeater">
-                                                <div data-repeater-list="prices">
-                                                    <div data-repeater-item>
-                                                        <div class="row d-flex align-items-end">
-                                                            <!-- Loop through prices -->
-                                                            @foreach ($model->prices as $index => $price)
+                                    <!-- Custom Prices -->
+                                    <div class="col-md-12" id="custom-price-section" style="display: none;">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="invoice-repeater">
+                                                    <div data-repeater-list="prices">
+                                                        <div data-repeater-item>
+                                                            <div class="row d-flex align-items-end">
                                                                 <div class="col-md-4">
                                                                     <div class="mb-1">
                                                                         <label class="form-label label-text">Quantity</label>
-                                                                        <input type="number"
-                                                                               name="prices[{{ $index }}][quantity]"
-                                                                               value="{{ $price->quantity }}"
-                                                                               class="form-control"
-                                                                               placeholder="Add Quantity"/>
+                                                                        <input type="number" name="prices[][quantity]" class="form-control" placeholder="Add Quantity" />
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <div class="mb-1">
-                                                                        <label class="form-label label-text">Price</label>
-                                                                        <input type="text"
-                                                                               name="prices[{{ $index }}][price]"
-                                                                               value="{{ $price->price }}"
-                                                                               class="form-control"
-                                                                               placeholder="Add Price"/>
+                                                                        <label class="form-label label-text">Price (EGP)</label>
+                                                                        <input type="text" name="prices[][price]" class="form-control" placeholder="Add Price" />
                                                                     </div>
                                                                 </div>
-                                                            @endforeach
-
-                                                            <!-- Delete button for each item -->
-                                                            <div class="col-md-4">
-                                                                <div class="mb-1">
-                                                                    <button type="button"
-                                                                            class="btn btn-outline-danger text-nowrap px-1 delete-btn"
-                                                                            data-repeater-delete style="display: none;">
-                                                                        <i data-feather="x" class="me-25"></i> <span>Delete</span>
-                                                                    </button>
+                                                                <div class="col-md-4">
+                                                                    <div class="mb-1">
+                                                                        <button type="button" class="btn btn-outline-danger text-nowrap px-1" style="display: none" data-repeater-delete>
+                                                                            <i data-feather="x" class="me-25"></i> <span>Delete</span>
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <hr/>
-                                                    </div>
-                                                </div>
 
-                                                <!-- Add New Button -->
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        <button  type="button" class="add-new-button btn btn-icon btn-primary" data-repeater-create>
-                                                            <i data-feather="plus" class="me-25"></i>
-                                                            <span>Add New</span>
-                                                        </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <button type="button" class="w-100  rounded-3 p-1 bg-white text-dark" style="border:2px dashed #CED5D4;" data-repeater-create>
+                                                                <i data-feather="plus" class="me-25"></i> <span>Add New Quantity</span>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+
+
+
+
 
                                 <!-- Default Price -->
                                 <div class="col-md-12" id="default-price-section"
@@ -324,216 +273,146 @@
                                     <div class="mb-1">
                                         <label class="form-label label-text">Product Specs</label>
                                         <div class="">
-                                            <div class="">
+                                            <div>
                                                 <!-- Outer Repeater for Specifications -->
                                                 <div class="outer-repeater">
                                                     <div data-repeater-list="specifications">
-
-                                                    @foreach($model->specifications as $specification)
-                                                            <div data-repeater-item>
-                                                                <div class="row">
-                                                                    <!-- Specification Name (English) -->
-                                                                    <div class="col-md-6">
-                                                                        <div class="mb-1">
-                                                                            <label class="form-label label-text">Specification
-                                                                                Name (EN)</label>
-                                                                            <input type="text"
-                                                                                   name="specifications[{{$loop->index}}][name_en]"
-                                                                                   value="{{ $specification->getTranslation('name','ar') }}"
-                                                                                   class="form-control"
-                                                                                   placeholder="Specification Name (EN)"/>
-                                                                        </div>
+                                                        <div data-repeater-item>
+                                                            <!-- Specification Fields -->
+                                                            <div class="row mt-1">
+                                                                <div class="col-md-6">
+                                                                    <div class="mb-1">
+                                                                        <label class="form-label label-text">Name (EN)</label>
+                                                                        <input type="text" name="name_en" class="form-control" placeholder="Specification Name (EN)" />
                                                                     </div>
+                                                                </div>
 
-                                                                    <!-- Specification Name (Arabic) -->
-                                                                    <div class="col-md-6">
-                                                                        <div class="mb-1">
-                                                                            <label class="form-label label-text">Specification
-                                                                                Name (AR)</label>
-                                                                            <input type="text"
-                                                                                   name="specifications[{{$loop->index}}][name_ar]"
-                                                                                   value="{{ $specification->getTranslation('name','ar') }}"
-                                                                                   class="form-control"
-                                                                                   placeholder="Specification Name (AR)"/>
-                                                                        </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="mb-1">
+                                                                        <label class="form-label label-text">Name (AR)</label>
+                                                                        <input type="text" name="name_ar" class="form-control" placeholder="Specification Name (AR)" />
                                                                     </div>
+                                                                </div>
 
-                                                                    <!-- Inner Repeater for Specification Options -->
-                                                                    <div class="inner-repeater">
-                                                                        <div data-repeater-list="specification_options">
-                                                                        @foreach($specification->options as $option)
-                                                                                <div data-repeater-item>
-                                                                                    <div
-                                                                                        class="row d-flex align-items-end mt-2">
-                                                                                        <!-- Option Name (English) -->
-                                                                                        <div class="col">
-                                                                                            <label class="label-text">Option
-                                                                                                (EN)</label>
-                                                                                            <input type="text"
-                                                                                                   name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][value_en]"
-                                                                                                   value="{{ $option->getTranslation('value','ar') }}"
-                                                                                                   class="form-control"
-                                                                                                   placeholder="Option (EN)"/>
+                                                                <!-- Inner Repeater for Specification Options -->
+                                                                <div class="inner-repeater">
+                                                                    <div data-repeater-list="specification_options">
+                                                                        <div data-repeater-item>
+                                                                            <div class="row d-flex align-items-end mt-2">
+                                                                                <!-- Option Name (EN) -->
+                                                                                <div class="col">
+                                                                                    <label class="form-label label-text">Value (Required) (EN)</label>
+                                                                                    <input type="text" name="value_en" class="form-control" placeholder="Option (EN)" />
+                                                                                </div>
+
+                                                                                <!-- Option Name (AR) -->
+                                                                                <div class="col">
+                                                                                    <label class="form-label label-text">Value (Required) (AR)</label>
+                                                                                    <input type="text" name="value_ar" class="form-control" placeholder="Option (AR)" />
+                                                                                </div>
+
+                                                                                <!-- Option Price -->
+                                                                                <div class="col">
+                                                                                    <label class="form-label label-text">Price (EGP) (Optional)</label>
+                                                                                    <input type="text" name="price" class="form-control" placeholder="Price" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="row d-flex align-items-end mt-2">
+                                                                                <!-- Option Image -->
+                                                                                <div class="col-md-12">
+                                                                                    <label class="form-label label-text">Option Image</label>
+
+                                                                                    <!-- Hidden real input -->
+                                                                                    <!-- Hidden real input -->
+                                                                                    <input type="file" name="image" class="form-control d-none option-image-input" accept="image/*">
+
+                                                                                    <!-- Custom Upload Card -->
+                                                                                    <div class="upload-card option-upload-area">
+                                                                                        <div class="d-flex justify-content-center align-items-center gap-1">
+                                                                                            <i data-feather="upload" class="mb-2"></i>
+                                                                                            <p>Drag image here to upload</p>
                                                                                         </div>
-
-                                                                                        <!-- Option Name (Arabic) -->
-                                                                                        <div class="col">
-                                                                                            <label class="label-text">Option
-                                                                                                (AR)</label>
-                                                                                            <input type="text"
-                                                                                                   name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][value_ar]"
-                                                                                                   value="{{ $option->getTranslation('value','ar') }}"
-                                                                                                   class="form-control"
-                                                                                                   placeholder="Option (AR)"/>
-                                                                                        </div>
-
-                                                                                        <!-- Option Price -->
-                                                                                        <div class="col">
-                                                                                            <label class="label-text">Price</label>
-                                                                                            <input type="text"
-                                                                                                   name="specifications[{{$loop->parent->index}}]specification_options[{{$loop->index}}][price]"
-                                                                                                   value="{{ $option->price }}"
-                                                                                                   class="form-control"
-                                                                                                   placeholder="Price"/>
-                                                                                        </div>
-
                                                                                     </div>
-                                                                                    <div
-                                                                                        class="row d-flex align-items-end mt-2">
-                                                                                        <!-- Option Image -->
-                                                                                        <div class="col-md-12">
-                                                                                            <label class="form-label label-text">Option Image</label>
 
-                                                                                            <!-- Hidden real input -->
-                                                                                            <input type="file" name="image" class="form-control d-none option-image-input" accept="image/*">
-
-                                                                                            <!-- Custom Upload Card -->
-                                                                                            <div class="option-upload-area upload-card">
-                                                                                                <div class="option-upload-content d-flex justify-content-center align-items-center gap-1">
-                                                                                                    <i data-feather="upload" class="mb-2"></i>
-                                                                                                    <p>Drag image here to upload</p>
-                                                                                                </div>
-                                                                                            </div>
-
-                                                                                            <!-- Progress Bar -->
-                                                                                            <div class="option-upload-progress progress mt-2 d-none w-50">
-                                                                                                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                                                                                            </div>
-
-                                                                                            <!-- Uploaded Image Preview -->
-                                                                                            <div class="option-uploaded-image uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                                                                                <img src="" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
-                                                                                                <div class="file-details">
-                                                                                                    <div class="file-name fw-bold option-file-name"></div>
-                                                                                                    <div class="file-size text-muted small option-file-size"></div>
-                                                                                                </div>
-                                                                                                <button type="button" class="btn btn-sm position-absolute text-danger option-remove-image" style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                                                                    <i data-feather="trash"></i>
-                                                                                                </button>
-                                                                                            </div>
-
-                                                                                        </div>
-
-
+                                                                                    <!-- Progress Bar -->
+                                                                                    <div class="progress mt-2 d-none w-50 option-upload-progress">
+                                                                                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                                                                                     </div>
+
                                                                                     <!-- Uploaded Image Preview -->
-                                                                                    <div class="uploaded-image position-relative mt-1 d-flex align-items-center gap-2 {{ $option->image ? '' : 'd-none' }}">
-                                                                                        <img src="{{ $option->image?->getUrl() }}" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                                    <div class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2 option-uploaded-image">
+                                                                                        <img src="" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
                                                                                         <div class="file-details">
-                                                                                            <div class="file-name fw-bold option-file-name">
-                                                                                                {{ $option->image?->file_name }}
-                                                                                            </div>
-                                                                                            <div class="file-size text-muted small option-file-size">
-                                                                                                {{ number_format($option->image?->size / 1024, 1) }}
-                                                                                                KB
-
-                                                                                            </div>
+                                                                                            <div class="file-name fw-bold option-file-name"></div>
+                                                                                            <div class="file-size text-muted small option-file-size"></div>
                                                                                         </div>
-                                                                                        <form action="" method="post" style="display: none">
-                                                                                            @csrf
-                                                                                            @method("DELETE")
-                                                                                            <button type="button"
-                                                                                                    class="btn btn-sm position-absolute text-danger remove-old-image"
-                                                                                                    data-image-id="{{ $option->image?->id }}"
-                                                                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                                                                <i data-feather="trash"></i>
-                                                                                            </button>
-                                                                                        </form>
+                                                                                        <button type="button" class="btn btn-sm position-absolute text-danger option-remove-image" style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                                                            <i data-feather="trash"></i>
+                                                                                        </button>
                                                                                     </div>
+
                                                                                     <div class="col-12 text-end mt-1 mb-2">
                                                                                         <button type="button" class="btn btn-outline-danger" style="display: none" data-repeater-delete>
                                                                                             <i data-feather="x" class="me-25"></i> Delete Value
                                                                                         </button>
                                                                                     </div>
                                                                                 </div>
-                                                                        @endforeach
-                                                                        </div>
-
-
-                                                                        <!-- Add Option Button -->
-                                                                        <div class="row">
-                                                                            <div class="col-12">
-                                                                                <button type="button"
-                                                                                        class="add-new-button btn primary-text-color bg-white mt-2 text-decoration-underline"
-                                                                                        style="padding: 0px;"
-                                                                                        data-repeater-create>
-                                                                                    <i data-feather="plus"></i> <span> Add New Value</span>
-                                                                                </button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <!-- End of Inner Repeater -->
 
-                                                                    <!-- Delete Specification Button -->
-                                                                    <div class="col-12 text-end mt-1 mb-2">
-                                                                        <button type="button"
-                                                                                class="delete-btn btn btn-outline-danger"
-                                                                                data-repeater-delete>
-                                                                            <i data-feather="x" class="me-25"></i>
-                                                                            Delete Spec
-                                                                        </button>
+                                                                    <!-- Add Option Button -->
+                                                                    <div class="row">
+                                                                        <div class="col-12">
+                                                                            <button type="button" class="btn primary-text-color bg-white mt-2" data-repeater-create>
+                                                                                <i data-feather="plus"></i> <span> Add New Value</span>
+                                                                            </button>
+                                                                        </div>
                                                                     </div>
-
                                                                 </div>
+                                                                <!-- End of Inner Repeater -->
+
+                                                                <!-- Delete Specification Button -->
+                                                                <div class="col-12 text-end mt-1 mb-2">
+                                                                    <button type="button" class="btn btn-outline-danger" style="display: none" data-repeater-delete>
+                                                                        <i data-feather="x" class="me-25"></i> Delete Spec
+                                                                    </button>
+                                                                </div>
+
                                                             </div>
-                                                    @endforeach
+                                                        </div>
                                                     </div>
 
-                                                    <!-- Add Specification Button -->
+                                                    <!-- Add New Specification Button -->
                                                     <div class="row">
                                                         <div class="col-12">
-                                                            <button type="button" class="w-100  rounded-3 p-1 text-dark add-new-button"
-                                                                    style="border:2px dashed #CED5D4;background-color:#EBEFEF"
-                                                                    data-repeater-create>
+                                                            <button type="button" class="w-100 rounded-3 p-1 text-dark" style="border: 2px dashed #CED5D4; background-color: #EBEFEF" data-repeater-create>
                                                                 <i data-feather="plus" class="me-25"></i> <span>Add New Spec</span>
                                                             </button>
                                                         </div>
                                                     </div>
                                                 </div>
-
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Free Shipping -->
-{{--                                    <div class="col-md-12 col-12 mb-2">--}}
-{{--                                        <div class="form-check form-switch">--}}
-{{--                                            <input type="hidden" name="is_free_shipping" value="0">--}}
-{{--                                            <input type="checkbox" class="form-check-input" id="free-shipping"--}}
-{{--                                                   name="is_free_shipping" value="1">--}}
-{{--                                            <label class="form-check-label" for="free-shipping">Product available for--}}
-{{--                                                free shipping</label>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-                                </div>
+                                    {{--                                <div class="col-md-12 col-12 mb-2">--}}
+                                    {{--                                    <div class="form-check form-switch">--}}
+                                    {{--                                        <input type="hidden" name="is_free_shipping" value="0">--}}
+                                    {{--                                        <input type="checkbox" class="form-check-input" id="free-shipping" name="is_free_shipping" value="1">--}}
+                                    {{--                                        <label class="form-check-label" for="free-shipping">Product available for free shipping</label>--}}
+                                    {{--                                    </div>--}}
+                                    {{--                                </div>--}}
+                                    {{--                            </div>--}}
 
-                                <!-- Submit -->
-                                <div class="col-12 d-flex justify-content-end gap-1">
-                                    <button type="reset" class="btn btn-outline-secondary fs-5">Cancel</button>
-                                    <button type="submit" class="btn btn-primary me-1 fs-5">Save Changes</button>
+                                    <!-- Submit -->
+                                    <div class="col-12 d-flex justify-content-end gap-1">
+                                        <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                                        <button type="submit" class="btn btn-primary me-1">Add Product</button>
 
+                                    </div>
                                 </div>
-                            </div>
                         </form>
                     </div>
                 </div>
@@ -550,227 +429,9 @@
 @section('page-script')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script>
-        function updateDeleteButtons(containerSelector) {
-            $(containerSelector).find('[data-repeater-list]').each(function () {
-                var items = $(this).find('[data-repeater-item]');
-                items.each(function (index) {
-                    if (index === 0) {
-                        $(this).find('[data-repeater-delete]').hide();
-                    } else {
-                        $(this).find('[data-repeater-delete]').show();
-                        feather.replace();
-                    }
-                });
-            });
-        }
-
-        function initializeImageUploaders(context) {
-            $(context).find('.option-upload-area').each(function () {
-                const uploadArea = $(this);
-                const input = uploadArea.closest('.col-md-12').find('.option-image-input');
-                const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
-                const imagePreview = previewContainer.find('.option-image-preview');
-                const fileNameLabel = previewContainer.find('.option-file-name');
-                const fileSizeLabel = previewContainer.find('.option-file-size');
-                const removeButton = previewContainer.find('.option-remove-image');
-
-                uploadArea.off('click').on('click', function () {
-                    input.trigger('click');
-                });
-
-                input.off('change').on('change', function () {
-                    const file = this.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            imagePreview.attr('src', e.target.result);
-                            fileNameLabel.text(file.name);
-                            fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
-                            previewContainer.removeClass('d-none');
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-
-                removeButton.off('click').on('click', function () {
-                    input.val('');
-                    previewContainer.addClass('d-none');
-                });
-            });
-        }
-
-        $('.outer-repeater').repeater({
-            repeaters: [{
-                selector: '.inner-repeater',
-                show: function () {
-                    $(this).slideDown();
-                    updateDeleteButtons($(this).closest('.outer-repeater'));
-                    initializeImageUploaders(this);
-                    feather.replace();
-                },
-                hide: function (deleteElement) {
-                    $(this).slideUp(deleteElement);
-                    updateDeleteButtons($(this).closest('.outer-repeater'));
-                },
-                nestedInputName: 'specification_options'
-            }],
-            show: function () {
-                $(this).slideDown();
-                updateDeleteButtons($('.outer-repeater'));
-                initializeImageUploaders(this);
-                feather.replace();
-            },
-            hide: function (deleteElement) {
-                $(this).slideUp(deleteElement);
-                updateDeleteButtons($('.outer-repeater'));
-            },
-            afterAdd: function () {
-                updateDeleteButtons($('.outer-repeater'));
-                initializeImageUploaders($('.outer-repeater'));
-                feather.replace();
-            },
-            afterDelete: function () {
-                updateDeleteButtons($('.outer-repeater'));
-            }
-        });
-
-        // Initialize on page load for already existing items
-        $(document).ready(function () {
-            updateDeleteButtons($('.outer-repeater'));
-            initializeImageUploaders($('.outer-repeater'));
-        });
-    </script>
 
     <script>
-        $(document).ready(function () {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-
-            // Toggle pricing
-            $('input[name="has_custom_prices"]').on('change', function () {
-                const isCustom = $(this).val() === '1';
-                $('#custom-price-section').toggle(isCustom).find('input').prop('disabled', !isCustom);
-                $('#default-price-section').toggle(!isCustom).find('input').prop('disabled', isCustom).val('');
-            });
-
-            // Repeater
-            $('.invoice-repeater').repeater({
-                show: function() {
-                    $(this).slideDown();
-                    feather && feather.replace();
-
-                    // Recalculate delete button visibility when an item is shown
-                    var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                    items.each(function(index) {
-                        // Hide delete button for the first item (index 0) and show for others
-                        if (index === 0) {
-                            $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
-                        } else {
-                            $(this).find('[data-repeater-delete]').show(); // Show delete button for others
-                        }
-                    });
-                },
-                hide: function(deleteElement) {
-                    $(this).slideUp(deleteElement);
-
-                    // Recalculate delete button visibility after an item is removed
-                    var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                    items.each(function(index) {
-                        // Hide delete button for the first item (index 0) and show for others
-                        if (index === 0) {
-                            $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
-                        } else {
-                            $(this).find('[data-repeater-delete]').show(); // Show delete button for others
-                        }
-                    });
-                }
-            });
-
-
-            $('.select2').select2();
-
-            // Category -> Subcategory
-            $('.category-select').on('change', function () {
-                const categoryId = $(this).val();
-                const $subCategorySelect = $('.sub-category-select');
-                $.ajax({
-                    url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
-                    method: "GET",
-                    success: function (res) {
-                        $subCategorySelect.empty().append('<option value="">Select subcategory</option>');
-                        $.each(res.data, (i, s) => $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`));
-                    },
-                    error: function () {
-                        $subCategorySelect.empty().append('<option value="">Error loading Subcategories</option>');
-                    }
-                });
-            });
-
-            // Form submit
-            $('#product-form').on('submit', function (e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                $.ajax({
-                    url: this.action,
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (res) {
-                        if (res.success) {
-                            sessionStorage.setItem('product_updated', 'true');
-                            window.location.href = '/products';
-                        }
-                    },
-                    error: function (xhr) {
-                        $.each(xhr.responseJSON.errors, (k, msgArr) => {
-                            Toastify({
-                                text: msgArr[0],
-                                duration: 4000,
-                                gravity: "top",
-                                position: "right",
-                                backgroundColor: "#EA5455",
-                                close: true
-                            }).showToast();
-                        });
-                    }
-                });
-            });
-
-            //Remove Extra Image
-            $('.remove-old-image').on('click', function (e) {
-                e.preventDefault();
-                var button = $(this);
-                var imageId = button.data('image-id');
-                var imageElement = button.closest('.uploaded-image');
-                $.ajax({
-                    url: '{{ url("api/media") }}/' + imageId,
-                    method: "DELETE",
-                    success: function (response) {
-                        imageElement.remove();
-                        Toastify({
-                            text: "Image Removed Successfully",
-                            duration: 4000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#28a745",
-                            close: true
-                        }).showToast();
-                    },
-                    error: function (xhr) {
-                        console.log(xhr.responseJson.errors)
-                    }
-                })
-
-            });
-        });
-    </script>
-    <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let input = $('#product-image-main');
             let uploadArea = $('#upload-area');
             let progress = $('#upload-progress');
@@ -779,27 +440,27 @@
             let removeButton = $('#remove-image');
 
             // Click on the upload area triggers the hidden input
-            uploadArea.on('click', function () {
+            uploadArea.on('click', function() {
                 input.click();
             });
 
             // Handle file selection
-            input.on('change', function (e) {
+            input.on('change', function(e) {
                 handleFiles(e.target.files);
             });
 
             // Handle Drag & Drop
-            uploadArea.on('dragover', function (e) {
+            uploadArea.on('dragover', function(e) {
                 e.preventDefault();
                 uploadArea.addClass('dragover');
             });
 
-            uploadArea.on('dragleave', function (e) {
+            uploadArea.on('dragleave', function(e) {
                 e.preventDefault();
                 uploadArea.removeClass('dragover');
             });
 
-            uploadArea.on('drop', function (e) {
+            uploadArea.on('drop', function(e) {
                 e.preventDefault();
                 uploadArea.removeClass('dragover');
                 handleFiles(e.originalEvent.dataTransfer.files);
@@ -815,7 +476,7 @@
 
                     // Fake loading effect
                     let fakeProgress = 0;
-                    let interval = setInterval(function () {
+                    let interval = setInterval(function() {
                         fakeProgress += 10;
                         progressBar.css('width', fakeProgress + '%');
 
@@ -824,7 +485,7 @@
 
                             // Preview image
                             let reader = new FileReader();
-                            reader.onload = function (e) {
+                            reader.onload = function(e) {
                                 uploadedImage.find('img').attr('src', e.target.result);
                                 uploadedImage.removeClass('d-none');
                                 progress.addClass('d-none');
@@ -841,40 +502,40 @@
 
 
             // Remove image
-            removeButton.on('click', function () {
+            removeButton.on('click', function() {
                 uploadedImage.addClass('d-none');
                 input.val(''); // Clear the input
             });
         });
     </script>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let input = $('#product-images');
             let uploadArea = $('#multi-upload-area');
             let uploadedImages = $('#multi-uploaded-images');
 
             // Click to open file input
-            uploadArea.on('click', function () {
+            uploadArea.on('click', function() {
                 input.click();
             });
 
             // Handle input change
-            input.on('change', function (e) {
+            input.on('change', function(e) {
                 handleFiles(e.target.files);
             });
 
             // Drag and Drop
-            uploadArea.on('dragover', function (e) {
+            uploadArea.on('dragover', function(e) {
                 e.preventDefault();
                 uploadArea.addClass('dragover');
             });
 
-            uploadArea.on('dragleave', function (e) {
+            uploadArea.on('dragleave', function(e) {
                 e.preventDefault();
                 uploadArea.removeClass('dragover');
             });
 
-            uploadArea.on('drop', function (e) {
+            uploadArea.on('drop', function(e) {
                 e.preventDefault();
                 uploadArea.removeClass('dragover');
                 handleFiles(e.originalEvent.dataTransfer.files);
@@ -915,7 +576,7 @@
 
                 // Fake upload progress
                 let progress = 0;
-                let interval = setInterval(function () {
+                let interval = setInterval(function() {
                     progress += 10;
                     progressBar.css('width', progress + '%');
 
@@ -924,7 +585,7 @@
 
                         // Display the image after "upload" finishes
                         let reader = new FileReader();
-                        reader.onload = function (e) {
+                        reader.onload = function(e) {
                             imgTag.attr('src', e.target.result).fadeIn();
                             wrapper.find('.progress').remove();
                         }
@@ -933,7 +594,7 @@
                 }, 100);
 
                 // Remove button
-                wrapper.find('.remove-btn').on('click', function () {
+                wrapper.find('.remove-btn').on('click', function() {
                     wrapper.remove();
                 });
 
@@ -942,62 +603,67 @@
             }
         });
     </script>
+
     <script>
-        $(document).ready(function () {
-            // Handle click event to trigger file input
-            $(document).on('click', '.option-upload-area', function () {
-                $(this).find('.option-image-input').click();
+        $(document).ready(function() {
+            let optionInput = $('#option-image-input');
+            let optionUploadArea = $('#option-upload-area');
+            let optionProgress = $('#option-upload-progress');
+            let optionProgressBar = $('#option-upload-progress .progress-bar');
+            let optionUploadedImage = $('#option-uploaded-image');
+            let optionRemoveButton = $('#option-remove-image');
+
+            // Click to open file input
+            optionUploadArea.on('click', function() {
+                optionInput.click();
             });
 
-            // Handle file input change
-            $(document).on('change', '.option-image-input', function (e) {
-                let parentElement = $(this).closest('.inner-repeater');
-                handleOptionFiles(e.target.files, parentElement);
+            // Handle input change
+            optionInput.on('change', function(e) {
+                handleOptionFiles(e.target.files);
             });
 
-            // Drag and drop events for file upload
-            $(document).on('dragover', '.option-upload-area', function (e) {
+            // Drag and Drop
+            optionUploadArea.on('dragover', function(e) {
                 e.preventDefault();
-                $(this).addClass('dragover');
+                optionUploadArea.addClass('dragover');
             });
 
-            $(document).on('dragleave', '.option-upload-area', function (e) {
+            optionUploadArea.on('dragleave', function(e) {
                 e.preventDefault();
-                $(this).removeClass('dragover');
+                optionUploadArea.removeClass('dragover');
             });
 
-            $(document).on('drop', '.option-upload-area', function (e) {
+            optionUploadArea.on('drop', function(e) {
                 e.preventDefault();
-                $(this).removeClass('dragover');
-                let parentElement = $(this).closest('.inner-repeater');
-                handleOptionFiles(e.originalEvent.dataTransfer.files, parentElement);
+                optionUploadArea.removeClass('dragover');
+                handleOptionFiles(e.originalEvent.dataTransfer.files);
             });
 
-            // Handle the file upload process
-            function handleOptionFiles(files, parentElement) {
+            function handleOptionFiles(files) {
                 if (files.length > 0) {
                     let file = files[0];
 
-                    parentElement.find('.option-upload-progress').removeClass('d-none');
-                    parentElement.find('.option-upload-progress .progress-bar').css('width', '0%');
+                    optionProgress.removeClass('d-none');
+                    optionProgressBar.css('width', '0%');
 
                     let fakeProgress = 0;
-                    let interval = setInterval(function () {
+                    let interval = setInterval(function() {
                         fakeProgress += 10;
-                        parentElement.find('.option-upload-progress .progress-bar').css('width', fakeProgress + '%');
+                        optionProgressBar.css('width', fakeProgress + '%');
 
                         if (fakeProgress >= 100) {
                             clearInterval(interval);
 
                             let reader = new FileReader();
-                            reader.onload = function (e) {
-                                parentElement.find('.option-uploaded-image img').attr('src', e.target.result);
-                                parentElement.find('.option-uploaded-image').removeClass('d-none');
-                                parentElement.find('.option-upload-progress').addClass('d-none');
+                            reader.onload = function(e) {
+                                optionUploadedImage.find('img').attr('src', e.target.result);
+                                optionUploadedImage.removeClass('d-none');
+                                optionProgress.addClass('d-none');
 
                                 // Show file name and size
-                                parentElement.find('.option-uploaded-image .file-name').text(file.name);
-                                parentElement.find('.option-uploaded-image .file-size').text((file.size / 1024).toFixed(2) + ' KB');
+                                $('#option-uploaded-image .file-name').text(file.name);
+                                $('#option-uploaded-image .file-size').text((file.size / 1024).toFixed(2) + ' KB');
                             }
                             reader.readAsDataURL(file);
                         }
@@ -1005,19 +671,221 @@
                 }
             }
 
-            // Handle the removal of uploaded image
-            $(document).on('click', '.option-remove-image', function () {
-                let parentElement = $(this).closest('.inner-repeater');
-                parentElement.find('.option-uploaded-image').addClass('d-none');
-                parentElement.find('.option-image-input').val(''); // Reset the file input
+            // Remove image
+            optionRemoveButton.on('click', function() {
+                optionUploadedImage.addClass('d-none');
+                optionInput.val('');
 
-                // Also clear the file name and size from the preview
-                parentElement.find('.option-uploaded-image .file-name').text('');
-                parentElement.find('.option-uploaded-image .file-size').text('');
+                // Also clear file name and size
+                $('#option-uploaded-image .file-name').text('');
+                $('#option-uploaded-image .file-size').text('');
+            });
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            // Toggle pricing
+            $('input[name="has_custom_prices"]').on('change', function() {
+                const isCustom = $(this).val() === '1';
+                $('#custom-price-section').toggle(isCustom).find('input').prop('disabled', !isCustom);
+                $('#default-price-section').toggle(!isCustom).find('input').prop('disabled', isCustom).val('');
             });
 
 
+
+            function updateDeleteButtons(containerSelector) {
+                $(containerSelector).find('[data-repeater-list]').each(function () {
+                    var items = $(this).find('[data-repeater-item]');
+                    items.each(function (index) {
+                        if (index === 0) {
+                            $(this).find('[data-repeater-delete]').hide();
+                        } else {
+                            $(this).find('[data-repeater-delete]').show();
+                            feather.replace();
+                        }
+                    });
+                });
+            }
+
+            function initializeImageUploaders(context) {
+                $(context).find('.option-upload-area').each(function () {
+                    const uploadArea = $(this);
+                    const input = uploadArea.closest('.col-md-12').find('.option-image-input');
+                    const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
+                    const imagePreview = previewContainer.find('.option-image-preview');
+                    const fileNameLabel = previewContainer.find('.option-file-name');
+                    const fileSizeLabel = previewContainer.find('.option-file-size');
+                    const removeButton = previewContainer.find('.option-remove-image');
+
+                    uploadArea.off('click').on('click', function () {
+                        input.trigger('click');
+                    });
+
+                    input.off('change').on('change', function () {
+                        const file = this.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                imagePreview.attr('src', e.target.result);
+                                fileNameLabel.text(file.name);
+                                fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
+                                previewContainer.removeClass('d-none');
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    removeButton.off('click').on('click', function () {
+                        input.val('');
+                        previewContainer.addClass('d-none');
+                    });
+                });
+            }
+
+            $('.outer-repeater').repeater({
+                repeaters: [{
+                    selector: '.inner-repeater',
+                    show: function () {
+                        $(this).slideDown();
+                        updateDeleteButtons($(this).closest('.outer-repeater'));
+                        initializeImageUploaders(this);
+                        feather.replace();
+                    },
+                    hide: function (deleteElement) {
+                        $(this).slideUp(deleteElement);
+                        updateDeleteButtons($(this).closest('.outer-repeater'));
+                    },
+                    nestedInputName: 'specification_options'
+                }],
+                show: function () {
+                    $(this).slideDown();
+                    updateDeleteButtons($('.outer-repeater'));
+                    initializeImageUploaders(this);
+                    feather.replace();
+                },
+                hide: function (deleteElement) {
+                    $(this).slideUp(deleteElement);
+                    updateDeleteButtons($('.outer-repeater'));
+                },
+                afterAdd: function () {
+                    updateDeleteButtons($('.outer-repeater'));
+                    initializeImageUploaders($('.outer-repeater'));
+                    feather.replace();
+                },
+                afterDelete: function () {
+                    updateDeleteButtons($('.outer-repeater'));
+                }
+            });
+
+// Initialize on page load for already existing items
+            $(document).ready(function () {
+                updateDeleteButtons($('.outer-repeater'));
+                initializeImageUploaders($('.outer-repeater'));
+            });
+
+
+            $('.select2').select2();
+
+            // Category -> Subcategory
+            $('.category-select').on('change', function() {
+                const categoryId = $(this).val();
+                const $subCategorySelect = $('.sub-category-select');
+                $.ajax({
+                    url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
+                    method: "GET",
+                    success: function(res) {
+                        $subCategorySelect.empty().append('<option value="">Select subcategory</option>');
+                        $.each(res.data, (i, s) => $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`));
+                    },
+                    error: function() {
+                        $subCategorySelect.empty().append('<option value="">Error loading Subcategories</option>');
+                    }
+                });
+            });
+
+            // Form submit
+            $('#product-form').on('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                $.ajax({
+                    url: this.action,
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        if (res.success) {
+                            sessionStorage.setItem('product_added', 'true');
+                            window.location.href = '/products';
+                        }
+                    },
+                    error: function(xhr) {
+                        $.each(xhr.responseJSON.errors, (k, msgArr) => {
+                            Toastify({
+                                text: msgArr[0],
+                                duration: 4000,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#EA5455",
+                                close: true
+                            }).showToast();
+                        });
+                    }
+                });
+            });
         });
+    </script>
+    <script>
+        // Repeater
+        $('.invoice-repeater').repeater({
+            initEmpty: false,
+            defaultValues: {
+                'quantity': '',
+                'price': ''
+            },
+            show: function() {
+                $(this).slideDown();
+                feather && feather.replace();
+
+                // Recalculate delete button visibility when an item is shown
+                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                items.each(function(index) {
+                    // Hide delete button for the first item (index 0) and show for others
+                    if (index === 0) {
+                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
+                    } else {
+                        $(this).find('[data-repeater-delete]').show(); // Show delete button for others
+                    }
+                });
+            },
+            hide: function(deleteElement) {
+                $(this).slideUp(deleteElement);
+
+                // Recalculate delete button visibility after an item is removed
+                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                items.each(function(index) {
+                    // Hide delete button for the first item (index 0) and show for others
+                    if (index === 0) {
+                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
+                    } else {
+                        $(this).find('[data-repeater-delete]').show(); // Show delete button for others
+                    }
+                });
+            }
+        });
+
+
+        var preloadedPrices = @json($model->prices->map(fn($p) => ['quantity' => $p->quantity, 'price' => $p->price]));
+
+        $('.invoice-repeater').repeater('setList', preloadedPrices);
     </script>
 
 @endsection

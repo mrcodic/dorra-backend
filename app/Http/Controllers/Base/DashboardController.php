@@ -96,7 +96,7 @@ class DashboardController extends Controller
     public function update(Request $request, string $id)
     {
         $validatedData = $request->validate($this->updateRequestClass->rules($id));
-        $this->service->updateResource($id, $validatedData);
+        $this->service->updateResource($validatedData, $id);
         return Response::api();
 
     }
