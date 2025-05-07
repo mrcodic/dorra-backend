@@ -7,48 +7,58 @@
 @section('vendor-style')
 <!-- Vendor CSS Files -->
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+
+<style>
+    .pill-selected {
+        background-color: #24B094 !important;
+        color: white !important;
+    }
+
+    .category-pill.pill-selected {
+        background-color: #24B094 !important;
+        color: white !important;
+    }
+
+    .category-pill,
+    .tag-pill {
+        cursor: pointer;
+    }
+</style>
+
 @endsection
 
 @section('content')
-<div class="container bg-white rounded-3 " style="min-height: 100vh;padding-top:160px;padding-left:146px;padding-right:146px">
+<div class="container bg-white rounded-3 " style="min-height: 100vh;padding-top:60px;padding-left:146px;padding-right:146px">
+    <!-- Step 5 -->
+    @include('dashboard.orders.steps.step5')
     <!-- Step 1 -->
-    <!-- Step 1 -->
-    <div id="step-1">
-        <h5 class="mb-2 fs-3 text-black">1. Select Customer</h5>
-        <div class="input-group mb-2">
-            <span class="input-group-text bg-white border-end-0">
-                <i data-feather="search"></i>
-            </span>
-            <input type="text" class="form-control border-start-0 border-end-0" placeholder="Search for a customer">
-            <span class="input-group-text bg-white border-start-0">
-                <i data-feather="filter"></i>
-            </span>
-        </div>
-        <div class="d-flex justify-content-end">
-            <button class="btn btn-primary fs-5" id="next-to-step-2">Next</button>
-        </div>
-    </div>
 
+    @include('dashboard.orders.steps.step1')
 
     <!-- Step 2 -->
-    <div id="step-2" style="display: none;">
-    <h5 class="mb-2 fs-3 text-black">2. Select Products</h5>
-        <div class="input-group mb-2">
-            <span class="input-group-text bg-white border-end-0">
-                <i data-feather="search"></i>
-            </span>
-            <input type="text" class="form-control border-start-0 border-end-0" placeholder="Search for products">
-            <span class="input-group-text bg-white border-start-0">
-                <i data-feather="filter"></i>
-            </span>
-        </div>
-        <div class="d-flex justify-content-end">
-            <button class="btn btn-outline-secondary me-1" id="back-to-step-1">Back</button>
-            <button class="btn btn-primary">Next</button>
-        </div>
-    </div>
+    @include('dashboard.orders.steps.step2')
+
+    <!-- Step 3 -->
+    @include('dashboard.orders.steps.step3')
+    <!-- Step 4 -->
+    @include('dashboard.orders.steps.step4')
+
+    <!-- Step 6 -->
+    @include('dashboard.orders.steps.step6')
+    <!-- Step 7 -->
+    @include('dashboard.orders.steps.step7')
+    <!-- Step 8 -->
+    @include('dashboard.orders.steps.step8')
+
 </div>
+
+
 @endsection
+
+
+
+
+
 
 
 @section('vendor-script')
@@ -60,22 +70,87 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://unpkg.com/feather-icons"></script>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener("DOMContentLoaded", function() {
         feather.replace();
 
-        document.getElementById('next-to-step-2').addEventListener('click', function() {
-            document.getElementById('step-1').style.display = 'none';
-            document.getElementById('step-2').style.display = 'block';
+        let currentStep = 1;
+        const steps = document.querySelectorAll(".step");
+
+        function showStep(stepNumber) {
+            steps.forEach((step, index) => {
+                step.style.display = (index + 1 === stepNumber) ? 'block' : 'none';
+            });
+            currentStep = stepNumber;
+            updateProgressBar(); // optional
+        }
+
+        function updateProgressBar() {
+            const progress = document.querySelector('.progress-bar');
+            if (progress) {
+                const percentage = (currentStep / steps.length) * 100;
+                progress.style.width = `${percentage}%`;
+            }
+        }
+
+        document.querySelectorAll('[data-next-step]').forEach(button => {
+            button.addEventListener("click", function() {
+
+                showStep(currentStep + 1);
+
+            });
         });
 
-        document.getElementById('back-to-step-1').addEventListener('click', function() {
-            document.getElementById('step-2').style.display = 'none';
-            document.getElementById('step-1').style.display = 'block';
+        document.querySelectorAll('[data-prev-step]').forEach(button => {
+            button.addEventListener("click", function() {
+                showStep(currentStep - 1);
+            });
+        });
+
+        showStep(currentStep); // initialize
+
+        // Show customer results when typing
+        const customerInput = document.querySelector('#step-1 input');
+        const customerResults = document.getElementById('customer-results-wrapper');
+        customerInput.addEventListener('input', function() {
+            customerResults.style.display = this.value.trim() ? 'block' : 'none';
+        });
+
+        // Show product filters/results when typing
+        const productInput = document.querySelector('#step-2 input');
+        const productFilters = document.getElementById('product-filters-wrapper');
+        productInput.addEventListener('input', function() {
+            productFilters.style.display = this.value.trim() ? 'block' : 'none';
+        });
+
+        // Make category pills clickable (single-select)
+        document.querySelectorAll(".category-pill").forEach(pill => {
+            pill.style.cursor = 'pointer';
+            pill.addEventListener("click", function() {
+                document.querySelectorAll(".category-pill").forEach(p => {
+                    p.classList.remove("pill-selected", "bg-primary", "text-white");
+                    p.classList.add("bg-light", "text-dark");
+                });
+
+                this.classList.remove("bg-light", "text-dark");
+                this.classList.add("pill-selected");
+            });
+        });
+
+
+        // Make tag pills clickable (multi-select)
+        document.querySelectorAll(".tag-pill").forEach(pill => {
+            pill.style.cursor = 'pointer'; // 👈 ensure pointer
+            pill.addEventListener("click", function() {
+                this.classList.toggle("pill-selected");
+                this.classList.toggle("bg-light");
+                this.classList.toggle("text-dark");
+            });
         });
     });
 </script>
+
+
 
 
 @endsection
