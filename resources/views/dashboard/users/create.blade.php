@@ -22,7 +22,7 @@
 
 @section('content')
 <div class="bs-stepper checkout-tab-steps">
-    <form id="checkout-form" class="bs-stepper checkout-tab-steps" enctype="multipart/form-data" action="{{ route("users.store") }}">
+    <form id="checkout-form" class="bs-stepper checkout-tab-steps" method="post" enctype="multipart/form-data" action="{{ route("users.store") }}">
         <!-- Wizard starts -->
         <div class="bs-stepper-header">
             <div class="step" data-target="#step-info" role="tab" id="step-info-trigger">
@@ -122,7 +122,7 @@
                     </div>
                     <div class="col-md-8">
                         <label for="phone_number" class="form-label label-text ">Phone Number</label>
-                        <input type="tel" id="phone_number" name="phone_number" class="form-control" placeholder="Enter phone number" required>
+                        <input type="tel" id="full_phone_number" name="phone_number" class="form-control" placeholder="Enter phone number" required>
                     </div>
                 </div>
 
@@ -315,5 +315,43 @@
             }
         });
     });
+
+
+    $(document).on("change", ".country-select", function () {
+
+        const countryId = $(this).val();
+        const stateSelect = $(this)
+            .find(".state-select");
+        if (countryId) {
+            $.ajax({
+                url: "{{ route('states') }}",  // Make sure this is wrapped in quotes for the URL
+                method: "GET",
+                data: {
+                    "filter[country_id]": countryId  // Corrected way to pass the data
+                },
+                success: function (response) {
+                    stateSelect
+                        .empty()
+                        .append('<option value="">Select State</option>');
+                    $.each(response.data, function (index, state) {
+                        stateSelect.append(
+                            `<option value="${state.id}">${state.name}</option>`
+                        );
+                    });
+                },
+                error: function () {
+                    stateSelect
+                        .empty()
+                        .append('<option value="">Error loading states</option>');
+                },
+            });
+
+        } else {
+            stateSelect
+                .empty()
+                .append('<option value="">Select State</option>');
+        }
+    });
+
 </script>
 @endsection
