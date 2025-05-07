@@ -34,7 +34,7 @@ class LoginController extends Controller
             return Response::api(HttpEnum::BAD_REQUEST, message: "Bad Request", errors: ['message' => 'something went wrong, please try again.']);
 
         }
-        return  redirect('http://localhost:3000/HomePage');
+        return  redirect('http://10.10.1.219:3000/HomePage');
 //        return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode', 'socialAccounts', 'notificationTypes')));
 
 
