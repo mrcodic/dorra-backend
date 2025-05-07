@@ -29,8 +29,7 @@
 
 @section('content')
 <div class="container bg-white rounded-3 " style="min-height: 100vh;padding-top:60px;padding-left:146px;padding-right:146px">
-    <!-- Step 5 -->
-    @include('dashboard.orders.steps.step5')
+
     <!-- Step 1 -->
 
     @include('dashboard.orders.steps.step1')
@@ -42,6 +41,8 @@
     @include('dashboard.orders.steps.step3')
     <!-- Step 4 -->
     @include('dashboard.orders.steps.step4')
+    <!-- Step 5 -->
+    @include('dashboard.orders.steps.step5')
 
     <!-- Step 6 -->
     @include('dashboard.orders.steps.step6')
