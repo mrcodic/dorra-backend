@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     ShippingAddress\ShippingAddressController};
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 Route::get('country-codes',[MainController::class, 'countryCodes']);
 
@@ -57,6 +58,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('bulk-delete-saved','destroyBulk');
     });
 
+
+
+
+    Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 
     Route::apiResource('categories',CategoryController::class)->only(['index','show']);
     Route::get('sub-categories',[MainController::class, 'subCategories']);
