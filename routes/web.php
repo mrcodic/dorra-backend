@@ -11,7 +11,9 @@ use App\Http\Controllers\Dashboard\{AdminController,
     TagController,
     UserController,
     CategoryController,
-    ProfileController};
+    ProfileController,
+    DiscountCodeController,
+};
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Rules\Role;
 
@@ -82,7 +84,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [InvoiceController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
-    Route::resource('/invoices', InvoiceController::class)->except('show');
+    Route::resource('/discount-codes', DiscountCodeController::class)->except('show');
+
+    Route::group(['prefix' => 'discount-codes', 'as' => 'discount-codes.', 'controller' => DiscountCodeController::class,],function () {
+        Route::get('/data', [DiscountCodeController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::resource('/invoices', DiscountCodeController::class)->except('show');
 
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);

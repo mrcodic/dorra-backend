@@ -24,7 +24,7 @@
                             <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
                                 <input class="form-check-input" type="radio" name="shipping_method" id="pickUp" value="pickup">
                                 <label class="form-check-label fs-4 text-black" for="pickUp">
-                                    456 Ocean Ave, Miami, FL
+                                   Pick up
                                 </label>
                             </div>
                         </div>

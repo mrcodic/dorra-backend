@@ -50,7 +50,7 @@
                     </form>
                 </div>
 
-                <div class="col-6 col-md-1 col-lg-2">
+                <div class="col-3">
                     <select name="created_at" class="form-select filter-date">
                         <option value="">Date</option>
                         <option value="asc">asc</option>
@@ -58,8 +58,9 @@
                     </select>
                 </div>
 
-                <div class="col-12 col-md-2 text-md-end">
-                    <a class="btn btn-outline-primary ms-2" href="{{ route("users.create") }}">Add New User</a>
+                <div class="col-3 text-md-end">
+                   
+                    <a class="btn btn-outline-primary w-100" href="{{ route("users.create") }}"> <i data-feather="plus"></i>Add New User</a>
                 </div>
             </div>
             <table class="user-list-table table">
