@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     SaveController,
     ShippingAddress\ShippingAddressController};
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 Route::get('country-codes',[MainController::class, 'countryCodes']);
 
@@ -31,8 +33,8 @@ Route::prefix('password')->group(function () {
 
 Route::prefix('login')->controller(LoginController::class)->group(function () {
     Route::post('/', LoginController::class);
-    Route::get('/google', 'redirectToGoogle');
-    Route::get('/google/callback', 'handleGoogleCallback');
+    Route::get('/google', 'redirectToGoogle')->middleware(EnsureFrontendRequestsAreStateful::class,);
+    Route::get('/google/callback', 'handleGoogleCallback')->middleware(EnsureFrontendRequestsAreStateful::class,);
     Route::get('/apple/callback', 'appleCallback');
 });
 
@@ -56,6 +58,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('bulk-delete-saved','destroyBulk');
     });
 
+
+
+
+    Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 
     Route::apiResource('categories',CategoryController::class)->only(['index','show']);
     Route::get('sub-categories',[MainController::class, 'subCategories']);
