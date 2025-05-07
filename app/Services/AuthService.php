@@ -7,6 +7,7 @@ use App\Repositories\Implementations\SocialAccountRepository;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthService
@@ -70,8 +71,10 @@ class AuthService
             $this->socialAccountRepository->updateOrCreate(['user_id' => $user->id, 'provider' => 'google',], [
                 'provider_id' => $googleUser->getId(),
             ]);
-            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
-            $user->token = $plainTextToken;
+//            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
+//            $user->token = $plainTextToken;
+            Auth::login($user);
+
             return $user;
 
         } catch (Exception $exception) {
