@@ -133,45 +133,50 @@ class ProductService extends BaseService
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
         if (isset($validatedData['prices'])) {
+            $product->update(['base_price'=>null]);
             collect($validatedData['prices'])->each(function ($price) use ($product) {
-                $product->prices()->updateOrCreate([
-                    'product_id' => $product->id,
-                ],$price);
+                $product->prices()->updateOrCreate(
+                    [
+                        'product_id' => $product->id,
+                        'quantity' => $price['quantity'],
+                    ],
+                    [
+                        'price' => $price['price'],
+                    ]
+                );
             });
+
 
         }
-        collect($validatedData['specifications'])->map(function ($specification) use ($product) {
-            dd($specification);
-            $productSpecification = tap($product->specifications()->first(), function ($spec) use ($specification) {
-                $spec->updateOrCreate([
-                    'name' => [
-                        'en' => $specification['name_en'],
-                        'ar' => $specification['name_ar'],
-                    ],
-                ],[]);
-            });
-
+        collect($validatedData['specifications'])->each(function ($specification) use ($product) {
+            // Find or create specification based on translated name
+            $productSpecification = $product->specifications()->updateOrCreate(
+                [
+                    'name->en' => $specification['name_en'],
+                    'name->ar' => $specification['name_ar'],
+                ],
+                [] // Add more fields here if needed
+            );
 
             collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
-                $productOption = tap($productSpecification->options()->first(),function ($spec) use ($option){
-                    $spec->updateOrCreate([
-                        'value' => [
-                            'en' => $option['value_en'],
-                            'ar' => $option['value_ar'],
-                        ],
-                        'price' => $option['price'],
-                    ]);
-                });
+                // Find or create option based on translated value and price
+                $productOption = $productSpecification->options()->updateOrCreate(
+                    [
+                        'value->en' => $option['value_en'],
+                        'value->ar' => $option['value_ar'],
+                    ],
+                    [
+                        'price' => $option['price'] ?? 0,
+                    ]
+                );
 
-                if (isset($option['image'])) {
-                    if ($option['image'] instanceof UploadedFile) {
-                        handleMediaUploads([$option['image']], $productOption);
-                    }
+                // Handle media upload
+                if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
+                    handleMediaUploads([$option['image']], $productOption);
                 }
             });
-
-
         });
+
         if (isset($validatedData['image'])) {
             handleMediaUploads($validatedData['image'], $product, 'product_main_image', clearExisting: true);
         }

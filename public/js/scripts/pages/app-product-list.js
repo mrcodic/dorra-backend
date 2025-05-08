@@ -51,23 +51,20 @@ var dt_user_table = $(".product-list-table").DataTable({
             orderable: false,
             render: function (data, type, row, meta) {
                 return `
-                    <div class="dropdown">
-                        <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                            <i data-feather="more-vertical"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a href="/products/${data}" class="dropdown-item">
-                                <i data-feather="file-text"></i> Details
-                            </a>
-                            <a href="/products/${data}/edit" class="dropdown-item">
-                                <i data-feather="edit"></i> Edit
-                            </a>
-                            <a href="#" class="dropdown-item text-danger delete-product" data-id="${data}">
-                                <i data-feather="trash-2"></i> Delete
-                            </a>
-                        </div>
-                    </div>
-                `;
+        <div class="d-flex gap-1">
+             <a href="/products/${data}" class="">
+                <i data-feather="eye"></i>
+              </a>
+              <a href="/products/${data}/edit" class="">
+                <i data-feather="edit-3"></i>
+              </a>
+
+              <a href="#" class=" text-danger delete-product" data-id="${data}">
+                <i data-feather="trash-2"></i>
+              </a>
+
+          </div>
+        `;
             }
         }
     ],

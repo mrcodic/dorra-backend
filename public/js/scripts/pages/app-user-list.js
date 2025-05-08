@@ -63,7 +63,6 @@ var dt_user_table = $(".user-list-table").DataTable({
             data: "id",
             orderable: false,
             render: function (data, type, row, meta) {
-                console.log(data);
                 return `
         <div class="d-flex gap-1">
              <a href="/users/${data}" class="">
