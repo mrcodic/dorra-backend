@@ -47,7 +47,7 @@
                             class="form-control ps-5 border rounded-3"
                             name="search_value"
                             id="search-tag-form"
-                            placeholder="Search product..."
+                            placeholder="Search tag..."
                             style="height: 38px;">
                     </form>
                 </div>
@@ -89,12 +89,21 @@
                 </thead>
             </table>
             <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+
                 <div class="delete-container">
-                    <p id="selected-count-text">0 Categories are selected</p>
-                    <form id="bulk-delete-form" method="POST" action="{{ route('categories.bulk-delete') }}">
+                    <p id="selected-count-text">0 Tags are selected</p>
+                    <button type="submit"  id="delete-selected-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteTagsModal"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
+                    <form style="display: none;" id="bulk-delete-form" method="POST" action="{{ route('tags.bulk-delete') }}">
                         @csrf
-                        <button type="submit" id="delete-selected-btn"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                        <button  type="submit"  id="delete-selected-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteTagsModal"
+                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                             <i data-feather="trash-2"></i> Delete Selected
                         </button>
                     </form>
@@ -102,6 +111,18 @@
 
                 </div>
             </div>
+
+            @include('modals.delete',[
+          'id' => 'deleteTagModal',
+          'formId' => 'deleteTagForm',
+          'title' => 'Delete Tag',
+          ])
+            @include('modals.delete',[
+            'id' => 'deleteTagsModal',
+            'formId' => 'bulk-delete-form',
+            'title' => 'Delete Tags',
+            'confirmText' => 'Are you sure you want to delete this items?',
+            ])
             @include('modals.tags.add-tag')
             @include('modals.tags.show-tag')
             @include('modals.tags.edit-tag')

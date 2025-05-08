@@ -95,7 +95,8 @@
                                 </li>
                             </ul>
                             <div class="d-flex justify-content-center pt-2">
-                                <a href="javascript:;" class="btn btn-primary me-1" data-bs-target="#editUser" data-bs-toggle="modal">
+                                <a href="javascript:;" class="btn btn-primary me-1" data-bs-target="#editUser"
+                                   data-bs-toggle="modal">
                                     Edit
                                 </a>
 
@@ -132,17 +133,18 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{asset('app/user/view/notifications')}}">
-                            <i data-feather="bell" class="font-medium-3 me-50"></i><span class="fw-bold">Notifications</span>
+                            <i data-feather="bell" class="font-medium-3 me-50"></i><span
+                                class="fw-bold">Notifications</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{asset('app/user/view/connections')}}">
-                            <i data-feather="link" class="font-medium-3 me-50"></i><span class="fw-bold">Connections</span>
+                            <i data-feather="link" class="font-medium-3 me-50"></i><span
+                                class="fw-bold">Connections</span>
                         </a>
                     </li>
                 </ul>
                 <!--/ User Pills -->
-
 
 
                 <!-- payment methods -->
@@ -172,7 +174,8 @@
                                     </div>
                                     <div class="d-flex flex-column text-start text-lg-end">
                                         <div class="d-flex order-sm-0 order-1 mt-1 mt-sm-0">
-                                            <button class="btn btn-outline-primary me-75" data-bs-toggle="modal" data-bs-target="#editCard">
+                                            <button class="btn btn-outline-primary me-75" data-bs-toggle="modal"
+                                                    data-bs-target="#editCard">
                                                 Edit
                                             </button>
                                             <button class="btn btn-outline-secondary">Delete</button>
@@ -194,7 +197,8 @@
                                     </div>
                                     <div class="d-flex flex-column text-start text-lg-end">
                                         <div class="d-flex order-sm-0 order-1 mt-1 mt-sm-0">
-                                            <button class="btn btn-outline-primary me-75" data-bs-toggle="modal" data-bs-target="#editCard">
+                                            <button class="btn btn-outline-primary me-75" data-bs-toggle="modal"
+                                                    data-bs-target="#editCard">
                                                 Edit
                                             </button>
                                             <button class="btn btn-outline-secondary">Delete</button>
@@ -216,7 +220,8 @@
                                     </div>
                                     <div class="d-flex flex-column text-start text-lg-end">
                                         <div class="d-flex order-sm-0 order-1 mt-1 mt-sm-0">
-                                            <button class="btn btn-outline-primary me-75" data-bs-toggle="modal" data-bs-target="#editCard">
+                                            <button class="btn btn-outline-primary me-75" data-bs-toggle="modal"
+                                                    data-bs-target="#editCard">
                                                 Edit
                                             </button>
                                             <button class="btn btn-outline-secondary">Delete</button>
@@ -233,20 +238,20 @@
                 <!-- Billing Address -->
                 @foreach($user->addresses as $address)
 
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title mb-50">Billing Address</h4>
-                        <button
-                            class="btn btn-primary btn-sm edit-address"
-                            type="button"
-                            data-bs-toggle="modal"
-                            data-bs-target="#addNewAddressModal"
-                        >
-                            Edit address
-                        </button>
-                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title mb-50">Billing Address</h4>
+                            <button
+                                class="btn btn-primary btn-sm edit-address"
+                                type="button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#addNewAddressModal"
+                            >
+                                Edit address
+                            </button>
+                        </div>
 
-                    <div class="card-body">
+                        <div class="card-body">
                             <div class="row">
                                 <div class="col-xl-7 col-12">
                                     <dl class="row mb-0">
@@ -266,10 +271,10 @@
                                 </div>
 
                             </div>
-                    </div>
+                        </div>
 
-                </div>
-                    @include('modals/modal-add-new-address',['address' => $address])
+                    </div>
+                    @include('modals.addresses.add-new-address',['address' => $address])
 
                 @endforeach
 
@@ -279,7 +284,7 @@
         </div>
     </section>
 
-    @include('modals/modal-edit-user')
+    @include('modals.users.edit-user')
     @include('modals/modal-upgrade-plan')
     @include('modals/modal-edit-cc')
     @include('modals/modal-add-new-cc')

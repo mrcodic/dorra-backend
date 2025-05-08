@@ -17,8 +17,6 @@ class TagController extends DashboardController
         $this->storeRequestClass = new StoreTagRequest();
         $this->updateRequestClass = new UpdateTagRequest();
         $this->indexView = 'tags.index';
-        $this->createView = 'tags.create';
-        $this->editView = 'tags.edit';
         $this->usePagination = true;
         $this->resourceTable = 'tags';
 

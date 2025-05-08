@@ -79,7 +79,8 @@
                                 </li>
                                 <li class="mb-75">
                                     <span class="fw-bolder me-25">Status:</span>
-                                    <span class="badge {{$model->status == "Active" ? 'bg-light-success' : 'bg-danger'}}"> {{ $model->status }}</span>
+                                    <span
+                                        class="badge {{$model->status == "Active" ? 'bg-light-success' : 'bg-danger'}}"> {{ $model->status }}</span>
                                 </li>
 
                                 <li class="mb-75">
@@ -245,7 +246,7 @@
         </div>
     </section>
 
-    @include('modals/modal-edit-user',['user'=>$model , 'countryCodes' => $associatedData['country_codes']])
+    @include('modals.users.edit-user',['user'=>$model , 'countryCodes' => $associatedData['country_codes']])
     @include('modals/modal-upgrade-plan')
 @endsection
 

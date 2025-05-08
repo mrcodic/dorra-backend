@@ -59,7 +59,9 @@ var dt_user_table = $(".product-list-table").DataTable({
                 <i data-feather="edit-3"></i>
               </a>
 
-              <a href="#" class=" text-danger delete-product" data-id="${data}">
+              <a href="#" class=" text-danger open-delete-product-modal" data-id="${data}"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteProductModal" >
                 <i data-feather="trash-2"></i>
               </a>
 
@@ -151,47 +153,46 @@ $(document).ready(function () {
         }
     });
 
-    $(document).on("click", ".delete-product", function (e) {
+    $(document).on("click", ".open-delete-product-modal", function () {
+        const productId = $(this).data("id");
+        $("#deleteProductForm").data("id", productId);
+    });
+
+    $(document).on("submit", "#deleteProductForm", function (e) {
         e.preventDefault();
+        const productId = $(this).data("id");
 
-        var $table = $(".product-list-table").DataTable();
-        var $row = $(this).closest("tr");
-        var rowData = $table.row($row).data();
+        $.ajax({
+            url: `/products/${productId}`,
+            method: "DELETE",
+            success: function (res) {
+                $("#deleteProductModal").modal("hide");
 
-        var productId = $(this).data("id");
-        var productName = rowData.name;
+                Toastify({
+                    text: "Product deleted successfully!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F",
+                    close: true,
+                }).showToast();
+                $(".product-list-table").DataTable().ajax.reload(null, false);
 
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `You are about to delete user "${productName}". This action cannot be undone.`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#6c757d",
-            confirmButtonText: "Yes, delete it!",
-            reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/products/${productId}`,
-                    method: "DELETE",
-                    success: function (res) {
-                        Swal.fire(
-                            "Deleted!",
-                            "Product has been deleted.",
-                            "success"
-                        );
-                        $table.ajax.reload();
-                    },
-                    error: function () {
-                        Swal.fire(
-                            "Failed",
-                            "Could not delete product.",
-                            "error"
-                        );
-                    },
-                });
-            }
+
+            },
+            error: function () {
+                $("#deleteProductModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#EA5455", // red
+                    close: true,
+                }).showToast();
+                $(".product-list-table").DataTable().ajax.reload(null, false);
+
+            },
         });
     });
 
@@ -201,53 +202,57 @@ $(document).ready(function () {
         const selectedIds = $(".category-checkbox:checked").map(function () {
             return $(this).val();
         }).get();
-        console.log(selectedIds)
 
         if (selectedIds.length === 0) return;
 
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `You're about to delete ${selectedIds.length} products.`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#6c757d",
-            confirmButtonText: "Yes, delete them!",
-            reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "products/bulk-delete",
-                    method: "POST",
-                    data: {
-                        ids: selectedIds,
-                        _token: $('meta[name="csrf-token"]').attr("content"),
-                    },
-                    success: function (response) {
-                        Toastify({
-                            text: "Selected products deleted successfully!",
-                            duration: 1500,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#28a745",
-                            close: true,
-                        }).showToast();
+        $.ajax({
+            url: "products/bulk-delete",
+            method: "POST",
+            data: {
+                ids: selectedIds,
+                _token: $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                $("#deleteProductsModal").modal("hide");
+                Toastify({
+                    text: "Selected products deleted successfully!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
 
-                        // Reload DataTable
-                        $(".product-list-table").DataTable().ajax.reload(null, false);
+                // Reload DataTable
 
-                        // Uncheck all checkboxes
-                        $(".category-checkbox").prop("checked", false);
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".product-list-table").DataTable().ajax.reload(null, false);
 
-                        // Hide the bulk delete container if needed
-                        $("#bulk-delete-container").hide();
-                    },
-                    error: function () {
-                        Swal.fire("Error", "Could not delete selected products.", "error");
-                    },
-                });
-            }
+            },
+            error: function () {
+                $("#deleteCategoriesModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
+
+                // Reload DataTable
+
+                $('#bulk-delete-container').hide();
+                $('.product-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".category-list-table").DataTable().ajax.reload(null, false);
+
+            },
         });
+
     });
+
 
 });

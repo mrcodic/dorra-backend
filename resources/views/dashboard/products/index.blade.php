@@ -97,8 +97,14 @@
                 </table>
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                     <div class="delete-container">
-                        <p id="selected-count-text">0 Categories are selected</p>
-                        <form id="bulk-delete-form" method="POST" action="{{ route('categories.bulk-delete') }}">
+                        <p id="selected-count-text">0 Products are selected</p>
+                        <button type="submit" id="delete-selected-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteProductsModal"
+                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                            <i data-feather="trash-2"></i> Delete Selected
+                        </button>
+                        <form style="display: none;" id="bulk-delete-form" method="POST" action="{{ route('categories.bulk-delete') }}">
                             @csrf
                             <button type="submit" id="delete-selected-btn"
                                     class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
@@ -110,7 +116,17 @@
                     </div>
                 </div>
             </div>
-
+            @include('modals.delete',[
+                     'id' => 'deleteProductModal',
+                     'formId' => 'deleteProductForm',
+                     'title' => 'Delete Product',
+                     ])
+            @include('modals.delete',[
+            'id' => 'deleteProductsModal',
+            'formId' => 'bulk-delete-form',
+            'title' => 'Delete Categories',
+            'confirmText' => 'Are you sure you want to delete this items?',
+            ])
         </div>
         <!-- list and filter end -->
     </section>

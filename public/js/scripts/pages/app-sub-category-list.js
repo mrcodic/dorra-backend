@@ -27,33 +27,48 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
             data: "id",
             orderable: false,
             render: function (data, type, row, meta) {
-                console.log(row.parent.id)
                 return `
-          <div class="dropdown">
-            <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-              <i data-feather="more-vertical"></i>
-            </button>
-            <div class="dropdown-menu">
-              <a href=""
-                 class="dropdown-item view-details"
-                 data-bs-toggle="modal"
-                 data-bs-target="#showSubCategoryModal"
-                 data-id="${data}"
-                 data-name_ar="${row.name_ar}"
-                 data-name_en="${row.name_en}"
-                 data-products="${row.no_of_products}"
-                 data-showdate="${row.show_date}"
-                 data-parent="${row.parent_name}"
-                 data-parent_id="${row.parent.id}">
-                <i data-feather="file-text"></i> Details
+        <div class="d-flex gap-1">
+                                <a href="#" class="view-details"
+                                   data-bs-toggle="modal"
+                                    data-bs-target="#showSubCategoryModal"
+                                     data-id="${data}"
+                                     data-name_ar="${row.name_ar}"
+                                     data-name_en="${row.name_en}"
+                                     data-products="${row.no_of_products}"
+                                     data-showdate="${row.show_date}"
+                                     data-parent="${row.parent_name}"
+                                     data-parent_id="${row.parent.id}">
+                                                <i data-feather="eye"></i>
+                                </a>
+
+
+              <a href="#" class="edit-details"
+               data-bs-toggle="modal"
+               data-bs-target="#editSubCategoryModal"
+               data-id="${data}"
+               data-name_ar="${row.name_ar}"
+               data-name_en="${row.name_en}"
+               data-products="${row.no_of_products}"
+               data-showdate="${row.show_date}"
+               data-parent="${row.parent_name}"
+               data-parent_id="${row.parent.id}">
+
+                <i data-feather="edit-3"></i>
               </a>
 
-              <a href="#" class="dropdown-item text-danger delete-sub-category" data-id="${data}">
-                <i data-feather="trash-2"></i> Delete
-              </a>
-            </div>
+      <a href="#" class="text-danger open-delete-sub-category-modal"
+       data-id="${data}"
+       data-name="${row.name}"
+       data-action="/sub-categories/${data}"
+       data-bs-toggle="modal"
+       data-bs-target="#deleteSubCategoryModal">
+   <i data-feather="trash-2"></i>
+</a>
+
           </div>
         `;
+
             },
         },
     ],
@@ -93,7 +108,49 @@ $('.filter-date').on('change', function () {
 });
 
 $(document).ready(function () {
-    $(document).ready(function () {
+    $("#addSubCategoryForm").on("submit", function (e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+
+        $.ajax({
+            url: $(this).attr("action"), // dynamic action URL
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                Toastify({
+                    text: "SubCategory added successfully!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F",
+                    close: true,
+                }).showToast();
+
+                $("#addSubCategoryForm")[0].reset();
+                $("#addSubCategoryModal").modal("hide");
+
+                $(".sub-category-list-table").DataTable().ajax.reload(); // reload your table
+            },
+            error: function (xhr) {
+                var errors = xhr.responseJSON.errors;
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        Toastify({
+                            text: errors[key][0],
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                    }
+                }
+            },
+        });
+    });
         // Check if the product was added successfully
         if (sessionStorage.getItem("Category_added") == "true") {
             // Show the success Toastify message
@@ -109,50 +166,7 @@ $(document).ready(function () {
             // Remove the flag after showing the Toastify message
             sessionStorage.removeItem("Category_added");
         }
-    });
 
-    $(document).on("click", ".delete-sub-category", function (e) {
-        e.preventDefault();
-
-        var $table = $(".sub-category-list-table").DataTable();
-        var $row = $(this).closest("tr");
-        var rowData = $table.row($row).data();
-        var categoryId = $(this).data("id");
-        var categoryName = rowData.name;
-
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `You are about to delete category "${categoryName}". This action cannot be undone.`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#6c757d",
-            confirmButtonText: "Yes, delete it!",
-            reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/categories/${categoryId}`,
-                    method: "DELETE",
-                    success: function (res) {
-                        Swal.fire(
-                            "Deleted!",
-                            "Category has been deleted.",
-                            "success"
-                        );
-                        $table.ajax.reload();
-                    },
-                    error: function () {
-                        Swal.fire(
-                            "Failed",
-                            "Could not delete category.",
-                            "error"
-                        );
-                    },
-                });
-            }
-        });
-    });
 
     $(document).on("click", ".view-details", function (e) {
         const categoryNameAR = $(this).data("name_ar");
@@ -173,6 +187,27 @@ $(document).ready(function () {
         // Show modal
         $("#showSubCategoryModal").modal("show");
     });
+
+    $(document).on("click", ".edit-details", function (e) {
+        const categoryNameAR = $(this).data("name_ar");
+        const categoryNameEn = $(this).data("name_en");
+        const products = $(this).data("products");
+        const addedDate = $(this).data("showdate");
+        const id = $(this).data("id");
+        const parentName = $(this).data("parent");
+        const parentId = $(this).data("parent_id");
+        // Populate modal
+        $("#editSubCategoryModal #edit-sub-category-name-ar").val(categoryNameAR);
+        $("#editSubCategoryModal #edit-sub-category-name-en").val(categoryNameEn);
+        $("#editSubCategoryModal #edit-sub-category-products").val(products);
+        $("#editSubCategoryModal #edit-sub-category-date").val(addedDate);
+        $("#editSubCategoryModal #edit-sub-category-id").val(id);
+        $("#editSubCategoryModal select[name='parent_id']").val(parentId);
+
+        // Show modal
+        $("#editSubCategoryModal").modal("show");
+    });
+
 
     $("#editButton").on("click", function () {
         var nameEN = $("#sub-category-name-en").val();
@@ -212,7 +247,8 @@ $(document).ready(function () {
                 // Close modal
                 $("#editSubCategoryModal").modal("hide");
                 $("#showSubCategoryModal").modal("hide");
-                $("#sub-category-list-table").DataTable().ajax.reload();
+                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
+
             },
             error: function (xhr) {
                 var errors = xhr.responseJSON.errors;
@@ -232,49 +268,51 @@ $(document).ready(function () {
         });
     });
 
-    $("#addSubCategoryForm").on("submit", function (e) {
+    $(document).on("click", ".open-delete-sub-category-modal", function () {
+
+        const categoryId = $(this).data("id");
+        $("#deleteSubCategoryForm").data("id", categoryId);
+
+    });
+
+
+    $(document).on("submit", "#deleteSubCategoryForm", function (e) {
         e.preventDefault();
 
-        var formData = new FormData(this);
+        var subCategoryId = $(this).data("id");
 
         $.ajax({
-            url: $(this).attr("action"), // dynamic action URL
-            type: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
+            url: `/sub-categories/${subCategoryId}`,
+            method: "DELETE",
+            success: function (res) {
+                $("#deleteSubCategoryModal").modal("hide");
+
                 Toastify({
-                    text: "Category added successfully!",
+                    text: "Subcategory deleted successfully!",
                     duration: 2000,
                     gravity: "top",
                     position: "right",
                     backgroundColor: "#28C76F",
                     close: true,
                 }).showToast();
-
-                $("#addSubCategoryForm")[0].reset();
-                $("#addSubCategoryModal").modal("hide");
-
-                $(".sub-category-list-table").DataTable().ajax.reload(); // reload your table
+                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
             },
-            error: function (xhr) {
-                var errors = xhr.responseJSON.errors;
-                for (var key in errors) {
-                    if (errors.hasOwnProperty(key)) {
-                        Toastify({
-                            text: errors[key][0],
-                            duration: 4000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#EA5455",
-                            close: true,
-                        }).showToast();
-                    }
-                }
+            error: function () {
+                $("#deleteSubCategoryModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#EA5455", // red
+                    close: true,
+                }).showToast();
+                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
             },
         });
+
     });
+
 
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();
@@ -284,48 +322,54 @@ $(document).ready(function () {
 
         if (selectedIds.length === 0) return;
 
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `You're about to delete ${selectedIds.length} sub-categories.`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#6c757d",
-            confirmButtonText: "Yes, delete them!",
-            reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "sub-categories/bulk-delete",
-                    method: "POST",
-                    data: {
-                        ids: selectedIds,
-                        _token: $('meta[name="csrf-token"]').attr("content"),
-                    },
-                    success: function (response) {
-                        Toastify({
-                            text: "Selected sub-categories deleted successfully!",
-                            duration: 1500,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#28a745",
-                            close: true,
-                        }).showToast();
+        $.ajax({
+            url: "sub-categories/bulk-delete",
+            method: "POST",
+            data: {
+                ids: selectedIds,
+                _token: $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                $("#deleteSubCategoriesModal").modal("hide");
+                Toastify({
+                    text: "Selected subcategories deleted successfully!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
 
-                        // Reload DataTable
+                // Reload DataTable
 
-                        $('#bulk-delete-container').hide();
-                        $('.category-checkbox').prop('checked', false);
-                        $('#select-all-checkbox').prop('checked', false);
-                        $(".sub-category-list-table").DataTable().ajax.reload(null, false);
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
 
-                    },
-                    error: function () {
-                        Swal.fire("Error", "Could not delete selected sub-categories.", "error");
-                    },
-                });
-            }
+            },
+            error: function () {
+                $("#deleteSubCategoriesModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
+
+                // Reload DataTable
+
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
+
+            },
         });
+
     });
+
 
 });
