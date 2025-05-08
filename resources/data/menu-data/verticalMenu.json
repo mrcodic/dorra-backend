@@ -91,7 +91,14 @@
                     "url": "/discount-codes"
                 }
             ]
+        },
+        {
+            "name": "Templates",
+            "icon": "percent",
+            "slug": "",
+            "url": "/templates"
+
         }
-        
+
     ]
 }

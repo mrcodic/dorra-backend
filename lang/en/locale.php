@@ -8,6 +8,7 @@ return [
     "eCommerce" => "eCommerce",
     "Apps" => "Apps",
     "Invoices" => "Invoices",
+    "Templates" => "Templates",
     "DiscountCodes" => "Discount Codes",
     "Discount" => "Discount",
     "Admins" => "Admins",
