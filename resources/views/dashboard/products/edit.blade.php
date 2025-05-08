@@ -67,7 +67,7 @@
 
                                         <!-- Hidden real input -->
                                         <input type="file" name="image" id="product-image-main"
-                                               class="form-control d-none" accept="image/*">
+                                               class="form-control d-none" accept="image/*" >
 
                                         <!-- Custom Upload Card -->
                                         <div id="upload-area" class="upload-card">
@@ -102,7 +102,7 @@
                                                     </div>
                                                 </div>
                                                 <button type="button" id="remove-image"
-                                                        class="btn btn-sm position-absolute text-danger"
+                                                        class="btn btn-sm position-absolute text-danger remove-old-image"
                                                         data-image-id="{{ $image?->id }}"
                                                         style="top: 5px; right: 5px; background-color: #FFEEED">
                                                     <i data-feather="trash"></i>
@@ -145,19 +145,15 @@
                                                     class="file-size text-muted small">{{ number_format($image->size / 1024, 1) }}
                                                     KB
                                                 </div>
+
                                             </div>
 
-                                            <!-- Delete Form & Button -->
-                                            <form method="POST" action="" class="delete-image-form">
-                                                @csrf
-                                                @method('DELETE')
                                                 <button type="submit"
-                                                        class="btn btn-sm position-absolute text-danger"
+                                                        class="btn btn-sm position-absolute text-danger remove-old-image"
                                                         data-image-id="{{ $image->id }}"
                                                         style="top: 5px; right: 5px; background-color: #FFEEED">
                                                     <i data-feather="trash"></i>
                                                 </button>
-                                            </form>
                                         </div>
                                     @endforeach
                                 @endif
@@ -998,6 +994,33 @@
                         });
                     }
                 });
+            });
+
+            //Remove Extra Image
+            $('.remove-old-image').on('click', function (e) {
+                e.preventDefault();
+                var button = $(this);
+                var imageId = button.data('image-id');
+                var imageElement = button.closest('.uploaded-image');
+                $.ajax({
+                    url: '{{ url("api/media") }}/' + imageId,
+                    method: "DELETE",
+                    success: function (response) {
+                        imageElement.remove();
+                        Toastify({
+                            text: "Image Removed Successfully",
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28a745",
+                            close: true
+                        }).showToast();
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseJson.errors)
+                    }
+                })
+
             });
         });
     </script>
