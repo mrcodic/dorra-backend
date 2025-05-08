@@ -347,10 +347,10 @@
                                                                                             <!-- Uploaded Image Preview -->
                                                                                             @php $image = $option->image; @endphp
                                                                                             <div class="uploaded-image {{ $option && $image  ? '' : 'd-none'  }} position-relative mt-1 d-flex align-items-center gap-2 option-uploaded-image">
-                                                                                                <img src="{{ $image->getUrl() }}" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                                                <img src="{{ $image?->getUrl() }}" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
                                                                                                 <div class="file-details">
-                                                                                                    <div class="file-name fw-bold option-file-name">{{ $image->file_name }}</div>
-                                                                                                    <div class="file-size text-muted small option-file-size"> {{ number_format($image->size / 1024, 1) }} KB </div>
+                                                                                                    <div class="file-name fw-bold option-file-name">{{ $image?->file_name }}</div>
+                                                                                                    <div class="file-size text-muted small option-file-size"> {{ number_format($image?->size / 1024, 1) }} KB </div>
                                                                                                 </div>
                                                                                                 <button type="button" class="btn btn-sm position-absolute text-danger option-remove-image" style="top: 5px; right: 5px; background-color: #FFEEED">
                                                                                                     <i data-feather="trash"></i>
