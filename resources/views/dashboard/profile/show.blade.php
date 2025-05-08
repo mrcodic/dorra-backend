@@ -60,63 +60,64 @@
             </div>
 
             <hr class="my-2" />
-            <!-- First Name and Last Name -->
-            <div class="row mb-2">
-                <div class="col-md-10">
-                    <label for="first_name" class="form-label label-text ">First Name</label>
-                    <input type="text" id="first_name" name="first_name" class="form-control" placeholder="Enter first name" required>
-                </div>
+            <form id="updateProfileForm" action="" method="post">
+                @csrf
+                @method("PUT")
+                <!-- First Name and Last Name -->
+                <div class="row mb-2">
+                    <div class="col-md-10">
+                        <label for="first_name" class="form-label label-text ">First Name</label>
+                        <input type="text" id="first_name" name="first_name" value="{{ Auth::user()->first_name }}" class="form-control" placeholder="Enter first name" required>
+                    </div>
 
 
-                <!-- Button -->
-                <div class="col-md-2 d-flex gap-1 justify-content-end mt-2">
-                    <button type="button" class="btn btn-outline-secondary  place-order fs-16">Edit</button>
-                </div>
-            </div>
-            <div class="row mb-2">
 
-                <div class="col-md-10">
-                    <label for="last_name" class="form-label label-text ">Last Name</label>
-                    <input type="text" id="last_name" name="last_name" class="form-control" placeholder="Enter last name" required>
+                </div>
+                <div class="row mb-2">
+
+                    <div class="col-md-10">
+                        <label for="last_name" class="form-label label-text ">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" value="{{ Auth::user()->last_name }}" class="form-control" placeholder="Enter last name" required>
+                    </div>
+
+
                 </div>
 
-                <!-- Button -->
-                <div class="col-md-2 d-flex gap-1 justify-content-end mt-2">
-                    <button type="button" class="btn btn-outline-secondary  place-order fs-16">Edit</button>
-                </div>
-            </div>
+                <!-- Email Address -->
+                <div class="row mb-2">
+                    <div class="col-md-10">
+                        <label for="email" class="form-label label-text ">Email Address</label>
+                        <input type="email" id="email" name="email" value="{{ Auth::user()->email }}" class="form-control" placeholder="Enter email address" required>
+                    </div>
 
-            <!-- Email Address -->
-            <div class="row mb-2">
-                <div class="col-md-10">
-                    <label for="email" class="form-label label-text ">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter email address" required>
                 </div>
-                <!-- Button -->
-                <div class="col-md-2 d-flex gap-1 justify-content-end mt-2">
-                    <button type="button" class="btn btn-outline-secondary  place-order fs-16">Edit</button>
-                </div>
-            </div>
-            <!-- Phone Number (Country Code + Number) -->
-            <div class="row mb-2">
-                <div class="col-md-2">
-                    <label for="country_code" class="form-label label-text ">Country Code</label>
-                    <select id="country_code" name="country_code" class="form-select" required>
-                        <option value="+1">🇺🇸 +1</option>
-                        <option value="+44">🇬🇧 +44</option>
-                        <option value="+20">🇪🇬 +20</option>
-                        <!-- Add more countries as needed -->
-                    </select>
-                </div>
-                <div class="col-md-8">
-                    <label for="phone_number" class="form-label label-text ">Phone Number</label>
-                    <input type="tel" id="phone_number" name="phone_number" class="form-control" placeholder="Enter phone number" required>
+                <!-- Phone Number (Country Code + Number) -->
+                <div class="row mb-2">
+                    <div class="col-md-2">
+                        <label for="country_code" class="form-label label-text ">Country Code</label>
+                        <select id="country_code" name="country_code_id" class="form-select" required>
+                            @foreach($countryCodes as $countryCode)
+                                <option value="{{ $countryCode?->id }}" @selected(Auth::user()->countryCode?->id == $countryCode?->id)>{{ $countryCode?->phone_code }} ({{ $countryCode->iso_code }})</option>
+
+                            @endforeach
+
+                            <!-- Add more countries as needed -->
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="phone_number" class="form-label label-text ">Phone Number</label>
+                        <input type="tel" id="phone_number" name="phone_number" value="{{ Auth::user()->phone_number }}" class="form-control" placeholder="Enter phone number" required>
+                    </div>
+
                 </div>
                 <!-- Buttons -->
-                <div class="col-md-2 d-flex gap-1 justify-content-end mt-2">
-                    <button type="button" class="btn btn-outline-secondary  place-order fs-16">Edit</button>
+                <div class="row mt-2">
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-secondary place-order fs-16">Edit</button>
+                    </div>
                 </div>
-            </div>
+            </form>
+
 
         </div>
         <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
@@ -231,6 +232,53 @@
             }).showToast();
         }
     });
+        $(document).on('submit', '#updateProfileForm', function (e) {
+        e.preventDefault();
+
+        let form = $(this);
+        let formData = new FormData(this);
+        formData.append('_method', 'PUT');
+        $.ajax({
+        url: "{{ route('profile.update', auth()->user()->id) }}",
+        method: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+        Toastify({
+        text: "Profile updated successfully!",
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#28c76f", // success green
+    }).showToast();
+
+        // Optional: Update form fields with returned values if needed
+        if (response.user) {
+        $('#first_name').val(response.user.first_name);
+        $('#last_name').val(response.user.last_name);
+        $('#email').val(response.user.email);
+        $('#phone_number').val(response.user.phone_number);
+        $('#country_code').val(response.user.country_code_id);
+    }
+    },
+        error: function (xhr) {
+        let errorMessage = "Something went wrong!";
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+        errorMessage = xhr.responseJSON.message;
+    }
+        Toastify({
+        text: errorMessage,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#ff3e1d", // error red
+    }).showToast();
+    }
+    });
+    });
+
+
 </script>
 
 

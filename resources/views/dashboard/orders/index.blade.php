@@ -204,8 +204,6 @@
 @endsection
 
 @section('page-script')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         const ordersDataUrl = "{{ route('products.data') }}";
         const ordersCreateUrl = "{{ route('orders.create') }}";
