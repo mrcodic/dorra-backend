@@ -923,6 +923,16 @@
                     $(this).slideDown();
                     updateDeleteButtons($('.outer-repeater'));
                     initializeImageUploaders(this);
+                    // Reset image preview in newly added inner repeater items
+                    $(this).find('.option-uploaded-image').addClass('d-none');
+                    $(this).find('.option-image-preview').attr('src', '');
+                    $(this).find('.option-file-name').text('');
+                    $(this).find('.option-file-size').text('');
+                    $(this).find('.option-upload-progress .progress-bar').css('width', '0%');
+                    $(this).find('.option-upload-progress').addClass('d-none');
+
+                    // Optionally clear the hidden input too
+                    $(this).find('.option-image-input').val('');
                     feather.replace();
                 },
                 hide: function (deleteElement) {
