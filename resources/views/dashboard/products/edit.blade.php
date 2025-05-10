@@ -554,8 +554,10 @@
                                     <!-- Submit -->
                                     <div class="col-12 d-flex justify-content-end gap-1">
                                         <button type="reset" class="btn btn-outline-secondary">Reset</button>
-                                        <button type="submit" class="btn btn-primary me-1">Edit Product</button>
-
+                                        <button type="submit" class="btn btn-primary me-1 saveChangesButton" id="SaveChangesButton">
+                                            <span class="btn-text">Edit Product</span>
+                                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                                        </button>
                                     </div>
                                 </div>
                         </form>
@@ -840,9 +842,32 @@
             // Toggle pricing
             $('input[name="has_custom_prices"]').on('change', function () {
                 const isCustom = $(this).val() === '1';
-                $('#custom-price-section').toggle(isCustom).find('input').prop('disabled', !isCustom);
-                $('#default-price-section').toggle(!isCustom).find('input').prop('disabled', isCustom).val('');
+
+                // Show/hide the respective sections
+                $('#custom-price-section')
+                    .toggle(isCustom)
+                    .find('input, select, textarea, button') // disable all form fields in repeater
+                    .prop('disabled', !isCustom);
+
+                $('#default-price-section')
+                    .toggle(!isCustom)
+                    .find('input, select, textarea, button')
+                    .prop('disabled', isCustom)
+                    .val('');
+
+                // Reset inputs when toggling
+                if (!isCustom) {
+                    $('#custom-price-section').find('input').val('');
+                } else {
+                    $('#default-price-section').find('input').val('');
+                }
+
+                // OPTIONAL: Completely clear repeater rows if needed
+                if (!isCustom) {
+                    $('#custom-price-section .repeater-item').remove(); // adjust selector as needed
+                }
             });
+
 
 
             function updateDeleteButtons(containerSelector) {
@@ -978,6 +1003,18 @@
             // Form submit
             $('#product-form').on('submit', function (e) {
                 e.preventDefault();
+                const isCustom = $('input[name="has_custom_prices"]:checked').val() === '1';
+
+                if (!isCustom) {
+                    // Disable all cu   stom price inputs so they're not submitted
+                    $('[name^="prices["]').prop('disabled', true);
+                }
+                const saveButton = $('.saveChangesButton');
+                const saveLoader = $('.saveLoader');
+                const saveButtonText = $('.saveChangesButton .btn-text');
+                saveButton.prop('disabled', true);
+                saveLoader.removeClass('d-none');
+                saveButtonText.addClass('d-none');
                 const formData = new FormData(this);
                 $.ajax({
                     url: this.action,
@@ -1002,6 +1039,9 @@
                                 close: true
                             }).showToast();
                         });
+                        saveButton.prop('disabled', false);
+                        saveLoader.addClass('d-none');
+                        saveButtonText.removeClass('d-none');
                     }
                 });
             });

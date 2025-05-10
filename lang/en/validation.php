@@ -155,6 +155,125 @@ return [
             'required' => 'Each address must have a valid state selected.',
             'exists' => 'The selected state is not valid.',
         ],
+        'name.en' => [
+            'required' => 'The English name is required.',
+            'string'   => 'The English name must be a valid string.',
+            'max'      => 'The English name must not exceed 255 characters.',
+            'unique'   => 'This English name already exists.',
+        ],
+        'name.ar' => [
+            'required' => 'The Arabic name is required.',
+            'string'   => 'The Arabic name must be a valid string.',
+            'max'      => 'The Arabic name must not exceed 255 characters.',
+            'unique'   => 'This Arabic name already exists.',
+        ],
+        'description.en' => [
+            'nullable' => 'The English description is optional.',
+            'string'   => 'The English description must be a valid string.',
+        ],
+        'description.ar' => [
+            'nullable' => 'The Arabic description is optional.',
+            'string'   => 'The Arabic description must be a valid string.',
+        ],
+        'image' => [
+            'required' => 'Please upload an image.',
+            'image'    => 'The uploaded file must be an image.',
+            'mimes'    => 'The image must be a file of type: jpeg, png, jpg, or svg.',
+        ],
+        'parent_id' => [
+            'required' => 'The main category is required.',
+            'integer'  => 'You must select a valid main category.',
+            'exists'   => 'The selected main category does not exist.',
+        ],
+        'images' => [
+            'array' => 'The product images must be an array.',
+        ],
+        'images.*' => [
+            'image' => 'Each product image must be a valid image.',
+            'mimes' => 'Each image must be of type: jpg, jpeg, png.',
+        ],
+        'category_id' => [
+            'required' => 'Please select a category.',
+            'integer' => 'You must select a valid category.',
+            'exists' => 'The selected category does not exist.',
+        ],
+        'sub_category_id' => [
+            'integer' => 'You must select a valid subcategory.',
+            'exists' => 'The selected subcategory does not exist.',
+        ],
+        'tags' => [
+            'array' => 'Tags must be provided as an array.',
+        ],
+        'has_custom_prices' => [
+            'required' => 'Please specify whether the product has custom pricing.',
+            'boolean' => 'Invalid value for custom pricing option.',
+        ],
+        'base_price' => [
+            'required_if' => 'Base price is required if custom pricing is not enabled.',
+            'prohibited_if' => 'Base price must not be set if custom pricing is enabled.',
+            'numeric' => 'Base price must be a numeric value.',
+            'min' => 'Base price must be at least 0.',
+        ],
+        'prices' => [
+            'required_if' => 'Prices are required if custom pricing is enabled.',
+            'prohibited_if' => 'Prices must not be set if custom pricing is disabled.',
+            'array' => 'Prices must be an array.',
+        ],
+        'prices.*.quantity' => [
+            'required' => 'Each custom price tier must include a quantity.',
+            'integer' => 'Quantity must be an integer.',
+            'min' => 'Quantity must be at least 0.',
+        ],
+        'prices.*.price' => [
+            'required' => 'Each custom price tier must include a price.',
+            'integer' => 'Price must be an integer.',
+            'min' => 'Price must be at least 0.',
+        ],
+        'specifications' => [
+            'required' => 'Product specifications are required.',
+            'array' => 'Specifications must be an array.',
+        ],
+        'specifications.*.name_en' => [
+            'nullable' => 'English name of specification is optional.',
+            'string' => 'English name of specification must be a valid string.',
+            'max' => 'English name of specification must not exceed 255 characters.',
+        ],
+        'specifications.*.name_ar' => [
+            'nullable' => 'Arabic name of specification is optional.',
+            'string' => 'Arabic name of specification must be a valid string.',
+            'max' => 'Arabic name of specification must not exceed 255 characters.',
+        ],
+        'specifications.*.specification_options' => [
+            'required' => 'Each specification must have at least one option.',
+            'array' => 'Specification options must be an array.',
+            'min' => 'Each specification must have at least one option.',
+        ],
+        'specifications.*.specification_options.*.value_en' => [
+            'required' => 'English value of the specification option is required.',
+            'string' => 'English value must be a valid string.',
+            'max' => 'English value must not exceed 255 characters.',
+        ],
+        'specifications.*.specification_options.*.value_ar' => [
+            'required' => 'Arabic value of the specification option is required.',
+            'string' => 'Arabic value must be a valid string.',
+            'max' => 'Arabic value must not exceed 255 characters.',
+        ],
+        'specifications.*.specification_options.*.price' => [
+            'nullable' => 'Option price is optional.',
+            'numeric' => 'Option price must be numeric.',
+            'min' => 'Option price must be at least 0.',
+        ],
+        'specifications.*.specification_options.*.image' => [
+            'nullable' => 'Option image is optional.',
+            'image' => 'Option image must be an image.',
+            'mimes' => 'Option image must be of type: jpg, jpeg, png.',
+        ],
+        'is_free_shipping' => [
+            'boolean' => 'Invalid value for free shipping option.',
+        ],
+        'status' => [
+            'in' => 'The selected status is invalid.',
+        ],
     ],
 
 

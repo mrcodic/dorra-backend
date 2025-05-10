@@ -43,6 +43,7 @@ const dt_user_table = $(".category-list-table").DataTable({
                                    data-name_ar="${row.name_ar}"
                                    data-name_en="${row.name_en}"
                                    data-image="${row.image}"
+                                   data-image_id="${row.imageId}"
                                    data-description_en="${row.description_en}"
                                    data-description_ar="${row.description_ar}"
                                    data-subcategories="${row.children.map((child) => child.name)}"
@@ -59,6 +60,7 @@ const dt_user_table = $(".category-list-table").DataTable({
                                    data-name_ar="${row.name_ar}"
                                    data-name_en="${row.name_en}"
                                    data-image="${row.image}"
+                                   data-image_id="${row.imageId}"
                                    data-description_en="${row.description_en}"
                                    data-description_ar="${row.description_ar}"
                                    data-subcategories="${row.children.map((child) => child.name)}"
@@ -183,6 +185,9 @@ dt_user_table.on("draw", function () {
 });
 
 $(document).ready(function () {
+    const saveButton = $('.saveChangesButton');
+    const saveLoader = $('.saveLoader');
+    const saveButtonText = $('.saveChangesButton .btn-text');
     $(document).ready(function () {
         // Check if the product was added successfully
         if (sessionStorage.getItem("Category_added") == "true") {
@@ -205,7 +210,9 @@ $(document).ready(function () {
         e.preventDefault();
 
         var formData = new FormData(this);
-
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
         $.ajax({
             url: $(this).attr("action"), // dynamic action URL
             type: "POST",
@@ -221,9 +228,18 @@ $(document).ready(function () {
                     backgroundColor: "#28C76F",
                     close: true,
                 }).showToast();
-
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
                 $("#addCategoryForm")[0].reset();
                 $("#addCategoryModal").modal("hide");
+                $("#add-uploaded-image").addClass("d-none");
+                $("#add-uploaded-image img").attr("src", "");
+                $("#add-file-details .file-name").text("");
+                $("#add-file-details .file-size").text("");
+                $("#add-category-image").val(""); // clear file input
+                $("#add-upload-progress").addClass("d-none");
+                $("#add-upload-progress .progress-bar").css("width", "0%");
 
                 $(".category-list-table").DataTable().ajax.reload(); // reload your table
             },
@@ -231,6 +247,7 @@ $(document).ready(function () {
                 var errors = xhr.responseJSON.errors;
                 for (var key in errors) {
                     if (errors.hasOwnProperty(key)) {
+
                         Toastify({
                             text: errors[key][0],
                             duration: 4000,
@@ -239,8 +256,12 @@ $(document).ready(function () {
                             backgroundColor: "#EA5455",
                             close: true,
                         }).showToast();
+
                     }
                 }
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
             },
         });
     });
@@ -262,6 +283,7 @@ $(document).ready(function () {
         const descriptionAr = $(this).data("description_ar");
         const descriptionEn = $(this).data("description_en");
         const image = $(this).data("image");
+        const imageId = $(this).data("image_id");
         const id = $(this).data("id");
         // Populate modal
         $("#showCategoryModal #category-name-ar").val(categoryNameAR);
@@ -272,6 +294,7 @@ $(document).ready(function () {
         $("#showCategoryModal #category-description-en").val(descriptionEn);
         $("#showCategoryModal #imagePreview").attr("src", image);
         $("#showCategoryModal #category-id").val(id);
+        $("#showCategoryModal #image-id").val(imageId);
 
         // Create badges for subcategories
         let badgesHtml = "";
@@ -280,7 +303,7 @@ $(document).ready(function () {
         });
 
         // Set the badges HTML in the modal
-        $("#subcategories-container").html(badgesHtml);
+        $("#subcategories-container").html(badgesHtml ? badgesHtml :"-");
 
         // Show modal
         const modal = new bootstrap.Modal(
@@ -305,6 +328,33 @@ $(document).ready(function () {
         const descriptionAr = $(this).data("description_ar");
         const descriptionEn = $(this).data("description_en");
         const image = $(this).data("image");
+        const imageId = $(this).data("image_id");
+        $('.remove-old-image').on('click', function (e) {
+
+            e.preventDefault();
+
+            var imageElement = $(this).closest('.uploaded-image');
+            $.ajax({
+                url: 'api/media/' + imageId,
+                method: "DELETE",
+                success: function (response) {
+                    imageElement.remove();
+                    Toastify({
+                        text: "Image Removed Successfully",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28a745",
+                        close: true
+                    }).showToast();
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseJson.errors)
+                }
+            })
+
+        });
+
         const id = $(this).data("id");
         // Populate modal
         $("#editCategoryModal #edit-category-name-ar").val(categoryNameAR);
@@ -313,7 +363,8 @@ $(document).ready(function () {
         $("#editCategoryModal #edit-category-date").val(addedDate);
         $("#editCategoryModal #edit-category-description-ar").val(descriptionAr);
         $("#editCategoryModal #edit-category-description-en").val(descriptionEn);
-        $("#editCategoryModal #edit-imagePreview").attr("src", image);
+        $("#editCategoryModal #edit-uploaded-image").removeClass('d-none');
+        $("#editCategoryModal #edit-preview-image").attr("src", image);
         $("#editCategoryModal #edit-category-id").val(id);
 
         // Create badges for subcategories
@@ -337,13 +388,40 @@ $(document).ready(function () {
         var nameAR = $("#category-name-ar").val();
         var descEN = $("#category-description-en").val();
         var descAR = $("#category-description-ar").val();
+        var imageId = $("#image-id").val();
+        var image = $("#imagePreview").attr("src");
         var id = $("#category-id").val();
-
         $("#edit-category-name-en").val(nameEN);
         $("#edit-category-name-ar").val(nameAR);
         $("#edit-category-description-en").val(descEN);
         $("#edit-category-description-ar").val(descAR);
         $("#edit-category-id").val(id);
+        $("#edit-uploaded-image").removeClass('d-none');
+        $("#edit-preview-image").attr("src", image);
+        $('.remove-old-image').on('click', function (e) {
+            e.preventDefault();
+
+            var imageElement = $(this).closest('.uploaded-image');
+
+            $.ajax({
+                url: 'api/media/' + imageId,
+                method: "DELETE",
+                success: function (response) {
+                    imageElement.remove();
+                    Toastify({
+                        text: "Image Removed Successfully",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28a745",
+                        close: true
+                    }).showToast();
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseJSON.errors)
+                }
+            });
+        });
 
         $("#editCategoryModal").modal("show");
     });
@@ -351,6 +429,9 @@ $(document).ready(function () {
     $("#editCategoryForm").on("submit", function (e) {
         e.preventDefault(); // prevent default form submission
         var categoryId = $(this).find("#edit-category-id").val();
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
         $.ajax({
             url: `categories/${categoryId}`,
             type: "POST", // IMPORTANT: Laravel expects POST + method spoofing (@method('PUT'))
@@ -358,7 +439,9 @@ $(document).ready(function () {
             processData: false,
             contentType: false,
             success: function (response) {
-
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
+                saveButton.prop('disabled', false);
                 Toastify({
                     text: "Category updated successfully!",
                     duration: 3000,
@@ -383,6 +466,9 @@ $(document).ready(function () {
                 $('.category-list-table').DataTable().ajax.reload();
             },
             error: function (xhr) {
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
+                saveButton.prop('disabled', false);
                 var errors = xhr.responseJSON.errors;
                 for (var key in errors) {
                     if (errors.hasOwnProperty(key)) {
@@ -421,6 +507,7 @@ $(document).ready(function () {
         }
     });
 
+
     $(document).on("click", ".open-delete-category-modal", function () {
         const categoryId = $(this).data("id");
         $("#deleteCategoryForm").data("id", categoryId);
@@ -434,6 +521,7 @@ $(document).ready(function () {
             url: `/categories/${categoryId}`,
             method: "DELETE",
             success: function (res) {
+
                 $("#deleteCategoryModal").modal("hide");
 
                 Toastify({
@@ -444,11 +532,12 @@ $(document).ready(function () {
                     backgroundColor: "#28C76F",
                     close: true,
                 }).showToast();
-                              $(".category-list-table").DataTable().ajax.reload(null, false);
+                $(".category-list-table").DataTable().ajax.reload(null, false);
 
 
             },
             error: function () {
+
                 $("#deleteCategoryModal").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",

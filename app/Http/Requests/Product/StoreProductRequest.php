@@ -17,7 +17,6 @@ class StoreProductRequest extends BaseRequest
         return true;
     }
 
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -77,22 +76,36 @@ class StoreProductRequest extends BaseRequest
             'is_free_shipping' => ['nullable', 'boolean'],
             'status' => ['nullable', 'in:', StatusEnum::values()],
         ];
-
     }
 
+    /**
+     * Get the custom validation messages for the request.
+     *
+     * @return array
+     */
     public function messages(): array
     {
         return [
-            'name.required' => 'The product name is required.',
-            'name.string' => 'The product name must be a valid string.',
-            'name.max' => 'The product name cannot be longer than 255 characters.',
+            'name.en.required' => 'The English name is required.',
+            'name.en.string' => 'The English name must be a valid string.',
+            'name.en.max' => 'The English name must not exceed 255 characters.',
+            'name.en.unique' => 'This English name already exists.',
 
-            'description.string' => 'The product description must be a valid string.',
+            'name.ar.required' => 'The Arabic name is required.',
+            'name.ar.string' => 'The Arabic name must be a valid string.',
+            'name.ar.max' => 'The Arabic name must not exceed 255 characters.',
+            'name.ar.unique' => 'This Arabic name already exists.',
 
-            'image.required' => 'A main product image is required.',
-            'image.image' => 'The main product image must be an image file.',
-            'image.mimes' => 'The main image must be a file of type: jpg, jpeg, png.',
-            'image.max' => 'The main image must not be larger than 2MB.',
+            'description.en.nullable' => 'The English description is optional.',
+            'description.en.string' => 'The English description must be a valid string.',
+
+            'description.ar.nullable' => 'The Arabic description is optional.',
+            'description.ar.string' => 'The Arabic description must be a valid string.',
+
+            'image.required' => 'Please upload an image.',
+            'image.image' => 'The uploaded file must be an image.',
+            'image.mimes' => 'The image must be a file of type: jpeg, png, jpg.',
+            'image.max' => 'The main product image must not be larger than 2MB.',
 
             'images.array' => 'The product images must be an array.',
             'images.*.image' => 'Each product image must be a valid image.',
@@ -105,6 +118,7 @@ class StoreProductRequest extends BaseRequest
 
             'sub_category_id.integer' => 'The subcategory must be a valid ID.',
             'sub_category_id.exists' => 'The selected subcategory does not exist.',
+            'sub_category_id.custom' => 'The selected category is a parent category, not a subcategory. Please select a valid subcategory.',
 
             'tags.array' => 'Tags must be provided as an array.',
 
@@ -117,5 +131,31 @@ class StoreProductRequest extends BaseRequest
             'status.in' => 'The selected status is invalid.',
         ];
     }
+
+    /**
+     * Get the custom validation attributes for the request.
+     *
+     * @return array
+     */
+    public function attributes(): array
+    {
+        return [
+            'name.en' => 'English Name',
+            'name.ar' => 'Arabic Name',
+            'description.en' => 'English Description',
+            'description.ar' => 'Arabic Description',
+            'image' => 'Product Image',
+            'category_id' => 'Category',
+            'sub_category_id' => 'Subcategory',
+            'tags' => 'Product Tags',
+            'has_custom_prices' => 'Custom Prices',
+            'base_price' => 'Base Price',
+            'prices' => 'Price Details',
+            'specifications' => 'Product Specifications',
+            'is_free_shipping' => 'Free Shipping',
+            'status' => 'Product Status',
+        ];
+    }
+
 
 }

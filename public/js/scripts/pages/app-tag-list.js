@@ -104,10 +104,14 @@ var dt_user_table = $('.tag-list-table').DataTable({
         dt_user_table.draw();
     });
 $(document).ready(function () {
-
+    const saveButton = $('.saveChangesButton');
+    const saveLoader = $('.saveLoader');
+    const saveButtonText = $('.saveChangesButton .btn-text');
     $('#addTagForm').on('submit', function (e) {
         e.preventDefault();
-
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
         var formData = new FormData(this);
 
         $.ajax({
@@ -126,10 +130,12 @@ $(document).ready(function () {
                     close: true
                 }).showToast();
 
-
-
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
                 $('#addTagForm')[0].reset();
                 $('#addTagModal').modal('hide');
+
 
                 $('.tag-list-table').DataTable().ajax.reload(); // reload your table
             },
@@ -147,25 +153,12 @@ $(document).ready(function () {
                         }).showToast();
                     }
                 }
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
             }
         });
     });
-
-        // Check if the product was added successfully
-        if (sessionStorage.getItem('Category_added') == 'true') {
-            // Show the success Toastify message
-            Toastify({
-                text: "Tag added successfully!",
-                duration: 4000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#28a745",  // Green for success
-                close: true
-            }).showToast();
-
-            // Remove the flag after showing the Toastify message
-            sessionStorage.removeItem('Category_added');
-        }
 
     $(document).on('click', '.view-details', function (e) {
         const tagNameAR = $(this).data('name_ar');
@@ -217,8 +210,9 @@ $(document).ready(function () {
     $('#editTagForm').on('submit', function (e) {
         e.preventDefault();
         var tagId = $(this).find('#edit-tag-id').val();
-        console.log(tagId)
-
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
         $.ajax({
             url: `tags/${tagId}`,
             type: 'POST',
@@ -235,7 +229,9 @@ $(document).ready(function () {
                     backgroundColor: "#28C76F",
                     close: true
                 }).showToast();
-
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
                 // Close modal
                 $('#editTagModal').modal('hide');
                 $('#showTagModal').modal('hide');
@@ -258,6 +254,9 @@ $(document).ready(function () {
                         }).showToast();
                     }
                 }
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
             }
         });
     });

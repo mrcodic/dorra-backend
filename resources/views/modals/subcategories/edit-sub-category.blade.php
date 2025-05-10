@@ -37,7 +37,10 @@
 
                 <div class="modal-footer border-top-0">
                     <button type="button" class="btn btn-outline-secondary " data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary " id="saveChangesButton">Save Changes</button>
+                    <button type="submit" class="btn btn-primary  saveChangesButton" id="SaveChangesButton">
+                        <span class="btn-text">Save Changes</span>
+                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                    </button>
                 </div>
 
             </form>

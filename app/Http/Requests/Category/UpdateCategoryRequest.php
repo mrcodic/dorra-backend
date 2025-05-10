@@ -26,7 +26,6 @@ class UpdateCategoryRequest extends BaseRequest
      */
     public function rules($id): array
     {
-        $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
             'name.en' => [
                 'required',
@@ -42,7 +41,7 @@ class UpdateCategoryRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],
         ];
     }
 

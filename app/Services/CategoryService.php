@@ -59,6 +59,9 @@ class CategoryService extends BaseService
             ->addColumn('image', function ($category) {
                 return $category->getFirstMediaUrl('categories');
             })
+            ->addColumn('imageId', function ($category) {
+                return $category->getFirstMedia('categories')?->id;
+            })
             ->addColumn('added_date', function ($category) {
                 return $category->created_at?->format('d/n/Y');
             })

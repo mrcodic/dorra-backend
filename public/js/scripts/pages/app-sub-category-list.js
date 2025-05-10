@@ -108,9 +108,14 @@ $('.filter-date').on('change', function () {
 });
 
 $(document).ready(function () {
+    const saveButton = $('.saveChangesButton');
+    const saveLoader = $('.saveLoader');
+    const saveButtonText = $('.saveChangesButton .btn-text');
     $("#addSubCategoryForm").on("submit", function (e) {
         e.preventDefault();
-
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
         var formData = new FormData(this);
 
         $.ajax({
@@ -120,6 +125,7 @@ $(document).ready(function () {
             processData: false,
             contentType: false,
             success: function (response) {
+
                 Toastify({
                     text: "SubCategory added successfully!",
                     duration: 2000,
@@ -131,7 +137,9 @@ $(document).ready(function () {
 
                 $("#addSubCategoryForm")[0].reset();
                 $("#addSubCategoryModal").modal("hide");
-
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
                 $(".sub-category-list-table").DataTable().ajax.reload(); // reload your table
             },
             error: function (xhr) {
@@ -146,26 +154,15 @@ $(document).ready(function () {
                             backgroundColor: "#EA5455",
                             close: true,
                         }).showToast();
+                        saveButton.prop('disabled', false);
+                        saveLoader.addClass('d-none');
+                        saveButtonText.removeClass('d-none');
                     }
                 }
             },
         });
     });
-        // Check if the product was added successfully
-        if (sessionStorage.getItem("Category_added") == "true") {
-            // Show the success Toastify message
-            Toastify({
-                text: "Subcategory added successfully!",
-                duration: 4000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#28a745", // Green for success
-                close: true,
-            }).showToast();
 
-            // Remove the flag after showing the Toastify message
-            sessionStorage.removeItem("Category_added");
-        }
 
 
     $(document).on("click", ".view-details", function (e) {
@@ -225,7 +222,9 @@ $(document).ready(function () {
     $("#editSubCategoryForm").on("submit", function (e) {
         e.preventDefault(); // prevent default form submission
         var categoryId = $(this).find("#edit-sub-category-id").val();
-        console.log(categoryId);
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
         $.ajax({
             url: `sub-categories/${categoryId}`,
             type: "POST", // IMPORTANT: Laravel expects POST + method spoofing (@method('PUT'))
@@ -233,7 +232,6 @@ $(document).ready(function () {
             processData: false,
             contentType: false,
             success: function (response) {
-                console.log(response);
 
                 Toastify({
                     text: "Subcategory updated successfully!",
@@ -247,6 +245,9 @@ $(document).ready(function () {
                 // Close modal
                 $("#editSubCategoryModal").modal("hide");
                 $("#showSubCategoryModal").modal("hide");
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
                 $(".sub-category-list-table").DataTable().ajax.reload(null, false);
 
             },
@@ -264,6 +265,9 @@ $(document).ready(function () {
                         }).showToast();
                     }
                 }
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
             },
         });
     });

@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Category;
 
 use App\Http\Requests\Base\BaseRequest;
-use App\Models\CountryCode;
 use Illuminate\Validation\Rule;
 
 class StoreCategoryRequest extends BaseRequest
@@ -39,10 +38,9 @@ class StoreCategoryRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,svg'],
         ];
 
     }
-
 
 }

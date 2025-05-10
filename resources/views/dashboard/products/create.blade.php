@@ -364,7 +364,10 @@
                             <!-- Submit -->
                             <div class="col-12 d-flex justify-content-end gap-1">
                                 <button type="reset" class="btn btn-outline-secondary">Reset</button>
-                                <button type="submit" class="btn btn-primary me-1">Add Product</button>
+                                <button type="submit" class="btn btn-primary me-1 saveChangesButton" id="SaveChangesButton">
+                                    <span class="btn-text">Add Product</span>
+                                    <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                                </button>
 
                             </div>
                         </div>
@@ -802,6 +805,12 @@
         // Form submit
         $('#product-form').on('submit', function(e) {
             e.preventDefault();
+            const saveButton = $('.saveChangesButton');
+            const saveLoader = $('.saveLoader');
+            const saveButtonText = $('.saveChangesButton .btn-text');
+            saveButton.prop('disabled', true);
+            saveLoader.removeClass('d-none');
+            saveButtonText.addClass('d-none');
             const formData = new FormData(this);
             $.ajax({
                 url: this.action,
@@ -826,6 +835,9 @@
                             close: true
                         }).showToast();
                     });
+                    saveButton.prop('disabled', false);
+                    saveLoader.addClass('d-none');
+                    saveButtonText.removeClass('d-none');
                 }
             });
         });

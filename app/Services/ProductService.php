@@ -132,6 +132,9 @@ class ProductService extends BaseService
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
+        if ($validatedData['base_price']){
+            $product->prices()->delete();
+        }
         if (isset($validatedData['prices'])) {
             $product->update(['base_price'=>null]);
             collect($validatedData['prices'])->each(function ($price) use ($product) {
@@ -145,21 +148,17 @@ class ProductService extends BaseService
                     ]
                 );
             });
-
-
         }
         collect($validatedData['specifications'])->each(function ($specification) use ($product) {
-            // Find or create specification based on translated name
             $productSpecification = $product->specifications()->updateOrCreate(
                 [
                     'name->en' => $specification['name_en'],
                     'name->ar' => $specification['name_ar'],
                 ],
-                [] // Add more fields here if needed
+                []
             );
 
             collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
-                // Find or create option based on translated value and price
                 $productOption = $productSpecification->options()->updateOrCreate(
                     [
                         'value->en' => $option['value_en'],
@@ -170,7 +169,6 @@ class ProductService extends BaseService
                     ]
                 );
 
-                // Handle media upload
                 if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
                     handleMediaUploads([$option['image']], $productOption);
                 }

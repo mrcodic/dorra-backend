@@ -6,6 +6,7 @@
                 <h5 class="modal-title fs-3" id="exampleModalLabel">Show Category</h5>
             </div>
             <div class="modal-body flex-grow-1">
+                <input type="hidden" id="image-id">
                 <!-- Image Upload with Preview -->
                 <div id="imagePreviewContainer" class="mt-2 d-flex justify-content-between align-items-between  ">
                     <label for="imageUpload" class="text-black small d-block cursor-pointer label-text">Image</label>
