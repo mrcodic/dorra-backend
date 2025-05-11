@@ -41,7 +41,7 @@
                 <div class="row gx-2 gy-2 align-items-center px-1">
 
                     {{-- Search Input - 70% on md+, full width on xs --}}
-                    <div class="col-12 col-md-7">
+                    <div class="col-12 col-md-4">
                         <form action="" method="get" class="position-relative">
                             <i data-feather="search"
                                class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
@@ -54,22 +54,46 @@
                                 style="height: 38px;">
                         </form>
                     </div>
+                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    <div class="col">
+                        <select name="created_at" class="form-select filter-date">
+                            <option value="">Drafts</option>
+                            <option value="asc">asc</option>
+                            <option value="desc">desc</option>
+                        </select>
+                    </div>
+                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    <div class="col">
+                        <select name="created_at" class="form-select filter-date">
+                            <option value="">Category</option>
+                            <option value="asc">asc</option>
+                            <option value="desc">desc</option>
+                        </select>
+                    </div>
+                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    <div class="col">
+                        <select name="created_at" class="form-select filter-date">
+                            <option value="">Subcategory </option>
+                            <option value="asc">asc</option>
+                            <option value="desc">desc</option>
+                        </select>
+                    </div>
 
                     {{-- Filter Select - 10% on md+, half width on sm --}}
-                    <div class="col-6 col-md-2">
+                    <div class="col">
                         <select name="created_at" class="form-select filter-date">
-                            <option value="">Date</option>
+                            <option value="">Tags</option>
                             <option value="asc">asc</option>
                             <option value="desc">desc</option>
                         </select>
                     </div>
 
                     {{-- Add Button - 20% on md+, full width on xs --}}
-                    <div class="col-6 col-md-3 text-md-end">
+                    <div class="col-6 col-md-2 text-md-end">
                         <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
                            data-bs-target="#addCategoryModal">
-                            <i data-feather="plus"></i>
-                            Add New Category
+                            <i data-feather="upload"></i>
+                            Upload Templates
                         </a>
                     </div>
 
