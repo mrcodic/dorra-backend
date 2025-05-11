@@ -203,7 +203,7 @@
                                         <span class="mb-1 fw-bold label-text">Name</span>
                                         <span class="fw-semibold disabled-field">{{ $specification->name }}</span>
                                     </div>
-                                    @foreach($specification->options as $index => $option) @endforeach
+                                    @foreach($specification->options as $index => $option)
                                     <div class="my-3 d-flex justify-content-between gap-2">
                                         <div class="d-flex flex-column w-100">
                                             <span class="mb-1 fw-bold label-text">Value</span>
@@ -225,9 +225,11 @@
                                             </span>
                                         </div>
                                     </div>
+                                    @endforeach
                                 </div>
                             @endforeach
                         </div>
+
                         <div class="tab-pane fade" id="tab2">
                             <!-- Total Reviews Section -->
                             <div class="">
