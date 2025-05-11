@@ -20,7 +20,7 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             } },
         { data: "name" },
-        { data: "no_of_products" },
+        { data: "sub_category_products_count" },
         { data: "added_date" },
 
         {

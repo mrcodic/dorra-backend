@@ -171,16 +171,24 @@
                                     </div>
                                 </div>
 
+                                <!-- Subcategory -->
                                 <div class="col-md-6">
                                     <div class="mb-1">
-                                        <label class="form-label label-text" for="sub-category">Subcategory</label>
-                                        <select name="sub_category_id" id="sub-category"
-                                                class="form-control sub-category-select"
-                                                data-sub-category-url="{{ route('sub-categories') }}">
+                                        <label class="form-label label-text" for="sub_category">Subcategory</label>
+                                        <select name="sub_category_id" id="sub_category" class="form-control sub-category-select" data-sub-category-url="{{ route('sub-categories') }}">
                                             <option value="">Select subcategory</option>
+                                            @php
+                                                $subCategories = App\Models\Category::whereParentId($model->category_id)->get();
+                                             @endphp
+                                            @if(old('category_id', $model->category_id))
+                                                @foreach($subCategories as $subCategory)
+                                                    <option value="{{ $subCategory->id }}" @selected($subCategory->id == $model->sub_category_id)>{{ $subCategory->name }}</option>
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
                                 </div>
+
 
                                 <!-- Tags -->
                                 <div class="col-md-12">
