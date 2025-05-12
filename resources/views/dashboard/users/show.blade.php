@@ -29,7 +29,12 @@
                 <!-- User Card -->
                 <div class="card">
                     <div class="card-body">
-                        <div class="user-avatar-section">
+                        <div class="user-avatar-section d-flex gap-5">
+                            <span class=" rounded-3 status-label
+                             {{ $model->status == "Active" ? "primary-text-color" : "" }}
+                             text-center d-flex justify-content-center align-items-center"
+                                  style="background-color: {{ $model->status == "Active" ?"#D7EEDD" : "#F0F0F0" }};">
+                                {{ $model->status == "Active" ? "Active" : "Blocked" }}</span>
                             <div class="d-flex align-items-center flex-column">
                                 <img
                                     class="img-fluid rounded-circle mt-3 mb-2"
@@ -39,7 +44,7 @@
                                     alt="User avatar"/>
                                 <div class="user-info text-center">
                                     <h4>{{ $model->name }}</h4>
-                                    <span class=" text-secondary">userid123</span>
+                                    <span class=" text-secondary">userId : {{ $model->id }}</span>
                                 </div>
                             </div>
                         </div>
@@ -47,21 +52,23 @@
                             <div class="d-flex align-items-center gap-1">
 
                                 <i data-feather="calendar" class="font-medium-2"></i>
-                                <h4 class="mb-0">Joined 13 Oct 2024</h4>
+                                <h4 class="mb-0">Joined {{ $model->created_at->format('j M Y') }}</h4>
                             </div>
                             <div class="d-flex align-items-center gap-1">
-                                <i data-feather="briefcase" class="font-medium-2"></i>
-                                <h4 class="mb-0">Basic Plan</h4>
+
                             </div>
                         </div>
                         <div class="w-100 d-flex flex-column gap-1">
-                            <div class="fw-semibold disabled-field w-100 p-1 text-center">Last Login:13 Oct 2024</div>
+                            <div class="fw-semibold disabled-field w-100 p-1 text-center">Last
+                                Login:{{ $model->last_login_at?->format('j M Y') }}</div>
                             <div
                                 class="w-100 rounded-3 border p-1 d-flex justify-content-center align-items-center gap-1">
-                                <i data-feather="at-sign" class="font-medium-2"></i><span>user1@gmail.com</span></div>
+                                <i data-feather="at-sign" class="font-medium-2"></i><span>{{  $model->email }}</span>
+                            </div>
                             <div
                                 class="w-100 rounded-3 border p-1 d-flex justify-content-center align-items-center gap-1">
-                                <i data-feather="smartphone" class="font-medium-2"></i><span>+20 123 456 7895</span>
+                                <i data-feather="smartphone"
+                                   class="font-medium-2"></i><span>{{ $model->countryCode?->phone_code }} {{ $model->phone_number }}</span>
                             </div>
                         </div>
 
@@ -106,11 +113,13 @@
 
 
                             <div class="d-flex flex-column gap-1">
-                                <a href="javascript:;" class="btn btn-primary me-1 w-100" data-bs-target="#editUser"
+                                <a href="{{ route("users.update",$model->id) }}" class="btn btn-primary me-1 w-100"
+                                   data-bs-target="#editUser"
                                    data-bs-toggle="modal">
                                     Edit User
                                 </a>
-                                <button class="btn btn-outline-danger me-1 w-100">
+                                <button class="btn btn-outline-danger me-1 w-100" data-bs-target="#deleteUserModal"
+                                        data-bs-toggle="modal">
                                     Delete User
                                 </button>
                             </div>
@@ -276,12 +285,18 @@
                         </div>
                     </div>
                 </div>
-
+                @include('modals.delete',[
+                                    'id' => 'deleteUserModal',
+                                    'formId' => 'deleteUserForm',
+                                    'title' => 'Delete User',
+                                    ])
                 <!--/ User Content -->
             </div>
+        </div>
+        @include('modals.users.edit-user',['user'=>$model , 'countryCodes' => $associatedData['country_codes']])
+
     </section>
 
-    @include('modals.users.edit-user',['user'=>$model , 'countryCodes' => $associatedData['country_codes']])
 @endsection
 
 @section('vendor-script')
@@ -315,4 +330,48 @@
     <script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
+    <script>
+        $(document).on("submit", "#deleteUserForm", function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: "{{ route('users.destroy',$model->id) }}",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                method: "DELETE",
+                success: function (res) {
+
+                    $("#deleteUserModal").modal("hide");
+
+                    Toastify({
+                        text: "User deleted successfully!",
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28C76F",
+                        close: true,
+                        callback: function () {
+                            window.location.href = "/users";
+                        }
+                    }).showToast();
+
+
+                },
+                error: function () {
+
+                    $("#deleteUserModal").modal("hide");
+                    Toastify({
+                        text: "Something Went Wrong!",
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#EA5455", // red
+                        close: true,
+                    }).showToast();
+
+                },
+            });
+        });
+
+    </script>
 @endsection

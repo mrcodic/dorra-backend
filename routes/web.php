@@ -24,8 +24,9 @@ Route::middleware('auth')->group(function () {
     Route::get('states', [MainController::class, 'states'])->name('states');
     Route::view('/', 'dashboard.index')->name('dashboard');
 
-    Route::prefix('/users')->as('users')->group(function () {
-        Route::get('/data', [UserController::class, 'getData'])->name('.data');
+    Route::group(['prefix' => 'users', 'as' => 'users.', 'controller' => UserController::class,], function () {
+        Route::get('/data', 'getData')->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::get('/billing/{user}', [UserController::class, 'billing'])->name('.billing');
     });
     Route::resource('/users', UserController::class);

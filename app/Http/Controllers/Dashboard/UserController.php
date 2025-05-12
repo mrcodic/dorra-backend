@@ -34,6 +34,8 @@ class UserController extends DashboardController
         $this->createView = 'users.create';
         $this->editView = 'users.edit';
         $this->usePagination = true;
+        $this->resourceTable = 'users';
+
     }
 
     public function getData(): JsonResponse
@@ -48,3 +50,4 @@ class UserController extends DashboardController
         return view('dashboard.users.billing', get_defined_vars());
     }
 }
+

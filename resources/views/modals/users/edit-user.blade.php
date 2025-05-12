@@ -1,5 +1,4 @@
 <!-- Edit User Modal -->
-
 <div class="modal fade" id="editUser" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-edit-user">
     <div class="modal-content">
@@ -56,7 +55,7 @@
                     <!-- Phone Code Select -->
                         <select class="form-select" id="phone-code" name="country_code_id">
                             @foreach($countryCodes as $countryCode)
-                                <option value="{{ $countryCode->id }}" @selected($countryCode->id == $user->countryCode->id)>
+                                <option value="{{ $countryCode->id }}" @selected($countryCode->id == $user->countryCode?->id)>
                                     {{ $countryCode->phone_code }} ({{ $countryCode->iso_code }})
                                 </option>
                             @endforeach

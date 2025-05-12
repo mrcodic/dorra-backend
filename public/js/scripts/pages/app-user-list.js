@@ -24,9 +24,9 @@ var dt_user_table = $(".user-list-table").DataTable({
             data: null,
             defaultContent: "",
             orderable: false,
-            render: function (data, type, row, meta) {
-                return `<input type="checkbox" class="category-checkbox form-check-input" value="${data}">`;
-            },
+            render: function (data) {
+                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
+            }
         },
         { data: "name" },
         { data: "email" },
@@ -72,9 +72,13 @@ var dt_user_table = $(".user-list-table").DataTable({
                 <i data-feather="edit-3"></i>
               </a>
 
-              <a href="#" class=" text-danger delete-user" data-id="${data}">
-                <i data-feather="trash-2"></i>
-              </a>
+              <a href="#" class="text-danger  open-delete-user-modal"
+               data-id="${data}"
+               data-action="/users/${data}"
+               data-bs-toggle="modal"
+               data-bs-target="#deleteUserModal">
+               <i data-feather="trash-2"></i>
+</a>
 
           </div>
         `;
@@ -239,43 +243,106 @@ $(document).ready(function () {
         }
     });
 
-    $(document).on("click", ".delete-user", function (e) {
+    $(document).on("click", ".open-delete-user-modal", function () {
+        const userId = $(this).data("id");
+        $("#deleteUserForm").data("id", userId);
+    });
+
+    $(document).on("submit", "#deleteUserForm", function (e) {
         e.preventDefault();
+        const userId = $(this).data("id");
 
-        var $table = $(".user-list-table").DataTable();
-        var $row = $(this).closest("tr");
-        var rowData = $table.row($row).data();
+        $.ajax({
+            url: `/users/${userId}`,
+            method: "DELETE",
+            success: function (res) {
 
-        var userId = $(this).data("id");
-        var userName = rowData.name;
+                $("#deleteUserModal").modal("hide");
 
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `You are about to delete user "${userName}". This action cannot be undone.`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#6c757d",
-            confirmButtonText: "Yes, delete it!",
-            reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/users/${userId}`,
-                    method: "DELETE",
-                    success: function (res) {
-                        Swal.fire(
-                            "Deleted!",
-                            "User has been deleted.",
-                            "success"
-                        );
-                        $table.ajax.reload();
-                    },
-                    error: function () {
-                        Swal.fire("Failed", "Could not delete user.", "error");
-                    },
-                });
-            }
+                Toastify({
+                    text: "User deleted successfully!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F",
+                    close: true,
+                }).showToast();
+                $(".user-list-table").DataTable().ajax.reload(null, false);
+
+
+            },
+            error: function () {
+
+                $("#deleteUserModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#EA5455", // red
+                    close: true,
+                }).showToast();
+                $(".user-list-table").DataTable().ajax.reload(null, false);
+
+            },
         });
     });
+
+    $(document).on("submit", "#bulk-delete-form", function (e) {
+        e.preventDefault();
+        const selectedIds = $(".category-checkbox:checked").map(function () {
+            return $(this).val();
+        }).get();
+
+        if (selectedIds.length === 0) return;
+        $.ajax({
+            url: "users/bulk-delete",
+            method: "POST",
+            data: {
+                ids: selectedIds,
+                _token: $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                $("#deleteUsersModal").modal("hide");
+                Toastify({
+                    text: "Selected users deleted successfully!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
+
+                // Reload DataTable
+
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".user-list-table").DataTable().ajax.reload(null, false);
+
+            },
+            error: function () {
+                $("#deleteUsersModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
+
+                // Reload DataTable
+
+                $('#bulk-delete-container').hide();
+                $('.user-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".category-list-table").DataTable().ajax.reload(null, false);
+
+            },
+        });
+
+    });
+
+
 });

@@ -29,7 +29,7 @@ class UserService extends BaseService
                 });
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
-            });
+            })->latest();
         return DataTables::of($users)
             ->addColumn('name', function ($user) {
                 return $user->name;
