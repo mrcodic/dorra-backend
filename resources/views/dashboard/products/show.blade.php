@@ -203,101 +203,125 @@
                                         <span class="mb-1 fw-bold label-text">Name</span>
                                         <span class="fw-semibold disabled-field">{{ $specification->name }}</span>
                                     </div>
-                                    @foreach($specification->options as $index => $option) @endforeach
-                                    <div class="my-3 d-flex justify-content-between gap-2">
-                                        <div class="d-flex flex-column w-100">
-                                            <span class="mb-1 fw-bold label-text">Value</span>
-                                            <span class="fw-semibold disabled-field">{{ $option->value }}</span>
-                                        </div>
-                                        <div class="d-flex flex-column  justify-content-between w-100  ">
-                                            <span class="mb-1 fw-bold label-text">Price (EGP) (Optional)</span>
-                                            <span class="fw-semibold disabled-field">{{ $option->price }}</span>
-                                        </div>
-                                        <div class="d-flex flex-column  justify-content-between w-100">
-                                            <span class="mb-1 fw-bold label-text">Photo</span>
-                                            <span class="fw-semibold disabled-field">
+                                    @foreach($specification->options as $index => $option)
+                                        <div class="my-3 d-flex justify-content-between gap-2">
+                                            <div class="d-flex flex-column w-100">
+                                                <span class="mb-1 fw-bold label-text">Value</span>
+                                                <span class="fw-semibold disabled-field">{{ $option->value }}</span>
+                                            </div>
+                                            <div class="d-flex flex-column  justify-content-between w-100  ">
+                                                <span class="mb-1 fw-bold label-text">Price (EGP) (Optional)</span>
+                                                <span class="fw-semibold disabled-field">{{ $option->price }}</span>
+                                            </div>
+                                            <div class="d-flex flex-column  justify-content-between w-100">
+                                                <span class="mb-1 fw-bold label-text">Photo</span>
+                                                <span class="fw-semibold disabled-field">
                                                 @if ($option->media->isNotEmpty())
-                                                    <img src="{{ $option->getFirstMediaUrl('productSpecificationOptions') }}" width="32px"
-                                                         height="32px"/>
-                                                @else
-                                                    -
-                                                @endif
+                                                        <img
+                                                            src="{{ $option->getFirstMediaUrl('productSpecificationOptions') }}"
+                                                            width="32px"
+                                                            height="32px"/>
+                                                    @else
+                                                        -
+                                                    @endif
                                             </span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endforeach
                                 </div>
                             @endforeach
                         </div>
+
                         <div class="tab-pane fade" id="tab2">
                             <!-- Total Reviews Section -->
                             <div class="">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-small">Total Reviews:</span>
-                                    <span class="label-text">421 Reviews</span>
+                                    <span class="label-text">{{$model->reviews()->count()}} Reviews</span>
                                 </div>
 
-                                <!-- Single Review -->
-                                <div class="">
-                                    <div class="d-flex align-items-center gap-1 mb-2">
-                                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Avatar"
-                                             class="rounded-circle" width="50" height="50">
-                                        <div>
-                                            <div class="fw-bold text-dark fs-4">John Doe</div>
-                                            <div class="text-small">2024-04-22</div>
+                                @forelse($model->reviews as $review)
+                                    <!-- Single Review -->
+                                    <div class="review-wrapper">
+                                        <div class="d-flex align-items-center gap-1 mb-2">
+                                            <img src="{{ $review->user->image ?? asset('images/default-user.png') }}"
+                                                 alt="Avatar"
+                                                 class="rounded-circle" width="50" height="50">
+                                            <div>
+                                                <div class="fw-bold text-dark fs-4">{{  $review->user->name}}</div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2 label-text">
+                                            {{ $review->review }}
+                                        </div>
+                                        @forelse($review->images as $image)
+                                            <div class="mb-2">
+                                                <img src="{{ $image->getUrl() }}" alt="Review Image"
+                                                     class="img-fluid rounded">
+                                            </div>
+                                        @empty
+                                            <div class="mb-2 text-muted" style="font-style: italic;">No review images
+                                                available.
+                                            </div>
+                                        @endforelse
+                                        <div class="mb-2 d-flex align-items-center gap-2">
+                                            <div class="rating-stars text-warning"
+                                                 data-rating="{{ $review->rating }}"></div>
+                                            <span class="fs-6">Placed {{ $review->created_at?->format('d/m/Y') }}</span>
+                                        </div>
+
+                                        <div class="d-flex gap-2 justify-content-end w-100">
+                                            <button class="btn btn-outline-danger d-none"
+                                                    data-bs-target="#deleteReviewModal"
+                                                    data-bs-toggle="modal">
+                                                <i data-feather="trash-2"></i> Delete
+                                            </button>
+                                            <button class="btn btn-outline-danger delete-review"
+                                                    data-review-id="{{ $review->id }}">
+
+                                                <i data-feather="trash-2"></i> Delete
+                                            </button>
+
+                                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#modals-slide-in">
+                                                Reply
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="mb-2 label-text">
-                                        This product is really great, highly recommend!
-                                    </div>
-                                    <div class="mb-2">
-                                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Review Image"
-                                             class="img-fluid rounded">
-                                    </div>
-                                    <div class="mb-2 d-flex align-items-center gap-2">
-                                        <div class="rating-stars text-warning" data-rating="4.1"></div>
-                                        <span class="fs-6">Placed 27/09/2024</span>
-                                    </div>
 
-                                    <div class="d-flex gap-2 justify-content-end w-100">
-                                        <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete
-                                        </button>
-                                        <button class="btn btn-primary" data-bs-toggle="modal"
-                                                data-bs-target="#modals-slide-in">
-                                            Reply
-                                        </button>
-                                    </div>
-                                </div>
+                                    <!-- Divider -->
+                                    <hr class="my-2">
 
-                                <!-- Divider -->
-                                <hr class="my-2">
+                                    <!-- Comment Reply -->
+                                    <div class="d-none">
+                                        <div class="d-flex justify-content-between align-items-center mb-1 ">
+                                            <div class="d-flex align-items-center gap-1 ">
+                                                <img src="{{ asset('images/logo-reply.png') }}" alt="Avatar"
+                                                     class="rounded-circle" width="48" height="48">
 
-                                <!-- Comment Reply -->
-                                <div class="">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <div class="d-flex align-items-center gap-1 ">
-                                            <img src="{{ asset('images/logo-reply.png') }}" alt="Avatar"
-                                                 class="rounded-circle" width="48" height="48">
-
-                                            <div class="fw-bold text-primary">Reply from Dorra Team</div>
-
-
+                                                <div class="fw-bold text-primary">Reply from Dorra Team</div>
+                                            </div>
+                                            <div class="text-small">{{ $review->comment_at?->format('d-m-Y') }}</div>
                                         </div>
-                                        <div class="text-small">2024-04-23</div>
-                                    </div>
 
-                                    <div class="mb-2 label-text mx-5">
-                                        Thank you for your kind words! We're happy you loved the product.
+                                        <div class="mb-2 label-text mx-5">
+                                            {{ $review->comment }}
+                                        </div>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete
+                                                Comment
+                                            </button>
+                                            <button class="btn btn-outline-secondary">Delete Reply</button>
+                                        </div>
                                     </div>
-                                    <div class="d-flex gap-2 justify-content-end">
-                                        <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete
-                                            Comment
-                                        </button>
-                                        <button class="btn btn-outline-secondary">Delete Reply</button>
+                                @empty
+                                    <!-- No Reviews Yet Message with Inline Styles -->
+                                    <div
+                                        style="padding: 50px; background-color: #f9f9f9; border-radius: 8px; border: 1px dashed #ccc; font-size: 1.2rem; color: #6c757d; margin-top: 20px; text-align: center;">
+                                        <p style="margin: 0; font-weight: 500; font-size: 1.1rem;">No reviews yet.</p>
                                     </div>
-                                </div>
+                                @endforelse
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -368,6 +392,50 @@
     <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
     <script src="{{ asset('js/scripts/ui/star-rate.js') }}?v={{ time() }}"></script>
+    <script !src="">
+        $(document).on('click', '.delete-review', function (e) {
+            e.preventDefault();
+
+            const button = $(this);
+            const reviewId = button.data('review-id');
+
+            if (!reviewId) return;
+
+
+            $.ajax({
+                url: '/api/reviews/' + reviewId,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    Toastify({
+                        text: "Review deleted successfully",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#dc3545",
+                        close: true
+                    }).showToast();
+
+                    // Optionally remove the review from the DOM
+                    button.closest('.review-wrapper').remove();
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseJSON);
+                    Toastify({
+                        text: "Failed to delete review",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#ffc107",
+                        close: true
+                    }).showToast();
+                }
+            });
+        });
+
+    </script>
     <script>
         const sliderTrack = document.getElementById('sliderTrack');
         const thumbWidth = 65;
