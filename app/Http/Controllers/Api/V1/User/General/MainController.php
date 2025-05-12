@@ -8,6 +8,7 @@ use App\Models\CountryCode;
 use App\Services\CategoryService;
 use App\Http\Resources\{CategoryResource, CountryCodeResource, CountryResource, StateResource};
 use App\Repositories\Interfaces\{CategoryRepositoryInterface, CountryRepositoryInterface, StateRepositoryInterface};
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -19,7 +20,13 @@ class MainController extends Controller
         public StateRepositoryInterface    $stateRepository,
         public CategoryService $categoryService,
     )
+    {}
+
+    public function addMedia(Request $request, $id)
     {
+        $model = ($request->resource)::find($id);
+        $media= addMediaToResource($request->allFiles(), $model,clearExisting: true);
+        return Response::api(data: $media);
     }
 
     public function removeMedia(Media $media)

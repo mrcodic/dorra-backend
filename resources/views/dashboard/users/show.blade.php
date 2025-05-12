@@ -38,7 +38,7 @@
                             <div class="d-flex align-items-center flex-column">
                                 <img
                                     class="img-fluid rounded-circle mt-3 mb-2"
-                                    src="{{$model->image?->getUrl() ?? asset('images/portrait/small/avatar-s-2.jpg')}}"
+                                    src="{{$model->image?->getUrl() ?? asset('images/avatar.png')}}"
                                     height="110"
                                     width="110"
                                     alt="User avatar"/>

@@ -27,7 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'users', 'as' => 'users.', 'controller' => UserController::class,], function () {
         Route::get('/data', 'getData')->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
-        Route::get('/billing/{user}', [UserController::class, 'billing'])->name('.billing');
+        Route::put('{id}/change-password', [UserController::class, 'changePassword'])->name('change-password');
+        Route::get('/billing/{user}', [UserController::class, 'billing'])->name('billing');
     });
     Route::resource('/users', UserController::class);
 
@@ -108,6 +109,8 @@ Route::middleware('auth')->group(function () {
             Route::get('states', 'states')->name('states');
             Route::get('sub-categories', 'subCategories')->name('sub-categories');
             Route::delete('/media/{media}', 'removeMedia')->name('remove-media');
+            Route::post('/media/{resource}', 'addMedia')->name('add-media');
+
         });
     });
 

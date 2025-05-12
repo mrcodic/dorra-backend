@@ -83,3 +83,33 @@ if (!function_exists('deleteMediaByCustomProperty')) {
     }
 }
 
+if (!function_exists('addMediaToResource')) {
+    function addMediaToResource($files, $modelData, string $collectionName = null, array $customProperties = [], bool $clearExisting = false)
+    {
+        if (empty($files)) {
+            return null;
+        }
+
+        $files = is_array($files) ? Arr::flatten($files) : [$files];
+
+        $collectionName = $collectionName ? getMediaCollectionName($collectionName) : getMediaCollectionName($modelData);
+
+        if ($clearExisting) {
+            $modelData->clearMediaCollection($collectionName);
+        }
+
+        $uploaded = collect($files)->map(function ($file) use ($modelData, $collectionName, $customProperties) {
+            $mediaAdder = $modelData->addMedia($file);
+
+            if (!empty($customProperties)) {
+                $mediaAdder->withCustomProperties($customProperties);
+            }
+
+            return $mediaAdder->toMediaCollection($collectionName);
+        });
+
+        return count($uploaded) === 1 ? $uploaded->first() : $uploaded->all();
+    }
+}
+
+
