@@ -101,12 +101,12 @@
                                                         KB
                                                     </div>
                                                 </div>
-                                                <button type="button" id="remove-image"
-                                                        class="btn btn-sm position-absolute text-danger remove-old-image"
-                                                        data-image-id="{{ $image?->id }}"
-                                                        style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                    <i data-feather="trash"></i>
-                                                </button>
+{{--                                                <button type="button" id="remove-image"--}}
+{{--                                                        class="btn btn-sm position-absolute text-danger remove-old-image"--}}
+{{--                                                        data-image-id="{{ $image?->id }}"--}}
+{{--                                                        style="top: 5px; right: 5px; background-color: #FFEEED">--}}
+{{--                                                    <i data-feather="trash"></i>--}}
+{{--                                                </button>--}}
                                             </div>
 
                                         </div>
