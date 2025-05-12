@@ -1,5 +1,4 @@
 @extends('layouts/contentLayoutMaster')
-
 @section('title', 'User View - Account')
 @section('main-page', 'Users')
 @section('sub-page', 'Show User')
@@ -214,74 +213,113 @@
                                 </div>
                             </div>
                             <!-- tab 2 content -->
-                            <div class="tab-pane fade" id="tab2"> <!-- Total Reviews Section -->
+                            <div class="tab-pane fade" id="tab2">
+                                <!-- Total Reviews Section -->
                                 <div class="">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-small">Total Reviews:</span>
-                                        <span class="label-text">421 Reviews</span>
+                                        <span class="label-text delete-review-label" id="review-counter">{{ $model->reviews()->count() }} Reviews</span>
+
                                     </div>
 
-                                    <!-- Single Review -->
-                                    <div class="">
-                                        <div class="d-flex align-items-center gap-1 mb-2">
-                                            <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Avatar"
-                                                 class="rounded-circle" width="50" height="50">
-                                            <div>
-                                                <div class="fw-bold text-dark fs-4">John Doe</div>
-                                                <div class="text-small">2024-04-22</div>
+                                    @forelse($model->reviews as $review)
+                                        <!-- Single Review -->
+                                        <div class="review-wrapper" data-review-id="{{ $review->id }}">
+                                            <div class="d-flex align-items-center gap-1 mb-2">
+                                                <img
+                                                    src="{{$review->product->getMainImageUrl() }}"
+                                                    alt="Avatar"
+                                                    class="rounded-circle" width="50" height="50">
+                                                <div>
+                                                    <div class="fw-bold text-dark fs-4">{{ $review->product->name }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="mb-2 label-text">
+                                                {{ $review->review }}
+                                            </div>
+                                            @forelse($review->images as $image)
+                                                <div class="mb-2">
+                                                    <img src="{{ $image?->getUrl() }}" alt="Review Image"
+                                                         class="img-fluid rounded" style="width: 80px;height: 80px">
+                                                </div>
+                                            @empty
+                                                <div class="mb-2 text-muted" style="font-style: italic;">No review
+                                                    images
+                                                    available.
+                                                </div>
+                                            @endforelse
+                                            <div class="mb-2 d-flex align-items-center gap-2">
+                                                <div class="rating-stars text-warning"
+                                                     data-rating="{{ $review->rating }}"></div>
+                                                <span
+                                                    class="fs-6">Placed {{ $review->created_at?->format('d/m/Y') }}</span>
+                                            </div>
+
+                                            <div class="d-flex gap-2 justify-content-end w-100">
+                                                <button class="btn btn-outline-danger d-none"
+                                                        data-bs-target="#deleteReviewModal"
+                                                        data-bs-toggle="modal">
+                                                    <i data-feather="trash-2"></i> Delete
+                                                </button>
+                                                <button class="btn btn-outline-danger delete-review  {{$review->comment ? "d-none" :""}}"
+                                                        data-review-id="{{ $review->id }}">
+
+                                                    <i data-feather="trash-2"></i> Delete
+                                                </button>
+
+                                                <button class="btn btn-primary reply-btn  {{$review->comment ? "d-none" :""}}"
+                                                        data-review-id="{{ $review->id }}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modals-slide-in">
+                                                    Reply
+                                                </button>
+
                                             </div>
                                         </div>
-                                        <div class="mb-2 label-text">
-                                            This product is really great, highly recommend!
-                                        </div>
-                                        <div class="mb-2">
-                                            <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Review Image"
-                                                 class="img-fluid rounded">
-                                        </div>
-                                        <div class="mb-2 d-flex align-items-center gap-2">
-                                            <div class="rating-stars text-warning" data-rating="4.1"></div>
-                                            <span class="fs-6">Placed 27/09/2024</span>
-                                        </div>
 
-                                        <div class="d-flex gap-2 justify-content-end w-100">
-                                            <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete
-                                            </button>
-                                            <button class="btn btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#modals-slide-in">
-                                                Reply
-                                            </button>
-                                        </div>
-                                    </div>
+                                        <!-- Divider -->
+                                        <hr class="my-2">
 
-                                    <!-- Divider -->
-                                    <hr class="my-2">
+                                        <!-- Comment Reply -->
+                                        <div class="reply-block {{$review->comment ? "" :"d-none"}}">
+                                            <div class="d-flex justify-content-between align-items-center mb-1 ">
+                                                <div class="d-flex align-items-center gap-1 ">
+                                                    <img src="{{ asset('images/logo-reply.png') }}" alt="Avatar"
+                                                         class="rounded-circle" width="48" height="48">
 
-                                    <!-- Comment Reply -->
-                                    <div class="">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <div class="d-flex align-items-center gap-1 ">
-                                                <img src="{{ asset('images/logo-reply.png') }}" alt="Avatar"
-                                                     class="rounded-circle" width="48" height="48">
-
-                                                <div class="fw-bold text-primary">Reply from Dorra Team</div>
-
-
+                                                    <div class="fw-bold text-primary">Reply from Dorra Team</div>
+                                                </div>
+                                                <div
+                                                    class="text-small">{{ $review->comment_at?->format('d-m-Y') }}</div>
                                             </div>
-                                            <div class="text-small">2024-04-23</div>
-                                        </div>
 
-                                        <div class="mb-2 label-text mx-5">
-                                            Thank you for your kind words! We're happy you loved the product.
+                                            <div class="mb-2 label-text mx-5">
+                                                {{ $review->comment }}
+                                            </div>
+                                            <div class="mb-2">
+                                                <img src="{{ $review->getFirstMediaUrl('review_reply') ?? "-"}}" alt="Review Image"
+                                                     class="img-fluid rounded" style="width: 80px;height: 80px">
+                                            </div>
+                                            <div class="d-flex gap-2 justify-content-end">
+                                                <button class="btn btn-outline-danger delete-review" data-review-id="{{ $review->id }}"><i data-feather="trash-2"></i>
+                                                    Delete
+                                                    Review
+                                                </button>
+                                                <button class="btn btn-outline-secondary delete-reply" data-review-id="{{ $review->id }}">Delete Reply</button>
+                                            </div>
                                         </div>
-                                        <div class="d-flex gap-2 justify-content-end">
-                                            <button class="btn btn-outline-danger"><i data-feather="trash-2"></i> Delete
-                                                Comment
-                                            </button>
-                                            <button class="btn btn-outline-secondary">Delete Reply</button>
+                                    @empty
+                                        <!-- No Reviews Yet Message with Inline Styles -->
+                                        <div
+                                            style="padding: 50px; background-color: #f9f9f9; border-radius: 8px; border: 1px dashed #ccc; font-size: 1.2rem; color: #6c757d; margin-top: 20px; text-align: center;">
+                                            <p style="margin: 0; font-weight: 500; font-size: 1.1rem;">No reviews
+                                                yet.</p>
                                         </div>
-                                    </div>
+                                    @endforelse
                                 </div>
                             </div>
+
+
                         </div>
                     </div>
                 </div>
@@ -294,7 +332,33 @@
             </div>
         </div>
         @include('modals.users.edit-user',['user'=>$model , 'countryCodes' => $associatedData['country_codes']])
+        <!-- Modal to add new user starts-->
 
+        <div class="modal modal-slide-in new-user-modal fade" id="modals-slide-in">
+            <div class="modal-dialog">
+                <form id="replyForm" class="add-new-user modal-content pt-0" method="post" enctype="multipart/form-data">
+                    @csrf
+                    @method("PUT")
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                    <div class="modal-header mb-1">
+                        <h5 class="modal-title" id="exampleModalLabel">Reply To Review</h5>
+                    </div>
+                    <div class="modal-body flex-grow-1">
+                        <div class="mb-3">
+                            <label for="replyImage" class="form-label">Upload Image</label>
+                            <input class="form-control" type="file" id="image" name="image">
+                        </div>
+                        <div class="mb-3">
+                            <label for="replyText" class="form-label">Your Reply</label>
+                            <textarea class="form-control" id="replyText" rows="4" name="comment"
+                                      placeholder="Write your reply here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Reply</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
     </section>
 
 @endsection
@@ -323,9 +387,166 @@
 @endsection
 
 @section('page-script')
+    <script !src="">
+        let currentReviewId = null;
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+        $(document).on('click', '.reply-btn', function () {
+            currentReviewId = $(this).data('review-id');
+        });
+        $('#replyForm').on('submit', function (e) {
+            e.preventDefault();
+
+            if (!currentReviewId) {
+                alert('Review ID not set');
+                return;
+            }
+
+            const formData = new FormData(this);
+
+            $.ajax({
+                url: `/api/reviews/${currentReviewId}`,
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    Toastify({
+                        text: "Reply sent successfully",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28a745",
+                        close: true
+                    }).showToast();
+
+                    $('#modals-slide-in').modal('hide');
+                    $('#replyForm')[0].reset();
+
+                    // Find the review element
+                    const wrapper = $(`.review-wrapper[data-review-id="${currentReviewId}"]`);
+
+                    // Show the reply block
+                    wrapper.find('.reply-block').removeClass('d-none');
+
+                    // Hide reply and delete buttons
+                    wrapper.find('.reply-btn').addClass('d-none');
+                    wrapper.find('.delete-review').addClass('d-none');
+
+                    // Optional: reset the currentReviewId
+                    currentReviewId = null;
+                },
+
+                error: function (xhr) {
+                    Toastify({
+                        text: "Failed to send reply",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#dc3545",
+                        close: true
+                    }).showToast();
+                }
+            });
+        });
+
+    </script>
+
+    <script !src="">
+        $(document).on('click', '.delete-review', function (e) {
+            e.preventDefault();
+
+            const button = $(this);
+            const reviewId = button.data('review-id');
+
+            if (!reviewId) return;
+
+
+            $.ajax({
+                url: '/api/reviews/' + reviewId,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    Toastify({
+                        text: "Review deleted successfully",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#EA5455",
+                        close: true
+                    }).showToast();
+
+                    button.closest('.review-wrapper').remove();
+
+                    const counter = $('#review-counter');
+                    let currentCount = parseInt(counter.text()) || 0;
+                    if (currentCount > 1) {
+                        counter.text(`${currentCount - 1} Reviews`);
+                    } else {
+                        counter.text(`0 Reviews`);
+                    }
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseJSON);
+                    Toastify({
+                        text: "Failed to delete review",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#ffc107",
+                        close: true
+                    }).showToast();
+                }
+            });
+        });
+        $(document).on('click', '.delete-reply', function (e) {
+            e.preventDefault();
+
+            const button = $(this);
+            const reviewId = button.data('review-id');
+
+            if (!reviewId) return;
+
+
+            $.ajax({
+                url: '/api/reviews/' + reviewId +'/reply',
+                type: 'PUT',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    Toastify({
+                        text: "Reply deleted successfully",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#EA5455",
+                        close: true
+                    }).showToast();
+
+                    button.closest('.reply-block').remove();
+
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseJSON);
+                    Toastify({
+                        text: "Failed to delete reply",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#ffc107",
+                        close: true
+                    }).showToast();
+                }
+            });
+        });
+
+    </script>
+
     {{-- Page js files --}}
     <script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>

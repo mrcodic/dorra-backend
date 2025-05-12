@@ -145,10 +145,11 @@
                                 </div>
                                 <!-- Buttons -->
                                 <div class="d-flex gap-1 justify-content-end mt-2">
-                                    <button type="button" class="btn btn-outline-secondary  place-order fs-16">Cancel
+                                    <button type="button" class="btn btn-outline-secondary  place-order fs-16">Cancel</button>
+                                    <button type="submit" class="btn btn-primary  place-order fs-16 saveChangesButton" id="saveChangesButton">
+                                        <span class="btn-text">Save</span>
+                                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
                                     </button>
-                                    <button type="submit" class="btn btn-primary  place-order fs-16">Save</button>
-
                                 </div>
 
                             </form>
@@ -254,7 +255,7 @@
                                 <div class="d-flex gap-1 justify-content-end mt-2">
                                     <button type="button" class="btn btn-outline-secondary place-order fs-16">Cancel
                                     </button>
-                                    <button type="button" class="btn btn-primary place-order fs-16">Save</button>
+                                    <button type="submit" class="btn btn-primary place-order fs-16">Save</button>
 
                                 </div>
                             </form>
@@ -399,28 +400,21 @@
         var formData = new FormData();
         var fileInput = $('#photoInput')[0];
 
-        // Ensure that a file was selected
         if (fileInput.files.length > 0) {
             formData.append('image', fileInput.files[0]);
 
-            // Add CSRF token for security
             formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
             formData.append('resource','App\\Models\\User');
 
-            // You can add any other data you need, for example, the user ID
-            // formData.append('user_id', userId);  // Example: add user ID if needed
-
-            // Send AJAX request to upload the image
             $.ajax({
                 url: '{{ route("add-media", $model->id) }}',  // Adjust the route
                 method: 'POST',
                 data: formData,
-                contentType: false, // Tell jQuery not to process the data
-                processData: false, // Tell jQuery not to process the file
+                contentType: false,
+                processData: false,
                 success: function(response) {
-                    // Update the image on success
                     if (response.success) {
-                        $("img.uploaded-image").attr("src", response.data.original_url); // Replace with the new media URL
+                        $("img.uploaded-image").attr("src", response.data.original_url);
                         $("button.remove-old-image").data('image-id', response.data.id);
                         Toastify({
                             text: "Image uploaded successfully!",
@@ -448,6 +442,71 @@
     });
 </script>
 
+<script>
+    $(document).ready(function () {
+        $('form[action*="change-password"]').on('submit', function (e) {
+            e.preventDefault();
+
+            let $form = $(this);
+            let actionUrl = $form.attr('action');
+            let formData = $form.serialize();
+            const saveButton = $('.saveChangesButton');
+            const saveLoader = $('.saveLoader');
+            const saveButtonText = $('.saveChangesButton .btn-text');
+            saveButton.prop('disabled', true);
+            saveLoader.removeClass('d-none');
+            saveButtonText.addClass('d-none');
+            $.ajax({
+                type: 'POST',
+                url: actionUrl,
+                data: formData,
+                success: function (response) {
+                    Toastify({
+                        text: "Password updated successfully!",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28a745",
+                        close: true
+                    }).showToast();
+                    saveButton.prop('disabled', false);
+                    saveLoader.addClass('d-none');
+                    saveButtonText.removeClass('d-none');
+                    $form[0].reset(); // Reset form fields
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            if (errors.hasOwnProperty(key)) {
+                                Toastify({
+                                    text: errors[key][0],
+                                    duration: 4000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            }
+                        }
+                    } else {
+                        Toastify({
+                            text: "Something went wrong!",
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28a745",
+                            close: true
+                        }).showToast();
+                        saveButton.prop('disabled', false);
+                        saveLoader.addClass('d-none');
+                        saveButtonText.removeClass('d-none');
+                    }
+                }
+            });
+        });
+    });
+</script>
 
 <script>
     function updateFullPhoneNumber() {

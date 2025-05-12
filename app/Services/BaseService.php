@@ -8,28 +8,26 @@ use Illuminate\Support\Str;
 
 class BaseService
 {
-    protected array $relations = [];
     protected array $filters = [];
-
 
     public function __construct(public BaseRepositoryInterface $repository)
     {
     }
 
 
-    public function getAll(bool $paginate = false, $columns = ['*'])
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'])
     {
-        return $this->repository->all($paginate, $columns, $this->relations, filters: $this->filters);
+        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters);
     }
 
-    public function showResource($id)
+    public function showResource($id,$relations=[])
     {
-        $model = $this->repository->find($id, $this->relations);
-        return $model;
+        $model = $this->repository->find($id, $relations);
+        return $model->load($relations);
 
     }
 
-    public function storeResource($validatedData, $relationsToStore = [])
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad =[])
     {
         $model = $this->repository->create($validatedData);
         $model->load($this->relations);
@@ -42,10 +40,10 @@ class BaseService
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }
-        return $model;
+        return $model->load($relationsToLoad);
     }
 
-    public function updateResource($validatedData, $id)
+    public function updateResource($validatedData, $id, $relationsToLoad =[])
     {
         $model = $this->repository->update($validatedData, $id);
         $model->load($this->relations);
@@ -53,7 +51,7 @@ class BaseService
         if ($files) {
             handleMediaUploads($files, $model, clearExisting: true);
         }
-        return $model;
+        return $model->load($relationsToLoad);
     }
 
     public function deleteResource($id)

@@ -34,11 +34,16 @@ class ProductController extends DashboardController
                 'tags' => $this->tagRepository->all(columns: ['id', 'name']),
             ],
         ];
+        $this->methodRelations = [
+        'show' => ['category', 'tags', 'reviews','media'],
+        'edit' => ['category', 'tags', 'reviews','media'],
+    ];
+
         $this->usePagination = true;
         $this->resourceTable = 'products';
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $relations = [])
     {
         $validatedData = $request->validate($this->storeRequestClass->rules());
         $this->productService->storeResource($validatedData);

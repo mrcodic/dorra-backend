@@ -26,6 +26,15 @@ class DashboardController extends Controller
     protected string $resourceTable;
     protected bool $mergeSharedVariables = true;
 
+    protected array $methodRelations = [
+        'index' => [],
+        'show' => [],
+        'edit' => [],
+        'update' => [],
+        'store' => [],
+    ];
+
+
 
     public function __construct(public BaseService $service){}
 
@@ -36,13 +45,18 @@ class DashboardController extends Controller
         return $this->mergeSharedVariables ? array_merge($shared, $custom) : $custom;
 
     }
+    protected function getRelations(string $method): array
+    {
+        return $this->methodRelations[$method] ?? [];
+    }
+
 
     /**
      * Display a listing of the resource.
      */
     public function index(): View|Factory|Application
     {
-        $data = $this->service->getAll($this->usePagination);
+        $data = $this->service->getAll($this->getRelations('index'), $this->usePagination);
         $associatedData = $this->getAssociatedData('index');
         return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());
     }
@@ -62,7 +76,7 @@ class DashboardController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate($this->storeRequestClass->rules());
-        $this->service->storeResource($validatedData,$this->relationsToStore);
+        $this->service->storeResource($validatedData, $this->relationsToStore, $this->getRelations('store'));
         return Response::api();
     }
 
@@ -71,8 +85,7 @@ class DashboardController extends Controller
      */
     public function show(string $id)
     {
-
-        $model = $this->service->showResource($id);
+        $model = $this->service->showResource($id, $this->getRelations('show'));
         $associatedData = $this->getAssociatedData('show');
         if (request()->ajax()) {
             return Response::api(data: $model);
@@ -85,7 +98,8 @@ class DashboardController extends Controller
      */
     public function edit(string $id): View|Application|Factory
     {
-        $model = $this->service->showResource($id);
+        $model = $this->service->showResource($id, $this->getRelations('edit'));
+
         $associatedData = $this->getAssociatedData('edit');
         return view(self::BASE_FOLDER . "{$this->editView}", get_defined_vars());
     }
@@ -96,7 +110,7 @@ class DashboardController extends Controller
     public function update(Request $request, string $id)
     {
         $validatedData = $request->validate($this->updateRequestClass->rules($id));
-        $this->service->updateResource($validatedData, $id);
+        $this->service->updateResource($validatedData, $id, $this->getRelations('update'));
         return Response::api();
 
     }

@@ -13,10 +13,7 @@ class CategoryService extends BaseService
 {
     public function __construct(CategoryRepositoryInterface $repository)
     {
-        $this->relations = ['products', 'children'];
-
         parent::__construct($repository);
-
     }
 
 
