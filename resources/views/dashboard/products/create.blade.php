@@ -256,13 +256,13 @@
                                                                         <div class="row d-flex align-items-end mt-2">
                                                                             <!-- Option Name (EN) -->
                                                                             <div class="col">
-                                                                                <label class="form-label label-text">Value (Required) (EN)</label>
+                                                                                <label class="form-label label-text">Value (EN)</label>
                                                                                 <input type="text" name="value_en" class="form-control" placeholder="Option (EN)" />
                                                                             </div>
 
                                                                             <!-- Option Name (AR) -->
                                                                             <div class="col">
-                                                                                <label class="form-label label-text">Value (Required) (AR)</label>
+                                                                                <label class="form-label label-text">Value (AR)</label>
                                                                                 <input type="text" name="value_ar" class="form-control" placeholder="Option (AR)" />
                                                                             </div>
 

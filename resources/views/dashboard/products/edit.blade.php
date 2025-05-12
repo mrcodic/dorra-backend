@@ -393,8 +393,7 @@
                                                                                         <!-- Option Name (EN) -->
                                                                                         <div class="col">
                                                                                             <label
-                                                                                                class="form-label label-text">Value
-                                                                                                (Required) (EN)</label>
+                                                                                                class="form-label label-text">Value (EN)</label>
                                                                                             <input type="text"
                                                                                                    name="value_en"
                                                                                                    value="{{ $option->getTranslation('value','en') }}"
@@ -405,8 +404,7 @@
                                                                                         <!-- Option Name (AR) -->
                                                                                         <div class="col">
                                                                                             <label
-                                                                                                class="form-label label-text">Value
-                                                                                                (Required) (AR)</label>
+                                                                                                class="form-label label-text">Value (AR)</label>
                                                                                             <input type="text"
                                                                                                    name="value_ar"
                                                                                                    value="{{ $option->getTranslation('value','ar') }}"
