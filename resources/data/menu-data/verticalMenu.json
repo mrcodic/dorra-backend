@@ -8,12 +8,6 @@
         },
 
         {
-            "name": "Products",
-            "icon": "box",
-            "slug": "",
-            "url": "/products"
-        },
-        {
             "name": "Categories",
             "icon": "grid",
             "slug": "",
@@ -37,8 +31,12 @@
                     "slug": "app-user-list"
                 }
             ]
+        },
+        {
+            "name": "Products",
+            "icon": "box",
+            "slug": "",
+            "url": "/products"
         }
-
-
     ]
 }
