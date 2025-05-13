@@ -20,7 +20,7 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             } },
         { data: "name" },
-        { data: "no_of_products" },
+        { data: "sub_category_products_count" },
         { data: "added_date" },
 
         {
@@ -35,7 +35,7 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
                                      data-id="${data}"
                                      data-name_ar="${row.name_ar}"
                                      data-name_en="${row.name_en}"
-                                     data-products="${row.no_of_products}"
+                                     data-products="${row.sub_category_products_count}"
                                      data-showdate="${row.show_date}"
                                      data-parent="${row.parent_name}"
                                      data-parent_id="${row.parent.id}">
@@ -49,7 +49,7 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
                data-id="${data}"
                data-name_ar="${row.name_ar}"
                data-name_en="${row.name_en}"
-               data-products="${row.no_of_products}"
+               data-products="${row.sub_category_products_count}"
                data-showdate="${row.show_date}"
                data-parent="${row.parent_name}"
                data-parent_id="${row.parent.id}">

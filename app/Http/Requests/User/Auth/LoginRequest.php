@@ -55,5 +55,10 @@ class LoginRequest extends BaseRequest
                 'email' => __('auth.failed'),
             ]);
         }
+        if ($user->status != 'Active') {
+            throw ValidationException::withMessages([
+                'email' => __('auth.active'),
+            ]);
+        }
     }
 }

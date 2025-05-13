@@ -16,11 +16,9 @@ class RoleService extends BaseService
 {
 
     public BaseRepositoryInterface $repository;
-    protected array $relations;
 
     public function __construct(ProductRepositoryInterface $repository)
     {
-        $this->relations = ['category'];
         parent::__construct($repository);
     }
 

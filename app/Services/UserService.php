@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Validation\Rules\Password;
 use Yajra\DataTables\DataTables;
 use App\Repositories\{Interfaces\UserRepositoryInterface, Base\BaseRepositoryInterface};
 
@@ -29,7 +32,7 @@ class UserService extends BaseService
                 });
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
-            });
+            })->latest();
         return DataTables::of($users)
             ->addColumn('name', function ($user) {
                 return $user->name;
@@ -40,6 +43,19 @@ class UserService extends BaseService
             ->addColumn('orders_count', function ($user) {
                 return 0;
             })->make();
+    }
+
+    public function changePassword($request, $id): bool
+    {
+        $request->validate([
+            'password' => ['required', 'string','confirmed',
+                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),],
+        ]);
+        $user = $this->repository->find($id);
+        $user =  $user->update([
+            'password' => $request->password,
+        ]);
+        return (bool)$user;
     }
 
 }

@@ -22,7 +22,7 @@ class DiscountCodeController extends DashboardController
         $this->resourceTable = 'discount_codes';
     }
 
-    public function getData(): JsonResponse
+    public function getData()
     {
         return $this->discountCodeService->getData();
     }

@@ -13,10 +13,7 @@ class CategoryService extends BaseService
 {
     public function __construct(CategoryRepositoryInterface $repository)
     {
-        $this->relations = ['products', 'children'];
-
         parent::__construct($repository);
-
     }
 
 
@@ -83,7 +80,7 @@ class CategoryService extends BaseService
         $categories = $this->repository
             ->query(['id', 'name', 'parent_id',  'created_at'])
             ->with(['parent'])
-            ->withCount(['products'])
+            ->withCount(['subCategoryProducts'])
             ->whereNotNull('parent_id')
             ->when(request()->filled('search_value'), function ($query) {
                 $locale = app()->getLocale();

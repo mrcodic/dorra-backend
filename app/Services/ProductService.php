@@ -68,7 +68,7 @@ class ProductService extends BaseService
             })->make();
     }
 
-    public function getAll(bool $paginate = false, $columns = ['*']): LengthAwarePaginator
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*']): LengthAwarePaginator
     {
         return QueryBuilder::for(Product::class)->select($columns)
             ->with($this->relations)
@@ -82,7 +82,7 @@ class ProductService extends BaseService
 
     }
 
-    public function storeResource($validatedData, $relationsToStore = [])
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $product = $this->repository->create($validatedData);
         $product->load($this->relations);
@@ -127,7 +127,7 @@ class ProductService extends BaseService
         return $product;
     }
 
-    public function updateResource($validatedData, $id)
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);

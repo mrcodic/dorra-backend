@@ -113,8 +113,8 @@
                 <!-- Phone Number (Country Code + Number) -->
                 <div class="row mb-2">
                     <div class="col-md-4">
-                        <label for="country_code" class="form-label label-text ">Country Code</label>
-                        <select id="country_code" name="country_code_id" class="form-select" required>
+                        <label for="phone-code" class="form-label label-text ">Country Code</label>
+                        <select id="phone-code" name="country_code_id" class="form-select" required>
                             @foreach($associatedData['country_codes'] as $countryCode)
                                 <option value="{{ $countryCode->id }}" data-phone-code="{{ $countryCode->phone_code }}">{{ $countryCode->phone_code }} ({{ $countryCode->iso_code }})</option>
                             @endforeach
@@ -123,21 +123,27 @@
                     </div>
                     <div class="col-md-8">
                         <label for="phone_number" class="form-label label-text ">Phone Number</label>
-                        <input type="tel" id="full_phone_number" name="phone_number" class="form-control" placeholder="Enter phone number" required>
+                        <input type="tel" id="phone_number" name="phone_number" class="form-control" placeholder="Enter phone number" required>
+                        <input type="hidden"  name="full_phone_number" id="full_phone_number" />
+
                     </div>
                 </div>
 
                 <!-- Account Status Toggle -->
                 <div class="">
-                    <div class="form-check form-switch  border rounded-3 p-1 d-flex justify-content-between align-items-center">
+                    <div class="form-check form-switch border rounded-3 p-1 d-flex justify-content-between align-items-center">
                         <div class="d-flex flex-column">
                             <label class="form-check-label text-dark" for="account_status">Account Active</label>
                             <span class="active-label rounded-3 status-label primary-text-color text-center d-flex justify-content-center align-items-center">Active</span>
                         </div>
 
-                        <input class="form-check-input" type="checkbox" id="account_status" name="status" checked>
+                        <!-- Visible Toggle -->
+                        <input class="form-check-input" type="checkbox" id="account_status_toggle" checked>
+                        <!-- Hidden field to hold 1 or 0 -->
+                        <input type="hidden" name="status" id="account_status" value="1">
                     </div>
                 </div>
+
                 <!-- Buttons -->
                 <div class="d-flex gap-1 justify-content-end mt-2">
 
@@ -269,7 +275,10 @@
                     <!-- Buttons -->
                     <div class="d-flex gap-1 justify-content-end mt-2">
                         <button type="button" class="btn btn-outline-secondary btn-prev place-order">Back</button>
-                        <button type="submit" class="btn btn-primary btn-next place-order">Add New User</button>
+                        <button type="submit" class="btn btn-primary btn-next place-order saveChangesButton" id="saveChangesButton">
+                            <span class="btn-text">Save</span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                        </button>
                     </div>
                 </div>
 
@@ -292,6 +301,13 @@
 <!-- Page js files -->
 <script src="{{ asset(mix('js/scripts/pages/app-ecommerce-checkout.js')) }}"></script>
 <script>
+    const toggle = document.getElementById('account_status_toggle');
+    const hiddenInput = document.getElementById('account_status');
+
+    toggle.addEventListener('change', function () {
+        hiddenInput.value = this.checked ? '1' : '0';
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const avatarInput = document.getElementById('avatarInput');
         const avatarCard = document.getElementById('avatarCard');
@@ -355,10 +371,21 @@
 
     $(".add-new-user").submit(function (event) {
         event.preventDefault();
-
+        const saveButton = $('.saveChangesButton');
+        const saveLoader = $('.saveLoader');
+        const saveButtonText = $('.saveChangesButton .btn-text');
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
         var form = $(this);
-        var actionUrl = form.attr("action");
 
+        var selectedOption = $("#phone-code option:selected");
+        var phoneCode = selectedOption.data("phone-code");
+        var phoneNumber = $("#phone_number").val();
+        var fullPhoneNumber = phoneCode + phoneNumber.replace(/\D/g, "");
+        $("#full_phone_number").val(fullPhoneNumber);
+
+        var actionUrl = form.attr("action");
         let formData = new FormData(form[0]);
         $.ajax({
             url: actionUrl,
@@ -372,10 +399,12 @@
                     window.location.href = "/users";
 
                 }
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
             },
             error: function (xhr) {
                 var errors = xhr.responseJSON.errors;
-
                 for (var key in errors) {
                     if (errors.hasOwnProperty(key)) {
                         Toastify({
@@ -388,7 +417,11 @@
                         }).showToast();
                     }
                 }
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
             },
+
         });
     });
 

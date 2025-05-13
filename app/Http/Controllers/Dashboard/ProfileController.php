@@ -25,7 +25,7 @@ class ProfileController extends Controller
     public function update(UpdateAdminRequest $request,$id,AdminRepositoryInterface $adminRepository)
     {
         $admin = $adminRepository->update($request->validated(),$id);
-        dd($admin);
+
         return Response::api(data: AdminResource::make($admin));
     }
 }
