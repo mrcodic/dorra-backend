@@ -141,6 +141,11 @@
                             <li class="nav-item">
                                 <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab2">Reviews</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab3">
+                                    Shipping Addresses
+                                </a>
+                            </li>
                         </ul>
                         <div class="tab-content mt-3">
                             <!-- tab 1 content -->
@@ -231,12 +236,10 @@
                                                     alt="Avatar"
                                                     class="rounded-circle" width="50" height="50">
                                                 <div>
-                                                    <div class="fw-bold text-dark fs-4">{{ $review->product->name }}</div>
+                                                    <div class="fw-bold text-dark fs-4">{{ $review->review }}</div>
                                                 </div>
                                             </div>
-                                            <div class="mb-2 label-text">
-                                                {{ $review->review }}
-                                            </div>
+
                                             @forelse($review->images as $image)
                                                 <div class="mb-2">
                                                     <img src="{{ $image?->getUrl() }}" alt="Review Image"
@@ -261,7 +264,7 @@
                                                         data-bs-toggle="modal">
                                                     <i data-feather="trash-2"></i> Delete
                                                 </button>
-                                                <button class="btn btn-outline-danger delete-review  {{$review->comment ? "d-none" :""}}"
+                                                <button class="btn btn-outline-danger delete-btn delete-review  {{$review->comment ? "d-none" :""}}"
                                                         data-review-id="{{ $review->id }}">
 
                                                     <i data-feather="trash-2"></i> Delete
@@ -277,8 +280,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Divider -->
-                                        <hr class="my-2">
+
 
                                         <!-- Comment Reply -->
                                         <div class="reply-block {{$review->comment ? "" :"d-none"}}">
@@ -293,12 +295,12 @@
                                                     class="text-small">{{ $review->comment_at?->format('d-m-Y') }}</div>
                                             </div>
 
-                                            <div class="mb-2 label-text mx-5">
+                                            <div class="mb-2 label-text mx-5 reply-comment">
                                                 {{ $review->comment }}
                                             </div>
                                             <div class="mb-2">
                                                 <img src="{{ $review->getFirstMediaUrl('review_reply') ?? "-"}}" alt="Review Image"
-                                                     class="img-fluid rounded" style="width: 80px;height: 80px">
+                                                     class="img-fluid rounded reply-image" style="width: 80px;height: 80px">
                                             </div>
                                             <div class="d-flex gap-2 justify-content-end">
                                                 <button class="btn btn-outline-danger delete-review" data-review-id="{{ $review->id }}"><i data-feather="trash-2"></i>
@@ -308,6 +310,8 @@
                                                 <button class="btn btn-outline-secondary delete-reply" data-review-id="{{ $review->id }}">Delete Reply</button>
                                             </div>
                                         </div>
+                                        <!-- Divider -->
+                                        <hr class="my-2">
                                     @empty
                                         <!-- No Reviews Yet Message with Inline Styles -->
                                         <div
@@ -315,8 +319,11 @@
                                             <p style="margin: 0; font-weight: 500; font-size: 1.1rem;">No reviews
                                                 yet.</p>
                                         </div>
+
                                     @endforelse
+
                                 </div>
+
                             </div>
 
 
@@ -425,20 +432,28 @@
                     $('#modals-slide-in').modal('hide');
                     $('#replyForm')[0].reset();
 
-                    // Find the review element
+                    // Find the review wrapper
                     const wrapper = $(`.review-wrapper[data-review-id="${currentReviewId}"]`);
 
+                    // Find the reply block directly after this wrapper
+                    const replyBlock = wrapper.next('.reply-block');
+
                     // Show the reply block
-                    wrapper.find('.reply-block').removeClass('d-none');
+                    replyBlock.removeClass('d-none');
 
-                    // Hide reply and delete buttons
+                    // Set comment content (optional based on response structure)
+                    replyBlock.find('.label-text').text(response.comment || '');
+                    replyBlock.find('.text-small').text(response.comment_at || '');
+                    replyBlock.find('.reply-image').attr('src', response.data.image || '-');
+                    replyBlock.find('.reply-comment').text(response.data.comment || '-');
+
+                    // Hide reply and delete buttons for this review
                     wrapper.find('.reply-btn').addClass('d-none');
-                    wrapper.find('.delete-review').addClass('d-none');
+                    wrapper.find('.delete-btn').addClass('d-none');
 
-                    // Optional: reset the currentReviewId
+                    // Reset currentReviewId
                     currentReviewId = null;
                 },
-
                 error: function (xhr) {
                     Toastify({
                         text: "Failed to send reply",
@@ -463,7 +478,6 @@
 
             if (!reviewId) return;
 
-
             $.ajax({
                 url: '/api/reviews/' + reviewId,
                 type: 'DELETE',
@@ -480,15 +494,20 @@
                         close: true
                     }).showToast();
 
-                    button.closest('.review-wrapper').remove();
+                    const reviewWrapper = $(`.review-wrapper[data-review-id="${reviewId}"]`);
+                    const replyBlock = reviewWrapper.next('.reply-block');
+
+                    reviewWrapper.slideUp(300, function () {
+                        $(this).remove();
+                    });
+
+                    replyBlock.slideUp(300, function () {
+                        $(this).remove();
+                    });
 
                     const counter = $('#review-counter');
                     let currentCount = parseInt(counter.text()) || 0;
-                    if (currentCount > 1) {
-                        counter.text(`${currentCount - 1} Reviews`);
-                    } else {
-                        counter.text(`0 Reviews`);
-                    }
+                    counter.text(`${Math.max(currentCount - 1, 0)} Reviews`);
                 },
                 error: function (xhr) {
                     console.error(xhr.responseJSON);
@@ -503,6 +522,7 @@
                 }
             });
         });
+
         $(document).on('click', '.delete-reply', function (e) {
             e.preventDefault();
 
@@ -519,17 +539,33 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function (response) {
+                    console.log(response)
                     Toastify({
                         text: "Reply deleted successfully",
                         duration: 4000,
                         gravity: "top",
                         position: "right",
-                        backgroundColor: "#EA5455",
+                        backgroundColor: "#28a745",
                         close: true
                     }).showToast();
 
-                    button.closest('.reply-block').remove();
+                    $('#modals-slide-in').modal('hide');
+                    $('#replyForm')[0].reset();
 
+                    const reviewId = button.data('review-id');
+
+                    // Get the review wrapper
+                    const wrapper = $(`.review-wrapper[data-review-id="${reviewId}"]`);
+
+                    // Hide the reply-block following this wrapper
+                    const replyBlock = wrapper.next('.reply-block');
+                    replyBlock.addClass('d-none');
+                    replyBlock.find('.reply-image').attr('src', response.data || '-');
+
+
+                    // Show the reply and delete buttons inside the wrapper
+                    wrapper.find('.reply-btn').removeClass('d-none');
+                    wrapper.find('.delete-btn').removeClass('d-none');
                 },
                 error: function (xhr) {
                     console.error(xhr.responseJSON);

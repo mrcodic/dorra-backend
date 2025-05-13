@@ -17,7 +17,7 @@ class ReviewService extends BaseService
         parent::__construct($repository);
 
     }
-    public function replyReview($request, $review): bool
+    public function replyReview($request, $review)
     {
       $review = $this->repository->update([
           'comment' => $request->comment,
@@ -25,7 +25,7 @@ class ReviewService extends BaseService
       if ($request->allFiles()) {
           handleMediaUploads($request->image,$review,"review_reply",clearExisting: true);
       }
-      return (bool) $review;
+      return $review;
 
     }
 
