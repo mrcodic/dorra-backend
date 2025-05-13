@@ -76,6 +76,7 @@
                         <div class="card border rounded p-1 my-2">
                             <div class="d-flex justify-content-between align-items-start">
 
+                                @forelse($model->teams as $team)
 
                                 <!-- left: Icon and Info -->
                                 <div class="d-flex gap-2 align-items-center">
@@ -84,16 +85,22 @@
                                     </div>
                                     <div class="text-center flex-grow-1">
 
-                                        <h5>John Doe’s Team</h5>
+                                        <h5>{{ $team->owner->name }}’s Team</h5>
                                         <div class="d-flex align-items-center justify-content-center">
-                                            <i data-feather="calendar"> </i> Joined 13 Oct 2024
+                                            <i data-feather="calendar"> </i> Joined {{ $team->created_at->format("j M Y") }}
                                         </div>
                                     </div>
                                 </div>
 
+                                @empty
+                                    <div class="text-center flex-grow-1">
+                                        <p>No teams
+                                            yet.</p>
+                                    </div>
 
+                                @endforelse
                                 <!-- Right: Actions Dropdown -->
-                                <div class="dropdown">
+                                <div class="dropdown d-none">
                                     <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
                                         <i data-feather="more-horizontal" class=""></i>
                                     </button>
@@ -325,39 +332,53 @@
                             </div>
 
                         </div>
-                        <div class="tab-pane fade" id="tab3"></div>
-                        <div class="d-flex justify-content-between align-items-end ">
-                            <!-- left: Icon and Info -->
-                            <div
-                                class=" border rounded-3 p-1  d-flex gap-2 align-items-center justify-content-start w-50">
+                        <!-- tab 3 content -->
 
-                                <div class=" flex-grow-1">
+                        <div class="tab-pane fade" id="tab3">
+                            <div class="d-flex justify-content-between align-items-end ">
+                                <!-- left: Icon and Info -->
+                                <div class=" border rounded-3 p-1  d-flex gap-2 align-items-center justify-content-start w-50 ">
+                                    @foreach($model->addresses as $address)
+                                        <div class=" flex-grow-1" >
 
-                                    <h5 class="fs-16 text-black"> Home</h5>
-                                    <div class="d-flex flex-column fs-16 text-dark">
-                                        <span>15 street name, neighborhood</span>
-                                        <span>Cairo, Egypt</span>
-                                    </div>
+                                            <h5 class="fs-16 text-black"> {{ $address->label }}</h5>
+                                            <div class="d-flex flex-column fs-16 text-dark">
+                                                <span>{{ $address->line }}</span>
+                                                <span>{{ $address->state->name }}, {{ $address->state->country->name }}</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+
+
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="d-flex gap-1 justify-content-end mt-2">
+                                    <button type="button" class="btn bg-white text-danger  place-order fs-16 delete-address"
+                                            data-id="{{ $address->id }}"
+                                            data-url="{{ route('shipping-addresses.destroy', $address->id) }}">
+                                        Delete
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary place-order fs-16"
+                                    data-bs-target="#editAddressModal" data-bs-toggle="modal"
+                                    >
+                                        Edit
+                                    </button>
+                                    @include('modals.addresses.edit-address',['address'=>$address , 'countries' => $associatedData['countries']])
+
+
                                 </div>
                             </div>
-
-                            <!-- Buttons -->
-                            <div class="d-flex gap-1 justify-content-end mt-2">
-                                <button type="button" class="btn bg-white text-danger  place-order fs-16">
-                                    Delete
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary place-order fs-16">
-                                    Edit
-                                </button>
-
-                            </div>
                         </div>
+
                         <div class="row mt-2">
                             <div class="col-12">
-                                <button type="button" class="w-100  rounded-3 p-1 bg-white text-dark" style="border:2px dashed #CED5D4;" data-repeater-create>
+                                <button type="button" class="w-100  rounded-3 p-1 bg-white text-dark" style="border:2px dashed #CED5D4;"  data-bs-target="#addNewAddressModal" data-bs-toggle="modal">
                                     <i data-feather="plus" class="me-25"></i> <span>Add New Address</span>
                                 </button>
                             </div>
+                            @include('modals.addresses.add-new-address',['countries' => $associatedData['countries']])
+
                         </div>
                     </div>
                 </div>
@@ -404,6 +425,7 @@
 
 @section('vendor-script')
 {{-- Vendor js files --}}
+<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
 <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
 <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
@@ -426,6 +448,46 @@
 @endsection
 
 @section('page-script')
+    <script src="">
+        $(document).on('click', '.delete-address', function () {
+            console.log("ukhjghjy")
+
+            const button = $(this);
+            const addressId = button.data('id');
+            const deleteUrl = button.data('url');
+
+            $.ajax({
+                url: deleteUrl,
+                method: 'POST',
+                data: {
+                    _method: 'DELETE',
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    Toastify({
+                        text: "Address deleted successfully!",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#dc3545", // red
+                        close: true,
+                        callback: function () {
+                            location.reload();
+                        }
+                    }).showToast();
+                },
+                error: function (xhr) {
+                    let errorMsg = 'Failed to delete address.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+
+                    alert(errorMsg);
+                }
+            });
+        });
+
+    </script>
 <script !src="">
     let currentReviewId = null;
 

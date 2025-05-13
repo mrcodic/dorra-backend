@@ -30,7 +30,7 @@ class BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad =[])
     {
         $model = $this->repository->create($validatedData);
-        $model->load($this->relations);
+        $model->load($relationsToLoad);
         collect($relationsToStore)->map(function ($relation) use ($validatedData, $model) {
             if (isset($validatedData[$relation])) {
                 $model->{$relation}()->createMany($validatedData[$relation]);

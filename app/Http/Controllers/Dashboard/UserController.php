@@ -30,6 +30,9 @@ class UserController extends DashboardController
                 'countries' => $this->countryRepository->all(),
             ],
         ];
+        $this->methodRelations = [
+            'show' => ['teams', 'reviews.product', 'addresses.state.country'],
+        ];
         $this->relationsToStore = ['addresses'];
         $this->indexView = 'users.index';
         $this->showView = 'users.show';

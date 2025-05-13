@@ -8,14 +8,14 @@ use App\Http\Controllers\Dashboard\{AdminController,
     ProductController,
     ReviewController,
     RoleController,
+    ShippingAddressController,
     SubCategoryController,
     TagController,
     TemplateController,
     UserController,
     CategoryController,
     ProfileController,
-    DiscountCodeController
-};
+    DiscountCodeController};
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Rules\Role;
 
@@ -123,6 +123,8 @@ Route::middleware('auth')->group(function () {
             Route::post('/media/{resource}', 'addMedia')->name('add-media');
 
         });
+        Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);
+
     });
 
 });
