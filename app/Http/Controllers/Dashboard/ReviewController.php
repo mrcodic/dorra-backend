@@ -13,8 +13,11 @@ class ReviewController extends Controller
 
     public function replyReview(Request $request,$review)
     {
-        $this->reviewService->replyReview($request,$review);
-        return Response::api();
+        $review =$this->reviewService->replyReview($request,$review);
+        return Response::api(data:[
+            'image' => $review->getFirstMediaUrl('review_reply')
+        ,'comment' => $review->comment
+        ]);
 
 
     }

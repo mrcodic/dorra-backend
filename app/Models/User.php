@@ -122,7 +122,7 @@ class User extends Authenticatable implements HasMedia
 
     public function teams(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class);
+        return $this->belongsToMany(Team::class)->withTimestamps();
     }
 
     public function reviews(): HasMany
