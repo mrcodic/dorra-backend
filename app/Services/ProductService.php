@@ -88,36 +88,36 @@ class ProductService extends BaseService
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
         $product->prices()->createMany($validatedData['prices'] ?? []);
-
-        collect($validatedData['specifications'])->map(function ($specification) use ($product) {
-            $productSpecification = $product->specifications()->create([
-                'name' => [
-                    'en' => $specification['name_en'],
-                    'ar' => $specification['name_ar'],
-                ],
-            ]);
-
-
-            collect($specification['specification_options'])->each(function ($option, $index) use ($productSpecification) {
-
-                $productOption = $productSpecification->options()->create([
-                    'value' => [
-                        'en' => $option['value_en'],
-                        'ar' => $option['value_ar'],
+        if (isset($validatedData['specifications'])) {
+            collect($validatedData['specifications'])->map(function ($specification) use ($product) {
+                $productSpecification = $product->specifications()->create([
+                    'name' => [
+                        'en' => $specification['name_en'],
+                        'ar' => $specification['name_ar'],
                     ],
-                    'price' => $option['price'],
                 ]);
 
-                if (isset($option['image'])) {
-                    if ($option['image'] instanceof UploadedFile) {
-                        handleMediaUploads([$option['image']], $productOption);
+
+                collect($specification['specification_options'])->each(function ($option, $index) use ($productSpecification) {
+
+                    $productOption = $productSpecification->options()->create([
+                        'value' => [
+                            'en' => $option['value_en'],
+                            'ar' => $option['value_ar'],
+                        ],
+                        'price' => $option['price'],
+                    ]);
+
+                    if (isset($option['image'])) {
+                        if ($option['image'] instanceof UploadedFile) {
+                            handleMediaUploads([$option['image']], $productOption);
+                        }
                     }
-                }
+                });
+
+
             });
-
-
-        });
-
+        }
         handleMediaUploads($validatedData['image'], $product, 'product_main_image');
         if (isset($validatedData['images'])) {
             handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
@@ -132,11 +132,11 @@ class ProductService extends BaseService
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
-        if (isset($validatedData['base_price'])){
+        if (isset($validatedData['base_price'])) {
             $product->prices()->delete();
         }
         if (isset($validatedData['prices'])) {
-            $product->update(['base_price'=>null]);
+            $product->update(['base_price' => null]);
             collect($validatedData['prices'])->each(function ($price) use ($product) {
                 $product->prices()->updateOrCreate(
                     [
@@ -149,8 +149,7 @@ class ProductService extends BaseService
                 );
             });
         }
-        if(isset($validatedData['specifications']))
-        {
+        if (isset($validatedData['specifications'])) {
             collect($validatedData['specifications'])->each(function ($specification) use ($product) {
                 $productSpecification = $product->specifications()->updateOrCreate(
                     [

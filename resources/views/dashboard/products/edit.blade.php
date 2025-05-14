@@ -477,11 +477,11 @@
                                                                                                         KB
                                                                                                     </div>
                                                                                                 </div>
-                                                                                                <button type="button"
-                                                                                                        class="btn btn-sm position-absolute text-danger option-remove-image"
-                                                                                                        style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                                                                    <i data-feather="trash"></i>
-                                                                                                </button>
+{{--                                                                                                <button type="button"--}}
+{{--                                                                                                        class="btn btn-sm position-absolute text-danger option-remove-image"--}}
+{{--                                                                                                        style="top: 5px; right: 5px; background-color: #FFEEED">--}}
+{{--                                                                                                    <i data-feather="trash"></i>--}}
+{{--                                                                                                </button>--}}
                                                                                             </div>
 
                                                                                             <div
