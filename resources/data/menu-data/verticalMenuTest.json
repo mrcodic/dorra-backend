@@ -1,0 +1,42 @@
+{
+    "menu": [
+        {
+            "name": "Dashboards",
+            "icon": "home",
+            "slug": "",
+            "url": "/"
+        },
+        {
+            "name": "Categories",
+            "icon": "grid",
+            "slug": "",
+            "submenu": [
+                {
+                    "url": "/categories",
+                    "name": "Categories",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/sub-categories",
+                    "name": "Subcategories",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/tags",
+                    "name": "Tags",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                }
+            ]
+        },
+        {
+            "name": "Products",
+            "icon": "box",
+            "slug": "",
+            "url": "/products"
+        }
+
+    ]
+}

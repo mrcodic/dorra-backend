@@ -99,6 +99,7 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
         Route::get('/data', [TemplateController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::post('/publish', 'bulkDelete')->name('publish');
     });
     Route::resource('/templates', TemplateController::class);
 
