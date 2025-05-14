@@ -307,7 +307,7 @@
                                                                                 </div>
 
                                                                                 <div class="col-12 text-end mt-1 mb-2">
-                                                                                    <button type="button" class="btn btn-outline-danger" style="display: none" data-repeater-delete>
+                                                                                    <button type="button" class="btn btn-outline-danger"  data-repeater-delete>
                                                                                         <i data-feather="x" class="me-25"></i> Delete Value
                                                                                     </button>
                                                                                 </div>
@@ -329,7 +329,7 @@
 
                                                             <!-- Delete Specification Button -->
                                                             <div class="col-12 text-end mt-1 mb-2">
-                                                                <button type="button" class="btn btn-outline-danger" style="display: none" data-repeater-delete>
+                                                                <button type="button" class="btn btn-outline-danger" data-repeater-delete>
                                                                     <i data-feather="x" class="me-25"></i> Delete Spec
                                                                 </button>
                                                             </div>
@@ -695,13 +695,9 @@
         function updateDeleteButtons(containerSelector) {
             $(containerSelector).find('[data-repeater-list]').each(function () {
                 var items = $(this).find('[data-repeater-item]');
-                items.each(function (index) {
-                    if (index === 0) {
-                        $(this).find('[data-repeater-delete]').hide();
-                    } else {
-                        $(this).find('[data-repeater-delete]').show();
-                        feather.replace();
-                    }
+                items.each(function () {
+                    $(this).find('[data-repeater-delete]').show();
+                    feather.replace();
                 });
             });
         }

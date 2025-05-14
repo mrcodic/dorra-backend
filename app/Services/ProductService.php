@@ -149,31 +149,35 @@ class ProductService extends BaseService
                 );
             });
         }
-        collect($validatedData['specifications'])->each(function ($specification) use ($product) {
-            $productSpecification = $product->specifications()->updateOrCreate(
-                [
-                    'name->en' => $specification['name_en'],
-                    'name->ar' => $specification['name_ar'],
-                ],
-                []
-            );
-
-            collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
-                $productOption = $productSpecification->options()->updateOrCreate(
+        if(isset($validatedData['specifications']))
+        {
+            collect($validatedData['specifications'])->each(function ($specification) use ($product) {
+                $productSpecification = $product->specifications()->updateOrCreate(
                     [
-                        'value->en' => $option['value_en'],
-                        'value->ar' => $option['value_ar'],
+                        'name->en' => $specification['name_en'],
+                        'name->ar' => $specification['name_ar'],
                     ],
-                    [
-                        'price' => $option['price'] ?? 0,
-                    ]
+                    []
                 );
 
-                if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
-                    handleMediaUploads([$option['image']], $productOption);
-                }
+                collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
+                    $productOption = $productSpecification->options()->updateOrCreate(
+                        [
+                            'value->en' => $option['value_en'],
+                            'value->ar' => $option['value_ar'],
+                        ],
+                        [
+                            'price' => $option['price'] ?? 0,
+                        ]
+                    );
+
+                    if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
+                        handleMediaUploads([$option['image']], $productOption);
+                    }
+                });
             });
-        });
+
+        }
 
         if (isset($validatedData['image'])) {
             handleMediaUploads($validatedData['image'], $product, 'product_main_image', clearExisting: true);

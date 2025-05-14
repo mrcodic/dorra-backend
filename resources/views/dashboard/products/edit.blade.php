@@ -488,7 +488,6 @@
                                                                                                 class="col-12 text-end mt-1 mb-2">
                                                                                                 <button type="button"
                                                                                                         class="btn btn-outline-danger"
-                                                                                                        style="display: none"
                                                                                                         data-repeater-delete>
                                                                                                     <i data-feather="x"
                                                                                                        class="me-25"></i>
@@ -519,7 +518,6 @@
                                                                     <div class="col-12 text-end mt-1 mb-2">
                                                                         <button type="button"
                                                                                 class="btn btn-outline-danger"
-                                                                                style="display: none"
                                                                                 data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
@@ -879,16 +877,13 @@
             function updateDeleteButtons(containerSelector) {
                 $(containerSelector).find('[data-repeater-list]').each(function () {
                     var items = $(this).find('[data-repeater-item]');
-                    items.each(function (index) {
-                        if (index === 0) {
-                            $(this).find('[data-repeater-delete]').hide();
-                        } else {
-                            $(this).find('[data-repeater-delete]').show();
-                            feather.replace();
-                        }
+                    items.each(function () {
+                        $(this).find('[data-repeater-delete]').show();
+                        feather.replace();
                     });
                 });
             }
+
 
             function initializeImageUploaders(context) {
                 $(context).find('.option-upload-area').each(function () {
@@ -965,11 +960,11 @@
                     // Optionally clear the hidden input too
                     $(this).find('.option-image-input').val('');
                     feather.replace();
-                },
-                hide: function (deleteElement) {
+                }, hide: function (deleteElement) {
                     $(this).slideUp(deleteElement);
                     updateDeleteButtons($('.outer-repeater'));
                 },
+
                 afterAdd: function () {
                     updateDeleteButtons($('.outer-repeater'));
                     initializeImageUploaders($('.outer-repeater'));
@@ -980,11 +975,7 @@
                 }
             });
 
-// Initialize on page load for already existing items
-            $(document).ready(function () {
-                updateDeleteButtons($('.outer-repeater'));
-                initializeImageUploaders($('.outer-repeater'));
-            });
+
 
 
             $('.select2').select2();
