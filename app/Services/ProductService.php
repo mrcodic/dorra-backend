@@ -177,6 +177,16 @@ class ProductService extends BaseService
             });
 
         }
+        else
+        {
+            $product->specifications->each(function ($spec) {
+                $spec->options->each(function ($option) {
+                    $option->clearMediaCollection();
+                    $option->delete();
+                });
+                $spec->delete();
+            });
+        }
 
         if (isset($validatedData['image'])) {
             handleMediaUploads($validatedData['image'], $product, 'product_main_image', clearExisting: true);
