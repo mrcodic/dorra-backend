@@ -28,7 +28,7 @@
                 <div class="card h-100">
                     <div class="card-body">
 
-                        ```
+
                         <div class="d-flex flex-column gap-1 my-1">
                             <div class="d-flex align-items-center gap-1">
 
@@ -147,7 +147,7 @@
                                                 @foreach($associatedData['country_codes'] as $countryCode)
                                                     <option value="{{ $countryCode->id }}"
                                                             data-phone-code="{{ $countryCode->phone_code }}"
-                                                        @selected($countryCode->id == $model->countryCode->id)
+                                                        @selected($countryCode->id == $model->countryCode?->id)
                                                     >
                                                         {{ $countryCode->phone_code }} ({{ $countryCode->iso_code }})
                                                     </option>
@@ -657,6 +657,6 @@
     <script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
-    ```
+
 
 @endsection

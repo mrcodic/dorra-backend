@@ -20,17 +20,17 @@
                     <div class="row mb-3">
                         <div class="col-6">
                             <label class="form-label label-text">Country</label>
-                            <select id="modalAddressCountry" name="country_id" class=" form-select country-select">
+                            <select id="modalAddressCountry" name="country_id" class=" form-select address-country-select">
                                 <option value="">Select a Country</option>
                                 @foreach($countries as $country)
-                                    <option value="{{ $country->id }}" @selected($country->id == $address->state->country->id)> {{ $country->name }}</option>
+                                    <option value="{{ $country->id }}"> {{ $country->name }}</option>
                                 @endforeach
 
                             </select>
                         </div>
                         <div class="col-6">
                             <label class="form-label label-text">State</label>
-                            <select id="modalAddressState" name="state_id" class="form-select state-select">
+                            <select id="modalAddressState" name="state_id" class="form-select address-state-select">
 
                                 <option value="" >Select a State</option>
                             </select>
@@ -64,43 +64,43 @@
 </div>
 <script>
     $(document).ready(function () {
-        // Function to populate states
-        function loadStates(countryId, selectedStateId = null) {
-            const baseUrl = $('#state-url').data('url');
-            const stateSelect = $('.state-select');
 
+        $(document).on("change", ".address-country-select", function () {
+
+            const countryId = $(this).val();
+            const stateSelect = $(".address-state-select");
             if (countryId) {
                 $.ajax({
-                    url: `${baseUrl}?filter[country_id]=${countryId}`,
-                    method: 'GET',
+                    url: "{{ route('states') }}",  // Make sure this is wrapped in quotes for the URL
+                    method: "GET",
+                    data: {
+                        "filter[country_id]": countryId  // Corrected way to pass the data
+                    },
                     success: function (response) {
-                        stateSelect.empty().append('<option value="">Select a State</option>');
+                        stateSelect
+                            .empty()
+                            .append('<option value="">Select State</option>');
                         $.each(response.data, function (index, state) {
-                            const selected = state.id == selectedStateId ? 'selected' : '';
-                            stateSelect.append(`<option value="${state.id}" ${selected}>${state.name}</option>`);
+                            stateSelect.append(
+                                `<option value="${state.id}">${state.name}</option>`
+                            );
                         });
                     },
                     error: function () {
-                        stateSelect.empty().append('<option value="">Error loading states</option>');
-                    }
+                        stateSelect
+                            .empty()
+                            .append('<option value="">Error loading states</option>');
+                    },
                 });
+
             } else {
-                stateSelect.empty().append('<option value="">Select a State</option>');
+                stateSelect
+                    .empty()
+                    .append('<option value="">Select State</option>');
             }
-        }
-
-        // When country is changed
-        $(document).on('change', '.country-select', function () {
-            const selectedCountry = $(this).val();
-            loadStates(selectedCountry);
         });
 
-        // When modal is shown — prefill the state dropdown
-        $('#addAddressModal').on('shown.bs.modal', function () {
-            const selectedCountry = $('.country-select').val();
-            const selectedStateId = `{{ $address->state_id }}`; // Pass in from backend
-            loadStates(selectedCountry, selectedStateId);
-        });
+
 
         $('#addAddressForm').on('submit', function (e) {
             e.preventDefault();
@@ -109,26 +109,33 @@
             const formData = $form.serialize();
             const actionUrl = $form.attr('action');
 
-            $('#saveLoader').removeClass('d-none');
+            const saveButton = $('.saveChangesButton');
+            const saveLoader = $('.saveLoader');
+            const saveButtonText = $('.saveChangesButton .btn-text');
+            saveButton.prop('disabled', true);
+            saveLoader.removeClass('d-none');
+            saveButtonText.addClass('d-none');
 
             $.ajax({
                 url: actionUrl,
                 method: 'POST',
                 data: formData,
                 success: function (response) {
-                    $('#saveLoader').addClass('d-none');
-                    $('#saveChangesButton .btn-text').text('Add');
-                    $('#editAddressModal').modal('hide');
-
+                    saveButton.prop('disabled', false);
+                    saveLoader.addClass('d-none');
+                    saveButtonText.removeClass('d-none');
+                    $('#addNewAddressModal').modal('hide');
+                    $form[0].reset();
                     Toastify({
                         text: "Address added successfully!",
-                        duration: 4000,
+                        duration: 1500,
                         gravity: "top",
                         position: "right",
                         backgroundColor: "#28a745",
-                        close: true ,
-                        callback: function () {
-                            location.reload();
+                        close: true,
+                        callback:function () {
+                            window.location.hash = '#tab3';
+                            location.reload()
                         }
                     }).showToast();
 

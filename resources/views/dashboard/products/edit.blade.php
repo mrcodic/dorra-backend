@@ -2,7 +2,7 @@
 
 @section('title', 'Edit Products')
 @section('main-page', 'Products')
-@section('sub-page', 'Edit New Product')
+@section('sub-page', 'Edit Product')
 
 @section('vendor-style')
     <!-- Vendor CSS Files -->
@@ -101,12 +101,12 @@
                                                         KB
                                                     </div>
                                                 </div>
-{{--                                                <button type="button" id="remove-image"--}}
-{{--                                                        class="btn btn-sm position-absolute text-danger remove-old-image"--}}
-{{--                                                        data-image-id="{{ $image?->id }}"--}}
-{{--                                                        style="top: 5px; right: 5px; background-color: #FFEEED">--}}
-{{--                                                    <i data-feather="trash"></i>--}}
-{{--                                                </button>--}}
+                                                {{--                                                <button type="button" id="remove-image"--}}
+                                                {{--                                                        class="btn btn-sm position-absolute text-danger remove-old-image"--}}
+                                                {{--                                                        data-image-id="{{ $image?->id }}"--}}
+                                                {{--                                                        style="top: 5px; right: 5px; background-color: #FFEEED">--}}
+                                                {{--                                                    <i data-feather="trash"></i>--}}
+                                                {{--                                                </button>--}}
                                             </div>
 
                                         </div>
@@ -148,12 +148,12 @@
 
                                             </div>
 
-                                                <button type="submit"
-                                                        class="btn btn-sm position-absolute text-danger remove-old-image"
-                                                        data-image-id="{{ $image->id }}"
-                                                        style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                    <i data-feather="trash"></i>
-                                                </button>
+                                            <button type="submit"
+                                                    class="btn btn-sm position-absolute text-danger remove-old-image"
+                                                    data-image-id="{{ $image->id }}"
+                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                <i data-feather="trash"></i>
+                                            </button>
                                         </div>
                                     @endforeach
                                 @endif
@@ -179,7 +179,7 @@
                                             <option value="">Select subcategory</option>
                                             @php
                                                 $subCategories = App\Models\Category::whereParentId($model->category_id)->get();
-                                             @endphp
+                                            @endphp
                                             @if(old('category_id', $model->category_id))
                                                 @foreach($subCategories as $subCategory)
                                                     <option value="{{ $subCategory->id }}" @selected($subCategory->id == $model->sub_category_id)>{{ $subCategory->name }}</option>
@@ -477,11 +477,11 @@
                                                                                                         KB
                                                                                                     </div>
                                                                                                 </div>
-{{--                                                                                                <button type="button"--}}
-{{--                                                                                                        class="btn btn-sm position-absolute text-danger option-remove-image"--}}
-{{--                                                                                                        style="top: 5px; right: 5px; background-color: #FFEEED">--}}
-{{--                                                                                                    <i data-feather="trash"></i>--}}
-{{--                                                                                                </button>--}}
+                                                                                                <button type="button"
+                                                                                                        class="btn btn-sm position-absolute text-danger option-remove-image"
+                                                                                                        style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                                                                    <i data-feather="trash"></i>
+                                                                                                </button>
                                                                                             </div>
 
                                                                                             <div
@@ -580,6 +580,8 @@
 @endsection
 
 @section('page-script')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script>
         $(document).ready(function () {

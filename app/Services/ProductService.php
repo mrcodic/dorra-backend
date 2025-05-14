@@ -132,7 +132,7 @@ class ProductService extends BaseService
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
-        if ($validatedData['base_price']){
+        if (isset($validatedData['base_price'])){
             $product->prices()->delete();
         }
         if (isset($validatedData['prices'])) {
