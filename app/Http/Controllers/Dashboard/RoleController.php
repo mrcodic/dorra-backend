@@ -30,7 +30,7 @@ class RoleController extends DashboardController
             ],
             'index' => [
                 'roles' => $this->roleRepository->all(columns: ['id', 'name']),
-            ]
+            ],
         ];
     }
 

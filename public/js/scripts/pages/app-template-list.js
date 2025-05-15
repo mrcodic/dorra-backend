@@ -3,12 +3,12 @@ $.ajaxSetup({
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
 });
-const dt_user_table = $(".category-list-table").DataTable({
+const dt_user_table = $(".template-list-table").DataTable({
     processing: true,
     serverSide: true,
     searching: false, // using custom search
     ajax: {
-        url: categoriesDataUrl,
+        url: templatesDataUrl,
         type: "GET",
         data: function (d) {
             d.search_value = $('#search-category-form').val(); // get from input
@@ -24,10 +24,11 @@ const dt_user_table = $(".category-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
+        { data: "preview_png" },
         { data: "name" },
-        { data: "sub_categories" },
-        { data: "no_of_products" },
-        { data: "added_date" },
+        { data: "product" },
+        { data: "status" },
+        { data: "updated_date" },
         {
             data: "id",
             orderable: false,
@@ -40,16 +41,16 @@ const dt_user_table = $(".category-list-table").DataTable({
                  class=""
                  data-bs-toggle="modal"
                  data-bs-target="#editAdminModal">
-                <i data-feather="edit-3"></i> 
+                <i data-feather="edit-3"></i>
               </a>
 
-              <a  class=" text-danger delete-user" 
+              <a  class=" text-danger delete-user"
                   href=""
                  data-bs-toggle="modal"
                  data-bs-target="#deleteModal">
-                <i data-feather="trash-2"></i> 
+                <i data-feather="trash-2"></i>
               </a>
-      
+
           </div>
         `;
             },
@@ -191,7 +192,7 @@ $(document).ready(function () {
     $(document).on("click", ".delete-category", function (e) {
         e.preventDefault();
 
-        var $table = $(".category-list-table").DataTable();
+        var $table = $(".template-list-table").DataTable();
         var $row = $(this).closest("tr");
         var rowData = $table.row($row).data();
         var categoryId = $(this).data("id");
@@ -274,7 +275,7 @@ $(document).ready(function () {
                         $('#bulk-delete-container').hide();
                         $('.category-checkbox').prop('checked', false);
                         $('#select-all-checkbox').prop('checked', false);
-                        $(".category-list-table").DataTable().ajax.reload(null, false);
+                        $(".template-list-table").DataTable().ajax.reload(null, false);
 
                     },
                     error: function () {

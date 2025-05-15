@@ -100,16 +100,17 @@
                 </div>
 
 
-                <table class="category-list-table table">
+                <table class="template-list-table table">
                     <thead class="table-light">
                     <tr>
                         <th>
                             <input type="checkbox" id="select-all-checkbox">
                         </th>
                         <th>Name</th>
-                        <th>SubTemplates</th>
-                        <th>NO.of Products</th>
-                        <th>Added Date</th>
+                        <th>Thumb</th>
+                        <th>Product</th>
+                        <th>Status</th>
+                        <th>Updated Date</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -164,8 +165,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        const categoriesDataUrl = "{{ route('categories.data') }}";
-        const categoriesCreateUrl = "{{ route('categories.create') }}";
+        const templatesDataUrl = "{{ route('templates.data') }}";
+        const templatesCreateUrl = "{{ route('templates.create') }}";
         const locale = "{{ app()->getLocale() }}";
     </script>
 

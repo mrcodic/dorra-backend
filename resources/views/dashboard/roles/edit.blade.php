@@ -1,5 +1,4 @@
 @extends('layouts/contentLayoutMaster')
-
 @section('title', 'Edit Role')
 @section('main-page', 'Roles')
 @section('sub-page', 'Edit Role')
@@ -18,7 +17,8 @@
             <input
                 type="text"
                 id="modalRoleName"
-                name="modalRoleName"
+                name="role"
+                value="{{ $model->name }}"
                 class="form-control"
                 placeholder="Enter role name"
                 tabindex="-1"
@@ -34,7 +34,7 @@
                 class="form-control"
                 rows="3"
                 placeholder="Enter role description"
-                data-msg="Please enter a description for the role"></textarea>
+                data-msg="Please enter a description for the role">{{ $model->description }}</textarea>
         </div>
 
         <div class="col-12">
@@ -58,37 +58,37 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                        $permissions = [
-                        'User Management' => 'userManagement',
-                        'Content Management' => 'contentManagement',
-                        'Disputes Management' => 'dispManagement',
-                        'Database Management' => 'dbManagement',
-                        'Financial Management' => 'finManagement',
-                        'Reporting' => 'reporting',
-                        'API Control' => 'api',
-                        'Repository Management' => 'repo',
-                        'Payroll' => 'payroll'
-                        ];
-                        @endphp
 
-                        @foreach($permissions as $label => $prefix)
-                        <tr>
-                            <td>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input row-checkbox" data-row="{{ $prefix }}" />
-                                    <span>{{ $label }}</span>
-                                </div>
+                        @foreach($model->permissions as $group => $groupPermissions)
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input row-checkbox" />
+                                        <span>{{ $group }}</span>
+                                    </div>
+                                </td>
 
-                            </td>
-                            @foreach(['Create', 'Read', 'Update','Delete'] as $action)
-                            <td>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input permission-checkbox {{ $prefix }}-checkbox" id="{{ $prefix . $action }}" />
-                                </div>
-                            </td>
-                            @endforeach
-                        </tr>
+                                @foreach(['Create', 'Read', 'Update', 'Delete'] as $action)
+                                    @php
+                                        $perm = $groupPermissions->firstWhere('name', $group . $action);
+                                    @endphp
+                                    <td>
+                                        <div class="form-check">
+                                            @if($perm)
+                                                <input
+                                                    type="checkbox"
+                                                    class="form-check-input permission-checkbox {{ $group }}-checkbox"
+                                                    name="permissions[]"
+                                                    value="{{ $perm->name }}"
+                                                    id="{{ $perm->name }}"
+                                                />
+                                            @else
+                                                <span class="text-muted small">N/A</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                @endforeach
+                            </tr>
                         @endforeach
                     </tbody>
                 </table>
