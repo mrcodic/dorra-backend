@@ -3,10 +3,9 @@
 namespace App\Repositories\Implementations;
 
 use App\Repositories\{Base\BaseRepository,
-    Interfaces\PermissionRepositoryInterface,
-    Interfaces\RoleRepositoryInterface};
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+    Interfaces\PermissionRepositoryInterface,};
+use App\Models\Permission;
+
 
 class PermissionRepository extends BaseRepository implements PermissionRepositoryInterface
 {

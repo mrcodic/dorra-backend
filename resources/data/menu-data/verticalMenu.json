@@ -6,23 +6,7 @@
             "slug": "",
             "url": "/"
         },
-        {
-            "name": "Admins",
-            "icon": "users",
-            "url": "/admins"
-        },
-        {
-            "name": "Users",
-            "icon": "users",
-            "slug": "",
-            "url": "/users"
-        },
-        {
-            "name": "Products",
-            "icon": "box",
-            "slug": "",
-            "url": "/products"
-        },
+
         {
             "name": "Categories",
             "icon": "grid",
@@ -47,12 +31,11 @@
                     "slug": "app-user-list"
                 }
             ]
-        },
-        {
-            "name": "Orders",
-            "icon": "file-text",
+        },       {
+            "name": "Products",
+            "icon": "box",
             "slug": "",
-            "url": "/orders"
+            "url": "/products"
         },
         {
             "name": "Roles",
@@ -70,25 +53,6 @@
                     "name": "Roles",
                     "icon": "circle",
                     "slug": "app-user-list"
-                }
-            ]
-        },
-        {
-            "name": "Invoices",
-            "icon": "dollar-sign",
-            "slug": "",
-            "url": "/invoices"
-        },
-        {
-            "name": "Discount",
-            "icon": "percent",
-            "slug": "",
-            "submenu": [
-                {
-                    "name": "DiscountCodes",
-                    "icon": "circle",
-                    "slug": "",
-                    "url": "/discount-codes"
                 }
             ]
         },

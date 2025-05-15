@@ -10,9 +10,9 @@ enum RoleEnum: string
     {
         return match ($this) {
             self::SUPER_ADMIN => [
-                'create-templates',
-                'edit-templates',
-                'publish-templates',
+                'templatesCreate',
+                'templatesUpdate',
+                'templatesPublish',
             ],
 
         };

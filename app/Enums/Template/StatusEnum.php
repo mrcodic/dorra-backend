@@ -11,4 +11,13 @@ enum StatusEnum : int
     case APPROVED = 2;
     case LIVE = 3;
 
+    public function label()
+    {
+        return match ($this) {
+            self::DRAFTED => __('Draft'),
+            self::APPROVED => __('Approved'),
+            self::LIVE => __('Live'),
+        };
+    }
+
 }

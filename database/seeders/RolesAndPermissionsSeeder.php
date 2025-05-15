@@ -4,9 +4,8 @@ namespace Database\Seeders;
 
 use App\Enums\Admin\PermissionEnum;
 use App\Enums\Admin\RoleEnum;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
+use App\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RolesAndPermissionsSeeder extends Seeder
@@ -17,10 +16,12 @@ class RolesAndPermissionsSeeder extends Seeder
     public function run(): void
     {
         foreach (PermissionEnum::cases() as $permissionEnum) {
-            Permission::query()->firstOrCreate([
-                'name' => $permissionEnum->value,
+            Permission::query()->firstOrCreate(
+                ['name' => $permissionEnum->value],
+            [
+                'group' => $permissionEnum->group(),
                 'guard_name' => 'web',
-                'routes' => json_encode($permissionEnum->routes()),
+                'routes' => $permissionEnum->routes(),
             ]);
         }
 

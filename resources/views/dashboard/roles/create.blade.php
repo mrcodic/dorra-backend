@@ -12,13 +12,14 @@
 @section('content')
 <div class="container bg-white p-3">
     <!-- Add role form -->
-    <form id="addRoleForm" class="row" onsubmit="return false">
+    <form id="addRoleForm" class="row" method="post" action="{{ route('roles.store') }}">
+        @csrf
         <div class="col-12">
             <label class="form-label" for="modalRoleName">Role Name</label>
             <input
                 type="text"
                 id="modalRoleName"
-                name="modalRoleName"
+                name="name"
                 class="form-control"
                 placeholder="Enter role name"
                 tabindex="-1"
@@ -30,7 +31,7 @@
             <label class="form-label" for="modalRoleDescription">Role Description</label>
             <textarea
                 id="modalRoleDescription"
-                name="modalRoleDescription"
+                name="description"
                 class="form-control"
                 rows="3"
                 placeholder="Enter role description"
@@ -58,38 +59,39 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                        $permissions = [
-                        'User Management' => 'userManagement',
-                        'Content Management' => 'contentManagement',
-                        'Disputes Management' => 'dispManagement',
-                        'Database Management' => 'dbManagement',
-                        'Financial Management' => 'finManagement',
-                        'Reporting' => 'reporting',
-                        'API Control' => 'api',
-                        'Repository Management' => 'repo',
-                        'Payroll' => 'payroll'
-                        ];
-                        @endphp
 
-                        @foreach($permissions as $label => $prefix)
+                    @foreach($associatedData['permissions'] as $group => $groupPermissions)
                         <tr>
                             <td>
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input row-checkbox" data-row="{{ $prefix }}" />
-                                    <span>{{ $label }}</span>
+                                    <input type="checkbox" class="form-check-input row-checkbox" />
+                                    <span>{{ $group }}</span>
                                 </div>
+                            </td>
 
-                            </td>
-                            @foreach(['Create', 'Read', 'Update','Delete'] as $action)
-                            <td>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input permission-checkbox {{ $prefix }}-checkbox" id="{{ $prefix . $action }}" />
-                                </div>
-                            </td>
+                            @foreach(['Create', 'Read', 'Update', 'Delete'] as $action)
+                                @php
+                                    $perm = $groupPermissions->firstWhere('name', $group . $action);
+                                @endphp
+                                <td>
+                                    <div class="form-check">
+                                        @if($perm)
+                                            <input
+                                                type="checkbox"
+                                                class="form-check-input permission-checkbox {{ $group }}-checkbox"
+                                                name="permissions[]"
+                                                value="{{ $perm->name }}"
+                                                id="{{ $perm->name }}"
+                                            />
+                                        @else
+                                            <span class="text-muted small">N/A</span>
+                                        @endif
+                                    </div>
+                                </td>
                             @endforeach
                         </tr>
-                        @endforeach
+                    @endforeach
+
                     </tbody>
                 </table>
             </div>
@@ -97,7 +99,7 @@
             <!-- Permission table -->
         </div>
         <div class="d-flex justify-content-end mt-2">
-            <button type="submit" class="btn btn-primary ms-1">Add New Permission</button>
+            <button type="submit" class="btn btn-primary ms-1">Add New Role</button>
         </div>
     </form>
     <!--/ Add role form -->
@@ -120,5 +122,49 @@
 <!-- Page js files -->
 <script src="{{ asset(mix('js/scripts/pages/modal-add-role.js')) }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-access-roles.js')) }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#addRoleForm').on('submit', function (e) {
+            e.preventDefault();
+
+            let form = $(this);
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: form.attr('action'),
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    Toastify({
+                        text: "Role created successfully!",
+                        duration: 3000,
+                        gravity: "top",
+                        backgroundColor: "#28a745",
+                    }).showToast();
+
+                    form.trigger('reset'); // Clear form
+                },
+                error: function (xhr) {
+                    let errorMsg = 'Something went wrong.';
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        errorMsg = Object.values(xhr.responseJSON.errors).flat().join('\n');
+                    }
+
+                    Toastify({
+                        text: errorMsg,
+                        duration: 4000,
+                        gravity: "top",
+                        backgroundColor: "#dc3545",
+                    }).showToast();
+                }
+            });
+        });
+    });
+</script>
 
 @endsection

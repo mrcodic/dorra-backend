@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Categories')
-@section('main-page', 'Categories')
+@section('title', 'Templates')
+@section('main-page', 'Templates')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -107,7 +107,7 @@
                             <input type="checkbox" id="select-all-checkbox">
                         </th>
                         <th>Name</th>
-                        <th>SubCategories</th>
+                        <th>SubTemplates</th>
                         <th>NO.of Products</th>
                         <th>Added Date</th>
                         <th>Actions</th>
@@ -116,7 +116,7 @@
                 </table>
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                     <div class="delete-container">
-                        <p id="selected-count-text">0 Categories are selected</p>
+                        <p id="selected-count-text">0 Templates are selected</p>
                         <form id="bulk-delete-form" method="POST" action="{{ route('categories.bulk-delete') }}">
                             @csrf
                             <button type="submit" id="delete-selected-btn"
@@ -169,56 +169,7 @@
         const locale = "{{ app()->getLocale() }}";
     </script>
 
-    <script>
-        $(document).ready(function () {
-            // Select all toggle
-            $('#select-all-checkbox').on('change', function () {
-                $('.category-checkbox').prop('checked', this.checked);
-                updateBulkDeleteVisibility();
-            });
-
-            // When individual checkbox changes
-            $(document).on('change', '.category-checkbox', function () {
-                // If any is unchecked, uncheck "Select All"
-                if (!this.checked) {
-                    $('#select-all-checkbox').prop('checked', false);
-                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
-                    $('#select-all-checkbox').prop('checked', true);
-                }
-                updateBulkDeleteVisibility();
-            });
-
-
-            // On table redraw (e.g. pagination, search)
-            $(document).on('draw.dt', function () {
-                $('#bulk-delete-container').hide();
-                $('#select-all-checkbox').prop('checked', false);
-            });
-
-            // Close bulk delete container
-            $(document).on('click', '#close-bulk-delete', function () {
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
-            });
-
-            // Update the bulk delete container visibility
-            function updateBulkDeleteVisibility() {
-                const selectedCheckboxes = $('.category-checkbox:checked');
-                const count = selectedCheckboxes.length;
-
-                if (count > 0) {
-                    $('#selected-count-text').text(`${count} Category${count > 1 ? 's' : ''} are selected`);
-                    $('#bulk-delete-container').show();
-                } else {
-                    $('#bulk-delete-container').hide();
-                }
-            }
-
-
-        });
-    </script>
 
     {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-category-list.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-template-list.js') }}?v={{ time() }}"></script>
 @endsection

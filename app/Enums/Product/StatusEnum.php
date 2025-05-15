@@ -10,4 +10,12 @@ enum StatusEnum : int
     case DRAFTED = 1;
     case PUBLISHED = 2;
 
+    public function label()
+    {
+        return match ($this) {
+            self::DRAFTED => __('Draft'),
+            self::PUBLISHED => __('Published'),
+        };
+    }
+
 }

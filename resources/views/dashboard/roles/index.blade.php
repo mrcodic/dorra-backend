@@ -37,9 +37,13 @@
 
   <!-- Role cards -->
   <div class="row">
+      @foreach($associatedData['roles'] as $role)
+
     <div class="col-xl-4 col-lg-6 col-md-6">
       <div class="card">
+
         <div class="card-body">
+
           <div class="d-flex justify-content-between">
             <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
               <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Jimmy Ressula" class="avatar avatar-sm pull-up">
@@ -60,18 +64,22 @@
             </ul>
             <span>7 Users</span>
           </div>
-          <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
-            <div class="role-heading">
-              <h4 class="">Manager</h4>
-              <a href="/roles/1/edit" class="role-edit-modal" >
-              Edit Role
-              </a>
-            </div>
-          
-          </div>
+                <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
+                    <div class="role-heading">
+                        <h4 class="">{{ $role->name }}</h4>
+                        <a href="{{ route("roles.edit",$role->id) }}" class="role-edit-modal" >
+                            Edit Role
+                        </a>
+                    </div>
+
+                </div>
+
         </div>
+
       </div>
     </div>
+      @endforeach
+
     {{-- Repeat for more role cards --}}
   </div>
 </div>
