@@ -11,16 +11,28 @@
         <div id="product-filters-wrapper" class="border shadow rounded-2 p-1" style="display: none;">
             <h6 class="mt-1">Category</h6>
             <div class="mb-1" id="category-filters">
-                <span class="badge rounded-pill bg-light text-dark me-1 category-pill">Electronics</span>
-                <span class="badge rounded-pill bg-primary text-white me-1 category-pill">Shoes</span>
+                @forelse($associatedData['categories'] as $category)
+                    <span class="badge rounded-pill bg-light text-dark me-1 category-pill">{{ $category->name }}</span>
+                    @empty
+                        <span class="badge rounded-pill bg-light text-dark me-1 category-pill">no categories found</span>
+
+
+                @endforelse
+
             </div>
 
             <hr>
 
             <h6>Tags</h6>
             <div class="mb-1" id="tag-filters">
-                <span class="badge rounded-pill bg-light text-dark me-1 tag-pill">New</span>
-                <span class="badge rounded-pill bg-primary text-white me-1 tag-pill">Sale</span>
+                @forelse($associatedData['tags'] as $tag)
+                    <span class="badge rounded-pill bg-light text-dark me-1 tag-pill">{{ $tag->name }}</span>
+
+                @empty
+                    <span class="badge rounded-pill bg-light text-dark me-1 tag-pill">no tags found</span>
+
+                @endforelse
+
             </div>
 
             <hr>

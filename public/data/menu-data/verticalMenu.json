@@ -6,18 +6,7 @@
             "slug": "",
             "url": "/"
         },
-        {
-            "name": "Users",
-            "icon": "users",
-            "slug": "",
-            "url": "/users"
-        },
-        {
-            "name": "Products",
-            "icon": "box",
-            "slug": "",
-            "url": "/products"
-        },
+
         {
             "name": "Categories",
             "icon": "grid",
@@ -28,18 +17,52 @@
                     "name": "Categories",
                     "icon": "circle",
                     "slug": "app-user-list"
-                },{
+                },
+                {
                     "url": "/sub-categories",
                     "name": "Subcategories",
                     "icon": "circle",
                     "slug": "app-user-list"
-                },{
+                },
+                {
                     "url": "/tags",
                     "name": "Tags",
                     "icon": "circle",
                     "slug": "app-user-list"
                 }
             ]
+        },       {
+            "name": "Products",
+            "icon": "box",
+            "slug": "",
+            "url": "/products"
+        },
+        {
+            "name": "Roles",
+            "icon": "shield",
+            "slug": "",
+            "submenu": [
+                {
+                    "url": "/permissions",
+                    "name": "Permissions",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/roles",
+                    "name": "Roles",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                }
+            ]
+        },
+        {
+            "name": "Templates",
+            "icon": "percent",
+            "slug": "",
+            "url": "/templates"
+
         }
+
     ]
 }

@@ -70,6 +70,7 @@ class ProductService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*']): LengthAwarePaginator
     {
+
         return QueryBuilder::for(Product::class)->select($columns)
             ->with($this->relations)
             ->withCount('reviews')

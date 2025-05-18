@@ -61,5 +61,11 @@ class UserController extends DashboardController
 
         return view('dashboard.users.billing', get_defined_vars());
     }
+
+    public function search(Request $request): JsonResponse
+    {
+        return Response::api(data: $this->userService->search($request));
+
+    }
 }
 

@@ -6,7 +6,12 @@
             "slug": "",
             "url": "/"
         },
-
+        {
+            "name": "Users",
+            "icon": "users",
+            "slug": "",
+            "url": "/users"
+        },
         {
             "name": "Categories",
             "icon": "grid",
@@ -38,23 +43,10 @@
             "url": "/products"
         },
         {
-            "name": "Roles",
-            "icon": "shield",
+            "name": "Orders",
+            "icon": "file-text",
             "slug": "",
-            "submenu": [
-                {
-                    "url": "/permissions",
-                    "name": "Permissions",
-                    "icon": "circle",
-                    "slug": "app-user-list"
-                },
-                {
-                    "url": "/roles",
-                    "name": "Roles",
-                    "icon": "circle",
-                    "slug": "app-user-list"
-                }
-            ]
+            "url": "/orders"
         },
         {
             "name": "Templates",

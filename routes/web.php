@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::put('{id}/change-password', [UserController::class, 'changePassword'])->name('change-password');
         Route::get('/billing/{user}', [UserController::class, 'billing'])->name('billing');
+        Route::get('/search', [UserController::class, 'search'])->name('search');
     });
     Route::resource('/users', UserController::class);
 

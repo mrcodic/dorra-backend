@@ -58,4 +58,25 @@ class UserService extends BaseService
         return (bool)$user;
     }
 
+    public function search($request)
+    {
+        $search = request('search');
+        $all = $request->boolean('all');
+
+        return $this->repository->query(['id', 'first_name', 'last_name'])
+            ->when(request()->filled('search'), function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('first_name', 'like', '%' . $search . '%')
+                        ->orWhere('last_name', 'like', '%' . $search . '%');
+                });
+
+            })->limit($all ? 100 : 5)
+            ->get()
+            ->map(fn ($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'image_url' => $user->image->getUrl(),
+            ]);
+    }
+
 }
