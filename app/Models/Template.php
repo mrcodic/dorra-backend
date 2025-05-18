@@ -5,10 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\Translatable\HasTranslations;
 
 class Template extends Model
 {
-    use HasUuids;
+    use HasUuids,HasTranslations;
+    public $translatable = ['name'];
+
     protected $fillable = [
         'name',
         'status',

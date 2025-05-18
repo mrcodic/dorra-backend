@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
            CountryStateSeeder::class,
           NotificationTypeSeeder::class,
            AdminSeeder::class,
+           TemplateSeeder::class
        ]);
     }
 }
