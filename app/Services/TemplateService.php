@@ -27,7 +27,7 @@ class TemplateService extends BaseService
                 return $template->getTranslation('name', app()->getLocale());
             })
             ->addColumn('status', function ($template) {
-                return $template->status->label() ?? '';
+                return $template->status?->label() ?? '';
             })
             ->make(true);
     }
