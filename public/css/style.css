@@ -206,3 +206,8 @@
 	cursor: pointer;
 
  }
+
+
+ .form-check-input:checked{
+	accent-color: #24B094 !important;
+ }

@@ -2785,10 +2785,12 @@ textarea.form-control-lg {
   box-shadow: 0 2px 4px 0 rgba(115, 103, 240, 0.4);
 }
 
-.form-check-input:checked {
+.form-check-input[type="radio"]:checked {
   background-color: #24B094;
   border-color: #24B094;
+  box-shadow: inset 0 0 0 3px #fff; /* creates the white inner dot */
 }
+
 
 .form-check-input:checked[type=checkbox] {
   background-image: url("data:image/svg+xml;charset=utf8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9.5 7.5'%3e%3cpolyline points='0.75 4.35 4.18 6.75 8.75 0.75' style='fill:none;stroke:%23fff;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5px'/%3e%3c/svg%3e");
