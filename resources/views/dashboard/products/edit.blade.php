@@ -743,6 +743,13 @@
             if (files.length > 0) {
                 let file = files[0];
 
+                // 🔽 This is the fix: assign the dropped file to the input element
+                let dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                input[0].files = dataTransfer.files;
+
+                console.log('Input files:', input[0].files); // Make sure this logs a FileList with 1 file
+
                 // Show loader
                 progress.removeClass('d-none');
                 progressBar.css('width', '0%');
@@ -772,6 +779,7 @@
                 }, 100);
             }
         }
+
 
 
         // Remove image
@@ -1224,9 +1232,6 @@
             });
         }
     });
-
-
- 
 </script>
 
 <script>

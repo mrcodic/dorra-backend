@@ -15,7 +15,9 @@ use App\Http\Controllers\Dashboard\{AdminController,
     UserController,
     CategoryController,
     ProfileController,
-    DiscountCodeController};
+    DiscountCodeController,
+    SettingController
+};
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Rules\Role;
 
@@ -111,6 +113,14 @@ Route::middleware('auth')->group(function () {
         Route::delete('reviews/{review}', 'deleteReview')->name('reviews.destroy');
         Route::put('reviews/{review}', 'replyReview')->name('reviews.reply');
     });
+
+
+    Route::controller(SettingController::class)->group(function () {
+        Route::get('settings/details', 'details')->name('settings.details');
+        Route::get('settings/payments', 'payments')->name('settings.payments');
+          Route::get('settings/notifications', 'notifications')->name('settings.notifications');
+    });
+
 
     Route::prefix('/api')->group(function () {
         Route::controller(ReviewController::class)->group(function () {

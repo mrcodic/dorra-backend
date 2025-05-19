@@ -202,13 +202,13 @@
 <script src="https://unpkg.com/feather-icons"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         feather.replace();
 
         const discountCheckbox = document.getElementById('add-discount-checkbox');
         const discountRow = document.getElementById('discount-code-row');
 
-        discountCheckbox.addEventListener('change', function () {
+        discountCheckbox.addEventListener('change', function() {
             discountRow.style.display = this.checked ? 'block' : 'none';
         });
     });
