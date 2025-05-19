@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'products', 'as' => 'products.', 'controller' => ProductController::class,], (function () {
         Route::get('/data', [ProductController::class, 'getData'])->name('data');
+        Route::get('/search', [ProductController::class, 'search'])->name('search');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     }));
     Route::resource('/products', ProductController::class);

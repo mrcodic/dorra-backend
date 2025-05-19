@@ -64,13 +64,19 @@ class UserService extends BaseService
         $all = $request->boolean('all');
 
         return $this->repository->query(['id', 'first_name', 'last_name'])
-            ->when(request()->filled('search'), function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('first_name', 'like', '%' . $search . '%')
-                        ->orWhere('last_name', 'like', '%' . $search . '%');
-                });
+            ->when(filled($search), function ($query) use ($search) {
+                $words = preg_split('/\s+/', $search);
 
-            })->limit($all ? 100 : 5)
+                $query->where(function ($query) use ($words) {
+                    foreach ($words as $word) {
+                        $query->where(function ($q) use ($word) {
+                            $q->where('first_name', 'like', '%' . $word . '%')
+                                ->orWhere('last_name', 'like', '%' . $word . '%');
+                        });
+                    }
+                });
+            })
+            ->limit($all ? 100 : 5)
             ->get()
             ->map(fn ($user) => [
                 'id' => $user->id,
@@ -78,5 +84,6 @@ class UserService extends BaseService
                 'image_url' => $user->image->getUrl(),
             ]);
     }
+
 
 }

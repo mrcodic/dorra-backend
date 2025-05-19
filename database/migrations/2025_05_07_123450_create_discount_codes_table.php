@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('discount_codes', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();
+            $table->decimal('value');
+            $table->tinyInteger('type');
+            $table->integer('max_usage')->default(1);
+            $table->integer('used')->default(0);
+            $table->date('expired_at');
+            $table->tinyInteger('scope');
             $table->timestamps();
         });
     }

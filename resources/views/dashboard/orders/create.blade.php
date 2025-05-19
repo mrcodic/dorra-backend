@@ -124,30 +124,7 @@
             productFilters.style.display = this.value.trim() ? 'block' : 'none';
         });
 
-        // Make category pills clickable (single-select)
-        document.querySelectorAll(".category-pill").forEach(pill => {
-            pill.style.cursor = 'pointer';
-            pill.addEventListener("click", function() {
-                document.querySelectorAll(".category-pill").forEach(p => {
-                    p.classList.remove("pill-selected", "bg-primary", "text-white");
-                    p.classList.add("bg-light", "text-dark");
-                });
 
-                this.classList.remove("bg-light", "text-dark");
-                this.classList.add("pill-selected");
-            });
-        });
-
-
-        // Make tag pills clickable (multi-select)
-        document.querySelectorAll(".tag-pill").forEach(pill => {
-            pill.style.cursor = 'pointer'; // 👈 ensure pointer
-            pill.addEventListener("click", function() {
-                this.classList.toggle("pill-selected");
-                this.classList.toggle("bg-light");
-                this.classList.toggle("text-dark");
-            });
-        });
     });
 </script>
 

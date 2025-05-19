@@ -4,62 +4,48 @@ $.ajaxSetup({
     },
 });
 
-var dt_user_table = $(".order-list-table").DataTable({
+var dt_user_table = $(".code-list-table").DataTable({
     processing: true,
     serverSide: true,
     searching: false,
     ajax: {
-        url: ordersDataUrl,
+        url: discountCodeDataUrl,
         type: "GET",
+        data: function (d) {
+            d.search_value = $('#search-code-form').val(); // get from input
+            d.created_at = $('.filter-date').val();
+            return d;
+        }
     },
     columns: [
         { data: null, defaultContent: "", orderable: false },
-        { data: "name" },
-        { data: "category" },
-        {
-            data: "tags",
-            render: function (data, type, row) {
-                if (!Array.isArray(JSON.parse(data))) return '';
-                return `
-            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                ${JSON.parse(data)
-                    .map(
-                        tag => `
-                        <span style="
-                            background-color: #FCF8FC;
-                            color: #000;
-                            padding: 6px 12px;
-                            border-radius: 12px;
-                            font-size: 14px;
-                            display: inline-block;
-                        ">
-                            ${tag}
-                        </span>`
-                    )
-                    .join("")}
-            </div>
-        `;
-            },
-        },
-        { data: "no_of_purchas" },
-        { data: "added_date" },
-        { data: "rating" },
+        { data: "code" },
+        { data: "type" },
+        { data: "max_usage" },
+        { data: "used" },
+        { data: "expired_at" },
         {
             data: "id",
             orderable: false,
             render: function (data, type, row, meta) {
                 return `
          <div class="d-flex gap-1">
-             <a href="/discount-codes/${data}" class="">
+             <a href="" class="">
                 <i data-feather="eye"></i>
               </a>
-              <a href="/discount-codes/${data}/edit" class="">
+              <a href="" class="">
                 <i data-feather="edit-3"></i>
               </a>
 
-              <a href="#" class=" text-danger delete-user" data-id="${data}">
-                <i data-feather="trash-2"></i>
-              </a>
+             <a href="#" class="text-danger  open-delete-code-modal"
+   data-id="${data}"
+   data-name="${row.name}"
+   data-action="/discount-codes/${data}"
+   data-bs-toggle="modal"
+   data-bs-target="#deleteCodeModal">
+   <i data-feather="trash-2"></i>
+</a>
+
 
           </div>
         `;
@@ -94,81 +80,63 @@ var dt_user_table = $(".order-list-table").DataTable({
         },
     },
 });
+// Custom search with debounce
+let searchTimeout;
+$('#search-code-form').on('keyup', function () {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        dt_user_table.draw();
+    }, 300);
+});
 
-$(document).ready(function () {
-    $(document).ready(function () {
-        // Check if the product was added successfully
-        if (sessionStorage.getItem("product_added") == "true") {
-            // Show the success Toastify message
+// Custom search with debounce
+
+$('.filter-date').on('change', function () {
+    dt_user_table.draw();
+});
+
+$(document).on("click", ".open-delete-code-modal", function () {
+    const codeId = $(this).data("id");
+    $("#deleteCodeForm").data("id", codeId);
+});
+
+$(document).on("submit", "#deleteCodeForm", function (e) {
+    e.preventDefault();
+    const codeId = $(this).data("id");
+
+    $.ajax({
+        url: `/discount-codes/${codeId}`,
+        method: "DELETE",
+        success: function (res) {
+
+            $("#deleteCodeModal").modal("hide");
+
             Toastify({
-                text: "Product added successfully!",
-                duration: 4000,
+                text: "Code deleted successfully!",
+                duration: 2000,
                 gravity: "top",
                 position: "right",
-                backgroundColor: "#28a745", // Green for success
+                backgroundColor: "#28C76F",
                 close: true,
             }).showToast();
+            $(".code-list-table").DataTable().ajax.reload(null, false);
 
-            // Remove the flag after showing the Toastify message
-            sessionStorage.removeItem("product_added");
-        }
-        if (sessionStorage.getItem("product_updated") == "true") {
-            // Show the success Toastify message
+
+        },
+        error: function () {
+
+            $("#deleteCodeModal").modal("hide");
             Toastify({
-                text: "Product updated successfully!",
-                duration: 4000,
+                text: "Something Went Wrong!",
+                duration: 2000,
                 gravity: "top",
                 position: "right",
-                backgroundColor: "#28a745", // Green for success
+                backgroundColor: "#EA5455", // red
                 close: true,
             }).showToast();
+            $(".code-list-table").DataTable().ajax.reload(null, false);
 
-            // Remove the flag after showing the Toastify message
-            sessionStorage.removeItem("product_updated");
-        }
-    });
-
-    $(document).on("click", ".delete-product", function (e) {
-        e.preventDefault();
-
-        var $table = $(".product-list-table").DataTable();
-        var $row = $(this).closest("tr");
-        var rowData = $table.row($row).data();
-
-        var productId = $(this).data("id");
-        var productName = rowData.name;
-
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `You are about to delete user "${productName}". This action cannot be undone.`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#6c757d",
-            confirmButtonText: "Yes, delete it!",
-            reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/products/${productId}`,
-                    method: "DELETE",
-                    success: function (res) {
-                        Swal.fire(
-                            "Deleted!",
-                            "Product has been deleted.",
-                            "success"
-                        );
-                        $table.ajax.reload();
-                    },
-                    error: function () {
-                        Swal.fire(
-                            "Failed",
-                            "Could not delete product.",
-                            "error"
-                        );
-                    },
-                });
-            }
-        });
+        },
     });
 });
+

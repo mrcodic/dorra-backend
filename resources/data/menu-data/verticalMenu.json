@@ -36,25 +36,25 @@
                     "slug": "app-user-list"
                 }
             ]
-        },       {
+        },
+        {
             "name": "Products",
             "icon": "box",
             "slug": "",
             "url": "/products"
         },
         {
+            "name": "Discount",
+            "icon": "percent",
+            "url": "/discount-codes"
+        },
+        {
             "name": "Orders",
             "icon": "file-text",
             "slug": "",
             "url": "/orders"
-        },
-        {
-            "name": "Templates",
-            "icon": "percent",
-            "slug": "",
-            "url": "/templates"
-
         }
+
 
     ]
 }

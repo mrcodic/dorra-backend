@@ -49,12 +49,19 @@
                             type="text"
                             class="form-control ps-5 border rounded-3"
                             name="search_value"
-                            id="search-category-form"
+                            id="search-code-form"
                             placeholder="Search here"
                             style="height: 38px;">
                     </form>
 
-                    <input type="date" class="form-control border rounded-3" style="width: 120px;" />
+                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    <div class="col-6 col-md-2">
+                        <select name="created_at" class="form-select filter-date">
+                            <option value="">Date</option>
+                            <option value="asc">asc</option>
+                            <option value="desc">desc</option>
+                        </select>
+                    </div>
                     <button type="date" class="btn btn-secondary fs-16" style="width: 96px; ">Export</button>
                     <button type="button" class="btn btn-outline-secondary fs-16 px-1" style="width: 126px;" data-bs-toggle="modal"
                         data-bs-target="#autoGenerateCodeTemplateModal">Auto
@@ -65,25 +72,24 @@
                         Create New Code
                     </button>
                 </div>
-                <table class="order-list-table table">
+                <table class="code-list-table table">
                     <thead class="table-light">
                         <tr>
                             <th>
                                 <input type="checkbox" id="select-all-checkbox">
                             </th>
-                            <th>Order Number</th>
-                            <th>Customer</th>
-                            <th>Items</th>
-                            <th>Price</th>
-                            <th>Order Status</th>
-                            <th>Added Date</th>
+                            <th>Code Name</th>
+                            <th>Type</th>
+                            <th>Restrictions</th>
+                            <th>Number Of Usage</th>
+                            <th>Expiry Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                 </table>
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                     <div class="delete-container">
-                        <p id="selected-count-text">0 Products are selected</p>
+                        <p id="selected-count-text">0 Discount Codes are selected</p>
                         <button id="delete-selected-btn"
                             class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
                             <i data-feather="trash-2"></i> Delete Selected
@@ -94,7 +100,17 @@
 
             @include('modals.discount-codes.auto-generate')
             @include('modals.discount-codes.create-code')
-
+            @include('modals.delete',[
+                    'id' => 'deleteCodeModal',
+                    'formId' => 'deleteCodeForm',
+                    'title' => 'Delete Code',
+                    ])
+            @include('modals.delete',[
+            'id' => 'deleteCodesModal',
+            'formId' => 'bulk-delete-form',
+            'title' => 'Delete Codes',
+            'confirmText' => 'Are you sure you want to delete this items?',
+            ])
         </div>
         <!-- list and filter end -->
     </section>
@@ -126,8 +142,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
-    const ordersDataUrl = "{{ route('products.data') }}";
-    const ordersCreateUrl = "{{ route('orders.create') }}";
+    const discountCodeDataUrl = "{{ route('discount-codes.data') }}";
+    const discountCodeCreateUrl = "{{ route('discount-codes.create') }}";
 </script>
 
 {{-- Page js files --}}

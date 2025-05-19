@@ -67,6 +67,7 @@ class DashboardController extends Controller
     public function create(): View|Application|Factory
     {
         $associatedData = $this->getAssociatedData('create');
+        dd($associatedData);
         return view(self::BASE_FOLDER . "{$this->createView}",get_defined_vars());
     }
 
