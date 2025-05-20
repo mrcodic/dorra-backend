@@ -6,6 +6,7 @@ use App\Http\Controllers\Base\DashboardController;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\DiscountCodeService;
+use Illuminate\Support\Facades\Response;
 use App\Http\Requests\DiscountCode\{StoreDiscountCodeRequest, UpdateDiscountCodeRequest};
 
 
@@ -35,6 +36,12 @@ class DiscountCodeController extends DashboardController
     public function getData()
     {
         return $this->discountCodeService->getData();
+    }
+
+    public function generateAndExport(StoreDiscountCodeRequest $request)
+    {
+
+        return $this->discountCodeService->generateAndExport($request->validated());
     }
 
 

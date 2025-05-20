@@ -28,6 +28,7 @@ class UpdateDiscountCodeRequest extends BaseRequest
             'type' => ['required', 'in:' . TypeEnum::getValuesAsString()],
             'value' => ['required', 'numeric', 'min:0'],
             'max_usage' => ['nullable', 'integer', 'min:1'],
+            'number_of_discount_codes' => ['nullable', 'integer', 'min:2'],
             'expired_at' => ['nullable', 'date', 'after:today'],
             'scope' => ['required', 'in:' . ScopeEnum::getValuesAsString()],
             'product_ids' => ['required_if:scope,1', 'array'],

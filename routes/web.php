@@ -97,6 +97,8 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'discount-codes', 'as' => 'discount-codes.', 'controller' => DiscountCodeController::class,], function () {
         Route::get('/data', [DiscountCodeController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::post('/generate-export', 'generateAndExport')->name('generate.export');
+        Route::post('/export', 'export')->name('export');
     });
     Route::resource('/discount-codes', DiscountCodeController::class)->except('show');
 
