@@ -81,7 +81,7 @@ class UserService extends BaseService
             ->map(fn ($user) => [
                 'id' => $user->id,
                 'name' => $user->name,
-                'image_url' => $user->image->getUrl(),
+                'image_url' => $user->image?->getUrl() ?? asset("images/default-user.png"),
             ]);
     }
 

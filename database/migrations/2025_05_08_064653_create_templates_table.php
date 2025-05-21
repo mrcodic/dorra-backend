@@ -17,9 +17,9 @@ return new class extends Migration
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->tinyInteger('status')->default(1);
-            $table->json('json_data');
-            $table->string('preview_png')->nullable();
-            $table->string('source_svg')->nullable();
+            $table->json('design_data');
+            $table->string('preview_image')->nullable();
+            $table->string('source_design_svg')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
