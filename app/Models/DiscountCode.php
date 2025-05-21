@@ -6,6 +6,7 @@ use App\Enums\DiscountCode\ScopeEnum;
 use App\Enums\DiscountCode\TypeEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Str;
 
 class DiscountCode extends Model
 {
@@ -22,7 +23,7 @@ class DiscountCode extends Model
     protected static function booted()
     {
         static::creating(function ($discountCode) {
-            $discountCode->code = $discountCode->code.rand(100000, 999999);
+            $discountCode->code = $discountCode->code.Str::random(16);
         });
         parent::booted();
     }

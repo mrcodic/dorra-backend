@@ -34,11 +34,11 @@ const dt_user_table = $(".code-list-table").DataTable({
             data: "id",
             orderable: false,
             render: function (data, type, row) {
-                console.log(row)
                 return `
                     <div class="d-flex gap-1">
                         <a href="#" class="" data-bs-toggle="modal"
                         data-bs-target="#showCodeModal"
+                        data-action="/discount-codes/${data}"
                         data-used="${row.used}"
                         data-type="${row.type}"
                         data-prefix="${row.prefix}"
@@ -51,7 +51,18 @@ const dt_user_table = $(".code-list-table").DataTable({
                           ><i data-feather="eye"></i>
                         </a>
                         <a href="#" class="" data-bs-toggle="modal"
-                        data-bs-target="#editCodeModal"><i data-feather="edit-3"></i></a>
+                        data-bs-target="#editCodeModal"
+                         data-action="/discount-codes/${data}"
+                        data-used="${row.used}"
+                        data-type="${row.type}"
+                        data-prefix="${row.prefix}"
+                        data-value="${row.value}"
+                        data-expired_at="${row.expired_at}"
+                        data-usage="${row.max_usage}"
+                        data-scope="${row.scope}"
+                         data-categories='${JSON.stringify(row.categories)}'
+                         data-products='${JSON.stringify(row.products)}'
+                        ><i data-feather="edit-3"></i></a>
                         <a href="#" class="text-danger open-delete-code-modal"
                            data-id="${data}"
                            data-name="${row.name}"
@@ -224,6 +235,7 @@ $('#showCodeModal').on('show.bs.modal', function (event) {
     const categories = button.data('categories');
     const products = button.data('products');
     const used = button.data('used');
+    const action = button.data('action');
     // Set read-only value
     $(this).find('#usedCount').val(used || 0);
     // Store values in Edit button's data attributes
@@ -236,8 +248,55 @@ $('#showCodeModal').on('show.bs.modal', function (event) {
     editBtn.data('expired_at', expiredDate);
     editBtn.data('categories', categories);
     editBtn.data('products', products);
-    console.log(products)
     editBtn.data('used', used);
+    editBtn.data('action', action);
+});
+
+$('#editCodeModal').on('show.bs.modal', function (event) {
+    const button = $(event.relatedTarget);
+
+    // Set form action URL
+    const actionUrl = button.data('action');
+    $('#editDiscountForm').attr('action', actionUrl);
+
+    const scope = button.data('scope') || '';
+
+    $('#discountType').val(button.data('type'));
+    $('#prefix').val(button.data('prefix') || '');
+    $('#discountValue').val(button.data('value') || '');
+    $('#restrictions').val(button.data('usage') || '');
+    $('#expiryDate').val(button.data('expired_at') || '');
+    $('#scopeType').val(scope);
+
+    const $productContainer = $('#selectedProducts').empty();
+    const $categoryContainer = $('#selectedCategories').empty();
+
+    // Show/hide based on scope
+    if (scope === 'Product') {
+        $('#selectedProducts').closest('.form-group').show();
+        $('#selectedCategories').closest('.form-group').hide();
+    } else if (scope === 'Category') {
+        $('#selectedProducts').closest('.form-group').hide();
+        $('#selectedCategories').closest('.form-group').show();
+    } else {
+        // Show both or hide both if scope is undefined or something else
+        $('#selectedProducts').closest('.form-group').hide();
+        $('#selectedCategories').closest('.form-group').hide();
+    }
+
+    try {
+        const products = JSON.parse(button.attr('data-products') || '[]');
+        products.forEach(product => {
+            $productContainer.append(`<span class="badge bg-primary">${product.name[locale]}</span>`);
+        });
+
+        const categories = JSON.parse(button.attr('data-categories') || '[]');
+        categories.forEach(category => {
+            $categoryContainer.append(`<span class="badge bg-primary">${category.name[locale]}</span>`);
+        });
+    } catch (err) {
+        console.error("Failed to parse products/categories JSON", err);
+    }
 });
 
 

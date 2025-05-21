@@ -64,9 +64,9 @@
                         </thead>
                     </table>
 
-                    <div id="bulk-delete-container" class="my-2" style="display: none;">
-                        <div>
-                            <p id="selected-count-text">0 Discount Codes are selected</p>
+                    <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                        <div class="delete-container">
+                        <p id="selected-count-text">0 Discount Codes are selected</p>
                             <button type="submit" id="delete-selected-btn" data-bs-toggle="modal" data-bs-target="#deleteCodesModal" class="btn btn-outline-danger d-flex align-items-center gap-1">
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
@@ -108,6 +108,7 @@
 @section('page-script')
     <script>
         const discountCodeDataUrl = "{{ route('discount-codes.data') }}";
+        const locale = "{{ app()->getLocale() }}";
     </script>
     <script src="{{ asset('js/scripts/pages/app-discount-codes-list.js') }}?v={{ time() }}"></script>
     <script src="https://unpkg.com/feather-icons"></script>

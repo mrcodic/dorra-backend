@@ -19,6 +19,7 @@
                 <button type="button"
                         class="btn btn-primary"
                         id="editDiscountBtn"
+                        data-action=""
                         data-type=""
                         data-prefix=""
                         data-value=""
@@ -26,6 +27,7 @@
                         data-scope=""
                         data-expired_at=""
                         data-categories=""
+                        data-products=""
                         data-used="">
                     Edit
                 </button>
@@ -51,7 +53,7 @@
         const categories = button.data('categories');
         const products = button.data('products');
         const used = button.data('used');
-        console.log(products)
+        const action = button.data('action');
 
         $('#showCodeModal').modal('hide');
 
@@ -66,7 +68,7 @@
             modal.find('#expiryDate').val(expireDate);
             modal.find('#restrictions').val(usage);
             modal.find('#usedCount').val(used);
-            modal.find('#numberOfCodes').val(1);
+            modal.find('form#editDiscountForm').attr('action',action);
 
             const selectedProductsContainer = modal.find('#selectedProducts');
             const selectedCategoriesContainer = modal.find('#selectedCategories');
@@ -85,19 +87,18 @@
             }
 
             if (scope === 'Category') {
-                console.log("D")
-                selectedCategoriesContainer.html(categoryList.map(cat => `<span class="badge bg-primary">${cat.name}</span>`));
+                selectedCategoriesContainer.html(categoryList.map(cat => `<span class="badge bg-primary">${cat.name.{{app()->getLocale()}}}</span>`).join(''));
                 selectedCategoriesContainer.closest('.form-group').show();
                 selectedProductsContainer.closest('.form-group').hide();
             } else if (scope === 'Product') {
-                console.log(productList)
-                selectedProductsContainer.html(productList.map(prod => `<span class="badge bg-info">${prod.name}</span>`));
+                selectedProductsContainer.html(productList.map(prod => `<span class="badge bg-primary">${prod.name.{{app()->getLocale()}}}</span>`).join(''));
                 selectedProductsContainer.closest('.form-group').show();
                 selectedCategoriesContainer.closest('.form-group').hide();
             } else {
                 selectedCategoriesContainer.closest('.form-group').hide();
                 selectedProductsContainer.closest('.form-group').hide();
             }
+
 
             $(this).off('hidden.bs.modal');
         });

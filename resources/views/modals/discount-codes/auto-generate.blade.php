@@ -9,8 +9,8 @@
                 </div>
                 <div class="modal-body flex-grow-1">
                     <div class="form-group mb-2">
-                        <label for="discountType" class="label-text mb-1">Type</label>
-                        <select id="discountType" class="form-select select2"  name="type" >
+                        <label for="createDiscountType" class="label-text mb-1">Type</label>
+                        <select id="createDiscountType" class="form-select select2"  name="type" >
                             <option value="">Select discount code type</option>
                             @foreach(\App\Enums\DiscountCode\TypeEnum::cases() as $case)
                                 <option value="{{ $case->value }}">{{ $case->label() }}</option>
@@ -19,13 +19,13 @@
                     </div>
 
                     <div class="form-group mb-2">
-                        <label for="prefix" class="label-text mb-1">Prefix (Write 4 char)</label>
-                        <input type="text" name="code" id="prefix" class="form-control" placeholder="Add prefix here">
+                        <label for="createPrefix" class="label-text mb-1">Prefix (Write 4 char)</label>
+                        <input type="text" name="code" id="createPrefix" class="form-control" placeholder="Add prefix here">
                     </div>
 
                     <div class="form-group mb-2">
-                        <label for="discountValue" class="label-text mb-1">Discount Value</label>
-                        <input type="text" name="value" id="discountValue" class="form-control" placeholder="Enter discount value here">
+                        <label for="createDiscountValue" class="label-text mb-1">Discount Value</label>
+                        <input type="text" name="value" id="createDiscountValue" class="form-control" placeholder="Enter discount value here">
                     </div>
 
                     <div class="form-group mb-2">
@@ -36,12 +36,12 @@
 
                     <div class="d-flex gap-1">
                         <div class="form-group mb-2 col-6">
-                            <label for="restrictions" class="label-text mb-1">Restrictions</label>
-                            <input type="number" name="max_usage" id="restrictions" class="form-control" placeholder="Enter number of usage times">
+                            <label for="createRestrictions" class="label-text mb-1">Restrictions</label>
+                            <input type="number" name="max_usage" id="createRestrictions" class="form-control" placeholder="Enter number of usage times">
                         </div>
                         <div class="form-group mb-2 col-6">
-                            <label for="expiryDate" class="label-text mb-1">Expiry Date</label>
-                            <input type="date" name="expired_at" id="expiryDate" class="form-control">
+                            <label for="createExpiryDate" class="label-text mb-1">Expiry Date</label>
+                            <input type="date" name="expired_at" id="createExpiryDate" class="form-control">
                         </div>
                     </div>
 
@@ -49,11 +49,11 @@
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Type</label>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="scope" id="applyToProducts" value="1" checked>
+                            <input class="form-check-input" type="radio" name="scope" id="applyToProducts" value="2" checked>
                             <label class="form-check-label text-black fs-16" for="applyToProducts">Products</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="scope" id="applyToCategories" value="2" >
+                            <input class="form-check-input" type="radio" name="scope" id="applyToCategories" value="1" >
                             <label class="form-check-label text-black fs-16" for="applyToCategories">Categories</label>
                         </div>
                     </div>
@@ -83,7 +83,11 @@
                 <div class="modal-footer border-top-0 d-flex justify-content-between">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-outline-secondary">Generate</button>
+                        <button type="submit" class="btn btn-outline-secondary" id="generateBtn">
+                            Generate
+                            <span id="generateLoader" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+
                         <button type="button" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                             <span >Generate & Export</span>
                             <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
@@ -105,7 +109,7 @@
 
         // Toggle between products and categories
         $('input[name="scope"]').on('change', function () {
-            if (this.value == 1) {
+            if (this.value == 2) {
                 $('.productsField').removeClass('d-none');
                 $('.categoriesField').addClass('d-none');
                 $('.categoriesSelect').val(null).trigger('change');
@@ -129,12 +133,22 @@
         });
 
         // AJAX form submission
+        // AJAX form submission
         $('#addDiscountForm').on('submit', function (e) {
             e.preventDefault();
 
             let form = $(this);
             let formData = new FormData(this);
             let actionUrl = form.attr('action');
+
+            // Disable buttons and show loader
+            const generateBtn = $('#generateBtn');
+            const generateLoader = $('#generateLoader');
+            const exportBtn = $('#SaveChangesButton');
+
+            generateBtn.attr('disabled', true);
+            exportBtn.attr('disabled', true);
+            generateLoader.removeClass('d-none');
 
             $.ajax({
                 url: actionUrl,
@@ -151,12 +165,11 @@
                         backgroundColor: "#28C76F",
                         close: true,
                     }).showToast();
-                    // Optional: Close modal and reload table or show success
+
                     $('#createCodeTemplateModal').modal('hide');
                     form[0].reset();
                     $('.select2').val(null).trigger('change');
                     $(".code-list-table").DataTable().ajax.reload();
-
                 },
                 error: function (xhr) {
                     let errors = xhr.responseJSON?.errors;
@@ -169,7 +182,7 @@
                                     duration: 4000,
                                     gravity: "top",
                                     position: "right",
-                                    backgroundColor: "#EA5455", // Error color
+                                    backgroundColor: "#EA5455",
                                     close: true,
                                 }).showToast();
                             });
@@ -184,11 +197,17 @@
                             close: true,
                         }).showToast();
                     }
+                },
+                complete: function () {
+                    // Re-enable buttons and hide loader
+                    generateBtn.attr('disabled', false);
+                    exportBtn.attr('disabled', false);
+                    generateLoader.addClass('d-none');
                 }
-
             });
         });
 
+        // Handle "Generate & Export" button click
         $('#SaveChangesButton').on('click', function () {
             const button = $(this);
             const loader = $('#saveLoader');
@@ -196,8 +215,10 @@
             const formData = new FormData(form[0]);
             const exportUrl = "{{ route('discount-codes.generate.export') }}";
 
+            // Disable both buttons
             button.attr('disabled', true);
             loader.removeClass('d-none');
+            $('button[type="submit"]').attr('disabled', true); // Disable Generate
 
             $.ajax({
                 url: exportUrl,
@@ -209,9 +230,6 @@
                     responseType: 'blob'
                 },
                 success: function (response, status, xhr) {
-                    button.attr('disabled', false);
-                    loader.addClass('d-none');
-
                     const disposition = xhr.getResponseHeader('Content-Disposition');
                     let filename = "discount_codes.xlsx";
 
@@ -231,6 +249,7 @@
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
+
                     $('#createCodeTemplateModal').modal('hide');
 
                     Toastify({
@@ -241,13 +260,13 @@
                         backgroundColor: "#28C76F",
                         close: true,
                     }).showToast();
+
+                    form[0].reset();
+                    $(".code-list-table").DataTable().ajax.reload();
                 },
-
                 error: function (xhr) {
-                    button.attr('disabled', false);
-                    loader.addClass('d-none');
-
                     let errors = xhr.responseJSON?.errors;
+
                     if (errors) {
                         Object.values(errors).forEach(errorArray => {
                             errorArray.forEach(message => {
@@ -256,7 +275,7 @@
                                     duration: 4000,
                                     gravity: "top",
                                     position: "right",
-                                    backgroundColor: "#EA5455", // Error color
+                                    backgroundColor: "#EA5455",
                                     close: true,
                                 }).showToast();
                             });
@@ -272,13 +291,20 @@
                         }).showToast();
                     }
                 },
-
                 complete: function () {
+                    // Re-enable both buttons after request
                     button.attr('disabled', false);
                     loader.addClass('d-none');
+                    $('button[type="submit"]').attr('disabled', false);
                 }
             });
         });
+
+// Handle "Generate" button click
+        $('button[type="submit"]').on('click', function () {
+            $('#SaveChangesButton').attr('disabled', true);
+        });
+
 
     });
 </script>

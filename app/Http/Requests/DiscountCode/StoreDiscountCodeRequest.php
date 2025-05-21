@@ -20,12 +20,12 @@ class StoreDiscountCodeRequest extends BaseRequest
             'type' => ['required', 'in:'.TypeEnum::getValuesAsString()],
             'value' => ['required', 'numeric', 'min:0'],
             'max_usage' => ['nullable', 'integer', 'min:1'],
-            'expired_at' => ['nullable', 'date', 'after:today'],
+            'expired_at' => ['required', 'date', 'after:today'],
             'number_of_discount_codes' => ['nullable', 'integer', 'min:2'],
             'scope' => ['required', 'in:'.ScopeEnum::getValuesAsString()],
-            'product_ids' => ['required_if:scope,1', 'array'],
+            'product_ids' => ['required_if:scope,2', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
-            'category_ids' => ['required_if:scope,2', 'array'],
+            'category_ids' => ['required_if:scope,1', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],
         ];
     }

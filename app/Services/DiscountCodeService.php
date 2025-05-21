@@ -58,7 +58,7 @@ class DiscountCodeService extends BaseService
         $count = $validatedData['number_of_discount_codes'] ?? 1;
         return collect()->times($count, function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $discountCode = $this->repository->create($validatedData);
-            if ($validatedData['scope'] == 1) {
+            if ($validatedData['scope'] == 2) {
                 $discountCode->products()->attach($validatedData['product_ids']);
             } else {
                 $discountCode->categories()->attach($validatedData['category_ids']);

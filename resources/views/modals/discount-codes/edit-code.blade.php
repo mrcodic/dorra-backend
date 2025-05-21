@@ -1,12 +1,14 @@
 <div class="modal modal-slide-in new-user-modal fade" id="editCodeModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="addDiscountForm" method="post" enctype="multipart/form-data" action="{{ route('discount-codes.store') }}">
+            <form id="editDiscountForm" method="post" enctype="multipart/form-data" action="">
                 @csrf
+                @method("PUT")
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
                     <h5 class="modal-title" id="exampleModalLabel">Edit Discount Code</h5>
                 </div>
+                <input type="hidden" id="codeId">
                 <div class="modal-body flex-grow-1">
                     <div class="form-group mb-2">
                         <label for="discountType" class="label-text mb-1">Type</label>
@@ -15,7 +17,7 @@
                     </div>
 
                     <div class="form-group mb-2">
-                        <label for="prefix" class="label-text mb-1">Prefix (Write 4 char)</label>
+                        <label for="prefix" class="label-text mb-1">Prefix</label>
                         <input type="text" name="code" id="prefix" class="form-control" placeholder="Add prefix here" disabled>
                     </div>
 
@@ -58,9 +60,8 @@
                 <div class="modal-footer border-top-0 d-flex justify-content-between">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-outline-secondary">Generate</button>
-                        <button type="button" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                            <span >Generate & Export</span>
+                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                            <span >Save Changes</span>
                             <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
                         </button>
                     </div>
@@ -70,6 +71,80 @@
         </div>
     </div>
 </div>
+<script>
+    $(document).ready(function () {
+        $('#editDiscountForm').on('submit', function (e) {
+            e.preventDefault();
+
+            let form = $(this);
+            let formData = new FormData(this);
+            let actionUrl = form.attr('action');
+
+            const saveButton = $('.saveChangesButton');
+            const loader = $('.saveLoader');
+
+            // Show loader and disable button
+            loader.removeClass('d-none');
+            saveButton.prop('disabled', true);
+
+            $.ajax({
+                url: actionUrl,
+                type: 'POST',
+                headers: { 'X-HTTP-Method-Override': 'PUT' }, // Laravel method spoofing
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    Toastify({
+                        text: "Code updated successfully!",
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28C76F",
+                        close: true,
+                    }).showToast();
+
+                    $('#editCodeModal').modal('hide');
+                    form[0].reset();
+                    $(".code-list-table").DataTable().ajax.reload();
+                },
+                error: function (xhr) {
+                    let errors = xhr.responseJSON?.errors;
+
+                    if (errors) {
+                        Object.values(errors).forEach(errorArray => {
+                            errorArray.forEach(message => {
+                                Toastify({
+                                    text: message,
+                                    duration: 4000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            });
+                        });
+                    } else {
+                        Toastify({
+                            text: "Something went wrong. Please try again.",
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                    }
+                },
+                complete: function () {
+                    // Always hide loader and enable button
+                    loader.addClass('d-none');
+                    saveButton.prop('disabled', false);
+                }
+            });
+        });
+    });
+</script>
+
 
 
 
