@@ -3,22 +3,23 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
-use App\Http\Requests\Admin\{StoreAdminRequest, UpdateAdminRequest};
-use App\Services\AdminService;
+use App\Services\PermissionService;
+use App\Http\Requests\Permission\{StorePermissionRequest, UpdatePermissionRequest};
 
 
 class PermissionController extends DashboardController
 {
-   public function __construct(AdminService $adminService)
+   public function __construct(public PermissionService $permissionService)
    {
-       parent::__construct($adminService);
-       $this->storeRequestClass = new StoreAdminRequest();
-       $this->updateRequestClass = new UpdateAdminRequest();
+       parent::__construct($permissionService);
+       $this->storeRequestClass = new StorePermissionRequest();
+       $this->updateRequestClass = new UpdatePermissionRequest();
        $this->indexView = 'permissions.index';
-       $this->createView = 'permissions.create';
-       $this->editView = 'permissions.edit';
-       $this->showView = 'permissions.show';
        $this->usePagination = true;
-       $this->successMessage = 'Process success';
+   }
+
+    public function getData()
+    {
+        return $this->permissionService->getData();
    }
 }

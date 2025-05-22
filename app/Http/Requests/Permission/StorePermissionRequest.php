@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Role;
+namespace App\Http\Requests\Permission;
 
 use App\Http\Requests\Base\BaseRequest;
 use Illuminate\Validation\Rule;
 
-class StoreRoleRequest extends BaseRequest
+class StorePermissionRequest extends BaseRequest
 {
     /**
      * Determine if the v1 is authorized to make this request.
@@ -24,24 +24,21 @@ class StoreRoleRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name.en' => [
+            'group.en' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('roles', 'name->en'),
+                Rule::unique('permissions', 'group->en'),
             ],
-            'name.ar' => [
+            'group.ar' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('roles', 'name->ar'),
+                Rule::unique('permissions', 'group->ar'),
             ],
-            'description.en' => ['nullable', 'string'],
-            'description.ar' => ['nullable', 'string'],
-            'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', Rule::exists('permissions', 'name')],
-        ];
-    }
 
+        ];
+
+    }
 
 }

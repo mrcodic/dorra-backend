@@ -3,15 +3,18 @@ $.ajaxSetup({
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
 });
-const dt_user_table = $(".category-list-table").DataTable({
+const dt_user_table = $(".admin-list-table").DataTable({
     processing: true,
     serverSide: true,
     searching: false, // using custom search
     ajax: {
-        url: categoriesDataUrl,
+        url: adminsDataUrl,
         type: "GET",
         data: function (d) {
             d.search_value = $('#search-category-form').val(); // get from input
+            d.role_id = $('.filter-role').val();
+            d.status = $('.filter-status').val();
+            console.log(d.status)
             return d;
         }
     },
@@ -24,55 +27,76 @@ const dt_user_table = $(".category-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
-        { data: "name" },
-        { data: "sub_categories" },
-        { data: "no_of_products" },
-        { data: "added_date" },
+        {data: "id"},
+        {data: "name"},
+        {data: "email"},
+        // {data: "role"},
+        {
+            data: "status",
+            render: function (data, type, row, meta) {
+                let textColor = "";
+                let bgColor = "";
+
+                switch (data) {
+                    case "active":
+                        textColor = "text-success";
+                        bgColor = "#D7EEDD"; // light green
+                        break;
+                    case "blocked":
+                        textColor = "text-secondary";
+                        bgColor = "#F0F0F0"; // light gray
+                        break;
+                    default:
+                        textColor = "text-muted";
+                        bgColor = "#E9ECEF"; // default gray
+                }
+
+                return `<span class="badge rounded-pill ${textColor} px-1" style="background-color: ${bgColor};">${data}</span>`;
+            },
+        },
+
+        {data: "created_at"},
         {
             data: "id",
             orderable: false,
-            searchable:false,
-            render: function (data, type, row, meta) {
-                console.log(data);
+            searchable: false,
+            render: function (data, type, row) {
                 return `
-        <div class="d-flex gap-1">
-              <a href=""
-                 class=""
-                 data-bs-toggle="modal"
-                 data-bs-target="#editAdminModal">
-                <i data-feather="edit-3"></i> 
+
+              <a href="#" class="edit-details"
+               data-bs-toggle="modal"
+                                   data-bs-target="#editAdminModal"
+                               >
+                <i data-feather="edit-3"></i>
               </a>
 
-              <a  class=" text-danger delete-user" 
-                  href=""
-                 data-bs-toggle="modal"
-                 data-bs-target="#deleteModal">
-                <i data-feather="trash-2"></i> 
-              </a>
-      
+      <a href="#" class="text-danger  open-delete-admin-modal"
+   data-id="${data}"
+   data-bs-toggle="modal"
+   data-bs-target="#deleteAdminModal"
+   >
+   <i data-feather="trash-2"></i>
+</a>
+
           </div>
         `;
-            },
-        },
+            }
+        }
     ],
     order: [[1, "asc"]],
     dom:
         '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
         '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        '<"d-flex align-items-center flex-grow-1 me-2"f>' +
-        '<"d-flex align-items-center gap-1"B>' +
         ">" +
         ">t" +
         '<"d-flex mx-2 row mb-1"' +
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
         ">",
-    buttons: [
-
-    ],
     drawCallback: function () {
         feather.replace();
     },
+
     language: {
         sLengthMenu: "Show _MENU_",
         search: "",
@@ -92,6 +116,13 @@ $('#search-category-form').on('keyup', function () {
         dt_user_table.draw();
     }, 300);
 });
+
+// Custom search with debounce
+
+$('.filter-role, .filter-status').on('change', function () {
+    dt_user_table.ajax.reload();
+});
+
 
 // Checkbox select all
 $('#select-all-checkbox').on('change', function () {
@@ -126,23 +157,6 @@ function updateBulkDeleteVisibility() {
     }
 }
 
-// Optional: Handle bulk delete form submission with confirmation
-$('#bulk-delete-form').on('submit', function (e) {
-    e.preventDefault();
-
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'You are about to delete selected categories.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, delete',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            this.submit();
-        }
-    });
-});
 
 // Listen to checkbox change
 $(document).on("change", ".category-checkbox", function () {
@@ -170,6 +184,9 @@ dt_user_table.on("draw", function () {
 });
 
 $(document).ready(function () {
+    const saveButton = $('.saveChangesButton');
+    const saveLoader = $('.saveLoader');
+    const saveButtonText = $('.saveChangesButton .btn-text');
     $(document).ready(function () {
         // Check if the product was added successfully
         if (sessionStorage.getItem("Category_added") == "true") {
@@ -188,46 +205,350 @@ $(document).ready(function () {
         }
     });
 
-    $(document).on("click", ".delete-category", function (e) {
+    $("#addCategoryForm").on("submit", function (e) {
         e.preventDefault();
 
+        var formData = new FormData(this);
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
+        $.ajax({
+            url: $(this).attr("action"), // dynamic action URL
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                Toastify({
+                    text: "Category added successfully!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F",
+                    close: true,
+                }).showToast();
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
+                $("#addCategoryForm")[0].reset();
+                $("#addCategoryModal").modal("hide");
+                $("#add-uploaded-image").addClass("d-none");
+                $("#add-uploaded-image img").attr("src", "");
+                $("#add-file-details .file-name").text("");
+                $("#add-file-details .file-size").text("");
+                $("#add-category-image").val(""); // clear file input
+                $("#add-upload-progress").addClass("d-none");
+                $("#add-upload-progress .progress-bar").css("width", "0%");
+
+                $(".category-list-table").DataTable().ajax.reload(); // reload your table
+            },
+            error: function (xhr) {
+                var errors = xhr.responseJSON.errors;
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+
+                        Toastify({
+                            text: errors[key][0],
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+
+                    }
+                }
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
+            },
+        });
+    });
+
+
+    $(document).on("click", ".view-details", function (e) {
+        // Get the data from attributes
         var $table = $(".category-list-table").DataTable();
         var $row = $(this).closest("tr");
         var rowData = $table.row($row).data();
-        var categoryId = $(this).data("id");
-        var categoryName = rowData.name;
+        const subCategories = rowData.children.map(function (child) {
+            return child["name"][locale];
+        });
+        const categoryNameAR = $(this).data("name_ar");
+        const categoryNameEn = $(this).data("name_en");
 
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `You are about to delete category "${categoryName}". This action cannot be undone.`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#6c757d",
-            confirmButtonText: "Yes, delete it!",
-            reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/categories/${categoryId}`,
-                    method: "DELETE",
-                    success: function (res) {
-                        Swal.fire(
-                            "Deleted!",
-                            "Category has been deleted.",
-                            "success"
-                        );
-                        $table.ajax.reload();
-                    },
-                    error: function () {
-                        Swal.fire(
-                            "Failed",
-                            "Could not delete category.",
-                            "error"
-                        );
-                    },
-                });
-            }
+        const products = $(this).data("products");
+        const addedDate = $(this).data("showdate");
+        const descriptionAr = $(this).data("description_ar");
+        const descriptionEn = $(this).data("description_en");
+        const image = $(this).data("image");
+        const imageId = $(this).data("image_id");
+        const id = $(this).data("id");
+        // Populate modal
+        $("#showCategoryModal #category-name-ar").val(categoryNameAR);
+        $("#showCategoryModal #category-name-en").val(categoryNameEn);
+        $("#showCategoryModal #category-products").val(products);
+        $("#showCategoryModal #category-date").val(addedDate);
+        $("#showCategoryModal #category-description-ar").val(descriptionAr);
+        $("#showCategoryModal #category-description-en").val(descriptionEn);
+        $("#showCategoryModal #imagePreview").attr("src", image);
+        $("#showCategoryModal #category-id").val(id);
+        $("#showCategoryModal #image-id").val(imageId);
+
+        // Create badges for subcategories
+        let badgesHtml = "";
+        subCategories.forEach(function (subcategory) {
+            badgesHtml += `<span class="badge bg-light text-dark border">${subcategory}</span>`;
+        });
+
+        // Set the badges HTML in the modal
+        $("#subcategories-container").html(badgesHtml ? badgesHtml :"-");
+
+        // Show modal
+        const modal = new bootstrap.Modal(
+            document.getElementById("showCategoryModal")
+        );
+        modal.show();
+    });
+
+    $(document).on("click", ".edit-details", function (e) {
+        // Get the data from attributes
+        var $table = $(".category-list-table").DataTable();
+        var $row = $(this).closest("tr");
+        var rowData = $table.row($row).data();
+        const subCategories = rowData.children.map(function (child) {
+            return child["name"][locale];
+        });
+        const categoryNameAR = $(this).data("name_ar");
+        const categoryNameEn = $(this).data("name_en");
+
+        const products = $(this).data("products");
+        const addedDate = $(this).data("showdate");
+        const descriptionAr = $(this).data("description_ar");
+        const descriptionEn = $(this).data("description_en");
+        const image = $(this).data("image");
+        const imageId = $(this).data("image_id");
+        $('.remove-old-image').on('click', function (e) {
+
+            e.preventDefault();
+
+            var imageElement = $(this).closest('.uploaded-image');
+            $.ajax({
+                url: 'api/media/' + imageId,
+                method: "DELETE",
+                success: function (response) {
+                    imageElement.remove();
+                    Toastify({
+                        text: "Image Removed Successfully",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28a745",
+                        close: true
+                    }).showToast();
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseJson.errors)
+                }
+            })
+
+        });
+
+        const id = $(this).data("id");
+        // Populate modal
+        $("#editCategoryModal #edit-category-name-ar").val(categoryNameAR);
+        $("#editCategoryModal #edit-category-name-en").val(categoryNameEn);
+        $("#editCategoryModal #edit-category-products").val(products);
+        $("#editCategoryModal #edit-category-date").val(addedDate);
+        $("#editCategoryModal #edit-category-description-ar").val(descriptionAr);
+        $("#editCategoryModal #edit-category-description-en").val(descriptionEn);
+        $("#editCategoryModal #edit-uploaded-image").removeClass('d-none');
+        $("#editCategoryModal #edit-preview-image").attr("src", image);
+        $("#editCategoryModal #edit-category-id").val(id);
+
+        // Create badges for subcategories
+        let badgesHtml = "";
+        subCategories.forEach(function (subcategory) {
+            badgesHtml += `<span class="badge bg-light text-dark border">${subcategory}</span>`;
+        });
+
+        // Set the badges HTML in the modal
+        $("#subcategories-container").html(badgesHtml);
+
+        // Show modal
+        const modal = new bootstrap.Modal(
+            document.getElementById("editCategoryModal")
+        );
+        modal.show();
+    });
+
+    $("#editButton").on("click", function () {
+        var nameEN = $("#category-name-en").val();
+        var nameAR = $("#category-name-ar").val();
+        var descEN = $("#category-description-en").val();
+        var descAR = $("#category-description-ar").val();
+        var imageId = $("#image-id").val();
+        var image = $("#imagePreview").attr("src");
+        var id = $("#category-id").val();
+        $("#edit-category-name-en").val(nameEN);
+        $("#edit-category-name-ar").val(nameAR);
+        $("#edit-category-description-en").val(descEN);
+        $("#edit-category-description-ar").val(descAR);
+        $("#edit-category-id").val(id);
+        $("#edit-uploaded-image").removeClass('d-none');
+        $("#edit-preview-image").attr("src", image);
+        $('.remove-old-image').on('click', function (e) {
+            e.preventDefault();
+
+            var imageElement = $(this).closest('.uploaded-image');
+
+            $.ajax({
+                url: 'api/media/' + imageId,
+                method: "DELETE",
+                success: function (response) {
+                    imageElement.remove();
+                    Toastify({
+                        text: "Image Removed Successfully",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28a745",
+                        close: true
+                    }).showToast();
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseJSON.errors)
+                }
+            });
+        });
+
+        $("#editCategoryModal").modal("show");
+    });
+
+    $("#editCategoryForm").on("submit", function (e) {
+        e.preventDefault(); // prevent default form submission
+        var categoryId = $(this).find("#edit-category-id").val();
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
+        $.ajax({
+            url: `categories/${categoryId}`,
+            type: "POST", // IMPORTANT: Laravel expects POST + method spoofing (@method('PUT'))
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
+                saveButton.prop('disabled', false);
+                Toastify({
+                    text: "Category updated successfully!",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F", // green for success
+                    close: true,
+                }).showToast();
+
+                // Close modal
+                $("#editCategoryModal").modal("hide");
+                $("#showCategoryModal").modal("hide");
+
+                // Optional: Clear form fields
+                $("#editCategoryForm")[0].reset();
+
+                // Optional: Remove uploaded image preview
+                $("#edit-image-preview-container").hide();
+                $("#edit-image-preview").attr("src", "");
+                $("#edit-image-details").hide();
+
+                $('.category-list-table').DataTable().ajax.reload();
+            },
+            error: function (xhr) {
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
+                saveButton.prop('disabled', false);
+                var errors = xhr.responseJSON.errors;
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        Toastify({
+                            text: errors[key][0],
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455", // red
+                            close: true,
+                        }).showToast();
+                    }
+                }
+            },
+        });
+    });
+
+    $("#edit-image-upload").on("change", function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                $("#edit-image-preview").attr("src", e.target.result);
+                $("#edit-image-preview-container").show();
+
+                // Show file name and size
+                const fileSize = (file.size / 1024).toFixed(2); // size in KB
+                $("#edit-image-details")
+                    .text(`${file.name} • ${fileSize} KB`)
+                    .show();
+            };
+
+            reader.readAsDataURL(file); // Read the file as DataURL for preview
+        }
+    });
+
+
+    $(document).on("click", ".open-delete-admin-modal", function () {
+        const adminId = $(this).data("id");
+        $("#deleteAdminForm").data("id", adminId);
+    });
+
+    $(document).on("submit", "#deleteCategoryForm", function (e) {
+        e.preventDefault();
+        const categoryId = $(this).data("id");
+
+        $.ajax({
+            url: `/categories/${categoryId}`,
+            method: "DELETE",
+            success: function (res) {
+
+                $("#deleteCategoryModal").modal("hide");
+
+                Toastify({
+                    text: "Category deleted successfully!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F",
+                    close: true,
+                }).showToast();
+                $(".category-list-table").DataTable().ajax.reload(null, false);
+
+
+            },
+            error: function () {
+
+                $("#deleteCategoryModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#EA5455", // red
+                    close: true,
+                }).showToast();
+                $(".category-list-table").DataTable().ajax.reload(null, false);
+
+            },
         });
     });
 
@@ -241,49 +562,94 @@ $(document).ready(function () {
 
         if (selectedIds.length === 0) return;
 
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `You're about to delete ${selectedIds.length} categories.`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#6c757d",
-            confirmButtonText: "Yes, delete them!",
-            reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "categories/bulk-delete",
-                    method: "POST",
-                    data: {
-                        ids: selectedIds,
-                        _token: $('meta[name="csrf-token"]').attr("content"),
-                    },
-                    success: function (response) {
-                        Toastify({
-                            text: "Selected categories deleted successfully!",
-                            duration: 1500,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#28a745",
-                            close: true,
-                        }).showToast();
+        $.ajax({
+            url: "categories/bulk-delete",
+            method: "POST",
+            data: {
+                ids: selectedIds,
+                _token: $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                $("#deleteCategoriesModal").modal("hide");
+                Toastify({
+                    text: "Selected categories deleted successfully!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
 
-                        // Reload DataTable
+                // Reload DataTable
 
-                        $('#bulk-delete-container').hide();
-                        $('.category-checkbox').prop('checked', false);
-                        $('#select-all-checkbox').prop('checked', false);
-                        $(".category-list-table").DataTable().ajax.reload(null, false);
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".category-list-table").DataTable().ajax.reload(null, false);
 
-                    },
-                    error: function () {
-                        Swal.fire("Error", "Could not delete selected categories.", "error");
-                    },
-                });
-            }
+            },
+            error: function () {
+                $("#deleteCategoriesModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
+
+                // Reload DataTable
+
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".category-list-table").DataTable().ajax.reload(null, false);
+
+            },
         });
+
     });
+
+
+    // Delete the selected image
+    $("#delete-image-button").on("click", function () {
+        $("#edit-image-upload").val(""); // clear the file input
+        $("#edit-image-preview-container").hide(); // hide preview container
+        $("#edit-image-preview").attr("src", ""); // clear the img src
+        $("#edit-image-details").hide(); // hide file details
+    });
+
+    $("#add-image-upload").on("change", function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                $("#add-image-preview").attr("src", e.target.result);
+                $("#add-image-preview-container").show();
+
+                // Show file name and size
+                const fileSize = (file.size / 1024).toFixed(2); // size in KB
+                $("#add-image-details")
+                    .text(`${file.name} • ${fileSize} KB`)
+                    .show();
+            };
+
+            reader.readAsDataURL(file); // Read the file as DataURL for preview
+        }
+    });
+
+    // Delete the selected image
+    $("#delete-image").on("click", function () {
+        $("#add-image-upload").val(""); // clear the file input
+        $("#add-image-preview-container").hide(); // hide preview container
+        $("#add-image-preview").attr("src", ""); // clear the img src
+        $("#add-image-details").hide(); // hide file details
+    });
+
+
 
 
 });

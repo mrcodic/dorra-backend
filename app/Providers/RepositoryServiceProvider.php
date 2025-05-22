@@ -24,8 +24,6 @@ class RepositoryServiceProvider extends ServiceProvider
             $this->app->bind("App\\Repositories\\Interfaces\\{$model}RepositoryInterface",
                 "App\\Repositories\\Implementations\\{$model}Repository");
         }
-        $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
-        $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
     }
 
     /**

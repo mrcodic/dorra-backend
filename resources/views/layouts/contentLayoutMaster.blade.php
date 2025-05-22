@@ -41,3 +41,65 @@ $configData = Helper::applClasses();
   'layouts.verticalLayoutMaster' ))
 @endisset
 <script src="https://unpkg.com/feather-icons"></script>
+<script !src="">
+    function handleAjaxFormSubmit(formSelector, options = {}) {
+        $(document).on('submit', formSelector, function (e) {
+            e.preventDefault();
+
+            const $form = $(this);
+            const $submitBtn = $form.find('button[type="submit"]');
+            const $loader = $form.find('.spinner-border');
+
+            $submitBtn.prop('disabled', true);
+            $loader.removeClass('d-none');
+
+            const formData = new FormData(this);
+
+            $.ajax({
+                url: $form.attr('action'),
+                method: $form.attr('method') || 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                },
+                success: function (response) {
+                    Toastify({
+                        text: options.successMessage || "✅ Operation successful!",
+                        duration: 3000,
+                        gravity: "top",
+                        backgroundColor: "#28a745",
+                    }).showToast();
+
+                    if (options.onSuccess) options.onSuccess(response, $form);
+
+                    if (options.resetForm !== false) $form.trigger('reset');
+                    if (options.closeModal) $(options.closeModal).modal('hide');
+                },
+                error: function (xhr) {
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = xhr.responseJSON.errors;
+                        for (const key in errors) {
+                            Toastify({
+                                text: errors[key][0],
+                                duration: 4000,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#EA5455",
+                                close: true,
+                            }).showToast();
+                        }
+                    }
+
+                    if (options.onError) options.onError(xhr, $form);
+                },
+                complete: function () {
+                    $submitBtn.prop('disabled', false);
+                    $loader.addClass('d-none');
+                }
+            });
+        });
+    }
+
+</script>

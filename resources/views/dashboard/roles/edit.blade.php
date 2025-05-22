@@ -11,7 +11,9 @@
 @section('content')
 <div class="container bg-white p-3">
     <!-- Add role form -->
-    <form id="addRoleForm" class="row" onsubmit="return false">
+    <form id="editRoleForm" class="row" method="post" action="{{ route('roles.update', $model->id) }}">
+        @csrf
+        @method("PUT")
         <div class="col-12">
             <label class="form-label" for="modalRoleName">Role Name</label>
             <input
@@ -59,32 +61,30 @@
                     </thead>
                     <tbody>
 
-                        @foreach($model->permissions as $group => $groupPermissions)
+                        @foreach($model->permissions->groupBy('group') as  $group => $groupPermissions)
                             <tr>
                                 <td>
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input row-checkbox" />
+                                        <input type="checkbox" class="form-check-input row-checkbox" data-group="{{ $group }}"
+                                        @checked($groupPermissions->count() == 4 )
+                                        />
                                         <span>{{ $group }}</span>
                                     </div>
                                 </td>
 
                                 @foreach(['Create', 'Read', 'Update', 'Delete'] as $action)
-                                    @php
-                                        $perm = $groupPermissions->firstWhere('name', $group . $action);
-                                    @endphp
                                     <td>
                                         <div class="form-check">
-                                            @if($perm)
-                                                <input
-                                                    type="checkbox"
-                                                    class="form-check-input permission-checkbox {{ $group }}-checkbox"
-                                                    name="permissions[]"
-                                                    value="{{ $perm->name }}"
-                                                    id="{{ $perm->name }}"
-                                                />
-                                            @else
-                                                <span class="text-muted small">N/A</span>
-                                            @endif
+
+                                            <input
+                                                type="checkbox"
+                                                class="form-check-input permission-checkbox {{ $group }}-checkbox"
+                                                name="permissions[]"
+                                                value="{{$group.$action }}"
+                                                id="{{ $group.$action }}"
+                                                @checked($groupPermissions->contains('name', $group . $action))
+
+                                            />
                                         </div>
                                     </td>
                                 @endforeach
@@ -124,5 +124,13 @@
 <!-- Page js files -->
 <script src="{{ asset(mix('js/scripts/pages/modal-add-role.js')) }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-access-roles.js')) }}"></script>
-
+<script !src="">
+    $(document).ready(function () {
+        $('.row-checkbox').on('change', function () {
+            const group = $(this).data('group');
+            const isChecked = $(this).is(':checked');
+            $(`.${group}-checkbox`).prop('checked', isChecked);
+        });
+    });
+</script>
 @endsection

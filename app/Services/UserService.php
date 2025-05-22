@@ -26,9 +26,14 @@ class UserService extends BaseService
             ->query(['id', 'first_name', 'last_name', 'email', 'status', 'created_at'])
             ->when(request()->filled('search_value'), function ($query) {
                 $search = request('search_value');
-                $query->where(function ($query) use ($search) {
-                    $query->where('first_name', 'like', '%' . $search . '%')
-                        ->orWhere('last_name', 'like', '%' . $search . '%');
+                $words = preg_split('/\s+/', $search);
+                $query->where(function ($query) use ($words) {
+                    foreach ($words as $word) {
+                        $query->where(function ($q) use ($word) {
+                            $q->where('first_name', 'like', '%' . $word . '%')
+                                ->orWhere('last_name', 'like', '%' . $word . '%');
+                        });
+                    }
                 });
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));

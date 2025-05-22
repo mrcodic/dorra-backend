@@ -5,15 +5,17 @@ namespace App\Enums\Admin;
 enum PermissionEnum : string
 {
     case CREATE_TEMPLATES = 'templatesCreate';
+    case READ_TEMPLATES = 'templatesRead';
     case UPDATE_TEMPLATES = 'templatesUpdate';
-    case PUBLISH_TEMPLATES = 'templatesPublish';
+    case DELETE_TEMPLATES = 'templatesDelete';
 
     public function group(): string
     {
         return match ($this) {
             self::CREATE_TEMPLATES,
+            self::DELETE_TEMPLATES ,
             self::UPDATE_TEMPLATES ,
-            self::PUBLISH_TEMPLATES => 'templates',
+            self::READ_TEMPLATES => 'templates',
         };
     }
     public function routes(): array
@@ -21,7 +23,8 @@ enum PermissionEnum : string
         return match ($this) {
           self::CREATE_TEMPLATES => ['templates.create','templates.store'],
           self::UPDATE_TEMPLATES => ['templates.edit','templates.update'],
-          self::PUBLISH_TEMPLATES => ['templates.publish'],
+          self::READ_TEMPLATES => ['templates.show'],
+          self::DELETE_TEMPLATES => ['templates.destroy','templates.bulk-delete'],
         };
     }
 

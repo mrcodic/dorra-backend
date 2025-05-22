@@ -54,7 +54,7 @@
 
                     <div class="col-6 col-md-2 col-lg-2">
                         <select name="category_id" class="form-select category-select">
-                            <option value="">Category</option>
+                            <option value=""  selected disabled>Category</option>
                             @foreach($associatedData['categories'] as $category)
                                 <option value="{{ $category->id }}">{{ $category->name}}</option>
                             @endforeach
@@ -64,7 +64,7 @@
 
                     <div class="col-6 col-md-2 col-lg-2">
                         <select name="tag_id" class="form-select tag-select">
-                            <option value="">Tag</option>
+                            <option value=""  selected disabled>Tag</option>
                             @foreach($associatedData['tags'] as $tag)
                                 <option value="{{ $tag->id }}">{{ $tag->name}}</option>
                             @endforeach

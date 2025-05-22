@@ -1,5 +1,4 @@
 @extends('layouts/contentLayoutMaster')
-
 @section('title', 'Add Role')
 @section('main-page', 'Roles')
 @section('sub-page', 'Add New Role')
@@ -14,28 +13,49 @@
     <!-- Add role form -->
     <form id="addRoleForm" class="row" method="post" action="{{ route('roles.store') }}">
         @csrf
-        <div class="col-12">
-            <label class="form-label" for="modalRoleName">Role Name</label>
+        <div class="col-6">
+            <label class="form-label" for="modalRoleName">Role Name (EN)</label>
             <input
                 type="text"
                 id="modalRoleName"
-                name="name"
+                name="name[en]"
                 class="form-control"
-                placeholder="Enter role name"
+                placeholder="Enter role name in english"
+                tabindex="-1"
+                data-msg="Please enter role name" />
+        </div>
+        <div class="col-6">
+            <label class="form-label" for="modalRoleName">Role Name (Ar)</label>
+            <input
+                type="text"
+                id="modalRoleName"
+                name="name[ar]"
+                class="form-control"
+                placeholder="Enter role name in arabic"
                 tabindex="-1"
                 data-msg="Please enter role name" />
         </div>
 
         <!-- New Role Description field -->
-        <div class="col-12 mt-1">
-            <label class="form-label" for="modalRoleDescription">Role Description</label>
+        <div class="col-6 mt-1">
+            <label class="form-label" for="modalRoleDescription">Role Description (EN)</label>
             <textarea
                 id="modalRoleDescription"
-                name="description"
+                name="description[en]"
                 class="form-control"
                 rows="3"
-                placeholder="Enter role description"
+                placeholder="Enter role description in english"
                 data-msg="Please enter a description for the role"></textarea>
+        </div>
+        <div class="col-6 mt-1">
+            <label class="form-label" for="modalRoleDescription">Role Description (AR)</label>
+            <textarea
+                id="modalRoleDescription"
+                name="description[ar]"
+                class="form-control"
+                rows="3"
+                placeholder="Enter role description in arabic"
+                data-msg="Please enter a description for the role "></textarea>
         </div>
 
         <div class="col-12">
@@ -64,28 +84,25 @@
                         <tr>
                             <td>
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input row-checkbox" />
+                                    <input type="checkbox" class="form-check-input row-checkbox" data-group="{{ $group }}" />
+
                                     <span>{{ $group }}</span>
                                 </div>
                             </td>
 
-                            @foreach(['Create', 'Read', 'Update', 'Delete'] as $action)
-                                @php
-                                    $perm = $groupPermissions->firstWhere('name', $group . $action);
-                                @endphp
+                            @foreach(\App\Enums\Permission\PermissionAction::values() as $action)
+
                                 <td>
                                     <div class="form-check">
-                                        @if($perm)
+
                                             <input
                                                 type="checkbox"
                                                 class="form-check-input permission-checkbox {{ $group }}-checkbox"
                                                 name="permissions[]"
-                                                value="{{ $perm->name }}"
-                                                id="{{ $perm->name }}"
+                                                value="{{$group.$action }}"
+                                                id="{{ $group.$action }}"
                                             />
-                                        @else
-                                            <span class="text-muted small">N/A</span>
-                                        @endif
+
                                     </div>
                                 </td>
                             @endforeach
@@ -124,6 +141,11 @@
 <script src="{{ asset(mix('js/scripts/pages/app-access-roles.js')) }}"></script>
 <script>
     $(document).ready(function () {
+        $('.row-checkbox').on('change', function () {
+            const group = $(this).data('group');
+            const isChecked = $(this).is(':checked');
+            $(`.${group}-checkbox`).prop('checked', isChecked);
+        });
         $('#addRoleForm').on('submit', function (e) {
             e.preventDefault();
 

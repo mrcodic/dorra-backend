@@ -7,6 +7,11 @@
             "url": "/"
         },
         {
+            "name": "Admins",
+            "icon": "users",
+            "url": "/admins"
+        },
+        {
             "name": "Users",
             "icon": "users",
             "slug": "",
@@ -49,12 +54,23 @@
             "url": "/discount-codes"
         },
         {
-            "name": "Orders",
-            "icon": "file-text",
+            "name": "Roles",
+            "icon": "shield",
             "slug": "",
-            "url": "/orders"
+            "submenu": [
+                {
+                    "url": "/permissions",
+                    "name": "Permissions",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/roles",
+                    "name": "Roles",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                }
+            ]
         }
-
-
     ]
 }

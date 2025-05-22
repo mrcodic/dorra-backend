@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="editAdminModal">
   <div class="modal-dialog">
     <div class="add-new-user modal-content pt-0">
-      <form id="addTagForm" enctype="multipart/form-data" action="{{ route('tags.store') }}" method="POST">
+      <form id="editAdminForm" enctype="multipart/form-data" action="{{ route('tags.store') }}" method="POST">
         @csrf
 
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>

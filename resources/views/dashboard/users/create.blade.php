@@ -49,21 +49,21 @@
                 </button>
             </div>
             <div class="line"></div>
-            <div class="step" data-target="#step-payment" role="tab" id="step-payment-trigger">
-                <button type="button" class="step-trigger">
-                    <span class="bs-stepper-box">
-                        03
-                    </span>
-                    <span class="bs-stepper-label">
-                        <span class="bs-stepper-title">Payment</span>
-                    </span>
-                </button>
-            </div>
-            <div class="line"></div>
+{{--            <div class="step" data-target="#step-payment" role="tab" id="step-payment-trigger">--}}
+{{--                <button type="button" class="step-trigger">--}}
+{{--                    <span class="bs-stepper-box">--}}
+{{--                        03--}}
+{{--                    </span>--}}
+{{--                    <span class="bs-stepper-label">--}}
+{{--                        <span class="bs-stepper-title">Payment</span>--}}
+{{--                    </span>--}}
+{{--                </button>--}}
+{{--            </div>--}}
+{{--            <div class="line"></div>--}}
             <div class="step" data-target="#step-address" role="tab" id="step-address-trigger">
                 <button type="button" class="step-trigger">
                     <span class="bs-stepper-box">
-                        04
+                        03
                     </span>
                     <span class="bs-stepper-label">
                         <span class="bs-stepper-title">Address</span>
@@ -202,42 +202,42 @@
                 </div>
             </div>
             <!-- step 3 -->
-            <div id="step-payment" class="content" role="tabpanel" aria-labelledby="step-payment-trigger">
-                <div id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">
-                    <!-- Cardholder Name (Optional) Label -->
-                    <div class="mb-1">
-                        <label class="form-label">Cardholder Name (Optional)</label>
-                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter cardholder name" />
-                    </div>
-                    <div class="mb-1">
-                        <label class="form-label">Card Number</label>
-                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter Card Number" />
-                    </div>
-                    <!-- Country and State -->
-                    <div class="d-flex justify-content-between gap-1 mb-1">
-                        <div class="w-50">
-                            <label class="form-label">Expiration Date</label>
-                            <input type="date" name="label" id="label" class="form-control" placeholder="Expiration Date" />
-                        </div>
-                        <div class="w-50">
-                            <label class="form-label">CVV</label>
-                            <input type="text" name="label" id="label" class="form-control" placeholder="Enter CVV" />
-                        </div>
-                    </div>
+{{--            <div id="step-payment" class="content" role="tabpanel" aria-labelledby="step-payment-trigger">--}}
+{{--                <div id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">--}}
+{{--                    <!-- Cardholder Name (Optional) Label -->--}}
+{{--                    <div class="mb-1">--}}
+{{--                        <label class="form-label">Cardholder Name (Optional)</label>--}}
+{{--                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter cardholder name" />--}}
+{{--                    </div>--}}
+{{--                    <div class="mb-1">--}}
+{{--                        <label class="form-label">Card Number</label>--}}
+{{--                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter Card Number" />--}}
+{{--                    </div>--}}
+{{--                    <!-- Country and State -->--}}
+{{--                    <div class="d-flex justify-content-between gap-1 mb-1">--}}
+{{--                        <div class="w-50">--}}
+{{--                            <label class="form-label">Expiration Date</label>--}}
+{{--                            <input type="date" name="label" id="label" class="form-control" placeholder="Expiration Date" />--}}
+{{--                        </div>--}}
+{{--                        <div class="w-50">--}}
+{{--                            <label class="form-label">CVV</label>--}}
+{{--                            <input type="text" name="label" id="label" class="form-control" placeholder="Enter CVV" />--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
-                    <!-- Address Line -->
-                    <div class="mb-1">
-                        <label for="line" class="form-label">Email Address</label>
-                        <input type="text" name="line" id="line" class="form-control" placeholder="Enter email address" />
-                    </div>
+{{--                    <!-- Address Line -->--}}
+{{--                    <div class="mb-1">--}}
+{{--                        <label for="line" class="form-label">Email Address</label>--}}
+{{--                        <input type="text" name="line" id="line" class="form-control" placeholder="Enter email address" />--}}
+{{--                    </div>--}}
 
-                    <div class="d-flex gap-1 justify-content-end">
-                        <button type="button" class="btn btn-outline-secondary  btn-prev place-order">Back</button>
-                        <button type="button" class="btn btn-primary  btn-next place-order">Next</button>
+{{--                    <div class="d-flex gap-1 justify-content-end">--}}
+{{--                        <button type="button" class="btn btn-outline-secondary  btn-prev place-order">Back</button>--}}
+{{--                        <button type="button" class="btn btn-primary  btn-next place-order">Next</button>--}}
 
-                    </div>
-                </div>
-            </div>
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--            </div>--}}
             <!-- step 4 -->
             <div id="step-address" class="content" role="tabpanel" aria-labelledby="step-address-trigger">
                 <div id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">
@@ -305,8 +305,20 @@
     const hiddenInput = document.getElementById('account_status');
 
     toggle.addEventListener('change', function () {
+        const label = document.querySelector('.active-label');
         hiddenInput.value = this.checked ? '1' : '0';
+
+        if (this.checked) {
+            label.textContent = "Active";
+            label.classList.remove('bg-secondary', 'text-white', 'bg-gray');
+            label.classList.add('primary-text-color');
+        } else {
+            label.textContent = "Blocked";
+            label.classList.remove('primary-text-color');
+            label.classList.add('bg-secondary', 'text-white');
+        }
     });
+
 
     document.addEventListener('DOMContentLoaded', function() {
         const avatarInput = document.getElementById('avatarInput');

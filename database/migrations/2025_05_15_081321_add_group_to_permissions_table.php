@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('permissions', function (Blueprint $table) {
-            $table->string('group')->after('name')->nullable();
+            $table->json('group')->after('name')->nullable();
         });
     }
 

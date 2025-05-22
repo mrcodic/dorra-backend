@@ -15,7 +15,7 @@ class RoleService extends BaseService
     {
         $model = $this->repository->create($validatedData);
         $model->load($relationsToLoad);
-        $model->syncPermissions($validatedData['permissions']);
+        $model->syncPermissions($validatedData['permissions'] );
         return $model->load($relationsToLoad);
     }
 }

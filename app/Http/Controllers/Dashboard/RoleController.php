@@ -32,6 +32,9 @@ class RoleController extends DashboardController
                 'roles' => $this->roleRepository->all(columns: ['id', 'name']),
             ],
         ];
+        $this->methodRelations = [
+          'edit' => ['permissions',]
+        ];
     }
 
 

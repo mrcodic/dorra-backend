@@ -30,9 +30,8 @@ class StoreAdminRequest extends BaseRequest
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:admins,email'],
-            'phone_number' => ['required', 'string', 'min:10', 'max:15', 'unique:admins,phone_number', new Phone($isoCode),],
+            'phone_number' => ['required', 'string', 'min:10', 'max:15',],
             'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
-            'country_code_id' => ['required', 'exists:country_codes,id'],
             'status' => ['required', 'boolean'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],];
 

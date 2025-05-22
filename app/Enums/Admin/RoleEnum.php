@@ -12,7 +12,8 @@ enum RoleEnum: string
             self::SUPER_ADMIN => [
                 'templatesCreate',
                 'templatesUpdate',
-                'templatesPublish',
+                'templatesRead',
+                'templatesDelete',
             ],
 
         };
