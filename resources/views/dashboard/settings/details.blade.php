@@ -69,10 +69,10 @@
                     <div class="col-md-3">
                         <label for="platform">Platform</label>
                         <select name="platform[]" class="form-select">
-                            <option value="facebook">📘 Facebook</option>
-                            <option value="instagram">📸 Instagram</option>
-                            <option value="twitter">🐦 Twitter</option>
-                            <option value="tiktok">🎵 TikTok</option>
+                            <option value="facebook"> Facebook</option>
+                            <option value="instagram"> Instagram</option>
+                            <option value="twitter"> Twitter</option>
+                            <option value="tiktok"> TikTok</option>
                         </select>
                     </div>
                     <div class="col-md-6">
@@ -135,6 +135,10 @@
                 </div>
             </div>
         </div>
+        <div class="d-flex justify-content-end mt-2">
+            <button class="btn btn-outline-secondary me-1">Discard Changes</button>
+            <button class="btn btn-primary">Save</button>
+        </div>
     </div>
 
 
@@ -171,15 +175,17 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.profile-tab');
         const sections = ['tab1', 'tab2', 'tab3', 'tab4'].map(id => document.getElementById(id));
 
         // Button click - scroll and set active class
         buttons.forEach(button => {
-            button.addEventListener('click', function () {
+            button.addEventListener('click', function() {
                 const targetId = this.dataset.target;
-                document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+                document.getElementById(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
 
                 // Remove active from all and add to clicked
                 buttons.forEach(btn => btn.classList.remove('active'));
@@ -188,7 +194,7 @@
         });
 
         // Optional: Scrollspy - update active button based on scroll
-        window.addEventListener('scroll', function () {
+        window.addEventListener('scroll', function() {
             let fromTop = window.scrollY + 100;
 
             sections.forEach((section, index) => {
@@ -247,11 +253,6 @@
         });
     });
 </script>
-
-
-
-
-
 {{-- Page js files --}}
 <script src="{{ asset('js/scripts/pages/app-product-list.js') }}?v={{ time() }}"></script>
 @endsection
