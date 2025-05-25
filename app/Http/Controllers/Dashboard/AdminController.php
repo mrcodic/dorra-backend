@@ -23,6 +23,7 @@ class AdminController extends DashboardController
                'roles' => $this->roleRepository->all(),
            ]
        ];
+       $this->resourceTable = 'admins';
    }
 
     public function getData()

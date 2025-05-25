@@ -17,7 +17,7 @@ return [
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1,dorra.test,dev.dorraprint.com,admin.dorraprint.com',
+        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1,dorra-backend.test,dev.dorraprint.com,admin.dorraprint.com',
         Sanctum::currentApplicationUrlWithPort()
     ))),
 
@@ -33,7 +33,7 @@ return [
     |
     */
 
-    'guard' => ['sanctum'],
+    'guard' => ['web'],
 
     /*
     |--------------------------------------------------------------------------

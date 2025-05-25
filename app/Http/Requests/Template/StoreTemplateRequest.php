@@ -3,8 +3,7 @@
 namespace App\Http\Requests\Template;
 
 use App\Http\Requests\Base\BaseRequest;
-use App\Models\CountryCode;
-use Illuminate\Validation\Rule;
+
 
 class StoreTemplateRequest extends BaseRequest
 {
@@ -25,18 +24,11 @@ class StoreTemplateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name.en' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('tags', 'name->en'),
-            ],
-            'name.ar' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('categories', 'name->ar'),
-            ],
+            'name' => ['required', 'string', 'max:255'],
+            'product_id' => ['required', 'exists:products,id'],
+            'design_data' => ['required', 'json'],
+            'preview_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
         ];
 
     }

@@ -91,7 +91,7 @@
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                     <div class="delete-container">
                         <p id="selected-count-text">0 admins are selected</p>
-                        <form id="bulk-delete-form" method="POST" action="{{ route('categories.bulk-delete') }}">
+                        <form id="bulk-delete-form" method="POST" action="{{ route('admins.bulk-delete') }}">
                             @csrf
                             <button type="submit" id="delete-selected-btn"
                                     class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
@@ -109,11 +109,16 @@
             @include('modals/admins/edit-admin')
 
             @include('modals.delete',[
-       'id' => 'deleteAdminModal',
-       'formId' => 'deleteAdminForm',
-       'title' => 'Delete Admin',
-       ])
-
+           'id' => 'deleteAdminModal',
+           'formId' => 'deleteAdminForm',
+           'title' => 'Delete Admin',
+           ])
+            @include('modals.delete',[
+                      'id' => 'deleteAdminsModal',
+                      'formId' => 'bulk-delete-form',
+                      'title' => 'Delete Admins',
+                      'confirmText' => 'Are you sure you want to delete this items?',
+                      ])
 
         </div>
         <!-- list and filter end -->

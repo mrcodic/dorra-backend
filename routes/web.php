@@ -37,8 +37,9 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/users', UserController::class);
 
-    Route::prefix('/admins')->as('admins')->group(function () {
-        Route::get('/data', [AdminController::class, 'getData'])->name('.data');
+    Route::prefix('/admins')->controller(AdminController::class)->as('admins.')->group(function () {
+        Route::get('/data', 'getData')->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/admins', AdminController::class);
 
@@ -102,12 +103,12 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/discount-codes', DiscountCodeController::class)->except('show');
 
-    Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
-        Route::get('/data', [TemplateController::class, 'getData'])->name('data');
-        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
-        Route::post('/publish', 'bulkDelete')->name('publish');
-    });
-    Route::resource('/templates', TemplateController::class);
+//    Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
+//        Route::get('/data', [TemplateController::class, 'getData'])->name('data');
+//        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+//        Route::post('/publish', 'bulkDelete')->name('publish');
+//    });
+//    Route::resource('/templates', TemplateController::class);
 
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);

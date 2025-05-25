@@ -33,7 +33,8 @@ class StoreAdminRequest extends BaseRequest
             'phone_number' => ['required', 'string', 'min:10', 'max:15',],
             'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'status' => ['required', 'boolean'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],];
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'role_id' => ['required', 'integer', 'exists:roles,id'],];
 
     }
 

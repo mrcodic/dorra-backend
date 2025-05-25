@@ -16,7 +16,7 @@ use Yajra\DataTables\Facades\DataTables;
 class ProductService extends BaseService
 {
 
-    public BaseRepositoryInterface $repository;
+        public BaseRepositoryInterface $repository;
     protected array $relations;
 
     public function __construct(ProductRepositoryInterface $repository)

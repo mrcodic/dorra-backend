@@ -3,10 +3,9 @@
 namespace App\Http\Requests\Admin;
 
 use App\Http\Requests\Base\BaseRequest;
-use App\Models\CountryCode;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
-use Propaganistas\LaravelPhone\Rules\Phone;
+
 
 class UpdateAdminRequest extends BaseRequest
 {
@@ -24,18 +23,26 @@ class UpdateAdminRequest extends BaseRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules($id): array
     {
-        $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
-        return [
+        $rules = [
             'first_name' => ['sometimes', 'string', 'max:255'],
             'last_name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', Rule::unique('admins', 'email')],
-            'phone_number' => ['sometimes', 'string', 'min:10', 'max:15', 'unique:admins,phone_number', new Phone($isoCode),],
-            'password' => ['sometimes', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
-            'country_code_id' => ['sometimes', 'exists:country_codes,id'],
+            'email' => ['sometimes', 'email', Rule::unique('admins', 'email')->ignore($id)],
+            'phone_number' => ['required', 'string', 'min:10', 'max:15',],
             'status' => ['sometimes', 'boolean'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],];
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'role_id' => ['sometimes', 'integer', 'exists:roles,id'],];
+        if ($this->filled('password')) {
+            $rules['password'] = [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)->letters()->mixedCase()->numbers()->symbols()
+            ];
+        }
+
+        return $rules;
     }
 
 

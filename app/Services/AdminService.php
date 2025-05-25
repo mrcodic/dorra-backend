@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Role;
 use App\Repositories\Interfaces\AdminRepositoryInterface;
-use Carbon\Carbon;
-use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class AdminService extends BaseService
@@ -16,11 +15,22 @@ class AdminService extends BaseService
 
     }
 
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    {
+        $model = $this->repository->create($validatedData);
+       $model->assignRole(Role::findById($validatedData['role_id']));
+       if (isset($validatedData['image'])) {
+           handleMediaUploads($validatedData['image'], $model);
+       }
+
+        return $model->load($relationsToLoad);
+    }
+
     public function getData()
     {
         $admins = $this->repository
-            ->query(['id', 'first_name', 'last_name', 'email', 'status', 'created_at'])
-            ->with(['roles'])
+            ->query(['id', 'first_name', 'last_name', 'email','phone_number', 'status', 'created_at'])
+            ->with(['roles','media'])
             ->when(request()->filled('search_value'), function ($query) {
                 $search = request('search_value');
                 $words = preg_split('/\s+/', $search);
@@ -52,6 +62,9 @@ class AdminService extends BaseService
             })
             ->editColumn('status', function ($admin) {
                 return $admin->status == 1 ? "active" : "blocked";
+            })
+            ->addColumn('status_value', function ($admin) {
+                return $admin->status;
             })
             ->make();
     }

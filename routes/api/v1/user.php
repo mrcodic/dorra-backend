@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Controllers\Dashboard\TemplateController;
-use App\Http\Controllers\Dashboard\UserController;
+
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\OtpController,
     Auth\RegisterController,
@@ -13,7 +12,8 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\ProfileController,
     Profile\UserNotificationTypeController,
     SaveController,
-    ShippingAddress\ShippingAddressController};
+    ShippingAddress\ShippingAddressController,
+    Template\TemplateController};
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
@@ -54,14 +54,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
     Route::apiResource('products',ProductController::class)->only(['index','show']);
-    Route::apiResource('templates',TemplateController::class);
     Route::controller(SaveController::class)->group(function () {
         Route::post('toggle-save','toggleSave');
         Route::delete('bulk-delete-saved','destroyBulk');
     });
 
 
-
+    Route::post('/templates',[TemplateController::class, 'store']);
+    Route::post('/templates/{product}',[TemplateController::class, 'index']);
 
     Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 
