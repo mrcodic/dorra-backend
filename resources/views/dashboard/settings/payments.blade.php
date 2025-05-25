@@ -25,13 +25,43 @@
 @endsection
 
 @section('content')
-<div class="card">
+<div class="card p-3">
+    @php
+    // Define label + icons for each row
+    $paymentRows = [
+    ['label' => 'Aman', 'icons' => ['aman.png']],
+    ['label' => 'Credit/Debit Card', 'icons' => ['Visa.png', 'mastercard.png']],
+    ['label' => 'Paypal', 'icons' => ['Paypal.png']],
+    ['label' => 'Cash on delivery (COD)', 'icons' => ['cash.png']],
+    ];
+    @endphp
 
+    @foreach ($paymentRows as $index => $row)
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-3">
+          
+            @foreach ($row['icons'] as $icon)
+            <img src="{{ asset('images/' . $icon) }}" alt="Payment Icon" style="height: 40px; width: auto;">
+            @endforeach
+              <span class="fw-bold text-black">{{ $row['label'] }}</span>
+        </div>
 
-</div>
+        <div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="switch-{{ $index }}">
+                <label class="form-check-label" for="switch-{{ $index }}"></label>
+            </div>
+        </div>
+    </div>
+    @endforeach
+          <div class="d-flex justify-content-end mt-2">
+            <button class="btn btn-outline-secondary me-1">Discard Changes</button>
+            <button class="btn btn-primary">Save</button>
+        </div>
 </div>
 
 @endsection
+
 
 @section('vendor-script')
 {{-- Vendor js files --}}
