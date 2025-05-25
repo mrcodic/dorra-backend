@@ -2,29 +2,32 @@
 
 namespace App\DTOs;
 
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+
 class TemplateData
 {
-    public function __construct(
-        public readonly int $product_id,
-        public readonly string $name,
-        public readonly int $status,
-        public readonly array $design_data,
-        public readonly ?string $preview_image,
-        public readonly ?string $source_design_svg,
-    ) {}
+    public int $product_id;
+    public string $name;
+    public int $status;
+    public string $design_data;
+    public ?UploadedFile $preview_image;
+    public ?string $source_design_svg;
 
     /**
-     * Create DTO from validated request data
+     * Create DTO from request
      */
-    public static function fromArray(array $data): self
+    public static function fromRequest(Request $request): self
     {
-        return new self(
-            product_id: $data['product_id'],
-            name: $data['name'],
-            status: $data['status'] ?? 1,
-            design_data: $data['design_data'],
-            preview_image: $data['preview_image'] ?? null,
-            source_design_svg: $data['source_design_svg'] ?? null,
-        );
+        $data = new self();
+
+        $data->product_id = $request->input('product_id');
+        $data->name = $request->input('name');
+        $data->status = $request->input('status', 1);
+        $data->design_data = $request->input('design_data');
+        $data->preview_image = $request->file('preview_image'); // handle file
+        $data->source_design_svg = $request->input('source_design_svg');
+
+        return $data;
     }
 }

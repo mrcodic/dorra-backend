@@ -6,6 +6,7 @@ use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Yajra\DataTables\DataTables;
 
 class TemplateService extends BaseService
@@ -20,15 +21,27 @@ class TemplateService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        if (isset($validatedData['preview_image'])) {
-            $path = $validatedData['preview_image']->store('public/templates');
+        $storedImagePath = null;
 
-            $validatedData['preview_image'] = str_replace('public/', '', $path);
+        if ($validatedData->preview_image instanceof UploadedFile) {
+            $file = $validatedData->preview_image;
+            $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+            $storedImagePath = $file->storeAs('templates', $fileName);
         }
-        $model = $this->repository->create($validatedData);
-        return $model->load($relationsToLoad);
 
+        $model = $this->repository->create([
+            'name' => $validatedData->name,
+            'status' => $validatedData->status,
+            'product_id' => $validatedData->product_id,
+            'design_data' => $validatedData->design_data,
+            'preview_image' => $storedImagePath,
+            'source_design_svg' => $validatedData->source_design_svg,
+        ]);
+
+        return $model->load($relationsToLoad);
     }
+
+
 
     public function getProductTemplates($productId)
     {

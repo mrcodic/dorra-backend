@@ -20,8 +20,7 @@ class TemplateController extends Controller
 
     public function store(StoreTemplateRequest $request, StoreTemplate $action)
     {
-        dd("Dda");
-        $templateData = TemplateData::fromArray($request->validated());
+        $templateData = TemplateData::fromRequest($request);
         $template = $action->handle($templateData);
         return Response::api(data: TemplateResource::make($template));
     }
