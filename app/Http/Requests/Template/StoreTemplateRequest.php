@@ -24,7 +24,7 @@ class StoreTemplateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255','unique:templates,name'],
             'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['required', 'json'],
             'preview_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
