@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Observers\DesignObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[ScopedBy(DesignObserver::class)]
+#[ObservedBy(DesignObserver::class)]
 class Design extends Model
 {
     use HasUuids;
@@ -18,7 +19,7 @@ class Design extends Model
         'user_id',
         'template_id',
         'design_data',
-        'design_url',
+        'design_image',
         'current_version',
     ];
 
@@ -31,7 +32,7 @@ class Design extends Model
     {
         return $this->belongsTo(Template::class);
     }
-    public function designUrl(): Attribute
+    public function designImage(): Attribute
     {
         return Attribute::get(function ($value){
             return  asset($value);
