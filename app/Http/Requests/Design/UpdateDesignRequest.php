@@ -24,19 +24,11 @@ class UpdateDesignRequest extends BaseRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules($id): array
+    public function rules(): array
     {
         return [
-            'template_id' => ['required', 'exists:templates,id'],
             'design_data' => ['required', 'json'],
-            'design_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-        ];
-    }
-
-    public function attributes()
-    {
-        return [
-            'design_image' => 'design_url'
+            'design_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],
         ];
     }
 

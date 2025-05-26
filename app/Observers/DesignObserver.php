@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Design;
+use App\Models\DesignVersion;
 
 class DesignObserver
 {
@@ -26,7 +27,11 @@ class DesignObserver
      */
     public function updated(Design $design): void
     {
-        //
+        $design->versions()->create([
+            'design_data' => $design->design_data,
+            'design_image'=> $design->design_image,
+            'version'=> $design->current_version,
+        ]);
     }
 
     /**

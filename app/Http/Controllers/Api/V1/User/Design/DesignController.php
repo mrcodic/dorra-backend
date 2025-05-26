@@ -31,8 +31,10 @@ class DesignController extends Controller
         return Response::api(data: DesignResource::make($design->refresh()));
     }
 
-    public function update(UpdateDesignRequest $request)
+    public function update($design)
     {
-
+        dd($design);
+        $design = $this->designService->updateResource($id,$request->validated());
+        return Response::api(data: DesignResource::make($design->refresh()));
     }
 }
