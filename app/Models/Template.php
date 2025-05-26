@@ -32,7 +32,14 @@ class Template extends Model
     public function previewImage(): Attribute
     {
         return Attribute::get(function ($value){
-           return  asset($value);
+           return  asset($value) ??null;
+        });
+    }
+
+    public function sourceDesignSvg(): Attribute
+    {
+        return Attribute::get(function ($value){
+           return $value ?   asset($value) : null;
         });
     }
 }

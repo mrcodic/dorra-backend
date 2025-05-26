@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Services\TemplateService;
 use Illuminate\Http\JsonResponse;
-use App\Http\Requests\Template\{StoreTemplateRequest, UpdateDesignRequest};
+use App\Http\Requests\Template\{StoreTemplateRequest, UpdateDesignRequest, UpdateTemplateRequest};
 
 
 class TemplateController extends DashboardController
@@ -14,7 +14,7 @@ class TemplateController extends DashboardController
     {
         parent::__construct($templateService);
         $this->storeRequestClass = new StoreTemplateRequest();
-        $this->updateRequestClass = new UpdateDesignRequest();
+        $this->updateRequestClass = new UpdateTemplateRequest();
         $this->indexView = 'templates.index';
         $this->createView = 'templates.create';
         $this->editView = 'templates.edit';
