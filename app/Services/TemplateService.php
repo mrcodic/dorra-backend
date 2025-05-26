@@ -22,7 +22,6 @@ class TemplateService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $storedImagePath = null;
-dd($validatedData->preview_image)   ;
         if ($validatedData->preview_image instanceof UploadedFile) {
             $file = $validatedData->preview_image;
             $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
