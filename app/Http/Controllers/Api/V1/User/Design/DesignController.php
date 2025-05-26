@@ -3,42 +3,29 @@
 namespace App\Http\Controllers\Api\V1\User\Design;
 
 
-use App\Actions\Template\StoreTemplate;
-use App\DTOs\TemplateData;
+
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Template\StoreTemplateRequest;
-use App\Http\Resources\TemplateResource;
+use App\Http\Requests\Design\StoreDesignRequest;
+use App\Http\Resources\DesignResource;
+
 use App\Services\DesignService;
 use Illuminate\Support\Facades\Response;
 
 
 class DesignController extends Controller
 {
-    public function __construct(public DesignService $designService)
+    public function __construct(public DesignService $designService){}
+
+    public function store(StoreDesignRequest $request)
     {
+        $design = $this->designService->storeResource($request->only([
+            'template_id',
+            'user_id',
+            'cookie_id',
+            'design_data',
+            'design_url',
+            'current_version',
+        ]));
+        return Response::api(data: DesignResource::make($design));
     }
-
-    public function store(StoreTemplateRequest $request, StoreTemplate $action)
-    {
-        $templateData = TemplateData::fromRequest($request);
-        $template = $action->handle($templateData);
-        return Response::api(data: TemplateResource::make($template));
-    }
-
-    public function show($id)
-    {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id)));
-
-
-    }
-
-    public function getProductTemplates()
-    {
-        $productId = request()->input('productId');
-        $templates = $this->templateService->getProductTemplates($productId);
-        return Response::api(data: TemplateResource::collection($templates));
-
-    }
-
-
 }

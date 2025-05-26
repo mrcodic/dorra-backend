@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Design;
 
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Template;
+use Illuminate\Support\Str;
 
 
 class StoreDesignRequest extends BaseRequest
@@ -25,8 +27,44 @@ class StoreDesignRequest extends BaseRequest
     {
         return [
             'template_id' => ['required', 'exists:templates,id'],
-            'user_id' => ['required', 'exists:users,id'],
+
         ];
+
+    }
+    protected function passedValidation()
+    {
+
+        $template = Template::find($this->template_id);
+        if (auth()->check())
+        {
+
+            $this->merge([
+                'user_id' =>auth()->user()->id ,
+                'design_data' => $template->value('design_data'),
+                'design_url' => $template->value('preview_image'),
+                'current_version' => 1,
+            ]);
+        }
+        else
+        {
+            $cookie = request()->cookie('cookie_id');
+
+            if (!$cookie)
+            {
+
+                $cookie= (string) Str::uuid();
+
+                cookie()->queue(cookie('cookie_id', $cookie, 60 * 24 * 30));
+            }
+            $this->merge([
+                'cookie_id' => $cookie ,
+                'design_data' => $template->value('design_data'),
+                'design_url' => $template->value('preview_image'),
+                'current_version' => 1,
+            ]);
+        }
+
+
 
     }
 

@@ -14,7 +14,8 @@ return new class extends Migration
     {
         Schema::create('designs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->string('cookie_id')->nullable();
+            $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->foreignUuid('template_id')->nullable()->constrained()->nullOnDelete();
             $table->json('design_data');
             $table->string('design_url')->nullable();
