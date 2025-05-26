@@ -29,10 +29,10 @@ class Template extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function previewImageAttribute(): Attribute
+    public function previewImage(): Attribute
     {
         return Attribute::get(function ($value){
-           return  Storage::url($value);
+           return  asset($value);
         });
     }
 }

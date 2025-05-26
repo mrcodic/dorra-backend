@@ -20,7 +20,7 @@ class TemplateResource extends JsonResource
             'name' => $this->name,
             'design_data' => $this->design_data,
             'product' => ProductResource::make($this->whenLoaded('product')),
-            'preview_image' => $this->previewImage,
+            'preview_image' => $this->preview_image,
 
         ];
     }

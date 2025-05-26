@@ -7,6 +7,7 @@ use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\DataTables;
 
 class TemplateService extends BaseService
@@ -22,10 +23,13 @@ class TemplateService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $storedImagePath = null;
+
         if ($validatedData->preview_image instanceof UploadedFile) {
             $file = $validatedData->preview_image;
-            $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-            $storedImagePath = $file->storeAs('templates', $fileName);
+            $fileName = uniqid() . '.' .  $file->getClientOriginalExtension();
+            $destinationPath = public_path('templates');
+            $file->move($destinationPath, $fileName);
+            $storedImagePath = 'templates/' . $fileName;
         }
 
         $model = $this->repository->create([
@@ -39,6 +43,7 @@ class TemplateService extends BaseService
 
         return $model->load($relationsToLoad);
     }
+
 
 
 
