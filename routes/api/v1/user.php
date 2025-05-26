@@ -13,12 +13,13 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\UserNotificationTypeController,
     SaveController,
     ShippingAddress\ShippingAddressController,
-    Template\TemplateController};
+    Template\TemplateController
+};
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
-Route::get('country-codes',[MainController::class, 'countryCodes']);
+Route::get('country-codes', [MainController::class, 'countryCodes']);
 
 Route::prefix('register')->group(function () {
     Route::post('/otp/send', [OtpController::class, 'sendRegistrationOtp']);
@@ -34,8 +35,8 @@ Route::prefix('password')->group(function () {
 
 Route::prefix('login')->controller(LoginController::class)->group(function () {
     Route::post('/', LoginController::class);
-    Route::get('/google', 'redirectToGoogle')->middleware(EnsureFrontendRequestsAreStateful::class,);
-    Route::get('/google/callback', 'handleGoogleCallback')->middleware(EnsureFrontendRequestsAreStateful::class,);
+    Route::get('/google', 'redirectToGoogle')->middleware(EnsureFrontendRequestsAreStateful::class);
+    Route::get('/google/callback', 'handleGoogleCallback')->middleware(EnsureFrontendRequestsAreStateful::class);
     Route::get('/apple/callback', 'appleCallback');
 });
 
@@ -49,27 +50,26 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::delete('/media/{media}', [MainController::class, 'removeMedia']);
     Route::put('password/update', PasswordController::class);
-    Route::get('notification-types',UserNotificationTypeController::class);
+    Route::get('notification-types', UserNotificationTypeController::class);
 
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
-    Route::apiResource('products',ProductController::class)->only(['index','show']);
+    Route::apiResource('products', ProductController::class)->only(['index', 'show']);
     Route::controller(SaveController::class)->group(function () {
-        Route::post('toggle-save','toggleSave');
-        Route::delete('bulk-delete-saved','destroyBulk');
+        Route::post('toggle-save', 'toggleSave');
+        Route::delete('bulk-delete-saved', 'destroyBulk');
     });
 
 
-    Route::post('/templates',[TemplateController::class, 'store']);
-    Route::get('/templates/{product}',[TemplateController::class, 'index']);
-
     Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 
-    Route::apiResource('categories',CategoryController::class)->only(['index','show']);
-    Route::get('sub-categories',[MainController::class, 'subCategories']);
+    Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+    Route::get('sub-categories', [MainController::class, 'subCategories']);
 
-    Route::get('states',[MainController::class, 'states']);
-    Route::get('countries',[MainController::class, 'countries']);
+    Route::get('states', [MainController::class, 'states']);
+    Route::get('countries', [MainController::class, 'countries']);
 });
 
 
+Route::post('/templates', [TemplateController::class, 'store']);
+Route::get('/templates/{product}', [TemplateController::class, 'index']);
