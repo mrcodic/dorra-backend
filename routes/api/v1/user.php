@@ -61,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::post('/templates',[TemplateController::class, 'store']);
-    Route::post('/templates/{product}',[TemplateController::class, 'index']);
+    Route::get('/templates/{product}',[TemplateController::class, 'index']);
 
     Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 

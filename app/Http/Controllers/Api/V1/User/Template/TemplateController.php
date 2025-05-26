@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Template\StoreTemplateRequest;
 use App\Http\Resources\TemplateResource;
 use App\Services\TemplateService;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Response;
 
 
 class TemplateController extends Controller
