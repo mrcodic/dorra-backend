@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\V1\User\General\MainController;
 use App\Http\Controllers\Dashboard\{AdminController,
+    FaqController,
     InvoiceController,
+    MessageController,
     OrderController,
     PermissionController,
     ProductController,
@@ -16,8 +18,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     CategoryController,
     ProfileController,
     DiscountCodeController,
-    SettingController
-};
+    SettingController};
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Rules\Role;
 
@@ -94,6 +95,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/invoices', InvoiceController::class)->except('show');
+
+    Route::group(['prefix' => 'faqs', 'as' => 'faqs.', 'controller' => FaqController::class,], function () {
+        Route::get('/data', [FaqController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::resource('/faqs', FaqController::class)->except('show');
+
+    Route::group(['prefix' => 'messages', 'as' => 'messages.', 'controller' => MessageController::class,], function () {
+        Route::get('/data', [MessageController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::resource('/messages', MessageController::class)->except('show');
 
     Route::group(['prefix' => 'discount-codes', 'as' => 'discount-codes.', 'controller' => DiscountCodeController::class,], function () {
         Route::get('/data', [DiscountCodeController::class, 'getData'])->name('data');
