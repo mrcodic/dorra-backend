@@ -25,8 +25,16 @@ class TemplateController extends Controller
         return Response::api(data: TemplateResource::make($template));
     }
 
-    public function index($productId)
+    public function show($id)
     {
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id)));
+
+
+    }
+
+    public function getProductTemplates()
+    {
+        $productId = request()->input('productId');
         $templates = $this->templateService->getProductTemplates($productId);
         return Response::api(data: TemplateResource::collection($templates));
 

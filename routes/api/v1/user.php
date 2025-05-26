@@ -71,5 +71,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-Route::post('/templates', [TemplateController::class, 'store']);
-Route::get('/templates/{product}', [TemplateController::class, 'index']);
+Route::apiResource('/templates', TemplateController::class)->only(['store', 'show']);
+Route::get('/templates', [TemplateController::class, 'getProductTemplates']);
