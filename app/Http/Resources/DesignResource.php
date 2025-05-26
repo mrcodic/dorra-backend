@@ -19,7 +19,7 @@ class DesignResource extends JsonResource
             'id' => $this->id,
             'design_data' => $this->design_data,
             'design_url' => $this->design_url,
-            'current_verision' => $this->current_verision,
+            'current_version' => $this->current_version,
             'product' => ProductResource::make($this->whenLoaded('product')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
         ];
