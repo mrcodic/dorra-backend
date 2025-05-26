@@ -45,9 +45,11 @@ $configData = Helper::applClasses();
       <li class="nav-item {{ $custom_classes }} {{ $isActive }}">
 
 
-        <a href="{{ isset($menu->url) ? url($menu->url) : 'javascript:void(0)' }}" class="d-flex align-items-center"
+        <a href="{{ isset($menu->url) ? url($menu->url) : 'javascript:void(0)' }}" class="d-flex align-items-center gap-1"
           target="{{ isset($menu->newTab) ? '_blank' : '_self' }}">
-          <i data-feather="{{ $menu->icon }}"></i>
+          <!-- <i data-feather="{{ $menu->icon }}"></i> -->
+        <img src="{{ asset('images/sidebar-icons/' . $menu->icon) }}" width="20" height="20" alt="{{ $menu->name }} icon" />
+
           <span class="menu-title text-truncate">{{ __('locale.' . $menu->name) }}</span>
           @if (isset($menu->badge))
           <?php $badgeClasses = 'badge rounded-pill badge-light-primary ms-auto me-1'; ?>

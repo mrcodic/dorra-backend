@@ -2,24 +2,37 @@
     "menu": [
         {
             "name": "Dashboards",
-            "icon": "home",
+            "icon": "Home.svg",
             "slug": "",
             "url": "/"
         },
         {
             "name": "Admins",
-            "icon": "users",
+            "icon": "user.svg",
             "url": "/admins"
         },
         {
             "name": "Users",
-            "icon": "users",
+            "icon": "Teams.svg",
             "slug": "",
             "url": "/users"
         },
         {
+            "name": "Products",
+            "icon": "Projects.svg",
+            "slug": "",
+            "url": "/products"
+        },
+        {
+            "name": "Templates",
+            "icon": "Templates.svg",
+            "slug": "",
+            "url": "/templates"
+
+        },
+        {
             "name": "Categories",
-            "icon": "grid",
+            "icon": "Category.svg",
             "slug": "",
             "submenu": [
                 {
@@ -43,19 +56,41 @@
             ]
         },
         {
-            "name": "Products",
-            "icon": "box",
+            "name": "Orders",
+            "icon": "Orders.svg",
             "slug": "",
-            "url": "/products"
+            "url": "/orders"
         },
+       
+       
         {
-            "name": "Discount",
-            "icon": "percent",
-            "url": "/discount-codes"
+            "name": "Marketing",
+            "icon": "Marketing.svg",
+            "slug": "",
+            "submenu": [
+                {
+                    "name": "DiscountCodes",
+                    "icon": "circle",
+                    "slug": "",
+                    "url": "/discount-codes"
+                },
+                      {
+                    "name": "Offers",
+                    "icon": "circle",
+                    "slug": "",
+                    "url": "/offers"
+                }
+            ]
         },
-        {
+         {
+            "name": "Invoices",
+            "icon": "Invoice.svg",
+            "slug": "",
+            "url": "/invoices"
+        },
+         {
             "name": "Roles",
-            "icon": "shield",
+            "icon": "Roles.svg",
             "slug": "",
             "submenu": [
                 {
@@ -71,6 +106,52 @@
                     "slug": "app-user-list"
                 }
             ]
+        },
+                 {
+            "name": "FAQs & Help",
+            "icon": "Info.svg",
+            "slug": "",
+            "submenu": [
+                {
+                    "url": "/faqs",
+                    "name": "FAQs",
+                    "icon": "circle",
+                    "slug": ""
+                },
+                {
+                    "url": "/messages",
+                    "name": "Messages",
+                    "icon": "circle",
+                    "slug": ""
+                }
+            ]
         }
+        ,
+                 {
+            "name": "Settings",
+            "icon": "Settings.svg",
+            "slug": "",
+            "submenu": [
+                {
+                    "url": "/settings/details",
+                    "name": "Details",
+                    "icon": "circle",
+                    "slug": ""
+                },
+                {
+                    "url": "/settings/payments",
+                    "name": "Payments",
+                    "icon": "circle",
+                    "slug": ""
+                },      
+                {
+                    "url": "/settings/notifications",
+                    "name": "Notifications",
+                    "icon": "circle",
+                    "slug": ""
+                }
+            ]
+        }
+
     ]
 }
