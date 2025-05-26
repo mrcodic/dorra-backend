@@ -27,18 +27,16 @@ class UpdateDesignRequest extends BaseRequest
     public function rules($id): array
     {
         return [
-            'name.en' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('tags', 'name->en')->ignore($id),
-            ],
-            'name.ar' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('tags', 'name->ar')->ignore($id),
-            ],
+            'template_id' => ['required', 'exists:templates,id'],
+            'design_data' => ['required', 'json'],
+            'design_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'design_image' => 'design_url'
         ];
     }
 

@@ -42,7 +42,6 @@ class StoreDesignRequest extends BaseRequest
                 'user_id' =>auth()->user()->id ,
                 'design_data' => $template->value('design_data'),
                 'design_url' => $template->value('preview_image'),
-                'current_version' => 1,
             ]);
         }
         else
@@ -59,8 +58,7 @@ class StoreDesignRequest extends BaseRequest
             $this->merge([
                 'cookie_id' => $cookie ,
                 'design_data' => $template->value('design_data'),
-                'design_url' => $template->value('preview_image'),
-                'current_version' => 1,
+                'design_url' => $template->getRawOriginal('preview_image'),
             ]);
         }
 
