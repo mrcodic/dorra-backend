@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Admins')
-@section('main-page', 'Admins')
+@section('title', 'FAQs')
+@section('main-page', 'FAQs')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -50,25 +50,16 @@
                             placeholder="Search here"
                             style="height: 38px;">
                     </form>
-
-                    <div class="col-2 col-md-2 col-lg-2">
-                        <select name="role_id" class="form-select filter-role">
-                            <option value="" selected disabled>Role</option>
-                            @foreach($associatedData['roles'] as $role)
-                                <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale())}}</option>
-                            @endforeach
-                        </select>
-                    </div>
                     <div class="col-2 col-md-2 col-lg-2">
                         <select name="status" class="form-select filter-status">
-                            <option value="" selected disabled>Status</option>
+                            <option value="" selected disabled>Date</option>
                                 <option value="0">Blocked</option>
                                 <option value="1">Active</option>
                         </select>
                     </div>
                     <button type="button" class="btn btn-outline-primary ms-2" data-bs-toggle="modal"
-                            data-bs-target="#addAdminModal">
-                        Add New Admin
+                            data-bs-target="#showQuestionModal">
+                        Add New Question
                     </button>
                 </div>
 
@@ -78,12 +69,8 @@
                         <th>
                             <input type="checkbox" id="select-all-checkbox">
                         </th>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        {{--                        <th>Role</th>--}}
-                        <th>Status</th>
-                        <th>Join Date</th>
+                        <th>Question</th>
+                        <th>Added Date</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -93,20 +80,18 @@
                         <p id="selected-count-text">0 admins are selected</p>
                         <form id="bulk-delete-form" method="POST" action="{{ route('admins.bulk-delete') }}">
                             @csrf
-                            <button type="submit" id="delete-selected-btn"
-                                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                            <button type="submit" id="delete-selected-btn"  class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
                         </form>
-
-
                     </div>
                 </div>
 
 
             </div>
-            @include('modals/admins/add-admin')
-            @include('modals/admins/edit-admin')
+            @include('modals/questions/add-question')
+            @include('modals/questions/show-question')
+             @include('modals/questions/edit-question')
 
             @include('modals.delete',[
            'id' => 'deleteAdminModal',
@@ -206,5 +191,5 @@
     </script>
 
     {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-admin-list.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-question-list.js') }}?v={{ time() }}"></script>
 @endsection

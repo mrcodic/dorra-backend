@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Admins')
-@section('main-page', 'Admins')
+@section('title', 'Messages')
+@section('main-page', 'Messages')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -67,8 +67,8 @@
                         </select>
                     </div>
                     <button type="button" class="btn btn-outline-primary ms-2" data-bs-toggle="modal"
-                            data-bs-target="#addAdminModal">
-                        Add New Admin
+                            data-bs-target="#showMessage">
+                        Show message modal
                     </button>
                 </div>
 
@@ -105,8 +105,7 @@
 
 
             </div>
-            @include('modals/admins/add-admin')
-            @include('modals/admins/edit-admin')
+            @include('modals/messages/show-message')
 
             @include('modals.delete',[
            'id' => 'deleteAdminModal',
