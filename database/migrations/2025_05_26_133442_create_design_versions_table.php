@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignUuid('design_id')->constrained('designs')->cascadeOnDelete();
             $table->json('design_data');
-            $table->string('design_image')->nullable();
             $table->unsignedInteger('version');
             $table->timestamps();
         });

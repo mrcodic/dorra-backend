@@ -18,7 +18,7 @@ class DesignResource extends JsonResource
         return [
             'id' => $this->id,
             'design_data' => $this->design_data,
-            'design_image' => $this->design_image,
+            'design_image' => $this->getFirstMediaUrl('designs'),
             'current_version' => $this->current_version,
             'product' => ProductResource::make($this->whenLoaded('product')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
