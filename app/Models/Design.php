@@ -20,7 +20,6 @@ class Design extends Model implements HasMedia
         'user_id',
         'template_id',
         'design_data',
-        'design_image',
         'current_version',
     ];
 
