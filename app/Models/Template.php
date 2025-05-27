@@ -33,7 +33,7 @@ class Template extends Model implements HasMedia
     public function previewImage(): Attribute
     {
         return Attribute::get(function ($value){
-           return  $value ?   asset($value) : null;
+           return   $this->getFirstMediaUrl()  ?  $this->getFirstMediaUrl() : null;
         });
     }
 
