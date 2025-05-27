@@ -43,18 +43,30 @@ class TemplateService extends BaseService
     public function getData(): JsonResponse
     {
         $templates = $this->repository
-            ->query(['id', 'name', 'preview_png', 'product_id', 'updated_at'])
+            ->query(['id', 'name', 'product_id', 'status', 'created_at'])
             ->with(['product:id,name'])
+            ->when(request()->filled('search_value'), function ($query) {
+                $locale = app()->getLocale();
+                $search = request('search_value');
+                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            })
+            ->when(request()->filled('product_id'), function ($query) {
+                $query->whereProductId(request('product_id'));
+            })->when(request()->filled('status'), function ($query) {
+                $query->whereStatus(request('status'));
+            })
             ->latest();
-
         return DataTables::of($templates)
             ->addColumn('name', function ($template) {
                 return $template->getTranslation('name', app()->getLocale());
             })
+            ->editColumn('created_at', function ($template) {
+                return $template->created_at->format('d/m/Y');
+            })
             ->addColumn('status', function ($template) {
                 return $template->status?->label() ?? '';
             })
-            ->make(true);
+            ->make();
     }
 
 

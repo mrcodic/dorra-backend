@@ -73,4 +73,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::apiResource('/templates', TemplateController::class)->only(['store', 'show', 'update']);
 Route::get('/templates', [TemplateController::class, 'getProductTemplates']);
-Route::apiResource('/designs', DesignController::class)->only(['store', 'update']);
+Route::apiResource('/designs', DesignController::class)->except(['destroy']);

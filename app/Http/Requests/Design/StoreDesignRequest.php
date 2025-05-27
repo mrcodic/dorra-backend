@@ -36,21 +36,21 @@ class StoreDesignRequest extends BaseRequest
     {
 
         $template = Template::find($this->template_id);
-        if (auth()->check())
+        $cookie = request()->cookie('cookie_id');
+
+        if (auth('sanctum')->check())
         {
             $this->merge([
-                'user_id' =>auth()->user()->id ,
+                'user_id' =>auth('sanctum')->id() ,
+                'cookie_id' => $cookie ?? null ,
                 'design_data' => $template->value('design_data'),
             ]);
 
         }
         else
         {
-            $cookie = request()->cookie('cookie_id');
-
             if (!$cookie)
             {
-
                 $cookie= (string) Str::uuid();
 
                 cookie()->queue(cookie('cookie_id', $cookie, 60 * 24 * 30));

@@ -131,12 +131,12 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/discount-codes', DiscountCodeController::class)->except('show');
 
-//    Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
-//        Route::get('/data', [TemplateController::class, 'getData'])->name('data');
-//        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
-//        Route::post('/publish', 'bulkDelete')->name('publish');
-//    });
-//    Route::resource('/templates', TemplateController::class);
+    Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
+        Route::get('/data', [TemplateController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::post('/publish', 'bulkDelete')->name('publish');
+    });
+    Route::resource('/templates', TemplateController::class);
 
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);

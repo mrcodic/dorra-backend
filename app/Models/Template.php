@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Template\StatusEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +24,9 @@ class Template extends Model implements HasMedia
         'design_data',
 
     ];
-    public $incrementing = false;
+    protected $casts = [
+        'status' => StatusEnum::class,
+    ];
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

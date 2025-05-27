@@ -18,6 +18,12 @@ class DesignController extends Controller
 {
     public function __construct(public DesignService $designService){}
 
+    public function index()
+    {
+        $designs = $this->designService->getDesigns();
+        return Response::api(data: DesignResource::collection($designs));
+
+    }
     public function store(StoreDesignRequest $request)
     {
         $design = $this->designService->storeResource($request->only([
@@ -31,6 +37,11 @@ class DesignController extends Controller
         return Response::api(data: DesignResource::make($design->refresh()));
     }
 
+    public function show($design)
+    {
+        $design = $this->designService->showResource($design,['media']);
+        return Response::api(data: DesignResource::make($design->refresh()));
+    }
     public function update(UpdateDesignRequest $request, $design)
     {
         $design = $this->designService->updateResource($request->validated(), $design);
