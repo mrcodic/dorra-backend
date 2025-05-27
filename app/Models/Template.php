@@ -28,5 +28,5 @@ class Template extends Model implements HasMedia
     {
         return $this->belongsTo(Product::class);
     }
-    
+
 }
