@@ -8,7 +8,7 @@ use Illuminate\Http\UploadedFile;
 class TemplateData
 {
     public int $product_id;
-    public string $name;
+    public array $name;
     public int $status;
     public string $design_data;
     public ?UploadedFile $preview_image;

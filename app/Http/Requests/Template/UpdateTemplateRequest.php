@@ -24,10 +24,21 @@ class UpdateTemplateRequest extends BaseRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules($id): array
     {
         return [
-            'name' => ['sometimes', 'string', 'max:255','unique:templates,name'],
+            'name.en' => [
+                'sometimes',
+                'string',
+                'max:255',
+                Rule::unique('templates', 'name->en')->ignore($id),
+            ],
+            'name.ar' => [
+                'sometimes',
+                'string',
+                'max:255',
+                Rule::unique('templates', 'name->ar')->ignore($id),
+            ],
             'product_id' => ['sometimes', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
             'preview_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Template;
 
 use App\Http\Requests\Base\BaseRequest;
+use Illuminate\Validation\Rule;
 
 
 class StoreTemplateRequest extends BaseRequest
@@ -24,10 +25,20 @@ class StoreTemplateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255','unique:templates,name'],
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('templates', 'name->en'),
+            ],
+            'name.ar' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('templates', 'name->ar'),
+            ],
             'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['required', 'json'],
-//            'preview_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
         ];
 
