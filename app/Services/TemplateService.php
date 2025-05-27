@@ -57,13 +57,10 @@ class TemplateService extends BaseService
 
 
 
-    public function getProductTemplatesCursor($productId)
+    public function getProductTemplates($productId)
     {
-        return $this->repository->query()
-            ->whereProductId($productId)
-            ->cursor();
+        return $this->repository->query()->whereProductId($productId)->paginate(10);
     }
-
     public function getData(): JsonResponse
     {
         $templates = $this->repository
