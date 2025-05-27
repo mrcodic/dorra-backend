@@ -31,14 +31,20 @@ class TemplateService extends BaseService
             $file->move($destinationPath, $fileName);
             $storedImagePath = 'templates/' . $fileName;
         }
-
+        if ($validatedData->source_design_svg instanceof UploadedFile) {
+            $file = $validatedData->source_design_svg;
+            $fileName = uniqid() . '.' .  $file->getClientOriginalExtension();
+            $destinationPath = public_path('templates/svg-files');
+            $file->move($destinationPath, $fileName);
+            $storedSvgImagePath = 'templates/svg-files/' . $fileName;
+        }
         $model = $this->repository->create([
             'name' => $validatedData->name,
             'status' => $validatedData->status,
             'product_id' => $validatedData->product_id,
             'design_data' => $validatedData->design_data,
-            'preview_image' => $storedImagePath,
-            'source_design_svg' => $validatedData->source_design_svg,
+            'preview_image' => $storedImagePath ?? null,
+            'source_design_svg' => $storedSvgImagePath ?? null,
         ]);
 
         return $model->load($relationsToLoad);

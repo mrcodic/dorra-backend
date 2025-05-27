@@ -6,7 +6,7 @@ use App\Http\Resources\Product\ProductResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TemplateResource extends JsonResource
+class DesignResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,12 +17,11 @@ class TemplateResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
             'design_data' => $this->design_data,
+            'design_image' => $this->design_image,
+            'current_version' => $this->current_version,
             'product' => ProductResource::make($this->whenLoaded('product')),
-            'preview_image' => $this->preview_image,
-            'source_design_svg' => $this->source_design_svg,
-
+            'template' => TemplateResource::make($this->whenLoaded('template')),
         ];
     }
 }

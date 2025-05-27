@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Services\TemplateService;
 use Illuminate\Http\JsonResponse;
-use App\Http\Requests\Template\{StoreTemplateRequest, UpdateTemplateRequest};
+use App\Http\Requests\Template\{StoreTemplateRequest, UpdateDesignRequest, UpdateTemplateRequest};
 
 
 class TemplateController extends DashboardController

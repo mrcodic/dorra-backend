@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Http\Requests\Template;
+namespace App\Http\Requests\Design;
 
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\CountryCode;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
+use Propaganistas\LaravelPhone\Rules\Phone;
 
-
-class StoreTemplateRequest extends BaseRequest
+class UpdateDesignRequest extends BaseRequest
 {
     /**
      * Determine if the v1 is authorized to make this request.
@@ -24,13 +27,9 @@ class StoreTemplateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255','unique:templates,name'],
-            'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['required', 'json'],
-            'preview_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],
-            'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
+            'design_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],
         ];
-
     }
 
 

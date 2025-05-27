@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\RegisterController,
     Auth\ResetPasswordController,
     Category\CategoryController,
+    Design\DesignController,
     General\MainController,
     Product\ProductController,
     Profile\PasswordController,
@@ -13,8 +14,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\UserNotificationTypeController,
     SaveController,
     ShippingAddress\ShippingAddressController,
-    Template\TemplateController
-};
+    Template\TemplateController};
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
@@ -73,3 +73,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::apiResource('/templates', TemplateController::class)->only(['store', 'show']);
 Route::get('/templates', [TemplateController::class, 'getProductTemplates']);
+Route::apiResource('/designs', DesignController::class)->only(['store', 'update']);
