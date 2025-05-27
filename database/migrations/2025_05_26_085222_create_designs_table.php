@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->foreignUuid('template_id')->nullable()->constrained()->nullOnDelete();
             $table->json('design_data');
-            $table->string('design_image')->nullable();
             $table->unsignedInteger('current_version')->default(1);
             $table->timestamps();
         });

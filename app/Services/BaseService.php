@@ -45,10 +45,8 @@ class BaseService
     public function updateResource($validatedData, $id, $relationsToLoad =[])
     {
         $model = $this->repository->update($validatedData, $id);
-        $model->load($relationsToLoad);
         $files = request()->allFiles();
         if ($files) {
-            dd($files);
             handleMediaUploads($files, $model, clearExisting: true);
         }
         return $model->load($relationsToLoad);

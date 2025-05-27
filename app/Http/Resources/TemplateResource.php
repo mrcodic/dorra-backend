@@ -15,13 +15,14 @@ class TemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'design_data' => $this->design_data,
             'product' => ProductResource::make($this->whenLoaded('product')),
-            'preview_image' => $this->preview_image,
-            'source_design_svg' => $this->source_design_svg,
+//            'preview_image' => $this->getFirstMediaUrl('templates'),
+            'source_design_svg' => $this->getFirstMediaUrl('templates'),
 
         ];
     }

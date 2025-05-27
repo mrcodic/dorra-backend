@@ -14,9 +14,9 @@ enum StatusEnum : int
     public function label()
     {
         return match ($this) {
-            self::DRAFTED => __('Draft'),
-            self::APPROVED => __('Approved'),
-            self::LIVE => __('Live'),
+            self::DRAFTED => "Draft",
+            self::APPROVED => "Approved",
+            self::LIVE => "Live",
         };
     }
 
