@@ -43,8 +43,8 @@ class TemplateService extends BaseService
             'status' => $validatedData->status,
             'product_id' => $validatedData->product_id,
             'design_data' => $validatedData->design_data,
-            'preview_image' => $storedImagePath,
-            'source_design_svg' => $storedSvgImagePath,
+            'preview_image' => $storedImagePath ?? null,
+            'source_design_svg' => $storedSvgImagePath ?? null,
         ]);
 
         return $model->load($relationsToLoad);
