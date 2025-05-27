@@ -46,6 +46,10 @@ class TemplateService extends BaseService
             'preview_image' => $storedImagePath ?? null,
             'source_design_svg' => $storedSvgImagePath ?? null,
         ]);
+//        if (request()->allFiles()) {
+//            handleMediaUploads(request()->allFiles(), $model);
+//        }
+
 
         return $model->load($relationsToLoad);
     }
@@ -53,10 +57,13 @@ class TemplateService extends BaseService
 
 
 
-    public function getProductTemplates($productId)
+    public function getProductTemplatesCursor($productId)
     {
-        return $this->repository->query()->whereProductId($productId)->get();
+        return $this->repository->query()
+            ->whereProductId($productId)
+            ->cursor();
     }
+
     public function getData(): JsonResponse
     {
         $templates = $this->repository

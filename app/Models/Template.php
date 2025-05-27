@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
-class Template extends Model
+class Template extends Model implements HasMedia
 {
-    use HasUuids,HasTranslations;
+    use HasUuids,HasTranslations, InteractsWithMedia;
     public $translatable = ['name'];
 
     protected $fillable = [
@@ -32,7 +33,7 @@ class Template extends Model
     public function previewImage(): Attribute
     {
         return Attribute::get(function ($value){
-           return  asset($value) ??null;
+           return  $value ?   asset($value) : null;
         });
     }
 
