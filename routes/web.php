@@ -18,9 +18,11 @@ use App\Http\Controllers\Dashboard\{AdminController,
     CategoryController,
     ProfileController,
     DiscountCodeController,
-    SettingController};
+    SettingController,
+    OfferController,
+    LogisticController};
 use Illuminate\Support\Facades\Route;
-use Laravel\Jetstream\Rules\Role;
+
 
 Route::view('/login/social', 'dashboard.auth.social-login');
 Route::view('confirm-password', 'dashboard.auth.confirm-password');
@@ -107,6 +109,19 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/messages', MessageController::class)->except('show');
+
+    Route::group(['prefix' => 'offers', 'as' => 'offers.', 'controller' => OfferController::class,], function () {
+        Route::get('/data', [OfferController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::resource('/offers', OfferController::class)->except('show');
+
+     Route::group(['prefix' => 'logistics', 'as' => 'logistics.', 'controller' => LogisticController::class,], function () {
+        Route::get('/data', [LogisticController::class, 'getData'])->name('data');
+         Route::get('/dashboard', [LogisticController::class, 'dashboard'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::resource('/logistics', LogisticController::class)->except('show');
 
     Route::group(['prefix' => 'discount-codes', 'as' => 'discount-codes.', 'controller' => DiscountCodeController::class,], function () {
         Route::get('/data', [DiscountCodeController::class, 'getData'])->name('data');

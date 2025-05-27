@@ -28,7 +28,6 @@
             "icon": "Templates.svg",
             "slug": "",
             "url": "/templates"
-
         },
         {
             "name": "Categories",
@@ -61,8 +60,7 @@
             "slug": "",
             "url": "/orders"
         },
-       
-       
+
         {
             "name": "Marketing",
             "icon": "Marketing.svg",
@@ -74,7 +72,7 @@
                     "slug": "",
                     "url": "/discount-codes"
                 },
-                      {
+                {
                     "name": "Offers",
                     "icon": "circle",
                     "slug": "",
@@ -82,13 +80,32 @@
                 }
             ]
         },
-         {
+        {
             "name": "Invoices",
             "icon": "Invoice.svg",
             "slug": "",
             "url": "/invoices"
         },
-         {
+        {
+            "name": "Logistics",
+            "icon": "Home.svg",
+            "slug": "",
+            "submenu": [
+                {
+                    "url": "/logistics/dashboard",
+                    "name": "Dashboard",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/logistics",
+                    "name": "Locations",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                }
+            ]
+        },
+        {
             "name": "Roles",
             "icon": "Roles.svg",
             "slug": "",
@@ -107,7 +124,7 @@
                 }
             ]
         },
-                 {
+        {
             "name": "FAQs & Help",
             "icon": "Info.svg",
             "slug": "",
@@ -125,9 +142,8 @@
                     "slug": ""
                 }
             ]
-        }
-        ,
-                 {
+        },
+        {
             "name": "Settings",
             "icon": "Settings.svg",
             "slug": "",
@@ -143,7 +159,7 @@
                     "name": "Payments",
                     "icon": "circle",
                     "slug": ""
-                },      
+                },
                 {
                     "url": "/settings/notifications",
                     "name": "Notifications",
@@ -152,6 +168,5 @@
                 }
             ]
         }
-
     ]
 }
