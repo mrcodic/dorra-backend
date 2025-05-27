@@ -41498,7 +41498,7 @@ input:focus~.bg-light {
 }
 
 .progress-bar-primary {
-    background-color: rgba(115, 103, 240, 0.12);
+    background-color: #B3E3D8;
 }
 
 .progress-bar-primary .progress-bar {
