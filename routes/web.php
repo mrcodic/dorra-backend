@@ -170,6 +170,8 @@ Route::middleware('auth')->group(function () {
 
         });
         Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);
+        Route::apiResource('/v1/templates', TemplateController::class)->only(['store', 'show', 'update']);
+        Route::get('/v1/templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
     });
 
 });

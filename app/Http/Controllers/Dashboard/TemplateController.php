@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
+use App\Http\Resources\TemplateResource;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\TemplateService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Template\{StoreTemplateRequest, UpdateTemplateRequest};
 
 
@@ -34,5 +36,12 @@ class TemplateController extends DashboardController
         return $this->templateService->getData();
     }
 
+    public function getProductTemplates()
+    {
+        $productId = request()->input('productId');
+        $templates = $this->templateService->getProductTemplates($productId);
+        return Response::api(data: TemplateResource::collection($templates));
+
+    }
 
 }
