@@ -60,10 +60,9 @@ class MainController extends Controller
     public function adminCheck()
     {
         if (auth()->check()) {
-            return Response::api(data: ['authorized' => true]);
+            return response()->json(['message' => 'authenticated.'], 200);
         }
-        return Response::api(status : HttpEnum::FORBIDDEN,data: ['authorized' => false]);
-        
+
     }
 
 

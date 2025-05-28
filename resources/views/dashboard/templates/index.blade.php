@@ -76,10 +76,9 @@
                     </div>
                     {{-- Add Button - 20% on md+, full width on xs --}}
                     <div class="col-6 col-md-2 text-md-end">
-                        <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                           data-bs-target="#addTemplateModal">
+                        <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ config("services.editor_url") }}">
                             <i data-feather="upload"></i>
-                            Upload Templates
+                            Upload Template
                         </a>
                     </div>
 

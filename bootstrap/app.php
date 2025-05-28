@@ -22,5 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api([EnsureFrontendRequestsAreStateful::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->render(function (Illuminate\Auth\AuthenticationException $e, $request) {
+            if ($request->route()->getName() === 'admin-check') {
 
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+
+            return redirect()->guest(route('login'));
+        });
     })->create();
