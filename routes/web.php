@@ -136,7 +136,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::post('/publish', 'bulkDelete')->name('publish');
     });
-    Route::resource('/templates', TemplateController::class);
+    Route::resource('template/templates', TemplateController::class);
 
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);

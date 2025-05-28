@@ -27,7 +27,7 @@
             "name": "Templates",
             "icon": "Templates.svg",
             "slug": "",
-            "url": "/templates"
+            "url": "template/templates"
         },
         {
             "name": "Categories",
@@ -56,7 +56,7 @@
         },
         {
             "name": "Orders",
-            "icon": "Orders.svg",
+            "icon": "orders.svg",
             "slug": "",
             "url": "/orders"
         },
