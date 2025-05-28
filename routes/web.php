@@ -168,7 +168,12 @@ Route::middleware('auth')->group(function () {
 
         });
         Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);
-
+        Route::get('admin-check', function () {
+            if (auth()->check()) {
+                return response()->json(['authorized' => true]);
+            }
+            return response()->json(['authorized' => false], 403);
+        });
     });
 
 });
