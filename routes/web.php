@@ -165,7 +165,7 @@ Route::middleware('auth')->group(function () {
             Route::get('sub-categories', 'subCategories')->name('sub-categories');
             Route::delete('/media/{media}', 'removeMedia')->name('remove-media');
             Route::post('/media/{resource}', 'addMedia')->name('add-media');
-            Route::get('admin-check', 'adminCheck')->name('admin-check');
+            Route::get('/v1/admin-check', 'adminCheck')->name('admin-check');
 
 
         });

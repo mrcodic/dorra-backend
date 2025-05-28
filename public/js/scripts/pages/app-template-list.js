@@ -63,10 +63,10 @@ const dt_user_table = $(".template-list-table").DataTable({
             orderable: false,
             searchable: false,
             render: function (data, type, row) {
-                console.log(row)
-                return `
-
-
+                return `<a href="${showTemplateUrl}${data}" class="view-details"
+                               >
+                                                <i data-feather="eye"></i>
+                                </a>
         <a href="#" class=" text-danger open-delete-template-modal" data-id="${data}"
                 data-bs-toggle="modal"
                 data-bs-target="#deleteTemplateModal" >
