@@ -17,6 +17,8 @@ $(window).on('load', function () {
 
   var $gainedChart = document.querySelector('#gained-chart');
   var $orderChart = document.querySelector('#order-chart');
+  var $visitsChart = document.querySelector('#visits-chart');
+   var $refundChart = document.querySelector('#refund-chart');
   var $avgSessionsChart = document.querySelector('#avg-sessions-chart');
   var $supportTrackerChart = document.querySelector('#support-trackers-chart');
   var $salesVisitChart = document.querySelector('#sales-visit-chart');
@@ -26,10 +28,14 @@ $(window).on('load', function () {
   var avgSessionsChartOptions;
   var supportTrackerChartOptions;
   var salesVisitChartOptions;
+  var visitsChartOptions;
+   var refundChartOptions;
 
   var gainedChart;
   var orderChart;
   var avgSessionsChart;
+  var visitsChart;
+   var refundChart;
   var supportTrackerChart;
   var salesVisitChart;
   var isRtl = $('html').attr('data-textdirection') === 'rtl';
@@ -57,7 +63,7 @@ $(window).on('load', function () {
         }
       }
     },
-    colors: [window.colors.solid.primary],
+    colors: ['#4E2775'],
     dataLabels: {
       enabled: false
     },
@@ -124,7 +130,7 @@ $(window).on('load', function () {
         }
       }
     },
-    colors: [window.colors.solid.warning],
+    colors: ["#24B094"],
     dataLabels: {
       enabled: false
     },
@@ -169,6 +175,142 @@ $(window).on('load', function () {
   };
   orderChart = new ApexCharts($orderChart, orderChartOptions);
   orderChart.render();
+
+
+    // visits Chart
+  // ----------------------------------
+
+ visitsChartOptions = {
+    chart: {
+      height: 100,
+      type: 'area',
+      toolbar: {
+        show: false
+      },
+      sparkline: {
+        enabled: true
+      },
+      grid: {
+        show: false,
+        padding: {
+          left: 0,
+          right: 0
+        }
+      }
+    },
+    colors: ["#F8AB1B"],
+    dataLabels: {
+      enabled: false
+    },
+    stroke: {
+      curve: 'smooth',
+      width: 2.5
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 0.9,
+        opacityFrom: 0.7,
+        opacityTo: 0.5,
+        stops: [0, 80, 100]
+      }
+    },
+    series: [
+      {
+        name: 'Visits',
+        data: [10, 15, 8, 15, 7, 12, 8]
+      }
+    ],
+    xaxis: {
+      labels: {
+        show: false
+      },
+      axisBorder: {
+        show: false
+      }
+    },
+    yaxis: [
+      {
+        y: 0,
+        offsetX: 0,
+        offsetY: 0,
+        padding: { left: 0, right: 0 }
+      }
+    ],
+    tooltip: {
+      x: { show: false }
+    }
+  };
+  visitsChart = new ApexCharts($visitsChart, visitsChartOptions);
+  visitsChart.render();
+
+      // refund Chart
+  // ----------------------------------
+
+ refundChartOptions = {
+    chart: {
+      height: 100,
+      type: 'area',
+      toolbar: {
+        show: false
+      },
+      sparkline: {
+        enabled: true
+      },
+      grid: {
+        show: false,
+        padding: {
+          left: 0,
+          right: 0
+        }
+      }
+    },
+    colors: ["#222245"],
+    dataLabels: {
+      enabled: false
+    },
+    stroke: {
+      curve: 'smooth',
+      width: 2.5
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 0.9,
+        opacityFrom: 0.7,
+        opacityTo: 0.5,
+        stops: [0, 80, 100]
+      }
+    },
+    series: [
+      {
+        name: 'Refund',
+        data: [10, 15, 8, 15, 7, 12, 8]
+      }
+    ],
+    xaxis: {
+      labels: {
+        show: false
+      },
+      axisBorder: {
+        show: false
+      }
+    },
+    yaxis: [
+      {
+        y: 0,
+        offsetX: 0,
+        offsetY: 0,
+        padding: { left: 0, right: 0 }
+      }
+    ],
+    tooltip: {
+      x: { show: false }
+    }
+  };
+  refundChart = new ApexCharts($refundChart, refundChartOptions);
+  refundChart.render();
+
 
   // Average Session Chart
   // ----------------------------------
