@@ -49,4 +49,6 @@ return [
         'private_key' => env('APPLE_PRIVATE_KEY_PATH'),
     ],
 
+    'editor_url' => env('FRONT_END_EDITOR_URL'),
+
 ];

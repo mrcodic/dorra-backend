@@ -136,7 +136,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::post('/publish', 'bulkDelete')->name('publish');
     });
-    Route::resource('/templates', TemplateController::class);
+    Route::resource('/product-templates', TemplateController::class);
 
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);
@@ -165,10 +165,13 @@ Route::middleware('auth')->group(function () {
             Route::get('sub-categories', 'subCategories')->name('sub-categories');
             Route::delete('/media/{media}', 'removeMedia')->name('remove-media');
             Route::post('/media/{resource}', 'addMedia')->name('add-media');
+            Route::get('/v1/admin-check', 'adminCheck')->name('admin-check');
+
 
         });
         Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);
-
+        Route::apiResource('/v1/templates', TemplateController::class)->only(['store', 'show', 'update']);
+        Route::get('/v1/templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
     });
 
 });

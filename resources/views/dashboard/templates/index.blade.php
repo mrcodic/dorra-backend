@@ -204,11 +204,12 @@
 @endsection
 
 @section('page-script')
-<script>
-    const templatesDataUrl = "{{ route('templates.data') }}";
-    const templatesCreateUrl = "{{ route('templates.create') }}";
-    const locale = "{{ app()->getLocale() }}";
-</script>
+    <script>
+        const templatesDataUrl = "{{ route('templates.data') }}";
+        const showTemplateUrl = "{{ config("services.editor_url") }}";
+
+        const locale = "{{ app()->getLocale() }}";
+    </script>
 
 
 {{-- Page js files --}}
