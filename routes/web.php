@@ -165,15 +165,11 @@ Route::middleware('auth')->group(function () {
             Route::get('sub-categories', 'subCategories')->name('sub-categories');
             Route::delete('/media/{media}', 'removeMedia')->name('remove-media');
             Route::post('/media/{resource}', 'addMedia')->name('add-media');
+            Route::get('admin-check', 'adminCheck')->name('admin-check');
+
 
         });
         Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);
-        Route::get('admin-check', function () {
-            if (auth()->check()) {
-                return response()->json(['authorized' => true]);
-            }
-            return response()->json(['authorized' => false], 403);
-        });
     });
 
 });

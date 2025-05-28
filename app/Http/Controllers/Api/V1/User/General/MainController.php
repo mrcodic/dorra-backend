@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\User\General;
 
 
+use App\Enums\HttpEnum;
 use App\Http\Controllers\Controller;
 use App\Models\CountryCode;
 use App\Services\CategoryService;
@@ -54,6 +55,15 @@ class MainController extends Controller
     public function subCategories()
     {
         return Response::api(data: CategoryResource::collection($this->categoryService->getSubCategories()));
+    }
+
+    public function adminCheck()
+    {
+        if (auth()->check()) {
+            return Response::api(data: ['authorized' => true]);
+        }
+        return Response::api(status : HttpEnum::FORBIDDEN,data: ['authorized' => false]);
+        
     }
 
 
