@@ -41,5 +41,10 @@ class DesignService extends BaseService
         })->paginate();
     }
 
+    public function getDesignVersions($designId)
+    {
+        return $this->repository->find($designId)->versions()->paginate();
+    }
+
 
 }

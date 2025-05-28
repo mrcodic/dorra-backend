@@ -102,25 +102,26 @@
 
             </div>
             <div class="row gx-2 gy-2 align-items-center px-1 pt-2">
-                @for ($i = 1; $i <= 4; $i++)
+                @foreach ($associatedData['templates'] as $template)
                     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
                     <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
                         <!-- Checkbox -->
                         <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 template-checkbox" name="selected_templates[]">
-                        <div style="background-color: #F4F6F6;height:160px">
+                        <div style="background-color: #F4F6F6;height:200px">
                             <!-- Top Image -->
-                            <img src="{{asset('images/icons/pdf.png')}}" class="mx-auto d-block " style="height:100%; width: auto;" alt="Template Image">
+                            <img src="{{ $template->getFirstMediaUrl('templates') }}" class="mx-auto d-block " style="height:100%; width: auto;" alt="Template Image">
                         </div>
 
                         <!-- Template Info -->
                         <div class="card-body text-start p-2">
-                            <h6 class="fw-bold mb-1 text-black fs-3">Template Name {{ $i }}</h6>
-                            <p class=" small mb-1">Product Name</p>
+                            <h6 class="fw-bold mb-1 text-black fs-3">{{ $template->getTranslation('name',app()->getLocale()) }}</h6>
+                            <p class=" small mb-1">{{ $template->product->getTranslation('name',app()->getLocale()) }}</p>
 
                             <!-- Tags -->
                             <div class="d-flex flex-wrap justify-content-start gap-1 mb-2">
-                                <span class="badge rounded-pill text-black p-75" style="background-color: #FCF8FC;">Modern</span>
-                                <span class="badge rounded-pill text-black p-75" style="background-color: #FCF8FC;">Fun</span>
+                                @foreach($template->product->tags as $tag)
+                                    <span class="badge rounded-pill text-black p-75" style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
+                                @endforeach
                             </div>
 
                             <!-- Palette and Status -->
@@ -130,27 +131,32 @@
                                     <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #33B5FF;"></div>
                                     <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #9B59B6;"></div>
                                 </div>
-                                <span class="badge text-dark  p-75" style="background-color: #CED5D4">Drafted</span>
+                                <span class="badge text-dark  p-75" style="background-color: #CED5D4">{{ $template->status->label() }}</span>
                             </div>
 
                             <hr class="my-2">
 
                             <!-- Footer Buttons -->
                             <div class="d-flex justify-content-center gap-1">
-                                <button class="btn btn-outline-secondary  text-black">Show</button>
+                                <a class="btn btn-outline-secondary  text-black" href="{{ config("services.editor_url").$template->id }}">Show</a>
                                 <button class="btn btn-outline-secondary text-black">Edit</button>
                                 <button class="btn btn-outline-danger">Delete</button>
                             </div>
                         </div>
                     </div>
             </div>
-            @endfor
+            @endforeach
+
+
         </div>
 
+            <div class="mt-2 px-1">
+                {{ $associatedData['templates']->links('pagination::bootstrap-5') }}
 
-
+            </div>
 
     </div>
+
 
     <!-- Bulk Delete Bar -->
     <div id="bulk-delete-container" class="my-2 bulk-delete-container " style="display: none;">

@@ -9,7 +9,9 @@ use App\Http\Requests\Design\StoreDesignRequest;
 use App\Http\Requests\Design\UpdateDesignRequest;
 use App\Http\Resources\DesignResource;
 
+use App\Http\Resources\DesignVersionResource;
 use App\Models\Design;
+use App\Models\DesignVersion;
 use App\Services\DesignService;
 use Illuminate\Support\Facades\Response;
 
@@ -42,9 +44,18 @@ class DesignController extends Controller
         $design = $this->designService->showResource($design,['media']);
         return Response::api(data: DesignResource::make($design->refresh()));
     }
+
     public function update(UpdateDesignRequest $request, $design)
     {
         $design = $this->designService->updateResource($request->validated(), $design);
         return Response::api(data: DesignResource::make($design->refresh()));
+    }
+
+    public function getDesignVersions($designId)
+    {
+        $designVersions = $this->designService->getDesignVersions($designId);
+        return Response::api(data: DesignVersionResource::collection($designVersions));
+
+
     }
 }

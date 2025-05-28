@@ -73,3 +73,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::apiResource('/designs', DesignController::class)->except(['destroy']);
+Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
