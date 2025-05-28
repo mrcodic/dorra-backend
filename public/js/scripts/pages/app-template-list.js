@@ -181,7 +181,7 @@ dt_user_table.on("draw", function () {
 $(document).on("click", ".open-delete-template-modal", function () {
     const templateId = $(this).data("id");
 
-    $("#deleteTemplateForm").attr('action',`templates/${templateId}`);
+    $("#deleteTemplateForm").attr('action',`product-templates/${templateId}`);
 });
 
 handleAjaxFormSubmit('#deleteTemplateForm', {

@@ -116,8 +116,8 @@
 
             </div>
 
-            @include('modals.templates.add-template')
-            @include('modals.templates.edit-template')
+{{--            @include('modals.templates.add-template')--}}
+{{--            @include('modals.templates.edit-template')--}}
             @include('modals.delete',[
             'id' => 'deleteTemplateModal',
             'formId' => 'deleteTemplateForm',
@@ -157,7 +157,6 @@
 @section('page-script')
     <script>
         const templatesDataUrl = "{{ route('templates.data') }}";
-        const templatesCreateUrl = "{{ route('templates.create') }}";
         const locale = "{{ app()->getLocale() }}";
     </script>
 
