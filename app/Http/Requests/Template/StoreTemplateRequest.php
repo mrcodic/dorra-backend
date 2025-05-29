@@ -27,7 +27,7 @@ class StoreTemplateRequest extends BaseRequest
     {
         return [
             'name.en' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
                 Rule::unique('templates', 'name->en'),
@@ -39,7 +39,7 @@ class StoreTemplateRequest extends BaseRequest
                 Rule::unique('templates', 'name->en'),
             ],
             'name.ar' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
                 Rule::unique('templates', 'name->ar'),

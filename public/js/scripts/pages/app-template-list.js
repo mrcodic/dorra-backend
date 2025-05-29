@@ -203,7 +203,7 @@ dt_user_table.on("draw", function () {
 
 $(document).on("click", ".open-delete-template-modal", function () {
     const templateId = $(this).data("id");
-
+    $('#deleteTemplateForm input[name="id"]').val(templateId);
     $("#deleteTemplateForm").attr('action',`product-templates/${templateId}`);
 });
 
@@ -211,13 +211,14 @@ handleAjaxFormSubmit('#deleteTemplateForm', {
     successMessage: "✅ Template deleted successfully!",
     closeModal: '#deleteTemplateModal',
     onSuccess: function (response, $form) {
-        const templateId = $form.find('input[name="id"]').val();
-        const card = document.getElementById(`template-card-${templateId}`);
-        if (card) {
-            card.remove();
-        }
+        const deletedId = $form.find('input[name="id"]').val();
+        console.log(deletedId)
+        const card = $(`button[data-id="${deletedId}"]`).closest('.col-md-6.col-lg-4.col-xxl-4');
+        card.remove();
     }
 });
+
+
 $(document).on("submit", "#bulk-delete-form", function (e) {
     e.preventDefault();
     const selectedIds = $(".category-checkbox:checked").map(function () {
