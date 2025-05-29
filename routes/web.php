@@ -137,7 +137,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::post('/publish', 'bulkDelete')->name('publish');
     });
-    Route::post('/store-templates', 'storeAndRedirect')->name('templates-redirect.store');
+    Route::post('/store-templates', [TemplateController::class,'storeAndRedirect'])->name('templates-redirect.store');
 
     Route::resource('/product-templates', TemplateController::class);
 
