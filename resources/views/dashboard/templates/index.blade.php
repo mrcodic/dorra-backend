@@ -102,7 +102,7 @@
 
             </div>
             <div class="row gx-2 gy-2 align-items-center px-1 pt-2">
-                @for ($i = 1; $i <= 4; $i++)
+                @for ($i = 1; $i <= 14; $i++)
                     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
                     <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
                         <!-- Checkbox -->
@@ -147,11 +147,6 @@
             @endfor
         </div>
 
-
-
-
-    </div>
-
     <!-- Bulk Delete Bar -->
     <div id="bulk-delete-container" class="my-2 bulk-delete-container " style="display: none;">
         <div class="delete-container mx-auto">
@@ -164,6 +159,11 @@
             </button>
         </div>
     </div>
+
+
+    </div>
+
+
 
     @include('modals.templates.add-template')
     @include('modals.templates.edit-template')
@@ -223,7 +223,7 @@
             const count = selectedCheckboxes.length;
 
             document.getElementById("selected-count-text").textContent = `${count} Templates are selected`;
-            bulkContainer.style.display = count > 0 ? "block" : "none";
+            bulkContainer.style.display = count > 0 ? "flex" : "none";
         }
 
         // Attach listener

@@ -20330,6 +20330,7 @@ footer.footer-border {
 
 .main-menu.menu-light .navigation>li.active {
     z-index: 1;
+    background-color: #F9FDFC;
 }
 
 .main-menu.menu-light .navigation>li.active>a {
