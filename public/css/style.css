@@ -1,17 +1,17 @@
 @font-face {
-    font-family: 'HvDTrial Brandon Grotesque';
-    src: url('{{ asset("fonts/ArbFONTS-4_F4.ttf") }}') format('ttf'),
-    url('{{ asset("fonts/ArbFONTS-4_F5.ttf") }}') format('ttf'),
-    url('{{ asset("fonts/ArbFONTS-BR.ttf") }}') format('ttf'),
-    url('{{ asset("fonts/ArbFONTS-riyad-bank-Bold.ttf") }}') format('ttf'),
-    url('{{ asset("fonts/ArbFONTS-riyad-bank-Regular.ttf") }}') format('ttf');
+    font-family: "HvDTrial Brandon Grotesque";
+    src: url('{{ asset("fonts/ArbFONTS-4_F4.ttf") }}') format("ttf"),
+        url('{{ asset("fonts/ArbFONTS-4_F5.ttf") }}') format("ttf"),
+        url('{{ asset("fonts/ArbFONTS-BR.ttf") }}') format("ttf"),
+        url('{{ asset("fonts/ArbFONTS-riyad-bank-Bold.ttf") }}') format("ttf"),
+        url('{{ asset("fonts/ArbFONTS-riyad-bank-Regular.ttf") }}')
+            format("ttf");
     font-weight: normal;
     font-style: normal;
 }
 
-
 .disabled-field {
-    background-color: #FCF9FC;
+    background-color: #fcf9fc;
     padding: 7px;
     border-radius: 12px;
     color: #121212;
@@ -35,11 +35,10 @@
     padding-right: 16px;
     padding-bottom: 10px;
     padding-top: 10px;
-
 }
 
 .tab-button.active {
-    background-color: #24B094;
+    background-color: #24b094;
     border-radius: 12px;
     color: white;
     padding-left: 16px;
@@ -49,20 +48,20 @@
 }
 
 .primary-text-color {
-    color: #24B094;
+    color: #24b094;
 }
-.active-label{
-    background-color:#D7EEDD;
+.active-label {
+    background-color: #d7eedd;
 }
-.status-label{
+.status-label {
     font-size: 14px;
     font-weight: 500;
-    width: 74px; ;
+    width: 74px;
     height: 24px;
 }
 
-
-#multi-upload-content,#upload-content {
+#multi-upload-content,
+#upload-content {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -70,7 +69,7 @@
 }
 
 .upload-card {
-    border: 2px dashed #CED5D4;
+    border: 2px dashed #ced5d4;
     border-radius: 12px;
     padding: 30px;
     text-align: center;
@@ -97,35 +96,29 @@
     gap: 10px;
 }
 
-
-
 .file-info {
     flex-grow: 1;
 }
-
 
 .progress {
     height: 5px;
     margin-top: 8px;
 }
 
-.bread-crumb-title{
+.bread-crumb-title {
     font-weight: 500;
     color: #121212;
     font-size: 18px;
 }
-.bulk-delete-container{
+.bulk-delete-container {
     width: 100%;
     display: flex;
     justify-content: center;
     padding: 5px;
-
-
 }
 
-.delete-container{
-
-    border: 1px solid #CED5D4;
+.delete-container {
+    border: 1px solid #ced5d4;
     border-radius: 16px;
     width: 65%;
     display: flex;
@@ -135,30 +128,33 @@
     padding-bottom: 24px;
     padding-right: 16px;
     padding-left: 16px;
+    background-color: white;
+    margin-bottom: 2px;
+    position: fixed;
+    bottom: 10px;
 }
 
-.fs-16{
+.fs-16 {
     font-size: 16px;
 }
-.fs-10{
+.fs-10 {
     font-size: 10px;
 }
 
-.profile-tab{
+.profile-tab {
     border-radius: 0;
     background-color: white;
-    border-left: 4px solid #9EA4A3;
+    border-left: 4px solid #9ea4a3;
     text-align: start;
     padding-left: 8px;
     font-size: 18px;
 }
-.profile-tab.active{
+.profile-tab.active {
     border-radius: 0;
     background-color: white;
-    border-left: 4px solid #24B094;
+    border-left: 4px solid #24b094;
     color: #121212;
     padding-left: 8px;
-
 }
 
 .order-img {
@@ -182,8 +178,8 @@
 }
 
 .status-pill {
-    background-color: #FCF8FC;
-    color: #4E2775;
+    background-color: #fcf8fc;
+    color: #4e2775;
     border-radius: 20px;
     padding: 6px 12px;
     font-weight: 500;
@@ -193,30 +189,27 @@
 .status-icon {
     width: 24px;
     height: 24px;
-    background-color: #DFC2E3;
+    background-color: #dfc2e3;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.lined-btn{
-    background:white;
+.lined-btn {
+    background: white;
     border: none;
-    color: #24B094;
+    color: #24b094;
     text-decoration: underline;
     cursor: pointer;
-
 }
 
-
-.form-check-input:checked{
-    accent-color: #24B094 !important;
+.form-check-input:checked {
+    accent-color: #24b094 !important;
 }
 
 @media (min-width: 1441px) {
-  .custom-4-per-row {
-    flex: 0 0 auto;
-    width: 25%; /* 100 / 4 = 25% */
-  }
+    .custom-4-per-row {
+        flex: 0 0 auto;
+        width: 25%; /* 100 / 4 = 25% */
+    }
 }
-

@@ -174,6 +174,11 @@
         </div>
     </div>
 
+
+    </div>
+
+
+
     @include('modals.templates.add-template')
     @include('modals.templates.edit-template')
     @include('modals.delete',[
@@ -232,7 +237,7 @@
             const count = selectedCheckboxes.length;
 
             document.getElementById("selected-count-text").textContent = `${count} Templates are selected`;
-            bulkContainer.style.display = count > 0 ? "block" : "none";
+            bulkContainer.style.display = count > 0 ? "flex" : "none";
         }
 
         // Attach listener
