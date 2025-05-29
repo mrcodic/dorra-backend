@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Traits\HandlesTryCatch;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
 class BaseService
 {
+    use HandlesTryCatch;
     protected array $filters = [];
 
     public function __construct(public BaseRepositoryInterface $repository)

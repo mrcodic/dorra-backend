@@ -37,8 +37,20 @@ class StoreTemplateRequest extends BaseRequest
                 'max:255',
                 Rule::unique('templates', 'name->ar'),
             ],
+            'description.en' => [
+                'nullable',
+                'string',
+                Rule::unique('templates', 'description->en'),
+            ],
+            'description.ar' => [
+                'nullable',
+                'string',
+                Rule::unique('templates', 'description->ar'),
+            ],
             'product_id' => ['required', 'exists:products,id'],
-            'design_data' => ['required', 'json'],
+            'design_data' => ['sometimes', 'json'],
+            'specifications' => ['sometimes', 'array'],
+            'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
         ];
 

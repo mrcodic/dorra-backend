@@ -41,12 +41,11 @@ class TemplateService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $model = $this->repository->create([
-            'name' => $validatedData->name,
-            'status' => $validatedData->status,
-            'product_id' => $validatedData->product_id,
-            'design_data' => $validatedData->design_data,
-        ]);
+        $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
+            $model = $this->repository->create($validatedData);
+            $model->specifications()->attach($validatedData['specifications']);
+            return $model;
+        });
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }

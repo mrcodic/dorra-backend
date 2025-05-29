@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     OrderController,
     PermissionController,
     ProductController,
+    ProductSpecificationController,
     ReviewController,
     RoleController,
     ShippingAddressController,
@@ -135,6 +136,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [TemplateController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::post('/publish', 'bulkDelete')->name('publish');
+        Route::post('/', 'storeAndRedirect')->name('redirect.store');
     });
     Route::resource('/product-templates', TemplateController::class);
 
@@ -155,23 +157,29 @@ Route::middleware('auth')->group(function () {
 
 
     Route::prefix('/api')->group(function () {
+
         Route::controller(ReviewController::class)->group(function () {
             Route::delete('reviews/{review}', 'deleteReview')->name('reviews.destroy');
             Route::put('reviews/{review}/reply', 'deleteReply')->name('reviews.reply.destroy');
             Route::put('reviews/{review}', 'replyReview')->name('reviews.reply');
         });
+
         Route::controller(MainController::class)->group(function () {
             Route::get('states', 'states')->name('states');
             Route::get('sub-categories', 'subCategories')->name('sub-categories');
             Route::delete('/media/{media}', 'removeMedia')->name('remove-media');
             Route::post('/media/{resource}', 'addMedia')->name('add-media');
             Route::get('/v1/admin-check', 'adminCheck')->name('admin-check');
-
-
         });
-        Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);
+
         Route::apiResource('/v1/templates', TemplateController::class)->only(['store', 'show', 'update']);
         Route::get('/v1/templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
+
+        Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);
+
+        Route::post('product-specifications',ProductSpecificationController::class)->name('products.specifications.create');
+        Route::get('product-specifications/{product}',[ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
+
     });
 
 });

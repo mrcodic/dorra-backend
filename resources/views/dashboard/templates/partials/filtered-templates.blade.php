@@ -1,7 +1,7 @@
 @foreach ($data as $template)
     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
         <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
-            <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox" value="{{ $template->id }}" name="selected_templates[]">
+            <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox" value="{{ $template->id }}" name="specifications[]">
             <div style="background-color: #F4F6F6;height:200px">
                 <img src="{{ $template->getFirstMediaUrl('templates') }}" class="mx-auto d-block " style="height:100%; width: auto;" alt="Template Image">
             </div>

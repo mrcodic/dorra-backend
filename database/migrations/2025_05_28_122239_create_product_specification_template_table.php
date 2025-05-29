@@ -14,7 +14,6 @@ return new class extends Migration
             $table->foreignUuid('template_id')->constrained('templates')->cascadeOnDelete();
             $table->foreignIdFor(ProductSpecification::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
-            $table->unique(['template_id', 'product_specification_id']);
         });
     }
 
