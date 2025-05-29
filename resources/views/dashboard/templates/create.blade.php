@@ -43,6 +43,24 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="form-group mb-2">
+                                        <label class="label-text mb-1">Template Type</label>
+                                        <div class="d-flex">
+                                            <div class="form-check me-2">
+                                                <input class="form-check-input" type="radio" name="type" id="templateFront" value="1">
+                                                <label class="form-check-label" for="templateFront">Front</label>
+                                            </div>
+                                            <div class="form-check me-2">
+                                                <input class="form-check-input" type="radio" name="type" id="templateBack" value="2">
+                                                <label class="form-check-label" for="templateBack">Back</label>
+                                            </div>
+                                            <div class="form-check me-2">
+                                                <input class="form-check-input" type="radio" name="type" id="templateNone" value="3">
+                                                <label class="form-check-label" for="templateNone">None</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="row">
                                         <div class="col-md-6 mb-2">
                                             <label for="templateName" class="label-text mb-1">Name (AR)</label>
@@ -92,7 +110,7 @@
                                     <div class="form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
                                         <select id="productsSelect" class="form-select select2" name="product_id">
-                                            <option value="">Choose Product</option>
+                                            <option value="" disabled>Choose Product</option>
                                             @foreach($associatedData['products'] as $product)
                                                 <option
                                                     value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
@@ -156,7 +174,7 @@
         handleAjaxFormSubmit("#addTemplateForm", {
             onSuccess: function (response, $form) {
                 if (response.data.redirect_url) {
-                    window.location.href = response.data.redirect_url;
+                    window.open(response.data.redirect_url, '_blank');
                 } else {
                     Toastify({
                         text: "No redirect URL provided.",
@@ -169,6 +187,7 @@
                 }
             }
         });
+
 
     </script>
     <script !src="">

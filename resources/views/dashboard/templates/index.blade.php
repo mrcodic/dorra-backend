@@ -78,14 +78,7 @@
                         @endforeach
                     </select>
                 </div>
-                {{-- Add Button - 20% on md+, full width on xs --}}
-                <div class="col-6 col-md-2 text-md-end">
-                    <a class="btn btn-outline-secondary w-100 w-md-auto" data-bs-toggle="modal"
-                        data-bs-target="#addTemplateModal">
-                        <i data-feather="upload"></i>
-                        Upload Templates
-                    </a>
-                </div>
+
                 {{-- Add Button - 20% on md+, full width on xs --}}
                 <div class="col-6 col-md-2 text-md-end">
                     <a class="btn btn-primary w-100 w-md-auto" href="{{ route("product-templates.create") }}">
