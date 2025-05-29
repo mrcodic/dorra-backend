@@ -140,7 +140,7 @@
 
                             <!-- Footer Buttons -->
                             <div class="d-flex justify-content-center gap-1">
-                                <a class="btn btn-outline-secondary  text-black" href="{{ config("services.editor_url").$template->id }}">Show</a>
+                                <a class="btn btn-outline-secondary  text-black" href="{{ config('services.editor_url') . 'templates/' . $template->id }}">Show</a>
                                 <button class="btn btn-outline-secondary text-black">Edit</button>
                                 <button class="btn btn-outline-danger open-delete-template-modal" data-bs-toggle="modal"
                                         data-bs-target="#deleteTemplateModal"
