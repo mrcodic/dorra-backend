@@ -116,8 +116,16 @@
 
                         <!-- Template Info -->
                         <div class="card-body text-start p-2">
-                            <h6 class="fw-bold mb-1 text-black fs-3">{{ $template->getTranslation('name',app()->getLocale()) }}</h6>
-                            <p class=" small mb-1">{{ $template->product->getTranslation('name',app()->getLocale()) }}</p>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-black fs-3" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;">
+                                    {{ $template->getTranslation('name', app()->getLocale()) }}
+                                </h6>
+                                <p class="small mb-1" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;">
+                                    {{ $template->product->getTranslation('name', app()->getLocale()) }}
+                                </p>
+
+                            </div>
+
 
                             <!-- Tags -->
                             <div class="d-flex flex-wrap justify-content-start gap-1 mb-2">
