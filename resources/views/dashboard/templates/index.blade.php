@@ -101,13 +101,10 @@
                 </div>
 
             </div>
-<<<<<<< HEAD
+
             <div class="row gx-2 gy-2 align-items-center px-1 pt-2" >
                 @foreach ($associatedData['templates'] as $template)
-=======
-            <div class="row gx-2 gy-2 align-items-center px-1 pt-2">
-                @for ($i = 1; $i <= 14; $i++)
->>>>>>> df142c600e5b22218892d87a79af74f499768710
+
                     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
                     <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
                         <!-- Checkbox -->
@@ -158,7 +155,6 @@
 
         </div>
 
-<<<<<<< HEAD
             <div class="mt-2 px-1">
                 {{ $associatedData['templates']->links('pagination::bootstrap-5') }}
 
@@ -166,9 +162,6 @@
 
     </div>
 
-
-=======
->>>>>>> df142c600e5b22218892d87a79af74f499768710
     <!-- Bulk Delete Bar -->
     <div id="bulk-delete-container" class="my-2 bulk-delete-container " style="display: none;">
         <div class="delete-container mx-auto">
