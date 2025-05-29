@@ -207,6 +207,23 @@
     accent-color: #24b094 !important;
 }
 
+.radio-box {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.radio-box:hover {
+  border-color: #24B094;
+}
+
+
+
 @media (min-width: 1441px) {
     .custom-4-per-row {
         flex: 0 0 auto;
