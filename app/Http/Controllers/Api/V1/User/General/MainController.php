@@ -62,7 +62,6 @@ class MainController extends Controller
         if (auth()->check()) {
             return response()->json(['message' => 'authenticated.'], 200);
         }
-
     }
 
 

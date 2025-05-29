@@ -5,15 +5,24 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\TemplateResource;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
+use App\Repositories\Interfaces\TagRepositoryInterface;
+use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Services\TemplateService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Template\{StoreTemplateRequest, UpdateTemplateRequest};
 
 
 class TemplateController extends DashboardController
 {
-    public function __construct(public TemplateService $templateService, public ProductRepositoryInterface $productRepository)
+    public function __construct(
+        public TemplateService                         $templateService,
+        public ProductRepositoryInterface              $productRepository,
+        public TemplateRepositoryInterface             $templateRepository,
+        public TagRepositoryInterface                  $tagRepository,
+        public ProductSpecificationRepositoryInterface $productSpecificationRepository
+
+    )
     {
         parent::__construct($templateService);
         $this->storeRequestClass = new StoreTemplateRequest();
@@ -27,14 +36,17 @@ class TemplateController extends DashboardController
         $this->assoiciatedData = [
             'index' => [
                 'products' => $this->productRepository->all(),
+                'tags' => $this->tagRepository->all(),
+                'templates' => $this->templateRepository->query()
+                    ->with(['product.tags'])
+                    ->paginate(16),
+            ],
+            'create' => [
+                'products' => $this->productRepository->all(),
             ]
         ];
     }
 
-    public function getData(): JsonResponse
-    {
-        return $this->templateService->getData();
-    }
 
     public function getProductTemplates()
     {
@@ -42,6 +54,14 @@ class TemplateController extends DashboardController
         $templates = $this->templateService->getProductTemplates($productId);
         return Response::api(data: TemplateResource::collection($templates));
 
+    }
+
+    public function storeAndRedirect(StoreTemplateRequest $request)
+    {
+      $template  = $this->templateService->storeResource($request->validated());
+      return Response::api(data: [
+         "redirect_url" => config('services.editor_url') . 'templates/' . $template->id
+      ]);
     }
 
 }

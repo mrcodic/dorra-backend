@@ -6,6 +6,7 @@ use App\Filters\SubCategoryFilter;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -16,10 +17,12 @@ use Yajra\DataTables\Facades\DataTables;
 class ProductService extends BaseService
 {
 
-        public BaseRepositoryInterface $repository;
+    public BaseRepositoryInterface $repository;
     protected array $relations;
 
-    public function __construct(ProductRepositoryInterface $repository)
+    public function __construct(ProductRepositoryInterface                     $repository,
+                                public ProductSpecificationRepositoryInterface $specificationRepository,
+    )
     {
         $this->relations = ['category', 'tags', 'reviews'];
 
@@ -178,9 +181,7 @@ class ProductService extends BaseService
                 });
             });
 
-        }
-        else
-        {
+        } else {
             $product->specifications->each(function ($spec) {
                 $spec->options->each(function ($option) {
                     $option->clearMediaCollection();
@@ -220,7 +221,42 @@ class ProductService extends BaseService
         return view("dashboard.partials.filtered-products", compact('products'));
     }
 
+    public function productSpecifications($productId)
+    {
+        return $this->specificationRepository->query()->whereProductId($productId)->get();
+    }
 
+    public function storeProductSpecification($validatedData)
+    {
+        $product = $this->repository->find($validatedData['product_id']);
+        return $this->handleTransaction(function () use ($product, $validatedData) {
+            $productSpecification = $product->specifications()->create([
+                'name' => [
+                    'en' => $validatedData['specifications'][0]['name_en'],
+                    'ar' => $validatedData['specifications'][0]['name_ar'],
+                ]
+            ]);
+            collect($validatedData['specifications'][0]['specification_options'])->each(function ($option, $index) use ($productSpecification) {
+
+                $productOption = $productSpecification->options()->create([
+                    'value' => [
+                        'en' => $option['value_en'],
+                        'ar' => $option['value_ar'],
+                    ],
+                    'price' => $option['price'],
+                ]);
+
+                if (isset($option['image'])) {
+                    if ($option['image'] instanceof UploadedFile) {
+                        handleMediaUploads([$option['image']], $productOption);
+                    }
+                }
+            });
+            return $productSpecification;
+        });
+
+
+    }
 
 
 }

@@ -54,10 +54,13 @@ class DashboardController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View|Factory|Application
+    public function index()
     {
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination);
         $associatedData = $this->getAssociatedData('index');
+        if (request()->ajax()) {
+            return Response::api(data: ['html' => view(self::BASE_FOLDER ."templates".".partials.filtered-templates", compact('data'))]);
+        }
         return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());
     }
 
