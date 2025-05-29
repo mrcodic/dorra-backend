@@ -193,7 +193,7 @@
     'title' => 'Delete Templates',
     'confirmText' => 'Are you sure you want to delete this items?',
     ])
-    </div>
+
     <!-- list and filter end -->
 </section>
 <!-- users list ends -->

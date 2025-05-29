@@ -59,7 +59,9 @@ class TemplateController extends DashboardController
     public function storeAndRedirect(StoreTemplateRequest $request)
     {
       $template  = $this->templateService->storeResource($request->validated());
-      return redirect()->away(config('services.editor_url') . 'templates/' . $template->id);
+      return Response::api(data: [
+         "redirect_url" => config('services.editor_url') . 'templates/' . $template->id
+      ]);
     }
 
 }

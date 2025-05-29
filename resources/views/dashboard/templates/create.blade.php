@@ -13,7 +13,7 @@
             <div class="col-12 ">
                 <div class="card">
                     <div class="card-body ">
-                        <form id="addTagForm" enctype="multipart/form-data" method="post" action="{{ route('templates.redirect.store') }}">
+                        <form id="addTemplateForm" enctype="multipart/form-data" method="post" action="{{ route('templates.redirect.store') }}">
                             @csrf
                             <div class="flex-grow-1">
                                 <div class="">
@@ -151,6 +151,22 @@
             } else {
                 $("#addSpecModal").modal("show");
 
+            }
+        });
+        handleAjaxFormSubmit("#addTemplateForm", {
+            onSuccess: function (response, $form) {
+                if (response.data.redirect_url) {
+                    window.location.href = response.data.redirect_url;
+                } else {
+                    Toastify({
+                        text: "No redirect URL provided.",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#EA5455",
+                        close: true
+                    }).showToast();
+                }
             }
         });
 
