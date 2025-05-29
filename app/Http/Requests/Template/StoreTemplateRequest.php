@@ -32,6 +32,12 @@ class StoreTemplateRequest extends BaseRequest
                 'max:255',
                 Rule::unique('templates', 'name->en'),
             ],
+            'name' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('templates', 'name->en'),
+            ],
             'name.ar' => [
                 'required',
                 'string',
@@ -41,12 +47,10 @@ class StoreTemplateRequest extends BaseRequest
             'description.en' => [
                 'nullable',
                 'string',
-                Rule::unique('templates', 'description->en'),
             ],
             'description.ar' => [
                 'nullable',
                 'string',
-                Rule::unique('templates', 'description->ar'),
             ],
             'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
             'product_id' => ['required', 'exists:products,id'],

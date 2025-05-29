@@ -97,8 +97,9 @@
                         <!-- Checkbox -->
                         <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox" value="{{ $template->id }}" name="selected_templates[]">
                         <div style="background-color: #F4F6F6;height:200px">
+
                             <!-- Top Image -->
-                            <img src="{{ $template->getFirstMediaUrl('templates') }}" class="mx-auto d-block " style="height:100%; width: auto;" alt="Template Image">
+                            <img src="{{ $template->getFirstMediaUrl('templates') ?$template->getFirstMediaUrl('templates'): asset("images/default-photo.png") }}" class="mx-auto d-block " style="height:100%; width: auto;" alt="Template Image">
                         </div>
 
                         <!-- Template Info -->
@@ -135,7 +136,12 @@
 
                             <!-- Footer Buttons -->
                             <div class="d-flex justify-content-center gap-1">
-                                <a class="btn btn-outline-secondary  text-black" href="{{ config('services.editor_url') . 'templates/' . $template->id }}">Show</a>
+                                <a class="btn btn-outline-secondary text-black"
+                                   href="{{ config('services.editor_url') . 'templates/' . $template->id }}"
+                                   target="_blank">
+                                    Show
+                                </a>
+
                                 <button class="btn btn-outline-secondary text-black">Edit</button>
                                 <button class="btn btn-outline-danger open-delete-template-modal" data-bs-toggle="modal"
                                         data-bs-target="#deleteTemplateModal"

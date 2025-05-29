@@ -211,7 +211,11 @@ handleAjaxFormSubmit('#deleteTemplateForm', {
     successMessage: "✅ Template deleted successfully!",
     closeModal: '#deleteTemplateModal',
     onSuccess: function (response, $form) {
-        $(".template-list-table").DataTable().ajax.reload(null, false); // false = stay on current page
+        const templateId = $form.find('input[name="id"]').val();
+        const card = document.getElementById(`template-card-${templateId}`);
+        if (card) {
+            card.remove();
+        }
     }
 });
 $(document).on("submit", "#bulk-delete-form", function (e) {
