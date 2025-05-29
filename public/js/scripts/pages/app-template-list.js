@@ -104,19 +104,42 @@ const dt_user_table = $(".template-list-table").DataTable({
 });
 
 // Custom search with debounce
-let searchTimeout;
-$('#search-category-form').on('keyup', function () {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        dt_user_table.draw();
-    }, 300);
-});
+// let searchTimeout;
+// $('#search-category-form').on('keyup', function () {
+//     clearTimeout(searchTimeout);
+//     searchTimeout = setTimeout(() => {
+//         dt_user_table.draw();
+//     }, 300);
+// });
 
 // Custom search with debounce
 
-$('.filter-product, .filter-status').on('change', function () {
-    dt_user_table.ajax.reload();
+// $('.filter-product, .filter-status').on('change', function () {
+//     dt_user_table.ajax.reload();
+// });
+$('.filter-status, .filter-product, #search-category-form').on('change keyup', function() {
+    // debounce this if needed!
+    fetchTemplates();
 });
+
+function fetchTemplates() {
+    $.ajax({
+        url: '/product-templates',
+        type: 'GET',
+        data: {
+            search_value: $('#search-category-form').val(),
+            product_id: $('.filter-product').val(),
+            status: $('.filter-status').val()
+        },
+        success: function(response) {
+            $('#templates-container').html(response.data.html);
+        },
+        error: function(xhr) {
+            console.error('Failed to fetch templates:', xhr);
+        }
+
+    });
+}
 
 
 // Checkbox select all
@@ -196,6 +219,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
     const selectedIds = $(".category-checkbox:checked").map(function () {
         return $(this).val();
     }).get();
+    console.log(selectedIds)
 
     if (selectedIds.length === 0) return;
 

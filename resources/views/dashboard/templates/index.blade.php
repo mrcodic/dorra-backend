@@ -68,9 +68,9 @@
                 <div class="col">
                     <select name="created_at" class="form-select filter-status">
                         <option value="">Tags</option>
-                        @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
-                        <option value="{{ $status->value }}">{{ $status->label() }}</option>
-
+                        @foreach($associatedData['tags'] as $tag)
+                            <option
+                                value="{{ $tag->id }}">{{ $tag->getTranslation('name', app()->getLocale()) }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -101,12 +101,12 @@
                 </div>
 
             </div>
-            <div class="row gx-2 gy-2 align-items-center px-1 pt-2">
+            <div class="row gx-2 gy-2 align-items-center px-1 pt-2" >
                 @foreach ($associatedData['templates'] as $template)
                     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
                     <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
                         <!-- Checkbox -->
-                        <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 template-checkbox" name="selected_templates[]">
+                        <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox" value="{{ $template->id }}" name="selected_templates[]">
                         <div style="background-color: #F4F6F6;height:200px">
                             <!-- Top Image -->
                             <img src="{{ $template->getFirstMediaUrl('templates') }}" class="mx-auto d-block " style="height:100%; width: auto;" alt="Template Image">
@@ -140,7 +140,10 @@
                             <div class="d-flex justify-content-center gap-1">
                                 <a class="btn btn-outline-secondary  text-black" href="{{ config("services.editor_url").$template->id }}">Show</a>
                                 <button class="btn btn-outline-secondary text-black">Edit</button>
-                                <button class="btn btn-outline-danger">Delete</button>
+                                <button class="btn btn-outline-danger open-delete-template-modal" data-bs-toggle="modal"
+                                        data-bs-target="#deleteTemplateModal"
+                                data-id="{{ $template->id }}"
+                                >Delete</button>
                             </div>
                         </div>
                     </div>

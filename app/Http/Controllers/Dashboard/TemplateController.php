@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\TemplateResource;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Interfaces\TagRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Services\TemplateService;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +19,7 @@ class TemplateController extends DashboardController
         public TemplateService $templateService,
         public ProductRepositoryInterface $productRepository,
         public TemplateRepositoryInterface $templateRepository,
+        public TagRepositoryInterface $tagRepository,
 
     )
     {
@@ -33,6 +35,7 @@ class TemplateController extends DashboardController
         $this->assoiciatedData = [
             'index' => [
                 'products' => $this->productRepository->all(),
+                'tags' => $this->tagRepository->all(),
                 'templates' => $this->templateRepository->query()
                     ->with(['product.tags'])
                     ->paginate(16),
