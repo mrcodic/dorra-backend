@@ -14,14 +14,18 @@ use Spatie\Translatable\HasTranslations;
 class Template extends Model implements HasMedia
 {
     use HasUuids,HasTranslations, InteractsWithMedia;
-    public $translatable = ['name'];
+    public $translatable = ['name','description'];
 
     protected $fillable = [
         'name',
         'status',
         'product_id',
         'design_data',
-
+        'type',
+        'description',
+        'unit',
+        'height',
+        'width',
     ];
     protected $casts = [
         'status' => StatusEnum::class,

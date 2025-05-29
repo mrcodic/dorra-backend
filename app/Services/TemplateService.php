@@ -43,7 +43,11 @@ class TemplateService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $model = $this->repository->create($validatedData);
-            $model->specifications()->attach($validatedData['specifications']);
+            if (isset($validatedData['specifications']))
+            {
+                $model->specifications()->attach($validatedData['specifications']);
+            }
+
             return $model;
         });
         if (request()->allFiles()) {

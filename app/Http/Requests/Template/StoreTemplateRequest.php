@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Template;
 
+use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
 use Illuminate\Validation\Rule;
 
@@ -47,6 +48,7 @@ class StoreTemplateRequest extends BaseRequest
                 'string',
                 Rule::unique('templates', 'description->ar'),
             ],
+            'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
             'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
             'specifications' => ['sometimes', 'array'],
