@@ -46,24 +46,15 @@
                                 <div class="form-group mb-2">
                                     <label class="label-text mb-1">Template Type</label>
                                     <div class="row">
-                                        <div class="col">
-                                            <label class="radio-box">
-                                                <input class="form-check-input" type="radio" name="type" value="1">
-                                                <span>Front</span>
-                                            </label>
-                                        </div>
-                                        <div class="col">
-                                        <label class="radio-box">
-                                            <input class="form-check-input" type="radio" name="type" value="2">
-                                            <span>Back</span>
-                                        </label>
-                                        </div>
-                                        <div class="col">
-                                        <label class="radio-box">
-                                            <input class="form-check-input" type="radio" name="type" value="3">
-                                            <span>None</span>
-                                        </label>
-                                        </div>
+                                        @foreach(\App\Enums\Template\TypeEnum::cases() as $type)
+                                            <div class="col">
+                                                <label class="radio-box">
+                                                    <input class="form-check-input" type="radio" name="type" value="{{ $type->value }}"
+                                                    >
+                                                    <span>{{ $type->label() }}</span>
+                                                </label>
+                                            </div>
+                                        @endforeach
                                     </div>
 
                                 </div>
@@ -154,8 +145,9 @@
     </div>
 
 </section>
-@endsection
 @include('modals.templates.add-spec')
+
+@endsection
 @section('vendor-script')
 <script !src="">
     $("#addNewSpec").on('click', function(e) {
@@ -180,6 +172,7 @@
     });
     handleAjaxFormSubmit("#addTemplateForm", {
         onSuccess: function(response, $form) {
+            $form[0].rest();
             if (response.data.redirect_url) {
                 window.open(response.data.redirect_url, '_blank');
             } else {
@@ -264,6 +257,7 @@
         successMessage: "Specification created successfully!",
         closeModal: '#addSpecModal',
         onSuccess: function(response, $form) {
+            $form[0].reset();
             const spec = response.data;
 
             const specHtml = `
@@ -290,200 +284,5 @@
 
     });
 </script>
-<script>
-    $(document).ready(function() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
 
-        // Toggle pricing
-        $('input[name="has_custom_prices"]').on('change', function() {
-            const isCustom = $(this).val() === '1';
-            $('#custom-price-section').toggle(isCustom).find('input').prop('disabled', !isCustom);
-            $('#default-price-section').toggle(!isCustom).find('input').prop('disabled', isCustom).val('');
-        });
-
-        // Repeater
-        $('.invoice-repeater').repeater({
-            show: function() {
-                $(this).slideDown();
-                feather && feather.replace();
-
-                // Recalculate delete button visibility when an item is shown
-                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                items.each(function(index) {
-                    // Hide delete button for the first item (index 0) and show for others
-                    if (index === 0) {
-                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
-                    } else {
-                        $(this).find('[data-repeater-delete]').show(); // Show delete button for others
-                    }
-                });
-            },
-            hide: function(deleteElement) {
-                $(this).slideUp(deleteElement);
-
-                // Recalculate delete button visibility after an item is removed
-                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                items.each(function(index) {
-                    // Hide delete button for the first item (index 0) and show for others
-                    if (index === 0) {
-                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
-                    } else {
-                        $(this).find('[data-repeater-delete]').show(); // Show delete button for others
-                    }
-                });
-            }
-        });
-
-
-        function updateDeleteButtons(containerSelector) {
-            $(containerSelector).find('[data-repeater-list]').each(function() {
-                var items = $(this).find('[data-repeater-item]');
-                items.each(function() {
-                    $(this).find('[data-repeater-delete]').show();
-                    feather.replace();
-                });
-            });
-        }
-
-        function initializeImageUploaders(context) {
-            $(context).find('.option-upload-area').each(function() {
-                const uploadArea = $(this);
-                const input = uploadArea.closest('.col-md-12').find('.option-image-input');
-                const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
-                const imagePreview = previewContainer.find('.option-image-preview');
-                const fileNameLabel = previewContainer.find('.option-file-name');
-                const fileSizeLabel = previewContainer.find('.option-file-size');
-                const removeButton = previewContainer.find('.option-remove-image');
-
-                uploadArea.off('click').on('click', function() {
-                    input.trigger('click');
-                });
-
-                input.off('change').on('change', function() {
-                    const file = this.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            imagePreview.attr('src', e.target.result);
-                            fileNameLabel.text(file.name);
-                            fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
-                            previewContainer.removeClass('d-none');
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-
-                removeButton.off('click').on('click', function() {
-                    input.val('');
-                    previewContainer.addClass('d-none');
-                });
-            });
-        }
-
-        $('.outer-repeater').repeater({
-            repeaters: [{
-                selector: '.inner-repeater',
-                show: function() {
-                    $(this).slideDown();
-                    updateDeleteButtons($(this).closest('.outer-repeater'));
-                    initializeImageUploaders(this);
-                    feather.replace();
-                },
-                hide: function(deleteElement) {
-                    $(this).slideUp(deleteElement);
-                    updateDeleteButtons($(this).closest('.outer-repeater'));
-                },
-                nestedInputName: 'specification_options'
-            }],
-            show: function() {
-                $(this).slideDown();
-                updateDeleteButtons($('.outer-repeater'));
-                initializeImageUploaders(this);
-                feather.replace();
-            },
-            hide: function(deleteElement) {
-                $(this).slideUp(deleteElement);
-                updateDeleteButtons($('.outer-repeater'));
-            },
-            afterAdd: function() {
-                updateDeleteButtons($('.outer-repeater'));
-                initializeImageUploaders($('.outer-repeater'));
-                feather.replace();
-            },
-            afterDelete: function() {
-                updateDeleteButtons($('.outer-repeater'));
-            }
-        });
-
-        // Initialize on page load for already existing items
-        $(document).ready(function() {
-            updateDeleteButtons($('.outer-repeater'));
-            initializeImageUploaders($('.outer-repeater'));
-        });
-
-
-        $('.select2').select2();
-
-        // Category -> Subcategory
-        $('.category-select').on('change', function() {
-            const categoryId = $(this).val();
-            const $subCategorySelect = $('.sub-category-select');
-            $.ajax({
-                url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
-                method: "GET",
-                success: function(res) {
-                    $subCategorySelect.empty().append('<option value="">Select subcategory</option>');
-                    $.each(res.data, (i, s) => $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`));
-                },
-                error: function() {
-                    $subCategorySelect.empty().append('<option value="">Error loading Subcategories</option>');
-                }
-            });
-        });
-
-        // Form submit
-        $('#product-form').on('submit', function(e) {
-            e.preventDefault();
-            const saveButton = $('.saveChangesButton');
-            const saveLoader = $('.saveLoader');
-            const saveButtonText = $('.saveChangesButton .btn-text');
-            saveButton.prop('disabled', true);
-            saveLoader.removeClass('d-none');
-            saveButtonText.addClass('d-none');
-            const formData = new FormData(this);
-            $.ajax({
-                url: this.action,
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(res) {
-                    if (res.success) {
-                        sessionStorage.setItem('product_added', 'true');
-                        window.location.href = '/products';
-                    }
-                },
-                error: function(xhr) {
-                    $.each(xhr.responseJSON.errors, (k, msgArr) => {
-                        Toastify({
-                            text: msgArr[0],
-                            duration: 4000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#EA5455",
-                            close: true
-                        }).showToast();
-                    });
-                    saveButton.prop('disabled', false);
-                    saveLoader.addClass('d-none');
-                    saveButtonText.removeClass('d-none');
-                }
-            });
-        });
-    });
-</script>
 @endsection

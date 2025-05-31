@@ -34,16 +34,15 @@ class TemplateController extends DashboardController
         $this->usePagination = true;
         $this->resourceTable = 'templates';
         $this->assoiciatedData = [
-            'index' => [
+            'shared'=>[
                 'products' => $this->productRepository->all(),
+            ],
+            'index' => [
                 'tags' => $this->tagRepository->all(),
                 'templates' => $this->templateRepository->query()
                     ->with(['product.tags'])
                     ->paginate(16),
             ],
-            'create' => [
-                'products' => $this->productRepository->all(),
-            ]
         ];
     }
 

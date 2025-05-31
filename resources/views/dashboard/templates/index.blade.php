@@ -161,7 +161,7 @@
                                             Show
                                         </a>
 
-                                        <button class="btn btn-outline-secondary text-black">Edit</button>
+                                        <a class="btn btn-outline-secondary text-black" href="{{ route("product-templates.edit",$template->id) }}">Edit</a>
                                         <button class="btn btn-outline-danger open-delete-template-modal"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#deleteTemplateModal"

@@ -40,4 +40,6 @@ class Template extends Model implements HasMedia
         return $this->belongsToMany(ProductSpecification::class);
     }
 
+
+
 }

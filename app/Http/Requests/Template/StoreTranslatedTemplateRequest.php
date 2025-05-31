@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Template;
 
 use App\Enums\Template\TypeEnum;
+use App\Enums\Template\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
 use Illuminate\Validation\Rule;
 
@@ -47,6 +48,9 @@ class StoreTranslatedTemplateRequest extends BaseRequest
                 'string',
             ],
             'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
+            'height' => ["required","integer"],
+            'width' => ["required","integer"],
+            'unit' => ["required","integer","in:".UnitEnum::getValuesAsString()],
             'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
             'specifications' => ['sometimes', 'array'],
