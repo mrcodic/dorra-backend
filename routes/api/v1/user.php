@@ -70,6 +70,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('states', [MainController::class, 'states']);
     Route::get('countries', [MainController::class, 'countries']);
+//    Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
+//    Route::apiResource('/designs', DesignController::class)->except(['destroy']);
+//    Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
+
 });
 
 

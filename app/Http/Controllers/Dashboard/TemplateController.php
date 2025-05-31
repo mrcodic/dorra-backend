@@ -10,7 +10,7 @@ use App\Repositories\Interfaces\TagRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Services\TemplateService;
 use Illuminate\Support\Facades\Response;
-use App\Http\Requests\Template\{StoreTemplateRequest, UpdateTemplateRequest};
+use App\Http\Requests\Template\{StoreTemplateRequest, StoreTranslatedTemplateRequest, UpdateTemplateRequest};
 
 
 class TemplateController extends DashboardController
@@ -56,7 +56,7 @@ class TemplateController extends DashboardController
 
     }
 
-    public function storeAndRedirect(StoreTemplateRequest $request)
+    public function storeAndRedirect(StoreTranslatedTemplateRequest $request)
     {
       $template  = $this->templateService->storeResource($request->validated());
       return Response::api(data: [
@@ -66,7 +66,5 @@ class TemplateController extends DashboardController
     public function show($id)
     {
         return Response::api(data: TemplateResource::make($this->templateService->showResource($id)));
-
-
     }
 }
