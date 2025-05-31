@@ -42,12 +42,37 @@ class TemplateService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
+           if ($validatedData['unit'] == 1)
+           {
+               $validatedData['width'] = $validatedData['width'] * 25.4 ;
+               $validatedData['height'] = $validatedData['height'] * 25.4 ;
+           }
             $model = $this->repository->create($validatedData);
             if (isset($validatedData['specifications']))
             {
                 $model->specifications()->attach($validatedData['specifications']);
             }
 
+            return $model;
+        });
+        if (request()->allFiles()) {
+            handleMediaUploads(request()->allFiles(), $model);
+        }
+        return $model->load($relationsToLoad);
+    }
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        if (isset($validatedData['unit']) && $validatedData['unit'] == 1)
+        {
+            $validatedData['width'] = $validatedData['width'] * 25.4 ;
+            $validatedData['height'] = $validatedData['height'] * 25.4 ;
+        }
+        $model = $this->handleTransaction(function () use ($validatedData, $id) {
+            $model = $this->repository->update($validatedData,$id);
+            if (isset($validatedData['specifications']))
+            {
+                $model->specifications()->sync($validatedData['specifications']);
+            }
             return $model;
         });
         if (request()->allFiles()) {

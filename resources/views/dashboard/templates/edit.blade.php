@@ -1,12 +1,11 @@
 @extends('layouts/contentLayoutMaster')
-
 @section('title', 'Edit Templates')
 @section('main-page', 'Templates')
 @section('sub-page', 'Edit Templates')
 
 @section('vendor-style')
-<!-- Vendor CSS Files -->
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+    <!-- Vendor CSS Files -->
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 @endsection
 
 @section('content')
@@ -15,22 +14,26 @@
             <div class="col-12 ">
                 <div class="card">
                     <div class="card-body ">
-                        <form id="addTemplateForm" enctype="multipart/form-data" method="post" action="{{ route('templates.redirect.store') }}">
+                        <form id="editTemplateForm" enctype="multipart/form-data" method="post"
+                              action="{{ route('product-templates.update',$model->id) }}">
                             @csrf
+                            @method("PUT")
                             <div class="flex-grow-1">
                                 <div class="">
                                     <div class="row">
                                         <!-- Width -->
                                         <div class="col-md-4 mb-2">
-                                            <label for="width" class="label-text mb-1">Width</label>
-                                            <input type="number" id="width" name="width" value="{{ $model->width }}" class="form-control"
+                                            <label for="width" class="label-text mb-1 width">Width</label>
+                                            <input type="number" id="width" name="width" value="{{ $model->width }}"
+                                                   class="form-control"
                                                    placeholder="Enter width">
                                         </div>
 
                                         <!-- Height -->
                                         <div class="col-md-4 mb-2">
                                             <label for="height" class="label-text mb-1">Height</label>
-                                            <input type="number" id="height" name="height" value="{{ $model->height }}" class="form-control"
+                                            <input type="number" id="height" name="height" value="{{ $model->height }}"
+                                                   class="form-control"
                                                    placeholder="Enter height">
                                         </div>
 
@@ -40,7 +43,8 @@
                                             <select id="unit" name="unit" class="form-select">
                                                 <option value="">Select Unit</option>
                                                 @foreach(\App\Enums\Template\UnitEnum::cases() as $unit)
-                                                    <option value="{{ $unit->value }}" @selected($unit->value == $model->unit)> {{ $unit->label() }}</option>
+                                                    <option
+                                                        value="{{ $unit->value }}" @selected($unit->value == $model->unit)> {{ $unit->label() }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -48,16 +52,17 @@
                                     <div class="form-group mb-2">
                                         <label class="label-text mb-1">Template Type</label>
                                         <div class="row">
-                                         @foreach(\App\Enums\Template\TypeEnum::cases() as $type)
+                                            @foreach(\App\Enums\Template\TypeEnum::cases() as $type)
                                                 <div class="col">
                                                     <label class="radio-box">
-                                                        <input class="form-check-input" type="radio" name="type" value="{{ $type->value }}"
-                                                        @checked($type->value == $model->type)
+                                                        <input class="form-check-input" type="radio" name="type"
+                                                               value="{{ $type->value }}"
+                                                            @checked($type->value == $model->type)
                                                         >
                                                         <span>{{ $type->label() }}</span>
                                                     </label>
                                                 </div>
-                                         @endforeach
+                                            @endforeach
 
                                         </div>
 
@@ -84,13 +89,15 @@
 
                                     <div class="row">
                                         <div class="col-md-6 mb-2">
-                                            <label for="templateDescription" class="label-text mb-1">Description (AR)</label>
+                                            <label for="templateDescription" class="label-text mb-1">Description
+                                                (AR)</label>
                                             <textarea id="templateDescription" class="form-control" rows="3"
                                                       name="description[ar]"
                                                       placeholder="Template Description in Arabic">{{ $model->getTranslation('description','ar') }}</textarea>
                                         </div>
                                         <div class="col-md-6 mb-2">
-                                            <label for="templateDescription" class="label-text mb-1">Description (EN)</label>
+                                            <label for="templateDescription" class="label-text mb-1">Description
+                                                (EN)</label>
                                             <textarea id="templateDescription" class="form-control" rows="3"
                                                       name="description[en]"
                                                       placeholder="Template Description in English">{{ $model->getTranslation('description','en') }}</textarea>
@@ -124,22 +131,25 @@
                                             @endforeach
                                         </select>
                                     </div>
-
-                                    <div class="form-group mb-2 d-none">
-                                        <label class="label-text mb-1">Spec</label>
-                                        <div class="row" id="specsContainer">
-                                            @foreach($model->product->specifications as $spec)
-                                                <div class="col-12 mb-1">
-                                                    <div class="border rounded p-1 d-flex align-items-center">
-                                                        <input type="checkbox" name="specifications[]" value="{{$spec->id}}" class="form-check-input me-1"
-                                                        @checked($model->specifications->contains($spec->id))
-                                                        >
-                                                        <label class="form-check-label">{{ $spec->name}}</label>
+                                    @if($model->specifications->isNotEmpty())
+                                        <div class="form-group mb-2">
+                                            <label class="label-text mb-1">Spec</label>
+                                            <div class="row" id="specsContainer">
+                                                @foreach($model->product->specifications as $spec)
+                                                    <div class="col-12 mb-1">
+                                                        <div class="border rounded p-1 d-flex align-items-center">
+                                                            <input type="checkbox" name="specifications[]"
+                                                                   value="{{$spec->id}}" class="form-check-input me-1"
+                                                                @checked($model->specifications->contains($spec->id))
+                                                            >
+                                                            <label class="form-check-label">{{ $spec->name}}</label>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            @endforeach
+                                                @endforeach
+                                            </div>
                                         </div>
-                                    </div>
+
+                                    @endif
                                 </div>
                             </div>
 
@@ -151,8 +161,9 @@
                             </div>
                             <div class="d-flex justify-content-between pt-2">
                                 <button type="button" class="btn btn-outline-secondary">Cancel</button>
-                                <a  href="{{ config("services.editor_url")."templates/".$model->id }}" class="btn btn-secondary fs-5 "
-                                        >
+                                <a href="{{ config("services.editor_url")."templates/".$model->id }}"
+                                   class="btn btn-secondary fs-5 "
+                                >
                                     <i data-feather="upload"></i>
                                     <span>Edit Design</span>
 
@@ -183,7 +194,33 @@
 
 @section('page-script')
     <script !src="">
-        $('#productsSelect').on('change', function() {
+        handleAjaxFormSubmit("#editTemplateForm", {
+            successMessage: "Template updated successfully",
+            onSuccess: function (response, $form) {
+                const data = response.data;
+                console.log(data.width)
+                // Update numeric fields
+                $('#width').val(data.width);
+                $('#height').val(data.height);
+
+                // Update select field
+                $('#unit').val(data.unit).trigger('change');
+
+                // Update name fields
+                $('input[name="name[ar]"]').val(data.name.ar);
+                $('input[name="name[en]"]').val(data.name.en);
+
+                // Update description fields
+                $('textarea[name="description[ar]"]').val(data.description.ar);
+                $('textarea[name="description[en]"]').val(data.description.en);
+
+                console.log('Form inputs updated with new data.');
+            }
+        });
+
+    </script>
+    <script !src="">
+        $('#productsSelect').on('change', function () {
             const productId = $(this).val();
             if (productId) {
                 $('#addNewSpec').attr('data-bs-toggle', 'modal').attr('data-bs-target', '#addSpecModal');
@@ -200,7 +237,7 @@
                 $.ajax({
                     url: "{{ url('api/product-specifications') }}/" + productId,
                     method: 'GET',
-                    success: function(res) {
+                    success: function (res) {
                         if (res.data && res.data.length > 0) {
                             $specsContainer.empty();
 
@@ -222,7 +259,7 @@
                             $specSection.addClass('d-none');
                         }
                     },
-                    error: function() {
+                    error: function () {
                         Toastify({
                             text: 'Failed to load specifications.',
                             duration: 4000,
@@ -245,7 +282,7 @@
         handleAjaxFormSubmit("#addSpecForm", {
             successMessage: "Specification created successfully!",
             closeModal: '#addSpecModal',
-            onSuccess: function(response, $form) {
+            onSuccess: function (response, $form) {
                 $form[0].reset();
                 const spec = response.data;
 
@@ -266,7 +303,7 @@
         });
     </script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#productsSelect').select2();
             $('#tagsSelect').select2();
             $('#colorsSelect').select2();

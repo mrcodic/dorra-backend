@@ -140,6 +140,7 @@ Route::middleware('auth')->group(function () {
     });
     Route::post('/store-templates', [TemplateController::class,'storeAndRedirect'])->name('templates.redirect.store');
 
+    Route::put('/product-templates/publish/{id}', [TemplateController::class,'publish'])->name("product-templates.publish");
     Route::resource('/product-templates', TemplateController::class);
 
 

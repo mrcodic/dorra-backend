@@ -10,7 +10,10 @@ use App\Repositories\Interfaces\TagRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Services\TemplateService;
 use Illuminate\Support\Facades\Response;
-use App\Http\Requests\Template\{StoreTemplateRequest, StoreTranslatedTemplateRequest, UpdateTemplateRequest};
+use App\Http\Requests\Template\{StoreTemplateRequest,
+    StoreTranslatedTemplateRequest,
+    UpdateTemplateRequest,
+    UpdateTranslatedTemplateRequest};
 
 
 class TemplateController extends DashboardController
@@ -26,7 +29,7 @@ class TemplateController extends DashboardController
     {
         parent::__construct($templateService);
         $this->storeRequestClass = new StoreTemplateRequest();
-        $this->updateRequestClass = new UpdateTemplateRequest();
+        $this->updateRequestClass = new UpdateTranslatedTemplateRequest();
         $this->indexView = 'templates.index';
         $this->createView = 'templates.create';
         $this->editView = 'templates.edit';
@@ -39,9 +42,6 @@ class TemplateController extends DashboardController
             ],
             'index' => [
                 'tags' => $this->tagRepository->all(),
-                'templates' => $this->templateRepository->query()
-                    ->with(['product.tags'])
-                    ->paginate(16),
             ],
         ];
     }
@@ -65,5 +65,11 @@ class TemplateController extends DashboardController
     public function show($id)
     {
         return Response::api(data: TemplateResource::make($this->templateService->showResource($id)));
+    }
+
+    public function publish($id)
+    {
+       $template =  $this->templateService->updateResource(['status'=>2],$id);
+        return Response::api(data: TemplateResource::make($template));
     }
 }

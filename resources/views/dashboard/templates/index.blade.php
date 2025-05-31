@@ -98,7 +98,7 @@
                 </div>
 
                 <div class="row gx-2 gy-2 align-items-center px-1 pt-2">
-                    @foreach ($associatedData['templates'] as $template)
+                    @foreach ($data as $template)
 
                         <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
                             <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
@@ -110,7 +110,7 @@
 
                                     <!-- Top Image -->
                                     <img
-                                        src="{{ $template->getFirstMediaUrl('templates') ?$template->getFirstMediaUrl('templates'): asset("images/default-photo.png") }}"
+                                        src="{{ $template->getFirstMediaUrl('templates') ? $template->getFirstMediaUrl('templates'): asset("images/default-photo.png") }}"
                                         class="mx-auto d-block " style="height:100%; width: auto;" alt="Template Image">
                                 </div>
 
@@ -154,7 +154,14 @@
                                     <hr class="my-2">
 
                                     <!-- Footer Buttons -->
+
                                     <div class="d-flex justify-content-center gap-1">
+                                        <a class="btn btn-outline-secondary text-black publish-btn {{ $template->design_data ? '' : 'disabled disabled-link' }}"
+                                           href="{{ $template->design_data ? route('product-templates.publish', ['id' => $template->id]) : '#' }}">
+                                            Publish
+                                        </a>
+
+
                                         <a class="btn btn-outline-secondary text-black"
                                            href="{{ config('services.editor_url') . 'templates/' . $template->id }}"
                                            target="_blank">
@@ -173,14 +180,14 @@
                                 </div>
                             </div>
                         </div>
-
                     @endforeach
+
 
 
                 </div>
 
                 <div class="mt-2 px-1">
-                    {{ $associatedData['templates']->links('pagination::bootstrap-5') }}
+                    {{ $data->links('pagination::bootstrap-5') }}
 
                 </div>
 
@@ -248,6 +255,40 @@
         const showTemplateUrl = "{{ config("services.editor_url") }}";
 
         const locale = "{{ app()->getLocale() }}";
+        $(".publish-btn").on('click', function (e) {
+            e.preventDefault();
+
+            if ($(this).hasClass('disabled') || $(this).hasClass('disabled-link')) return;
+
+            const url = $(this).attr('href');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    '_method': "PUT"
+                },
+                headers: { 'X-CSRF-TOKEN': $('input[name="_token"]').val() },
+                success: function (response) {
+                    Toastify({
+                        text: "Template published successfully",
+                        duration: 3000,
+                        gravity: "top",
+                        backgroundColor: "#28a745",
+                    }).showToast();
+                },
+                error: function (xhr) {
+                    Toastify({
+                        text: "Failed to publish template",
+                        duration: 4000,
+                        gravity: "top",
+                        backgroundColor: "#EA5455",
+                        close: true,
+                    }).showToast();
+                }
+            });
+        });
+
     </script>
 
 
