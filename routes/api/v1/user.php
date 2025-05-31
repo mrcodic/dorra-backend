@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\Dashboard\TemplateController;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\OtpController,
     Auth\RegisterController,
@@ -14,7 +15,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\UserNotificationTypeController,
     SaveController,
     ShippingAddress\ShippingAddressController,
-    Template\TemplateController};
+  };
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
@@ -74,3 +75,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
+
+Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update']);
+Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
