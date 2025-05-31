@@ -22,6 +22,7 @@ class TemplateResource extends JsonResource
             'design_data' => $this->design_data,
             'width' => $this->width,
             'height' => $this->height,
+            'unit' => $this->unit,
             'dpi' => $this->dpi,
             'product' => ProductResource::make($this->whenLoaded('product')),
 //            'preview_image' => $this->getFirstMediaUrl('templates'),
