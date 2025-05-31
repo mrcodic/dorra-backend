@@ -172,7 +172,6 @@
     });
     handleAjaxFormSubmit("#addTemplateForm", {
         onSuccess: function(response, $form) {
-            $form[0].rest();
             if (response.data.redirect_url) {
                 window.open(response.data.redirect_url, '_blank');
             } else {
@@ -257,7 +256,6 @@
         successMessage: "Specification created successfully!",
         closeModal: '#addSpecModal',
         onSuccess: function(response, $form) {
-            $form[0].reset();
             const spec = response.data;
 
             const specHtml = `
