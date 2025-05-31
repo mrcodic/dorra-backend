@@ -42,7 +42,8 @@
         },
         "files": [
             "app\\Helpers\\MediaUploadHelper.php",
-            "app\\Helpers\\Helpers.php"
+            "app\\Helpers\\Helpers.php",
+            "app\\Helpers\\General.php"
         ]
     },
     "autoload-dev": {

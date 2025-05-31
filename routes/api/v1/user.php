@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Dashboard\TemplateController;
+use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\OtpController,
     Auth\RegisterController,
@@ -78,3 +79,4 @@ Route::get('/design-versions/{design_version}', [DesignController::class, 'getDe
 
 Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
+Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
