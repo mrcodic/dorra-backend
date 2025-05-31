@@ -63,5 +63,10 @@ class TemplateController extends DashboardController
          "redirect_url" => config('services.editor_url') . 'templates/' . $template->id
       ]);
     }
+    public function show($id)
+    {
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id)));
 
+
+    }
 }
