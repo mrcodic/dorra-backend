@@ -175,9 +175,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/v1/admin-check', 'adminCheck')->name('admin-check');
         });
 
-//        Route::apiResource('/v1/templates', TemplateController::class)->only(['store', 'show', 'update']);
-//        Route::get('/v1/templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
-//        Route::apiResource('/v1/library-assets', LibraryAssetController::class)->only(['store', 'index']);
+        Route::apiResource('/v1/templates', TemplateController::class)->only(['store', 'show', 'update']);
+        Route::get('/v1/templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
+        Route::apiResource('/v1/library-assets', LibraryAssetController::class)->only(['store', 'index']);
 
         Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);
 

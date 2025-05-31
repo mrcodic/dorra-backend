@@ -50,7 +50,7 @@
                     </div>
                     {{-- Filter Select - 10% on md+, half width on sm --}}
                     <div class="col">
-                        <select name="created_at" class="form-select filter-status">
+                        <select name="created_at" class="form-select filter-status select2" data-placeholder="Status">
                             <option value="">Status</option>
                             @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
                                 <option value="{{ $status->value }}">{{ $status->label() }}</option>
@@ -60,7 +60,7 @@
                     </div>
                     {{-- Filter Select - 10% on md+, half width on sm --}}
                     <div class="col">
-                        <select name="created_at" class="form-select filter-status">
+                        <select name="created_at" class="form-select filter-status select2" data-placeholder="Tags">
                             <option value="">Tags</option>
                             @foreach($associatedData['tags'] as $tag)
                                 <option
@@ -70,7 +70,7 @@
                     </div>
                     {{-- Filter Select - 10% on md+, half width on sm --}}
                     <div class="col">
-                        <select name="created_at" class="form-select filter-product">
+                        <select name="created_at" class="form-select filter-product select2" data-placeholder="Product">
                             <option value="">Product</option>
                             @foreach($associatedData['products'] as $product)
                                 <option
@@ -100,7 +100,7 @@
                 <div class="row gx-2 gy-2 align-items-center px-1 pt-2">
                     @foreach ($data as $template)
 
-                        <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
+                        <div class="col-md-6 col-lg-4 col-xxl-4 custom-2-per-row">
                             <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
                                 <!-- Checkbox -->
                                 <input type="checkbox"
@@ -156,7 +156,7 @@
                                     <!-- Footer Buttons -->
 
                                     <div class="d-flex justify-content-center gap-1">
-                                        <a class="btn btn-outline-secondary text-black publish-btn {{ $template->design_data ? '' : 'disabled disabled-link' }}"
+                                        <a class="btn btn-outline-secondary text-black publish-btn {{ $template->design_data  != 3 ? '' : 'disabled disabled-link' }}"
                                            href="{{ $template->design_data ? route('product-templates.publish', ['id' => $template->id]) : '#' }}">
                                             Publish
                                         </a>
@@ -251,6 +251,16 @@
 
 @section('page-script')
     <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: function(){
+                    $(this).data('placeholder');
+                },
+                allowClear: true,
+                width: '100%'
+            });
+        });
+
         const templatesDataUrl = "{{ route('templates.data') }}";
         const showTemplateUrl = "{{ config("services.editor_url") }}";
 
