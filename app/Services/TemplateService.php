@@ -42,7 +42,7 @@ class TemplateService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
-           if ($validatedData['unit'] == 1)
+           if (isset($validatedData['unit']) && $validatedData['unit'] == 1)
            {
                $validatedData['width'] = $validatedData['width'] * 25.4 ;
                $validatedData['height'] = $validatedData['height'] * 25.4 ;
