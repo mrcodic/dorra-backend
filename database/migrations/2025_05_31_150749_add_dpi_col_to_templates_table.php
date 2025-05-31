@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('templates', function (Blueprint $table) {
-            $table->integer("dpi")->nullable()->after("unit");
+            $table->integer("dpi")->nullable()->after("unit")->default(300);
             $table->decimal('width')->change();
             $table->decimal('height')->change();
         });
