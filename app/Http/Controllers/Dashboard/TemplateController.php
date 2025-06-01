@@ -46,7 +46,16 @@ class TemplateController extends DashboardController
         ];
     }
 
-
+    public function index()
+    {
+        $data = $this->service->getAll($this->getRelations('index'), $this->usePagination);
+        $associatedData = $this->getAssociatedData('index');
+        if (request()->ajax()) {
+            $html = view("dashboard.templates.partials.filtered-templates", compact('data'))->render();
+            return Response::api(data: ['html' =>  $html]);
+        }
+        return view("dashboard.templates.index", get_defined_vars());
+    }
     public function getProductTemplates()
     {
         $productId = request()->input('productId');

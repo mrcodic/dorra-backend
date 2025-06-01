@@ -97,7 +97,7 @@
 
                 </div>
 
-                <div class="row gx-2 gy-2 align-items-center px-1 pt-2">
+                <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="templates-container">
                     @foreach ($data as $template)
 
                         <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
