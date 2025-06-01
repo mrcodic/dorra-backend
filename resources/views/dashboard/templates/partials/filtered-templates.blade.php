@@ -1,5 +1,5 @@
 @forelse ($data as $template)
-    <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
+    <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row"  data-template-id="{{ $template->id }}">
         <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
             <!-- Checkbox -->
             <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"

@@ -132,7 +132,7 @@ class DashboardController extends Controller
             'ids.*' => 'exists:'.$this->resourceTable.',id'
         ]);
         $this->service->bulkDeleteResources($request->ids);
-        return Response::api();
+        return Response::api(data: $request->ids);
 
     }
 }

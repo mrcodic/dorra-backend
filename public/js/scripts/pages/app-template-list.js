@@ -218,6 +218,16 @@ handleAjaxFormSubmit('#deleteTemplateForm', {
     }
 });
 
+function removeTemplateCards(ids) {
+    if (Array.isArray(ids)) {
+        ids.forEach(function (id) {
+            $('[data-template-id="' + id + '"]').fadeOut(300, function () {
+                $(this).remove();
+            });
+        });
+    }
+}
+
 
 $(document).on("submit", "#bulk-delete-form", function (e) {
     e.preventDefault();
@@ -237,6 +247,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
         },
         success: function (response) {
             $("#deleteTemplatesModal").modal("hide");
+
             Toastify({
                 text: "Selected templates deleted successfully!",
                 duration: 1500,
@@ -246,14 +257,14 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
                 close: true,
             }).showToast();
 
-            // Reload DataTable
+            removeTemplateCards(response.data);
 
             $('#bulk-delete-container').hide();
             $('.category-checkbox').prop('checked', false);
             $('#select-all-checkbox').prop('checked', false);
-            $(".template-list-table").DataTable().ajax.reload(null, false);
-
         },
+
+
         error: function () {
             $("#deleteTemplatesModal").modal("hide");
             Toastify({
