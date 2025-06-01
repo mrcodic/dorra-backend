@@ -100,7 +100,7 @@
                 <div class="row gx-2 gy-2 align-items-center px-1 pt-2">
                     @foreach ($data as $template)
 
-                        <div class="col-md-6 col-lg-4 col-xxl-4 custom-2-per-row">
+                        <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
                             <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
                                 <!-- Checkbox -->
                                 <input type="checkbox"
@@ -118,11 +118,11 @@
                                 <div class="card-body text-start p-2">
                                     <div>
                                         <h6 class="fw-bold mb-1 text-black fs-3"
-                                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;">
+                                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px">
                                             {{ $template->getTranslation('name', app()->getLocale()) }}
                                         </h6>
                                         <p class="small mb-1"
-                                           style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;">
+                                           style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px">
                                             {{ $template->product->getTranslation('name', app()->getLocale()) }}
                                         </p>
 
@@ -130,9 +130,9 @@
 
 
                                     <!-- Tags -->
-                                    <div class="d-flex flex-wrap justify-content-start gap-1 mb-2">
+                                    <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"  style="min-height: 44px;">
                                         @foreach($template->product->tags as $tag)
-                                            <span class="badge rounded-pill text-black p-75"
+                                            <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
                                                   style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
                                         @endforeach
                                     </div>
@@ -155,7 +155,7 @@
 
                                     <!-- Footer Buttons -->
 
-                                    <div class="d-flex justify-content-center gap-1">
+                                    <div class="d-flex justify-content-center gap-1 flex-wrap">
                                         <a class="btn btn-outline-secondary text-black publish-btn {{ $template->design_data  != 3 ? '' : 'disabled disabled-link' }}"
                                            href="{{ $template->design_data ? route('product-templates.publish', ['id' => $template->id]) : '#' }}">
                                             Publish
