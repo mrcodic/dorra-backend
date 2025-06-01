@@ -19,7 +19,6 @@ class TemplateService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10)
     {
-
         if (request()->ajax()) {
             $query = $this->repository
                 ->query(['id', 'name', 'product_id', 'status', 'created_at'])
@@ -38,9 +37,10 @@ class TemplateService extends BaseService
             if (request('per_page') == "all") {
                 return $query->get();
             }
+//            dd(request('per_page',16),$query->paginate(request('per_page',50)));
             return $query->paginate(request('per_page',16));
         }
-        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters,perPage: 16);
+        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters,perPage: request('per_page',16));
 
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Template;
 
+use App\Enums\Template\StatusEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
 use Illuminate\Validation\Rule;
@@ -39,12 +40,12 @@ class UpdateTemplateRequest extends BaseRequest
                 'max:255',
                 Rule::unique('templates', 'name->ar')->ignore($id),
             ],
-            'name' => ['sometimes',
-                'string',
-                'max:255'],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'status' => ["sometimes","integer","in:".StatusEnum::getValuesAsString()],
             'product_id' => ['sometimes', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
-            'preview_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],
+            'specifications' => ['sometimes', 'array'],
+            'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
         ];
     }
