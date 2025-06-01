@@ -17,7 +17,7 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
         parent::__construct($category);
     }
 
-    public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc',$filters = []): EloquentCollection|LengthAwarePaginator
+    public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc', $filters = [], $perPage = 10): EloquentCollection|LengthAwarePaginator
     {
         $query =  parent::buildQuery($filters, $relations, $orderBy, $direction)->whereNull('parent_id');
         return $paginate ? $query->paginate() : $query->get($columns);

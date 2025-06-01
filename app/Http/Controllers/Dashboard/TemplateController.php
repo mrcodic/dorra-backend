@@ -48,11 +48,15 @@ class TemplateController extends DashboardController
 
     public function index()
     {
-        $data = $this->service->getAll($this->getRelations('index'), $this->usePagination);
+
+        $data = $this->service->getAll($this->getRelations('index'), $this->usePagination ,perPage: request('per_page',16));
         $associatedData = $this->getAssociatedData('index');
         if (request()->ajax()) {
             $html = view("dashboard.templates.partials.filtered-templates", compact('data'))->render();
-            return Response::api(data: ['html' =>  $html]);
+            return Response::api(data: [
+                'html' => $html,
+                'total' => is_countable($data) ? count($data) : $data->total(),
+            ]);
         }
         return view("dashboard.templates.index", get_defined_vars());
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Template;
 
+use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
 use App\Enums\Template\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
@@ -53,6 +54,7 @@ class UpdateTranslatedTemplateRequest extends BaseRequest
             'height' => ["required","integer"],
             'width' => ["required","integer"],
             'unit' => ["required","integer","in:".UnitEnum::getValuesAsString()],
+            'status' => ["required","integer","in:".StatusEnum::getValuesAsString()],
             'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
             'specifications' => ['sometimes', 'array'],

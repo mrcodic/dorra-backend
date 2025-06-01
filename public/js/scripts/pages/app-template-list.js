@@ -117,7 +117,7 @@ const dt_user_table = $(".template-list-table").DataTable({
 // $('.filter-product, .filter-status').on('change', function () {
 //     dt_user_table.ajax.reload();
 // });
-$('.filter-status, .filter-product, #search-category-form').on('change keyup', function() {
+$('.filter-status, .filter-product, #search-category-form, .filter-paginate-number').on('change keyup', function() {
     // debounce this if needed!
     fetchTemplates();
 });
@@ -129,7 +129,8 @@ function fetchTemplates() {
         data: {
             search_value: $('#search-category-form').val(),
             product_id: $('.filter-product').val(),
-            status: $('.filter-status').val()
+            status: $('.filter-status').val(),
+            per_page: $('.filter-paginate-number').val()
         },
         success: function(response) {
             $('#templates-container').html(response.data.html);

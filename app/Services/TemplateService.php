@@ -17,10 +17,10 @@ class TemplateService extends BaseService
 
     }
 
-    public function getAll($relations = [], bool $paginate = false, $columns = ['*'])
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10)
     {
         if (request()->ajax()) {
-            return $this->repository
+            $query = $this->repository
                 ->query(['id', 'name', 'product_id', 'status', 'created_at'])
                 ->with(['product:id,name'])
                 ->when(request()->filled('search_value'), function ($query) {
@@ -33,9 +33,14 @@ class TemplateService extends BaseService
                 })->when(request()->filled('status'), function ($query) {
                     $query->whereStatus(request('status'));
                 })
-                ->latest()->get();
+                ->latest();
+            if (request('per_page') == "all") {
+                return $query->get();
+            }
+//            dd(request('per_page',16),$query->paginate(request('per_page',50)));
+            return $query->paginate(request('per_page',16));
         }
-        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters);
+        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters,perPage: request('per_page',16));
 
     }
 

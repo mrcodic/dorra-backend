@@ -61,7 +61,8 @@ class StoreTemplateRequest extends BaseRequest
             'unit' => ["sometimes","integer","in:".UnitEnum::getValuesAsString()],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
-            'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
+//            'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
+            'source_design_svg' => ['nullable'],
         ];
 
     }

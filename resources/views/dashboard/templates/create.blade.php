@@ -224,7 +224,7 @@
 
     </script>
     <script !src="">
-        $('#productsSelect').on('change', function () {
+        $('#productsSelect').on('click', function () {
             const productId = $(this).val();
             if (productId) {
                 $('#addNewSpec').attr('data-bs-toggle', 'modal').attr('data-bs-target', '#addSpecModal');
@@ -316,6 +316,93 @@
             $('#tagsSelect').select2();
             $('#colorsSelect').select2();
 
+        });
+    </script>
+    <script !src="">
+        function updateDeleteButtons(containerSelector) {
+            $(containerSelector).find('[data-repeater-list]').each(function() {
+                var items = $(this).find('[data-repeater-item]');
+                items.each(function() {
+                    $(this).find('[data-repeater-delete]').show();
+                    feather.replace();
+                });
+            });
+        }
+
+        function initializeImageUploaders(context) {
+            $(context).find('.option-upload-area').each(function() {
+                const uploadArea = $(this);
+                const input = uploadArea.closest('.col-md-12').find('.option-image-input');
+                const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
+                const imagePreview = previewContainer.find('.option-image-preview');
+                const fileNameLabel = previewContainer.find('.option-file-name');
+                const fileSizeLabel = previewContainer.find('.option-file-size');
+                const removeButton = previewContainer.find('.option-remove-image');
+
+                uploadArea.off('click').on('click', function() {
+                    input.trigger('click');
+                });
+
+                input.off('change').on('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            imagePreview.attr('src', e.target.result);
+                            fileNameLabel.text(file.name);
+                            fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
+                            previewContainer.removeClass('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                removeButton.off('click').on('click', function() {
+                    input.val('');
+                    previewContainer.addClass('d-none');
+                });
+            });
+        }
+
+        $('.outer-repeater').repeater({
+            repeaters: [{
+                selector: '.inner-repeater',
+                show: function() {
+                    $(this).slideDown();
+                    updateDeleteButtons($(this).closest('.outer-repeater'));
+                    initializeImageUploaders(this);
+                    feather.replace();
+                },
+                hide: function(deleteElement) {
+                    $(this).slideUp(deleteElement);
+                    updateDeleteButtons($(this).closest('.outer-repeater'));
+                },
+                nestedInputName: 'specification_options'
+            }],
+            show: function() {
+                $(this).slideDown();
+                updateDeleteButtons($('.outer-repeater'));
+                initializeImageUploaders(this);
+                feather.replace();
+            },
+            hide: function(deleteElement) {
+                $(this).slideUp(deleteElement);
+                updateDeleteButtons($('.outer-repeater'));
+            },
+            afterAdd: function() {
+                updateDeleteButtons($('.outer-repeater'));
+                initializeImageUploaders($('.outer-repeater'));
+                feather.replace();
+            },
+            afterDelete: function() {
+                updateDeleteButtons($('.outer-repeater'));
+            }
+        });
+
+        // Initialize on page load for already existing items
+        $(document).ready(function() {
+            updateDeleteButtons($('.outer-repeater'));
+            initializeImageUploaders($('.outer-repeater'));
         });
     </script>
 
