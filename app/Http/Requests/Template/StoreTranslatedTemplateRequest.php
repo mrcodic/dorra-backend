@@ -55,7 +55,8 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'design_data' => ['sometimes', 'json'],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
-            'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
+            'source_design_svg' => ['nullable'],
+//            'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
         ];
 
     }
