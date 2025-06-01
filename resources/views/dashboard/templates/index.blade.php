@@ -115,7 +115,23 @@
             <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="templates-container">
                 @forelse ($data as $template)
                 <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
-                    <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;"> <!-- Checkbox --> <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox" value="{{ $template->id }}" name="selected_templates[]">
+                    <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
+                        <!-- Checkbox -->
+                        <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox" value="{{ $template->id }}" name="selected_templates[]">
+                        <!-- Action Icon with Dropdown (Top Right) -->
+                        <div class="dropdown position-absolute top-0 end-0 m-1">
+                            <button class="btn btn-sm  border-0" type="button" id="actionDropdown{{ $template->id }}" data-bs-toggle="dropdown" aria-expanded="false" style="background-color:#F9FDFC">
+                                <i data-feather="more-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionDropdown{{ $template->id }}">
+                                <li><a class="dropdown-item" href="{{ route("product-templates.edit",$template->id) }}"><i data-feather="edit-3" class="me-1"></i>Edit</a></li>
+                                <li><a class="dropdown-item" href="{{ config('services.editor_url') . 'templates/' . $template->id }}" target="_blank"><i data-feather="eye" class="me-1"></i>Show</a></li>
+                                <li><a class="dropdown-item publish-btn {{ $template->design_data != 3 ? '' : 'disabled disabled-link' }}" href="{{ $template->design_data ? route('product-templates.publish', ['id' => $template->id]) : '#' }}"><i data-feather="send" class="me-1"></i>Publish</a></li>
+                                <li><a class="dropdown-item publish-btn {{ $template->design_data != 3 ? '' : 'disabled disabled-link' }}" href="{{ $template->design_data ? route('product-templates.publish', ['id' => $template->id]) : '#' }}"><i data-feather="file" class="me-1"></i>Draft</a></li>
+                                <li><a class="dropdown-item publish-btn {{ $template->design_data != 3 ? '' : 'disabled disabled-link' }}" href="{{ $template->design_data ? route('product-templates.publish', ['id' => $template->id]) : '#' }}"><i data-feather="radio" class="me-1"></i>Live</a></li>
+                                <li><button class="dropdown-item text-danger open-delete-template-modal" data-bs-toggle="modal" data-bs-target="#deleteTemplateModal" data-id="{{ $template->id }}"><i data-feather="trash-2" class="me-1 text-danger"></i>Delete</button></li>
+                            </ul>
+                        </div>
                         <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img src="{{ $template->getFirstMediaUrl('templates') ? $template->getFirstMediaUrl('templates'): asset("images/default-photo.png") }}" class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image"> </div> <!-- Template Info -->
                         <div class="card-body text-start p-2">
                             <div>
@@ -130,8 +146,6 @@
                                     <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #9B59B6;"></div>
                                 </div> <span class="badge text-dark  p-75" style="background-color: #CED5D4">{{ $template->status->label() }}</span>
                             </div>
-                            <hr class="my-2"> <!-- Footer Buttons -->
-                            <div class="d-flex justify-content-center gap-1 flex-wrap"> <a class="btn btn-outline-secondary text-black publish-btn {{ $template->design_data  != 3 ? '' : 'disabled disabled-link' }}" href="{{ $template->design_data ? route('product-templates.publish', ['id' => $template->id]) : '#' }}"> Publish </a> <a class="btn btn-outline-secondary text-black" href="{{ config('services.editor_url') . 'templates/' . $template->id }}" target="_blank"> Show </a> <a class="btn btn-outline-secondary text-black" href="{{ route("product-templates.edit",$template->id) }}">Edit</a> <button class="btn btn-outline-danger open-delete-template-modal" data-bs-toggle="modal" data-bs-target="#deleteTemplateModal" data-id="{{ $template->id }}"> Delete </button> </div>
                         </div>
                     </div>
                 </div>
