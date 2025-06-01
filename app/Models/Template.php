@@ -37,7 +37,7 @@ class Template extends Model implements HasMedia
 
     public function specifications(): BelongsToMany
     {
-        return $this->belongsToMany(ProductSpecification::class);
+        return $this->belongsToMany(ProductSpecification::class)->withTimestamps();
     }
 
 

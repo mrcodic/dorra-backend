@@ -122,6 +122,7 @@
                                     <div class="form-group mb-2 d-none">
                                         <label class="label-text mb-1">Spec</label>
                                         <div class="row" id="specsContainer">
+
                                         </div>
                                     </div>
                                 </div>
@@ -163,7 +164,15 @@
 
 @endsection
 @section('vendor-script')
+
     <script !src="">
+        $(document).ready(function() {
+            const preselectedProductId = $('#productsSelect').val();
+            if (preselectedProductId) {
+                $('#productsSelect').trigger('change');
+            }
+        });
+
         $("#addNewSpec").on('click', function (e) {
             const productId = $('#productsSelect').val();
 
@@ -224,7 +233,8 @@
 
     </script>
     <script !src="">
-        $('#productsSelect').on('change click', function () {
+
+        $('#productsSelect').on('change', function () {
             const productId = $(this).val();
             if (productId) {
                 $('#addNewSpec').attr('data-bs-toggle', 'modal').attr('data-bs-target', '#addSpecModal');

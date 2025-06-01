@@ -139,8 +139,8 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    @if($model->specifications->isNotEmpty())
-                                        <div class="form-group mb-2">
+                                    @if($model->product && $model->product->specifications->isNotEmpty())
+                                    <div class="form-group mb-2">
                                             <label class="label-text mb-1">Spec</label>
                                             <div class="row" id="specsContainer">
                                                 @foreach($model->product->specifications as $spec)
@@ -148,8 +148,7 @@
                                                         <div class="border rounded p-1 d-flex align-items-center">
                                                             <input type="checkbox" name="specifications[]"
                                                                    value="{{$spec->id}}" class="form-check-input me-1"
-                                                                @checked($model->specifications->contains($spec->id))
-                                                            >
+                                                                @checked($model->specifications->pluck('id')->contains($spec->id))>
                                                             <label class="form-check-label">{{ $spec->name}}</label>
                                                         </div>
                                                     </div>
@@ -206,6 +205,7 @@
 
 @section('page-script')
     <script !src="">
+
         $("#addNewSpec").on('click', function (e) {
             const productId = $('#productsSelect').val();
             $('#product_id_input').val(productId);
@@ -254,6 +254,12 @@
 
     </script>
     <script !src="">
+        $(document).ready(function() {
+            const preselectedProductId = $('#productsSelect').val();
+            if (preselectedProductId) {
+                $('#productsSelect').trigger('change');
+            }
+        });
         $('#productsSelect').on('change', function () {
             const productId = $(this).val();
             if (productId) {
