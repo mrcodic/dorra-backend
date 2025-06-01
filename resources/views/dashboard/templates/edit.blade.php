@@ -164,6 +164,7 @@
                                      <div class="d-flex gap-1">
                                 <a href="{{ config("services.editor_url")."templates/".$model->id }}"
                                    class="btn btn-outline-secondary fs-5 "
+                                   target="_blank"
                                 >
                                     <i data-feather="edit-3"></i>
                                     <span>Edit Design</span>
