@@ -161,10 +161,11 @@
                             </div>
                             <div class="d-flex justify-content-between pt-2">
                                 <button type="button" class="btn btn-outline-secondary">Cancel</button>
+                                     <div class="d-flex gap-1">
                                 <a href="{{ config("services.editor_url")."templates/".$model->id }}"
-                                   class="btn btn-secondary fs-5 "
+                                   class="btn btn-outline-secondary fs-5 "
                                 >
-                                    <i data-feather="upload"></i>
+                                    <i data-feather="edit-3"></i>
                                     <span>Edit Design</span>
 
                                 </a>
@@ -174,6 +175,7 @@
                                     <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
                                           role="status" aria-hidden="true"></span>
                                 </button>
+                                     </div>
                             </div>
                         </form>
                     </div>
