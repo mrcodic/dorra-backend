@@ -32,83 +32,88 @@
             </div>
         </div>
         <div class=" pt-0">
-            <div class="row gx-2 gy-2 align-items-center px-1">
+            <div class="row gx-2  align-items-center px-1">
+                {{-- Filters Row --}}
+                <div class="row gx-2 ">
+                    {{-- Search Input --}}
+                    <div class="col-12 col-md-6">
+                        <form action="" method="get" class="position-relative">
+                            <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                            <input
+                                type="text"
+                                class="form-control ps-5 border rounded-3"
+                                name="search_value"
+                                id="search-category-form"
+                                placeholder="Search template..."
+                                style="height: 38px;">
+                        </form>
+                    </div>
 
-                {{-- Search Input - 70% on md+, full width on xs --}}
-                <div class="col-12 col-md-4">
-                    <form action="" method="get" class="position-relative">
-                        <i data-feather="search"
-                            class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
-                        <input
-                            type="text"
-                            class="form-control ps-5 border rounded-3"
-                            name="search_value"
-                            id="search-category-form"
-                            placeholder="Search template..."
-                            style="height: 38px;">
-                    </form>
-                </div>
-                {{-- Filter Select - 10% on md+, half width on sm --}}
-                <div class="col">
-                    <select name="created_at" class="form-select filter-status select2" data-placeholder="Status">
-                        <option value="">Status</option>
-                        @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
-                        <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                    {{-- Status Filter --}}
+                    <div class="col-6 col-md-2">
+                        <select name="status" class="form-select filter-status select2" data-placeholder="Status">
+                            <option value="">Status</option>
+                            @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
+                            <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                        @endforeach
-                    </select>
-                </div>
-                {{-- Filter Select - 10% on md+, half width on sm --}}
-                <div class="col">
-                    <select name="created_at" class="form-select filter-status select2" data-placeholder="Tags">
-                        <option value="">Tags</option>
-                        @foreach($associatedData['tags'] as $tag)
-                        <option
-                            value="{{ $tag->id }}">{{ $tag->getTranslation('name', app()->getLocale()) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                {{-- Filter Select - 10% on md+, half width on sm --}}
-                <div class="col">
-                    <select name="created_at" class="form-select filter-product select2" data-placeholder="Product">
-                        <option value="">Product</option>
-                        @foreach($associatedData['products'] as $product)
-                        <option
-                            value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                          {{-- Filter Select - 10% on md+, half width on sm --}}
-                <div class="col">
-                    <select name="created_at" class="form-select filter-status select2" data-placeholder="Show">
-                        <option value="">Show</option>
-                        @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
-                        <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                    {{-- Tags Filter --}}
+                    <div class="col-6 col-md-2">
+                        <select name="tags" class="form-select filter-status select2" data-placeholder="Tags">
+                            <option value="">Tags</option>
+                            @foreach($associatedData['tags'] as $tag)
+                            <option value="{{ $tag->id }}">{{ $tag->getTranslation('name', app()->getLocale()) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                        @endforeach
-                    </select>
+                    {{-- Product Filter --}}
+                    <div class="col-6 col-md-2">
+                        <select name="product" class="form-select filter-product select2" data-placeholder="Product">
+                            <option value="">Product</option>
+                            @foreach($associatedData['products'] as $product)
+                            <option value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
-                {{-- Add Button - 20% on md+, full width on xs --}}
-                <div class="col-6 col-md-2 text-md-end">
-                    <a class="btn btn-outline-secondary w-100 w-md-auto" href="{{ config('services.editor_url') }} "
-                        target="_blank">
-                        <i data-feather="upload"></i>
-                        Upload Template
-                    </a>
-                </div>
-                {{-- Add Button - 20% on md+, full width on xs --}}
-                <div class="col-6 col-md-2 text-md-end">
-                    <a class="btn btn-primary w-100 w-md-auto" href="{{ route("product-templates.create") }}">
-                        <i data-feather="plus"></i>
-                        Create Template
-                    </a>
+                {{-- Divider --}}
+                <div class="col-12 ">
+                    <hr class="my-2">
                 </div>
 
+                {{-- Buttons Row --}}
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-1">
+                    {{-- Show Filter --}}
+                    <div class="col-12 col-md-1">
+                        <select name="show" class="form-select filter-status select2" data-placeholder="Show">
+                            <option value="">Show</option>
+                            @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
+                            <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Action Buttons --}}
+                    <div class="col-4 d-flex gap-1">
+                        <a class="btn btn-outline-secondary w-100 w-md-auto" href="{{ config('services.editor_url') }}" target="_blank">
+                            <i data-feather="upload"></i>
+                            Upload Template
+                        </a>
+                        <a class="btn btn-primary w-100 w-md-auto" href="{{ route('product-templates.create') }}">
+                            <i data-feather="plus"></i>
+                            Create Template
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <div class="row gx-2 gy-2 align-items-center px-1 pt-2">
-                @foreach ($data as $template)
+
+            <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="templates-container">
+                @forelse ($data as $template)
                 <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
                     <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;"> <!-- Checkbox --> <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox" value="{{ $template->id }}" name="selected_templates[]">
                         <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img src="{{ $template->getFirstMediaUrl('templates') ? $template->getFirstMediaUrl('templates'): asset("images/default-photo.png") }}" class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image"> </div> <!-- Template Info -->
@@ -130,10 +135,7 @@
                         </div>
                     </div>
                 </div>
-
-                @endforeach
-
-                @if($data->isEmpty())
+                @empty
                 <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100" style="min-height:65vh;">
                     <!-- Empty Image -->
                     <img src="{{ asset('images/Empty.png') }}" alt="No Templates" style="max-width: 200px;" class="mb-2">
@@ -147,7 +149,9 @@
                         Create Template
                     </a>
                 </div>
-                @endif
+                @endforelse
+
+
             </div>
             <div class="mt-2 px-1">
                 {{ $data->links('pagination::bootstrap-5') }}
