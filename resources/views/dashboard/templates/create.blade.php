@@ -224,7 +224,7 @@
 
     </script>
     <script !src="">
-        $('#productsSelect').on('change', function () {
+        $('#productsSelect').on('change click', function () {
             const productId = $(this).val();
             if (productId) {
                 $('#addNewSpec').attr('data-bs-toggle', 'modal').attr('data-bs-target', '#addSpecModal');

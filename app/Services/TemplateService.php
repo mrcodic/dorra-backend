@@ -21,7 +21,7 @@ class TemplateService extends BaseService
     {
 
         if (request()->ajax()) {
-            return $this->repository
+            $query = $this->repository
                 ->query(['id', 'name', 'product_id', 'status', 'created_at'])
                 ->with(['product:id,name'])
                 ->when(request()->filled('search_value'), function ($query) {
@@ -34,7 +34,11 @@ class TemplateService extends BaseService
                 })->when(request()->filled('status'), function ($query) {
                     $query->whereStatus(request('status'));
                 })
-                ->latest()->paginate(request('per_page',16));
+                ->latest();
+            if (request('per_page') == "all") {
+                return $query->get();
+            }
+            return $query->paginate(request('per_page',16));
         }
         return $this->repository->all($paginate, $columns, $relations, filters: $this->filters,perPage: 16);
 

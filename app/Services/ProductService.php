@@ -72,7 +72,7 @@ class ProductService extends BaseService
             })->make();
     }
 
-    public function getAll($relations = [], bool $paginate = false, $columns = ['*']): LengthAwarePaginator
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10): LengthAwarePaginator
     {
 
         return QueryBuilder::for(Product::class)->select($columns)

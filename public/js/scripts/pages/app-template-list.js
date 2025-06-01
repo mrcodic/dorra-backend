@@ -117,7 +117,7 @@ const dt_user_table = $(".template-list-table").DataTable({
 // $('.filter-product, .filter-status').on('change', function () {
 //     dt_user_table.ajax.reload();
 // });
-$('.filter-status, .filter-product, #search-category-form').on('change keyup', function() {
+$('.filter-status, .filter-product, #search-category-form, .filter-paginate-number').on('change keyup', function() {
     // debounce this if needed!
     fetchTemplates();
 });
