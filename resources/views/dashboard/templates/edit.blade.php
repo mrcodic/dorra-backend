@@ -154,7 +154,8 @@
                             </div>
 
                             <div class="d-flex justify-content-end">
-                                <button type="button" class="btn btn-outline-secondary" id="addNewSpec">
+                                <button type="button" class="btn btn-outline-secondary" id="addNewSpec"
+                                >
                                     Add New Specs
                                 </button>
 
@@ -196,6 +197,28 @@
 
 
 @section('page-script')
+    <script !src="">
+        $("#addNewSpec").on('click', function (e) {
+            const productId = $('#productsSelect').val();
+
+            if (!productId) {
+                e.preventDefault(); // block behavior
+
+                Toastify({
+                    text: "Select product first to add spec on it!",
+                    duration: 4000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#EA5455", // Red for warning
+                    close: true,
+                }).showToast();
+
+            } else {
+                $("#addSpecModal").modal("show");
+
+            }
+        });
+    </script>
     <script !src="">
         handleAjaxFormSubmit("#editTemplateForm", {
             successMessage: "Template updated successfully",

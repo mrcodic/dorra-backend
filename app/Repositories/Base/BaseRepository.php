@@ -20,10 +20,10 @@ class BaseRepository implements BaseRepositoryInterface
             ->with($relations)
             ->orderBy($orderBy, $direction);
     }
-    public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc',$filters = []): Collection|LengthAwarePaginator
+    public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc',$filters = [],$perPage = 10): Collection|LengthAwarePaginator
     {
         $query =  $this->query($columns)->with($relations)->orderBy($orderBy, $direction);
-        return $paginate ? $query->paginate() : $query->get($columns);
+        return $paginate ? $query->paginate($perPage) : $query->get($columns);
     }
 
 

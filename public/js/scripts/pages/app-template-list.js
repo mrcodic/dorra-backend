@@ -129,7 +129,8 @@ function fetchTemplates() {
         data: {
             search_value: $('#search-category-form').val(),
             product_id: $('.filter-product').val(),
-            status: $('.filter-status').val()
+            status: $('.filter-status').val(),
+            per_page: $('.filter-paginate-number').val()
         },
         success: function(response) {
             $('#templates-container').html(response.data.html);

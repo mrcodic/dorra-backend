@@ -17,8 +17,9 @@ class TemplateService extends BaseService
 
     }
 
-    public function getAll($relations = [], bool $paginate = false, $columns = ['*'])
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10)
     {
+
         if (request()->ajax()) {
             return $this->repository
                 ->query(['id', 'name', 'product_id', 'status', 'created_at'])
@@ -33,9 +34,9 @@ class TemplateService extends BaseService
                 })->when(request()->filled('status'), function ($query) {
                     $query->whereStatus(request('status'));
                 })
-                ->latest()->get();
+                ->latest()->paginate(request('per_page',16));
         }
-        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters);
+        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters,perPage: 16);
 
     }
 

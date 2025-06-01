@@ -89,11 +89,13 @@
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-1">
                     {{-- Show Filter --}}
                     <div class="col-12 col-md-1">
-                        <select name="show" class="form-select filter-status select2" data-placeholder="Show">
-                            <option value="">Show</option>
-                            @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
-                            <option value="{{ $status->value }}">{{ $status->label() }}</option>
-                            @endforeach
+                        <select name="show" class="form-select filter-paginate-number">
+                            <option value="" disabled>Show</option>
+                            <option value="16">16</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="all">All</option>
+
                         </select>
                     </div>
 
@@ -229,8 +231,7 @@
     });
 
     const templatesDataUrl = "{{ route('templates.data') }}";
-    const showTemplateUrl = "{{ config("
-    services.editor_url ") }}";
+    const showTemplateUrl = "{{ config("services.editor_url ") }}";
 
     const locale = "{{ app()->getLocale() }}";
     $(".publish-btn").on('click', function(e) {
