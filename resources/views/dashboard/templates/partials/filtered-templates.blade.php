@@ -141,7 +141,7 @@
 
                 // Optionally: also disable the publish button if needed
                 const $publishBtn = $form.find('button[type="submit"]');
-                if (response.status === 'published') { // check against your enum value
+                if (response.data.status === "{{ \App\Enums\Template\StatusEnum::PUBLISHED }}") { // check against your enum value
                     $publishBtn.addClass('disabled');
                 }
             },
