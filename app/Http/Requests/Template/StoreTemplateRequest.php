@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Template;
 
 use App\Enums\Template\TypeEnum;
+use App\Enums\Template\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
 use Illuminate\Validation\Rule;
 
@@ -34,7 +35,7 @@ class StoreTemplateRequest extends BaseRequest
             ],
             'name' => [
                 'nullable',
-                'string',
+//                'string',
                 'max:255',
                 Rule::unique('templates', 'name->en'),
             ],
@@ -55,6 +56,9 @@ class StoreTemplateRequest extends BaseRequest
             'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
             'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
+            'height' => ["sometimes","integer"],
+            'width' => ["sometimes","integer"],
+            'unit' => ["sometimes","integer","in:".UnitEnum::getValuesAsString()],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],

@@ -3,214 +3,250 @@
 @section('title', 'Templates')
 
 @section('vendor-style')
-<!-- Vendor CSS Files -->
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+    <!-- Vendor CSS Files -->
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 @endsection
 
 @section('content')
-<section id="multiple-column-form ">
-    <div class="row ">
-        <div class="col-12 ">
-            <div class="card">
-                <div class="card-body ">
-                    <form id="addTemplateForm" enctype="multipart/form-data" method="post" action="{{ route('templates.redirect.store') }}">
-                        @csrf
-                        <div class="flex-grow-1">
-                            <div class="">
-                                <div class="row">
-                                    <!-- Width -->
-                                    <div class="col-md-4 mb-2">
-                                        <label for="width" class="label-text mb-1">Width</label>
-                                        <input type="number" id="width" name="width" class="form-control"
-                                            placeholder="Enter width">
+    <section id="multiple-column-form ">
+        <div class="row ">
+            <div class="col-12 ">
+                <div class="card">
+                    <div class="card-body ">
+                        <form id="addTemplateForm" enctype="multipart/form-data" method="post"
+                              action="{{ route('templates.redirect.store') }}">
+                            @csrf
+                            <div class="flex-grow-1">
+                                <div class="">
+                                    <div class="row">
+                                        <!-- Width -->
+                                        <div class="col-md-4 mb-2">
+                                            <label for="width" class="label-text mb-1">Width</label>
+                                            <input type="number" id="width" name="width" class="form-control"
+                                                   placeholder="Enter width">
+                                        </div>
+
+                                        <!-- Height -->
+                                        <div class="col-md-4 mb-2">
+                                            <label for="height" class="label-text mb-1">Height</label>
+                                            <input type="number" id="height" name="height" class="form-control"
+                                                   placeholder="Enter height">
+                                        </div>
+
+                                        <!-- Unit -->
+                                        <div class="col-md-4 mb-2">
+                                            <label for="unit" class="label-text mb-1">Unit</label>
+                                            <select id="unit" name="unit" class="form-select">
+                                                <option value="">Select Unit</option>
+                                                @foreach(\App\Enums\Template\UnitEnum::cases() as $unit)
+                                                    <option value="{{ $unit->value }}"> {{ $unit->label() }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label class="label-text mb-1">Template Type</label>
+                                        <div class="row">
+                                            @foreach(\App\Enums\Template\TypeEnum::cases() as $type)
+                                                <div class="col">
+                                                    <label class="radio-box">
+                                                        <input class="form-check-input" type="radio" name="type"
+                                                               value="{{ $type->value }}"
+                                                        >
+                                                        <span>{{ $type->label() }}</span>
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        </div>
+
                                     </div>
 
-                                    <!-- Height -->
-                                    <div class="col-md-4 mb-2">
-                                        <label for="height" class="label-text mb-1">Height</label>
-                                        <input type="number" id="height" name="height" class="form-control"
-                                            placeholder="Enter height">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label for="templateName" class="label-text mb-1">Name (AR)</label>
+                                            <input type="text" id="templateName" class="form-control"
+                                                   name="name[ar]"
+                                                   placeholder="Template Name in Arabic">
+                                        </div>
+
+                                        <div class="col-md-6 mb-2">
+                                            <label for="templateName" class="label-text mb-1">Name (EN)</label>
+                                            <input type="text" id="templateName" class="form-control"
+                                                   name="name[en]"
+                                                   placeholder="Template Name in English">
+                                        </div>
                                     </div>
 
-                                    <!-- Unit -->
-                                    <div class="col-md-4 mb-2">
-                                        <label for="unit" class="label-text mb-1">Unit</label>
-                                        <select id="unit" name="unit" class="form-select">
-                                            <option value="">Select Unit</option>
-                                            @foreach(\App\Enums\Template\UnitEnum::cases() as $unit)
-                                            <option value="{{ $unit->value }}"> {{ $unit->label() }}</option>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label for="templateDescription" class="label-text mb-1">Description
+                                                (AR)</label>
+                                            <textarea id="templateDescription" class="form-control" rows="3"
+                                                      name="description[ar]"
+                                                      placeholder="Template Description in Arabic"></textarea>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label for="templateDescription" class="label-text mb-1">Description
+                                                (EN)</label>
+                                            <textarea id="templateDescription" class="form-control" rows="3"
+                                                      name="description[en]"
+                                                      placeholder="Template Description in English"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-2">
+                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>
+                                        <select id="tagsSelect" class="form-select select2" multiple>
+                                            <option value="">Choose tag</option>
+                                        </select>
+                                    </div>
+                                    <!-- Colors -->
+                                    <div class="form-group mb-2">
+                                        <label for="colorsSelect" class="label-text mb-1">Colors</label>
+                                        <select id="colorsSelect" name="colors[]" class="form-select select2" multiple>
+                                            <option value="">Choose colors</option>
+                                            <!-- Add dynamic options here if needed -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label for="productsSelect" class="label-text mb-1">Product</label>
+                                        <select id="productsSelect" class="form-select select2" name="product_id">
+                                            <option value="" disabled>Choose Product</option>
+                                            @foreach($associatedData['products'] as $product)
+                                                <option
+                                                    value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="label-text mb-1">Template Type</label>
-                                    <div class="row">
-                                        @foreach(\App\Enums\Template\TypeEnum::cases() as $type)
-                                            <div class="col">
-                                                <label class="radio-box">
-                                                    <input class="form-check-input" type="radio" name="type" value="{{ $type->value }}"
-                                                    >
-                                                    <span>{{ $type->label() }}</span>
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-2">
-                                        <label for="templateName" class="label-text mb-1">Name (AR)</label>
-                                        <input type="text" id="templateName" class="form-control"
-                                            name="name[ar]"
-                                            placeholder="Template Name in Arabic">
-                                    </div>
-
-                                    <div class="col-md-6 mb-2">
-                                        <label for="templateName" class="label-text mb-1">Name (EN)</label>
-                                        <input type="text" id="templateName" class="form-control"
-                                            name="name[en]"
-                                            placeholder="Template Name in English">
-                                    </div>
-                                </div>
-
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-2">
-                                        <label for="templateDescription" class="label-text mb-1">Description (AR)</label>
-                                        <textarea id="templateDescription" class="form-control" rows="3"
-                                            name="description[ar]"
-                                            placeholder="Template Description in Arabic"></textarea>
-                                    </div>
-                                    <div class="col-md-6 mb-2">
-                                        <label for="templateDescription" class="label-text mb-1">Description (EN)</label>
-                                        <textarea id="templateDescription" class="form-control" rows="3"
-                                            name="description[en]"
-                                            placeholder="Template Description in English"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label for="tagsSelect" class="label-text mb-1">Tags</label>
-                                    <select id="tagsSelect" class="form-select select2" multiple>
-                                        <option value="">Choose tag</option>
-                                    </select>
-                                </div>
-                                <!-- Colors -->
-                                <div class="form-group mb-2">
-                                    <label for="colorsSelect" class="label-text mb-1">Colors</label>
-                                    <select id="colorsSelect" name="colors[]" class="form-select select2" multiple>
-                                        <option value="">Choose colors</option>
-                                        <!-- Add dynamic options here if needed -->
-                                    </select>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label for="productsSelect" class="label-text mb-1">Product</label>
-                                    <select id="productsSelect" class="form-select select2" name="product_id">
-                                        <option value="" disabled>Choose Product</option>
-                                        @foreach($associatedData['products'] as $product)
-                                        <option
-                                            value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group mb-2 d-none">
-                                    <label class="label-text mb-1">Spec</label>
-                                    <div class="row" id="specsContainer">
+                                    <div class="form-group mb-2 d-none">
+                                        <label class="label-text mb-1">Spec</label>
+                                        <div class="row" id="specsContainer">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="d-flex justify-content-end">
-                            <button type="button" class="btn btn-outline-secondary" id="addNewSpec">
-                                Add New Specs
-                            </button>
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary" id="addNewSpec">
+                                    Add New Specs
+                                </button>
 
-                        </div>
-                        <div class="d-flex justify-content-between pt-2">
-                            <button type="button" class="btn btn-outline-secondary">Cancel</button>
-                            <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
-                                id="SaveChangesButton">
-                                <span>Add Template</span>
-                                <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
-                                    role="status" aria-hidden="true"></span>
-                            </button>
-                        </div>
-                    </form>
+                            </div>
+                            <div class="d-flex justify-content-between pt-2">
+                                <button type="button" class="btn btn-outline-secondary">Cancel</button>
+                                <div class="d-flex gap-1">
+                                    <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
+                                            id="SaveChangesButton" data-action="draft">
+                                        <span>Add Template as Draft</span>
+                                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                              role="status" aria-hidden="true" ></span>
+                                    </button>
+                                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
+                                            id="SaveChangesButton" data-action="editor">
+                                        <span>Save & Go to Editor</span>
+                                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                              role="status" aria-hidden="true"></span>
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-</section>
-@include('modals.templates.add-spec')
+    </section>
+    @include('modals.templates.add-spec')
 
 @endsection
 @section('vendor-script')
-<script !src="">
-    $("#addNewSpec").on('click', function(e) {
-        const productId = $('#productsSelect').val();
+    <script !src="">
+        $("#addNewSpec").on('click', function (e) {
+            const productId = $('#productsSelect').val();
 
-        if (!productId) {
-            e.preventDefault(); // block behavior
+            if (!productId) {
+                e.preventDefault(); // block behavior
 
-            Toastify({
-                text: "Select product first to add spec on it!",
-                duration: 4000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#EA5455", // Red for warning
-                close: true,
-            }).showToast();
-
-        } else {
-            $("#addSpecModal").modal("show");
-
-        }
-    });
-    handleAjaxFormSubmit("#addTemplateForm", {
-        onSuccess: function(response, $form) {
-            if (response.data.redirect_url) {
-                window.open(response.data.redirect_url, '_blank');
-            } else {
                 Toastify({
-                    text: "No redirect URL provided.",
+                    text: "Select product first to add spec on it!",
                     duration: 4000,
                     gravity: "top",
                     position: "right",
-                    backgroundColor: "#EA5455",
-                    close: true
+                    backgroundColor: "#EA5455", // Red for warning
+                    close: true,
                 }).showToast();
+
+            } else {
+                $("#addSpecModal").modal("show");
+
             }
-        }
-    });
-</script>
-<script !src="">
-    $('#productsSelect').on('change', function() {
-        const productId = $(this).val();
-        if (productId) {
-            $('#addNewSpec').attr('data-bs-toggle', 'modal').attr('data-bs-target', '#addSpecModal');
-            $('#product_id_input').val(productId);
+        });
+        $('.saveChangesButton').on('click', function (e) {
+            const $button = $(this);
+            const action = $button.data('action');
+            // Set form action
+            if (action === 'draft') {
+                $('#addTemplateForm').attr('action', "{{ route('templates.store') }}");
+            } else if (action === 'editor') {
+                $('#addTemplateForm').attr('action', "{{ route('templates.redirect.store') }}");
+            }
+        });
 
-        } else {
-            $('#addNewSpec').removeAttr('data-bs-toggle').removeAttr('data-bs-target');
-        }
 
-        const $specsContainer = $('#specsContainer');
-        const $specSection = $specsContainer.closest('.form-group');
+        handleAjaxFormSubmit("#addTemplateForm", {
+            successMessage : "Template created successfully",
+            onSuccess: function (response, $form) {
+                // Re-enable buttons & hide all loaders
+                $('.saveChangesButton').prop('disabled', false).find('.saveLoader').addClass('d-none');
 
-        if (productId) {
-            $.ajax({
-                url: "{{ url('api/product-specifications') }}/" + productId,
-                method: 'GET',
-                success: function(res) {
-                    if (res.data && res.data.length > 0) {
-                        $specsContainer.empty();
+                if (response.data.redirect_url) {
+                    window.open(response.data.redirect_url, '_blank');
+                } else {
+                    Toastify({
+                        text: "No redirect URL provided.",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#EA5455",
+                        close: true
+                    }).showToast();
+                }
 
-                        res.data.forEach(spec => {
-                            const specHtml = `
+            },
+            onError: function () {
+                // Re-enable buttons & hide all loaders on error too
+                $('.saveChangesButton').prop('disabled', false).find('.saveLoader').addClass('d-none');
+            }
+        });
+
+    </script>
+    <script !src="">
+        $('#productsSelect').on('change', function () {
+            const productId = $(this).val();
+            if (productId) {
+                $('#addNewSpec').attr('data-bs-toggle', 'modal').attr('data-bs-target', '#addSpecModal');
+                $('#product_id_input').val(productId);
+
+            } else {
+                $('#addNewSpec').removeAttr('data-bs-toggle').removeAttr('data-bs-target');
+            }
+
+            const $specsContainer = $('#specsContainer');
+            const $specSection = $specsContainer.closest('.form-group');
+
+            if (productId) {
+                $.ajax({
+                    url: "{{ url('api/product-specifications') }}/" + productId,
+                    method: 'GET',
+                    success: function (res) {
+                        if (res.data && res.data.length > 0) {
+                            $specsContainer.empty();
+
+                            res.data.forEach(spec => {
+                                const specHtml = `
                             <div class="col-12 mb-1">
                                 <div class="border rounded p-1 d-flex align-items-center">
                                     <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
@@ -218,47 +254,47 @@
                                 </div>
                             </div>
                         `;
-                            $specsContainer.append(specHtml);
-                        });
+                                $specsContainer.append(specHtml);
+                            });
 
-                        $specSection.removeClass('d-none');
-                    } else {
+                            $specSection.removeClass('d-none');
+                        } else {
+                            $specsContainer.empty();
+                            $specSection.addClass('d-none');
+                        }
+                    },
+                    error: function () {
+                        Toastify({
+                            text: 'Failed to load specifications.',
+                            duration: 4000,
+                            gravity: 'top',
+                            position: 'right',
+                            backgroundColor: '#EA5455',
+                            close: true
+                        }).showToast();
                         $specsContainer.empty();
                         $specSection.addClass('d-none');
                     }
-                },
-                error: function() {
-                    Toastify({
-                        text: 'Failed to load specifications.',
-                        duration: 4000,
-                        gravity: 'top',
-                        position: 'right',
-                        backgroundColor: '#EA5455',
-                        close: true
-                    }).showToast();
-                    $specsContainer.empty();
-                    $specSection.addClass('d-none');
-                }
-            });
-        } else {
-            $specsContainer.empty();
-            $specSection.addClass('d-none');
-        }
-    });
-</script>
-<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+                });
+            } else {
+                $specsContainer.empty();
+                $specSection.addClass('d-none');
+            }
+        });
+    </script>
+    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
-<script !src="">
-    handleAjaxFormSubmit("#addSpecForm", {
-        successMessage: "Specification created successfully!",
-        closeModal: '#addSpecModal',
-        onSuccess: function(response, $form) {
-            const spec = response.data;
+    <script !src="">
+        handleAjaxFormSubmit("#addSpecForm", {
+            successMessage: "Specification created successfully!",
+            closeModal: '#addSpecModal',
+            onSuccess: function (response, $form) {
+                const spec = response.data;
 
-            const specHtml = `
+                const specHtml = `
             <div class="col-12 mb-1">
                 <div class="border rounded p-1 d-flex align-items-center">
                     <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
@@ -267,20 +303,20 @@
             </div>
         `;
 
-            $('#specsContainer').append(specHtml);
+                $('#specsContainer').append(specHtml);
 
 
-            $form[0].reset();
-        }
-    });
-</script>
-<script>
-    $(document).ready(function() {
-        $('#productsSelect').select2();
-        $('#tagsSelect').select2();
-        $('#colorsSelect').select2();
+                $form[0].reset();
+            }
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#productsSelect').select2();
+            $('#tagsSelect').select2();
+            $('#colorsSelect').select2();
 
-    });
-</script>
+        });
+    </script>
 
 @endsection

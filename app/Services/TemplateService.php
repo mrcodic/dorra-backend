@@ -46,6 +46,7 @@ class TemplateService extends BaseService
            {
                $validatedData['width'] = $validatedData['width'] * 25.4 ;
                $validatedData['height'] = $validatedData['height'] * 25.4 ;
+               $validatedData['unit'] = 2;
            }
             $model = $this->repository->create($validatedData);
             if (isset($validatedData['specifications']))
@@ -66,6 +67,7 @@ class TemplateService extends BaseService
         {
             $validatedData['width'] = $validatedData['width'] * 25.4 ;
             $validatedData['height'] = $validatedData['height'] * 25.4 ;
+            $validatedData['unit'] = 2;
         }
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
             $model = $this->repository->update($validatedData,$id);
