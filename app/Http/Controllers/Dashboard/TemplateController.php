@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\TemplateResource;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
@@ -9,6 +10,7 @@ use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
 use App\Repositories\Interfaces\TagRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Services\TemplateService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Template\{StoreTemplateRequest,
     StoreTranslatedTemplateRequest,
@@ -80,9 +82,10 @@ class TemplateController extends DashboardController
         return Response::api(data: TemplateResource::make($this->templateService->showResource($id)));
     }
 
-    public function publish($id)
+    public function changeStatus(Request $request, $id)
     {
-       $template =  $this->templateService->updateResource(['status'=>2],$id);
+        $request->validate(['status' => 'required','in:'.StatusEnum::getValuesAsString()]);
+       $template =  $this->templateService->updateResource(['status'=> $request->status],$id);
         return Response::api(data: TemplateResource::make($template));
     }
 }

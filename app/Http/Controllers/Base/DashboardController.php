@@ -120,9 +120,9 @@ class DashboardController extends Controller
      */
     public function destroy(string $id)
     {
+        $model = $this->service->showResource($id);
         $this->service->deleteResource($id);
-        return Response::api();
-
+        return Response::api(data: $model);
     }
 
     public function bulkDelete(Request $request)

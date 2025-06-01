@@ -136,11 +136,10 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
         Route::get('/data', [TemplateController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
-        Route::post('/publish', 'bulkDelete')->name('publish');
     });
     Route::post('/store-templates', [TemplateController::class,'storeAndRedirect'])->name('templates.redirect.store');
 
-    Route::put('/product-templates/publish/{id}', [TemplateController::class,'publish'])->name("product-templates.publish");
+    Route::put('/product-templates/change-status/{id}', [TemplateController::class,'changeStatus'])->name("product-templates.change-status");
     Route::resource('/product-templates', TemplateController::class);
 
 

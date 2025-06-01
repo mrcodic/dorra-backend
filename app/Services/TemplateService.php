@@ -22,7 +22,7 @@ class TemplateService extends BaseService
         if (request()->ajax()) {
             $query = $this->repository
                 ->query(['id', 'name', 'product_id', 'status', 'created_at'])
-                ->with(['product:id,name'])
+                ->with(['product:id,name','product.tags'])
                 ->when(request()->filled('search_value'), function ($query) {
                     $locale = app()->getLocale();
                     $search = request('search_value');

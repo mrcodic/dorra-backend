@@ -1,33 +1,156 @@
-@foreach ($data as $template)
+@forelse ($data as $template)
     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row">
         <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
-            <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox" value="{{ $template->id }}" name="specifications[]">
-            <div style="background-color: #F4F6F6;height:200px">
-                <img src="{{ $template->getFirstMediaUrl('templates') }}" class="mx-auto d-block " style="height:100%; width: auto;" alt="Template Image">
+            <!-- Checkbox -->
+            <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
+                   value="{{ $template->id }}" name="selected_templates[]">
+            <!-- Action Icon with Dropdown (Top Right) -->
+            <div class="dropdown position-absolute top-0 end-0 m-1">
+                <button class="btn btn-sm  border-0" type="button" id="actionDropdown{{ $template->id }}"
+                        data-bs-toggle="dropdown" aria-expanded="false" style="background-color:#F9FDFC">
+                    <i data-feather="more-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionDropdown{{ $template->id }}">
+                    <li><a class="dropdown-item" href="{{ route("product-templates.edit",$template->id) }}"><i
+                                data-feather="edit-3" class="me-1"></i>Edit</a></li>
+                    <li><a class="dropdown-item"
+                           href="{{ config('services.editor_url') . 'templates/' . $template->id }}" target="_blank"><i
+                                data-feather="eye" class="me-1"></i>Show</a></li>
+                    <li>
+                        <form class="change-status-form"
+                              action="{{ route("product-templates.change-status",$template->id) }}" method="post">
+                            @csrf
+                            @method("PUT")
+                            <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}">
+
+                            <button class="dropdown-item change-status-btn w-100
+                                {{ (!empty($template->design_data) && $template->status !== \App\Enums\Template\StatusEnum::PUBLISHED) ? '' : 'disabled' }}   ">
+                                <i data-feather="send" class="me-1">
+
+                                </i>Publish
+                            </button>
+                        </form>
+                    </li>
+
+
+                    <li>
+                        <form class="change-status-form"
+                              action="{{ route("product-templates.change-status",$template->id) }}" method="post">
+                            @csrf
+                            @method("PUT")
+                            <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}">
+                            <button class="dropdown-item change-status-btn w-100 {{ $template->design_data ? '' : 'disabled' }}">
+                                <i data-feather="file" class="me-1">
+                                </i>Draft
+                            </button>
+                        </form>
+                    </li>
+                    <li>
+                        <form  class="change-status-form" action="{{ route("product-templates.change-status",$template->id) }}" method="post">
+                            @csrf
+                            @method("PUT")
+                            <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::LIVE }}">
+                            <button class="dropdown-item change-status-btn w-100 {{ $template->design_data ? '' : 'disabled' }}" >
+                                <i data-feather="radio" class="me-1">
+
+                                </i>Live
+                            </button>
+                        </form>
+                    </li>
+                    <li>
+                        <button class="dropdown-item text-danger open-delete-template-modal w-100"
+                                data-bs-toggle="modal" data-bs-target="#deleteTemplateModal"
+                                data-id="{{ $template->id }}"><i data-feather="trash-2" class="me-1 text-danger"></i>Delete
+                        </button>
+                    </li>
+                </ul>
             </div>
+            <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
+                    src="{{ $template->getFirstMediaUrl('templates') ? $template->getFirstMediaUrl('templates'): asset("images/default-photo.png") }}"
+                    class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
+            </div> <!-- Template Info -->
             <div class="card-body text-start p-2">
-                <h6 class="fw-bold mb-1 text-black fs-3">{{ $template->getTranslation('name', app()->getLocale()) }}</h6>
-                <p class="small mb-1">{{ $template->product->getTranslation('name', app()->getLocale()) }}</p>
-                <div class="d-flex flex-wrap justify-content-start gap-1 mb-2">
-                    @foreach($template->product->tags as $tag)
-                        <span class="badge rounded-pill text-black p-75" style="background-color: #FCF8FC;">{{ $tag->getTranslation('name', app()->getLocale()) }}</span>
-                    @endforeach
-                </div>
+                <div>
+                    <h6 class="fw-bold mb-1 text-black fs-3"
+                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->getTranslation('name', app()->getLocale()) }} </h6>
+                    <p class="small mb-1"
+                       style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->product->getTranslation('name', app()->getLocale()) }} </p>
+                </div> <!-- Tags -->
+                <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
+                     style="min-height: 44px;"> @foreach($template->product->tags as $tag)
+                        <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
+                              style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
+                    @endforeach </div> <!-- Palette and Status -->
                 <div class="d-flex justify-content-between align-items-center mb-2 px-1">
                     <div class="d-flex" style="gap: 5px;">
                         <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #FF5733;"></div>
                         <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #33B5FF;"></div>
                         <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #9B59B6;"></div>
                     </div>
-                    <span class="badge text-dark p-75" style="background-color: #CED5D4">{{ $template->status->label() }}</span>
-                </div>
-                <hr class="my-2">
-                <div class="d-flex justify-content-center gap-1">
-                    <a class="btn btn-outline-secondary text-black" href="{{ config('services.editor_url').$template->id }}">Show</a>
-                    <button class="btn btn-outline-secondary text-black">Edit</button>
-                    <button class="btn btn-outline-danger open-delete-template-modal" data-bs-toggle="modal" data-bs-target="#deleteTemplateModal" data-id="{{ $template->id }}">Delete</button>
+                    <span class="badge text-dark p-75 template-status-label"
+                          data-template-id="{{ $template->id }}"
+                          style="background-color: #CED5D4">
+                        {{ $template->status->label() }}
+                    </span>
+
                 </div>
             </div>
         </div>
     </div>
-@endforeach
+@empty
+    <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"
+         style="min-height:65vh;">
+        <!-- Empty Image -->
+        <img src="{{ asset('images/Empty.png') }}" alt="No Templates" style="max-width: 200px;" class="mb-2">
+
+        <!-- Empty Message -->
+        <p class="mb-2 text-secondary">You didn’t create any templates yet.</p>
+
+        <!-- Create Button -->
+        <a class="btn btn-primary" href="{{ route('product-templates.create') }}">
+            <i data-feather="plus"></i>
+            Create Template
+        </a>
+    </div>
+@endforelse
+<script !src="">
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.feather) {
+            feather.replace();
+        }
+    });
+
+    // Also run after AJAX updates
+    $(document).ajaxComplete(function () {
+        if (window.feather) {
+            feather.replace();
+        }
+    });
+    $(document).ready(function () {
+        handleAjaxFormSubmit('.change-status-form', {
+            successMessage: '✅ Status updated successfully!',
+            onSuccess: function (response, $form) {
+                console.log('Success:', response);
+
+                // Find the status label by template ID
+                const $statusLabel = $('.template-status-label[data-template-id="' + response.data.id + '"]');
+
+                if ($statusLabel.length) {
+                    $statusLabel.text(response.data.status.label);
+                }
+
+                // Optionally: also disable the publish button if needed
+                const $publishBtn = $form.find('button[type="submit"]');
+                if (response.status === 'published') { // check against your enum value
+                    $publishBtn.addClass('disabled');
+                }
+            },
+            onError: function (xhr, $form) {
+                console.error('Error:', xhr);
+            },
+            resetForm: false,
+        });
+    });
+
+
+</script>

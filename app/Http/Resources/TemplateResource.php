@@ -22,8 +22,12 @@ class TemplateResource extends JsonResource
             'design_data' => $this->design_data,
             'width' => $this->width ?? 200,
             'height' => $this->height ?? 100,
-            'unit' => $this->unit ?? "mm" ,
+            'unit' => $this->unit ?? "mm",
             'dpi' => $this->dpi ?? 300,
+            'status' => [
+                'value' => $this->status->value,
+                'label' => $this->status->label()
+            ],
             'product' => ProductResource::make($this->whenLoaded('product')),
 //            'preview_image' => $this->getFirstMediaUrl('templates'),
             'source_design_svg' => $this->getFirstMediaUrl('templates'),

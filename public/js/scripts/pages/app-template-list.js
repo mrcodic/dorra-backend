@@ -212,8 +212,7 @@ handleAjaxFormSubmit('#deleteTemplateForm', {
     successMessage: "✅ Template deleted successfully!",
     closeModal: '#deleteTemplateModal',
     onSuccess: function (response, $form) {
-        const deletedId = $form.find('input[name="id"]').val();
-        console.log(deletedId)
+        const deletedId = response.data.id;
         const card = $(`button[data-id="${deletedId}"]`).closest('.col-md-6.col-lg-4.col-xxl-4');
         card.remove();
     }
@@ -277,3 +276,6 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
     });
 
 });
+
+
+
