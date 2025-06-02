@@ -24,7 +24,7 @@
                                         <!-- Width -->
                                         <div class="col-md-4 mb-2">
                                             <label for="width" class="label-text mb-1 width">Width</label>
-                                            <input type="number" id="width" name="width" value="{{ $model->width }}"
+                                            <input type="number" step="0.01" id="width" name="width" value="{{ $model->width }}"
                                                    class="form-control"
                                                    placeholder="Enter width">
                                         </div>
@@ -32,7 +32,7 @@
                                         <!-- Height -->
                                         <div class="col-md-4 mb-2">
                                             <label for="height" class="label-text mb-1">Height</label>
-                                            <input type="number" id="height" name="height" value="{{ $model->height }}"
+                                            <input type="number" step="0.01" id="height" name="height" value="{{ $model->height }}"
                                                    class="form-control"
                                                    placeholder="Enter height">
                                         </div>
@@ -68,23 +68,25 @@
 
                                     </div>
 
+
                                     <div class="row">
                                         <div class="col-md-6 mb-2">
-                                            <label for="templateName" class="label-text mb-1">Name (AR)</label>
-                                            <input type="text" id="templateName" class="form-control"
+                                            <label for="templateNameAr" class="label-text mb-1">Name (AR)</label>
+                                            <input type="text" id="templateNameAr" class="form-control"
                                                    name="name[ar]"
                                                    value="{{ $model->getTranslation('name','ar') }}"
                                                    placeholder="Template Name in Arabic">
                                         </div>
 
                                         <div class="col-md-6 mb-2">
-                                            <label for="templateName" class="label-text mb-1">Name (EN)</label>
-                                            <input type="text" id="templateName" class="form-control"
+                                            <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
+                                            <input type="text" id="templateNameEn" class="form-control"
                                                    name="name[en]"
                                                    value="{{ $model->getTranslation('name','en') }}"
                                                    placeholder="Template Name in English">
                                         </div>
                                     </div>
+
 
                                     <div class="form-group mb-2">
                                         <label for="statusSelect" class="label-text mb-1">Status</label>
@@ -113,20 +115,20 @@
                                     </div>
 
 
-                                    <div class="form-group mb-2">
-                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>
-                                        <select id="tagsSelect" class="form-select select2" multiple>
-                                            <option value="">Choose tag</option>
-                                        </select>
-                                    </div>
-                                    <!-- Colors -->
-                                    <div class="form-group mb-2">
-                                        <label for="colorsSelect" class="label-text mb-1">Colors</label>
-                                        <select id="colorsSelect" name="colors[]" class="form-select select2" multiple>
-                                            <option value="">Choose colors</option>
-                                            <!-- Add dynamic options here if needed -->
-                                        </select>
-                                    </div>
+{{--                                    <div class="form-group mb-2">--}}
+{{--                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>--}}
+{{--                                        <select id="tagsSelect" class="form-select select2" multiple>--}}
+{{--                                            <option value="">Choose tag</option>--}}
+{{--                                        </select>--}}
+{{--                                    </div>--}}
+{{--                                    <!-- Colors -->--}}
+{{--                                    <div class="form-group mb-2">--}}
+{{--                                        <label for="colorsSelect" class="label-text mb-1">Colors</label>--}}
+{{--                                        <select id="colorsSelect" name="colors[]" class="form-select select2" multiple>--}}
+{{--                                            <option value="">Choose colors</option>--}}
+{{--                                            <!-- Add dynamic options here if needed -->--}}
+{{--                                        </select>--}}
+{{--                                    </div>--}}
                                     <div class="form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
                                         <select id="productsSelect" class="form-select select2" name="product_id">
@@ -231,26 +233,14 @@
         handleAjaxFormSubmit("#editTemplateForm", {
             successMessage: "Template updated successfully",
             onSuccess: function (response, $form) {
-                const data = response.data;
-                console.log(data.width)
-                // Update numeric fields
-                $('#width').val(data.width);
-                $('#height').val(data.height);
-
-                // Update select field
-                $('#unit').val(data.unit).trigger('change');
-
-                // Update name fields
-                $('input[name="name[ar]"]').val(data.name.ar);
-                $('input[name="name[en]"]').val(data.name.en);
-
-                // Update description fields
-                $('textarea[name="description[ar]"]').val(data.description.ar);
-                $('textarea[name="description[en]"]').val(data.description.en);
+                setTimeout(function () {
+                    window.location.href = '/product-templates';
+                }, 1000);
 
                 console.log('Form inputs updated with new data.');
             }
         });
+
 
     </script>
     <script !src="">

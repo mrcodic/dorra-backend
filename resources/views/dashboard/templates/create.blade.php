@@ -21,15 +21,15 @@
                                     <div class="row">
                                         <!-- Width -->
                                         <div class="col-md-4 mb-2">
-                                            <label for="width" class="label-text mb-1">Width</label>
-                                            <input type="number" id="width" name="width" class="form-control"
+                                            <label for="edit-width" class="label-text mb-1">Width</label>
+                                            <input type="number" id="edit-width" name="width" class="form-control"
                                                    placeholder="Enter width">
                                         </div>
 
                                         <!-- Height -->
                                         <div class="col-md-4 mb-2">
-                                            <label for="height" class="label-text mb-1">Height</label>
-                                            <input type="number" id="height" name="height" class="form-control"
+                                            <label for="edit-height" class="label-text mb-1">Height</label>
+                                            <input type="number" id="edit-height" name="height" class="form-control"
                                                    placeholder="Enter height">
                                         </div>
 
@@ -95,20 +95,20 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group mb-2">
-                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>
-                                        <select id="tagsSelect" class="form-select select2" multiple>
-                                            <option value="">Choose tag</option>
-                                        </select>
-                                    </div>
-                                    <!-- Colors -->
-                                    <div class="form-group mb-2">
-                                        <label for="colorsSelect" class="label-text mb-1">Colors</label>
-                                        <select id="colorsSelect" name="colors[]" class="form-select select2" multiple>
-                                            <option value="">Choose colors</option>
-                                            <!-- Add dynamic options here if needed -->
-                                        </select>
-                                    </div>
+                                    {{--                                    <div class="form-group mb-2">--}}
+                                    {{--                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>--}}
+                                    {{--                                        <select id="tagsSelect" class="form-select select2" multiple>--}}
+                                    {{--                                            <option value="">Choose tag</option>--}}
+                                    {{--                                        </select>--}}
+                                    {{--                                    </div>--}}
+                                    {{--                                    <!-- Colors -->--}}
+                                    {{--                                    <div class="form-group mb-2">--}}
+                                    {{--                                        <label for="colorsSelect" class="label-text mb-1">Colors</label>--}}
+                                    {{--                                        <select id="colorsSelect" name="colors[]" class="form-select select2" multiple>--}}
+                                    {{--                                            <option value="">Choose colors</option>--}}
+                                    {{--                                            <!-- Add dynamic options here if needed -->--}}
+                                    {{--                                        </select>--}}
+                                    {{--                                    </div>--}}
                                     <div class="form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
                                         <select id="productsSelect" class="form-select select2" name="product_id">
@@ -138,13 +138,13 @@
                                 <button type="button" class="btn btn-outline-secondary">Cancel</button>
                                 <div class="d-flex gap-1">
                                     <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
-                                            id="SaveChangesButton" data-action="draft">
+                                            data-action="draft">
                                         <span>Add Template as Draft</span>
                                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
-                                              role="status" aria-hidden="true" ></span>
+                                              role="status" aria-hidden="true"></span>
                                     </button>
                                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
-                                            id="SaveChangesButton" data-action="editor">
+                                            data-action="editor">
                                         <span>Save & Go to Editor</span>
                                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
                                               role="status" aria-hidden="true"></span>
@@ -166,7 +166,7 @@
 @section('vendor-script')
 
     <script !src="">
-        $(document).ready(function() {
+        $(document).ready(function () {
             const preselectedProductId = $('#productsSelect').val();
             if (preselectedProductId) {
                 $('#productsSelect').trigger('change');
@@ -206,11 +206,15 @@
 
 
         handleAjaxFormSubmit("#addTemplateForm", {
-            successMessage : "Template created successfully",
+            successMessage: "Template created successfully",
             onSuccess: function (response, $form) {
                 // Re-enable buttons & hide all loaders
                 $('.saveChangesButton').prop('disabled', false).find('.saveLoader').addClass('d-none');
-
+                if (!response.data) {
+                    setTimeout(function () {
+                        window.location.href = '/product-templates';
+                    }, 1000);
+                }
                 if (response.data.redirect_url) {
                     window.open(response.data.redirect_url, '_blank');
                 } else {
@@ -257,13 +261,13 @@
 
                             res.data.forEach(spec => {
                                 const specHtml = `
-                            <div class="col-12 mb-1">
-                                <div class="border rounded p-1 d-flex align-items-center">
-                                    <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
-                                    <label class="form-check-label">${spec.name}</label>
+                                <div class="col-12 mb-1">
+                                    <div class="border rounded p-1 d-flex align-items-center">
+                                        <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
+                                        <label class="form-check-label">${spec.name}</label>
+                                    </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
                                 $specsContainer.append(specHtml);
                             });
 
@@ -305,13 +309,13 @@
                 const spec = response.data;
 
                 const specHtml = `
-            <div class="col-12 mb-1">
-                <div class="border rounded p-1 d-flex align-items-center">
-                    <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
-                    <label class="form-check-label">${spec.name}</label>
+                <div class="col-12 mb-1">
+                    <div class="border rounded p-1 d-flex align-items-center">
+                        <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
+                        <label class="form-check-label">${spec.name}</label>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
 
                 $('#specsContainer').append(specHtml);
 
@@ -330,9 +334,9 @@
     </script>
     <script !src="">
         function updateDeleteButtons(containerSelector) {
-            $(containerSelector).find('[data-repeater-list]').each(function() {
+            $(containerSelector).find('[data-repeater-list]').each(function () {
                 var items = $(this).find('[data-repeater-item]');
-                items.each(function() {
+                items.each(function () {
                     $(this).find('[data-repeater-delete]').show();
                     feather.replace();
                 });
@@ -340,7 +344,7 @@
         }
 
         function initializeImageUploaders(context) {
-            $(context).find('.option-upload-area').each(function() {
+            $(context).find('.option-upload-area').each(function () {
                 const uploadArea = $(this);
                 const input = uploadArea.closest('.col-md-12').find('.option-image-input');
                 const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
@@ -349,15 +353,15 @@
                 const fileSizeLabel = previewContainer.find('.option-file-size');
                 const removeButton = previewContainer.find('.option-remove-image');
 
-                uploadArea.off('click').on('click', function() {
+                uploadArea.off('click').on('click', function () {
                     input.trigger('click');
                 });
 
-                input.off('change').on('change', function() {
+                input.off('change').on('change', function () {
                     const file = this.files[0];
                     if (file) {
                         const reader = new FileReader();
-                        reader.onload = function(e) {
+                        reader.onload = function (e) {
                             imagePreview.attr('src', e.target.result);
                             fileNameLabel.text(file.name);
                             fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
@@ -367,7 +371,7 @@
                     }
                 });
 
-                removeButton.off('click').on('click', function() {
+                removeButton.off('click').on('click', function () {
                     input.val('');
                     previewContainer.addClass('d-none');
                 });
@@ -377,40 +381,40 @@
         $('.outer-repeater').repeater({
             repeaters: [{
                 selector: '.inner-repeater',
-                show: function() {
+                show: function () {
                     $(this).slideDown();
                     updateDeleteButtons($(this).closest('.outer-repeater'));
                     initializeImageUploaders(this);
                     feather.replace();
                 },
-                hide: function(deleteElement) {
+                hide: function (deleteElement) {
                     $(this).slideUp(deleteElement);
                     updateDeleteButtons($(this).closest('.outer-repeater'));
                 },
                 nestedInputName: 'specification_options'
             }],
-            show: function() {
+            show: function () {
                 $(this).slideDown();
                 updateDeleteButtons($('.outer-repeater'));
                 initializeImageUploaders(this);
                 feather.replace();
             },
-            hide: function(deleteElement) {
+            hide: function (deleteElement) {
                 $(this).slideUp(deleteElement);
                 updateDeleteButtons($('.outer-repeater'));
             },
-            afterAdd: function() {
+            afterAdd: function () {
                 updateDeleteButtons($('.outer-repeater'));
                 initializeImageUploaders($('.outer-repeater'));
                 feather.replace();
             },
-            afterDelete: function() {
+            afterDelete: function () {
                 updateDeleteButtons($('.outer-repeater'));
             }
         });
 
         // Initialize on page load for already existing items
-        $(document).ready(function() {
+        $(document).ready(function () {
             updateDeleteButtons($('.outer-repeater'));
             initializeImageUploaders($('.outer-repeater'));
         });
