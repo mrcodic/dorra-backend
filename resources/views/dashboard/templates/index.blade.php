@@ -50,7 +50,7 @@
                     </div>
 
                     {{-- Status Filter --}}
-                    <div class="col-6 col-md-2">
+                    <div class="col-6 col-md-4">
                         <select name="status" class="form-select filter-status select2" data-placeholder="Status">
                             <option value="">Status</option>
                             @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
@@ -70,7 +70,7 @@
 {{--                    </div>--}}
 
                     {{-- Product Filter --}}
-                    <div class="col-6 col-md-2">
+                    <div class="col-6 col-md-4">
                         <select name="product" class="form-select filter-product select2" data-placeholder="Product">
                             <option value="">Product</option>
                             @foreach($associatedData['products'] as $product)
