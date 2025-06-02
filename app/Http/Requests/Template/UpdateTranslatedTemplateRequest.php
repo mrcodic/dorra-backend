@@ -34,13 +34,11 @@ class UpdateTranslatedTemplateRequest extends BaseRequest
                 'sometimes',
                 'string',
                 'max:255',
-                Rule::unique('templates', 'name->en')->ignore($id),
             ],
             'name.ar' => [
                 'sometimes',
                 'string',
                 'max:255',
-                Rule::unique('templates', 'name->ar')->ignore($id),
             ],
             'description.en' => [
                 'nullable',

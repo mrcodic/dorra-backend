@@ -31,13 +31,11 @@ class StoreTranslatedTemplateRequest extends BaseRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('templates', 'name->en'),
             ],
             'name.ar' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('templates', 'name->ar'),
             ],
             'description.en' => [
                 'nullable',

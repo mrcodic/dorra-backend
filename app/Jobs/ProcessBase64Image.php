@@ -40,13 +40,18 @@ class ProcessBase64Image implements ShouldQueue
             throw new \Exception('Invalid base64 format');
         }
 
-        $tempFilePath = sys_get_temp_dir() . '/' . uniqid() . '.' . $type;
-        file_put_contents($tempFilePath, $imageData);
+        $tempFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid() . '.' . $type;
+
+        if (file_put_contents($tempFilePath, $imageData) === false) {
+            throw new \Exception('Failed to write temp file');
+        }
 
         $this->template->addMedia($tempFilePath)
             ->toMediaCollection('templates');
 
-        unlink($tempFilePath);
+        if (file_exists($tempFilePath)) {
+            unlink($tempFilePath);
+        }
     }
 
 }

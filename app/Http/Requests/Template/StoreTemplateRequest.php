@@ -31,19 +31,16 @@ class StoreTemplateRequest extends BaseRequest
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('templates', 'name->en'),
             ],
             'name' => [
                 'nullable',
 //                'string',
                 'max:255',
-                Rule::unique('templates', 'name->en'),
             ],
             'name.ar' => [
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('templates', 'name->ar'),
             ],
             'description.en' => [
                 'nullable',

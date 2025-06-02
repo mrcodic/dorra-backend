@@ -30,8 +30,8 @@ class TemplateResource extends JsonResource
             ],
             'product' => ProductResource::make($this->whenLoaded('product')),
 //            'preview_image' => $this->getFirstMediaUrl('templates'),
-            'source_design_svg' => $this->getFirstMediaUrl('templates'),
-            'base64_preview_image' => $this->base64_preview_image,
+            'source_design_svg' => $this->image,
+            'base64_preview_image' => $this->image,
 
         ];
     }
