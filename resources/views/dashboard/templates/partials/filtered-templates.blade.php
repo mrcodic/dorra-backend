@@ -132,19 +132,53 @@
             onSuccess: function (response, $form) {
                 console.log('Success:', response);
 
-                // Find the status label by template ID
-                const $statusLabel = $('.template-status-label[data-template-id="' + response.data.id + '"]');
+                const templateId = response.data.id;
+                const status = response.data.status.value; // assuming this contains status enum value
+                const statusLabel = response.data.status.label;
+                const designData = response.data.design_data; // assuming design_data returned from server
 
+                // Update status label text
+                const $statusLabel = $('.template-status-label[data-template-id="' + templateId + '"]');
                 if ($statusLabel.length) {
-                    $statusLabel.text(response.data.status.label);
+                    $statusLabel.text(statusLabel);
                 }
 
-                // Optionally: also disable the publish button if needed
-                const $publishBtn = $form.find('button[type="submit"]');
-                if (response.data.status.value === "{{ \App\Enums\Template\StatusEnum::PUBLISHED->value }}") { // check against your enum value
-                    $publishBtn.addClass('disabled');
+                // Find the template card div by data-template-id
+                const $templateCard = $('[data-template-id="' + templateId + '"]');
+
+                if ($templateCard.length) {
+                    // Find publish button
+                    const $publishBtn = $templateCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}"]').siblings('button');
+                    // Find draft button
+                    const $draftBtn = $templateCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}"]').siblings('button');
+                    // Find live button
+                    const $liveBtn = $templateCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::LIVE }}"]').siblings('button');
+
+                    // Logic to enable/disable buttons, example (adjust according to your rules):
+
+                    // Enable Publish if design_data exists and status not published
+                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::PUBLISHED->value }}) {
+                        $publishBtn.removeClass('disabled').prop('disabled', false);
+                    } else {
+                        $publishBtn.addClass('disabled').prop('disabled', true);
+                    }
+
+                    // Enable Draft if design_data exists and status not drafted
+                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::DRAFTED->value }}) {
+                        $draftBtn.removeClass('disabled').prop('disabled', false);
+                    } else {
+                        $draftBtn.addClass('disabled').prop('disabled', true);
+                    }
+
+                    // Enable Live if design_data exists and status not live (adjust this condition if needed)
+                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::LIVE->value }}) {
+                        $liveBtn.removeClass('disabled').prop('disabled', false);
+                    } else {
+                        $liveBtn.addClass('disabled').prop('disabled', true);
+                    }
                 }
             },
+
             onError: function (xhr, $form) {
                 console.error('Error:', xhr);
             },
