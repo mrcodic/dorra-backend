@@ -60,14 +60,14 @@
                     </div>
 
                     {{-- Tags Filter --}}
-                    <div class="col-6 col-md-2">
-                        <select name="tags" class="form-select filter-status select2" data-placeholder="Tags">
-                            <option value="">Tags</option>
-                            @foreach($associatedData['tags'] as $tag)
-                            <option value="{{ $tag->id }}">{{ $tag->getTranslation('name', app()->getLocale()) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+{{--                    <div class="col-6 col-md-2">--}}
+{{--                        <select name="tags" class="form-select filter-status select2" data-placeholder="Tags">--}}
+{{--                            <option value="">Tags</option>--}}
+{{--                            @foreach($associatedData['tags'] as $tag)--}}
+{{--                            <option value="{{ $tag->id }}">{{ $tag->getTranslation('name', app()->getLocale()) }}</option>--}}
+{{--                            @endforeach--}}
+{{--                        </select>--}}
+{{--                    </div>--}}
 
                     {{-- Product Filter --}}
                     <div class="col-6 col-md-2">
