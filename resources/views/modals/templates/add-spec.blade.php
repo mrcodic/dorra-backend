@@ -38,16 +38,16 @@
                                             <div data-repeater-list="specification_options">
                                                 <div data-repeater-item>
                                                     <div class="row d-flex align-items-end mt-2">
-                                                        <!-- Option Name (EN) -->
+                                                        <!-- Value Name (EN) -->
                                                         <div class="col">
                                                             <label class="form-label label-text">Value (EN)</label>
-                                                            <input type="text" name="value_en" class="form-control" placeholder="Option (EN)" />
+                                                            <input type="text" name="value_en" class="form-control" placeholder="Value (EN)" />
                                                         </div>
 
-                                                        <!-- Option Name (AR) -->
+                                                        <!-- Value Name (AR) -->
                                                         <div class="col">
                                                             <label class="form-label label-text">Value (AR)</label>
-                                                            <input type="text" name="value_ar" class="form-control" placeholder="Option (AR)" />
+                                                            <input type="text" name="value_ar" class="form-control" placeholder="Value (AR)" />
                                                         </div>
 
                                                         <!-- Option Price -->

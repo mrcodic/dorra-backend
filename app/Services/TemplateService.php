@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\ProcessBase64Image;
 use App\Jobs\RenderFabricJsonToPngJob;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
@@ -58,6 +59,10 @@ class TemplateService extends BaseService
             if (isset($validatedData['specifications']))
             {
                 $model->specifications()->attach($validatedData['specifications']);
+            }
+            if (isset($validatedData['base64_preview_image']))
+            {
+                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
             }
 
             return $model;
