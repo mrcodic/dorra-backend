@@ -87,7 +87,7 @@
 
                 {{-- Buttons Row --}}
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-1">
-                    {{-- Show Filter --}}
+
                     <div class="col-12 col-md-1">
                         <select name="show" class="form-select filter-paginate-number">
                             <option value="" disabled>Show</option>

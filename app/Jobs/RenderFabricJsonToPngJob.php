@@ -32,32 +32,39 @@ class RenderFabricJsonToPngJob implements ShouldQueue
      */
     public function handle(): void
     {
-        // Save Fabric JSON temporarily
         $jsonPath = storage_path('app/fabric-json.json');
+        $tempPngPath = storage_path('app/fabric-rendered.png');
+        $nodeScriptPath = base_path('fabric-renderer/renderFabric.js');
+
         file_put_contents($jsonPath, $this->fabricJson);
 
-        // Temp PNG path
-        $tempPngPath = storage_path('app/fabric-rendered.png');
-
-        // Node script path
-        $nodeScriptPath = base_path('fabric-renderer/renderFabric.js');
         $cmd = "node {$nodeScriptPath} {$jsonPath} {$tempPngPath}";
-
         exec($cmd, $output, $returnVar);
 
         if ($returnVar !== 0) {
             Log::error('Fabric render job failed', ['cmd' => $cmd, 'output' => $output]);
+            if (file_exists($jsonPath)) {
+                unlink($jsonPath);
+            }
             throw new \Exception("Failed to render PNG from Fabric JSON");
         }
 
-        // Attach PNG to model using media library
-        $this->model->addMedia($tempPngPath)
-            ->usingFileName('fabric_rendered_' . uniqid() . '.png')
-            ->toMediaCollection($this->collectionName);
-
+        if (file_exists($tempPngPath)) {
+            $this->model->addMedia($tempPngPath)
+                ->usingFileName('fabric_rendered_' . uniqid() . '.png')
+                ->toMediaCollection($this->collectionName);
+        } else {
+            Log::error('Rendered PNG file missing after node script', ['path' => $tempPngPath]);
+            throw new \Exception("Rendered PNG file not found");
+        }
 
         // Cleanup temp files
-        unlink($jsonPath);
-        unlink($tempPngPath);
+        if (file_exists($jsonPath)) {
+            unlink($jsonPath);
+        }
+        if (file_exists($tempPngPath)) {
+            unlink($tempPngPath);
+        }
     }
+
 }
