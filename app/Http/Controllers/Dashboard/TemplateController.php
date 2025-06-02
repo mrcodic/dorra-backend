@@ -47,6 +47,9 @@ class TemplateController extends DashboardController
                 'tags' => $this->tagRepository->all(),
             ],
         ];
+        $this->methodRelations = [
+            'index' => ["product"]
+        ];
 
     }
 
