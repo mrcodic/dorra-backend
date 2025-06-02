@@ -217,15 +217,6 @@
                 }
                 if (response.data.redirect_url) {
                     window.open(response.data.redirect_url, '_blank');
-                } else {
-                    Toastify({
-                        text: "No redirect URL provided.",
-                        duration: 4000,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#EA5455",
-                        close: true
-                    }).showToast();
                 }
 
             },
