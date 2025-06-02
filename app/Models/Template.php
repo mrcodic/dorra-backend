@@ -45,6 +45,18 @@ class Template extends Model implements HasMedia
         return $this->belongsToMany(ProductSpecification::class)->withTimestamps();
     }
 
+    public function getImageAttribute()
+    {
+        if ($this->getFirstMediaUrl('templates')) {
+            return $this->getFirstMediaUrl('templates');
+        } elseif ($this->base64_preview_image) {
+            return $this->base64_preview_image;
+        } else {
+            return asset("images/default-photo.png");
+        }
+    }
+
+
 
 
 }

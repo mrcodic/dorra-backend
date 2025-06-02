@@ -39,7 +39,7 @@
                             @csrf
                             @method("PUT")
                             <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}">
-                            <button class="dropdown-item change-status-btn w-100 {{ $template->design_data ? '' : 'disabled' }}">
+                            <button class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}">
                                 <i data-feather="file" class="me-1">
                                 </i>Draft
                             </button>
@@ -50,7 +50,7 @@
                             @csrf
                             @method("PUT")
                             <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::LIVE }}">
-                            <button class="dropdown-item change-status-btn w-100 {{ $template->design_data ? '' : 'disabled' }}" >
+                            <button class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}" >
                                 <i data-feather="radio" class="me-1">
 
                                 </i>Live
@@ -66,7 +66,7 @@
                 </ul>
             </div>
             <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
-                    src="{{ $template->getFirstMediaUrl('templates') ? $template->getFirstMediaUrl('templates'): asset("images/default-photo.png") }}"
+                    src="{{ $template->image }}"
                     class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
             </div> <!-- Template Info -->
             <div class="card-body text-start p-2">
