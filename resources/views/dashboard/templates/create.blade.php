@@ -135,7 +135,7 @@
 
                             </div>
                             <div class="d-flex justify-content-between pt-2">
-                                <button type="button" class="btn btn-outline-secondary">Cancel</button>
+                                <button type="button" class="btn btn-outline-secondary"  id="cancelButton">Cancel</button>
                                 <div class="d-flex gap-1">
                                     <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
                                             data-action="draft">
@@ -167,6 +167,27 @@
 
     <script !src="">
         $(document).ready(function () {
+            $('#cancelButton').on('click', function(e) {
+                e.preventDefault();
+
+                // Reset the form inputs to initial values
+                $('#addTemplateForm')[0].reset();
+
+                // Reset all select2 fields inside the form to their original values
+                $('#addTemplateForm').find('.select2').each(function() {
+                    var $select = $(this);
+                    // Get the option with selected attribute from original HTML
+                    var originalVal = $select.find('option[selected]').val() || '';
+                    $select.val(originalVal).trigger('change');
+                });
+            });
+            $(document).on('click', '#specsContainer .border', function(e) {
+                if ($(e.target).is('input[type="checkbox"]')) {
+                    return;
+                }
+                const checkbox = $(this).find('input[type="checkbox"]');
+                checkbox.prop('checked', !checkbox.prop('checked'));
+            });
             const preselectedProductId = $('#productsSelect').val();
             if (preselectedProductId) {
                 $('#productsSelect').trigger('change');

@@ -170,7 +170,7 @@
 
                             </div>
                             <div class="d-flex justify-content-between pt-2">
-                                <button type="button" class="btn btn-outline-secondary">Cancel</button>
+                                <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
                                 <div class="d-flex gap-1">
                                     <a href="{{ config("services.editor_url")."templates/".$model->id }}"
                                        class="btn btn-outline-secondary fs-5 "
@@ -207,6 +207,20 @@
 
 @section('page-script')
     <script !src="">
+        $('#cancelButton').on('click', function(e) {
+            e.preventDefault();
+
+            // Reset the form inputs to initial values
+            $('#editTemplateForm')[0].reset();
+
+            // Reset all select2 fields inside the form to their original values
+            $('#editTemplateForm').find('.select2').each(function() {
+                var $select = $(this);
+                // Get the option with selected attribute from original HTML
+                var originalVal = $select.find('option[selected]').val() || '';
+                $select.val(originalVal).trigger('change');
+            });
+        });
 
         $("#addNewSpec").on('click', function (e) {
             const productId = $('#productsSelect').val();
@@ -245,6 +259,13 @@
     </script>
     <script !src="">
         $(document).ready(function () {
+            $(document).on('click', '#specsContainer .border', function(e) {
+                if ($(e.target).is('input[type="checkbox"]')) {
+                    return;
+                }
+                const checkbox = $(this).find('input[type="checkbox"]');
+                checkbox.prop('checked', !checkbox.prop('checked'));
+            });
             const preselectedProductId = $('#productsSelect').val();
             if (preselectedProductId) {
                 $('#productsSelect').trigger('change');
@@ -312,6 +333,7 @@
         });
     </script>
     <script !src="">
+
         handleAjaxFormSubmit("#addSpecForm", {
             successMessage: "Specification created successfully!",
             closeModal: '#addSpecModal',
