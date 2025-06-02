@@ -23,6 +23,7 @@ class DashboardController extends Controller
     protected $relationsToStore = [];
     protected $usePagination = false;
     protected $successMessage;
+    protected $resourceClass;
     protected string $resourceTable;
     protected bool $mergeSharedVariables = true;
 
@@ -76,8 +77,9 @@ class DashboardController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate($this->storeRequestClass->rules());
-        $this->service->storeResource($validatedData, $this->relationsToStore, $this->getRelations('store'));
-        return Response::api();
+        $model = $this->service->storeResource($validatedData, $this->relationsToStore, $this->getRelations('store'));
+        return $this->resourceClass ?  Response::api(data: $this->resourceClass::make($model))
+        :  Response::api(data: $model);
     }
 
     /**

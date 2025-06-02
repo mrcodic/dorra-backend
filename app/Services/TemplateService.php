@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\RenderFabricJsonToPngJob;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use Illuminate\Http\JsonResponse;
@@ -61,6 +62,10 @@ class TemplateService extends BaseService
 
             return $model;
         });
+        if (isset($validatedData['design_data']))
+        {
+            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'templates');
+        }
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }

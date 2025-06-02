@@ -30,6 +30,10 @@ class Template extends Model implements HasMedia
     protected $casts = [
         'status' => StatusEnum::class,
     ];
+
+    protected $attributes = [
+        'status' => StatusEnum::DRAFTED,
+    ];
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

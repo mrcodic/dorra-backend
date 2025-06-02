@@ -38,6 +38,7 @@ class TemplateController extends DashboardController
         $this->showView = 'templates.show';
         $this->usePagination = true;
         $this->resourceTable = 'templates';
+        $this->resourceClass = TemplateResource::class;
         $this->assoiciatedData = [
             'shared'=>[
                 'products' => $this->productRepository->all(),
