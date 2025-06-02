@@ -316,7 +316,6 @@
             successMessage: "Specification created successfully!",
             closeModal: '#addSpecModal',
             onSuccess: function (response, $form) {
-                $form[0].reset();
                 const spec = response.data;
 
                 const specHtml = `
@@ -330,10 +329,17 @@
 
                 $('#specsContainer').append(specHtml);
 
-
-                $form[0].reset();
-            }
+                // Clear uploaded images and previews
+                $form.find('.option-image-input').val(''); // Clear file input
+                $form.find('.option-upload-progress').addClass('d-none').find('.progress-bar').css('width', '0%'); // Reset progress bar
+                $form.find('.option-uploaded-image').addClass('d-none'); // Hide uploaded image preview container
+                $form.find('.option-image-preview').attr('src', ''); // Clear preview src
+                $form.find('.option-file-name').text(''); // Clear file name text
+                $form.find('.option-file-size').text(''); // Clear file size text
+            },
+            resetForm: true,
         });
+
     </script>
     <script>
         $(document).ready(function () {
