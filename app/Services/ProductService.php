@@ -161,24 +161,36 @@ class ProductService extends BaseService
                         'name->en' => $specification['name_en'],
                         'name->ar' => $specification['name_ar'],
                     ],
-                    []
+                    [
+                        'name' => [
+                            'en' => $specification['name_en'],
+                            'ar' => $specification['name_ar'],
+                        ],
+                    ]
                 );
 
-                collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
-                    $productOption = $productSpecification->options()->updateOrCreate(
-                        [
-                            'value->en' => $option['value_en'],
-                            'value->ar' => $option['value_ar'],
+        if (isset($specification['specification_options'])) {
+            collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
+                $productOption = $productSpecification->options()->updateOrCreate(
+                    [
+                        'value->en' => $option['value_en'],
+                        'value->ar' => $option['value_ar'],
+                    ],
+                    [
+                        'value' => [
+                            'en' => $option['value_en'],
+                            'ar' => $option['value_ar'],
                         ],
-                        [
-                            'price' => $option['price'] ?? 0,
-                        ]
-                    );
+                        'price' => $option['price'] ?? 0,
+                    ]
+                );
 
-                    if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
-                        handleMediaUploads([$option['image']], $productOption);
-                    }
-                });
+                if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
+                    handleMediaUploads([$option['image']], $productOption);
+                }
+            });
+        }
+
             });
 
         } else {

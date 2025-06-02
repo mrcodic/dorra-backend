@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::table('templates', function (Blueprint $table) {
             $table->json("description")->after("name")->nullable();
-            $table->integer("height")->after("description")->nullable();
-            $table->integer("width")->after("height")->nullable();
+            $table->integer("height")->nullable()->after("description");
+            $table->integer("width")->nullable()->after("height");
             $table->tinyInteger("unit")->after("width")->nullable();
         });
     }

@@ -88,10 +88,10 @@
 
                                     <div class="form-group mb-2">
                                         <label for="statusSelect" class="label-text mb-1">Status</label>
-                                        <select id="statusSelect" name="status" class="form-select select2" >
+                                        <select id="statusSelect" name="status" class="form-select select2">
                                             <option value="">Choose status</option>
                                             @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
-                                                <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                                                <option value="{{ $status->value }}" @selected($status == $model->status)>{{ $status->label() }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -140,7 +140,7 @@
                                         </select>
                                     </div>
                                     @if($model->product && $model->product->specifications->isNotEmpty())
-                                    <div class="form-group mb-2">
+                                        <div class="form-group mb-2">
                                             <label class="label-text mb-1">Spec</label>
                                             <div class="row" id="specsContainer">
                                                 @foreach($model->product->specifications as $spec)
@@ -169,22 +169,22 @@
                             </div>
                             <div class="d-flex justify-content-between pt-2">
                                 <button type="button" class="btn btn-outline-secondary">Cancel</button>
-                                     <div class="d-flex gap-1">
-                                <a href="{{ config("services.editor_url")."templates/".$model->id }}"
-                                   class="btn btn-outline-secondary fs-5 "
-                                   target="_blank"
-                                >
-                                    <i data-feather="edit-3"></i>
-                                    <span>Edit Design</span>
+                                <div class="d-flex gap-1">
+                                    <a href="{{ config("services.editor_url")."templates/".$model->id }}"
+                                       class="btn btn-outline-secondary fs-5 "
+                                       target="_blank"
+                                    >
+                                        <i data-feather="edit-3"></i>
+                                        <span>Edit Design</span>
 
-                                </a>
-                                <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
-                                        id="SaveChangesButton">
-                                    <span>Save Changes</span>
-                                    <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
-                                          role="status" aria-hidden="true"></span>
-                                </button>
-                                     </div>
+                                    </a>
+                                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
+                                            id="SaveChangesButton">
+                                        <span>Save Changes</span>
+                                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                              role="status" aria-hidden="true"></span>
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -254,7 +254,7 @@
 
     </script>
     <script !src="">
-        $(document).ready(function() {
+        $(document).ready(function () {
             const preselectedProductId = $('#productsSelect').val();
             if (preselectedProductId) {
                 $('#productsSelect').trigger('change');
@@ -279,19 +279,22 @@
                     method: 'GET',
                     success: function (res) {
                         if (res.data && res.data.length > 0) {
+                            const selectedSpecs = @json($model->specifications->pluck('id'));
                             $specsContainer.empty();
 
                             res.data.forEach(spec => {
+                                const isChecked = selectedSpecs.includes(spec.id);
                                 const specHtml = `
-                            <div class="col-12 mb-1">
-                                <div class="border rounded p-1 d-flex align-items-center">
-                                    <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
-                                    <label class="form-check-label">${spec.name}</label>
-                                </div>
-                            </div>
-                        `;
+                    <div class="col-12 mb-1">
+                        <div class="border rounded p-1 d-flex align-items-center">
+                            <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1" ${isChecked ? 'checked' : ''}>
+                            <label class="form-check-label">${spec.name}</label>
+                        </div>
+                    </div>
+                `;
                                 $specsContainer.append(specHtml);
                             });
+
 
                             $specSection.removeClass('d-none');
                         } else {
@@ -352,9 +355,9 @@
     </script>
     <script !src="">
         function updateDeleteButtons(containerSelector) {
-            $(containerSelector).find('[data-repeater-list]').each(function() {
+            $(containerSelector).find('[data-repeater-list]').each(function () {
                 var items = $(this).find('[data-repeater-item]');
-                items.each(function() {
+                items.each(function () {
                     $(this).find('[data-repeater-delete]').show();
                     feather.replace();
                 });
@@ -362,7 +365,7 @@
         }
 
         function initializeImageUploaders(context) {
-            $(context).find('.option-upload-area').each(function() {
+            $(context).find('.option-upload-area').each(function () {
                 const uploadArea = $(this);
                 const input = uploadArea.closest('.col-md-12').find('.option-image-input');
                 const previewContainer = uploadArea.closest('.col-md-12').find('.option-uploaded-image');
@@ -371,15 +374,15 @@
                 const fileSizeLabel = previewContainer.find('.option-file-size');
                 const removeButton = previewContainer.find('.option-remove-image');
 
-                uploadArea.off('click').on('click', function() {
+                uploadArea.off('click').on('click', function () {
                     input.trigger('click');
                 });
 
-                input.off('change').on('change', function() {
+                input.off('change').on('change', function () {
                     const file = this.files[0];
                     if (file) {
                         const reader = new FileReader();
-                        reader.onload = function(e) {
+                        reader.onload = function (e) {
                             imagePreview.attr('src', e.target.result);
                             fileNameLabel.text(file.name);
                             fileSizeLabel.text((file.size / 1024).toFixed(1) + ' KB');
@@ -389,7 +392,7 @@
                     }
                 });
 
-                removeButton.off('click').on('click', function() {
+                removeButton.off('click').on('click', function () {
                     input.val('');
                     previewContainer.addClass('d-none');
                 });
@@ -399,40 +402,40 @@
         $('.outer-repeater').repeater({
             repeaters: [{
                 selector: '.inner-repeater',
-                show: function() {
+                show: function () {
                     $(this).slideDown();
                     updateDeleteButtons($(this).closest('.outer-repeater'));
                     initializeImageUploaders(this);
                     feather.replace();
                 },
-                hide: function(deleteElement) {
+                hide: function (deleteElement) {
                     $(this).slideUp(deleteElement);
                     updateDeleteButtons($(this).closest('.outer-repeater'));
                 },
                 nestedInputName: 'specification_options'
             }],
-            show: function() {
+            show: function () {
                 $(this).slideDown();
                 updateDeleteButtons($('.outer-repeater'));
                 initializeImageUploaders(this);
                 feather.replace();
             },
-            hide: function(deleteElement) {
+            hide: function (deleteElement) {
                 $(this).slideUp(deleteElement);
                 updateDeleteButtons($('.outer-repeater'));
             },
-            afterAdd: function() {
+            afterAdd: function () {
                 updateDeleteButtons($('.outer-repeater'));
                 initializeImageUploaders($('.outer-repeater'));
                 feather.replace();
             },
-            afterDelete: function() {
+            afterDelete: function () {
                 updateDeleteButtons($('.outer-repeater'));
             }
         });
 
         // Initialize on page load for already existing items
-        $(document).ready(function() {
+        $(document).ready(function () {
             updateDeleteButtons($('.outer-repeater'));
             initializeImageUploaders($('.outer-repeater'));
         });

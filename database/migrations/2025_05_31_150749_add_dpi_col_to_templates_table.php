@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::table('templates', function (Blueprint $table) {
             $table->integer("dpi")->nullable()->after("unit")->default(300);
-            $table->decimal('width')->change();
-            $table->decimal('height')->change();
+            $table->decimal('width')->nullable()->change();
+            $table->decimal('height')->nullable()->change();
         });
     }
 

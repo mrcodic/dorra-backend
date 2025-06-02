@@ -46,6 +46,7 @@ class TemplateController extends DashboardController
                 'tags' => $this->tagRepository->all(),
             ],
         ];
+
     }
 
     public function index()
