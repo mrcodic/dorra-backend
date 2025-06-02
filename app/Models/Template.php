@@ -21,6 +21,7 @@ class Template extends Model implements HasMedia
         'status',
         'product_id',
         'design_data',
+        'base64_preview_image',
         'type',
         'description',
         'unit',

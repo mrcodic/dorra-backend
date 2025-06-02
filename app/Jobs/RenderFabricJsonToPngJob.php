@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Support\Facades\Storage;
 
@@ -45,7 +46,7 @@ class RenderFabricJsonToPngJob implements ShouldQueue
         exec($cmd, $output, $returnVar);
 
         if ($returnVar !== 0) {
-            \Log::error('Fabric render job failed', ['cmd' => $cmd, 'output' => $output]);
+            Log::error('Fabric render job failed', ['cmd' => $cmd, 'output' => $output]);
             throw new \Exception("Failed to render PNG from Fabric JSON");
         }
 

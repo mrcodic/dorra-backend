@@ -53,6 +53,7 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'unit' => ["required","integer","in:".UnitEnum::getValuesAsString()],
             'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
+            'base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable'],

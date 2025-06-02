@@ -44,6 +44,7 @@ class UpdateTemplateRequest extends BaseRequest
             'status' => ["sometimes","integer","in:".StatusEnum::getValuesAsString()],
             'product_id' => ['sometimes', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
+            'base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],

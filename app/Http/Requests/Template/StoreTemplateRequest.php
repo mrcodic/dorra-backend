@@ -56,6 +56,7 @@ class StoreTemplateRequest extends BaseRequest
             'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
             'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
+            'base64_preview_image' => ['sometimes', 'string'],
             'height' => ["sometimes"],
             'width' => ["sometimes"],
             'unit' => ["sometimes","integer","in:".UnitEnum::getValuesAsString()],
