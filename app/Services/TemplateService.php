@@ -108,14 +108,13 @@ class TemplateService extends BaseService
                     $q->whereIn('tags.id', $tags);
                 });
             })
-            ->when($recent, function ($query) {
+            ->when($recent || $recent !== null, function ($query) {
                 $query->whereNotNull('updated_at')
                     ->orderByDesc('updated_at');
             }, function ($query) {
                 $query->oldest();
             })
             ->whereProductId($productId)
-            ->latest()
             ->paginate(10);
     }
 
