@@ -59,9 +59,10 @@ class TemplateService extends BaseService
                 ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
             }
 
+
             return $model;
         });
-       /* if (isset($validatedData['design_data']))
+        /*if (isset($validatedData['design_data']))
         {
             RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'templates');
         }*/
@@ -84,6 +85,10 @@ class TemplateService extends BaseService
         {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
         }
+        /*if (isset($validatedData['design_data']))
+      {
+          RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'templates');
+      }*/
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }

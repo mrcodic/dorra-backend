@@ -50,6 +50,9 @@ class RenderFabricJsonToPngJob implements ShouldQueue
         }
 
         if (file_exists($tempPngPath)) {
+            if ($this->model->hasMedia('models')) {
+                $this->model->clearMediaCollection('templates');
+            }
             $this->model->addMedia($tempPngPath)
                 ->usingFileName('fabric_rendered_' . uniqid() . '.png')
                 ->toMediaCollection($this->collectionName);
