@@ -55,7 +55,6 @@ class TemplateController extends DashboardController
 
     public function index()
     {
-
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination ,perPage: request('per_page',16));
         $associatedData = $this->getAssociatedData('index');
         if (request()->ajax()) {

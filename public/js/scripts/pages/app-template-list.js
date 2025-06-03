@@ -117,10 +117,14 @@ const dt_user_table = $(".template-list-table").DataTable({
 // $('.filter-product, .filter-status').on('change', function () {
 //     dt_user_table.ajax.reload();
 // });
-$('.filter-status, .filter-product, #search-category-form, .filter-paginate-number').on('change keyup', function() {
-    // debounce this if needed!
+$(document).ready(function () {
     fetchTemplates();
+
+    $('.filter-status, .filter-product, #search-category-form, .filter-paginate-number').on('change keyup', function () {
+        fetchTemplates();
+    });
 });
+
 
 function fetchTemplates() {
     $.ajax({
@@ -134,6 +138,7 @@ function fetchTemplates() {
         },
         success: function(response) {
             $('#templates-container').html(response.data.html);
+            $('#template-list-and-pagination').replaceWith(response.data.html);
         },
         error: function(xhr) {
             console.error('Failed to fetch templates:', xhr);

@@ -90,13 +90,13 @@
 
                     <div class="col-12 col-md-1">
                         <select name="show" class="form-select filter-paginate-number">
-                            <option value="" disabled>Show</option>
-                            <option value="16">16</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="all">All</option>
-
+                            <option value="" disabled {{ request('per_page') === null ? 'selected' : '' }}>Show</option>
+                            <option value="16" @selected(request('per_page') == 16)>16</option>
+                            <option value="50" @selected(request('per_page') == 50)>50</option>
+                            <option value="100" @selected(request('per_page') == 100)>100</option>
+                            <option value="all" @selected(request('per_page') == 'all')>All</option>
                         </select>
+
                     </div>
 
                     {{-- Action Buttons --}}
@@ -117,11 +117,12 @@
             <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="templates-container">
               @include("dashboard.templates.partials.filtered-templates")
             </div>
-            <div class="mt-2 px-1">
-                {{ $data->links('pagination::bootstrap-5') }}
+            @if($data instanceof \Illuminate\Pagination\LengthAwarePaginator)
 
-            </div>
-
+                <div class="mt-2 px-1">
+                    {{ $data->withQueryString()->links('pagination::bootstrap-5') }}
+                </div>
+            @endif
         </div>
 
         <!-- Bulk Delete Bar -->
