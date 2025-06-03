@@ -66,7 +66,7 @@
                 </ul>
             </div>
             <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
-                    src="{{ $template->image }}"
+                    src="{{ $template->base64_preview_image }}"
                     class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
             </div> <!-- Template Info -->
             <div class="card-body text-start p-2">
