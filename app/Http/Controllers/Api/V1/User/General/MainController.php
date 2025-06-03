@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api\V1\User\General;
 
 
 use App\Enums\HttpEnum;
+use App\Enums\Template\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Models\CountryCode;
 use App\Services\CategoryService;
 use App\Services\ReviewService;
-use App\Http\Resources\{CategoryResource, CountryCodeResource, CountryResource, StateResource};
+use App\Services\TagService;
+use App\Http\Resources\{CategoryResource, CountryCodeResource, CountryResource, StateResource, TagResource};
 use App\Repositories\Interfaces\{CategoryRepositoryInterface, CountryRepositoryInterface, StateRepositoryInterface};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -21,6 +23,7 @@ class MainController extends Controller
         public CountryRepositoryInterface  $countryRepository,
         public StateRepositoryInterface    $stateRepository,
         public CategoryService $categoryService,
+        public TagService $tagService,
     )
     {}
 
@@ -62,6 +65,18 @@ class MainController extends Controller
         if (auth()->check()) {
             return response()->json(['message' => 'authenticated.'], 200);
         }
+    }
+
+    public function tags()
+    {
+        return Response::api(data: TagResource::collection($this->tagService->getAll(columns: ['id', 'name'])));
+
+    }
+
+    public function templateTypes()
+    {
+        return Response::api(data: TypeEnum::toArray());
+
     }
 
 

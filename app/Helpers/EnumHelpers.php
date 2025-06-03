@@ -12,6 +12,13 @@ trait EnumHelpers
     public static function getValuesAsString(): string
     {
         return implode(',',array_column(self::cases(), 'value'));
-
     }
+    public static function toArray(): array
+    {
+        return array_map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label(),
+        ], self::cases());
+    }
+
 }

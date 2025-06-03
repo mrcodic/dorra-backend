@@ -169,6 +169,8 @@ Route::middleware('auth')->group(function () {
         Route::controller(MainController::class)->group(function () {
             Route::get('states', 'states')->name('states');
             Route::get('sub-categories', 'subCategories')->name('sub-categories');
+            Route::get('template-types', 'templateTypes')->name('template-types');
+            Route::get('tags', 'tags')->name('tags');
             Route::delete('/media/{media}', 'removeMedia')->name('remove-media');
             Route::post('/media/{resource}', 'addMedia')->name('add-media');
             Route::get('/v1/admin-check', 'adminCheck')->name('admin-check');

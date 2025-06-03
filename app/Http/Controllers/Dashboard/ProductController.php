@@ -36,7 +36,7 @@ class ProductController extends DashboardController
         ];
         $this->methodRelations = [
         'show' => ['category', 'tags', 'reviews.user','media'],
-        'edit' => ['category', 'tags', 'reviews','media'],
+        'edit' => ['category', 'tags', 'reviews','media', 'specifications.options'],
     ];
 
         $this->usePagination = true;

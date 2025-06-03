@@ -84,3 +84,5 @@ Route::get('/design-versions/{design_version}', [DesignController::class, 'getDe
 Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
+Route::get('template-types', [MainController::class,'templateTypes'])->name('template-types');
+Route::get('tags', [MainController::class,'tags'])->name('tags');

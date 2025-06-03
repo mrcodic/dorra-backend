@@ -89,10 +89,29 @@ class TemplateService extends BaseService
 
     public function getProductTemplates($productId)
     {
+        $search = trim(request()->input('search'));
+        $type = request()->input('type');
+        $tags = array_filter((array) request()->input('tags'));
+
         return $this->repository->query()
             ->with('media')
-            ->whereProductId($productId)->latest()->paginate(10);
+            ->when($search, function ($query) use ($search) {
+                $locale = app()->getLocale();
+                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            })
+            ->when($type !== null && $type !== '', function ($query) use ($type) {
+                $query->whereType($type);
+            })
+            ->when(!empty($tags), function ($query) use ($tags) {
+                $query->whereHas('product.tags', function ($q) use ($tags) {
+                    $q->whereIn('tags.id', $tags);
+                });
+            })
+            ->whereProductId($productId)
+            ->latest()
+            ->paginate(10);
     }
+
 
 
 }

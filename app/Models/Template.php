@@ -3,18 +3,21 @@
 namespace App\Models;
 
 use App\Enums\Template\StatusEnum;
+use App\Enums\Template\TypeEnum;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
 class Template extends Model implements HasMedia
 {
-    use HasUuids,HasTranslations, InteractsWithMedia;
-    public $translatable = ['name','description'];
+    use HasUuids, HasTranslations, InteractsWithMedia;
+
+    public $translatable = ['name', 'description'];
 
     protected $fillable = [
         'name',
@@ -30,11 +33,13 @@ class Template extends Model implements HasMedia
     ];
     protected $casts = [
         'status' => StatusEnum::class,
+        'type' => TypeEnum::class,
     ];
 
     protected $attributes = [
         'status' => StatusEnum::DRAFTED,
     ];
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -50,8 +55,6 @@ class Template extends Model implements HasMedia
         return $this->getFirstMediaUrl('templates') ?: asset("images/default-photo.png");
 
     }
-
-
 
 
 }
