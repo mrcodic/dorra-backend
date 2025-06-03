@@ -35,7 +35,6 @@ class TemplateResource extends JsonResource
                 'label' => $this->type?->label()
             ],
             'product' => ProductResource::make($this->whenLoaded('product')),
-//            'preview_image' => $this->getFirstMediaUrl('templates'),
             'source_design_svg' => $this->image,
             'base64_preview_image' => $this->image,
             'last_updated' => $this->updated_at->diffForHumans(),
