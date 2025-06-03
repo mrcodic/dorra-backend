@@ -86,3 +86,4 @@ Route::get('templates', [TemplateController::class, 'getProductTemplates'])->nam
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 Route::get('template-types', [MainController::class,'templateTypes'])->name('template-types');
 Route::get('tags', [MainController::class,'tags'])->name('tags');
+Route::delete('/media/{media}', [MainController::class,'removeMedia'])->name('remove-media');
