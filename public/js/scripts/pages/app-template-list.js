@@ -29,9 +29,9 @@ const dt_user_table = $(".template-list-table").DataTable({
         },
         {data: "name"},
         {data: "product",
-        render: function (data, type, row, meta) {
-            return row.product.name[locale];
-        }
+            render: function (data, type, row, meta) {
+                return row.product.name[locale];
+            }
         },
         {
             data: "status",
@@ -126,26 +126,35 @@ $(document).ready(function () {
 });
 
 
-function fetchTemplates() {
+function fetchTemplates(page = 1) {
     $.ajax({
         url: '/product-templates',
         type: 'GET',
         data: {
+            page,
             search_value: $('#search-category-form').val(),
-            product_id: $('.filter-product').val(),
-            status: $('.filter-status').val(),
-            per_page: $('.filter-paginate-number').val()
+            product_id  : $('.filter-product').val(),
+            status      : $('.filter-status').val(),
+            per_page    : $('.filter-paginate-number').val()
         },
-        success: function(response) {
-            $('#templates-container').html(response.data.html);
-            $('#template-list-and-pagination').replaceWith(response.data.html);
+        success: res => {
+            $('#templates-container').html(res.data.cards);
+            $('#pagination-container').html(res.data.pagination);
         },
-        error: function(xhr) {
-            console.error('Failed to fetch templates:', xhr);
-        }
-
+        error: xhr => console.error('Failed to fetch templates:', xhr)
     });
 }
+
+/* 3-A  — page-size selector */
+$('.filter-paginate-number').on('change', () => fetchTemplates(1));
+
+/* 3-B  — delegate clicks on the (new) paginator links */
+$(document).on('click', '#pagination-container a.page-link', function (e) {
+    e.preventDefault();
+    const url  = new URL($(this).attr('href'), location.origin);
+    const page = url.searchParams.get('page') || 1;
+    fetchTemplates(page);
+});
 
 
 // Checkbox select all

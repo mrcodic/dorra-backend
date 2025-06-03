@@ -19,31 +19,43 @@ class TemplateService extends BaseService
 
     }
 
-    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10)
-    {
-        if (request()->ajax()) {
-            $query = $this->repository
-                ->query(['id', 'name', 'product_id', 'status', 'created_at'])
-                ->with(['product:id,name','product.tags'])
-                ->when(request()->filled('search_value'), function ($query) {
-                    $locale = app()->getLocale();
-                    $search = request('search_value');
-                    $query->where("name->{$locale}", 'LIKE', "%{$search}%");
-                })
-                ->when(request()->filled('product_id'), function ($query) {
-                    $query->whereProductId(request('product_id'));
-                })->when(request()->filled('status'), function ($query) {
-                    $query->whereStatus(request('status'));
-                })
-                ->latest();
-            if (request('per_page') == "all") {
-                return $query->get();
-            }
-//            dd(request('per_page',16),$query->paginate(request('per_page',50)));
-            return $query->paginate(request('per_page',16));
-        }
-        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters,perPage: request('per_page',16));
+    public function getAll(
+        $relations = [],
+        bool $paginate = false,
+        $columns = ['*'],
+        $perPage = 16
+    ) {
 
+        $requested = request('per_page', $perPage);
+        $pageSize  = $requested === 'all' ? null : (int) $requested;
+
+
+        $query = $this->repository
+            ->query(['id', 'name', 'product_id', 'status', 'created_at'])
+            ->with(['product:id,name', 'product.tags'])
+            ->when(request()->filled('search_value'), function ($q) {
+                $locale = app()->getLocale();
+                $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
+            })
+            ->when(request()->filled('product_id'), fn ($q) => $q->whereProductId(request('product_id')))
+            ->when(request()->filled('status'),     fn ($q) => $q->whereStatus(request('status')))
+            ->latest();
+
+
+        if (request()->ajax()) {
+            return $pageSize === null
+                ? $query->get()                                   // “all”
+                : $query->paginate($pageSize)->withQueryString(); // 16 / 50 / 100
+        }
+
+
+        return $this->repository->all(
+            $paginate,
+            $columns,
+            $relations,
+            filters : $this->filters,
+            perPage : $pageSize ?? $perPage
+        );
     }
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])

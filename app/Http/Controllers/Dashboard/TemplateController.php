@@ -58,10 +58,19 @@ class TemplateController extends DashboardController
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination ,perPage: request('per_page',16));
         $associatedData = $this->getAssociatedData('index');
         if (request()->ajax()) {
-            $html = view("dashboard.templates.partials.filtered-templates", compact('data'))->render();
+            $cards = view('dashboard.templates.partials.filtered-templates', compact('data'))->render();
+
+            $pagination = '';
+            if ($data instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+                $pagination = '<div class="mt-2 px-1">' .
+                    $data->withQueryString()->links('pagination::bootstrap-5')->render() .
+                    '</div>';
+            }
+
             return Response::api(data: [
-                'html' => $html,
-                'total' => is_countable($data) ? count($data) : $data->total(),
+                'cards'      => $cards,
+                'pagination' => $pagination,
+                'total'      => is_countable($data) ? count($data) : $data->total(),
             ]);
         }
         return view("dashboard.templates.index", get_defined_vars());
