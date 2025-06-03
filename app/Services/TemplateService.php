@@ -49,12 +49,6 @@ class TemplateService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
-           if (isset($validatedData['unit']) && $validatedData['unit'] == 1)
-           {
-               $validatedData['width'] = $validatedData['width'] * 25.4 ;
-               $validatedData['height'] = $validatedData['height'] * 25.4 ;
-               $validatedData['unit'] = 2;
-           }
             $model = $this->repository->create($validatedData);
             if (isset($validatedData['specifications']))
             {
@@ -67,10 +61,10 @@ class TemplateService extends BaseService
 
             return $model;
         });
-        if (isset($validatedData['design_data']))
+ /*       if (isset($validatedData['design_data']))
         {
             RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'templates');
-        }
+        }*/
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }
@@ -78,12 +72,6 @@ class TemplateService extends BaseService
     }
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        if (isset($validatedData['unit']) && $validatedData['unit'] == 1)
-        {
-            $validatedData['width'] = $validatedData['width'] * 25.4 ;
-            $validatedData['height'] = $validatedData['height'] * 25.4 ;
-            $validatedData['unit'] = 2;
-        }
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
             $model = $this->repository->update($validatedData,$id);
             if (isset($validatedData['specifications']))
