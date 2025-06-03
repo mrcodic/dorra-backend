@@ -80,6 +80,10 @@ class TemplateService extends BaseService
             }
             return $model;
         });
+        if (isset($validatedData['base64_preview_image']))
+        {
+            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+        }
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }
