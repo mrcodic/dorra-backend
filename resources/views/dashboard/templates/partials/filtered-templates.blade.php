@@ -72,7 +72,7 @@
             <div class="card-body text-start p-2">
                 <div>
                     <h6 class="fw-bold mb-1 text-black fs-3"
-                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ data_get($template->getTranslation('name', app()->getLocale()), 0, '') }}
+                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->getTranslation('name', app()->getLocale()) }}
                     </h6>
                     <p class="small mb-1"
                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->product->getTranslation('name', app()->getLocale()) }} </p>
