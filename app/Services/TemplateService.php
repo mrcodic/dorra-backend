@@ -92,6 +92,7 @@ class TemplateService extends BaseService
         $search = trim(request()->input('search'));
         $type = request()->input('type');
         $tags = array_filter((array) request()->input('tags'));
+        $recent = request()->boolean('recent');
 
         return $this->repository->query()
             ->with('media')
@@ -106,6 +107,10 @@ class TemplateService extends BaseService
                 $query->whereHas('product.tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', $tags);
                 });
+            })
+            ->when($recent, function ($query) {
+                $query->whereNotNull('updated_at')
+                    ->orderByDesc('updated_at');
             })
             ->whereProductId($productId)
             ->latest()

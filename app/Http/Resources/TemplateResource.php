@@ -38,6 +38,7 @@ class TemplateResource extends JsonResource
 //            'preview_image' => $this->getFirstMediaUrl('templates'),
             'source_design_svg' => $this->image,
             'base64_preview_image' => $this->image,
+            'last_updated' => $this->updated_at->diffForHumans(),
 
         ];
     }

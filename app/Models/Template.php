@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
+use App\Observers\TemplateObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
-
+#[ObservedBy(TemplateObserver::class)]
 class Template extends Model implements HasMedia
 {
     use HasUuids, HasTranslations, InteractsWithMedia;
@@ -30,6 +32,7 @@ class Template extends Model implements HasMedia
         'unit',
         'height',
         'width',
+        'last_used_at',
     ];
     protected $casts = [
         'status' => StatusEnum::class,
