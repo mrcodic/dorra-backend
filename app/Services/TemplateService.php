@@ -54,18 +54,18 @@ class TemplateService extends BaseService
             {
                 $model->specifications()->attach($validatedData['specifications']);
             }
-            if (isset($validatedData['base64_preview_image']))
+         /*   if (isset($validatedData['base64_preview_image']))
             {
                 ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
-            }
+            }*/
 
 
             return $model;
         });
-        /*if (isset($validatedData['design_data']))
+        if (isset($validatedData['design_data']))
         {
             RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'templates');
-        }*/
+        }
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }
@@ -81,14 +81,14 @@ class TemplateService extends BaseService
             }
             return $model;
         });
-        if (isset($validatedData['base64_preview_image']))
+      /*  if (isset($validatedData['base64_preview_image']))
         {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
-        }
-        /*if (isset($validatedData['design_data']))
+        }*/
+        if (isset($validatedData['design_data']))
       {
           RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'templates');
-      }*/
+      }
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }
