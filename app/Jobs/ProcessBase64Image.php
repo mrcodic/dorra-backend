@@ -45,7 +45,9 @@ class ProcessBase64Image implements ShouldQueue
         if (file_put_contents($tempFilePath, $imageData) === false) {
             throw new \Exception('Failed to write temp file');
         }
-
+        if ($this->template->hasMedia('templates')) {
+            $this->template->clearMediaCollection('templates');
+        }
         $this->template->addMedia($tempFilePath)
             ->toMediaCollection('templates');
 
