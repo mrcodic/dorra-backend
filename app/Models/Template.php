@@ -32,7 +32,6 @@ class Template extends Model implements HasMedia
         'unit',
         'height',
         'width',
-        'last_used_at',
     ];
     protected $casts = [
         'status' => StatusEnum::class,

@@ -109,8 +109,8 @@ class TemplateService extends BaseService
                 });
             })
             ->when($recent, function ($query) {
-                $query->whereNotNull('last_used_at')
-                    ->orderByDesc('last_used_at');
+                $query->whereNotNull('updated_at')
+                    ->orderByDesc('updated_at');
             }, function ($query) {
                 $query->oldest();
             })

@@ -26,6 +26,7 @@ class LibraryAssetController extends Controller
 //           ->get();
      $media = Media::query()->whereMorphedTo('model',Admin::find(1))
            ->whereCollectionName("web_assets")
+            ->latest()
            ->get();
        return Response::api(data: MediaResource::collection($media));
    }
