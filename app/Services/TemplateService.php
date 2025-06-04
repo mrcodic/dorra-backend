@@ -6,8 +6,6 @@ use App\Jobs\ProcessBase64Image;
 use App\Jobs\RenderFabricJsonToPngJob;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
-use Illuminate\Http\JsonResponse;
-use Yajra\DataTables\DataTables;
 
 class TemplateService extends BaseService
 {
@@ -71,7 +69,7 @@ class TemplateService extends BaseService
                 ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
             }
 
-            return $model;
+            return $model->refresh();
         });
         /*if (isset($validatedData['design_data']))
         {

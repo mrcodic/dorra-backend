@@ -6,7 +6,7 @@ use App\Http\Requests\Base\BaseRequest;
 use App\Models\Template;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-
+use Illuminate\Validation\Validator;
 
 
 class StoreDesignRequest extends BaseRequest
@@ -58,5 +58,17 @@ class StoreDesignRequest extends BaseRequest
             'design_data' => $template?->design_data,
         ]);
     }
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            $templateId = $this->input('template_id');
 
+            if ($templateId) {
+                $template = Template::find($templateId);
+                if (!$template || $template->media->isEmpty()) {
+                    $validator->errors()->add('template_id', 'The selected template does not have any media attached.');
+                }
+            }
+        });
+    }
 }

@@ -17,7 +17,6 @@ class DesignService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        dd($validatedData);
         $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id']], $validatedData);
         $this->templateRepository
             ->find($validatedData['template_id'])

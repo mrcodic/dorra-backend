@@ -14,6 +14,7 @@ class DesignObserver
     public function created(Design $design): void
     {
         DB::transaction(function () use ($design) {
+            $design->refresh();
             $design->versions()->create([
                 'design_data' => $design->design_data,
                 'version'     => $design->current_version,

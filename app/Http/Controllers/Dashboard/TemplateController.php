@@ -48,7 +48,7 @@ class TemplateController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'index' => ["product" ,"media"]
+            'index' => ["product.tags" ,"media"],
         ];
 
     }
@@ -92,7 +92,7 @@ class TemplateController extends DashboardController
     }
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id)));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id,['specifications.options','product.prices'])));
     }
 
     public function changeStatus(Request $request, $id)
