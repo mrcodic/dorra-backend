@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
+use App\Enums\Template\UnitEnum;
 use App\Observers\TemplateObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -36,6 +37,7 @@ class Template extends Model implements HasMedia
     protected $casts = [
         'status' => StatusEnum::class,
         'type' => TypeEnum::class,
+        'unit' => UnitEnum::class,
     ];
 
     protected $attributes = [
