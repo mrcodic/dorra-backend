@@ -75,6 +75,20 @@ class TemplateController extends DashboardController
         }
         return view("dashboard.templates.index", get_defined_vars());
     }
+
+    public function storeAndRedirect(StoreTranslatedTemplateRequest $request)
+{
+    $template  = $this->templateService->storeResource($request->validated());
+    return Response::api(data: [
+        "redirect_url" => config('services.editor_url') . 'templates/' . $template->id
+    ]);
+}
+
+    public function show($id)
+    {
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id,['specifications.options','product.prices'])));
+    }
+
     public function getProductTemplates()
     {
         $productId = request()->input('productId');
@@ -83,18 +97,12 @@ class TemplateController extends DashboardController
 
     }
 
-    public function storeAndRedirect(StoreTranslatedTemplateRequest $request)
+    public function templateCustomizations(Request $request)
     {
-      $template  = $this->templateService->storeResource($request->validated());
-      return Response::api(data: [
-         "redirect_url" => config('services.editor_url') . 'templates/' . $template->id
-      ]);
-    }
-    public function show($id)
-    {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id,['specifications.options','product.prices'])));
-    }
+        $templates = $this->templateService->templateCustomizations($request->validated());
+        return Response::api(data: TemplateResource::collection($templates));
 
+    }
     public function changeStatus(Request $request, $id)
     {
         $request->validate(['status' => 'required','in:'.StatusEnum::getValuesAsString()]);

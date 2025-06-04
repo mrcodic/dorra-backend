@@ -93,6 +93,7 @@
                                     class="form-select filter-paginate-number">
                                 <option value=""  disabled {{ request('per_page') === null ? 'selected' : '' }}>Show</option>
                                 <option value="16"  @selected(request('per_page') == 16 )>16</option>
+                                <option value="16"  @selected(request('per_page') == 16 )>16</option>
                                 <option value="50"  @selected(request('per_page') == 50 )>50</option>
                                 <option value="80"  @selected(request('per_page') == 80 )>80</option>  {{-- add --}}
                                 <option value="100" @selected(request('per_page') == 100)>100</option>

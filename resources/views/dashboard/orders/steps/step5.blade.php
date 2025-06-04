@@ -88,7 +88,7 @@
             </div>
                 <button type="button" class="btn btn-outline-secondary fs-16"  data-bs-toggle="modal" data-bs-target="#selectLocationModal"> <i data-feather="map-pin"></i> Select pick up location</button>
             </div>
-           
+
 
             <div class="mb-2">
                 <label class="form-label fw-bold fs-3">Who's picking up the package?</label>

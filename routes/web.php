@@ -23,6 +23,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     OfferController,
     LogisticController};
 use App\Http\Controllers\Shared\LibraryAssetController;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 
@@ -162,7 +163,7 @@ Route::middleware('auth')->group(function () {
 
         Route::controller(ReviewController::class)->group(function () {
             Route::delete('reviews/{review}', 'deleteReview')->name('reviews.destroy');
-            Route::put('reviews/{review}/reply', 'deleteReply')->name('reviews.reply.destroy');
+            Route::put('reviews/{ review}/reply', 'deleteReply')->name('reviews.reply.destroy');
             Route::put('reviews/{review}', 'replyReview')->name('reviews.reply');
         });
 
@@ -177,8 +178,15 @@ Route::middleware('auth')->group(function () {
             Route::get('/v1/admin-check', 'adminCheck')->name('admin-check');
         });
 
+        Route::prefix("orders/")->controller(OrderController::class)->as("orders.")->group(function () {
+            Route::post("step1", 'storeStep1')->name('step1');
+            Route::post("step2", 'storeStep2')->name('step2');
+
+        });
+
         Route::apiResource('/v1/templates', TemplateController::class)->only(['store', 'show', 'update']);
         Route::get('/v1/templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
+        Route::get('/v1/template-customizations', [TemplateController::class, 'templateCustomizations'])->name("templates.customizations");
         Route::apiResource('/v1/library-assets', LibraryAssetController::class)->only(['store', 'index']);
 
         Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);

@@ -6,6 +6,7 @@ use App\Jobs\ProcessBase64Image;
 use App\Jobs\RenderFabricJsonToPngJob;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
+use Illuminate\Support\Facades\Cache;
 
 class TemplateService extends BaseService
 {
@@ -80,6 +81,7 @@ class TemplateService extends BaseService
         }
         return $model->load($relationsToLoad);
     }
+
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
@@ -103,7 +105,6 @@ class TemplateService extends BaseService
         }
         return $model->load($relationsToLoad);
     }
-
 
     public function getProductTemplates($productId)
     {
@@ -135,6 +136,14 @@ class TemplateService extends BaseService
             ->whereProductId($productId)
             ->paginate(10);
     }
+
+//    public function templateCustomizations($validatedData)
+//    {
+//        $data = [
+//
+//        ];
+//        Cache::put("order_step_data_{$validatedData["user_id"]}",)
+//    }
 
 
 

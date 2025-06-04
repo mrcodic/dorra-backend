@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 function getActiveGuard(): string|null
 {
@@ -12,3 +13,20 @@ function getActiveGuard(): string|null
     return null;
 }
 
+function getOrderStepCacheKey(): string
+{
+    if (getActiveGuard() == "web" && request()->has('user_id')) {
+        return 'order_step_data_' . request('user_id');
+    }
+    if (auth('sanctum')->check()) {
+        return 'order_step_data_' . auth()->id();
+    }
+
+    $cookieId = request()->cookie('cookie_id') ?? (string) Str::uuid();
+
+    if (!request()->hasCookie('cookie_id')) {
+        cookie()->queue(cookie('cookie_id', $cookieId, 60 * 24 * 30));
+    }
+
+    return 'order_step_data_guest_' . $cookieId;
+}
