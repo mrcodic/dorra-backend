@@ -24,7 +24,10 @@ class TemplateResource extends JsonResource
             'height' => ($this->height * 25.4) ?? 100,
             'original_width' => $this->width ?? 200,
             'original_height' => $this->height ?? 100,
-            'unit' => $this->unit ?? "mm",
+            'unit' => [
+                'value' => $this->unit?->value,
+                'label' => $this->unit?->label()
+            ],
             'dpi' => $this->dpi ?? 300,
             'status' => [
                 'value' => $this->status?->value,
