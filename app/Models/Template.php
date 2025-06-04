@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
+
 #[ObservedBy(TemplateObserver::class)]
 class Template extends Model implements HasMedia
 {
@@ -45,6 +46,8 @@ class Template extends Model implements HasMedia
         'status' => StatusEnum::DRAFTED,
     ];
 
+
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -61,17 +64,21 @@ class Template extends Model implements HasMedia
 
     }
 
-//    public function getHeightMmAttribute()
-//    {
-//return Attribute::get($this->attributes['height'],function (){
-//
-//});
-//    }
+    public function getWidthMmAttribute()
+    {
+        return $this->unit === UnitEnum::INCH
+            ? round($this->width * 25.4, 2)
+            : $this->width ;
+    }
 
-//    public function getWidthMmAttribute()
-//    {
-//
-//    }
+    public function getHeightMmAttribute()
+    {
+        return $this->unit === UnitEnum::INCH
+            ? round($this->height * 25.4, 2)
+            : $this->height ;
+    }
+
+
 
 
 }

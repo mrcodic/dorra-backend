@@ -16,9 +16,9 @@ enum TypeEnum : int
     public function label()
     {
         return match ($this) {
-            self::FRONT => "front",
-            self::BACK => "back",
-            self::NONE => "none",
+            self::FRONT => "Front",
+            self::BACK => "Back",
+            self::NONE => "None",
 
         };
     }

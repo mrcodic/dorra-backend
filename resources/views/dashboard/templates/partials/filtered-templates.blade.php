@@ -75,10 +75,11 @@
                         style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->getTranslation('name', app()->getLocale()) }}
                     </h6>
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div class="text-16">Dimensions:<span class="text-black">1000*1000 mm</span></div>
+                        <div class="text-16">Dimensions: <span class="text-black">{{ $template->height_mm }} × {{ $template->width_mm }} mm</span>
+                        </div>
 
                         <span class="badge text-light p-75 px-2 template-status-label" style="background-color: #222245">
-                           None
+                           {{ $template->type->label() }}
                     </span>
                     </div>
                     <p class="fs-4 mb-1"

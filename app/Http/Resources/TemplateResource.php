@@ -21,8 +21,8 @@ class TemplateResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'design_data' => $this->design_data,
-            'width'  => $this->unit == UnitEnum::INCH ? $this->width * 25.4 : $this->width,
-            'height' => $this->unit == UnitEnum::INCH ? $this->height * 25.4 : $this->height,
+            'width'  => $this->width_mm,
+            'height' =>  $this->height_mm,
 
             'original_width' => $this->width,
             'original_height' => $this->height,
