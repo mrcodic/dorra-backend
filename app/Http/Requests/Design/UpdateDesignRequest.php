@@ -28,7 +28,8 @@ class UpdateDesignRequest extends BaseRequest
     {
         return [
             'design_data' => ['required', 'json'],
-            'design_image' => ['required', 'image', 'mimes:svg', 'max:2048'],
+            'base64_preview_image' => ['sometimes', 'string', 'required_without:design_image'],
+            'design_image' => ['sometimes', 'file', 'mimetypes:image/svg+xml', 'max:2048', 'required_without:base64_preview_image'],
         ];
     }
 

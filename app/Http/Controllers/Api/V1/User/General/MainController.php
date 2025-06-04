@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\User\General;
 
 use App\Enums\HttpEnum;
 use App\Enums\Template\TypeEnum;
+use App\Enums\Template\UnitEnum;
 use App\Http\Controllers\Controller;
 use App\Models\CountryCode;
 use App\Services\CategoryService;
@@ -70,6 +71,11 @@ class MainController extends Controller
     public function tags()
     {
         return Response::api(data: TagResource::collection($this->tagService->getAll(columns: ['id', 'name'])));
+
+    }
+    public function units()
+    {
+        return Response::api(data: UnitEnum::toArray());
 
     }
 
