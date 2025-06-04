@@ -66,7 +66,7 @@
                 </ul>
             </div>
             <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
-                    src="{{ $template->image }}"
+                    src="{{  $this->getFirstMediaUrl('templates') ?: asset("images/default-photo.png") }}"
                     class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
             </div> <!-- Template Info -->
             <div class="card-body text-start p-2">
@@ -74,7 +74,14 @@
                     <h6 class="fw-bold mb-1 text-black fs-3"
                         style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->getTranslation('name', app()->getLocale()) }}
                     </h6>
-                    <p class="small mb-1"
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="text-16">Dimensions:<span class="text-black">1000*1000 mm</span></div>
+
+                        <span class="badge text-light p-75 px-2 template-status-label" style="background-color: #222245">
+                           None
+                    </span>
+                    </div>
+                    <p class="fs-4 mb-1"
                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->product->getTranslation('name', app()->getLocale()) }} </p>
                 </div> <!-- Tags -->
                 <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
@@ -82,13 +89,14 @@
                         <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
                               style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
                     @endforeach </div> <!-- Palette and Status -->
-                <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+
+                <div class="d-flex justify-content-between align-items-center mb-1">
                     <div class="d-flex" style="gap: 5px;">
                         <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #FF5733;"></div>
                         <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #33B5FF;"></div>
                         <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #9B59B6;"></div>
                     </div>
-                    <span class="badge text-dark p-75 template-status-label"
+                    <span class="badge text-dark p-75 px-2 template-status-label"
                           data-template-id="{{ $template->id }}"
                           style="background-color: #CED5D4">
                         {{ $template->status->label() }}

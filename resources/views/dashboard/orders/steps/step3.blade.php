@@ -1,4 +1,4 @@
-<div id="step-3" class="step" style="display: none;">
+<div id="" class="step" style="display: none;">
     <h5 class="mb-2 fs-3 text-black">Order Details</h5>
     <div class="mb-3 " id="discount-code-row" >
         <div class="input-group">

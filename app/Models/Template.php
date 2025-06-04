@@ -7,6 +7,7 @@ use App\Enums\Template\TypeEnum;
 use App\Enums\Template\UnitEnum;
 use App\Observers\TemplateObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,9 +57,21 @@ class Template extends Model implements HasMedia
 
     public function getImageAttribute()
     {
-        return $this->getFirstMediaUrl('templates') ?: asset("images/default-photo.png");
+        return $this->getFirstMediaUrl('templates') ?: "";
 
     }
+
+//    public function getHeightMmAttribute()
+//    {
+//return Attribute::get($this->attributes['height'],function (){
+//
+//});
+//    }
+
+//    public function getWidthMmAttribute()
+//    {
+//
+//    }
 
 
 }
