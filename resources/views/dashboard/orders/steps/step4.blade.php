@@ -43,7 +43,6 @@
 
 
     <div class="d-flex justify-content-end mt-2">
-        <button class="btn btn-outline-secondary me-1" data-prev-step>Back</button>
         <button class="btn btn-primary" data-next-step>Next</button>
     </div>
 </div>

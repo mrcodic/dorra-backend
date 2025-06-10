@@ -178,13 +178,16 @@
         });
     });
 
-    // Handle back button in step 3
-    $(document).on('click', '[data-prev-step]', function() {
+    // // Handle back button in step 3
+    $(document).on('click', 'back-step-1', function() {
         $('#step-3').hide();
         $('#step-2').show();
     });
 
     // Handle next button in step 3 (if needed)
 
-
+    $(document).on('click', 'next-step-2', function() {
+        $('#step-2').hide();
+        $('#step-3').show();
+    });
 </script>

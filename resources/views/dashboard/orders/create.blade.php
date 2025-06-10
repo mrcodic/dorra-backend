@@ -76,17 +76,27 @@
     document.addEventListener("DOMContentLoaded", function() {
         feather.replace();
 
-        let currentStep = 1;
+        // Read the step from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentStep = parseInt(urlParams.get('step')) || 1;
+        if (currentStep < 1) currentStep = 1;
+        if (currentStep > 8) currentStep = 8;
+
         const steps = document.querySelectorAll(".step");
 
+        // Function to show a specific step and update the URL
         function showStep(stepNumber) {
+            if (stepNumber < 1 || stepNumber > 8) return;
             steps.forEach((step, index) => {
                 step.style.display = (index + 1 === stepNumber) ? 'block' : 'none';
             });
             currentStep = stepNumber;
-            updateProgressBar(); // optional
+            updateProgressBar();
+            console.log(stepNumber)
+            history.pushState({}, '', `?step=${stepNumber}`);
         }
 
+        // Function to update the progress bar (if present)
         function updateProgressBar() {
             const progress = document.querySelector('.progress-bar');
             if (progress) {
@@ -95,37 +105,48 @@
             }
         }
 
+        // Handle next button clicks
         document.querySelectorAll('[data-next-step]').forEach(button => {
             button.addEventListener("click", function() {
-
-                showStep(currentStep + 1);
-
+                if (currentStep < 8) {
+                    showStep(currentStep + 1);
+                }
             });
         });
 
+        // Handle previous button clicks
         document.querySelectorAll('[data-prev-step]').forEach(button => {
             button.addEventListener("click", function() {
-                showStep(currentStep - 1);
+                if (currentStep > 1) {
+                    showStep(currentStep - 1);
+                }
             });
         });
 
-        showStep(currentStep); // initialize
+        // Initialize with the step from the URL
+        showStep(currentStep);
 
-        // Show customer results when typing
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', function(event) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const step = parseInt(urlParams.get('step')) || 1;
+            if (step >= 1 && step <= 8) {
+                showStep(step);
+            }
+        });
+
+        // Rest of your code (e.g., customer and product input handling)
         const customerInput = document.querySelector('#step-1 input');
         const customerResults = document.getElementById('customer-results-wrapper');
         customerInput.addEventListener('input', function() {
             customerResults.style.display = this.value.trim() ? 'block' : 'none';
         });
 
-        // Show product filters/results when typing
         const productInput = document.querySelector('#step-2 input');
         const productFilters = document.getElementById('product-filters-wrapper');
         productInput.addEventListener('input', function() {
             productFilters.style.display = this.value.trim() ? 'block' : 'none';
         });
-
-
     });
 </script>
 

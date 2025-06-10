@@ -3,11 +3,13 @@
 @endphp
 
 <div id="step-3" class="step">
+    <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="templates-container">
 
     @forelse ($templates as $template)
+
         <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row"  data-template-id="{{ $template->id }}">
             <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
-                <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
+                <div style="background-color: #F4F6F6;height:200px" class="d-flex justify-content-center"> <!-- Top Image --> <img
                         src="{{  $template->getFirstMediaUrl('templates') ?: asset("images/default-photo.png") }}"
                         class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
                 </div> <!-- Template Info -->
@@ -28,10 +30,12 @@
                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->product->getTranslation('name', app()->getLocale()) }} </p>
                     </div> <!-- Tags -->
                     <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
-                         style="min-height: 44px;"> @foreach($template->product->tags as $tag)
+                         style="min-height: 44px;">
+                        @foreach($template->product->tags as $tag)
                             <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
                                   style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
-                        @endforeach </div> <!-- Palette and Status -->
+                        @endforeach
+                    </div> <!-- Palette and Status -->
 
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div class="d-flex" style="gap: 5px;">
@@ -45,13 +49,16 @@
                         {{ $template->status->label() }}
                     </span>
                     </div>
-                    <a class="btn btn-primary w-100"
-                       href="{{ config("editor_url")."templates/{$template->id}/users/".Cache::get(getOrderStepCacheKey())["user_id"] }}">
-                        Customize Template
-                    </a>
+                    <div class="mt-auto"> <!-- Pushes button to bottom -->
+                        <a class="btn btn-primary w-100"
+                           href="{{ config('editor_url').'templates/'.$template->id.'/users/'.Cache::get(getOrderStepCacheKey())['user_id'] }}">
+                            Customize Template
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
+
     @empty
         <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"
              style="min-height:65vh;">
@@ -63,9 +70,9 @@
 
         </div>
     @endforelse
+        </div>
     <div class="d-flex justify-content-end mt-2">
-        <button class="btn btn-outline-secondary me-1" data-prev-step>Back</button>
-        <button class="btn btn-primary" id="nextStep3" data-next-step>Next</button>
+        <button class="btn btn-outline-secondary me-1" id="prev-step-3" data-prev-step>Back</button>
     </div>
 </div>
 
@@ -73,6 +80,11 @@
     $(document).on('click', '#nextStep3', function() {
         $('#step-3').hide();
         $('#step-4').show();
+
+    });
+    $(document).on('click', '#prev-step-3', function() {
+        $('#step-3').hide();
+        $('#step-2').show();
 
     });
 </script>
