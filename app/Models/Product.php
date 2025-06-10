@@ -70,6 +70,10 @@ class Product extends Model implements HasMedia
     {
         return $this->hasMany(ProductSpecification::class);
     }
+    public function templates(): HasMany
+    {
+        return $this->hasMany(Template::class);
+    }
     public function specificationOptions(): HasManyThrough
     {
         return $this->hasManyThrough(ProductSpecificationOption::class, ProductSpecification::class,

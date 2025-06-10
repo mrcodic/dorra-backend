@@ -31,6 +31,7 @@ class OrderController extends DashboardController
            'create' => [
                'categories' => $this->categoryRepository->query(['id','name'])->whereNull('parent_id')->get(),
                'tags' => $this->tagRepository->all(columns: ['id','name']),
+               'templates' => [],
            ],
        ];
    }

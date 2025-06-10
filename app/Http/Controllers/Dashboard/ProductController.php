@@ -15,10 +15,13 @@ use App\Services\ProductService;
 
 class ProductController extends DashboardController
 {
-    public function __construct(
+    public function __construct
+    (
         public ProductService              $productService,
         public CategoryRepositoryInterface $categoryRepository,
-        public TagRepositoryInterface      $tagRepository,)
+        public TagRepositoryInterface      $tagRepository
+
+    )
     {
 
         parent::__construct($productService);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Enums\HttpEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\TemplateResource;
@@ -11,6 +12,7 @@ use App\Repositories\Interfaces\TagRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Template\{StoreTemplateRequest,
     StoreTranslatedTemplateRequest,
@@ -93,6 +95,18 @@ class TemplateController extends DashboardController
     {
         $productId = request()->input('productId');
         $templates = $this->templateService->getProductTemplates($productId);
+        if(request()->ajax()) {
+            if (!$productId) {
+                $cacheKey = getOrderStepCacheKey();
+                $stepData = Cache::get($cacheKey, []);
+                $productId = $stepData['product_id'] ?? null;
+            }
+            if (!$productId) {
+                return Response::api(HttpEnum::BAD_REQUEST, errors:['error' => 'Product not selected.']);
+            }
+            $templates = $this->templateRepository->query()->whereProductId($productId)->live()->get();
+            return view('dashboard.orders.steps.step3', compact('templates'))->render();
+        }
         return Response::api(data: TemplateResource::collection($templates));
 
     }

@@ -23,8 +23,14 @@
 
     <!-- Next Step -->
     <div class="d-flex justify-content-end mt-2">
-        <button class="btn btn-primary fs-5" id="next-step-btn" data-next-step>Next</button>
+        <button class="btn btn-primary fs-5" id="next-step-btn" data-next-step disabled>Next</button>
+
     </div>
+    <!-- Validation Message -->
+    <div id="customer-error" class="text-danger mt-1" style="display: none;">
+        You must select a customer.
+    </div>
+
 </div>
 
 <!-- Script -->
@@ -32,9 +38,23 @@
     let searchTimeout;
     let selectedUserId = null;
 
-    // Search input listener
+    // Enable/Disable Next button
+    function updateNextButtonState() {
+        if (selectedUserId) {
+            $('#next-step-btn').prop('disabled', false);
+            $('#customer-error').hide();
+        } else {
+            $('#next-step-btn').prop('disabled', true);
+        }
+    }
+
+    // Input change listener
     $('#customer-search').on('input', function () {
         const query = $(this).val().trim();
+
+        selectedUserId = null; // Reset selection if input is changed
+        updateNextButtonState(); // Update button state
+        $('#customer-error').hide(); // Hide error message
 
         clearTimeout(searchTimeout);
         if (query.length < 2) {
@@ -53,14 +73,14 @@
                 $('#show-all-container').hide();
             } else {
                 const html = data.data.map(user => `
-                    <div class="customer-result d-flex align-items-center mb-1 p-1 rounded hover-bg-light"
-                         style="cursor: pointer;"
-                         data-id="${user.id}" data-name="${user.name}">
-                        <img src="${user.image_url || '/images/default-avatar.png'}"
-                             class="rounded-circle mx-1" width="40" height="40" alt="Avatar">
-                        <span class="fw-bold">${user.name}</span>
-                    </div>
-                `).join('');
+                <div class="customer-result d-flex align-items-center mb-1 p-1 rounded hover-bg-light"
+                     style="cursor: pointer;"
+                     data-id="${user.id}" data-name="${user.name}">
+                    <img src="${user.image_url || '/images/default-avatar.png'}"
+                         class="rounded-circle mx-1" width="40" height="40" alt="Avatar">
+                    <span class="fw-bold">${user.name}</span>
+                </div>
+            `).join('');
 
                 $('#customer-results').html(html);
                 $('#show-all-container').toggle(!all && data.data.length === 5);
@@ -70,16 +90,17 @@
         });
     }
 
-    // Delegate click on dynamically added results
+    // Select customer from results
     $('#customer-results').on('click', '.customer-result', function () {
         const name = $(this).data('name');
         selectedUserId = $(this).data('id');
 
         $('#customer-search').val(name);
         $('#customer-results-wrapper').hide();
+        updateNextButtonState(); // Enable next step
     });
 
-    // Show all click
+    // Show all results
     $('#show-all-btn').on('click', function () {
         const query = $('#customer-search').val().trim();
         if (query) fetchResults(query, true);
@@ -88,7 +109,7 @@
     // Step submit
     $('#next-step-btn').on('click', function () {
         if (!selectedUserId) {
-            alert('Please select a customer.');
+            $('#customer-error').show();
             return;
         }
 
@@ -100,11 +121,12 @@
                 _token: '{{ csrf_token() }}'
             },
             success: function (response) {
-
+                // Proceed to next step (handle as needed)
             },
             error: function (xhr) {
                 console.error(xhr.responseJSON);
             }
         });
     });
+
 </script>

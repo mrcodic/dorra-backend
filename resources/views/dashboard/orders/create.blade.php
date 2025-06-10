@@ -37,6 +37,7 @@
     <!-- Step 2 -->
     @include('dashboard.orders.steps.step2')
 
+
     <!-- Step 3 -->
     @include('dashboard.orders.steps.step3')
     <!-- Step 4 -->
@@ -44,6 +45,8 @@
     <!-- Step 5 -->
     @include('dashboard.orders.steps.step5')
 
+    <!-- Step 6 -->
+    @include('dashboard.orders.steps.step6')
     <!-- Step 7 -->
     @include('dashboard.orders.steps.step7')
     <!-- Step 8 -->

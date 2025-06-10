@@ -51,7 +51,8 @@
 
     <div class="d-flex justify-content-end mt-2">
         <button class="btn btn-outline-secondary me-1" id="back-step-1">Back</button>
-        <button class="btn btn-primary" id="next-step-2" data-next-step>Next</button>
+        <button class="btn btn-primary fs-5" id="next-step-2" data-next-step disabled>Next</button>
+
     </div>
 </div>
 
@@ -59,8 +60,15 @@
     let selectedCategory = null;
     let selectedTags = [];
     let selectedProductId = null;
+    function updateProductNextButtonState() {
+        $('#next-step-2').prop('disabled', !selectedProductId);
+    }
+    $('#product-search').on('input', function () {
+        selectedProductId = null;
+        updateProductNextButtonState(); // ← Add this
+        filterProducts();
+    });
 
-    $('#product-search').on('input', filterProducts);
     $('#product-search').on('click', () => $('#product-filters-wrapper').slideDown());
 
     $(document).on('click', '.category-pill', function () {
@@ -97,6 +105,7 @@
 
         // Hide warning when product is selected
         $('#product-warning').hide();
+        updateProductNextButtonState();
     });
 
     function filterProducts() {
@@ -121,12 +130,19 @@
         $('#step-1').show();
     });
 
-    $('#next-step-2').on('click', function () {
+    // Update the next-step-2 click handler
+    $('#next-step-2').on('click', function() {
         if (!selectedProductId) {
             $('#product-warning').show();
             return;
         }
 
+        // Show loading state
+        $('#step-3').html('<div class="d-flex justify-content-center align-items-center" style="min-height: 300px;"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+        $('#step-2').hide();
+        $('#step-3').show();
+
+        // First save the product selection
         $.ajax({
             url: '{{ route("orders.step2") }}',
             method: 'POST',
@@ -136,14 +152,39 @@
             data: {
                 product_id: selectedProductId
             },
-            success: function (response) {
-                console.log('Product submitted successfully:', response);
-                // Hide step 2, show next step here
+            success: function(response) {
+                // Then load templates
+                $.ajax({
+                    url: '{{ route("templates.products") }}',
+                    method: 'GET',
+                    data: { product_id: selectedProductId }, // Pass the product ID
+                    success: function(html) {
+                        $('#step-3').html(html);
+                        // Initialize Feather Icons for newly loaded content
+                        if (feather) {
+                            feather.replace();
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error loading templates:', xhr.responseText);
+                        $('#step-3').html('<div class="alert alert-danger">Error loading templates</div>');
+                    }
+                });
             },
-            error: function (xhr) {
+            error: function(xhr) {
                 console.error('Error:', xhr.responseJSON);
+                $('#step-3').html('<div class="alert alert-danger">Error saving product selection</div>');
             }
         });
     });
+
+    // Handle back button in step 3
+    $(document).on('click', '[data-prev-step]', function() {
+        $('#step-3').hide();
+        $('#step-2').show();
+    });
+
+    // Handle next button in step 3 (if needed)
+
 
 </script>

@@ -1,49 +1,78 @@
-<div id="" class="step" style="display: none;">
-    <h5 class="mb-2 fs-3 text-black">Order Details</h5>
-    <div class="mb-3 " id="discount-code-row" >
-        <div class="input-group">
-            <input type="text" class="form-control" name="discount_code" placeholder="Enter discount code">
-            <button class="btn btn-secondary" type="button">Apply</button>
+@php
+    $templates = $templates ?? collect();
+@endphp
+
+<div id="step-3" class="step">
+
+    @forelse ($templates as $template)
+        <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row"  data-template-id="{{ $template->id }}">
+            <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
+                <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
+                        src="{{  $template->getFirstMediaUrl('templates') ?: asset("images/default-photo.png") }}"
+                        class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
+                </div> <!-- Template Info -->
+                <div class="card-body text-start p-2">
+                    <div>
+                        <h6 class="fw-bold mb-1 text-black fs-3"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->getTranslation('name', app()->getLocale()) }}
+                        </h6>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="text-16">Dimensions: <span class="text-black">{{ $template->height_mm }} × {{ $template->width_mm }} mm</span>
+                            </div>
+
+                            <span class="badge text-light p-75 px-2 template-status-label" style="background-color: #222245">
+                           {{ $template->type->label() }}
+                    </span>
+                        </div>
+                        <p class="fs-4 mb-1"
+                           style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->product->getTranslation('name', app()->getLocale()) }} </p>
+                    </div> <!-- Tags -->
+                    <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
+                         style="min-height: 44px;"> @foreach($template->product->tags as $tag)
+                            <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
+                                  style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
+                        @endforeach </div> <!-- Palette and Status -->
+
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="d-flex" style="gap: 5px;">
+                            <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #FF5733;"></div>
+                            <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #33B5FF;"></div>
+                            <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #9B59B6;"></div>
+                        </div>
+                        <span class="badge text-dark p-75 px-2 template-status-label"
+                              data-template-id="{{ $template->id }}"
+                              style="background-color: #CED5D4">
+                        {{ $template->status->label() }}
+                    </span>
+                    </div>
+                    <a class="btn btn-primary w-100"
+                       href="{{ config("editor_url")."templates/{$template->id}/users/".Cache::get(getOrderStepCacheKey())["user_id"] }}">
+                        Customize Template
+                    </a>
+                </div>
+            </div>
         </div>
-    </div>
+    @empty
+        <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"
+             style="min-height:65vh;">
+            <!-- Empty Image -->
+            <img src="{{ asset('images/Empty.png') }}" alt="No Templates" style="max-width: 200px;" class="mb-2">
 
+            <!-- Empty Message -->
+            <p class="mb-2 text-secondary">this product doesn’t have any live templates.</p>
 
-
-    <!-- Pricing Summary -->
-    <h5 class="mt-3 mb-1 text-black fs-16">Pricing Details</h5>
-    <div class="d-flex justify-content-between mb-1">
-        <span class="text-dark fs-16 fw-bold">Subtotal</span>
-        <span class="fs-4 text-black fw-bold">$65.00</span>
-    </div>
-    <div class="d-flex justify-content-between mb-1">
-        <span class="text-dark fs-16 fw-bold">Discount</span>
-        <span class="fs-16 text-black">-$5.00</span>
-    </div>
-    <div class="d-flex justify-content-between mb-1">
-        <span class="text-dark fs-16 fw-bold">
-            Delivery
-            <i data-feather="info" data-bs-toggle="tooltip" title="Delivery charges may vary based on location."></i>
-        </span>
-        <span class="fs-16 text-black">$5.00</span>
-    </div>
-    <div class="d-flex justify-content-between mb-1">
-        <span class="text-dark fs-16 fw-bold">
-            Tax
-            <i data-feather="info" data-bs-toggle="tooltip" title="Tax is calculated as per applicable laws."></i>
-        </span>
-        <span class="fs-16 text-black">$3.00</span>
-    </div>
-
-    <hr class="border-dashed my-1">
-
-    <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
-        <span class="fs-4 text-black ">Total</span>
-        <span class="fs-4 text-black fw-bold">$68.00</span>
-    </div>
-
-
+        </div>
+    @endforelse
     <div class="d-flex justify-content-end mt-2">
         <button class="btn btn-outline-secondary me-1" data-prev-step>Back</button>
-        <button class="btn btn-primary" data-next-step>Next</button>
+        <button class="btn btn-primary" id="nextStep3" data-next-step>Next</button>
     </div>
 </div>
+
+<script !src="">
+    $(document).on('click', '#nextStep3', function() {
+        $('#step-3').hide();
+        $('#step-4').show();
+
+    });
+</script>

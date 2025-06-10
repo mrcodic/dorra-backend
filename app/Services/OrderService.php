@@ -25,13 +25,13 @@ class OrderService extends BaseService
         Cache::put($cacheKey, $merged, now()->addHours(1));
     }
 
-    public function storeStep1($request)
+    public function storeStep1($request): void
     {
         $request->validate(["user_id" => ["required","exists:users,id"]]);
         $this->storeStepData($request->only("user_id"));
 
     }
-    public function storeStep2($request)
+    public function storeStep2($request): void
     {
         $request->validate(["product_id" => ["required","exists:products,id"]]);
         $this->storeStepData($request->only("product_id"));

@@ -8,11 +8,11 @@
         <div class="mb-2 p-1 rounded" style="background-color: #F9FDFC;">
             <h4 class="fw-bold mb-2 text-black">Personal Information</h4>
             <p class="my-1"><span class="fs-4 text-dark">Name:</span> <span id="confirm-customer-name"
-                    class="fs-16 text-black">John Doe</span></p>
+                                                                            class="fs-16 text-black">John Doe</span></p>
             <p class="my-1"><span class="fs-4 text-dark">Email:</span> <span id="confirm-customer-email"
-                    class="fs-16 text-black">john@example.com</span></p>
+                                                                             class="fs-16 text-black">john@example.com</span></p>
             <p class="my-1"><span class="fs-4 text-dark">Phone Number:</span> <span id="confirm-customer-email"
-                    class="fs-16 text-black">+20 0123 1234 5678</span></p>
+                                                                                    class="fs-16 text-black">+20 0123 1234 5678</span></p>
         </div>
 
         <!-- Section: Shipping Information -->
@@ -21,7 +21,7 @@
             <p class="my-1"><span class="fs-4 text-dark">Estimated Delivery Time:</span> <span
                     id="confirm-customer-email" class="fs-16 text-black">Monday, 23 Sep 2024</span></p>
             <p class="my-1"><span class="fs-4 text-dark">Shipping Address:</span> <span id="confirm-customer-email"
-                    class="fs-16 text-black">15 street name, neighborhood, Cairo, Egypt</span></p>
+                                                                                        class="fs-16 text-black">15 street name, neighborhood, Cairo, Egypt</span></p>
             <div class="my-1 d-flex align-items-start">
                 <p class="fs-4 text-dark" style="width:30%;">Delivery Instructions:</p>
                 <p id="confirm-customer-email" class="fs-16 text-black">Lorem ipsum dolor sit amet, consectetur
@@ -36,7 +36,7 @@
                 <div class="d-flex align-items-start justify-content-between">
                     <div class="d-flex">
                         <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-2 rounded" alt="Product"
-                            style="width: 60px; height: 60px;">
+                             style="width: 60px; height: 60px;">
                         <div>
                             <div class="fw-bold text-black fs-16">Product Name 1</div>
                             <div class="text-dark fs-5">Qty: 2</div>
@@ -65,7 +65,7 @@
                 <span class="text-dark fs-16 fw-bold">
                     Delivery
                     <i data-feather="info" data-bs-toggle="tooltip"
-                        title="Delivery charges may vary based on location."></i>
+                       title="Delivery charges may vary based on location."></i>
                 </span>
                 <span class="fs-16 text-black">$5.00</span>
             </div>
@@ -73,7 +73,7 @@
                 <span class="text-dark fs-16 fw-bold">
                     Tax
                     <i data-feather="info" data-bs-toggle="tooltip"
-                        title="Tax is calculated as per applicable laws."></i>
+                       title="Tax is calculated as per applicable laws."></i>
                 </span>
                 <span class="fs-16 text-black">$3.00</span>
             </div>

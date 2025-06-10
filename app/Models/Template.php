@@ -7,6 +7,7 @@ use App\Enums\Template\TypeEnum;
 use App\Enums\Template\UnitEnum;
 use App\Observers\TemplateObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -47,7 +48,6 @@ class Template extends Model implements HasMedia
     ];
 
 
-
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -68,17 +68,20 @@ class Template extends Model implements HasMedia
     {
         return $this->unit === UnitEnum::INCH
             ? round($this->width * 25.4, 2)
-            : $this->width ;
+            : $this->width;
     }
 
     public function getHeightMmAttribute()
     {
         return $this->unit === UnitEnum::INCH
             ? round($this->height * 25.4, 2)
-            : $this->height ;
+            : $this->height;
     }
 
-
+    public function scopeLive(Builder $builder): Builder
+    {
+        return $builder->where('status', StatusEnum::LIVE);
+    }
 
 
 }
