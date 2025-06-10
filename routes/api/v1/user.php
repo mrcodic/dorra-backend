@@ -81,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
 
-Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update']);
+Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update','destroy']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 Route::get('template-types', [MainController::class,'templateTypes'])->name('template-types');

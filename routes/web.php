@@ -184,7 +184,7 @@ Route::middleware('auth')->group(function () {
 
         });
 
-        Route::apiResource('/v1/templates', TemplateController::class)->only(['store', 'show', 'update']);
+        Route::apiResource('/v1/templates', TemplateController::class)->only(['store', 'show', 'update','destroy']);
         Route::get('/v1/templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
         Route::get('/v1/template-customizations', [TemplateController::class, 'templateCustomizations'])->name("templates.customizations");
         Route::apiResource('/v1/library-assets', LibraryAssetController::class)->only(['store', 'index']);
