@@ -127,7 +127,7 @@ class TemplateService extends BaseService
                     $q->whereIn('tags.id', $tags);
                 });
             })
-            ->when($recent || $recent !== null, function ($query) {
+            ->when($recent == true || request()->isNotFilled("recent"), function ($query) use ($recent) {
                 $query->whereNotNull('updated_at')
                     ->orderByDesc('updated_at');
             }, function ($query) {
@@ -139,9 +139,7 @@ class TemplateService extends BaseService
 
 //    public function templateCustomizations($validatedData)
 //    {
-//        $data = [
 //
-//        ];
 //        Cache::put("order_step_data_{$validatedData["user_id"]}",)
 //    }
 

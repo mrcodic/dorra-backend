@@ -70,7 +70,6 @@
                     class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
             </div> <!-- Template Info -->
             <div class="card-body text-start p-2">
-                @dump($template->name)
                 <div>
                     <h6 class="fw-bold mb-1 text-black fs-3"
                         style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->getTranslation('name', app()->getLocale()) }}
