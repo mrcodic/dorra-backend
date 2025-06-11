@@ -47,10 +47,9 @@ class OrderService extends BaseService
 
     }
 
-    public function storeStep4(): void
+    public function storeStep4($request): void
     {
-        $this->storeStepData();
-
+        $this->storeStepData(["pricing_details"=> $request->all()]);
     }
 
     public function templateCustomizations($request)

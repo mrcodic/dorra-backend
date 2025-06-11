@@ -5,7 +5,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:3000','https://app.dorraprint.com'], // or whatever your frontend URL is
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 

@@ -44,7 +44,7 @@
             Tax
             <i data-feather="info" data-bs-toggle="tooltip" title="Tax is calculated as per applicable laws."></i>
         </span>
-        <span class="fs-16 text-black">0.1</span>
+        <span class="fs-16 text-black">(10%) {{ $orderData['pricing_details']["sub_total"] * 0.1 }}</span>
     </div>
 
     <hr class="border-dashed my-1">
@@ -93,6 +93,30 @@
                     } else {
                         $('#discount-code-error').text('An error occurred. Please try again.').show();
                     }
+                }
+            });
+        });
+
+        $('[data-next-step]').on('click', function () {
+            const orderData = {
+                subtotal: parseFloat("{{ $subtotal }}"),
+                tax: parseFloat("{{ $orderData['pricing_details']['sub_total'] * 0.1 }}"),
+                delivery: 30,
+                discount: parseFloat($('#discount-amount').text().replace('-', '')) || 0,
+                total: parseFloat($('#total').text())
+            };
+
+            $.ajax({
+                url: "{{ route('orders.step4') }}",
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    pricing: orderData
+                },
+                success: function (response) {
+                },
+                error: function (xhr) {
+                    alert('Failed to proceed. Please try again.');
                 }
             });
         });

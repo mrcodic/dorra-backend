@@ -38,7 +38,7 @@ class ProductController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-        'show' => ['category', 'tags', 'reviews.user','media'],
+        'show' => ['category', 'tags', 'reviews.user','media','specifications.options.media'],
         'edit' => ['category', 'tags', 'reviews','media', 'specifications.options'],
     ];
 
