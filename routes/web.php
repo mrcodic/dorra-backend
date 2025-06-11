@@ -21,7 +21,8 @@ use App\Http\Controllers\Dashboard\{AdminController,
     DiscountCodeController,
     SettingController,
     OfferController,
-    LogisticController};
+    LogisticController
+};
 use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -119,9 +120,9 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/offers', OfferController::class)->except('show');
 
-     Route::group(['prefix' => 'logistics', 'as' => 'logistics.', 'controller' => LogisticController::class,], function () {
+    Route::group(['prefix' => 'logistics', 'as' => 'logistics.', 'controller' => LogisticController::class,], function () {
         Route::get('/data', [LogisticController::class, 'getData'])->name('data');
-         Route::get('/dashboard', [LogisticController::class, 'dashboard'])->name('data');
+        Route::get('/dashboard', [LogisticController::class, 'dashboard'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/logistics', LogisticController::class)->except('show');
@@ -138,9 +139,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [TemplateController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
-    Route::post('/store-templates', [TemplateController::class,'storeAndRedirect'])->name('templates.redirect.store');
+    Route::post('/store-templates', [TemplateController::class, 'storeAndRedirect'])->name('templates.redirect.store');
 
-    Route::put('/product-templates/change-status/{id}', [TemplateController::class,'changeStatus'])->name("product-templates.change-status");
+    Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status");
     Route::resource('/product-templates', TemplateController::class);
 
 
@@ -155,11 +156,14 @@ Route::middleware('auth')->group(function () {
     Route::controller(SettingController::class)->group(function () {
         Route::get('settings/details', 'details')->name('settings.details');
         Route::get('settings/payments', 'payments')->name('settings.payments');
-          Route::get('settings/notifications', 'notifications')->name('settings.notifications');
+        Route::get('settings/notifications', 'notifications')->name('settings.notifications');
     });
 
 
-    Route::prefix('/api')->group(function () {
+
+
+
+    Route::prefix('api/v1/')->group(function () {
 
         Route::controller(ReviewController::class)->group(function () {
             Route::delete('reviews/{review}', 'deleteReview')->name('reviews.destroy');
@@ -173,26 +177,31 @@ Route::middleware('auth')->group(function () {
             Route::get('template-types', 'templateTypes')->name('template-types');
             Route::get('tags', 'tags')->name('tags');
             Route::get('units', 'units')->name('units');
-            Route::delete('/media/{media}', 'removeMedia')->name('remove-media');
-            Route::post('/media/{resource}', 'addMedia')->name('add-media');
-            Route::get('/v1/admin-check', 'adminCheck')->name('admin-check');
+            Route::delete('media/{media}', 'removeMedia')->name('remove-media');
+            Route::post('media/{resource}', 'addMedia')->name('add-media');
+            Route::get('admin-check', 'adminCheck')->name('admin-check');
         });
 
         Route::prefix("orders/")->controller(OrderController::class)->as("orders.")->group(function () {
             Route::post("step1", 'storeStep1')->name('step1');
             Route::post("step2", 'storeStep2')->name('step2');
+            Route::post("template-customizations", 'templateCustomizations')->name('template.customizations');
+            Route::post("apply-discount-code", 'applyDiscountCode')->name('apply-discount-code');
+            Route::post("step4", 'storeStep4')->name('step4');
+
 
         });
 
-        Route::apiResource('/v1/templates', TemplateController::class)->only(['store', 'show', 'update','destroy']);
-        Route::get('/v1/templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
-        Route::get('/v1/template-customizations', [TemplateController::class, 'templateCustomizations'])->name("templates.customizations");
-        Route::apiResource('/v1/library-assets', LibraryAssetController::class)->only(['store', 'index']);
+        Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);
+        Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
+        Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 
-        Route::resource('/shipping-addresses', ShippingAddressController::class)->only(['store', 'update','destroy']);
+        Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 
-        Route::post('product-specifications',ProductSpecificationController::class)->name('products.specifications.create');
-        Route::get('product-specifications/{product}',[ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
+        Route::resource('shipping-addresses', ShippingAddressController::class)->only(['store', 'update', 'destroy']);
+
+        Route::post('product-specifications', ProductSpecificationController::class)->name('products.specifications.create');
+        Route::get('product-specifications/{product}', [ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
 
     });
 

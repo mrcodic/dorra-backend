@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Enums\HttpEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
+use App\Http\Resources\MediaResource;
 use App\Http\Resources\TemplateResource;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
@@ -111,16 +112,17 @@ class TemplateController extends DashboardController
 
     }
 
-    public function templateCustomizations(Request $request)
-    {
-        $templates = $this->templateService->templateCustomizations($request->validated());
-        return Response::api(data: TemplateResource::collection($templates));
-
-    }
     public function changeStatus(Request $request, $id)
     {
         $request->validate(['status' => 'required','in:'.StatusEnum::getValuesAsString()]);
        $template =  $this->templateService->updateResource(['status'=> $request->status],$id);
         return Response::api(data: TemplateResource::make($template));
+    }
+
+    public function templateAssets()
+    {
+        $media = $this->templateService->templateAssets();
+        return Response::api(data: MediaResource::collection($media));
+
     }
 }

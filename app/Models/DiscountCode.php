@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Enums\DiscountCode\ScopeEnum;
 use App\Enums\DiscountCode\TypeEnum;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 
 class DiscountCode extends Model
 {
-    protected $fillable =[
+    protected $fillable = [
         'code',
         'type',
         'value',
@@ -23,17 +24,9 @@ class DiscountCode extends Model
     protected static function booted()
     {
         static::creating(function ($discountCode) {
-            $discountCode->code = $discountCode->code.Str::random(16);
+            $discountCode->code = $discountCode->code . Str::random();
         });
         parent::booted();
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'type' => TypeEnum::class,
-            'scope' => ScopeEnum::class,
-        ];
     }
 
     public function products(): MorphToMany
@@ -44,5 +37,23 @@ class DiscountCode extends Model
     public function categories(): MorphToMany
     {
         return $this->morphedByMany(Category::class, 'discountable');
+    }
+
+    public function value(): Attribute
+    {
+        return Attribute::get(function ($value) {
+            if ($this->type == TypeEnum::PERCENTAGE) {
+                return $value / 100;
+            }
+            return $value;
+        });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'type' => TypeEnum::class,
+            'scope' => ScopeEnum::class,
+        ];
     }
 }

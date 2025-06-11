@@ -62,17 +62,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('bulk-delete-saved', 'destroyBulk');
     });
 
-
-    Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
-
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
     Route::get('sub-categories', [MainController::class, 'subCategories']);
 
     Route::get('states', [MainController::class, 'states']);
     Route::get('countries', [MainController::class, 'countries']);
-//    Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
-//    Route::apiResource('/designs', DesignController::class)->except(['destroy']);
-//    Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
+
 
 });
 
@@ -88,3 +83,5 @@ Route::get('template-types', [MainController::class,'templateTypes'])->name('tem
 Route::get('tags', [MainController::class,'tags'])->name('tags');
 Route::get('units', [MainController::class,'units'])->name('units');
 Route::delete('/media/{media}', [MainController::class,'removeMedia'])->name('remove-media');
+Route::post("orders/template-customizations", [\App\Http\Controllers\Dashboard\OrderController::class,'templateCustomizations'])->name('template.customizations');
+Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
