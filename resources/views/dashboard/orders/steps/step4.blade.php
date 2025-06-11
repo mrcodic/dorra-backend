@@ -99,7 +99,7 @@
 
         $('[data-next-step]').on('click', function () {
             const orderData = {
-                subtotal: parseFloat("{{ $subtotal }}"),
+                sub_total: parseFloat("{{ $subtotal }}"),
                 tax: parseFloat("{{ $orderData['pricing_details']['sub_total'] * 0.1 }}"),
                 delivery: 30,
                 discount: parseFloat($('#discount-amount').text().replace('-', '')) || 0,
@@ -111,7 +111,7 @@
                 method: 'POST',
                 data: {
                     _token: "{{ csrf_token() }}",
-                    pricing: orderData
+                    orderData
                 },
                 success: function (response) {
                 },

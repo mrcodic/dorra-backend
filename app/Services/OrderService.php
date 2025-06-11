@@ -49,7 +49,8 @@ class OrderService extends BaseService
 
     public function storeStep4($request): void
     {
-        $this->storeStepData(["pricing_details"=> $request->all()]);
+//        dd(...["pricing_details"=> $request->all()['orderData']]);
+         $this->storeStepData(["pricing_details"=> $request->all()['orderData']]);
     }
 
     public function templateCustomizations($request)
