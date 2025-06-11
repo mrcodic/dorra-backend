@@ -2,11 +2,15 @@
 
 namespace App\Services;
 
+use App\Http\Resources\MediaResource;
 use App\Jobs\ProcessBase64Image;
 use App\Jobs\RenderFabricJsonToPngJob;
+use App\Models\Admin;
+use App\Models\Template;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TemplateService extends BaseService
@@ -138,9 +142,18 @@ class TemplateService extends BaseService
     public function templateAssets()
     {
         return Media::query()
-            ->whereCollectionName("templates")
+//            ->whereMorphedTo('model',auth($this->activeGuard)->user())
+            ->whereCollectionName("template_assets")
             ->latest()
             ->get();
+    }
+
+    public function storeTemplateAssets($request)
+    {
+        $validated = $request->validate(["file" => "required|file|mimes:svg"]);
+        return handleMediaUploads($validated['file'],Admin::find(1),"template_assets");
+//        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user(),"template_assets");
+
     }
 
 

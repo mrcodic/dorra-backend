@@ -85,3 +85,4 @@ Route::get('units', [MainController::class,'units'])->name('units');
 Route::delete('/media/{media}', [MainController::class,'removeMedia'])->name('remove-media');
 Route::post("orders/template-customizations", [\App\Http\Controllers\Dashboard\OrderController::class,'templateCustomizations'])->name('template.customizations');
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
+Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");

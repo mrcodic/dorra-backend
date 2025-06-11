@@ -125,4 +125,11 @@ class TemplateController extends DashboardController
         return Response::api(data: MediaResource::collection($media));
 
     }
+
+    public function storeTemplateAssets(Request $request)
+    {
+        $media = $this->templateService->storeTemplateAssets($request);
+        return Response::api(data: MediaResource::make($media));
+
+    }
 }

@@ -195,6 +195,7 @@ Route::middleware('auth')->group(function () {
         Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);
         Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
         Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
+        Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
 
         Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 
