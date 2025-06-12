@@ -41,9 +41,9 @@ class StoreOrderRequest extends BaseRequest
             'product_name' => 'required|string|max:255',
 
             // Template Info
-            'template_info' => 'required|array',
-            'template_info.id' => 'required|string',
-            'template_info.template_image' => 'nullable|string',
+            'design_info' => 'required|array',
+            'design_info.id' => 'required|string',
+            'design_info.design_image' => 'nullable|string',
 
             // Personal Info
             'personal_info' => 'required|array',
