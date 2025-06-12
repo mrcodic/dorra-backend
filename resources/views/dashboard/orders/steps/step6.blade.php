@@ -9,7 +9,8 @@
             <label class="form-label fw-bold fs-5 mb-2">Shipping Method</label>
             <div class="d-flex gap-2 ">
                 <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                    <input class="form-check-input" type="radio" name="shipping_method" id="shipToCustomer" value="ship" checked>
+                    <input class="form-check-input" type="radio" name="shipping_method" id="shipToCustomer" value="ship"
+                           checked>
                     <label class="form-check-label fs-4 text-black" for="shipToCustomer">
                         Ship to customer
                     </label>
@@ -26,57 +27,34 @@
         <!-- Ship to Customer Section -->
         <div id="shipSection">
             <!-- Existing Addresses -->
-            <div class="d-flex gap-2 ">
-                <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                    <input class="form-check-input" type="radio" name="address_id" id="address1" value="1">
-                    <label class="form-check-label fs-4 text-black" for="shipToCustomer">
-
-                        <p>Home</p>
-                        <p class="text-dark fs-16">15 street name, neighborhood</p>
-                    </label>
-                </div>
-                <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                    <input class="form-check-input" type="radio" name="address_id" id="address2" value="2">
-                    <label class="form-check-label fs-4 text-black" for="pickUp">
-                        <p>Office</p>
-                        <p class="text-dark fs-16">15 street name, neighborhood</p>
-                    </label>
-                </div>
+            <div class="d-flex gap-2">
+                @if(!empty($orderData["user_info"]["id"]))
+                    @foreach(\App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->get() as $shippingAddress)
+                        <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
+                            <input class="form-check-input" type="radio" name="shipping_id" id="address{{ $shippingAddress->id }}"
+                                   value="{{ $shippingAddress->id }}">
+                            <label class="form-check-label fs-4 text-black" for="address{{ $shippingAddress->id }}">
+                                <p>{{ $shippingAddress->label }}</p>
+                                <p class="text-dark fs-16">{{ $shippingAddress->line }}</p>
+                            </label>
+                        </div>
+                    @endforeach
+                @else
+                    <div class="col-12 text-center py-3">
+                        <p class="text-muted">No saved addresses found</p>
+                    </div>
+                @endif
             </div>
 
             <!-- Divider -->
-            <div class="text-center my-3 fw-bold">OR</div>
+            @if(!empty($orderData["user_info"]["id"]) && \App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->count() > 0)
+                <div class="text-center my-3 fw-bold">OR</div>
+            @endif
 
             <!-- Add New Address -->
-            <div class="">
-                <h5 class="mb-2 text-black fs-4">Add new address</h5>
-                <div class="mb-2">
-                    <label class="form-label ">Address Label</label>
-                    <select class="form-select">
-                        <option>Home</option>
-                        <option>Work</option>
-                        <option>Other</option>
-                    </select>
-                </div>
-                <div class="row g-2 mb-2">
-                    <div class="col">
-                        <label class="form-label ">Country</label>
-                        <input type="text" class="form-control">
-                    </div>
-                    <div class="col">
-                        <label class="form-label ">State</label>
-                        <input type="text" class="form-control">
-                    </div>
-                </div>
-                <div class="mb-2">
-                    <label class="form-label">Address Line</label>
-                    <input type="text" class="form-control">
-                </div>
-                <div class="mb-2">
-                    <label class="form-label">Delivery Instructions</label>
-                    <textarea class="form-control" rows="2"></textarea>
-                </div>
-            </div>
+            <button class="upload-card p-1 w-100 bg-white mt-2" data-bs-toggle="modal" data-bs-target="#addNewAddressModal">
+                <i data-feather="plus"></i>Add New Address
+            </button>
         </div>
 
         <!-- Pick Up Section -->
@@ -84,9 +62,11 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="w-50 fs-4 text-black">
                     To proceed to checkout, choose a pick up location.
-                    This will help us deliver your order to the preferred  location.
+                    This will help us deliver your order to the preferred location.
                 </div>
-                <button type="button" class="btn btn-outline-secondary fs-16"  data-bs-toggle="modal" data-bs-target="#selectLocationModal"> <i data-feather="map-pin"></i> Select pick up location</button>
+                <button type="button" class="btn btn-outline-secondary fs-16" data-bs-toggle="modal"
+                        data-bs-target="#selectLocationModal"><i data-feather="map-pin"></i> Select pick up location
+                </button>
             </div>
 
 
@@ -132,18 +112,19 @@
     </div>
 
 
-
     <div class="d-flex justify-content-end mt-2">
         <button class="btn btn-outline-secondary me-1" data-prev-step>Back</button>
-        <button class="btn btn-primary" data-next-step>Next</button>
+        <button class="btn btn-primary" id="nextStep6" data-next-step>Next</button>
     </div>
 
     @include('modals/select-location')
+    @include('modals.addresses.add-new-address',['countries' => $associatedData['countries'],'modelId'=>$orderData["user_info"]["id"] ?? 0])
+
 </div>
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         feather.replace();
         const shipRadio = document.getElementById("shipToCustomer");
         const pickupRadio = document.getElementById("pickUp");
@@ -167,7 +148,7 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         const shipRadio = document.getElementById("shipToCustomer");
         const pickupRadio = document.getElementById("pickUp");
         const shipSection = document.getElementById("shipSection");
@@ -196,13 +177,13 @@
         pickupRadio.addEventListener("change", toggleSections);
         toggleSections();
 
-        changeLocationBtn.addEventListener("click", function() {
+        changeLocationBtn.addEventListener("click", function () {
             pickupSection.style.display = "none";
             changeLocationSection.style.display = "block";
             shippingMethodSection.style.display = "none";
         });
 
-        backToPickupBtn.addEventListener("click", function() {
+        backToPickupBtn.addEventListener("click", function () {
             changeLocationSection.style.display = "none";
             pickupSection.style.display = "block";
             shippingMethodSection.style.display = "block";
@@ -211,4 +192,66 @@
         // Initialize feather icons
         feather.replace();
     });
+</script>
+
+<script !src="">
+    $('#nextStep6').click(function(e) {
+        e.preventDefault();
+
+        // Get the selected shipping method
+        const shippingMethod = $('input[name="shipping_method"]:checked').val();
+
+        // Prepare data to send
+        const data = {
+            shipping_method: shippingMethod,
+            _token: '{{ csrf_token() }}' // CSRF token for Laravel
+        };
+
+        // If shipping method is "ship", get the selected shipping address ID
+        if (shippingMethod === 'ship') {
+            const shippingId = $('input[name="shipping_id"]:checked').val();
+            if (!shippingId) {
+                alert('Please select a shipping address');
+                return;
+            }
+            data.shipping_id = shippingId;
+        } else if (shippingMethod === 'pickup') {
+            // For pickup, collect pickup location and person details
+            data.pickup_first_name = $('#pickup_first_name').val();
+            data.pickup_last_name = $('#pickup_last_name').val();
+            data.pickup_email = $('#pickup_email').val();
+            data.pickup_phone = $('#pickup_phone').val();
+            data.pickup_location_id = $('#pickup_location_id').val();
+        }
+
+        // Show loading indicator if needed
+        $(this).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+
+        // Send AJAX request
+        $.ajax({
+            url: "{{ route('orders.step6') }}",
+            type: "POST",
+            data: data,
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    // Proceed to next step
+                    // Example: go to next step in your wizard
+                    $('#step-6').hide();
+                    $('#step-7').show();
+                } else {
+                    alert('Error: ' + (response.message || 'Failed to save shipping information'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('An error occurred while saving shipping information');
+            },
+            complete: function() {
+                // Re-enable button
+                $('[data-next-step]').prop('disabled', false).text('Next');
+            }
+        });
+    });
+
 </script>

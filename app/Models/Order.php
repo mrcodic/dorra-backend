@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Order\StatusEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,6 +22,9 @@ class Order extends Model
         'status',
     ];
 
+    protected $casts = [
+        'status' => StatusEnum::class,
+    ];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

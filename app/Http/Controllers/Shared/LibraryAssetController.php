@@ -23,6 +23,7 @@ class LibraryAssetController extends Controller
    {
        $media = Media::query()->whereMorphedTo('model',auth($this->activeGuard)->user())
            ->whereCollectionName("{$this->activeGuard}_assets")
+           ->latest()
            ->get();
        return Response::api(data: MediaResource::collection($media));
    }

@@ -2,15 +2,11 @@
 
 namespace App\Services;
 
-use App\Http\Resources\MediaResource;
+
 use App\Jobs\ProcessBase64Image;
-use App\Jobs\RenderFabricJsonToPngJob;
 use App\Models\Admin;
-use App\Models\Template;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TemplateService extends BaseService

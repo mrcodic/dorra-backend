@@ -274,6 +274,10 @@ return [
         'status' => [
             'in' => 'The selected status is invalid.',
         ],
+        'state_id' => [
+            "required" => "The selected state is required.",
+            "integer" => "The selected state is invalid.",
+        ]
     ],
 
 

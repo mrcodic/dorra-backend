@@ -93,6 +93,7 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'orders', 'as' => 'orders.', 'controller' => OrderController::class,], function () {
         Route::get('/data', [OrderController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::get('/pdf', 'downloadPDF')->name('pdf');
     });
     Route::resource('/orders', OrderController::class);
 
@@ -188,6 +189,8 @@ Route::middleware('auth')->group(function () {
             Route::post("template-customizations", 'templateCustomizations')->name('template.customizations');
             Route::post("apply-discount-code", 'applyDiscountCode')->name('apply-discount-code');
             Route::post("step4", 'storeStep4')->name('step4');
+            Route::post("step5", 'storeStep5')->name('step5');
+            Route::post("step6", 'storeStep6')->name('step6');
 
 
         });

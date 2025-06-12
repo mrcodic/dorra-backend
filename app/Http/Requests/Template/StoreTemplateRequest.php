@@ -28,17 +28,12 @@ class StoreTemplateRequest extends BaseRequest
     {
         return [
             'name.en' => [
-                'nullable',
+                'required',
                 'string',
                 'max:255',
             ],
-            'name' => [
-                'nullable',
-//                'string',
-                'max:255',
-            ],
             'name.ar' => [
-                'nullable',
+                'required',
                 'string',
                 'max:255',
             ],

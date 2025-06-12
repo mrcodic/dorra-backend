@@ -387,7 +387,7 @@
                                 </div>
                                 </div>
                             </div>
-                            @include('modals.addresses.add-new-address',['countries' => $associatedData['countries']])
+                            @include('modals.addresses.add-new-address',['countries' => $associatedData['countries'],'modelId'=> $model->id])
 
                         </div>
                     </div>

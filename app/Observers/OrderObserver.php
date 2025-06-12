@@ -2,6 +2,8 @@
 
 namespace App\Observers;
 
+use App\Enums\Order\StatusEnum;
+use App\Models\Admin;
 use App\Models\Order;
 
 class OrderObserver
@@ -11,6 +13,10 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
+        if (request()->user() instanceof Admin)
+        {
+            $order->update(["status"=> StatusEnum::CONFIRMED]);
+        }
         $order->update(["order_number"=> "#ORD-{$order->created_at->format('d-m-Y')}-0{$order->id}"]);
     }
 

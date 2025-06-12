@@ -16,8 +16,8 @@
         Please select a product before continuing.
     </div>
 
-    <!-- Filters + Results -->
-    <div id="product-filters-wrapper" class="border shadow rounded-2 p-1 mt-2">
+    <!-- Filters + Results - Hidden by default -->
+    <div id="product-filters-wrapper" class="border shadow rounded-2 p-1 mt-2" style="display: none;">
         <h6 class="mt-1">Category</h6>
         <div class="mb-1" id="category-filters">
             @forelse($associatedData['categories'] as $category)
@@ -52,7 +52,6 @@
     <div class="d-flex justify-content-end mt-2">
         <button class="btn btn-outline-secondary me-1" id="back-step-1">Back</button>
         <button class="btn btn-primary fs-5" id="next-step-2" data-next-step disabled>Next</button>
-
     </div>
 </div>
 
@@ -60,16 +59,36 @@
     let selectedCategory = null;
     let selectedTags = [];
     let selectedProductId = null;
+
     function updateProductNextButtonState() {
         $('#next-step-2').prop('disabled', !selectedProductId);
     }
-    $('#product-search').on('input', function () {
-        selectedProductId = null;
-        updateProductNextButtonState(); // ← Add this
-        filterProducts();
+
+    // Initialize with filters hidden
+    $(document).ready(function() {
+        $('#product-filters-wrapper').hide();
     });
 
-    $('#product-search').on('click', () => $('#product-filters-wrapper').slideDown());
+    // Toggle filters when clicking search input
+    $('#product-search').on('click', function(e) {
+        e.stopPropagation();
+        $('#product-filters-wrapper').slideToggle();
+    });
+
+    // Close filters when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#product-filters-wrapper').length &&
+            !$(e.target).is('#product-search') &&
+            !$(e.target).closest('.input-group').length) {
+            $('#product-filters-wrapper').slideUp();
+        }
+    });
+
+    $('#product-search').on('input', function () {
+        selectedProductId = null;
+        updateProductNextButtonState();
+        filterProducts();
+    });
 
     $(document).on('click', '.category-pill', function () {
         const id = $(this).data('category');
@@ -102,8 +121,6 @@
         $('#product-filters-wrapper').slideUp();
         $('.product-item').removeClass('border-primary');
         $(this).addClass('border border-primary');
-
-        // Hide warning when product is selected
         $('#product-warning').hide();
         updateProductNextButtonState();
     });
@@ -130,7 +147,6 @@
         $('#step-1').show();
     });
 
-    // Update the next-step-2 click handler
     $('#next-step-2').on('click', function() {
         if (!selectedProductId) {
             $('#product-warning').show();
@@ -157,10 +173,9 @@
                 $.ajax({
                     url: '{{ route("templates.products") }}',
                     method: 'GET',
-                    data: { product_id: selectedProductId }, // Pass the product ID
+                    data: { product_id: selectedProductId },
                     success: function(html) {
                         $('#step-3').html(html);
-                        // Initialize Feather Icons for newly loaded content
                         if (feather) {
                             feather.replace();
                         }
@@ -178,13 +193,10 @@
         });
     });
 
-    // // Handle back button in step 3
     $(document).on('click', 'back-step-1', function() {
         $('#step-3').hide();
         $('#step-2').show();
     });
-
-    // Handle next button in step 3 (if needed)
 
     $(document).on('click', 'next-step-2', function() {
         $('#step-2').hide();
