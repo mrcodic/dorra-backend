@@ -14,38 +14,17 @@ class DesignObserver
     {
         DB::transaction(function () use ($design) {
             $design->refresh();
-
             $designVersion = $design->versions()->create([
                 'design_data' => $design->design_data,
                 'version'     => $design->current_version,
             ]);
 
-            // Enable query log
-            DB::enableQueryLog();
-
-            // Run the actual query
-            $firstMedia = $design->media()
-                ->where('collection_name', 'designs')
-                ->orderBy('order_column') // Optional, used internally by Spatie
-                ->first();
-
-            // Get the logged SQL queries
-            $queries = DB::getQueryLog();
-
-            // Show SQL + Bindings + Result
-            dd([
-                'sql'      => $queries[0]['query'],
-                'bindings' => $queries[0]['bindings'],
-                'result'   => $firstMedia,
-            ]);
-
+            $firstMedia = $design->getFirstMediaUrl('designs');
             if ($firstMedia) {
                 $firstMedia->copy($designVersion, 'design-versions');
             }
         });
     }
-
-
 
     /**
      * Handle the Design "updating" event.
