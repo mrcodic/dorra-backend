@@ -28,8 +28,9 @@ class StoreDesignRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'template_id' => ['required', 'exists:templates,id'],
-            'user_id' => ['required', 'exists:users,id'],
+            'template_id' => ['required_without:file', 'exists:templates,id'],
+            'user_id' => ['nullable', 'exists:users,id'],
+            'design_data' => ['required_without:template_id', 'string'],
         ];
 
     }

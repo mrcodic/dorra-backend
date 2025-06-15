@@ -17,24 +17,29 @@ class DesignService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id']], $validatedData);
-        $this->templateRepository
-            ->find($validatedData['template_id'])
-            ->getFirstMedia('templates')
-            ->copy($design, 'designs');
+        if (!empty($validatedData['template_id'])) {
+            $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id']], $validatedData);
+            $this->templateRepository
+                ->find($validatedData['template_id'])
+                ->getFirstMedia('templates')
+                ->copy($design, 'designs');
+        } else {
+            $design = $this->repository->query()->create($validatedData);
+
+            handleMediaUploads($validatedData["file"], $design);
+        }
 
         return $design->load($relationsToLoad);
     }
 
-    public function updateResource($validatedData, $id, $relationsToLoad =[])
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
         $files = request()->allFiles();
         if ($files) {
             handleMediaUploads($files, $model, clearExisting: true);
         }
-        if (isset($validatedData['base64_preview_image']))
-        {
+        if (isset($validatedData['base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
         }
         return $model->load($relationsToLoad);

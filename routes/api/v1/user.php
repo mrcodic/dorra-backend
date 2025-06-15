@@ -16,10 +16,11 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\UserNotificationTypeController,
     SaveController,
     ShippingAddress\ShippingAddressController,
-  };
+};
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
+
 
 Route::get('country-codes', [MainController::class, 'countryCodes']);
 
@@ -34,13 +35,18 @@ Route::prefix('password')->group(function () {
     Route::post('reset', ResetPasswordController::class);
 });
 
-
 Route::prefix('login')->controller(LoginController::class)->group(function () {
     Route::post('/', LoginController::class);
     Route::get('/google', 'redirectToGoogle')->middleware(EnsureFrontendRequestsAreStateful::class);
     Route::get('/google/callback', 'handleGoogleCallback')->middleware(EnsureFrontendRequestsAreStateful::class);
     Route::get('/apple/callback', 'appleCallback');
 });
+
+Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
+Route::apiResource('/designs', DesignController::class)->except(['destroy']);
+Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -56,13 +62,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
-    Route::apiResource('products', ProductController::class)->only(['index', 'show']);
     Route::controller(SaveController::class)->group(function () {
         Route::post('toggle-save', 'toggleSave');
         Route::delete('bulk-delete-saved', 'destroyBulk');
     });
 
-    Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
     Route::get('sub-categories', [MainController::class, 'subCategories']);
 
     Route::get('states', [MainController::class, 'states']);
@@ -72,17 +76,12 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-
-Route::apiResource('/designs', DesignController::class)->except(['destroy']);
-Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
-
-Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update','destroy']);
-Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
+Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
-Route::get('template-types', [MainController::class,'templateTypes'])->name('template-types');
-Route::get('tags', [MainController::class,'tags'])->name('tags');
-Route::get('units', [MainController::class,'units'])->name('units');
-Route::delete('/media/{media}', [MainController::class,'removeMedia'])->name('remove-media');
-Route::post("orders/template-customizations", [\App\Http\Controllers\Dashboard\OrderController::class,'templateCustomizations'])->name('template.customizations');
+Route::get('template-types', [MainController::class, 'templateTypes'])->name('template-types');
+Route::get('tags', [MainController::class, 'tags'])->name('tags');
+Route::get('units', [MainController::class, 'units'])->name('units');
+Route::delete('/media/{media}', [MainController::class, 'removeMedia'])->name('remove-media');
+Route::post("orders/template-customizations", [\App\Http\Controllers\Dashboard\OrderController::class, 'templateCustomizations'])->name('template.customizations');
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");

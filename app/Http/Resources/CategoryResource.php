@@ -19,7 +19,7 @@ class CategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'image' => $this->getFirstMediaUrl(),
+            'image' => $this->getFirstMediaUrl("categories"),
             'sub_categories' => CategoryResource::collection($this->whenLoaded('children')),
             'products' => ProductResource::collection($this->whenLoaded('products'))
         ];
