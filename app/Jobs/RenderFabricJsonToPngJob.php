@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 
+use App\Models\Design;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -10,7 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
-use Illuminate\Support\Facades\Storage;
+
 
 class RenderFabricJsonToPngJob implements ShouldQueue
 {
@@ -36,38 +37,43 @@ class RenderFabricJsonToPngJob implements ShouldQueue
         $tempPngPath = storage_path('app/fabric-rendered.png');
         $nodeScriptPath = base_path('fabric-renderer/renderFabric.js');
 
-        file_put_contents($jsonPath, $this->fabricJson);
+        try {
+            file_put_contents($jsonPath, $this->fabricJson);
 
-        $cmd = "node {$nodeScriptPath} {$jsonPath} {$tempPngPath}";
-        exec($cmd, $output, $returnVar);
+            $cmd = "node {$nodeScriptPath} {$jsonPath} {$tempPngPath} 2>&1";
+            exec($cmd, $output, $returnVar);
 
-        if ($returnVar !== 0) {
-            Log::error('Fabric render job failed', ['cmd' => $cmd, 'output' => $output]);
+            if ($returnVar !== 0) {
+                Log::error('Fabric render job failed', ['cmd' => $cmd, 'output' => implode("\n", $output)]);
+                throw new \Exception("Failed to render PNG from Fabric JSON");
+            }
+
+            if (!file_exists($tempPngPath)) {
+                Log::error('Rendered PNG file missing after node script', ['path' => $tempPngPath]);
+                throw new \Exception("Rendered PNG file not found");
+            }
+
+            if ($this->model->hasMedia($this->collectionName)) {
+                $this->model->clearMediaCollection($this->collectionName);
+            }
+          $firstMedia =  $this->model->addMedia($tempPngPath)
+                ->usingFileName('fabric_rendered_' . uniqid() . '.png')
+                ->toMediaCollection($this->collectionName);
+
+            if ($this->model instanceof Design) {
+                $designVersion =  $this->model->versions()->first();
+                $firstMedia->copy($designVersion, 'design-versions');
+            }
+
+        } finally {
             if (file_exists($jsonPath)) {
                 unlink($jsonPath);
             }
-            throw new \Exception("Failed to render PNG from Fabric JSON");
-        }
-
-        if (file_exists($tempPngPath)) {
-            if ($this->model->hasMedia('models')) {
-                $this->model->clearMediaCollection($this->collectionName);
+            if (file_exists($tempPngPath)) {
+                unlink($tempPngPath);
             }
-            $this->model->addMedia($tempPngPath)
-                ->usingFileName('fabric_rendered_' . uniqid() . '.png')
-                ->toMediaCollection($this->collectionName);
-        } else {
-            Log::error('Rendered PNG file missing after node script', ['path' => $tempPngPath]);
-            throw new \Exception("Rendered PNG file not found");
         }
 
-        // Cleanup temp files
-        if (file_exists($jsonPath)) {
-            unlink($jsonPath);
-        }
-        if (file_exists($tempPngPath)) {
-            unlink($tempPngPath);
-        }
     }
 
 }

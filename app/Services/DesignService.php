@@ -19,11 +19,16 @@ class DesignService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         if (!empty($validatedData['template_id'])) {
-            $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id']], $validatedData);
-            $this->templateRepository
-                ->find($validatedData['template_id'])
-                ->getFirstMedia('templates')
-                ->copy($design, 'designs');
+          $design = $this->handleTransaction(function () use ($validatedData) {
+                $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id']], $validatedData);
+               $this->templateRepository
+                   ->find($validatedData['template_id'])
+                   ->getFirstMedia('templates')
+                   ->copy($design, 'designs');
+
+                return $design;
+            });
+
         } else {
             $design = $this->repository->query()->create($validatedData);
             RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $design, 'designs');
@@ -57,7 +62,7 @@ class DesignService extends BaseService
 
                 $q->whereRaw('1 = 0');
             }
-        })->paginate();
+        })->latest()->paginate();
     }
 
     public function getDesignVersions($designId)

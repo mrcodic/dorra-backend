@@ -108,7 +108,7 @@ class TemplateController extends DashboardController
             $templates = $this->templateRepository->query()->with('product')->whereProductId($productId)->live()->get();
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
         }
-        return Response::api(data: TemplateResource::collection($templates));
+        return Response::api(data: TemplateResource::collection($templates)->response()->getData(true));
 
     }
 
@@ -122,14 +122,14 @@ class TemplateController extends DashboardController
     public function templateAssets()
     {
         $media = $this->templateService->templateAssets();
-        return Response::api(data: MediaResource::collection($media));
+        return Response::api(data: MediaResource::collection($media)->response()->getData(true));
 
     }
 
     public function storeTemplateAssets(Request $request)
     {
         $media = $this->templateService->storeTemplateAssets($request);
-        return Response::api(data: MediaResource::make($media));
+        return Response::api(data: MediaResource::make($media)->response()->getData(true));
 
     }
 }
