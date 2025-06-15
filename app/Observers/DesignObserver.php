@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Design;
-use App\Models\DesignVersion;
 use Illuminate\Support\Facades\DB;
 
 class DesignObserver
@@ -15,18 +14,38 @@ class DesignObserver
     {
         DB::transaction(function () use ($design) {
             $design->refresh();
-            $design->versions()->create([
+
+            $designVersion = $design->versions()->create([
                 'design_data' => $design->design_data,
                 'version'     => $design->current_version,
             ]);
 
+            // Enable query log
+            DB::enableQueryLog();
 
-            $firstMedia = $design->getFirstMedia('designs');
+            // Run the actual query
+            $firstMedia = $design->media()
+                ->where('collection_name', 'designs')
+                ->orderBy('order_column') // Optional, used internally by Spatie
+                ->first();
+
+            // Get the logged SQL queries
+            $queries = DB::getQueryLog();
+
+            // Show SQL + Bindings + Result
+            dd([
+                'sql'      => $queries[0]['query'],
+                'bindings' => $queries[0]['bindings'],
+                'result'   => $firstMedia,
+            ]);
+
             if ($firstMedia) {
-                $firstMedia->copy($design, 'design-versions');
+                $firstMedia->copy($designVersion, 'design-versions');
             }
         });
     }
+
+
 
     /**
      * Handle the Design "updating" event.

@@ -85,3 +85,4 @@ Route::delete('/media/{media}', [MainController::class, 'removeMedia'])->name('r
 Route::post("orders/template-customizations", [\App\Http\Controllers\Dashboard\OrderController::class, 'templateCustomizations'])->name('template.customizations');
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
+Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
