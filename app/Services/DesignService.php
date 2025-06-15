@@ -4,6 +4,7 @@ namespace App\Services;
 
 
 use App\Jobs\ProcessBase64Image;
+use App\Jobs\RenderFabricJsonToPngJob;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 
@@ -25,10 +26,8 @@ class DesignService extends BaseService
                 ->copy($design, 'designs');
         } else {
             $design = $this->repository->query()->create($validatedData);
-
-            handleMediaUploads($validatedData["file"], $design);
+            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $design, 'designs');
         }
-
         return $design->load($relationsToLoad);
     }
 

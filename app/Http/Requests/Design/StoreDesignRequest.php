@@ -28,9 +28,9 @@ class StoreDesignRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'template_id' => ['required_without:file', 'exists:templates,id'],
+            'template_id' => ['required_without:design_data', 'exists:templates,id'],
             'user_id' => ['nullable', 'exists:users,id'],
-            'design_data' => ['required_without:template_id', 'string'],
+            'design_data' => ['required_without:template_id','json'],
         ];
 
     }
@@ -56,7 +56,7 @@ class StoreDesignRequest extends BaseRequest
         $this->merge([
             'user_id' => $userId,
             'cookie_id' => $cookie,
-            'design_data' => $template?->design_data,
+            'design_data' => $template?->design_data ?? $this->input('design_data'),
         ]);
     }
     public function withValidator(Validator $validator): void
