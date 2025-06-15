@@ -64,17 +64,17 @@ class Template extends Model implements HasMedia
 
     }
 
-    public function getWidthMmAttribute()
+    public function getWidthPixelAttribute()
     {
-        return $this->unit === UnitEnum::INCH
-            ? round($this->width * 25.4, 2)
+        return $this->unit === UnitEnum::CM
+            ? round($this->width / 2.54, 2)
             : $this->width;
     }
 
-    public function getHeightMmAttribute()
+    public function getHeightPixelAttribute()
     {
-        return $this->unit === UnitEnum::INCH
-            ? round($this->height * 25.4, 2)
+        return $this->unit === UnitEnum::CM
+            ? round($this->height / 2.54, 2)
             : $this->height;
     }
 

@@ -44,7 +44,7 @@
                                                 <option value="">Select Unit</option>
                                                 @foreach(\App\Enums\Template\UnitEnum::cases() as $unit)
                                                     <option
-                                                        value="{{ $unit->value }}" @selected($unit->value == $model->unit)> {{ $unit->label() }}</option>
+                                                        value="{{ $unit->value }}" @selected($unit == $model->unit)> {{ $unit->label() }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -286,7 +286,7 @@
 
             if (productId) {
                 $.ajax({
-                    url: "{{ url('api/product-specifications') }}/" + productId,
+                    url: "{{ url('api/v1/product-specifications') }}/" + productId,
                     method: 'GET',
                     success: function (res) {
                         if (res.data && res.data.length > 0) {
