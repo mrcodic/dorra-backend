@@ -17,7 +17,6 @@ class UserService extends BaseService
     {
         $this->repository = $repository;
         parent::__construct($repository);
-
     }
 
     public function getData(): JsonResponse

@@ -3,18 +3,19 @@
 namespace App\Services;
 
 use App\Models\Product;
-use App\Repositories\Interfaces\DesignRepositoryInterface;
-use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
-use App\Repositories\Interfaces\OrderRepositoryInterface;
-use App\Repositories\Interfaces\ProductPriceRepositoryInterface;
-use App\Repositories\Interfaces\ProductRepositoryInterface;
-use App\Repositories\Interfaces\ProductSpecificationOptionRepositoryInterface;
-use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
-use App\Repositories\Interfaces\TemplateRepositoryInterface;
-use App\Repositories\Interfaces\UserRepositoryInterface;
-use App\Rules\ValidDiscountCode;
+use App\Enums\Order\StatusEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Rules\ValidDiscountCode;
 use Illuminate\Support\Facades\Cache;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
+use App\Repositories\Interfaces\DesignRepositoryInterface;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Interfaces\TemplateRepositoryInterface;
+use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
+use App\Repositories\Interfaces\ProductPriceRepositoryInterface;
+use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
+use App\Repositories\Interfaces\ProductSpecificationOptionRepositoryInterface;
 
 
 class OrderService extends BaseService
@@ -85,6 +86,7 @@ class OrderService extends BaseService
                     ->pluck("price");
             })
             ->sum();
+            
         $subTotalPrice = $productPrice->price + $specsPrices;
         $this->storeStepData(["pricing_details" => ["sub_total" => $subTotalPrice, 'quantity' => $productPrice->quantity ?? 1 ],
             "design_info" => [
@@ -116,10 +118,16 @@ class OrderService extends BaseService
         ]]);
     }
 
-    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
-    {
-        dd($validatedData);
+public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+{
+    // $order = $this->repository->create($validatedData);
+    // $order->load($relationsToLoad);
+    // $order->load($relationsToStore);
+    // return $order;
 }
+
+
+    
     public function applyDiscountCode($request)
     {
         $orderStepData = Cache::get(getOrderStepCacheKey());

@@ -34,7 +34,7 @@ class StoreAdminRequest extends BaseRequest
             'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'status' => ['required', 'boolean'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
-            'role_id' => ['required', 'integer', 'exists:roles,id'],];
+            'role_id' => ['nullable', 'integer', 'exists:roles,id'],];
 
     }
 

@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Order;
 use App\Observers\DesignObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 use Spatie\MediaLibrary\HasMedia;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 
 #[ObservedBy(DesignObserver::class)]
 class Design extends Model implements HasMedia
@@ -38,5 +39,10 @@ class Design extends Model implements HasMedia
         return $this->hasMany(DesignVersion::class);
     }
 
+
+    public function order()
+{
+    return $this->belongsTo(Order::class);
+}
 
 }
