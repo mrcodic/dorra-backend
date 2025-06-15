@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
-use App\Http\Requests\Category\{StoreOrderRequest, UpdateOrderRequest};
+use App\Http\Requests\Order\{StoreOrderRequest, UpdateOrderRequest};
 
 
 class OfferController extends DashboardController

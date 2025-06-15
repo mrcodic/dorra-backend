@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Design;
+use App\Models\OrderAddress;
 use App\Enums\Order\StatusEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,5 +30,17 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+
+    public function designs()
+    {
+        return $this->hasMany(Design::class);
+    }
+
+
+    public function OrderAddress()
+    {
+        return $this->hasMany(OrderAddress::class);
     }
 }

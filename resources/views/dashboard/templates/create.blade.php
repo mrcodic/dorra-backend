@@ -265,7 +265,7 @@
 
             if (productId) {
                 $.ajax({
-                    url: "{{ url('api/product-specifications') }}/" + productId,
+                    url: "{{ url('api/v1/product-specifications') }}/" + productId,
                     method: 'GET',
                     success: function (res) {
                         if (res.data && res.data.length > 0) {

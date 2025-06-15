@@ -16,12 +16,12 @@ use App\Http\Requests\Order\{StoreOrderRequest, UpdateOrderRequest};
 
 class OrderController extends DashboardController
 {
-    public function __construct(public OrderService                $orderService,
-                                public CategoryRepositoryInterface $categoryRepository,
-                                public TagRepositoryInterface      $tagRepository,
-                                public CountryRepositoryInterface $countryRepository,
-    )
-    {
+    public function __construct(
+        public OrderService $orderService,
+        public CategoryRepositoryInterface $categoryRepository,
+        public TagRepositoryInterface $tagRepository,
+        public CountryRepositoryInterface $countryRepository,
+    ) {
         parent::__construct($orderService);
         $this->storeRequestClass = new StoreOrderRequest();
         $this->updateRequestClass = new UpdateOrderRequest();
@@ -80,19 +80,34 @@ class OrderController extends DashboardController
     {
         $orderStepData = Cache::get(getOrderStepCacheKey());
         $code = $this->orderService->applyDiscountCode($request);
-        return Response::api(message: "discount code applied successfully",
+        return Response::api(
+            message: "discount code applied successfully",
             data: [
-            "discount_amount" => getDiscountAmount($code->value, $orderStepData['pricing_details']['sub_total']),
-            "total" => getTotalPrice($code->value, $orderStepData['pricing_details']['sub_total']),
-        ]);
-
+                "discount_amount" => getDiscountAmount($code->value, $orderStepData['pricing_details']['sub_total']),
+                "total" => getTotalPrice($code->value, $orderStepData['pricing_details']['sub_total']),
+            ]
+        );
     }
+
+
+    //    public function store(Request $request)
+    // {
+    //         $order = $this->orderService->storeResource([]);
+    //         return Response::api(
+    //             message: 'Order placed successfully!',
+    //             data: [
+    //                 'order_id' => $order->id,
+    //                 'order_number' => $order->order_number,
+    //                 'redirect_url' => route('orders.show', $order->id)
+    //             ]
+    //         );
+    // }
 
 
 
     public function downloadPDF()
     {
-      return $this->orderService->downloadPDF();
+        return $this->orderService->downloadPDF();
     }
 
 }
