@@ -141,7 +141,7 @@ class TemplateService extends BaseService
 //            ->whereMorphedTo('model',auth($this->activeGuard)->user())
             ->whereCollectionName("template_assets")
             ->latest()
-            ->get();
+            ->paginate();
     }
 
     public function storeTemplateAssets($request)

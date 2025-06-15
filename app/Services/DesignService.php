@@ -25,6 +25,7 @@ class DesignService extends BaseService
                    ->find($validatedData['template_id'])
                    ->getFirstMedia('templates')
                    ->copy($design, 'designs');
+
                 return $design;
             });
 
