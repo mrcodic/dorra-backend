@@ -89,19 +89,21 @@ class OrderController extends DashboardController
         );
     }
 
+    
 
-    //    public function store(Request $request)
-    // {
-    //         $order = $this->orderService->storeResource([]);
-    //         return Response::api(
-    //             message: 'Order placed successfully!',
-    //             data: [
-    //                 'order_id' => $order->id,
-    //                 'order_number' => $order->order_number,
-    //                 'redirect_url' => route('orders.show', $order->id)
-    //             ]
-    //         );
-    // }
+
+       public function store(Request $request)
+    {
+            $order = $this->orderService->storeResource([]);
+            return Response::api(
+                message: 'Order placed successfully!',
+                data: [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'redirect_url' => route('orders.index', $order->id)
+                ]
+            );
+    }
 
 
 

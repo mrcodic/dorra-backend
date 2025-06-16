@@ -79,27 +79,4 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('order-form');
 
-        // Update notification options before submit
-        form.addEventListener('submit', function(e) {
-            // Update the hidden inputs with checkbox values
-            form.querySelector('input[name="track_order"]').value =
-                document.getElementById('track-order').checked ? 1 : 0;
-            form.querySelector('input[name="send_email"]').value =
-                document.getElementById('send-email').checked ? 1 : 0;
-            form.querySelector('input[name="send_notification"]').value =
-                document.getElementById('send-notification').checked ? 1 : 0;
-
-            // Optional: Add loading state
-            const submitBtn = document.getElementById('place-order');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Processing...
-        `;
-        });
-    });
-</script>

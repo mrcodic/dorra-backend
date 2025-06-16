@@ -160,5 +160,16 @@
             });
         });
     </script>
+<script>
+      $(document).ready(function () {
+          handleAjaxFormSubmit("#order-form", {
+            successMessage: "Order created successfully!",
+            onSuccess: function (response, $form) {
+            resetForm: true,
+        }});
+    });
+   
+   
 
+</script>
 @endsection

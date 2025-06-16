@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Design;
 use App\Models\Product;
 use App\Enums\Order\StatusEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -118,13 +119,108 @@ class OrderService extends BaseService
         ]]);
     }
 
-public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
+    {
+        $cacheKey = getOrderStepCacheKey();
+        $orderStepData = Cache::get($cacheKey, []);
+
+        if (empty($orderStepData)) {
+            throw new \Exception('Order step data not found in cache');
+        }
+
+        $orderData = [
+            'user_id' => $orderStepData['user_info']['id'] ?? null,
+            'product_id' => $orderStepData['product_id'] ?? null,
+            'design_id' => $orderStepData['design_info']['id'] ?? null,
+            'price_id' => $orderStepData['price_id'] ?? null,
+            'quantity' => $orderStepData['pricing_details']['quantity'] ?? 1,
+            'subtotal' => $orderStepData['pricing_details']['sub_total'] ?? 0,
+            'total_price' => $orderStepData['pricing_details']['total'] ?? ($orderStepData['pricing_details']['sub_total'] ?? 0),
+            'discount_amount' => $orderStepData['pricing_details']['discount'] ?? 0,
+            'delivery_amount' => $orderStepData['pricing_details']['delivery'] ?? 0,
+            'tax_amount' => $orderStepData['pricing_details']['tax'] ?? 0,
+            'discount_code_id' => $orderStepData['pricing_details']['discount_code_id'] ?? null,
+            'shipping_address_id' => $orderStepData['shipping_info']['id'] ?? null,
+            'status' => StatusEnum::CONFIRMED,
+            'notes' => $orderStepData['personal_info']['notes'] ?? null,
+            'special_instructions' => $orderStepData['personal_info']['special_instructions'] ?? null,
+            'order_number' => 'TEMP-' . uniqid(),
+        ];
+
+        $orderData = array_merge($orderData, $validatedData);
+        $order = $this->repository->create($orderData);
+
+        if (isset($orderStepData['specs']) && !empty($orderStepData['specs'])) {
+            $this->attachSpecificationOptions($order, $orderStepData['specs']);
+        }
+
+        $this->saveOrderAddress($order, $orderStepData['personal_info'], $orderStepData['shipping_info']);
+
+        $this->updateDesignOrderId($orderStepData['design_info']['id'] ?? null, $order->id);
+
+        if (!empty($relationsToStore)) {
+            foreach ($relationsToStore as $relation => $data) {
+                $order->$relation()->create($data);
+            }
+        }
+
+        if (!empty($relationsToLoad)) {
+            $order->load($relationsToLoad);
+        }
+
+        Cache::forget($cacheKey);
+        return $order;
+    }
+
+    private function attachSpecificationOptions($order, $specs)
+    {
+        $specData = [];
+
+        foreach ($specs as $spec) {
+            foreach ($spec['options'] as $optionId) {
+                $option = $this->specificationOptionRepository->find($optionId);
+                $specData[$optionId] = [
+                    'specification_id' => $spec['id'],
+                    'price' => $option->price ?? 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        if (!empty($specData)) {
+            $order->specificationOptions()->attach($specData);
+        }
+    }
+
+   private function saveOrderAddress($order, $personalInfo, $shippingInfo)
 {
-    // $order = $this->repository->create($validatedData);
-    // $order->load($relationsToLoad);
-    // $order->load($relationsToStore);
-    // return $order;
+    $order->OrderAddress()->create([
+        'order_id' => $order->id,
+        'type' => 'shipping',       
+        'first_name' => $personalInfo['first_name'] ?? null,
+        'last_name' => $personalInfo['last_name'] ?? null,
+        'email' => $personalInfo['email'] ?? null,
+        'phone' => $personalInfo['phone_number'] ?? null,  
+        'address_label' => $shippingInfo['label'] ?? null, 
+        'address_line' => $shippingInfo['line'] ?? null,  
+        'state' => $shippingInfo['state'] ?? null,
+        'country' => $shippingInfo['country'] ?? null,
+    ]);
 }
+
+private function updateDesignOrderId($designId, $orderId)
+{
+    if ($designId) {
+        $design = Design::find($designId);
+        if ($design) {
+            $design->order_id = $orderId;
+            $design->save();
+        }
+    }
+}
+
+
 
 
     
@@ -144,11 +240,12 @@ public function storeResource($validatedData, $relationsToStore = [], $relations
 
     }
 
-    public function downloadPDF()
-    {
-        $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
-        $pdf = PDF::loadView('dashboard.orders.steps.step7', compact('orderData'));
-        return $pdf->setPaper('a4')
-            ->setOption('defaultFont', 'Helvetica')->download('order-confirmation.pdf');
-    }
+   public function downloadPDF()
+{
+    $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
+    $pdf = Pdf::loadView('dashboard.orders.steps.step7', compact('orderData'));
+    return $pdf->setPaper('a4')
+        ->setOption('defaultFont', 'Helvetica')
+        ->download('order-confirmation.pdf');
+}
 }

@@ -5,9 +5,12 @@ namespace App\Models;
 use App\Models\Design;
 use App\Models\OrderAddress;
 use App\Enums\Order\StatusEnum;
+use App\Observers\OrderObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[ObservedBy(OrderObserver::class)]
 class Order extends Model
 {
     protected $fillable =[
@@ -43,4 +46,5 @@ class Order extends Model
     {
         return $this->hasMany(OrderAddress::class);
     }
+
 }
