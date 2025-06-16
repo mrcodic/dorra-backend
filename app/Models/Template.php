@@ -58,7 +58,7 @@ class Template extends Model implements HasMedia
         return $this->belongsToMany(ProductSpecification::class)->withTimestamps();
     }
 
-    public function getImageAttribute()
+    public function getImageAttribute(): string
     {
         return $this->getFirstMediaUrl('templates') ?: "";
 
