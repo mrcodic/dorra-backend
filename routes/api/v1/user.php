@@ -46,6 +46,7 @@ Route::apiResource('categories', CategoryController::class)->only(['index', 'sho
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 Route::apiResource('/designs', DesignController::class)->except(['destroy']);
+Route::post('/design-finalization', [DesignController::class, 'designFinalization']);
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
 
 

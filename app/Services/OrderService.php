@@ -37,7 +37,7 @@ class OrderService extends BaseService
         public DesignRepositoryInterface                    $designRepository,
     )
 
-    
+
     {
         $this->relations = ['user', 'OrderAddress'];
         parent::__construct($repository);
@@ -116,14 +116,7 @@ class OrderService extends BaseService
     }
     public function templateCustomizations($request): void
     {
-        $validatedData = $request->validate([
-            "design_id" => ["required", "exists:designs,id"],
-            "price_id" => ["required", "exists:product_prices,id"],
-            "specs" => ["required", "array"],
-            "specs.*.id" => ["required", "exists:product_specification_template,product_specification_id"],
-            "specs.*.options" => ["required", "array"],
-            "specs.*.options.*" => ["required", "exists:product_specification_options,id"],
-        ]);
+        $validatedData = $request->validated();
         $design = $this->designRepository->find($validatedData["design_id"]);
 
         $productPrice = $this->productPriceRepository->query(["id", "price","quantity"])->whereKey($validatedData["price_id"])->first();
@@ -134,7 +127,7 @@ class OrderService extends BaseService
                     ->pluck("price");
             })
             ->sum();
-            
+
         $subTotalPrice = $productPrice->price + $specsPrices;
         $this->storeStepData(["pricing_details" => ["sub_total" => $subTotalPrice, 'quantity' => $productPrice->quantity ?? 1 ],
             "design_info" => [
@@ -197,7 +190,7 @@ class OrderService extends BaseService
         $orderData = array_merge($orderData, $validatedData);
         $order = $this->repository->create($orderData);
 
-        if (isset($orderStepData['specs']) && !empty($orderStepData['specs'])) {
+        if (!empty($orderStepData['specs'])) {
             $this->attachSpecificationOptions($order, $orderStepData['specs']);
         }
 
@@ -219,7 +212,7 @@ class OrderService extends BaseService
         return $order;
     }
 
-    private function attachSpecificationOptions($order, $specs)
+    private function attachSpecificationOptions($order, $specs): void
     {
         $specData = [];
 
@@ -244,13 +237,13 @@ class OrderService extends BaseService
 {
     $order->OrderAddress()->create([
         'order_id' => $order->id,
-        'type' => 'shipping',       
+        'type' => 'shipping',
         'first_name' => $personalInfo['first_name'] ?? null,
         'last_name' => $personalInfo['last_name'] ?? null,
         'email' => $personalInfo['email'] ?? null,
-        'phone' => $personalInfo['phone_number'] ?? null,  
-        'address_label' => $shippingInfo['label'] ?? null, 
-        'address_line' => $shippingInfo['line'] ?? null,  
+        'phone' => $personalInfo['phone_number'] ?? null,
+        'address_label' => $shippingInfo['label'] ?? null,
+        'address_line' => $shippingInfo['line'] ?? null,
         'state' => $shippingInfo['state'] ?? null,
         'country' => $shippingInfo['country'] ?? null,
     ]);
@@ -270,7 +263,7 @@ private function updateDesignOrderId($designId, $orderId)
 
 
 
-    
+
     public function applyDiscountCode($request)
     {
         $orderStepData = Cache::get(getOrderStepCacheKey());

@@ -72,20 +72,26 @@ class ProductService extends BaseService
             })->make();
     }
 
-    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10): LengthAwarePaginator
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10)
     {
-
-        return QueryBuilder::for(Product::class)->select($columns)
-            ->with($this->relations)
+        $query = QueryBuilder::for(Product::class)
+            ->select($columns)
+            ->with($relations)
             ->withCount('reviews')
             ->allowedFilters([
                 AllowedFilter::partial('category.id'),
                 AllowedFilter::custom('sub_categories', new SubCategoryFilter()),
                 AllowedFilter::scope('with_review_rating'),
             ])
-            ->paginate();
+            ->latest();
 
+        if (request()->has('limit') && is_numeric(request('limit'))) {
+            return $query->take((int) request('limit'))->get();
+        }
+
+        return $query->paginate($perPage);
     }
+
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {

@@ -9,20 +9,22 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough};
 
 #[ObservedBy(DesignObserver::class)]
 class Design extends Model implements HasMedia
 {
     use HasUuids, InteractsWithMedia;
 
-    protected $fillable =[
+    protected $fillable = [
         'cookie_id',
         'user_id',
         'order_id',
         'template_id',
         'design_data',
         'current_version',
+        'product_price_id',
+        'quantity',
     ];
 
     public function user(): BelongsTo
@@ -35,15 +37,42 @@ class Design extends Model implements HasMedia
         return $this->belongsTo(Template::class);
     }
 
+    public function product(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Product::class,
+            Template::class,
+            'id',
+            'id',
+            'template_id',
+            'product_id'
+        );
+    }
+
+
     public function versions(): HasMany
     {
         return $this->hasMany(DesignVersion::class);
     }
 
 
-    public function order()
-{
-    return $this->belongsTo(Order::class);
-}
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
 
+    public function productPrice(): BelongsTo
+    {
+        return $this->belongsTo(ProductPrice::class);
+    }
+
+    public function specifications(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductSpecification::class)->withTimestamps();
+    }
+
+    public function options(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductSpecificationOption::class,'design_product_specification','spec_option_id')->withTimestamps();
+    }
 }

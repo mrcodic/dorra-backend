@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
+use App\Http\Requests\Design\StoreDesignFinalizationRequest;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\CountryRepositoryInterface;
 use App\Repositories\Interfaces\TagRepositoryInterface;
@@ -76,7 +77,7 @@ class OrderController extends DashboardController
         return Response::api();
     }
 
-    public function templateCustomizations(Request $request)
+    public function templateCustomizations(StoreDesignFinalizationRequest $request)
     {
         $this->orderService->templateCustomizations($request);
         return Response::api();
@@ -95,7 +96,7 @@ class OrderController extends DashboardController
         );
     }
 
-    
+
 
 
        public function store(Request $request)

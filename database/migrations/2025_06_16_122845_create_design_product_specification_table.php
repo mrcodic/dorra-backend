@@ -18,7 +18,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignIdFor(Design::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(ProductSpecification::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(ProductSpecificationOption::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(ProductSpecificationOption::class, 'spec_option_id')
+                ->constrained('product_specification_options')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

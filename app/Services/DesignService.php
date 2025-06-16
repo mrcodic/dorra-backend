@@ -5,12 +5,14 @@ namespace App\Services;
 
 use App\Jobs\ProcessBase64Image;
 use App\Jobs\RenderFabricJsonToPngJob;
+use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 
 
 class DesignService extends BaseService
 {
+    public BaseRepositoryInterface $repository;
     public function __construct(DesignRepositoryInterface $repository, public TemplateRepositoryInterface $templateRepository)
     {
         parent::__construct($repository);
@@ -39,10 +41,7 @@ class DesignService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
-        $files = request()->allFiles();
-        if ($files) {
-            handleMediaUploads($files, $model, clearExisting: true);
-        }
+          RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'designs');
         if (isset($validatedData['base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
         }
@@ -70,5 +69,18 @@ class DesignService extends BaseService
         return $this->repository->find($designId)->versions()->paginate();
     }
 
+    public function designFinalization($request)
+    {
+        $validatedData = $request->validated();
+//        dd($validatedData['specs']);
 
+        $this->handleTransaction(function () use ($validatedData) {
+            $this->repository->update($validatedData, $validatedData['design_id']);
+            $this->repository->query()->specifications()->sync([]);
+        });
+
+
+
+
+    }
 }
