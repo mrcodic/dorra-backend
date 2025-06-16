@@ -187,7 +187,7 @@ $(document).ready(function () {
                     duration: 2000,
                     gravity: "top",
                     position: "right",
-                    backgroundColor: "#EA5455", // red
+                    backgroundColor: "#EA5455", 
                     close: true,
                 }).showToast();
                 $(".product-list-table").DataTable().ajax.reload(null, false);
@@ -223,7 +223,6 @@ $(document).ready(function () {
                     close: true,
                 }).showToast();
 
-                // Reload DataTable
 
                 $('#bulk-delete-container').hide();
                 $('.category-checkbox').prop('checked', false);
@@ -242,7 +241,6 @@ $(document).ready(function () {
                     close: true,
                 }).showToast();
 
-                // Reload DataTable
 
                 $('#bulk-delete-container').hide();
                 $('.product-checkbox').prop('checked', false);

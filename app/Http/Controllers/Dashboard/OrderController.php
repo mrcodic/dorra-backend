@@ -40,6 +40,12 @@ class OrderController extends DashboardController
         ];
     }
 
+
+        public function getData()
+    {
+        return $this->orderService->getData();
+    }
+
     public function storeStep1(Request $request)
     {
         $this->orderService->storeStep1($request);

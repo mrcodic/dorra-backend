@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Models\Design;
+use App\Models\Order;
 use App\Models\Product;
 use App\Enums\Order\StatusEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\Facades\Cache;
+use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
@@ -21,6 +23,9 @@ use App\Repositories\Interfaces\ProductSpecificationOptionRepositoryInterface;
 
 class OrderService extends BaseService
 {
+
+        protected array $relations;
+
     public function __construct(
         OrderRepositoryInterface                             $repository,
         public ProductPriceRepositoryInterface               $productPriceRepository,
@@ -29,11 +34,53 @@ class OrderService extends BaseService
         public UserRepositoryInterface                       $userRepository,
         public ProductRepositoryInterface                    $productRepository,
         public ShippingAddressRepositoryInterface            $shippingAddressRepository,
-        public DesignRepositoryInterface                   $designRepository,
+        public DesignRepositoryInterface                    $designRepository,
     )
+
+    
     {
+        $this->relations = ['user', 'OrderAddress'];
         parent::__construct($repository);
     }
+
+
+
+   public function getData()
+{
+    $orders = $this->repository
+        ->query()
+        ->with($this->relations) // هنا علاقات user + designs + OrderAddress مشمولة
+        ->withCount(['designs']) // لاحتساب عدد التصاميم في كل order
+        ->when(request()->filled('search_value'), function ($query) {
+            $locale = app()->getLocale();
+            $search = request('search_value');
+            $query->where("order_number->{$locale}", 'LIKE', "%{$search}%");
+        })
+        ->latest();
+
+    return DataTables::of($orders)
+        ->addColumn('order_number', function ($order) {
+            return $order->order_number ?? '-';
+        })
+        ->addColumn('user_name', function ($order) {
+            return $order->user
+                ? ($order->user->first_name . ' ' . $order->user->last_name)
+                : 'No User';
+        })
+        ->addColumn('items', function ($order) {
+            return $order->designs_count ?? 0;
+        })
+        ->addColumn('total_price', function ($order) {
+            return $order->total_price ? number_format($order->total_price, 2) : '0.00';
+        })
+        ->addColumn('status', function ($order) {
+            return $order->status ? $order->status->label() : 'No Status';
+        })
+        ->addColumn('added_date', function ($order) {
+            return $order->created_at ? $order->created_at->format('d/m/Y') : '-';
+        })
+        ->make();
+}
 
     public function storeStep1($request): void
     {

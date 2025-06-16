@@ -175,7 +175,18 @@
                 @include('modals.categories.show-category')
                 @include('modals.categories.edit-category')
                 @include('modals.categories.add-category')
-
+        @include('modals.delete',[
+                            'id' => 'deleteOrdersModal',
+                            'formId' => 'deleteOrdersForm',
+                            'title' => 'Delete Order',
+                            ])
+            @include('modals.delete',[
+            'id' => 'deleteOrdersModal',
+            'formId' => 'bulk-delete-form',
+            'title' => 'Delete Categories',
+            'confirmText' => 'Are you sure you want to delete this items?',
+            ])
+        </div>
             </div>
             <!-- list and filter end -->
         </section>
@@ -205,7 +216,7 @@
 
 @section('page-script')
     <script>
-        const ordersDataUrl = "{{ route('products.data') }}";
+        const ordersDataUrl = "{{ route('orders.data') }}";
         const ordersCreateUrl = "{{ route('orders.create') }}";
     </script>
 
