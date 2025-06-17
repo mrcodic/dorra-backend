@@ -33,7 +33,13 @@ class Product extends Model implements HasMedia
             'status' => StatusEnum::class,
         ];
     }
+    public function price(): Attribute
+    {
+        return Attribute::get(function ($value) {
+            return fmod($value, 1) == 0.0 ? (int)$value : $value;
 
+        });
+    }
     public function rating(): Attribute
     {
         return Attribute::get(fn(?int $value) => $this->reviews?->pluck('rating')->avg());
