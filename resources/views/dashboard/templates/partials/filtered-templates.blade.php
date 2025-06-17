@@ -81,7 +81,7 @@
                     </div>
 
                     <span class="badge text-light p-75 px-2 template-status-label" style="background-color: #222245">
-                        {{ $template->type_label }}
+                        {{ $template->type->label() }}
                     </span>
                 </div>
                 <p class="fs-4 mb-1"

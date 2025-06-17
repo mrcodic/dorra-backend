@@ -105,9 +105,6 @@ class Template extends Model implements HasMedia
     }
 
 
-public function getTypeLabelAttribute()
-{
-    return $this->type->label();
-}
+
 
 }
