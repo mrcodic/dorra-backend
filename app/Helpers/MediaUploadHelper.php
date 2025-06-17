@@ -34,7 +34,7 @@ if (!function_exists('handleMediaUploads')) {
             }
             return $mediaAdder->toMediaCollection($collectionName);
         });
-        return count($uploaded) === 1 ? $uploaded->first() : $uploaded->get();
+        return count($uploaded) === 1 ? $uploaded->first() : $uploaded;
     }
 }
 
