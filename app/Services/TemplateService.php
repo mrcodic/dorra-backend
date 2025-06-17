@@ -32,7 +32,7 @@ class TemplateService extends BaseService
 
 
         $query = $this->repository
-            ->query(['id', 'name', 'product_id', 'status', 'created_at'])
+            ->query(['id', 'name', 'product_id', 'status', 'created_at' , 'type' , ''])
             ->with(['product:id,name', 'product.tags'])
             ->when(request()->filled('search_value'), function ($q) {
                 $locale = app()->getLocale();
@@ -48,7 +48,6 @@ class TemplateService extends BaseService
                 ? $query->get()                                   // “all”
                 : $query->paginate($pageSize)->withQueryString(); // 16 / 50 / 100
         }
-
 
         return $this->repository->all(
             $paginate,
