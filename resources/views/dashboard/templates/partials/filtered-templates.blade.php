@@ -1,145 +1,148 @@
 @forelse ($data as $template)
-    <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row"  data-template-id="{{ $template->id }}">
-        <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
-            <!-- Checkbox -->
-            <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
-                   value="{{ $template->id }}" name="selected_templates[]">
-            <!-- Action Icon with Dropdown (Top Right) -->
-            <div class="dropdown position-absolute top-0 end-0 m-1">
-                <button class="btn btn-sm  border-0" type="button" id="actionDropdown{{ $template->id }}"
-                        data-bs-toggle="dropdown" aria-expanded="false" style="background-color:#F9FDFC">
-                    <i data-feather="more-vertical"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionDropdown{{ $template->id }}">
-                    <li><a class="dropdown-item" href="{{ route("product-templates.edit",$template->id) }}"><i
-                                data-feather="edit-3" class="me-1"></i>Edit</a></li>
-                    <li><a class="dropdown-item"
-                           href="{{ config('services.editor_url') . 'templates/' . $template->id }}" target="_blank"><i
-                                data-feather="eye" class="me-1"></i>Show</a></li>
-                    <li>
-                        <form class="change-status-form"
-                              action="{{ route("product-templates.change-status",$template->id) }}" method="post">
-                            @csrf
-                            @method("PUT")
-                            <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}">
+<div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row" data-template-id="{{ $template->id }}">
+    <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
+        <!-- Checkbox -->
+        <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
+            value="{{ $template->id }}" name="selected_templates[]">
+        <!-- Action Icon with Dropdown (Top Right) -->
+        <div class="dropdown position-absolute top-0 end-0 m-1">
+            <button class="btn btn-sm  border-0" type="button" id="actionDropdown{{ $template->id }}"
+                data-bs-toggle="dropdown" aria-expanded="false" style="background-color:#F9FDFC">
+                <i data-feather="more-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionDropdown{{ $template->id }}">
+                <li><a class="dropdown-item" href="{{ route("product-templates.edit",$template->id) }}"><i
+                            data-feather="edit-3" class="me-1"></i>Edit</a></li>
+                <li><a class="dropdown-item"
+                        href="{{ config('services.editor_url') . 'templates/' . $template->id }}" target="_blank"><i
+                            data-feather="eye" class="me-1"></i>Show</a></li>
+                <li>
+                    <form class="change-status-form"
+                        action="{{ route("product-templates.change-status",$template->id) }}" method="post">
+                        @csrf
+                        @method("PUT")
+                        <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}">
 
-                            <button class="dropdown-item change-status-btn w-100
+                        <button class="dropdown-item change-status-btn w-100
                                 {{ (!empty($template->design_data) && $template->status !== \App\Enums\Template\StatusEnum::PUBLISHED) ? '' : 'disabled' }}   ">
-                                <i data-feather="send" class="me-1">
+                            <i data-feather="send" class="me-1">
 
-                                </i>Publish
-                            </button>
-                        </form>
-                    </li>
-
-
-                    <li>
-                        <form class="change-status-form"
-                              action="{{ route("product-templates.change-status",$template->id) }}" method="post">
-                            @csrf
-                            @method("PUT")
-                            <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}">
-                            <button class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}">
-                                <i data-feather="file" class="me-1">
-                                </i>Draft
-                            </button>
-                        </form>
-                    </li>
-                    <li>
-                        <form  class="change-status-form" action="{{ route("product-templates.change-status",$template->id) }}" method="post">
-                            @csrf
-                            @method("PUT")
-                            <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::LIVE }}">
-                            <button class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}" >
-                                <i data-feather="radio" class="me-1">
-
-                                </i>Live
-                            </button>
-                        </form>
-                    </li>
-                    <li>
-                        <button class="dropdown-item text-danger open-delete-template-modal w-100"
-                                data-bs-toggle="modal" data-bs-target="#deleteTemplateModal"
-                                data-id="{{ $template->id }}"><i data-feather="trash-2" class="me-1 text-danger"></i>Delete
+                            </i>Publish
                         </button>
-                    </li>
-                </ul>
-            </div>
-            <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
-                    src="{{  $template->getFirstMediaUrl('templates') ?: asset("images/default-photo.png") }}"
-                    class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
-            </div> <!-- Template Info -->
-            <div class="card-body text-start p-2">
-                <div>
-                    <h6 class="fw-bold mb-1 text-black fs-3"
-                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->getTranslation('name', app()->getLocale()) }}
-                    </h6>
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div class="text-16">Dimensions: <span class="text-black">{{ $template->height_pixel }} × {{ $template->width_pixel }} pixel</span>
-                        </div>
+                    </form>
+                </li>
 
-                        <span class="badge text-light p-75 px-2 template-status-label" style="background-color: #222245">
-                           {{ $template->type->label() }}
-                    </span>
-                    </div>
-                    <p class="fs-4 mb-1"
-                       style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->product->getTranslation('name', app()->getLocale()) }} </p>
-                </div> <!-- Tags -->
-                <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
-                     style="min-height: 44px;"> @foreach($template->product->tags as $tag)
-                        <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
-                              style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
-                    @endforeach </div> <!-- Palette and Status -->
+
+                <li>
+                    <form class="change-status-form"
+                        action="{{ route("product-templates.change-status",$template->id) }}" method="post">
+                        @csrf
+                        @method("PUT")
+                        <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}">
+                        <button class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}">
+                            <i data-feather="file" class="me-1">
+                            </i>Draft
+                        </button>
+                    </form>
+                </li>
+                <li>
+                    <form class="change-status-form" action="{{ route("product-templates.change-status",$template->id) }}" method="post">
+                        @csrf
+                        @method("PUT")
+                        <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::LIVE }}">
+                        <button class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}">
+                            <i data-feather="radio" class="me-1">
+
+                            </i>Live
+                        </button>
+                    </form>
+                </li>
+                <li>
+                    <button class="dropdown-item text-danger open-delete-template-modal w-100"
+                        data-bs-toggle="modal" data-bs-target="#deleteTemplateModal"
+                        data-id="{{ $template->id }}"><i data-feather="trash-2" class="me-1 text-danger"></i>Delete
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
+                src="{{  $template->getFirstMediaUrl('templates') ?: asset("images/default-photo.png") }}"
+                class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
+        </div> <!-- Template Info -->
+        <div class="card-body text-start p-2">
+            <div>
+                <h6 class="fw-bold mb-1 text-black fs-3"
+                    style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 300px; height: 54px;">
+                    {{ $template->getTranslation('name', app()->getLocale()) }}
+                </h6>
 
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <div class="d-flex" style="gap: 5px;">
-                        <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #FF5733;"></div>
-                        <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #33B5FF;"></div>
-                        <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #9B59B6;"></div>
+                    <div class="text-16">Dimensions: <span class="text-black">{{ $template->height_pixel }} × {{ $template->width_pixel }} pixel</span>
                     </div>
-                    <span class="badge text-dark p-75 px-2 template-status-label"
-                          data-template-id="{{ $template->id }}"
-                          style="background-color: #CED5D4">
-                        {{ $template->status->label() }}
-                    </span>
 
+                    <span class="badge text-light p-75 px-2 template-status-label" style="background-color: #222245">
+                        {{ $template->type->label() }}
+                    </span>
                 </div>
+                <p class="fs-4 mb-1"
+                    style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:29px"> {{ $template->product->getTranslation('name', app()->getLocale()) }} </p>
+            </div> <!-- Tags -->
+            <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
+                style="min-height: 44px;"> @foreach($template->product->tags as $tag)
+                <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
+                    style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
+                @endforeach
+            </div> <!-- Palette and Status -->
+
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <div class="d-flex" style="gap: 5px;">
+                    <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #FF5733;"></div>
+                    <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #33B5FF;"></div>
+                    <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #9B59B6;"></div>
+                </div>
+                <span class="badge text-dark p-75 px-2 template-status-label"
+                    data-template-id="{{ $template->id }}"
+                    style="background-color: #CED5D4">
+                    {{ $template->status->label() }}
+                </span>
+
             </div>
         </div>
     </div>
+</div>
 @empty
-    <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"
-         style="min-height:65vh;">
-        <!-- Empty Image -->
-        <img src="{{ asset('images/Empty.png') }}" alt="No Templates" style="max-width: 200px;" class="mb-2">
+<div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"
+    style="min-height:65vh;">
+    <!-- Empty Image -->
+    <img src="{{ asset('images/Empty.png') }}" alt="No Templates" style="max-width: 200px;" class="mb-2">
 
-        <!-- Empty Message -->
-        <p class="mb-2 text-secondary">You didn’t create any templates yet.</p>
+    <!-- Empty Message -->
+    <p class="mb-2 text-secondary">You didn’t create any templates yet.</p>
 
-        <!-- Create Button -->
-        <a class="btn btn-primary" href="{{ route('product-templates.create') }}">
-            <i data-feather="plus"></i>
-            Create Template
-        </a>
-    </div>
+    <!-- Create Button -->
+    <a class="btn btn-primary" href="{{ route('product-templates.create') }}">
+        <i data-feather="plus"></i>
+        Create Template
+    </a>
+</div>
 @endforelse
 <script !src="">
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         if (window.feather) {
             feather.replace();
         }
     });
 
     // Also run after AJAX updates
-    $(document).ajaxComplete(function () {
+    $(document).ajaxComplete(function() {
         if (window.feather) {
             feather.replace();
         }
     });
-    $(document).ready(function () {
+    $(document).ready(function() {
         handleAjaxFormSubmit('.change-status-form', {
             successMessage: '✅ Status updated successfully!',
-            onSuccess: function (response, $form) {
+            onSuccess: function(response, $form) {
                 console.log('Success:', response);
 
                 const templateId = response.data.id;
@@ -167,21 +170,36 @@
                     // Logic to enable/disable buttons, example (adjust according to your rules):
 
                     // Enable Publish if design_data exists and status not published
-                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::PUBLISHED->value }}) {
+                    if (designData && status !== {
+                            {
+                                \
+                                App\ Enums\ Template\ StatusEnum::PUBLISHED - > value
+                            }
+                        }) {
                         $publishBtn.removeClass('disabled').prop('disabled', false);
                     } else {
                         $publishBtn.addClass('disabled').prop('disabled', true);
                     }
 
                     // Enable Draft if design_data exists and status not drafted
-                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::DRAFTED->value }}) {
+                    if (designData && status !== {
+                            {
+                                \
+                                App\ Enums\ Template\ StatusEnum::DRAFTED - > value
+                            }
+                        }) {
                         $draftBtn.removeClass('disabled').prop('disabled', false);
                     } else {
                         $draftBtn.addClass('disabled').prop('disabled', true);
                     }
 
                     // Enable Live if design_data exists and status not live (adjust this condition if needed)
-                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::LIVE->value }}) {
+                    if (designData && status !== {
+                            {
+                                \
+                                App\ Enums\ Template\ StatusEnum::LIVE - > value
+                            }
+                        }) {
                         $liveBtn.removeClass('disabled').prop('disabled', false);
                     } else {
                         $liveBtn.addClass('disabled').prop('disabled', true);
@@ -189,12 +207,10 @@
                 }
             },
 
-            onError: function (xhr, $form) {
+            onError: function(xhr, $form) {
                 console.error('Error:', xhr);
             },
             resetForm: false,
         });
     });
-
-
 </script>
