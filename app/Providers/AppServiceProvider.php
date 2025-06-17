@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\HttpEnum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
@@ -53,6 +54,9 @@ class AppServiceProvider extends ServiceProvider
                 else{
                     $response['data'] = $data;
                 }
+            }
+            if ($data instanceof JsonResource) {
+                return $data->response()->setStatusCode($statusCode->value);
             }
             return response()->json($response, $statusCode->value);
         });

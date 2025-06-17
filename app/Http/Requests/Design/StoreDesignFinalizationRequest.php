@@ -12,6 +12,7 @@ use Illuminate\Validation\Validator;
 
 class StoreDesignFinalizationRequest extends BaseRequest
 {
+    protected $design;
     /**
      * Determine if the v1 is authorized to make this request.
      */
@@ -28,24 +29,28 @@ class StoreDesignFinalizationRequest extends BaseRequest
      */
     public function rules(): array
     {
-        $design = Design::findOrFail($this->input('design_id'));
+        $design = $this->design = Design::findOrFail($this->input('design_id'));
         return [
             "design_id" => ["required", "exists:designs,id"],
-            "product_price_id" => ["sometimes", "exists:product_prices,id",function ($attribute, $value, $fail) use ($design) {
+            "product_price_id" => ["required_without:quantity", "exists:product_prices,id",function ($attribute, $value, $fail) use ($design) {
              if (!$design->product->prices->contains($value)) {
                 $fail("The selected price is not valid for the chosen product.");
             }
             }],
-            "quantity" => ["required_without:price_id", "integer", "min:1"],
+            "quantity" => ["nullable", "integer", "min:1",function ($attribute, $value, $fail) use ($design) {
+            if ($design->product->prices->isNotEmpty()) {
+                $fail("You cannot send quantity when product has prices.");
+            }
+            }],
             "specs" => ["required", "array"],
             "specs.*.id" => ["required", "exists:product_specification_template,product_specification_id",function ($attribute, $value, $fail) use ($design) {
             if (!$design->template->specifications->contains($value)) {
                 $fail("The selected specification is not valid for the chosen template.");
             }
             }],
-            "specs.*.options" => ["required", "array"],
-            "specs.*.options.*" => ["required", "exists:product_specification_options,id",function ($attribute, $value, $fail) use ($design) {
+            "specs.*.option" => ["required", "exists:product_specification_options,id",function ($attribute, $value, $fail) use ($design) {
             if (!$design->template->specifications->each(function ($spec) use ($value) {
+                $spec->load('options');
                 $spec->options->contains($value);
             })) {
                 $fail("The selected option is not valid for the chosen template.");
@@ -54,6 +59,13 @@ class StoreDesignFinalizationRequest extends BaseRequest
 
         ];
 
+    }
+
+    public function passedValidation(): void
+    {
+        if ($this->design->product->prices->isNotEmpty()) {
+         $this->input("quantity" ,1);
+        }
     }
 
 }

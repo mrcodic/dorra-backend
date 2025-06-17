@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Jobs\ProcessBase64Image;
 use App\Jobs\RenderFabricJsonToPngJob;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 
@@ -13,7 +14,12 @@ use App\Repositories\Interfaces\TemplateRepositoryInterface;
 class DesignService extends BaseService
 {
     public BaseRepositoryInterface $repository;
-    public function __construct(DesignRepositoryInterface $repository, public TemplateRepositoryInterface $templateRepository)
+
+    public function __construct(
+        DesignRepositoryInterface                   $repository,
+        public TemplateRepositoryInterface          $templateRepository,
+        public ProductSpecificationOptionRepository $optionRepository,
+    )
     {
         parent::__construct($repository);
     }
@@ -21,12 +27,12 @@ class DesignService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         if (!empty($validatedData['template_id'])) {
-          $design = $this->handleTransaction(function () use ($validatedData) {
+            $design = $this->handleTransaction(function () use ($validatedData) {
                 $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id']], $validatedData);
-               $this->templateRepository
-                   ->find($validatedData['template_id'])
-                   ->getFirstMedia('templates')
-                   ->copy($design, 'designs');
+                $this->templateRepository
+                    ->find($validatedData['template_id'])
+                    ->getFirstMedia('templates')
+                    ->copy($design, 'designs');
 
                 return $design;
             });
@@ -41,7 +47,7 @@ class DesignService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
-          RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'designs');
+        RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'designs');
         if (isset($validatedData['base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
         }
@@ -72,15 +78,36 @@ class DesignService extends BaseService
     public function designFinalization($request)
     {
         $validatedData = $request->validated();
-//        dd($validatedData['specs']);
 
-        $this->handleTransaction(function () use ($validatedData) {
+
+        return $this->handleTransaction(function () use ($validatedData) {
             $this->repository->update($validatedData, $validatedData['design_id']);
-            $this->repository->query()->specifications()->sync([]);
+            $design = $this->repository->query()->find($validatedData['design_id']);
+
+            $syncData = collect($validatedData['specs'])->mapWithKeys(function ($spec) {
+                return [
+                    $spec['id'] => ['spec_option_id' => $spec['option']]
+                ];
+            })->toArray();
+
+            $design->specifications()->sync($syncData);
+
+            $optionTotal = collect($validatedData['specs'])
+                ->map(function ($spec) {
+                    return $this->optionRepository->find($spec['option'])->price;
+                })
+                ->sum();
+
+
+            $productPrice = optional($design->productPrice)->price;
+            $subTotal = $optionTotal + ($productPrice ?? ($design->product->base_price * $design->quantity));
+
+            return [
+                'sub_total' => $subTotal,
+                'quantity' =>  $design->productPrice?->quantity ?? $design->quantity,
+                'syncData' => $design->specifications->load(['options']),
+            ];
         });
-
-
-
-
     }
+
 }

@@ -8,11 +8,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Design\StoreDesignFinalizationRequest;
 use App\Http\Requests\Design\StoreDesignRequest;
 use App\Http\Requests\Design\UpdateDesignRequest;
-use App\Http\Resources\DesignResource;
-
-use App\Http\Resources\DesignVersionResource;
-use App\Models\Design;
-use App\Models\DesignVersion;
+use App\Http\Resources\Design\DesignFinalizationResource;
+use App\Http\Resources\Design\DesignResource;
+use App\Http\Resources\Design\DesignVersionResource;
 use App\Services\DesignService;
 use Illuminate\Support\Facades\Response;
 
@@ -60,7 +58,13 @@ class DesignController extends Controller
 
     public function designFinalization(StoreDesignFinalizationRequest $request)
     {
-        $this->designService->designFinalization($request);
+        $designData = $this->designService->designFinalization($request);
+
+        return Response::api(data: DesignFinalizationResource::collection($designData['syncData'])->additional([
+            'sub_total' => $designData['sub_total'],
+            'quantity' => $designData['quantity'],
+        ]));
+
 
     }
 }
