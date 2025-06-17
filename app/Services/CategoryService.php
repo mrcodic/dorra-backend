@@ -35,6 +35,7 @@ class CategoryService extends BaseService
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
             })
+            ->whereNull('parent_id')
             ->latest();
 
         return DataTables::of($categories)
