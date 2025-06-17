@@ -42,9 +42,14 @@ var dt_user_table = $(".order-list-table").DataTable({
                <a href="/orders/${data}/edit" class="dropdown-item">
                 <i data-feather="edit"></i> Edit
               </a>
-              <a href="#" class="dropdown-item text-danger delete-order" data-id="${data}">
-                <i data-feather="trash-2"></i> Delete
-              </a>
+                <a href="#" class="dropdown-item text-danger open-delete-order-modal"
+                        data-id="${data}"
+                        data-name="${row.order_number}"
+                        data-action="/orders/${data}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteOrdersModal">
+                        <i data-feather="trash-2"></i> Delete
+                    </a>
             </div>
           </div>
         `;
@@ -188,16 +193,13 @@ $(document).ready(function () {
     // Alternative modal-based delete handler
     $(document).on("click", ".open-delete-order-modal", function () {
         const orderId = $(this).data("id");
+        console.log(orderId);
         $("#deleteOrderForm").data("id", orderId);
         $("#deleteOrderModal").modal("show");
     });
 
     // Single order delete form submission
-    $(document).on("submit", "#deleteOrderForm", function (e) {
-        e.preventDefault();
-        const orderId = $(this).data("id");
-        deleteOrder(orderId);
-    });
+
 
     // Bulk delete form submission
     $(document).on("submit", "#bulk-delete-form", function (e) {
@@ -258,60 +260,46 @@ $(document).ready(function () {
 });
 
 // Single order delete function
-function deleteOrder(orderId) {
-    $.ajax({
-        url: `/orders/${orderId}`,
-        method: "DELETE",
-        data: {
-            _token: $('meta[name="csrf-token"]').attr("content"),
-        },
-        beforeSend: function() {
-            // Show loading state
-            Toastify({
-                text: "Deleting order...",
-                duration: 1000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#17a2b8",
-                close: true,
-            }).showToast();
-        },
-        success: function (response) {
-            // Hide any open modals
-            $("#deleteOrderModal").modal("hide");
-            
-            Toastify({
-                text: "Order deleted successfully!",
-                duration: 2000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#28C76F",
-                close: true,
-            }).showToast();
-            
-            // Reload the DataTable
-            dt_user_table.ajax.reload(null, false);
-        },
-        error: function (xhr, status, error) {
-            // Hide any open modals
-            $("#deleteOrderModal").modal("hide");
-            
-            let errorMessage = "Something went wrong!";
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
-            }
-            
-            Toastify({
-                text: errorMessage,
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#EA5455",
-                close: true,
-            }).showToast();
-        }
+   $(document).on("submit", "#deleteOrderForm", function (e) {
+        e.preventDefault();
+        const OrderId = $(this).data("id");
+        console.log(OrderId);
+
+        $.ajax({
+            url: `/orders/${OrderId}`,
+            method: "DELETE",
+            success: function (res) {
+
+                $("#deleteOrderModal").modal("hide");
+
+                Toastify({
+                    text: "Order deleted successfully!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F",
+                    close: true,
+                }).showToast();
+                $(".order-list-table").DataTable().ajax.reload(null, false);
+
+            },
+            error: function () {
+
+                $("#deleteOrderModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#EA5455", // red
+                    close: true,
+                }).showToast();
+                              $(".order-list-table").DataTable().ajax.reload(null, false);
+
+            },
+        });
     });
-}
+
 
 // Bulk delete orders function
 function bulkDeleteOrders(selectedIds) {

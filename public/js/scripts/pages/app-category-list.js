@@ -516,14 +516,11 @@ $(document).ready(function () {
     $(document).on("submit", "#deleteCategoryForm", function (e) {
         e.preventDefault();
         const categoryId = $(this).data("id");
-
         $.ajax({
             url: `/categories/${categoryId}`,
             method: "DELETE",
             success: function (res) {
-
                 $("#deleteCategoryModal").modal("hide");
-
                 Toastify({
                     text: "Category deleted successfully!",
                     duration: 2000,
@@ -533,11 +530,8 @@ $(document).ready(function () {
                     close: true,
                 }).showToast();
                 $(".category-list-table").DataTable().ajax.reload(null, false);
-
-
             },
             error: function () {
-
                 $("#deleteCategoryModal").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",
@@ -547,8 +541,7 @@ $(document).ready(function () {
                     backgroundColor: "#EA5455", // red
                     close: true,
                 }).showToast();
-                              $(".category-list-table").DataTable().ajax.reload(null, false);
-
+                    $(".category-list-table").DataTable().ajax.reload(null, false);
             },
         });
     });

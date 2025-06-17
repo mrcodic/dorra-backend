@@ -175,24 +175,20 @@
                 @include('modals.categories.show-category')
                 @include('modals.categories.edit-category')
                 @include('modals.categories.add-category')
-        @include('modals.delete',[
-                            'id' => 'deleteOrdersModal',
-                            'formId' => 'deleteOrdersForm',
-                            'title' => 'Delete Order',
-                            ])
-            @include('modals.delete',[
+        @include('modals.delete', [
+    'id' => 'deleteOrderModal',
+    'formId' => 'deleteOrderForm',
+    'title' => 'Delete Order',
+    'message' => 'Are you sure you want to delete this order? This action cannot be undone.',
+    'confirmText' => 'Yes, Delete Order'
+])
+
+@include('modals.delete',[
             'id' => 'deleteOrdersModal',
             'formId' => 'bulk-delete-form',
-            'title' => 'Delete Categories',
+            'title' => 'Delete Orders',
             'confirmText' => 'Are you sure you want to delete this items?',
             ])
-        </div>
-            </div>
-            <!-- list and filter end -->
-        </section>
-        <!-- users list ends -->
-    </div>
-
 @endsection
 
 @section('vendor-script')

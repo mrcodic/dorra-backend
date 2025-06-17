@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\V1\User\General\MainController;
-use App\Http\Controllers\Dashboard\{AdminController,
+use App\Http\Controllers\Dashboard\{
+    AdminController,
     FaqController,
     InvoiceController,
     MessageController,
