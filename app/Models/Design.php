@@ -68,11 +68,15 @@ class Design extends Model implements HasMedia
 
     public function specifications(): BelongsToMany
     {
-        return $this->belongsToMany(ProductSpecification::class)->withTimestamps();
+        return $this->belongsToMany(ProductSpecification::class)
+            ->using(DesignProductSpecification::class)
+            ->withPivot('spec_option_id')->withTimestamps();
     }
 
     public function options(): BelongsToMany
     {
-        return $this->belongsToMany(ProductSpecificationOption::class,'design_product_specification','spec_option_id')->withTimestamps();
+        return $this->belongsToMany(ProductSpecificationOption::class,'design_product_specification','spec_option_id')
+            ->using(DesignProductSpecification::class)
+            ->withTimestamps();
     }
 }
