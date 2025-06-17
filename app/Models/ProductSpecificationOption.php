@@ -22,5 +22,12 @@ class ProductSpecificationOption extends Model implements HasMedia
     {
         return Attribute::get(fn () => $this->getFirstMedia('productSpecificationOptions'));
     }
+    
+    public function price(): Attribute
+    {
+        return Attribute::get(function ($value) {
+            return fmod($value, 1) == 0.0 ? (int)$value : $value;
 
+        });
+    }
 }
