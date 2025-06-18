@@ -29,31 +29,26 @@ var dt_user_table = $(".order-list-table").DataTable({
         {
             data: "id",
             orderable: false,
-            render: function (data, type, row, meta) {
-                return `
-          <div class="dropdown">
-            <button class="btn btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-              <i data-feather="more-vertical"></i>
-            </button>
-            <div class="dropdown-menu">
-             <a href="/orders/${data}" class="dropdown-item">
-                <i data-feather="file-text"></i> Details
-              </a>
-               <a href="/orders/${data}/edit" class="dropdown-item">
-                <i data-feather="edit"></i> Edit
-              </a>
-                <a href="#" class="dropdown-item text-danger open-delete-order-modal"
-                        data-id="${data}"
-                        data-name="${row.order_number}"
-                        data-action="/orders/${data}"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteOrdersModal">
-                        <i data-feather="trash-2"></i> Delete
-                    </a>
-            </div>
-          </div>
-        `;
-            },
+           render: function(data, type, row) {
+    return `
+        <div class="d-flex gap-1">
+            <a href="/orders/${data}" class="">
+                <i data-feather="file-text"></i>
+            </a>
+            <a href="/orders/${data}/edit" class="">
+                <i data-feather="edit"></i>
+            </a>
+            <a href="#" class="text-danger open-delete-order-modal" 
+               data-id="${data}"
+               data-name="${row.order_number}"
+               data-action="/orders/${data}"
+               data-bs-toggle="modal"
+               data-bs-target="#deleteOrdersModal">
+               <i data-feather="trash-2"></i>
+            </a>
+        </div>
+    `;
+},
         },
     ],
     order: [[1, "asc"]],
