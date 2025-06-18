@@ -704,6 +704,8 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 <script>
+
+
     $(document).ready(function() {
         let input = $('#product-image-main');
         let uploadArea = $('#upload-area');
@@ -1046,7 +1048,9 @@
                 });
             });
         }
-
+        $(document).ready(function () {
+            initializeImageUploaders($('.outer-repeater')); // This ensures the first one is bound properly
+        });
         $('.outer-repeater').repeater({
             repeaters: [{
                 selector: '.inner-repeater',
