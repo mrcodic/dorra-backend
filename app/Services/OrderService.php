@@ -136,14 +136,14 @@ class OrderService extends BaseService
             $this->productPriceRepository->query(["id", "price", "quantity"])->whereKey($validatedData["product_price_id"])->first()->price
             : $design->product->base_price;
         $specsPrices = collect($validatedData["specs"])
-            ->flatMap(function ($spec) {
+            ->map(function ($spec) {
                 return $this->specificationOptionRepository->query(["id", "price"])
-                    ->where("id", $spec["option"])
-                    ->value("price");
+                    ->find($spec["option"])
+                    ->price;
             })
             ->sum();
-            
-        $subTotalPrice = $productPrice +$specsPrices;
+
+        $subTotalPrice = $productPrice + $specsPrices;
         $this->storeStepData(["pricing_details" => ["sub_total" => $subTotalPrice, 'quantity' => $productPrice->quantity ?? 1],
             "design_info" => [
                 "id" => $design->id,
