@@ -187,7 +187,7 @@
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input " type="radio" name="has_custom_prices" id="defaultPrice" value="0">
                                                     <div>
-                                                        <label class="form-check-label label-text d-block" for="customPrice">Default Quantity</label>
+                                                        <label class="form-check-label label-text d-block" for="defaultPrice">Default Quantity</label>
                                                         <label class="form-check-label text-dark" for="defaultPrice">Default Price</label>
                                                     </div>
                                                 </div>
@@ -939,6 +939,6 @@
         showStep(currentStep);
     });
 </script>
- 
+
 
 @endsection
