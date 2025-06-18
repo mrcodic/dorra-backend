@@ -202,11 +202,11 @@ $(document).ready(function () {
 
 
     // Bulk delete form submission
-    $(document).on("submit", "#bulk-delete-form", function (e) {
-        e.preventDefault();
-        const selectedIds = $(".category-checkbox:checked").map(function () {
-            return $(this).val();
-        }).get();
+    // $(document).on("submit", "#bulk-delete-form", function (e) {
+    //     e.preventDefault();
+    //     const selectedIds = $(".category-checkbox:checked").map(function () {
+    //         return $(this).val();
+    //     }).get();
 
         if (selectedIds.length === 0) {
             Toastify({
@@ -257,7 +257,6 @@ $(document).ready(function () {
             bulkDeleteOrders(selectedIds);
         }
     });
-});
 
 // Single order delete function
    $(document).on("submit", "#deleteOrderForm", function (e) {
@@ -302,67 +301,69 @@ $(document).ready(function () {
 
 
 // Bulk delete orders function
-function bulkDeleteOrders(selectedIds) {
-    $.ajax({
-        url: "/orders/bulk-delete",
-        method: "POST",
-        data: {
-            ids: selectedIds,
-            _token: $('meta[name="csrf-token"]').attr("content"),
-        },
-        beforeSend: function() {
-            // Show loading state
-            Toastify({
-                text: `Deleting ${selectedIds.length} order(s)...`,
-                duration: 1000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#17a2b8",
-                close: true,
-            }).showToast();
-        },
-        success: function (response) {
-            // Hide any open modals
-            $("#deleteOrdersModal").modal("hide");
-            
-            Toastify({
-                text: `${selectedIds.length} order(s) deleted successfully!`,
-                duration: 2000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#28a745",
-                close: true,
-            }).showToast();
+$(document).on("submit", "#bulk-delete-form", function (e) {
+        e.preventDefault();
+        const selectedIds = $(".category-checkbox:checked").map(function () {
+            return $(this).val();
+        }).get();
 
-            // Reset checkboxes and hide bulk delete container
-            resetBulkSelection();
-            
-            // Reload the DataTable
-            dt_user_table.ajax.reload(null, false);
-        },
-        error: function (xhr, status, error) {
-            // Hide any open modals
-            $("#deleteOrdersModal").modal("hide");
-            
-            let errorMessage = "Something went wrong while deleting orders!";
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
-            }
-            
-            Toastify({
-                text: errorMessage,
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#EA5455",
-                close: true,
-            }).showToast();
+        if (selectedIds.length === 0) return;
 
-            // Reset checkboxes and hide bulk delete container
+        $.ajax({
+            url: "orders/bulk-delete",
+            method: "POST",
+            data: {
+                ids: selectedIds,
+                _token: $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                $("#deleteOrdersModal").modal("hide");
+                Toastify({
+                    text: "Selected orders deleted successfully!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
+
+                
+
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".category-list-table").DataTable().ajax.reload(null, false);
+
+
             resetBulkSelection();
-        },
+            $(".order-list-table").DataTable().ajax.reload(null, false);
+
+            },
+            error: function () {
+                $("#deleteOrdersModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
+
+                // Reload DataTable
+
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".category-list-table").DataTable().ajax.reload(null, false);
+
+
+                
+
+            },
+        });
+
     });
-}
 
 // Reset bulk selection function
 function resetBulkSelection() {

@@ -211,8 +211,6 @@
                     $('#bulk-delete-container').hide();
                 }
             }
-
-
         });
     </script>
 

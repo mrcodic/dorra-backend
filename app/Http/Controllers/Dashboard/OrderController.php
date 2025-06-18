@@ -30,6 +30,7 @@ class OrderController extends DashboardController
         $this->createView = 'orders.create';
         $this->editView = 'orders.edit';
         $this->showView = 'orders.show';
+        $this->resourceTable = 'orders';
         $this->usePagination = true;
         $this->assoiciatedData = [
             'create' => [

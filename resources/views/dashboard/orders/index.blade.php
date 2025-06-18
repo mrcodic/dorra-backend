@@ -160,61 +160,71 @@
                         </tr>
                         </thead>
                     </table>
-                    <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                        <div class="delete-container">
-                            <p id="selected-count-text">0 Products are selected</p>
-                            <button id="delete-selected-btn"
-                                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
+                              <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                    <div class="delete-container">
+                        <p id="selected-count-text">0 Orders are selected</p>
+                        <button type="submit" id="delete-selected-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteOrdersModal"
+                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                            <i data-feather="trash-2"></i> Delete Selected
+                        </button>
+                        <form style="display: none;" id="bulk-delete-form" method="POST" action="{{ route('orders.bulk-delete') }}">
+                            @csrf
+                            <button type="submit" id="delete-selected-btn"
+                                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
-                        </div>
+                        </form>
+
+
                     </div>
-
-
                 </div>
-                @include('modals.categories.show-category')
-                @include('modals.categories.edit-category')
-                @include('modals.categories.add-category')
-        @include('modals.delete', [
-    'id' => 'deleteOrderModal',
-    'formId' => 'deleteOrderForm',
-    'title' => 'Delete Order',
-    'message' => 'Are you sure you want to delete this order? This action cannot be undone.',
-    'confirmText' => 'Yes, Delete Order'
-])
+            </div>
 
-@include('modals.delete',[
-            'id' => 'deleteOrdersModal',
-            'formId' => 'bulk-delete-form',
-            'title' => 'Delete Orders',
-            'confirmText' => 'Are you sure you want to delete this items?',
-            ])
-@endsection
+                    @include('modals.categories.show-category')
+                    @include('modals.categories.edit-category')
+                    @include('modals.categories.add-category')
+                    @include('modals.delete', [
+                        'id' => 'deleteOrderModal',
+                        'formId' => 'deleteOrderForm',
+                        'title' => 'Delete Order',
+                        'message' => 'Are you sure you want to delete this order? This action cannot be undone.',
+                        'confirmText' => 'Yes, Delete Order'
+                    ])
 
-@section('vendor-script')
-    {{-- Vendor js files --}}
-    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
-@endsection
+                    @include('modals.delete',[
+                                'id' => 'deleteOrdersModal',
+                                'formId' => 'bulk-delete-form',
+                                'title' => 'Delete Orders',
+                                'confirmText' => 'Are you sure you want to delete this items?',
+                                ])
+                    @endsection
 
-@section('page-script')
-    <script>
-        const ordersDataUrl = "{{ route('orders.data') }}";
-        const ordersCreateUrl = "{{ route('orders.create') }}";
-    </script>
+        @section('vendor-script')
+            {{-- Vendor js files --}}
+            <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+            <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+        @endsection
+
+        @section('page-script')
+            <script>
+                const ordersDataUrl = "{{ route('orders.data') }}";
+                const ordersCreateUrl = "{{ route('orders.create') }}";
+            </script>
 
     {{-- Page js files --}}
     <script src="{{ asset('js/scripts/pages/app-order-list.js') }}?v={{ time() }}"></script>
@@ -255,6 +265,55 @@
                 });
             });
         });
+
+
+        // bulk delete function for show number of orders selected
+        $(document).ready(function () {
+            // Select all toggle
+            $('#select-all-checkbox').on('change', function () {
+                $('.category-checkbox').prop('checked', this.checked);
+                updateBulkDeleteVisibility();
+            });
+
+            // When individual checkbox changes
+            $(document).on('change', '.category-checkbox', function () {
+                // If any is unchecked, uncheck "Select All"
+                if (!this.checked) {
+                    $('#select-all-checkbox').prop('checked', false);
+                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
+                    $('#select-all-checkbox').prop('checked', true);
+                }
+                updateBulkDeleteVisibility();
+            });
+
+
+            // On table redraw (e.g. pagination, search)
+            $(document).on('draw.dt', function () {
+                $('#bulk-delete-container').hide();
+                $('#select-all-checkbox').prop('checked', false);
+            });
+
+            // Close bulk delete container
+            $(document).on('click', '#close-bulk-delete', function () {
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+            });
+
+            // Update the bulk delete container visibility
+            function updateBulkDeleteVisibility() {
+                const selectedCheckboxes = $('.category-checkbox:checked');
+                const count = selectedCheckboxes.length;
+
+                if (count > 0) {
+                    $('#selected-count-text').text(`${count} Categor${count > 1  ? 'ies' : 'y'} are selected`);
+                    $('#bulk-delete-container').show();
+                } else {
+                    $('#bulk-delete-container').hide();
+                }
+            }
+        });
+    </script>
     </script>
 
 @endsection
