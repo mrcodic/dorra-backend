@@ -52,8 +52,8 @@ class OrderService extends BaseService
 {
     $orders = $this->repository
         ->query()
-        ->with($this->relations) 
-        ->withCount(['designs']) 
+        ->with($this->relations)
+        ->withCount(['designs'])
         ->when(request()->filled('search_value'), function ($query) {
             $locale = app()->getLocale();
             $search = request('search_value');
@@ -120,24 +120,37 @@ class OrderService extends BaseService
     public function templateCustomizations($request): void
     {
         $validatedData = $request->validated();
-        $design = $this->designRepository->find($validatedData["design_id"]);
+        $design = $this->designRepository->query()->find($validatedData['design_id']);
+        $this->handleTransaction(function () use ($validatedData, $design) {
+            $this->designRepository->update($validatedData, $validatedData['design_id']);
+            $syncData = collect($validatedData['specs'])->mapWithKeys(function ($spec) {
+                return [
+                    $spec['id'] => ['spec_option_id' => $spec['option']]
+                ];
+            })->toArray();
 
-        $productPrice = $this->productPriceRepository->query(["id", "price","quantity"])->whereKey($validatedData["price_id"])->first();
+            $design->specifications()->sync($syncData);
+        });
+
+        $productPrice = !empty($validatedData["product_price_id"]) ?
+            $this->productPriceRepository->query(["id", "price", "quantity"])->whereKey($validatedData["product_price_id"])->first()
+            : $design->product->base_price;
         $specsPrices = collect($validatedData["specs"])
             ->flatMap(function ($spec) {
                 return $this->specificationOptionRepository->query(["id", "price"])
-                    ->whereIn("id", $spec["options"])
-                    ->pluck("price");
+                    ->where("id", $spec["option"])
+                    ->value("price");
             })
             ->sum();
 
-        $subTotalPrice = $productPrice->price + $specsPrices;
-        $this->storeStepData(["pricing_details" => ["sub_total" => $subTotalPrice, 'quantity' => $productPrice->quantity ?? 1 ],
+        $subTotalPrice = $productPrice->price ?? +$specsPrices;
+        $this->storeStepData(["pricing_details" => ["sub_total" => $subTotalPrice, 'quantity' => $productPrice->quantity ?? 1],
             "design_info" => [
                 "id" => $design->id,
                 "design_image" => $design->getFirstMediaUrl("designs") ?: asset("images/default-photo.png"),
             ]]);
     }
+
 
     public function storeStep4($request): void
     {
@@ -279,12 +292,6 @@ class OrderService extends BaseService
 
         $order->designs()->attach($pivotData);
     }
-
-
-
-
-
-
 
     public function applyDiscountCode($request)
     {
