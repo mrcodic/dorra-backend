@@ -69,14 +69,14 @@ class TemplateController extends DashboardController
                     $data->withQueryString()->links('pagination::bootstrap-5')->render() .
                     '</div>';
             }
-            
+
             return Response::api(data: [
                 'cards'      => $cards,
                 'pagination' => $pagination,
                 'total'      => is_countable($data) ? count($data) : $data->total(),
             ]);
         }
-        
+
         return view("dashboard.templates.index", get_defined_vars());
     }
 
@@ -130,7 +130,7 @@ class TemplateController extends DashboardController
     public function storeTemplateAssets(Request $request)
     {
         $media = $this->templateService->storeTemplateAssets($request);
-        return Response::api(data: MediaResource::make($media)->response()->getData(true));
+        return Response::api(data: MediaResource::make($media));
 
     }
 }
