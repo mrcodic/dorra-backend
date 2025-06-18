@@ -7,6 +7,7 @@ use App\Models\Design;
 use App\Models\Template;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 
@@ -32,14 +33,9 @@ class StoreDesignFinalizationRequest extends BaseRequest
         $design = $this->design = Design::findOrFail($this->input('design_id'));
         return [
             "design_id" => ["required", "exists:designs,id"],
-            "product_price_id" => ["required_without:quantity", "exists:product_prices,id",function ($attribute, $value, $fail) use ($design) {
+            "product_price_id" => [Rule::requiredIf($design->product->prices->isNotEmpty()), "exists:product_prices,id",function ($attribute, $value, $fail) use ($design) {
              if (!$design->product->prices->contains($value)) {
                 $fail("The selected price is not valid for the chosen product.");
-            }
-            }],
-            "quantity" => ["nullable", "integer", "min:1",function ($attribute, $value, $fail) use ($design) {
-            if ($design->product->prices->isNotEmpty()) {
-                $fail("You cannot send quantity when product has prices.");
             }
             }],
             "specs" => ["required", "array"],
@@ -61,11 +57,5 @@ class StoreDesignFinalizationRequest extends BaseRequest
 
     }
 
-    public function passedValidation(): void
-    {
-        if ($this->design->product->prices->isNotEmpty()) {
-         $this->input("quantity" ,1);
-        }
-    }
 
 }
