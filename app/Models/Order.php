@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Design;
+use App\Models\OrderItem;
 use App\Models\OrderAddress;
 use App\Enums\Order\StatusEnum;
 use App\Observers\OrderObserver;
@@ -36,17 +37,25 @@ class Order extends Model
     }
 
 
-   public function designs()
-{
-    return $this->belongsToMany(Design::class, 'order_items', 'order_id', 'design_id')
-                ->withPivot(['quantity', 'base_price', 'custom_product_price', 'total_price'])
-                ->withTimestamps();
-}
+     public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 
+    public function designs()
+    {
+        return $this->belongsToMany(Design::class, 'order_items', 'order_id', 'design_id')
+                    ->withPivot(['quantity', 'base_price', 'custom_product_price', 'total_price'])
+                    ->withTimestamps();
+
+    }
 
     public function OrderAddress()
     {
         return $this->hasMany(OrderAddress::class);
     }
+
+
+
 
 }

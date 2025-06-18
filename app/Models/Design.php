@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Observers\DesignObserver;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
@@ -56,12 +57,17 @@ class Design extends Model implements HasMedia
     }
 
 
-    public function orders()
-{
-    return $this->belongsToMany(Order::class, 'order_items', 'design_id', 'order_id')
-                ->withPivot(['quantity', 'base_price', 'custom_product_price', 'total_price'])
-                ->withTimestamps();
-}
+ public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'order_items', 'design_id', 'order_id')
+                    ->withPivot(['quantity', 'base_price', 'custom_product_price', 'total_price'])
+                    ->withTimestamps();
+    }
+
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 
     public function productPrice(): BelongsTo
     {
