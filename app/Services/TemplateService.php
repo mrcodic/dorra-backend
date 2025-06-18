@@ -44,8 +44,8 @@ class TemplateService extends BaseService
 
             if (request()->ajax()) {
                 return $pageSize === null
-                    ? $query->get()                                  
-                    : $query->paginate($pageSize)->withQueryString(); 
+                    ? $query->get()
+                    : $query->paginate($pageSize)->withQueryString();
             }
 
             return $this->repository->all(
