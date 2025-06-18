@@ -7,7 +7,7 @@
         <!-- Action Icon with Dropdown (Top Right) -->
         <div class="dropdown position-absolute top-0 end-0 m-1">
             <button class="btn btn-sm  border-0" type="button" id="actionDropdown{{ $template->id }}"
-                data-bs-toggle="dropdown" aria-expanded="false" style="background-color:#F9FDFC">
+                    data-bs-toggle="dropdown" aria-expanded="false" style="background-color:#F9FDFC">
                 <i data-feather="more-vertical"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionDropdown{{ $template->id }}">
@@ -170,36 +170,21 @@
                     // Logic to enable/disable buttons, example (adjust according to your rules):
 
                     // Enable Publish if design_data exists and status not published
-                    if (designData && status !== {
-                            {
-                                \
-                                App\ Enums\ Template\ StatusEnum::PUBLISHED - > value
-                            }
-                        }) {
+                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::PUBLISHED->value }}) {
                         $publishBtn.removeClass('disabled').prop('disabled', false);
                     } else {
                         $publishBtn.addClass('disabled').prop('disabled', true);
                     }
 
                     // Enable Draft if design_data exists and status not drafted
-                    if (designData && status !== {
-                            {
-                                \
-                                App\ Enums\ Template\ StatusEnum::DRAFTED - > value
-                            }
-                        }) {
+                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::DRAFTED->value }}) {
                         $draftBtn.removeClass('disabled').prop('disabled', false);
                     } else {
                         $draftBtn.addClass('disabled').prop('disabled', true);
                     }
 
                     // Enable Live if design_data exists and status not live (adjust this condition if needed)
-                    if (designData && status !== {
-                            {
-                                \
-                                App\ Enums\ Template\ StatusEnum::LIVE - > value
-                            }
-                        }) {
+                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::LIVE->value }}) {
                         $liveBtn.removeClass('disabled').prop('disabled', false);
                     } else {
                         $liveBtn.addClass('disabled').prop('disabled', true);
