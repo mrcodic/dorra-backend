@@ -51,8 +51,8 @@ class OrderService extends BaseService
 {
     $orders = $this->repository
         ->query()
-        ->with($this->relations) // هنا علاقات user + designs + OrderAddress مشمولة
-        ->withCount(['designs']) // لاحتساب عدد التصاميم في كل order
+        ->with($this->relations) 
+        ->withCount(['designs']) 
         ->when(request()->filled('search_value'), function ($query) {
             $locale = app()->getLocale();
             $search = request('search_value');
