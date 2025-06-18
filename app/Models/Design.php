@@ -56,10 +56,12 @@ class Design extends Model implements HasMedia
     }
 
 
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo(Order::class);
-    }
+    public function orders()
+{
+    return $this->belongsToMany(Order::class, 'order_items', 'design_id', 'order_id')
+                ->withPivot(['quantity', 'base_price', 'custom_product_price', 'total_price'])
+                ->withTimestamps();
+}
 
     public function productPrice(): BelongsTo
     {

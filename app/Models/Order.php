@@ -36,10 +36,12 @@ class Order extends Model
     }
 
 
-    public function designs()
-    {
-        return $this->hasMany(Design::class);
-    }
+   public function designs()
+{
+    return $this->belongsToMany(Design::class, 'order_items', 'order_id', 'design_id')
+                ->withPivot(['quantity', 'base_price', 'custom_product_price', 'total_price'])
+                ->withTimestamps();
+}
 
 
     public function OrderAddress()
