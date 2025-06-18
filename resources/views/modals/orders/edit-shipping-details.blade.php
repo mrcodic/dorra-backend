@@ -31,7 +31,7 @@
                     </div>
 
                     <!-- Ship to Customer Section -->
-                    <div id="shipSection">
+                    {{-- <div id="shipSection">
                         <!-- Existing Addresses -->
                         <div class="d-flex gap-2 ">
                             <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
@@ -49,6 +49,29 @@
                                     <p class="text-dark fs-16">15 street name, neighborhood</p>
                                 </label>
                             </div>
+                        </div> --}}
+
+
+                   <div id="shipSection">
+                        <!-- User Addresses -->
+                        <div class="d-flex gap-2">
+                            @foreach($model->user->addresses as $address)
+                                <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
+                                    <input class="form-check-input" type="radio" 
+                                        name="address_id" 
+                                        id="address{{ $address->id }}" 
+                                        value="{{ $address->id }}">
+
+                                    <label class="form-check-label fs-4 text-black" for="address{{ $address->id }}">
+                                        <p>{{ $address->label ?? 'No Label' }}</p>
+                                        <p class="text-dark fs-16">
+                                            {{ $address->line ?? 'No Address' }},
+                                            {{ optional($address->state)->name ?? 'No State' }},
+                                            {{ optional(optional($address->state)->country)->name ?? 'No Country' }}
+                                        </p>
+                                    </label>
+                                </div>
+                            @endforeach
                         </div>
 
                         <!-- Divider -->
@@ -86,7 +109,6 @@
                         </div>
                     </div>
 
-                    <!-- Pick Up Section -->
                     <div id="pickupSection" style="display: none;">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h5 class="form-label ">Pick up Location</h5>
