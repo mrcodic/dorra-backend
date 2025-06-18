@@ -42,21 +42,20 @@ class TemplateService extends BaseService
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
             ->latest();
 
+            if (request()->ajax()) {
+                return $pageSize === null
+                    ? $query->get()                                  
+                    : $query->paginate($pageSize)->withQueryString(); 
+            }
 
-        if (request()->ajax()) {
-            return $pageSize === null
-                ? $query->get()                                   // “all”
-                : $query->paginate($pageSize)->withQueryString(); // 16 / 50 / 100
+            return $this->repository->all(
+                $paginate,
+                $columns,
+                $relations,
+                filters: $this->filters,
+                perPage: $pageSize ?? $perPage
+            );
         }
-
-        return $this->repository->all(
-            $paginate,
-            $columns,
-            $relations,
-            filters: $this->filters,
-            perPage: $pageSize ?? $perPage
-        );
-    }
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
