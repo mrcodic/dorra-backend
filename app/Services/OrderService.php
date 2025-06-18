@@ -332,6 +332,9 @@ private function attachDesignsToOrder($order, $designsData)
     }
 }
 
+
+
+
     public function applyDiscountCode($request)
     {
         $orderStepData = Cache::get(getOrderStepCacheKey());

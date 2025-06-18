@@ -181,13 +181,13 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="d-flex gap-2 justify-content-between ">
+                    <div class="d-flex gap-2 justify-content-between ">
 
 
                     <button class="btn btn-outline-secondary">Discard Changes</button>
                     <div class="d-flex gap-1">
                         <button class="btn btn-outline-secondary">Cancel Order</button>
-                        <button class="btn btn-primary">Save changes</button>
+                        <button  class="btn btn-primary">Save changes</button>
                     </div>
                 </div>
             </div>
