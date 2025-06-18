@@ -37,7 +37,7 @@ class StoreDesignRequest extends BaseRequest
     protected function passedValidation()
     {
         $template = Template::find($this->template_id);
-        $cookie = request()->cookie('cookie_id');
+        $cookie = getCookieId('cookie_id');
         $activeGuard = getActiveGuard();
 
         if ($activeGuard === 'web') {
@@ -46,11 +46,6 @@ class StoreDesignRequest extends BaseRequest
             $userId = Auth::guard($activeGuard)->id();
         } else {
             $userId = null;
-        }
-
-        if (!$cookie) {
-            $cookie = (string) Str::uuid();
-            cookie()->queue(cookie('cookie_id', $cookie, 60 * 24 * 30));
         }
 
         $this->merge([

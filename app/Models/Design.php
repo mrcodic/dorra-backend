@@ -83,8 +83,20 @@ class Design extends Model implements HasMedia
 
     public function options(): BelongsToMany
     {
-        return $this->belongsToMany(ProductSpecificationOption::class,'design_product_specification','spec_option_id')
+        return $this->belongsToMany(ProductSpecificationOption::class,'design_product_specification',
+            'design_id',
+            'spec_option_id'  )
             ->using(DesignProductSpecification::class)
             ->withTimestamps();
     }
+
+    public function getTotalPriceAttribute(): float
+    {
+        $specOptions = $this->options()->select('price')->get();
+        $specTotalPrice = $specOptions->sum('price');
+        $productPrice = $this->productPrice->price ?? $this->product->base_price;
+
+        return $specTotalPrice + $productPrice;
+    }
+
 }
