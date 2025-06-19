@@ -19,6 +19,7 @@ class LoginController extends Controller
     public function __invoke(LoginRequest $request)
     {
         $user = $this->authService->login($request);
+
         return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode', 'socialAccounts', 'notificationTypes')));
     }
 
