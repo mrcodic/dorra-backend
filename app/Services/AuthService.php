@@ -111,10 +111,10 @@ class AuthService
 
     public function logout($request)
     {
-        if ($request->cookie('cookie_id')) {
-            cookie()->queue(cookie()->forget('cookie_id'));
-        }
-        return $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+        return cookie()->forget('cookie_id');
     }
+
 
 }
