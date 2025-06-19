@@ -116,6 +116,13 @@ class OrderController extends DashboardController
     }
 
 
+    public function editShippingAddresses(Request $request)
+    {
+        $this->orderService->editShippingAddresses($request);
+        return Response::api();
+    }
+
+
 
 
     
