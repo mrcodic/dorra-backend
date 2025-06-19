@@ -61,11 +61,9 @@ class DesignService extends BaseService
         return $this->repository->query()->where(function ($q) use ($cookieId, $userId) {
             if ($userId) {
                 $q->whereUserId($userId);
-            } elseif ($cookieId) {
+            }
+            if ($cookieId) {
                 $q->whereCookieId($cookieId);
-            } else {
-
-                $q->whereRaw('1 = 0');
             }
         })->latest()->paginate();
     }

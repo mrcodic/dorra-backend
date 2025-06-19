@@ -132,7 +132,10 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Review::class);
     }
 
-
+    public function designs(): HasMany
+    {
+        return $this->hasMany(Design::class);
+    }
 
 
 }
