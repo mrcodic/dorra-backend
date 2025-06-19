@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->string('delivery_method')->nullable()->change();
             $table->string('payment_method')->nullable()->change();
-            $table->tinyInteger('payment_status')->nullable()->default(1)->change();
+            $table->tinyInteger('payment_status')->nullable()->change();
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->string('delivery_method')->nullable(false)->change();
             $table->string('payment_method')->nullable(false)->change();
-            $table->tinyInteger('payment_status')->nullable(false)->default(1)->change();
+            $table->tinyInteger('payment_status')->nullable(false)->change();
         });
     }
 };

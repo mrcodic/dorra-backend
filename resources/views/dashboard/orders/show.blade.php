@@ -24,19 +24,22 @@
             <!-- Left Column -->
             <div class="col-12 col-md-4">
                 <h5 class="mb-2 fs-16 text-black">Customer Details</h5>
+                 <div class="mb-2">
+                    <label class="form-label fw-bold">First Name</label>
+                    <input type="text" class="form-control" name="first_name" value="{{ optional($model->OrderAddress->first())->first_name }}" readonly>
+                </div>
                 <div class="mb-2">
-                    <label class="form-label fw-bold">Name</label>
-                    <input type="text" class="form-control" name="name" value="{{ $model->user->first_name . ' ' . $model->user->last_name }}" disabled>
+                    <label class="form-label fw-bold">Last Name</label>
+                    <input type="text" class="form-control" name="last_name" value="{{ optional($model->OrderAddress->first())->last_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
-                    <input type="email" class="form-control" name="email" value="{{ $model->user->email }}" disabled>
+                    <input type="email" class="form-control" name="email" value="{{ optional($model->OrderAddress->first())->email }}" readonly>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone" value="{{ $model->user->phone_number }}" disabled>
+                    <input type="text" class="form-control" name="phone" value="{{ optional($model->OrderAddress->first())->phone }}" readonly>
                 </div>
-
                 <span class="text-black fs-16 fw-bold mb-1">Address:</span>
                 <div class="border rounded p-2 mb-2 text-black fs-5">
                     {{ optional($model->OrderAddress->first())->address_line }}, {{ optional($model->OrderAddress->first())->address_label}},<br>{{ optional($model->OrderAddress->first())->state }}, {{ optional($model->OrderAddress->first())->country }}
@@ -45,7 +48,6 @@
                 <div class="border rounded p-1 mb-2 text-black fs-5">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </div>
-
                 <div class="rounded p-1 d-flex align-items-center text-black" style="background-color: #FCF8FC;">
                     <i data-feather="truck" class="me-2"></i>
                     <div>
