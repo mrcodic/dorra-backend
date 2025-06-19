@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1\User\Cart;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddToCartRequest;
+use App\Http\Resources\CartResource;
+use App\Http\Resources\Design\DesignResource;
 use App\Services\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -20,6 +22,7 @@ class CartController extends Controller
 
     public function index()
     {
-        return $this->cartService->getCurrentUserOrGuestCart();
+        $cart =  $this->cartService->getCurrentUserOrGuestCart();
+        return Response::api(data: CartResource::make($cart));
     }
 }

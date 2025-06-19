@@ -50,15 +50,16 @@ class AppServiceProvider extends ServiceProvider
                         'next_page_url' => $data->nextPageUrl(),
                         'prev_page_url' => $data->previousPageUrl(),
                     ];
-
+                    if ($data instanceof ResourceCollection) {
+                        return $data->response()->setStatusCode($statusCode->value);
+                    }
                 }
                 else{
                     $response['data'] = $data;
                 }
+
             }
-            if ($data instanceof ResourceCollection) {
-                return $data->response()->setStatusCode($statusCode->value);
-            }
+
             return response()->json($response, $statusCode->value);
         });
          Model::preventLazyLoading(! app()->isProduction());

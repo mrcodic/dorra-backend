@@ -36,10 +36,11 @@ class AddToCartRequest extends BaseRequest
 
     public function passedValidation()
     {
-        $design = Design::find($this->input('design_id'));
-        $cookie = request()->cookie('cookie_id');
         $activeGuard = getActiveGuard();
         $userId = $activeGuard === 'sanctum' ? Auth::guard($activeGuard)->id() : null;
+        $design = Design::find($this->input('design_id'));
+        $cookie = request()->cookie('cookie_id');
+
         if (empty($userId) && empty($cookie)) {
             throw new HttpResponseException(
                 Response::api(
@@ -49,8 +50,16 @@ class AddToCartRequest extends BaseRequest
                 )
             );
         }
+
+       $totalPriceDesigns = Design::query()->with(['productPrice','product'])
+            ->where(function ($query) use ($cookie, $userId) {
+                $query->where('cookie_id', $cookie)
+                    ->orWhere('user_id', $userId);
+            })
+            ->get()->sum('total_price');
+
         $this->merge([
-            'price' => $design->total_price,
+            'price' => $totalPriceDesigns + $design->total_price,
             'user_id' => $userId,
             'cookie_id' => $cookie,
         ]);

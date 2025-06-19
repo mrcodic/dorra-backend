@@ -9,6 +9,7 @@ use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 
 class DesignService extends BaseService
@@ -58,14 +59,24 @@ class DesignService extends BaseService
     {
         $cookieId = request()->cookie('cookie_id');
         $userId = auth('sanctum')->id();
-        return $this->repository->query()->where(function ($q) use ($cookieId, $userId) {
-            if ($userId) {
-                $q->whereUserId($userId);
-            }
-            if ($cookieId) {
-                $q->whereCookieId($cookieId);
-            }
-        })->latest()->paginate();
+        if ( $userId || $cookieId) {
+            $designs = $this->repository->query()->where(function ($q) use ($cookieId, $userId) {
+                if ($userId) {
+                    $q->whereUserId($userId);
+                }
+                if ($cookieId) {
+                    $q->whereCookieId($cookieId);
+                }
+            })->latest()->paginate();
+        }
+        return $designs ?? new LengthAwarePaginator(
+            collect([]),
+            0,
+            10,
+            LengthAwarePaginator::resolveCurrentPage(),
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
+
     }
 
     public function getDesignVersions($designId)

@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\CartRepositoryInterface;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 
 class CartService extends BaseService
@@ -14,9 +15,9 @@ class CartService extends BaseService
         parent::__construct($repository);
     }
 
-    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad =[])
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $model = $this->repository->query()->firstOrCreate(Arr::except($validatedData,'design_id'));
+        $model = $this->repository->query()->firstOrCreate(Arr::except($validatedData, 'design_id'));
         $model->designs()->attach([
             $validatedData['design_id'] => ['status' => 1]
         ]);
@@ -26,20 +27,22 @@ class CartService extends BaseService
     public function getCurrentUserOrGuestCart()
     {
         $cookieId = request()->cookie('cookie_id');
-        $userId = request()->user()?->id;
+        $userId = auth('sanctum')->id();
+        if ($userId || $cookieId) {
+            $cart = $this->repository->query()
+                ->where(function ($q) use ($cookieId, $userId) {
+                    if ($userId) {
+                        $q->whereUserId($userId);
+                    }
+                    if ($cookieId) {
+                        $q->whereCookieId($cookieId);
+                    }
+                })
+                ->with('designs')
+                ->first();
+        }
 
-        $cart = $this->repository->query()
-            ->where(function ($q) use ($cookieId, $userId) {
-                if ($userId) {
-                    $q->whereUserId($userId);
-                }
-                if ($cookieId) {
-                    $q->whereCookieId($cookieId);
-                }
-            })
-            ->with('designs')
-            ->first();
-        return $cart ?? ['designs' => []];
+        return $cart ?? collect([]);
     }
 
 }

@@ -22,7 +22,7 @@ class DesignController extends Controller
     public function index()
     {
         $designs = $this->designService->getDesigns();
-        return Response::api(data: DesignResource::collection($designs));
+        return Response::api(data: DesignResource::collection($designs)->response()->getData(true));
 
     }
     public function store(StoreDesignRequest $request)
