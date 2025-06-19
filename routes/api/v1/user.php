@@ -4,6 +4,7 @@
 use App\Http\Controllers\Dashboard\TemplateController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
+    Auth\LogoutController,
     Auth\OtpController,
     Auth\RegisterController,
     Auth\ResetPasswordController,
@@ -52,6 +53,8 @@ Route::apiResource('/carts',CartController::class)->only(['store','index','destr
 Route::get('sub-categories', [MainController::class, 'subCategories']);
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post('logout', LogoutController::class);
 
     Route::group(['prefix' => 'profile', 'controller' => ProfileController::class], function () {
         Route::get('/', 'show');
