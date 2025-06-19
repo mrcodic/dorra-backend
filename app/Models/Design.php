@@ -57,11 +57,11 @@ class Design extends Model implements HasMedia
     }
 
 
- public function orders(): BelongsToMany
+    public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'order_items', 'design_id', 'order_id')
-                    ->withPivot(['quantity', 'base_price', 'custom_product_price', 'total_price'])
-                    ->withTimestamps();
+            ->withPivot(['quantity', 'base_price', 'custom_product_price', 'total_price'])
+            ->withTimestamps();
     }
 
     public function orderItems(): HasMany
@@ -81,14 +81,11 @@ class Design extends Model implements HasMedia
             ->withPivot('spec_option_id')->withTimestamps();
     }
 
-    public function options(): BelongsToMany
+    public function cartItems(): BelongsToMany
     {
-        return $this->belongsToMany(ProductSpecificationOption::class,'design_product_specification',
-            'design_id',
-            'spec_option_id'  )
-            ->using(DesignProductSpecification::class)
-            ->withTimestamps();
+        return $this->belongsToMany(Cart::class, 'cart_items');
     }
+
 
     public function getTotalPriceAttribute(): float
     {
@@ -97,6 +94,15 @@ class Design extends Model implements HasMedia
         $productPrice = $this->productPrice->price ?? $this->product->base_price;
 
         return $specTotalPrice + $productPrice;
+    }
+
+    public function options(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductSpecificationOption::class, 'design_product_specification',
+            'design_id',
+            'spec_option_id')
+            ->using(DesignProductSpecification::class)
+            ->withTimestamps();
     }
 
 }
