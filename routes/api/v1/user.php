@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\OtpController,
     Auth\RegisterController,
     Auth\ResetPasswordController,
+    Cart\CartController,
     Category\CategoryController,
     Design\DesignController,
     General\MainController,
@@ -15,8 +16,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\ProfileController,
     Profile\UserNotificationTypeController,
     SaveController,
-    ShippingAddress\ShippingAddressController,
-};
+    ShippingAddress\ShippingAddressController};
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
@@ -48,7 +48,7 @@ Route::get('templates', [TemplateController::class, 'getProductTemplates'])->nam
 Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 Route::post('/design-finalization', [DesignController::class, 'designFinalization']);
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
-
+Route::apiResource('/carts',CartController::class)->only(['store','index','destroy']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
