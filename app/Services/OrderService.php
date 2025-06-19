@@ -74,7 +74,7 @@ class OrderService extends BaseService
             return $order->designs_count ?? 0;
         })
         ->addColumn('total_price', function ($order) {
-            return $order->total_price ? number_format($order->total_price, 2) : '0.00';
+            return $order->total_price ?? 0;
         })
         ->addColumn('status', function ($order) {
             return $order->status ? $order->status->label() : 'No Status';

@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\OrderAddress;
 use App\Enums\Order\StatusEnum;
 use App\Observers\OrderObserver;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -31,6 +32,14 @@ class Order extends Model
     protected $casts = [
         'status' => StatusEnum::class,
     ];
+
+    public function totalPrice(): Attribute
+    {
+        return Attribute::get(function ($value) {
+            return fmod($value, 1) == 0.0 ? (int)$value : $value;
+
+        });
+    }
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

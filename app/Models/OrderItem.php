@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Order;
 use App\Models\Design;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
@@ -19,7 +20,13 @@ class OrderItem extends Model
 
 
 
+    public function totalPrice(): Attribute
+    {
+        return Attribute::get(function ($value) {
+            return fmod($value, 1) == 0.0 ? (int)$value : $value;
 
+        });
+    }
     public function order()
     {
         return $this->belongsTo(Order::class);
