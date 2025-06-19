@@ -361,6 +361,24 @@ private function attachDesignToOrder($order, $designInfo, $pricingDetails)
     return $model->load($relationsToLoad);
 }
 
+public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
+{
+    $model = $this->repository->update($validatedData, $id);
+    if (isset($validatedData['address_id'])) {
+        $newAddressId = $validatedData['address_id'];
+        $addresses = $model->OrderAddress;
+        foreach ($addresses as $address) {
+            if ($address->id == $newAddressId) {
+                $address->shipping_address_id = $model->OrderAddress->shipping_address_id; 
+            } else {
+                $address->shipping_address_id = null;
+            }
+            $address->save();
+        }
+    }
+    return $model->load($relationsToLoad);
+}
+
    public function downloadPDF()
 {
     $orderData = Cache::get(getOrderStepCacheKey()) ?? [];

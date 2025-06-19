@@ -63,7 +63,7 @@
                         <div class="d-flex gap-2 flex-wrap">
                             @foreach ($model->user->addresses as $address)
                                 <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                                    <input class="form-check-input" type="radio" name="address_id"
+                                    <input class="form-check-input" type="radio" name="shipping_address_id"
                                         id="address{{ $address->id }}" value="{{ $address->id }}"
                                         {{ $shippingAddressId == $address->id ? 'checked' : '' }}>
                                     <label class="form-check-label fs-4 text-black" for="address{{ $address->id }}">
