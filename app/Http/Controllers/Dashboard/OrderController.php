@@ -39,6 +39,9 @@ class OrderController extends DashboardController
                 'tags' => $this->tagRepository->all(columns: ['id', 'name']),
                 'templates' => [],
             ],
+            'edit' => [
+                'countries' => $this->countryRepository->query(['id', 'name'])->get(),
+                ],
         ];
     }
 
@@ -99,7 +102,6 @@ class OrderController extends DashboardController
 
 
 
-
        public function store(Request $request)
     {
             $order = $this->orderService->storeResource([]);
@@ -112,6 +114,8 @@ class OrderController extends DashboardController
                 ]
             );
     }
+
+
 
 
     

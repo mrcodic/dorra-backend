@@ -107,6 +107,7 @@ class OrderService extends BaseService
         Cache::put($cacheKey, $merged, now()->addHours(1));
     }
 
+
     public function storeStep2($request): void
     {
         $product = $this->productRepository->find($request->product_id);
@@ -117,6 +118,7 @@ class OrderService extends BaseService
         ]);
 
     }
+
     public function templateCustomizations($request): void
     {
         $validatedData = $request->validated();
@@ -175,137 +177,100 @@ class OrderService extends BaseService
         ]]);
     }
 
-public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
-{
-    $cacheKey = getOrderStepCacheKey();
-    $orderStepData = Cache::get($cacheKey, []);
+    public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
+    {
+        $cacheKey = getOrderStepCacheKey();
+        $orderStepData = Cache::get($cacheKey, []);
 
-    if (empty($orderStepData)) {
-        throw new Exception('Order step data not found in cache');
+        if (empty($orderStepData)) {
+            throw new Exception('Order step data not found in cache');
+        }
+
+        $orderData = [
+            'user_id' => $orderStepData['user_info']['id'] ?? null,
+            'subtotal' => $orderStepData['pricing_details']['sub_total'] ?? 0,
+            'total_price' => $orderStepData['pricing_details']['total'] ?? 0,
+            'discount_amount' => $orderStepData['pricing_details']['discount'] ?? 0,
+            'delivery_amount' => $orderStepData['pricing_details']['delivery'] ?? 0,
+            'tax_amount' => $orderStepData['pricing_details']['tax'] ?? 0,
+            'status' => StatusEnum::CONFIRMED,
+            'order_number' => 'TEMP-' . uniqid(),
+        ];
+
+        $orderData = array_merge($orderData, $validatedData);
+        $order = $this->repository->create($orderData);
+
+        if (!empty($orderStepData['specs'])) {
+            $this->attachSpecificationOptions($order, $orderStepData['specs']);
+        }
+
+        $this->saveOrderAddress($order, $orderStepData['personal_info'], $orderStepData['shipping_info']);
+
+        // FIXED: Use 'design_info' instead of 'designs'
+        if (!empty($orderStepData['design_info'])) {
+            $this->attachDesignToOrder($order, $orderStepData['design_info'], $orderStepData['pricing_details']);
+        }
+
+        if (!empty($relationsToStore)) {
+            foreach ($relationsToStore as $relation => $data) {
+                $order->$relation()->create($data);
+            }
+        }
+
+        if (!empty($relationsToLoad)) {
+            $order->load($relationsToLoad);
+        }
+
+        Cache::forget($cacheKey);
+        return $order;
     }
 
-    $orderData = [
-        'user_id' => $orderStepData['user_info']['id'] ?? null,
-        'subtotal' => $orderStepData['pricing_details']['sub_total'] ?? 0,
-        'total_price' => $orderStepData['pricing_details']['total'] ?? 0,
-        'discount_amount' => $orderStepData['pricing_details']['discount'] ?? 0,
-        'delivery_amount' => $orderStepData['pricing_details']['delivery'] ?? 0,
-        'tax_amount' => $orderStepData['pricing_details']['tax'] ?? 0,
-        'status' => StatusEnum::CONFIRMED,
-        'order_number' => 'TEMP-' . uniqid(),
-    ];
+    private function attachSpecificationOptions($order, $specs): void
+    {
+        $specData = [];
 
-    $orderData = array_merge($orderData, $validatedData);
-    $order = $this->repository->create($orderData);
+        foreach ($specs as $spec) {
+            foreach ($spec['options'] as $optionId) {
+                $option = $this->specificationOptionRepository->find($optionId);
+                $specData[$optionId] = [
+                    'specification_id' => $spec['id'],
+                    'price' => $option->price ?? 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
 
-    if (!empty($orderStepData['specs'])) {
-        $this->attachSpecificationOptions($order, $orderStepData['specs']);
-    }
-
-    $this->saveOrderAddress($order, $orderStepData['personal_info'], $orderStepData['shipping_info']);
-
-    // FIXED: Use 'design_info' instead of 'designs'
-    if (!empty($orderStepData['design_info'])) {
-        $this->attachDesignToOrder($order, $orderStepData['design_info'], $orderStepData['pricing_details']);
-    }
-
-    if (!empty($relationsToStore)) {
-        foreach ($relationsToStore as $relation => $data) {
-            $order->$relation()->create($data);
+        if (!empty($specData)) {
+            $order->specificationOptions()->attach($specData);
         }
     }
 
-    if (!empty($relationsToLoad)) {
-        $order->load($relationsToLoad);
+    private function saveOrderAddress($order, $personalInfo, $shippingInfo)
+    {
+        $order->OrderAddress()->create([
+            'order_id' => $order->id,
+            'type' => 'shipping',
+            'first_name' => $personalInfo['first_name'] ?? null,
+            'last_name' => $personalInfo['last_name'] ?? null,
+            'email' => $personalInfo['email'] ?? null,
+            'phone' => $personalInfo['phone_number'] ?? null,
+            'address_label' => $shippingInfo['label'] ?? null,
+            'address_line' => $shippingInfo['line'] ?? null,
+            'state' => $shippingInfo['state'] ?? null,
+            'country' => $shippingInfo['country'] ?? null,
+        ]);
     }
 
-    Cache::forget($cacheKey);
-    return $order;
-}
-
-private function attachSpecificationOptions($order, $specs): void
-{
-    $specData = [];
-
-    foreach ($specs as $spec) {
-        foreach ($spec['options'] as $optionId) {
-            $option = $this->specificationOptionRepository->find($optionId);
-            $specData[$optionId] = [
-                'specification_id' => $spec['id'],
-                'price' => $option->price ?? 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-    }
-
-    if (!empty($specData)) {
-        $order->specificationOptions()->attach($specData);
-    }
-}
-
-private function saveOrderAddress($order, $personalInfo, $shippingInfo)
-{
-    $order->OrderAddress()->create([
-        'order_id' => $order->id,
-        'type' => 'shipping',
-        'first_name' => $personalInfo['first_name'] ?? null,
-        'last_name' => $personalInfo['last_name'] ?? null,
-        'email' => $personalInfo['email'] ?? null,
-        'phone' => $personalInfo['phone_number'] ?? null,
-        'address_label' => $shippingInfo['label'] ?? null,
-        'address_line' => $shippingInfo['line'] ?? null,
-        'state' => $shippingInfo['state'] ?? null,
-        'country' => $shippingInfo['country'] ?? null,
-    ]);
-}
-
-private function attachDesignToOrder($order, $designInfo, $pricingDetails)
-{
-    $design = Design::with(['product', 'productPrice'])->find($designInfo['id']);
-
-    if (!$design) {
-        return;
-    }
-
-    $quantity = $pricingDetails['quantity'] ?? 1;
-
-    if ($design->product_price_id && $design->productPrice) {
-        $customProductPrice = $design->productPrice->price;
-        $basePrice = 0;
-        $totalPrice = $customProductPrice * $quantity;
-    } else {
-        $customProductPrice = 0;
-        $basePrice = $design->product ? $design->product->base_price : 0;
-        $totalPrice = $basePrice * $quantity;
-    }
-
-    $pivotData = [
-        $design->id => [
-            'quantity' => $quantity,
-            'base_price' => $basePrice,
-            'custom_product_price' => $customProductPrice,
-            'total_price' => $totalPrice,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]
-    ];
-
-    $order->designs()->attach($pivotData);
-}
-
-private function attachDesignsToOrder($order, $designsData)
-{
-    $pivotData = [];
-
-    foreach ($designsData as $designData) {
-        $design = Design::with(['product', 'productPrice'])->find($designData['id']);
+    private function attachDesignToOrder($order, $designInfo, $pricingDetails)
+    {
+        $design = Design::with(['product', 'productPrice'])->find($designInfo['id']);
 
         if (!$design) {
-            continue;
+            return;
         }
 
-        $quantity = $designData['quantity'] ?? 1;
+        $quantity = $pricingDetails['quantity'] ?? 1;
 
         if ($design->product_price_id && $design->productPrice) {
             $customProductPrice = $design->productPrice->price;
@@ -317,22 +282,78 @@ private function attachDesignsToOrder($order, $designsData)
             $totalPrice = $basePrice * $quantity;
         }
 
-        $pivotData[$design->id] = [
-            'quantity' => $quantity,
-            'base_price' => $basePrice,
-            'custom_product_price' => $customProductPrice,
-            'total_price' => $totalPrice,
-            'created_at' => now(),
-            'updated_at' => now(),
+        $pivotData = [
+            $design->id => [
+                'quantity' => $quantity,
+                'base_price' => $basePrice,
+                'custom_product_price' => $customProductPrice,
+                'total_price' => $totalPrice,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ];
-    }
 
-    if (!empty($pivotData)) {
         $order->designs()->attach($pivotData);
     }
+
+    private function attachDesignsToOrder($order, $designsData)
+    {
+        $pivotData = [];
+
+        foreach ($designsData as $designData) {
+            $design = Design::with(['product', 'productPrice'])->find($designData['id']);
+
+            if (!$design) {
+                continue;
+            }
+
+            $quantity = $designData['quantity'] ?? 1;
+
+            if ($design->product_price_id && $design->productPrice) {
+                $customProductPrice = $design->productPrice->price;
+                $basePrice = 0;
+                $totalPrice = $customProductPrice * $quantity;
+            } else {
+                $customProductPrice = 0;
+                $basePrice = $design->product ? $design->product->base_price : 0;
+                $totalPrice = $basePrice * $quantity;
+            }
+
+            $pivotData[$design->id] = [
+                'quantity' => $quantity,
+                'base_price' => $basePrice,
+                'custom_product_price' => $customProductPrice,
+                'total_price' => $totalPrice,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        if (!empty($pivotData)) {
+            $order->designs()->attach($pivotData);
+        }
+    }
+
+
+public function updateResource($validatedData, $id, $relationsToLoad = [])
+{
+    // Update main order data
+    $model = $this->repository->update($validatedData, $id);
+
+    // Handle OrderAddress update
+    if (isset($validatedData['first_name']) || isset($validatedData['last_name']) || isset($validatedData['email']) || isset($validatedData['phone'])) {
+        $orderAddress = $model->OrderAddress()->first(); 
+        if ($orderAddress) {
+            $orderAddress->update([
+                'first_name'   => $validatedData['first_name'] ?? $orderAddress->first_name,
+                'last_name'    => $validatedData['last_name'] ?? $orderAddress->last_name,
+                'email'        => $validatedData['email'] ?? $orderAddress->email,
+                'phone'        => $validatedData['phone'] ?? $orderAddress->phone,
+            ]);
+        }
+    }
+    return $model->load($relationsToLoad);
 }
-
-
 
 
     public function applyDiscountCode($request)
