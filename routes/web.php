@@ -189,6 +189,7 @@ Route::middleware('auth')->group(function () {
             Route::post("step4", 'storeStep4')->name('step4');
             Route::post("step5", 'storeStep5')->name('step5');
             Route::post("step6", 'storeStep6')->name('step6');
+            Route::put("edit-shiiping-addresses", 'editShippingAddresses')->name('edit-shipping-addresses');
 
 
         });

@@ -42,7 +42,10 @@ class OrderService extends BaseService
 
 
     {
-        $this->relations = ['user', 'OrderAddress'];
+        $this->relations = [
+        'user.addresses.state.country',
+        'OrderAddress'
+    ];
         parent::__construct($repository);
     }
 
@@ -324,8 +327,6 @@ private function attachDesignToOrder($order, $designInfo, $pricingDetails)
 }
 
 
-
-
     public function applyDiscountCode($request)
     {
         $orderStepData = Cache::get(getOrderStepCacheKey());
@@ -339,8 +340,26 @@ private function attachDesignToOrder($order, $designInfo, $pricingDetails)
             'code' => ['required', 'string', new ValidDiscountCode($product, $category)],
         ]);
         return $this->discountCodeRepository->query()->where($validated)->first();
-
     }
+
+
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+{
+    $model = $this->repository->update($validatedData, $id);
+
+    if (isset($validatedData['first_name']) || isset($validatedData['last_name']) || isset($validatedData['email']) || isset($validatedData['phone'])) {
+        $orderAddress = $model->OrderAddress()->first(); 
+        if ($orderAddress) {
+            $orderAddress->update([
+                'first_name'   => $validatedData['first_name'] ?? $orderAddress->first_name,
+                'last_name'    => $validatedData['last_name'] ?? $orderAddress->last_name,
+                'email'        => $validatedData['email'] ?? $orderAddress->email,
+                'phone'        => $validatedData['phone'] ?? $orderAddress->phone,
+            ]);
+        }
+    }
+    return $model->load($relationsToLoad);
+}
 
    public function downloadPDF()
 {
