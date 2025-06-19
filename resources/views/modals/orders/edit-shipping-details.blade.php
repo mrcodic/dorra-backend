@@ -50,29 +50,31 @@
                                 </label>
                             </div>
                         </div> --}}
+                        @php
+                            $shippingAddress = $model->OrderAddress->firstWhere('shipping_address_id', '!=', null);
+                        @endphp
 
-
-                   <div id="shipSection">
-                        <!-- User Addresses -->
-                        <div class="d-flex gap-2">
-                            @foreach($model->user->addresses as $address)
-                                <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                                    <input class="form-check-input" type="radio" 
-                                        name="address_id" 
-                                        id="address{{ $address->id }}" 
-                                        value="{{ $address->id }}">
-
-                                    <label class="form-check-label fs-4 text-black" for="address{{ $address->id }}">
-                                        <p>{{ $address->label ?? 'No Label' }}</p>
-                                        <p class="text-dark fs-16">
-                                            {{ $address->line ?? 'No Address' }},
-                                            {{ optional($address->state)->name ?? 'No State' }},
-                                            {{ optional(optional($address->state)->country)->name ?? 'No Country' }}
-                                        </p>
-                                    </label>
-                                </div>
-                            @endforeach
-                        </div>
+                <div id="shipSection">
+                    <div class="d-flex gap-2">
+                        @foreach($model->OrderAddress as $address)
+                            <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
+                                <input class="form-check-input" type="radio" 
+                                    name="address_id" 
+                                    id="address{{ $address->id }}" 
+                                    value="{{ $address->id }}"
+                                    {{ optional($shippingAddress)->id == $address->id ? 'checked' : '' }}>
+                                <label class="form-check-label fs-4 text-black" for="address{{ $address->id }}">
+                                    <p>{{ $address->address_label ?? 'No Label' }}</p>
+                                    <p class="text-dark fs-16">
+                                        {{ $address->address_line ?? 'No Address' }},
+                                        {{ $address->state ?? 'No State' }},
+                                        {{ $address->country ?? 'No Country' }}
+                                    </p>
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
 
                         <!-- Divider -->
                         <div class="text-center my-3 fw-bold">OR</div>
@@ -89,14 +91,24 @@
                                 </select>
                             </div>
                             <div class="row g-2 mb-2">
-                                <div class="col">
-                                    <label class="form-label ">Country</label>
-                                    <input type="text" class="form-control">
+                               <div class="col">
+                                    <label class="form-label">Country</label>
+                                    <select class="form-select" name="country_id">
+                                        <option value="">Select Country</option>
+                                        @foreach($associatedData['countries'] as $country)
+                                            <option value="{{ $country->id }}" {{ (old('country_id') == $country->id) ? 'selected' : '' }}>
+                                                {{ $country->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col">
-                                    <label class="form-label ">State</label>
-                                    <input type="text" class="form-control">
-                                </div>
+                            <label class="form-label label-text">State</label>
+                            <select id="modalAddressState" name="state_id" class="form-select address-state-select">
+                                <option value="">Select a State</option>
+                            </select>
+                            <div class="invalid-feedback" id="state_id-error"></div>
+                            <div id="state-url" data-url="{{ route('states') }}"></div>
                             </div>
                             <div class="mb-2">
                                 <label class="form-label">Address Line</label>
@@ -238,5 +250,12 @@
         // Initialize feather icons
         feather.replace();
     });
+
+
+
+
+
+    // handle add new address
+
 </script>
 
