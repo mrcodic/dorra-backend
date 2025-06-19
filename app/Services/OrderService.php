@@ -241,6 +241,7 @@ class OrderService extends BaseService
             'last_name' => $personalInfo['last_name'] ?? null,
             'email' => $personalInfo['email'] ?? null,
             'phone' => $personalInfo['phone_number'] ?? null,
+            'shipping_address_id' => $shippingInfo['id'] ?? null,
             'address_label' => $shippingInfo['label'] ?? null,
             'address_line' => $shippingInfo['line'] ?? null,
             'state' => $shippingInfo['state'] ?? null,
