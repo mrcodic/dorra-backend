@@ -4,18 +4,21 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Repositories\Implementations\SocialAccountRepository;
+use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthService
 {
     use OtpTrait;
 
-    public function __construct(public UserRepositoryInterface $userRepository,
-                                public SocialAccountRepository $socialAccountRepository)
+    public function __construct(public UserRepositoryInterface   $userRepository,
+                                public SocialAccountRepository   $socialAccountRepository,
+                                public DesignRepositoryInterface $designRepository)
     {
     }
 
@@ -33,16 +36,6 @@ class AuthService
         $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
         $user->token = $plainTextToken;
         return $user->refresh();
-    }
-
-    public function login($validatedData): ?User
-    {
-        $user = $this->userRepository->findByEmail($validatedData['email']);
-        $expiresAt = ($validatedData['remember'] ?? false) ? now()->addDays(30) : now()->addHours(5);
-        $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
-        $user->token = $plainTextToken;
-        return $user;
-
     }
 
     public function redirectToGoogle()
@@ -81,5 +74,53 @@ class AuthService
             return false;
         }
     }
+
+    public function login($validatedData): ?User
+    {
+        $user = $this->userRepository->findByEmail($validatedData['email']);
+
+        $expiresAt = ($validatedData['remember'] ?? false) ? now()->addDays(30) : now()->addHours(5);
+        $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
+        $user->token = $plainTextToken;
+
+        $oldCookieId = request()->cookie('cookie_id');
+
+        // Get designs with no user assigned but have matching cookie_id
+        $cookieQuery = $this->designRepository->query()
+            ->whereNull('user_id')
+            ->whereCookieId($oldCookieId);
+
+        if ($cookieQuery->exists()) {
+            $cookieQuery->update(['user_id' => $user->id]);
+        }
+
+        // Get designs with same cookie_id that already have a user assigned
+        $cookieUserQuery = $this->designRepository->query()
+            ->whereNotNull('user_id')
+            ->whereCookieId($oldCookieId);
+
+        if ($cookieUserQuery->exists()) {
+            // Generate new cookie ID
+            $newCookie = (string) Str::uuid();
+
+            // Queue it in response
+            cookie()->queue(cookie('cookie_id', $newCookie, 60 * 24 * 30)); // 30 days
+
+            // Fetch rows to copy
+            $designsToCopy = $cookieUserQuery->get();
+
+            // Duplicate each row with the new user and new cookie_id
+            foreach ($designsToCopy as $design) {
+                $newDesign = $design->replicate(); // Copy all attributes
+                $newDesign->user_id = $user->id;
+                $newDesign->cookie_id = $newCookie;
+                $newDesign->save();
+            }
+        }
+
+        return $user;
+    }
+
+
 
 }

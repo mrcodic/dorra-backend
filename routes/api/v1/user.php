@@ -49,6 +49,7 @@ Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 Route::post('/design-finalization', [DesignController::class, 'designFinalization']);
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
 Route::apiResource('/carts',CartController::class)->only(['store','index','destroy']);
+Route::get('sub-categories', [MainController::class, 'subCategories']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -68,7 +69,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('bulk-delete-saved', 'destroyBulk');
     });
 
-    Route::get('sub-categories', [MainController::class, 'subCategories']);
 
     Route::get('states', [MainController::class, 'states']);
     Route::get('countries', [MainController::class, 'countries']);

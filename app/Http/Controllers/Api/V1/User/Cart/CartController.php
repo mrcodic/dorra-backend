@@ -20,6 +20,6 @@ class CartController extends Controller
 
     public function index()
     {
-        return$this->cartService->getCurrentUserOrGuestCart();
+        return $this->cartService->getCurrentUserOrGuestCart();
     }
 }
