@@ -28,6 +28,10 @@ class UpdateOrderRequest extends BaseRequest
     {
         return [
 
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'phone' => ['required', 'string', 'max:255'],
         ];
     }
 

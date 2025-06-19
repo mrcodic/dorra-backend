@@ -31,16 +31,20 @@
                 <h5 class="mb-2 fs-16 text-black">Customer Details</h5>
 
                 <div class="mb-2">
-                    <label class="form-label fw-bold">Name</label>
-                    <input type="text" class="form-control" name="name" value="{{ $model->user->first_name . ' ' . $model->user->last_name}}">
+                    <label class="form-label fw-bold">First Name</label>
+                    <input type="text" class="form-control" name="first_name" value="{{ optional($model->OrderAddress->first())->first_name }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-bold">Last Name</label>
+                    <input type="text" class="form-control" name="last_name" value="{{ optional($model->OrderAddress->first())->last_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
-                    <input type="email" class="form-control" name="email" value="{{ $model->user->email}}">
+                    <input type="email" class="form-control" name="email" value="{{ optional($model->OrderAddress->first())->email }}">
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone_number" value="{{ $model->user->phone_number}}">
+                    <input type="text" class="form-control" name="phone" value="{{ optional($model->OrderAddress->first())->phone }}">
                 </div>
 
 
@@ -209,7 +213,36 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://unpkg.com/feather-icons"></script>
 
+<script>
+      $('#order-form').on('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                $.ajax({
+                    url: this.action,
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        if (res.success) {
+                            sessionStorage.setItem('order_updated', 'true');
+                            window.location.href = '/orders';
+                        }
+                    },
+                    error: function (xhr) {
+                        $.each(xhr.responseJSON.errors, (k, msgArr) => {
+                            Toastify({
+                                text: msgArr[0],
+                                duration: 4000,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#EA5455",
+                                close: true
+                            }).showToast();
+                        });
+                    }
+                });
+            });
 
-
-
+</script>
 @endsection

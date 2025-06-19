@@ -36,7 +36,6 @@ class ShippingAddressController extends Controller
     {
         $shippingAddress = $this->shippingAddressService->updateResource($request->validated(), $shippingAddress->id);
         return Response::api(data: ShippingAddressResource::make($shippingAddress));
-
     }
 
     public function destroy(ShippingAddress $shippingAddress)
