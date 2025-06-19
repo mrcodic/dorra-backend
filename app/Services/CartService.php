@@ -29,10 +29,13 @@ class CartService extends BaseService
         $userId = request()->user()?->id;
 
         $cart = $this->repository->query()
-            ->when($userId, function ($query) use ($userId) {
-                $query->whereUserId( $userId);
-            }, function ($query) use ($cookieId) {
-                $query->whereCookieId($cookieId);
+            ->where(function ($q) use ($cookieId, $userId) {
+                if ($userId) {
+                    $q->whereUserId($userId);
+                }
+                if ($cookieId) {
+                    $q->whereCookieId($cookieId);
+                }
             })
             ->with('designs')
             ->first();
