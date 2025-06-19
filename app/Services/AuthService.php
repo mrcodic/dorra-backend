@@ -112,8 +112,22 @@ class AuthService
     public function logout($request)
     {
         $user = $request->user();
-        $user->currentAccessToken()->delete();
-        return cookie()->forget('cookie_id');
+
+        $oldCookieId = request()->cookie('cookie_id');
+        if ($oldCookieId)
+        {
+            $this->designRepository->query()
+                ->whereNotNull('user_id')
+                ->whereCookieId($oldCookieId)
+                ->update(['cookie_id' => null]);
+
+            $this->cartRepository->query()
+                ->whereNotNull('user_id')
+                ->whereCookieId($oldCookieId)
+                ->update(['cookie_id' => null]);
+        }
+
+        return  $user->currentAccessToken()->delete();
     }
 
 
