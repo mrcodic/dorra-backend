@@ -67,7 +67,7 @@
                 </div>
 
 
-                <table class="category-list-table table">
+                <table class="location-list-table table">
                     <thead class="table-light">
                     <tr>
                         <th>
@@ -119,7 +119,7 @@
             ])
             @include('modals.location.add-location')
            @include('modals.location.edit-location')
-        
+
 
 
         </div>
@@ -158,7 +158,7 @@
 
     <script>
         $(document).ready(function () {
-          
+
             // Select all toggle
             $('#select-all-checkbox').on('change', function () {
                 $('.category-checkbox').prop('checked', this.checked);
@@ -209,4 +209,5 @@
 
     {{-- Page js files --}}
     <script src="{{ asset('js/scripts/pages/app-location.js') }}?v={{ time() }}"></script>
+
 @endsection

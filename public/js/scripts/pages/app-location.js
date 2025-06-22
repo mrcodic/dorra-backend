@@ -3,7 +3,7 @@ $.ajaxSetup({
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
 });
-const dt_user_table = $(".category-list-table").DataTable({
+const dt_user_table = $(".location-list-table").DataTable({
     processing: true,
     serverSide: true,
     searching: false, // using custom search
@@ -39,15 +39,7 @@ const dt_user_table = $(".category-list-table").DataTable({
                                    data-bs-toggle="modal"
                                    data-bs-target="#modals-slide-in"
                                    data-id="${data}"
-                                   data-name_ar="${row.name_ar}"
-                                   data-name_en="${row.name_en}"
-                                   data-image="${row.image}"
-                                   data-image_id="${row.imageId}"
-                                   data-description_en="${row.description_en}"
-                                   data-description_ar="${row.description_ar}"
-                                   data-subcategories="${row.children.map((child) => child.name)}"
-                                   data-products="${row.no_of_products}"
-                                   data-showdate="${row.show_date}">
+                            >
                                                 <i data-feather="eye"></i>
                                 </a>
 
@@ -56,22 +48,13 @@ const dt_user_table = $(".category-list-table").DataTable({
                data-bs-toggle="modal"
                                    data-bs-target="#modals-slide-in"
                                    data-id="${data}"
-                                   data-name_ar="${row.name_ar}"
-                                   data-name_en="${row.name_en}"
-                                   data-image="${row.image}"
-                                   data-image_id="${row.imageId}"
-                                   data-description_en="${row.description_en}"
-                                   data-description_ar="${row.description_ar}"
-                                   data-subcategories="${row.children.map((child) => child.name)}"
-                                   data-products="${row.no_of_products}"
-                                   data-showdate="${row.show_date}">
+                                >
 
                 <i data-feather="edit-3"></i>
               </a>
 
       <a href="#" class="text-danger  open-delete-category-modal"
    data-id="${data}"
-   data-name="${row.name}"
    data-action="/categories/${data}"
    data-bs-toggle="modal"
    data-bs-target="#deleteCategoryModal">
@@ -240,7 +223,7 @@ $(document).ready(function () {
                 $("#add-upload-progress").addClass("d-none");
                 $("#add-upload-progress .progress-bar").css("width", "0%");
 
-                $(".category-list-table").DataTable().ajax.reload(); // reload your table
+                $(".location-list-table").DataTable().ajax.reload(); // reload your table
             },
             error: function (xhr) {
                 var errors = xhr.responseJSON.errors;
@@ -268,7 +251,7 @@ $(document).ready(function () {
 
     $(document).on("click", ".view-details", function (e) {
         // Get the data from attributes
-        var $table = $(".category-list-table").DataTable();
+        var $table = $(".location-list-table").DataTable();
         var $row = $(this).closest("tr");
         var rowData = $table.row($row).data();
         const subCategories = rowData.children.map(function (child) {
@@ -313,7 +296,7 @@ $(document).ready(function () {
 
     $(document).on("click", ".edit-details", function (e) {
         // Get the data from attributes
-        var $table = $(".category-list-table").DataTable();
+        var $table = $(".location-list-table").DataTable();
         var $row = $(this).closest("tr");
         var rowData = $table.row($row).data();
         const subCategories = rowData.children.map(function (child) {
@@ -462,7 +445,7 @@ $(document).ready(function () {
                 $("#edit-image-preview").attr("src", "");
                 $("#edit-image-details").hide();
 
-                $('.category-list-table').DataTable().ajax.reload();
+                $('.location-list-table').DataTable().ajax.reload();
             },
             error: function (xhr) {
                 saveLoader.addClass('d-none');
@@ -528,7 +511,7 @@ $(document).ready(function () {
                     backgroundColor: "#28C76F",
                     close: true,
                 }).showToast();
-                $(".category-list-table").DataTable().ajax.reload(null, false);
+                $(".location-list-table").DataTable().ajax.reload(null, false);
             },
             error: function () {
                 $("#deleteCategoryModal").modal("hide");
@@ -540,7 +523,7 @@ $(document).ready(function () {
                     backgroundColor: "#EA5455", // red
                     close: true,
                 }).showToast();
-                    $(".category-list-table").DataTable().ajax.reload(null, false);
+                    $(".location-list-table").DataTable().ajax.reload(null, false);
             },
         });
     });
@@ -578,7 +561,7 @@ $(document).ready(function () {
                 $('#bulk-delete-container').hide();
                 $('.category-checkbox').prop('checked', false);
                 $('#select-all-checkbox').prop('checked', false);
-                $(".category-list-table").DataTable().ajax.reload(null, false);
+                $(".location-list-table").DataTable().ajax.reload(null, false);
 
             },
             error: function () {
@@ -597,7 +580,7 @@ $(document).ready(function () {
                 $('#bulk-delete-container').hide();
                 $('.category-checkbox').prop('checked', false);
                 $('#select-all-checkbox').prop('checked', false);
-                $(".category-list-table").DataTable().ajax.reload(null, false);
+                $(".location-list-table").DataTable().ajax.reload(null, false);
 
             },
         });

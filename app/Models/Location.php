@@ -4,12 +4,13 @@ namespace App\Models;
 
 use App\Enums\Location\DayEnum;
 use App\Models\State;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Sanctum\Guard;
 use Illuminate\Database\Eloquent\Model;
 
 class Location extends Model
 {
- protected $fillable = [
+    protected $fillable = [
         'name',
         'state_id',
         'address_line',
@@ -21,14 +22,14 @@ class Location extends Model
     ];
 
 
-        protected $casts = [
-            'days' => DayEnum::class,
-        ];
+    protected $casts = [
+        'days' => DayEnum::class,
+    ];
 
 
-        public function state()
-        {
-            return $this->belongsTo(State::class);
-        }
+    public function state(): BelongsTo
+    {
+        return $this->belongsTo(State::class);
+    }
 
 }

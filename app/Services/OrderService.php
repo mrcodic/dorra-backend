@@ -17,7 +17,6 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
-use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
 use App\Repositories\Interfaces\ProductPriceRepositoryInterface;
 use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
@@ -350,7 +349,7 @@ private function attachDesignToOrder($order, $designInfo, $pricingDetails)
     $model = $this->repository->update($validatedData, $id);
 
     if (isset($validatedData['first_name']) || isset($validatedData['last_name']) || isset($validatedData['email']) || isset($validatedData['phone'])) {
-        $orderAddress = $model->OrderAddress()->first(); 
+        $orderAddress = $model->OrderAddress()->first();
         if ($orderAddress) {
             $orderAddress->update([
                 'first_name'   => $validatedData['first_name'] ?? $orderAddress->first_name,
@@ -363,7 +362,7 @@ private function attachDesignToOrder($order, $designInfo, $pricingDetails)
     return $model->load($relationsToLoad);
 }
 public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
-{   
+{
     $model = $this->repository->find($id);
     if (!$model) {
         throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
@@ -372,15 +371,15 @@ public function editShippingAddresses($validatedData, $id, $relationsToLoad = []
     if (isset($validatedData['shipping_address_id'])) {
         $newAddressId = $validatedData['shipping_address_id'];
         $shippingAddress = ShippingAddress::with(['state.country'])->findOrFail($newAddressId);
-        
+
         $orderAddress = $model->OrderAddress()->where('type', 'shipping')->first();
-        
+
         if ($orderAddress) {
             $orderAddress->update([
                 'shipping_address_id' => $newAddressId,
                 'address_label' => $shippingAddress->label,
                 'address_line'  => $shippingAddress->line,
-                'state'         => optional($shippingAddress->state)->name, 
+                'state'         => optional($shippingAddress->state)->name,
                 'country'       => optional($shippingAddress->state?->country)->name,
             ]);
         } else {
@@ -390,7 +389,7 @@ public function editShippingAddresses($validatedData, $id, $relationsToLoad = []
                 'shipping_address_id' => $newAddressId,
                 'address_label' => $shippingAddress->label,
                 'address_line'  => $shippingAddress->line,
-                'state'         => optional($shippingAddress->state)->name, 
+                'state'         => optional($shippingAddress->state)->name,
                 'country'       => optional($shippingAddress->state?->country)->name,
             ]);
         }

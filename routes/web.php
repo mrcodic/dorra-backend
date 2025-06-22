@@ -125,7 +125,7 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'locations', 'as' => 'locations.', 'controller' => LocationController::class,], function () {
         Route::get('/data', [LocationController::class, 'getData'])->name('data');
-        Route::get('/dashboard', [LocationController::class, 'dashboard'])->name('data');
+        Route::get('/dashboard', [LocationController::class, 'dashboard'])->name('dashboard');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/logistics', LocationController::class)->except('show');
@@ -190,7 +190,7 @@ Route::middleware('auth')->group(function () {
             Route::post("step4", 'storeStep4')->name('step4');
             Route::post("step5", 'storeStep5')->name('step5');
             Route::post("step6", 'storeStep6')->name('step6');
-            Route::put('orders/{order}/edit-shiiping-addresses', 'editShippingAddresses')->name('edit-shipping-addresses');
+            Route::put('orders/{order}/edit-shipping-addresses', 'editShippingAddresses')->name('edit-shipping-addresses');
             Route::delete('orders/{orderId}/designs/{designId}', 'deleteDesign')->name('designs.delete');
 
 

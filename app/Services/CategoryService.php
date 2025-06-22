@@ -2,11 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Category;
+
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use Illuminate\Http\JsonResponse;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 use Yajra\DataTables\DataTables;
 
 class CategoryService extends BaseService

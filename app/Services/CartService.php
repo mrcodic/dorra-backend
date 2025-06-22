@@ -2,16 +2,16 @@
 
 namespace App\Services;
 
-
-use App\Models\Cart;
 use App\Repositories\Interfaces\CartRepositoryInterface;
-
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Repositories\Interfaces\DesignRepositoryInterface;
 use Illuminate\Support\Arr;
 
 class CartService extends BaseService
 {
-    public function __construct(CartRepositoryInterface $repository)
+    public function __construct(CartRepositoryInterface $repository,
+    public DesignRepositoryInterface $designRepository,
+    public CartRepositoryInterface $cartRepository,
+    )
     {
         parent::__construct($repository);
     }
@@ -48,6 +48,16 @@ class CartService extends BaseService
         }
 
         return $cart ?? null;
+    }
+
+    public function deleteItemFromCart($designId, $cartId)
+    {
+        $this->handleTransaction(function () use ($designId, $cartId) {
+            $design = $this->designRepository->find($designId);
+            $design->cartItems()->detach($cartId);
+            $cart =  $this->cartRepository->find($cartId);
+            $cart->update(['price' => $cart->price - $design->total_price]);
+        });
     }
 
 }

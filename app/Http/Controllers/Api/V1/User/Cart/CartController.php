@@ -26,4 +26,11 @@ class CartController extends Controller
         $data =  $cart ? CartResource::make($cart) : (object)[];
         return Response::api(data: $data );
     }
+
+    public function destroy(Request $request, $cartId)
+    {
+        $request->validate(['design_id' => 'required','exists:designs,id']);
+        $this->cartService->deleteItemFromCart($request->design_id,$cartId);
+        return Response::api();
+    }
 }

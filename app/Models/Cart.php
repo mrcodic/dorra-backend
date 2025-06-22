@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Cart extends Model
 {
@@ -16,5 +17,9 @@ class Cart extends Model
     {
         return $this->belongsToMany(Design::class,'cart_items')
             ->withTimestamps();
+    }
+    public function cartItems(): BelongsToMany
+    {
+        return $this->belongsToMany(Cart::class, 'cart_items');
     }
 }
