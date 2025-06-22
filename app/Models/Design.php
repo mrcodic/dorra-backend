@@ -95,7 +95,7 @@ class Design extends Model implements HasMedia
         $this->load('productPrice');
         $specOptions = $this->options()->select('price')->get();
         $specTotalPrice = $specOptions->sum('price');
-        $productPrice = $this->productPrice->price ?? $this->product?->base_price;
+        $productPrice = $this->productPrice->price ?? $this->product?->base_price * $this->quantity;
         return $specTotalPrice + $productPrice;
     }
 

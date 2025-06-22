@@ -44,13 +44,18 @@ Route::prefix('login')->controller(LoginController::class)->group(function () {
 });
 
 Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+Route::get('sub-categories', [MainController::class, 'subCategories']);
+
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
+
 Route::apiResource('/designs', DesignController::class)->except(['destroy']);
+Route::post('designs/{design}/add-quantity',[DesignController::class, 'addQuantity']);
 Route::post('/design-finalization', [DesignController::class, 'designFinalization']);
+
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
+
 Route::apiResource('/carts',CartController::class)->only(['store','index','destroy']);
-Route::get('sub-categories', [MainController::class, 'subCategories']);
 
 Route::middleware('auth:sanctum')->group(function () {
 

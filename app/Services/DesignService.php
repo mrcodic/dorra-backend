@@ -10,6 +10,7 @@ use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\ValidationException;
 
 
 class DesignService extends BaseService
@@ -121,4 +122,18 @@ class DesignService extends BaseService
         });
     }
 
+    /**
+     * @throws ValidationException
+     */
+    public function addQuantity($request, $id)
+    {
+        $design = $this->repository->find( $id);
+        if ($design->product->has_custom_prices)
+        {
+            throw ValidationException::withMessages([
+                'custom_prices' => 'this product has custom prices',
+            ]);
+        }
+       return $design->update($request->only(['quantity']));
+    }
 }
