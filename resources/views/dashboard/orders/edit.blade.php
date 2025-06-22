@@ -364,8 +364,8 @@
 
 
 
-    handleAjaxFormSubmit('#DeleteDesignForm', {
-        successMessage: ' design deleted successfully!',
+    handleAjaxFormSubmit('.delete-design-form', {
+        successMessage: 'design deleted successfully!',
     });
 
 </script>
