@@ -13,4 +13,9 @@ class OrderAddress extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function shippingAddress()
+    {
+        return $this->belongsTo(ShippingAddress::class);
+    }
 }

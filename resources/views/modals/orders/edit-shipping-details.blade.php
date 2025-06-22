@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="editOrderShippingModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="editTagForm" enctype="multipart/form-data" action="">
+            <form id="editTagForm" enctype="multipart/form-data" action="{{ route('orders.edit-shipping-addresses', ['order' => $model->id]) }}">>
                 @csrf
                 @method('PUT')
                 <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close">×</button>
@@ -10,6 +10,8 @@
                 </div>
                 <div class="modal-body flex-grow-1">
                     <input type="hidden" id="edit-tag-id">
+
+                    <input type="hidden" name="order_id" value="{{ $model->id }}">
 
                     <!-- Shipping Method Selection -->
                     <div class="mb-3" id="shippingMethodSection">
@@ -286,7 +288,17 @@
 
 
 
+ handleAjaxFormSubmit('#editTagForm', {
+        successMessage: 'Shipping details updated successfully!',
+        closeModal: '#yourModalId', 
+        onSuccess: function(response, $form) {
+            console.log('Response:', response);
 
+        },
+        onError: function(xhr, $form) {
+            console.error('Error:', xhr);
+        }
+    });
 
     // handle add new address
 </script>

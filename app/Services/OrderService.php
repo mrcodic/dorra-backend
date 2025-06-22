@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Design;
 use App\Models\Product;
 use App\Enums\Order\StatusEnum;
+use App\Models\ShippingAddress;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\Facades\Cache;
@@ -360,23 +361,41 @@ private function attachDesignToOrder($order, $designInfo, $pricingDetails)
     }
     return $model->load($relationsToLoad);
 }
-
 public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
-{
-    $model = $this->repository->update($validatedData, $id);
-    if (isset($validatedData['address_id'])) {
-        $newAddressId = $validatedData['address_id'];
-        $addresses = $model->OrderAddress;
-        foreach ($addresses as $address) {
-            if ($address->id == $newAddressId) {
-                $address->shipping_address_id = $model->OrderAddress->shipping_address_id; 
-            } else {
-                $address->shipping_address_id = null;
-            }
-            $address->save();
+{   
+    $model = $this->repository->find($id);
+    if (!$model) {
+        throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
+    }
+
+    if (isset($validatedData['shipping_address_id'])) {
+        $newAddressId = $validatedData['shipping_address_id'];
+        $shippingAddress = ShippingAddress::with(['state.country'])->findOrFail($newAddressId);
+        
+        $orderAddress = $model->OrderAddress()->where('type', 'shipping')->first();
+        
+        if ($orderAddress) {
+            $orderAddress->update([
+                'shipping_address_id' => $newAddressId,
+                'address_label' => $shippingAddress->label,
+                'address_line'  => $shippingAddress->line,
+                'state'         => optional($shippingAddress->state)->name, 
+                'country'       => optional($shippingAddress->state?->country)->name,
+            ]);
+        } else {
+            $model->OrderAddress()->create([
+                'order_id' => $model->id,
+                'type' => 'shipping',
+                'shipping_address_id' => $newAddressId,
+                'address_label' => $shippingAddress->label,
+                'address_line'  => $shippingAddress->line,
+                'state'         => optional($shippingAddress->state)->name, 
+                'country'       => optional($shippingAddress->state?->country)->name,
+            ]);
         }
     }
-    return $model->load($relationsToLoad);
+
+    return $model->load(!empty($relationsToLoad) ? $relationsToLoad : ['OrderAddress']);
 }
 
    public function downloadPDF()

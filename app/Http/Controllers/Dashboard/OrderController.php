@@ -116,12 +116,23 @@ class OrderController extends DashboardController
     }
 
 
-    public function editShippingAddresses(Request $request)
-    {
-        $this->orderService->editShippingAddresses($request);
-        return Response::api();
-    }
+public function editShippingAddresses(Request $request, $orderId)
+{
+    $validated = $request->validate([
+        'shipping_address_id' => ['required', 'exists:shipping_addresses,id'],
+    ]);
 
+    $order = $this->orderService->editShippingAddresses($validated, $orderId);
+
+    return Response::api(
+        message: 'Shipping address updated successfully!',
+        data: [
+            'order_id'     => $order->id,
+            'order_number' => $order->order_number,
+            'redirect_url' => route('orders.index', $order->id),
+        ]
+    );
+}
 
 
 
