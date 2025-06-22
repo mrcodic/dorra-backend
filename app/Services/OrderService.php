@@ -10,6 +10,7 @@ use App\Enums\Order\StatusEnum;
 use App\Models\ShippingAddress;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Interfaces\UserRepositoryInterface;
@@ -397,6 +398,33 @@ public function editShippingAddresses($validatedData, $id, $relationsToLoad = []
 
     return $model->load(!empty($relationsToLoad) ? $relationsToLoad : ['OrderAddress']);
 }
+
+
+    public function deleteDesignFromOrder($orderId, $designId)
+    {
+        return DB::transaction(function () use ($orderId, $designId) {
+            $order = Order::with(['orderItems'])->findOrFail($orderId);
+
+            $orderItem = $order->orderItems()->where('design_id', $designId)->first();
+
+            if (!$orderItem) {
+                throw new Exception('Design not found in this order.');
+            }
+
+            $orderItem->delete();
+
+            $subtotal = $order->orderItems()->sum(DB::raw('quantity * base_price'));
+            $totalPrice = $subtotal + $order->delivery_amount + $order->tax_amount - $order->discount_amount;
+
+            $order->update([
+                'subtotal'    => $subtotal,
+                'total_price' => $totalPrice
+            ]);
+
+            return $order->refresh();
+        });
+    }
+
 
    public function downloadPDF()
 {

@@ -190,6 +190,7 @@ Route::middleware('auth')->group(function () {
             Route::post("step5", 'storeStep5')->name('step5');
             Route::post("step6", 'storeStep6')->name('step6');
             Route::put('orders/{order}/edit-shiiping-addresses', 'editShippingAddresses')->name('edit-shipping-addresses');
+            Route::delete('orders/{orderId}/designs/{designId}', 'deleteDesign')->name('designs.delete');
 
 
         });

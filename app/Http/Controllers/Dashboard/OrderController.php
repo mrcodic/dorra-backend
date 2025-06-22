@@ -42,7 +42,14 @@ class OrderController extends DashboardController
             'edit' => [
                 'countries' => $this->countryRepository->query(['id', 'name'])->get(),
                 ],
+        
+            ];
+
+        $this->methodRelations = [
+          
+            'edit' => ['designs.template.product' , 'designs.product'],
         ];
+
     }
 
 
@@ -134,7 +141,28 @@ public function editShippingAddresses(Request $request, $orderId)
     );
 }
 
+    public function deleteDesign(Request $request, $orderId, $designId)
+{
+    try {
+        $order = $this->orderService->deleteDesignFromOrder($orderId, $designId);
 
+        return Response::api(
+            message: 'Design deleted and order updated successfully!',
+            data: [
+                'order_id'     => $order->id,
+                'order_number' => $order->order_number,
+                'redirect_url' => route('orders.index', $order->id),
+            ]
+        );
+
+    } catch (Exception $e) {
+        return Response::api(
+            message: $e->getMessage(),
+            data: null,
+            status: 400
+        );
+    }
+}
 
     
     public function downloadPDF()

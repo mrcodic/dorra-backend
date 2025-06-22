@@ -94,52 +94,42 @@
 
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
 
-                @foreach($model->designs as $design)
+                @foreach ($model->designs as $design)
                     @php
-                        $product = optional(optional($design->template)->product);
+                        $product = $design->product; // assuming this relation exists
                     @endphp
-
-                <!-- Items List -->
-                 <div class="mb-1">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div class="d-flex">
-                        <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
-                        <div>
-                            <div class="fw-bold text-black fs-16">
-                                {{ $product->name ?? 'No Product Found' }}
+                    <div class="mb-1">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="d-flex">
+                                <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+                                <div>
+                                    <div class="fw-bold text-black fs-16">
+                                        {{ $product->name ?? 'No Product Found' }}
+                                    </div>
+                                    <div class="text-dark fs-5">
+                                        Qty: {{ $design->pivot->quantity }}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="text-dark fs-5">
-                                Qty: {{ $design->pivot->quantity }}
+                            <div class="text-end">
+                                <div class="fw-bold text-black">
+                                    ${{ number_format($product->base_price ?? 0, 2) }}
+                                </div>
+                                @if ($model->orderItems->count() > 1 )
+                                    <form class="delete-design-form d-inline" id="DeleteDesignForm" method="POST" action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $design->id]) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn" data-design-id="{{ $design->id }}">
+                                            Delete
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <div class="fw-bold text-black">
-                            ${{ number_format($product->base_price ?? 0, 2) }}
-                        </div>
-                        <button class="btn btn-sm btn-outline-danger mt-1">Delete</button>
-                    </div>
-                </div>
-            </div>
-            @endforeach
+                @endforeach
 
 
-                {{-- <!-- Repeat for more items -->
-                <div class="mb-3 border-bottom pb-2">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="d-flex">
-                            <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
-                            <div>
-                                <div class="fw-bold text-black fs-16">Product Name 1</div>
-                                <div class="text-dark fs-5">Qty: 2</div>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold text-black">$40.00</div>
-                            <button class="btn btn-sm btn-outline-danger mt-1">Delete</button>
-                        </div>
-                    </div>
-                </div> --}}
 
                 <!-- Pricing Summary -->
                 <h5 class="mt-3 mb-1 text-black fs-16">Pricing Details</h5>
@@ -370,6 +360,12 @@
             $('.form-control, .form-select').removeClass('is-invalid');
             $('#addAddressForm')[0].reset();
         });
+    });
+
+
+
+    handleAjaxFormSubmit('#DeleteDesignForm', {
+        successMessage: ' design deleted successfully!',
     });
 
 </script>
