@@ -407,6 +407,9 @@
 
 
 
+    handleAjaxFormSubmit('.delete-design-form', {
+        successMessage: 'design deleted successfully!',
+    });
 
 </script>
 @endsection
