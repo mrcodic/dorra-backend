@@ -74,9 +74,8 @@
                             <input type="checkbox" id="select-all-checkbox">
                         </th>
                         <th>Name</th>
-                        <th>SubCategories</th>
-                        <th>NO.of Products</th>
-                        <th>Added Date</th>
+                        <th>Country</th>
+                        <th>State</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -152,7 +151,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        const categoriesDataUrl = "{{ route('categories.data') }}";
+        const categoriesDataUrl = "{{ route('locations.data') }}";
         const categoriesCreateUrl = "{{ route('categories.create') }}";
         const locale = "{{ app()->getLocale() }}";
     </script>

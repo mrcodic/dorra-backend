@@ -123,7 +123,7 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/offers', OfferController::class)->except('show');
 
-    Route::group(['prefix' => 'locations', 'as' => 'logistics.', 'controller' => LocationController::class,], function () {
+    Route::group(['prefix' => 'locations', 'as' => 'locations.', 'controller' => LocationController::class,], function () {
         Route::get('/data', [LocationController::class, 'getData'])->name('data');
         Route::get('/dashboard', [LocationController::class, 'dashboard'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');

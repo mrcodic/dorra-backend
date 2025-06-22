@@ -26,9 +26,8 @@ const dt_user_table = $(".category-list-table").DataTable({
             }
         },
         {data: "name"},
-        {data: "sub_categories"},
-        {data: "no_of_products"},
-        {data: "added_date"},
+        {data: "country"},
+        {data: "state"},
         {
             data: "id",
             orderable: false,

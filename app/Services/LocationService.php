@@ -42,11 +42,11 @@ class LocationService extends BaseService
             return $location->name ?? '-';
         })
         ->addColumn('state', function ($location) {
-            return $location->state->name ?? '-';
-        })
-        ->addColumn('country', function ($location) {
-            return $location->state?->country?->name ?? '-';
-        })
+    return optional($location->state)->name ?? '-';
+})
+       ->addColumn('country', function ($location) {
+    return optional($location->state?->country)->name ?? '-';
+})
 
         ->make();
 }
