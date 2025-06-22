@@ -9,25 +9,21 @@ use Yajra\DataTables\Facades\DataTables;
 
 class LocationService extends BaseService
 {
-
         protected array $relations;
-
-
-
     public function __construct(
         LocationRepositoryInterface         $repository,
+        
     )
-
     {
         $this->relations = [
+        'state',
         'state.country',
     ];
         parent::__construct($repository);
     }
-
-   public function getData()
+  public function getData()
 {
-    $orders = $this->repository
+    $locations = $this->repository
         ->query()
         ->with($this->relations)
         ->when(request()->filled('search_value'), function ($query) {
@@ -37,18 +33,17 @@ class LocationService extends BaseService
         })
         ->latest();
 
-    return DataTables::of($orders)
-        ->addColumn('name', function ($order) {
+    return DataTables::of($locations)
+        ->addColumn('name', function ($location) {
             return $location->name ?? '-';
         })
         ->addColumn('state', function ($location) {
-    return optional($location->state)->name ?? '-';
-})
-       ->addColumn('country', function ($location) {
-    return optional($location->state?->country)->name ?? '-';
-})
-
-        ->make();
+            return optional($location->state)->name ?? '-';
+        })
+        ->addColumn('country', function ($location) {
+            return optional($location->state?->country)->name ?? '-';
+        })
+        ->make(true);
 }
 
 }
