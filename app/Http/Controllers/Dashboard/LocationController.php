@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Services\CategoryService;
 use App\Services\LocationService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Base\DashboardController;
