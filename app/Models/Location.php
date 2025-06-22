@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Location\DayEnum;
 use App\Models\State;
 use Laravel\Sanctum\Guard;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +22,7 @@ class Location extends Model
 
 
         protected $casts = [
-            'days' => 'array',
+            'days' => DayEnum::class,
         ];
 
 

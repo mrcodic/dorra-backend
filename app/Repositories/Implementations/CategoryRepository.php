@@ -30,7 +30,6 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
         ])
             ->whereNotNull('parent_id')
             ->get();
-
     }
 
 }

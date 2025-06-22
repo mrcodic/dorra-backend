@@ -209,5 +209,5 @@
     </script>
 
     {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-category-list.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-location.js') }}?v={{ time() }}"></script>
 @endsection
