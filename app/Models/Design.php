@@ -27,6 +27,9 @@ class Design extends Model implements HasMedia
         'product_price_id',
         'quantity',
     ];
+    protected $attributes = [
+        'quantity' => 1
+    ];
 
     public function user(): BelongsTo
     {
@@ -89,6 +92,7 @@ class Design extends Model implements HasMedia
 
     public function getTotalPriceAttribute(): float
     {
+        $this->load('productPrice');
         $specOptions = $this->options()->select('price')->get();
         $specTotalPrice = $specOptions->sum('price');
         $productPrice = $this->productPrice->price ?? $this->product?->base_price;

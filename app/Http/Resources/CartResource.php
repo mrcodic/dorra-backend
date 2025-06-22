@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Design\DesignResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,7 +17,8 @@ class CartResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "designs" => $this->whenLoaded('designs'),
+            "designs" => DesignResource::collection( $this->whenLoaded('designs')),
+            'price' => $this->price,
         ];
     }
 }

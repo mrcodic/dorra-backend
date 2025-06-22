@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Models\Cart;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -17,8 +18,12 @@ class CartService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $model = $this->repository->query()->firstOrCreate(Arr::except($validatedData, 'design_id'));
-        $model->designs()->attach([
+        $model = $this->repository->query()->firstOrCreate([
+            'user_id' => Arr::get($validatedData, 'user_id'),
+            'cookie_id' => Arr::get($validatedData, 'cookie_id'),
+        ],
+            Arr::except($validatedData, 'design_id'));
+        $model->designs()->syncWithoutDetaching([
             $validatedData['design_id'] => ['status' => 1]
         ]);
         return $model->load($relationsToLoad);
@@ -34,15 +39,15 @@ class CartService extends BaseService
                     if ($userId) {
                         $q->whereUserId($userId);
                     }
-                    if ($cookieId) {
+                    elseif ($cookieId) {
                         $q->whereCookieId($cookieId);
                     }
                 })
-                ->with('designs')
+                ->with(['designs.product'])
                 ->first();
         }
 
-        return $cart ?? collect([]);
+        return $cart ?? null;
     }
 
 }

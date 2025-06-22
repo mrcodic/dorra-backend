@@ -23,6 +23,7 @@ class CartController extends Controller
     public function index()
     {
         $cart =  $this->cartService->getCurrentUserOrGuestCart();
-        return Response::api(data: CartResource::make($cart));
+        $data =  $cart ? CartResource::make($cart) : (object)[];
+        return Response::api(data: $data );
     }
 }

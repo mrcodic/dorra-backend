@@ -16,6 +16,7 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -24,10 +25,13 @@ class ProductResource extends JsonResource
             'has_custom_prices' => $this->when($this->has_custom_prices,true,false),
             'base_price' => $this->base_price,
             'custom_prices' =>ProductPriceResource::collection($this->whenLoaded('prices')),
-            'rating' => $this->rating,
-            'reviews_count' => $this->reviews_count,
+            'rating' => $this->whenLoaded('reviews','rating'),
+            'reviews_count' => $this->whenLoaded('reviews','reviews_count'),
             'main_image' => MediaResource::make($this->getFirstMedia('product_main_image')),
-            'all_product_images' => MediaResource::collection($this->getAllProductImages()),
+            'all_product_images' => $this->whenLoaded('media', function () {
+                return MediaResource::collection($this->getAllProductImages());
+            }),
+
         ];
     }
 }

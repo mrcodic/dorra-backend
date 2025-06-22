@@ -29,7 +29,8 @@ class DesignService extends BaseService
     {
         if (!empty($validatedData['template_id'])) {
             $design = $this->handleTransaction(function () use ($validatedData) {
-                $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id']], $validatedData);
+                $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id'],
+                    'user_id' => $validatedData['user_id']], $validatedData);
                 $this->templateRepository
                     ->find($validatedData['template_id'])
                     ->getFirstMedia('templates')
@@ -59,12 +60,13 @@ class DesignService extends BaseService
     {
         $cookieId = request()->cookie('cookie_id');
         $userId = auth('sanctum')->id();
-        if ( $userId || $cookieId) {
-            $designs = $this->repository->query()->where(function ($q) use ($cookieId, $userId) {
+        if ($userId || $cookieId) {
+            $designs = $this->repository->query()
+                ->with('product')
+                ->where(function ($q) use ($cookieId, $userId) {
                 if ($userId) {
                     $q->whereUserId($userId);
-                }
-                if ($cookieId) {
+                } elseif ($cookieId) {
                     $q->whereCookieId($cookieId);
                 }
             })->latest()->paginate();
@@ -113,7 +115,7 @@ class DesignService extends BaseService
 
             return [
                 'sub_total' => $subTotal,
-                'quantity' =>  $design->productPrice?->quantity ?? $design->quantity,
+                'quantity' => $design->productPrice?->quantity ?? $design->quantity,
                 'syncData' => $design->specifications->load(['options']),
             ];
         });

@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::table('designs', function (Blueprint $table) {
             $table->after('current_version',function (Blueprint $table) {
                 $table->foreignIdFor(ProductPrice::class)->nullable()->constrained()->cascadeOnDelete();
+                $table->unsignedInteger('quantity')->nullable()->default(1);
             });
 
         });
@@ -28,6 +29,7 @@ return new class extends Migration
         Schema::table('designs', function (Blueprint $table) {
             $table->dropForeign(['product_price_id']);
             $table->dropColumn('product_price_id');
+            $table->dropColumn('quantity');
         });
     }
 };
