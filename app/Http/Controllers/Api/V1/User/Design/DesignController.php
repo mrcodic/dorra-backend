@@ -12,6 +12,7 @@ use App\Http\Resources\Design\DesignFinalizationResource;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Design\DesignVersionResource;
 use App\Services\DesignService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 
@@ -65,6 +66,12 @@ class DesignController extends Controller
             'quantity' => $designData['quantity'],
         ]));
 
+    }
 
+    public function addQuantity(Request $request,$designId)
+    {
+        $request->validate(['quantity'=>'required','integer','min:1']);
+        $this->designService->addQuantity($request,$designId);
+        return Response::api();
     }
 }
