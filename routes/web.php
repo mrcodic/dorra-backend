@@ -24,6 +24,7 @@ use App\Http\Controllers\Dashboard\{
     OfferController,
     LogisticController
 };
+use App\Http\Controllers\Dashboard\LocationController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -122,12 +123,12 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/offers', OfferController::class)->except('show');
 
-    Route::group(['prefix' => 'logistics', 'as' => 'logistics.', 'controller' => LogisticController::class,], function () {
-        Route::get('/data', [LogisticController::class, 'getData'])->name('data');
-        Route::get('/dashboard', [LogisticController::class, 'dashboard'])->name('data');
+    Route::group(['prefix' => 'locations', 'as' => 'locations.', 'controller' => LocationController::class,], function () {
+        Route::get('/data', [LocationController::class, 'getData'])->name('data');
+        Route::get('/dashboard', [LocationController::class, 'dashboard'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
-    Route::resource('/logistics', LogisticController::class)->except('show');
+    Route::resource('/logistics', LocationController::class)->except('show');
 
     Route::group(['prefix' => 'discount-codes', 'as' => 'discount-codes.', 'controller' => DiscountCodeController::class,], function () {
         Route::get('/data', [DiscountCodeController::class, 'getData'])->name('data');
