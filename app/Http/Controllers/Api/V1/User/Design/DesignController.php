@@ -10,6 +10,7 @@ use App\Http\Requests\Design\UpdateDesignRequest;
 use App\Http\Resources\Design\DesignFinalizationResource;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Design\DesignVersionResource;
+use App\Models\Design;
 use App\Services\DesignService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -75,7 +76,17 @@ class DesignController extends Controller
 
     public function addQuantity(Request $request, $designId)
     {
-        $request->validate(['quantity' => 'required', 'integer', 'min:1']);
+        $request->validate([
+            'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
+            'product_price_id' => ['required_without:quantity', 'integer', 'exists:product_prices,id',
+                function ($attribute, $value, $fail) use ($designId) {
+                    $design = Design::find($designId);
+                    if (!$design || !$design->product->prices->pluck('id')->contains($value)) {
+                        $fail('The selected product price is not valid for the current design.');
+                    }
+                }
+            ],
+        ]);
         $this->designService->addQuantity($request, $designId);
         return Response::api();
     }

@@ -60,9 +60,9 @@ class CartService extends BaseService
     public function deleteItemFromCart($designId, $cartId)
     {
         $this->handleTransaction(function () use ($designId, $cartId) {
-            $design = $this->designRepository->find($designId);
-            $design->cartItems()->detach($cartId);
+//            $design = $this->designRepository->find($designId);
             $cart = $this->cartRepository->find($cartId);
+            $cart->cartItems()->detach($designId);
             dd($cart->cartItems()
                 ->wherePivot('design_id', $designId)
                 ->first());

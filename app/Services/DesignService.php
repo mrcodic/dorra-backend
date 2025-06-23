@@ -130,11 +130,12 @@ class DesignService extends BaseService
         $design = $this->repository->find( $id);
         if ($design->product->has_custom_prices)
         {
-            throw ValidationException::withMessages([
-                'custom_prices' => 'this product has custom prices',
-            ]);
+            return $design->update($request->only(['product_price_id']));
         }
-       return $design->update($request->only(['quantity']));
+        else
+        {
+            return $design->update($request->only(['quantity']));
+        }
     }
 
     public function priceDetails($designId)
