@@ -120,17 +120,8 @@
             'title' => 'Delete Categories',
             'confirmText' => 'Are you sure you want to delete this items?',
             ])
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            @include('modals.location.add-location')
-           @include('modals.location.edit-location')
-
-=======
-=======
->>>>>>> Stashed changes
           
         
->>>>>>> Stashed changes
 
 
         </div>
@@ -281,12 +272,5 @@
     {{-- Page js files --}}
     <script src="{{ asset('js/scripts/pages/app-location.js') }}?v={{ time() }}"></script>
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
     
->>>>>>> Stashed changes
-=======
-    
->>>>>>> Stashed changes
 @endsection

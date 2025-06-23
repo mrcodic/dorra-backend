@@ -13,7 +13,7 @@
                         <input type="text" class="form-control" id="locationName" name="location_name" placeholder="Enter name">
                     </div>
 
-                      <div class="row g-2 mb-2">
+                      {{-- <div class="row g-2 mb-2">
                     <div class="col">
                         <label class="form-label">Country</label>
                         <select class="form-select address-country-select" name="country_id">
@@ -35,7 +35,7 @@
                         <div class="invalid-feedback" id="state_id-error"></div>
                         <div id="state-url" data-url="{{ route('states') }}"></div>
                     </div>
-                </div>
+                </div> --}}
 
                     <div class="mb-1">
                         <label for="addressLine" class="form-label">Address Line</label>
