@@ -36,6 +36,7 @@ const dt_user_table = $(".location-list-table").DataTable({
                 return `
         <div class="d-flex gap-1">
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                 <a href="#" class="view-details"
                                    data-bs-toggle="modal"
                                    data-bs-target="#modals-slide-in"
@@ -43,6 +44,8 @@ const dt_user_table = $(".location-list-table").DataTable({
                             >
                                                 <i data-feather="eye"></i>
                                 </a>
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
@@ -53,8 +56,12 @@ const dt_user_table = $(".location-list-table").DataTable({
                                    data-bs-toggle="modal"
                                    data-id="${data}"
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                 >
 
+=======
+                                  >
+>>>>>>> Stashed changes
 =======
                                   >
 >>>>>>> Stashed changes
@@ -63,6 +70,10 @@ const dt_user_table = $(".location-list-table").DataTable({
       <a href="#" class="text-danger  open-delete-category-modal"
    data-id="${data}"
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 =======
 
 >>>>>>> Stashed changes
