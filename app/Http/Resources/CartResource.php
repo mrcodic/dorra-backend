@@ -19,6 +19,10 @@ class CartResource extends JsonResource
             "id" => $this->id,
             "designs" => DesignResource::collection( $this->whenLoaded('designs')),
             'price' => $this->price,
+            'tax' =>  setting('tax') * 100 ." %",
+            'delivery' =>  setting('delivery'),
+            'discount' => 0 ." %",
         ];
     }
 }
+

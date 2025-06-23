@@ -38,7 +38,6 @@ class AddToCartRequest extends BaseRequest
     {
         $activeGuard = getActiveGuard();
         $userId = $activeGuard === 'sanctum' ? Auth::guard($activeGuard)->id() : null;
-        $design = Design::find($this->input('design_id'));
         $cookie = request()->cookie('cookie_id');
 
         if (empty($userId) && empty($cookie)) {
@@ -50,16 +49,7 @@ class AddToCartRequest extends BaseRequest
                 )
             );
         }
-
-       $totalPriceDesigns = Design::query()->with(['productPrice','product'])
-            ->where(function ($query) use ($cookie, $userId) {
-                $query->where('cookie_id', $cookie)
-                    ->orWhere('user_id', $userId);
-            })
-            ->get()->sum('total_price');
-
         $this->merge([
-            'price' => $totalPriceDesigns + $design->total_price,
             'user_id' => $userId,
             'cookie_id' => $cookie,
         ]);

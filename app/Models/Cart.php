@@ -20,6 +20,8 @@ class Cart extends Model
     }
     public function cartItems(): BelongsToMany
     {
-        return $this->belongsToMany(Cart::class, 'cart_items');
+        return $this->belongsToMany(Cart::class, 'cart_items')->withPivot([
+            'design_id', 'sub_total','total_price'
+        ]);
     }
 }

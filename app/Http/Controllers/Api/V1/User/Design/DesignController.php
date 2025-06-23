@@ -61,10 +61,14 @@ class DesignController extends Controller
     {
         $designData = $this->designService->designFinalization($request);
 
-        return Response::api(data: DesignFinalizationResource::collection($designData['syncData'])->additional([
-            'sub_total' => $designData['sub_total'],
-            'quantity' => $designData['quantity'],
-        ]));
+        return Response::api(data:
+            DesignFinalizationResource::collection($designData['syncData'])
+                ->additional([
+                    'sub_total' => $designData['sub_total'],
+                    'quantity' => $designData['quantity'],
+                ])->response()->getData(true)
+        );
+
 
     }
 

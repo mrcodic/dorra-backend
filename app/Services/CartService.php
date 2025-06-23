@@ -4,13 +4,14 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
+use Dflydev\DotAccessData\Data;
 use Illuminate\Support\Arr;
 
 class CartService extends BaseService
 {
-    public function __construct(CartRepositoryInterface $repository,
-    public DesignRepositoryInterface $designRepository,
-    public CartRepositoryInterface $cartRepository,
+    public function __construct(CartRepositoryInterface          $repository,
+                                public DesignRepositoryInterface $designRepository,
+                                public CartRepositoryInterface   $cartRepository,
     )
     {
         parent::__construct($repository);
@@ -23,8 +24,15 @@ class CartService extends BaseService
             'cookie_id' => Arr::get($validatedData, 'cookie_id'),
         ],
             Arr::except($validatedData, 'design_id'));
+        $totalPrice = $model->cartItems->isNotEmpty() ? $model->cartItems->sum(fn($value) => $value->pivot->total_price) : 0;
+        $model->update(['price' => $totalPrice]);
+        $design = $this->designRepository->find($validatedData['design_id']);
         $model->designs()->syncWithoutDetaching([
-            $validatedData['design_id'] => ['status' => 1]
+            $validatedData['design_id'] => [
+                'status' => 1,
+                'sub_total' => $design->total_price,
+                'total_price' => $design->total_price,
+            ]
         ]);
         return $model->load($relationsToLoad);
     }
@@ -38,8 +46,7 @@ class CartService extends BaseService
                 ->where(function ($q) use ($cookieId, $userId) {
                     if ($userId) {
                         $q->whereUserId($userId);
-                    }
-                    elseif ($cookieId) {
+                    } elseif ($cookieId) {
                         $q->whereCookieId($cookieId);
                     }
                 })
@@ -55,8 +62,11 @@ class CartService extends BaseService
         $this->handleTransaction(function () use ($designId, $cartId) {
             $design = $this->designRepository->find($designId);
             $design->cartItems()->detach($cartId);
-            $cart =  $this->cartRepository->find($cartId);
-            $cart->update(['price' => $cart->price - $design->total_price]);
+            $cart = $this->cartRepository->find($cartId);
+            dd($cart->cartItems()
+                ->wherePivot('design_id', $designId)
+                ->first());
+            $cart->update(['price' => $cart->price - $cart->cartItems()->whereDesignId($designId)->first()->total_price]);
         });
     }
 
