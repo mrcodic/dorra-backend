@@ -70,4 +70,8 @@ class CartService extends BaseService
         });
     }
 
+    public function applyDiscount($cartId)
+    {
+        $subTotal = $this->repository->find($cartId)->designs->pluck('total_price')->sum();
+    }
 }

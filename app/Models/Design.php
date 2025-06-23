@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Observers\DesignObserver;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -30,6 +31,13 @@ class Design extends Model implements HasMedia
     protected $attributes = [
         'quantity' => 1
     ];
+
+    public function quantity()
+    {
+        return Attribute::get(function ($value) {
+            return $this->productPrice ? $this->productPrice->quantity : $value;
+        });
+    }
 
     public function user(): BelongsTo
     {
@@ -87,7 +95,7 @@ class Design extends Model implements HasMedia
     public function cartItems(): BelongsToMany
     {
         return $this->belongsToMany(Cart::class, 'cart_items')->withPivot([
-            'sub_total','total_price'
+            'sub_total', 'total_price'
         ]);
     }
 

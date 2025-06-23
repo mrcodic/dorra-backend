@@ -21,12 +21,12 @@ class CartResource extends JsonResource
             'sub_total' => $this->designs->pluck('total_price')->sum(),
             'total' => $this->price,
             'tax' => [
-                'ratio' => setting('tax') * 100 . " %",
+                'ratio' => setting('tax') * 100 . "%",
                 'value' => getPriceAfterTax(setting('tax'), $this->price),
             ],
             'delivery' => setting('delivery'),
             'discount' => [
-                'ratio' => 0 . " %",
+                'ratio' => 0 . "%",
                 'value' => 0,
             ],
         ];

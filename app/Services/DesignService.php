@@ -136,4 +136,10 @@ class DesignService extends BaseService
         }
        return $design->update($request->only(['quantity']));
     }
+
+    public function priceDetails($designId)
+    {
+        $design = $this->repository->find($designId);
+        return $design->specifications->load(['options']);
+    }
 }
