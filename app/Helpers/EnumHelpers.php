@@ -21,4 +21,16 @@ trait EnumHelpers
         ], self::cases());
     }
 
+
+
+    public static function tryFromName(string $name): ?self
+{
+    foreach (self::cases() as $case) {
+        if ($case->name === $name) {
+            return $case;
+        }
+    }
+    return null;
+}
+
 }

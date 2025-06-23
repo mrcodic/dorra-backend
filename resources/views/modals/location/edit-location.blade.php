@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="editLocationModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="addDiscountForm" method="post" enctype="multipart/form-data" action="{{ route('discount-codes.store') }}">
+            <form id="EditLocation" method="post" enctype="multipart/form-data" action="{{ route('discount-codes.store') }}">
                 @csrf
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
@@ -13,26 +13,29 @@
                         <input type="text" class="form-control" id="locationName" name="location_name" placeholder="Enter name">
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-1">
-                            <label for="country" class="form-label">Country</label>
-                            <select class="form-select" id="country" name="country">
-                                <option selected disabled>Select country</option>
-                                <option value="egypt">Egypt</option>
-                                <option value="ksa">KSA</option>
-                                <!-- Add more countries as needed -->
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-1">
-                            <label for="state" class="form-label">State</label>
-                            <select class="form-select" id="state" name="state">
-                                <option selected disabled>Select state</option>
-                                <option value="cairo">Cairo</option>
-                                <option value="riyadh">Riyadh</option>
-                                <!-- Add more states as needed -->
-                            </select>
-                        </div>
+                      <div class="row g-2 mb-2">
+                    <div class="col">
+                        <label class="form-label">Country</label>
+                        <select class="form-select address-country-select" name="country_id">
+                            <option value="">Select Country</option>
+                            @foreach ($associatedData['countries'] as $country)
+                                <option value="{{ $country->id }}"
+                                    {{ old('country_id') == $country->id ? 'selected' : '' }}>
+                                    {{ $country->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
+
+                    <div class="col">
+                        <label class="form-label label-text">State</label>
+                        <select id="modalAddressState" name="state_id" class="form-select address-state-select">
+                            <option value="">Select a State</option>
+                        </select>
+                        <div class="invalid-feedback" id="state_id-error"></div>
+                        <div id="state-url" data-url="{{ route('states') }}"></div>
+                    </div>
+                </div>
 
                     <div class="mb-1">
                         <label for="addressLine" class="form-label">Address Line</label>

@@ -35,6 +35,7 @@ const dt_user_table = $(".location-list-table").DataTable({
             render: function (data, type, row) {
                 return `
         <div class="d-flex gap-1">
+<<<<<<< Updated upstream
                                 <a href="#" class="view-details"
                                    data-bs-toggle="modal"
                                    data-bs-target="#modals-slide-in"
@@ -42,19 +43,29 @@ const dt_user_table = $(".location-list-table").DataTable({
                             >
                                                 <i data-feather="eye"></i>
                                 </a>
+=======
+>>>>>>> Stashed changes
 
 
               <a href="#" class="edit-details"
                data-bs-toggle="modal"
-                                   data-bs-target="#modals-slide-in"
+                                   data-bs-target="#editLocationModal"
+                                   data-bs-toggle="modal"
                                    data-id="${data}"
+<<<<<<< Updated upstream
                                 >
 
+=======
+                                  >
+>>>>>>> Stashed changes
                 <i data-feather="edit-3"></i>
               </a>
-
       <a href="#" class="text-danger  open-delete-category-modal"
    data-id="${data}"
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
    data-action="/categories/${data}"
    data-bs-toggle="modal"
    data-bs-target="#deleteCategoryModal">

@@ -22,9 +22,12 @@ class Location extends Model
     ];
 
 
+<<<<<<< Updated upstream
     protected $casts = [
         'days' => DayEnum::class,
     ];
+=======
+>>>>>>> Stashed changes
 
 
     public function state(): BelongsTo

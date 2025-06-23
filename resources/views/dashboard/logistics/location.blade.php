@@ -59,7 +59,7 @@
                     {{-- Add Button - 20% on md+, full width on xs --}}
                     <div class="col-6 col-md-3 text-md-end">
                         <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                           data-bs-target="#editLocationModal">
+                           data-bs-target="#addLocationModal">
                             <i data-feather="plus"></i>
                            Add New Location
                         </a>
@@ -104,7 +104,10 @@
                 </div>
 
 
-            </div>
+            </div>   
+               @include('modals.location.edit-location')
+                @include('modals.location.add-location')
+      
 
             @include('modals.delete',[
             'id' => 'deleteCategoryModal',
@@ -117,9 +120,14 @@
             'title' => 'Delete Categories',
             'confirmText' => 'Are you sure you want to delete this items?',
             ])
+<<<<<<< Updated upstream
             @include('modals.location.add-location')
            @include('modals.location.edit-location')
 
+=======
+          
+        
+>>>>>>> Stashed changes
 
 
         </div>
@@ -152,11 +160,68 @@
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         const categoriesDataUrl = "{{ route('locations.data') }}";
-        const categoriesCreateUrl = "{{ route('categories.create') }}";
+        const categoriesCreateUrl = "{{ route('logistics.create') }}";
         const locale = "{{ app()->getLocale() }}";
     </script>
 
     <script>
+
+
+ $(document).ready(function () {
+
+        $(document).on("change", ".address-country-select", function () {
+            const countryId = $(this).val();
+            const stateSelect = $(".address-state-select");
+
+            if (countryId) {
+                $.ajax({
+                    url: "{{ route('states') }}",
+                    method: "GET",
+                    data: { "filter[country_id]": countryId },
+                    success: function (response) {
+                        stateSelect.empty().append('<option value="">Select State</option>');
+                        $.each(response.data, function (index, state) {
+                            stateSelect.append(`<option value="${state.id}">${state.name}</option>`);
+                        });
+                    },
+                    error: function () {
+                        stateSelect.empty().append('<option value="">Error loading states</option>');
+                    }
+                });
+            } else {
+                stateSelect.empty().append('<option value="">Select State</option>');
+            }
+        });
+    });
+
+
+      $(document).ready(function () {
+        $(document).on("change", ".address-country-select", function () {
+            const countryId = $(this).val();
+            const stateSelect = $(".address-state-select");
+            if (countryId) {
+                $.ajax({
+                    url: "{{ route('states') }}",
+                    method: "GET",
+                    data: { "filter[country_id]": countryId },
+                    success: function (response) {
+                        stateSelect.empty().append('<option value="">Select State</option>');
+                        $.each(response.data, function (index, state) {
+                            stateSelect.append(`<option value="${state.id}">${state.name}</option>`);
+                        });
+                    },
+                    error: function () {
+                        stateSelect.empty().append('<option value="">Error loading states</option>');
+                    }
+                });
+            } else {
+                stateSelect.empty().append('<option value="">Select State</option>');
+            }
+        });
+    });
+
+
+
         $(document).ready(function () {
 
             // Select all toggle
@@ -207,7 +272,14 @@
         });
     </script>
 
+
+
+
     {{-- Page js files --}}
     <script src="{{ asset('js/scripts/pages/app-location.js') }}?v={{ time() }}"></script>
 
+<<<<<<< Updated upstream
+=======
+    
+>>>>>>> Stashed changes
 @endsection
