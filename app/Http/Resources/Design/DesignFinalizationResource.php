@@ -21,7 +21,7 @@ class DesignFinalizationResource extends JsonResource
             "item" => $this->pivot->productSpecification->name,
             "selection" => $this->pivot->specOption->value,
             "price" => $this->pivot->specOption->price,
-            "quantity"=>$this->pivot->design->quantity,
+            "quantity"=> $this->pivot->design->quantity,
             "total_price"=>$this->pivot->design->total_price,
         ];
     }

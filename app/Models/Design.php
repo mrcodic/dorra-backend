@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Order;
-use App\Models\OrderItem;
+
 use App\Observers\DesignObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\MediaLibrary\HasMedia;
@@ -32,8 +31,9 @@ class Design extends Model implements HasMedia
         'quantity' => 1
     ];
 
-    public function quantity()
+    public function quantity(): Attribute
     {
+
         return Attribute::get(function ($value) {
             return $this->productPrice ? $this->productPrice->quantity : $value;
         });
