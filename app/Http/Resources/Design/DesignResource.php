@@ -23,8 +23,7 @@ class DesignResource extends JsonResource
             'current_version' => $this->current_version,
             'product' => ProductResource::make($this->whenLoaded('product')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
-            'placed_on' => $this->whenLoaded('cartItems',function (){
-            }),
+            'placed_on' => optional($this->pivot)->created_at->format('d/m/Y'),
             'price' => $this->total_price,
             'quantity' => $this->productPrice?->quantity ?? $this->quantity,
         ];
