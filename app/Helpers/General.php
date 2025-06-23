@@ -57,6 +57,10 @@ function getTotalPrice($discount, $subtotal): float|int
     return $subtotal - $discountAmount + ($tax * $subtotal) + $delivery;
 }
 
+function getPriceAfterTax($tax, $subtotal): float|int
+{
+    return  $tax * $subtotal;
+}
 function setting(string $key, $default = null)
 {
     return app(SettingRepository::class)->get($key, $default);
