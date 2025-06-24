@@ -95,7 +95,7 @@ class DesignController extends Controller
     public function priceDetails($designId)
     {
         $designData = $this->designService->priceDetails($designId);
-        return new DesignFinalizationCollectionResource(collect($designData));
+        return Response::api(data: new DesignFinalizationCollectionResource(collect($designData)));
 
 
     }
