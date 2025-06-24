@@ -51,6 +51,7 @@ Route::get('templates', [TemplateController::class, 'getProductTemplates'])->nam
 
 Route::get('designs/{design}/price-details',[DesignController::class, 'priceDetails']);
 Route::post('designs/{design}/add-quantity',[DesignController::class, 'addQuantity']);
+Route::get('designs/{design}/quantities',[DesignController::class, 'getQuantities']);
 Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 Route::post('/design-finalization', [DesignController::class, 'designFinalization']);
 

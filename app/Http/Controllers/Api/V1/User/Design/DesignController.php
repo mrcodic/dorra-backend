@@ -96,4 +96,12 @@ class DesignController extends Controller
         $specs = $this->designService->priceDetails($designId);
         return Response::api(data: DesignFinalizationResource::collection($specs));
     }
+
+    public function getQuantities($designId)
+    {
+        $quantities = $this->designService->getQuantities($designId);
+        $quantities = $quantities ?: (object) [];
+        return Response::api(data: $quantities);
+
+    }
 }
