@@ -12,14 +12,14 @@
             </div>
 
 
-            <div id="locationList" class="mb-3"></div> 
+            <div id="locationList" class="mb-3"></div>
 
 
                 <div id="mapPlaceholder" style="height: 300px; background-color: #f0f0f0; border-radius: 8px;">
                     <div id="mapPlaceholder" style="width: 100%; height: 400px;"></div>
                 </div>
             </div>
-            
+
             <div class="d-flex justify-content-end m-2">
                 <button class="btn btn-outline-secondary me-1" data-bs-dismiss="modal">cancel</button>
                 <button type="submit" id="confirmLocationBtn" class="btn btn-primary">confirm</button>

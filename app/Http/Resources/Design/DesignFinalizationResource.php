@@ -17,12 +17,9 @@ class DesignFinalizationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "product"=>$this->pivot->design->product->name,
             "item" => $this->pivot->productSpecification->name,
             "selection" => $this->pivot->specOption->value,
             "price" => $this->pivot->specOption->price,
-            "quantity"=> $this->pivot->design->quantity,
-            "total_price"=>$this->pivot->design->total_price,
         ];
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Requests\Design\UpdateDesignRequest;
 use App\Http\Resources\Design\DesignFinalizationResource;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Design\DesignVersionResource;
+use App\Http\Resources\DesignFinalizationCollectionResource;
 use App\Models\Design;
 use App\Services\DesignService;
 use Illuminate\Http\Request;
@@ -93,8 +94,10 @@ class DesignController extends Controller
 
     public function priceDetails($designId)
     {
-        $specs = $this->designService->priceDetails($designId);
-        return Response::api(data: DesignFinalizationResource::collection($specs));
+        $designData = $this->designService->priceDetails($designId);
+        return Response::api(data: new DesignFinalizationCollectionResource(collect($designData)));
+
+
     }
 
     public function getQuantities($designId)

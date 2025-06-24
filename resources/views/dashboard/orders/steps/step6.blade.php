@@ -106,7 +106,7 @@
             </div>
 
             <div class="mb-3">
-                <input type="text" class="form-control" placeholder="Search for a location..." id="locationSearch">
+                <input type="text" class="form-control" placeholder="Search for a location..." id="">
             </div>
 
             <div id="mapPlaceholder" style="height: 300px; background-color: #f0f0f0; border-radius: 8px;">

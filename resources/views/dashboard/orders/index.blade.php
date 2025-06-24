@@ -160,160 +160,218 @@
                         </tr>
                         </thead>
                     </table>
-                              <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                    <div class="delete-container">
-                        <p id="selected-count-text">0 Orders are selected</p>
-                        <button type="submit" id="delete-selected-btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#deleteOrdersModal"
-                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                            <i data-feather="trash-2"></i> Delete Selected
-                        </button>
-                        <form style="display: none;" id="bulk-delete-form" method="POST" action="{{ route('orders.bulk-delete') }}">
-                            @csrf
+                    <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                        <div class="delete-container">
+                            <p id="selected-count-text">0 Orders are selected</p>
                             <button type="submit" id="delete-selected-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteOrdersModal"
                                     class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
-                        </form>
+                            <form style="display: none;" id="bulk-delete-form" method="POST"
+                                  action="{{ route('orders.bulk-delete') }}">
+                                @csrf
+                                <button type="submit" id="delete-selected-btn"
+                                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                                    <i data-feather="trash-2"></i> Delete Selected
+                                </button>
+                            </form>
 
 
+                        </div>
                     </div>
                 </div>
-            </div>
 
-                    @include('modals.categories.show-category')
-                    @include('modals.categories.edit-category')
-                    @include('modals.categories.add-category')
-                    @include('modals.delete', [
-                        'id' => 'deleteOrderModal',
-                        'formId' => 'deleteOrderForm',
-                        'title' => 'Delete Order',
-                        'message' => 'Are you sure you want to delete this order? This action cannot be undone.',
-                        'confirmText' => 'Yes, Delete Order'
-                    ])
+                @include('modals.categories.show-category')
+                @include('modals.categories.edit-category')
+                @include('modals.categories.add-category')
+                @include('modals.delete', [
+                    'id' => 'deleteOrderModal',
+                    'formId' => 'deleteOrderForm',
+                    'title' => 'Delete Order',
+                    'message' => 'Are you sure you want to delete this order? This action cannot be undone.',
+                    'confirmText' => 'Yes, Delete Order'
+                ])
 
-                    @include('modals.delete',[
-                                'id' => 'deleteOrdersModal',
-                                'formId' => 'bulk-delete-form',
-                                'title' => 'Delete Orders',
-                                'confirmText' => 'Are you sure you want to delete this items?',
-                                ])
-                    @endsection
+                @include('modals.delete',[
+                            'id' => 'deleteOrdersModal',
+                            'formId' => 'bulk-delete-form',
+                            'title' => 'Delete Orders',
+                            'confirmText' => 'Are you sure you want to delete this items?',
+                            ])
+                @endsection
 
-        @section('vendor-script')
-            {{-- Vendor js files --}}
-            <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-            <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
-        @endsection
+                @section('vendor-script')
+                    {{-- Vendor js files --}}
+                    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+                    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+                @endsection
 
-        @section('page-script')
-            <script>
-                const ordersDataUrl = "{{ route('orders.data') }}";
-                const ordersCreateUrl = "{{ route('orders.create') }}";
-            </script>
+                @section('page-script')
+                    <script>
+                        const ordersDataUrl = "{{ route('orders.data') }}";
+                        const ordersCreateUrl = "{{ route('orders.create') }}";
+                    </script>
 
-    {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-order-list.js') }}?v={{ time() }}"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
+                    {{-- Page js files --}}
+                    <script src="{{ asset('js/scripts/pages/app-order-list.js') }}?v={{ time() }}"></script>
+                    <script src="https://unpkg.com/feather-icons"></script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            feather.replace();
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            feather.replace();
 
-            // Set icon based on initial state
-            document.querySelectorAll('.toggle-icon').forEach(icon => {
-                const targetId = icon.getAttribute('data-target');
-                const collapseEl = document.querySelector(targetId);
+                            // Set icon based on initial state
+                            document.querySelectorAll('.toggle-icon').forEach(icon => {
+                                const targetId = icon.getAttribute('data-target');
+                                const collapseEl = document.querySelector(targetId);
 
-                if (collapseEl.classList.contains('show')) {
-                    icon.setAttribute('data-feather', 'chevron-up');
-                } else {
-                    icon.setAttribute('data-feather', 'chevron-down');
-                }
-            });
+                                if (collapseEl.classList.contains('show')) {
+                                    icon.setAttribute('data-feather', 'chevron-up');
+                                } else {
+                                    icon.setAttribute('data-feather', 'chevron-down');
+                                }
+                            });
 
-            feather.replace(); // re-render after initial update
+                            feather.replace(); // re-render after initial update
 
-            // Handle dynamic toggle icon on collapse
-            document.querySelectorAll('.collapsed-toggle').forEach(header => {
-                const icon = header.querySelector('.toggle-icon');
-                const targetId = icon.getAttribute('data-target');
-                const collapseEl = document.querySelector(targetId);
+                            // Handle dynamic toggle icon on collapse
+                            document.querySelectorAll('.collapsed-toggle').forEach(header => {
+                                const icon = header.querySelector('.toggle-icon');
+                                const targetId = icon.getAttribute('data-target');
+                                const collapseEl = document.querySelector(targetId);
 
-                collapseEl.addEventListener('show.bs.collapse', () => {
-                    icon.setAttribute('data-feather', 'chevron-up');
-                    feather.replace();
-                });
+                                collapseEl.addEventListener('show.bs.collapse', () => {
+                                    icon.setAttribute('data-feather', 'chevron-up');
+                                    feather.replace();
+                                });
 
-                collapseEl.addEventListener('hide.bs.collapse', () => {
-                    icon.setAttribute('data-feather', 'chevron-down');
-                    feather.replace();
-                });
-            });
-        });
-
-
-        // bulk delete function for show number of orders selected
-        $(document).ready(function () {
-            // Select all toggle
-            $('#select-all-checkbox').on('change', function () {
-                $('.category-checkbox').prop('checked', this.checked);
-                updateBulkDeleteVisibility();
-            });
-
-            // When individual checkbox changes
-            $(document).on('change', '.category-checkbox', function () {
-                // If any is unchecked, uncheck "Select All"
-                if (!this.checked) {
-                    $('#select-all-checkbox').prop('checked', false);
-                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
-                    $('#select-all-checkbox').prop('checked', true);
-                }
-                updateBulkDeleteVisibility();
-            });
+                                collapseEl.addEventListener('hide.bs.collapse', () => {
+                                    icon.setAttribute('data-feather', 'chevron-down');
+                                    feather.replace();
+                                });
+                            });
+                        });
 
 
-            // On table redraw (e.g. pagination, search)
-            $(document).on('draw.dt', function () {
-                $('#bulk-delete-container').hide();
-                $('#select-all-checkbox').prop('checked', false);
-            });
+                        // bulk delete function for show number of orders selected
+                        $(document).ready(function () {
+                            // Select all toggle
+                            $('#select-all-checkbox').on('change', function () {
+                                $('.category-checkbox').prop('checked', this.checked);
+                                updateBulkDeleteVisibility();
+                            });
 
-            // Close bulk delete container
-            $(document).on('click', '#close-bulk-delete', function () {
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
-            });
+                            // When individual checkbox changes
+                            $(document).on('change', '.category-checkbox', function () {
+                                // If any is unchecked, uncheck "Select All"
+                                if (!this.checked) {
+                                    $('#select-all-checkbox').prop('checked', false);
+                                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
+                                    $('#select-all-checkbox').prop('checked', true);
+                                }
+                                updateBulkDeleteVisibility();
+                            });
 
-            // Update the bulk delete container visibility
-            function updateBulkDeleteVisibility() {
-                const selectedCheckboxes = $('.category-checkbox:checked');
-                const count = selectedCheckboxes.length;
 
-                if (count > 0) {
-                    $('#selected-count-text').text(`${count} Categor${count > 1  ? 'ies' : 'y'} are selected`);
-                    $('#bulk-delete-container').show();
-                } else {
-                    $('#bulk-delete-container').hide();
-                }
-            }
-        });
-    </script>
-    </script>
+                            // On table redraw (e.g. pagination, search)
+                            $(document).on('draw.dt', function () {
+                                $('#bulk-delete-container').hide();
+                                $('#select-all-checkbox').prop('checked', false);
+                            });
+
+                            // Close bulk delete container
+                            $(document).on('click', '#close-bulk-delete', function () {
+                                $('#bulk-delete-container').hide();
+                                $('.category-checkbox').prop('checked', false);
+                                $('#select-all-checkbox').prop('checked', false);
+                            });
+
+                            // Update the bulk delete container visibility
+                            function updateBulkDeleteVisibility() {
+                                const selectedCheckboxes = $('.category-checkbox:checked');
+                                const count = selectedCheckboxes.length;
+
+                                if (count > 0) {
+                                    $('#selected-count-text').text(`${count} Categor${count > 1 ? 'ies' : 'y'} are selected`);
+                                    $('#bulk-delete-container').show();
+                                } else {
+                                    $('#bulk-delete-container').hide();
+                                }
+                            }
+                        });
+
+                    </script>
+
+{{--                    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAP_API_KEY"></script>--}}
+                    <script>
+                        // let map;
+                        // let marker;
+                        //
+                        // function initMap(lat = 30.0444, lng = 31.2357) {
+                        //     const defaultLocation = {lat: parseFloat(lat), lng: parseFloat(lng)};
+                        //     map = new google.maps.Map(document.getElementById('mapPlaceholder'), {
+                        //         zoom: 10,
+                        //         center: defaultLocation,
+                        //     });
+                        //
+                        //     marker = new google.maps.Marker({
+                        //         position: defaultLocation,
+                        //         map: map,
+                        //     });
+                        // }
+
+                        $(document).ready(function () {
+                            $('#selectLocationModal').on('shown.bs.modal', function () {
+                                initMap();
+                            });
+
+                            $('#location-search').on('input', function () {
+                                console.log('Search query:', $(this).val());
+                                const query = $(this).val();
+                                if (query.length >= 2) {
+                                    $.ajax({
+                                        url: "{{ route('locations.search') }}",
+                                        method: 'GET',
+                                        data: {search: query},
+                                        success: function (response) {
+                                            $('#locationList').html(response);
+                                        }
+                                    });
+                                } else {
+                                    $('#locationList').html('');
+                                }
+                            });
+
+                            // عند الضغط على نتيجة البحث
+                            $(document).on('click', '.location-item', function () {
+                                const lat = parseFloat($(this).data('lat'));
+                                const lng = parseFloat($(this).data('lng'));
+                                const name = $(this).data('name');
+
+                                const newLocation = {lat: lat, lng: lng};
+                                map.setCenter(newLocation);
+                                marker.setPosition(newLocation);
+
+                                $('#mapPlaceholder').find('p').hide();
+                                $('#locationSearch').val(name);
+                                $('#locationList').html('');
+                            });
+                        });
+                    </script>
 
 @endsection
