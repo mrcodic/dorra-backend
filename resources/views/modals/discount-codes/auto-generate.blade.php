@@ -49,6 +49,10 @@
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Type</label>
                         <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="scope" id="general" value="3">
+                            <label class="form-check-label text-black fs-16" for="general">General</label>
+                        </div>
+                        <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="scope" id="applyToProducts" value="2" checked>
                             <label class="form-check-label text-black fs-16" for="applyToProducts">Products</label>
                         </div>
@@ -109,16 +113,25 @@
 
         // Toggle between products and categories
         $('input[name="scope"]').on('change', function () {
-            if (this.value == 2) {
+            const scope = parseInt(this.value);
+
+            if (scope === 2) {
+                // Products
                 $('.productsField').removeClass('d-none');
                 $('.categoriesField').addClass('d-none');
                 $('.categoriesSelect').val(null).trigger('change');
-            } else {
+            } else if (scope === 1) {
+                // Categories
                 $('.categoriesField').removeClass('d-none');
                 $('.productsField').addClass('d-none');
                 $('.productsSelect').val(null).trigger('change');
+            } else {
+                // General
+                $('.productsField, .categoriesField').addClass('d-none');
+                $('.productsSelect, .categoriesSelect').val(null).trigger('change');
             }
         });
+
 
         $('input[name="scope"]:checked').trigger('change');
 

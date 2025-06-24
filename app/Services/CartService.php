@@ -3,17 +3,22 @@
 namespace App\Services;
 
 use App\Models\CartItem;
+use App\Models\Category;
+use App\Models\Product;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
+use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
+use App\Rules\ValidDiscountCode;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class CartService extends BaseService
 {
-    public function __construct(CartRepositoryInterface          $repository,
-                                public DesignRepositoryInterface $designRepository,
-                                public CartRepositoryInterface   $cartRepository,
+    public function __construct(CartRepositoryInterface                $repository,
+                                public DesignRepositoryInterface       $designRepository,
+                                public CartRepositoryInterface         $cartRepository,
+                                public DiscountCodeRepositoryInterface $discountCodeRepository,
     )
     {
         parent::__construct($repository);
@@ -98,8 +103,31 @@ class CartService extends BaseService
     }
 
 
-    public function applyDiscount($cartId)
+    public function applyDiscount($request, $cartId)
     {
-        $subTotal = $this->repository->find($cartId)->designs->pluck('total_price')->sum();
+        $cart = $this->cartRepository->find($cartId);
+
+        $items = $cart->cartItems;
+        $products = $items->map(function ($item) {
+            return optional($item?->load('product')->product)->id;
+        })->filter()->unique();
+        $allSameProduct = $products->count() === 1;
+        if ($allSameProduct) {
+            $request->validate(['code' => ['required', new ValidDiscountCode(Product::find($products[0]))]]);
+        } else {
+            $request->validate(['code' => ['required', new ValidDiscountCode()]]);
+        }
+        $subTotal =$cart->price;
+        $discountValue = $this->discountCodeRepository->query()->where(['code' => $request->code])->value('value');
+        $discountAmount = getDiscountAmount($discountValue,$subTotal);
+        $totalPrice = getTotalPrice($discountValue,$subTotal);
+        return [
+            'discount' => [
+                'ratio' => $discountValue,
+                'value' => $discountAmount,
+            ],
+            'total_price' => $totalPrice,
+        ];
+
     }
 }

@@ -26,10 +26,11 @@ class Cart extends Model
         return $this->belongsToMany(Design::class,'cart_items')
             ->withTimestamps();
     }
-    public function cartItems(): BelongsToMany
+    public function cartItems()
     {
-        return $this->belongsToMany(Cart::class, 'cart_items')->withPivot([
-            'design_id', 'sub_total','total_price'
-        ]);
+        return $this->belongsToMany(Design::class, 'cart_items')
+            ->using(CartItem::class)
+            ->withPivot(['sub_total', 'total_price'])
+            ->withTimestamps();
     }
 }

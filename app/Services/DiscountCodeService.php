@@ -60,7 +60,7 @@ class DiscountCodeService extends BaseService
             $discountCode = $this->repository->create($validatedData);
             if ($validatedData['scope'] == 2) {
                 $discountCode->products()->attach($validatedData['product_ids']);
-            } else {
+            } elseif($validatedData['scope'] == 1) {
                 $discountCode->categories()->attach($validatedData['category_ids']);
             }
             return $discountCode->load($relationsToLoad)->refresh();
