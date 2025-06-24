@@ -5,10 +5,11 @@ namespace App\Models;
 use App\Models\Design;
 use App\Models\OrderItem;
 use App\Models\OrderAddress;
+use App\Models\PickupContact;
 use App\Enums\Order\StatusEnum;
 use App\Observers\OrderObserver;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
@@ -64,6 +65,11 @@ class Order extends Model
         return $this->hasMany(OrderAddress::class);
     }
 
+
+    public function pickupContact()
+    {
+        return $this->hasOne(PickupContact::class);
+    }
 
 
 

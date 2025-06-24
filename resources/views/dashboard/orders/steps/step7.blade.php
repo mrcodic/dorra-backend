@@ -30,32 +30,59 @@
         </div>
 
         <!-- Section: Shipping Information -->
-        <div class="mb-2 p-1 rounded" style="background-color: #F9FDFC;">
-            <h4 class="fw-bold mb-2 text-black">Shipping Information</h4>
-            <p class="my-1"><span class="fs-4 text-dark">Estimated Delivery Time:</span>
-                <span class="fs-16 text-black">
-                    {{ $orderData['shipping_info']['estimated_delivery'] ?? 'Not specified' }}
-                </span>
+       @if(!empty($orderData['shipping_info']))
+    <div class="mb-2 p-1 rounded" style="background-color: #F9FDFC;">
+        <h4 class="fw-bold mb-2 text-black">Shipping Information</h4>
+        
+        <p class="my-1">
+            <span class="fs-4 text-dark">Estimated Delivery Time:</span>
+            <span class="fs-16 text-black">
+                {{ $orderData['shipping_info']['estimated_delivery'] ?? 'Not specified' }}
+            </span>
+        </p>
+
+        <p class="my-1">
+            <span class="fs-4 text-dark">Shipping Address:</span>
+            <span class="fs-16 text-black">
+                {{ $orderData['shipping_info']['line'] ?? '' }}
+                {{ isset($orderData['shipping_info']['label']) ? ', ' . $orderData['shipping_info']['label'] : '' }}
+                {{ isset($orderData['shipping_info']['state']) ? ', ' . $orderData['shipping_info']['state'] : '' }}
+                {{ isset($orderData['shipping_info']['country']) ? ', ' . $orderData['shipping_info']['country'] : '' }}
+            </span>
+        </p>
+
+        <div class="my-1 d-flex align-items-start">
+            <p class="fs-4 text-dark" style="width:30%;">Delivery Instructions:</p>
+            <p class="fs-16 text-black">
+                {{ $orderData['shipping_info']['instructions'] ?? 'No special instructions' }}
             </p>
-            <p class="my-1"><span class="fs-4 text-dark">Shipping Address:</span>
-                <span class="fs-16 text-black">
-                    @isset($orderData['shipping_info'])
-                        {{ $orderData['shipping_info']['line'] ?? '' }}
-                        {{ isset($orderData['shipping_info']['label']) ? ', ' . $orderData['shipping_info']['label'] : '' }}
-                        {{ isset($orderData['shipping_info']['state']) ? ', ' . $orderData['shipping_info']['state'] : '' }}
-                        {{ isset($orderData['shipping_info']['country']) ? ', ' . $orderData['shipping_info']['country'] : '' }}
-                    @else
-                        Not specified
-                    @endisset
-                </span>
-            </p>
-            <div class="my-1 d-flex align-items-start">
-                <p class="fs-4 text-dark" style="width:30%;">Delivery Instructions:</p>
-                <p class="fs-16 text-black">
-                    {{ $orderData['shipping_info']['instructions'] ?? 'No special instructions' }}
+        </div>
+    </div>
+
+        @elseif(!empty($orderData['pickup_info']))
+            <div class="mb-2 p-1 rounded" style="background-color: #F9FDFC;">
+                <h4 class="fw-bold mb-2 text-black">Pickup Information</h4>
+                
+                <p class="my-1">
+                    <span class="fs-4 text-dark">Pickup Location:</span>
+                    <span class="fs-16 text-black">
+                        {{ $orderData['pickup_info']['location_name'] ?? '' }}
+                    </span>
+                </p>
+
+                <p class="my-1">
+                    <span class="fs-4 text-dark">Address:</span>
+                    <span class="fs-16 text-black">
+                        {{ $orderData['pickup_info']['line'] ?? '' }}
+                        {{ isset($orderData['pickup_info']['state']) ? ', ' . $orderData['pickup_info']['state'] : '' }}
+                        {{ isset($orderData['pickup_info']['country']) ? ', ' . $orderData['pickup_info']['country'] : '' }}
+                    </span>
                 </p>
             </div>
-        </div>
+        @else
+            <p class="text-muted">No shipping or pickup information available.</p>
+        @endif
+
 
         <!-- Section: Selected Items -->
         <div class="mb-2 p-1 rounded" style="background-color: #F9FDFC;">

@@ -1,5 +1,4 @@
 
-{{-- @dd($orderData) --}}
 <div id="step-6" class="step" style="display: none;">
 
     <h5 class="mb-2 fs-3 text-black">Personal Information</h5>
@@ -275,26 +274,26 @@
 
         const shippingMethod = parseInt($('input[name="type"]:checked').val()); // Now int not string
 
-        const data = {
-            type: shippingMethod, // send type (for Enum in PHP)
-            _token: '{{ csrf_token() }}'
-        };
+       const data = {
+    type: shippingMethod, // send type (for Enum in PHP)
+    _token: '{{ csrf_token() }}'
+};
 
-        if (shippingMethod === {{ \App\Enums\Order\ShippingMethodEnum::SHIPPING->value }}) {
-            const shippingId = $('input[name="shipping_id"]:checked').val();
-            if (!shippingId) {
-                alert('Please select a shipping address');
-                return;
-            }
-            data.shipping_id = shippingId;
-
-         } else if (shippingMethod === {{ \App\Enums\Order\ShippingMethodEnum::PICKUP->value }}) {
-        data.pickup_first_name = $('#pickup_first_name').val();
-        data.pickup_last_name  = $('#pickup_last_name').val();
-        data.pickup_email      = $('#pickup_email').val();
-        data.pickup_phone      = $('#pickup_phone').val();
-        data.location_id       = $('#pickup_location_id').val();
+if (shippingMethod === {{ \App\Enums\Order\ShippingMethodEnum::SHIPPING->value }}) {
+    const shippingId = $('input[name="shipping_id"]:checked').val();
+    if (!shippingId) {
+        alert('Please select a shipping address');
+        return;
     }
+    data.shipping_id = shippingId;
+
+} else if (shippingMethod === {{ \App\Enums\Order\ShippingMethodEnum::PICKUP->value }}) {
+    data.pickup_first_name = $('#pickup_first_name').val();
+    data.pickup_last_name  = $('#pickup_last_name').val();
+    data.pickup_email      = $('#pickup_email').val();
+    data.pickup_phone      = $('#pickup_phone').val();
+    data.location_id       = $('#pickup_location_id').val();
+}
 
         // Button Loading
         $(this).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');

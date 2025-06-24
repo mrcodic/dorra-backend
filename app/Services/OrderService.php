@@ -11,6 +11,7 @@ use App\Models\ShippingAddress;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use App\Enums\Order\ShippingMethodEnum;
 use Yajra\DataTables\Facades\DataTables;
@@ -160,44 +161,49 @@ class OrderService extends BaseService
         $this->storeStepData(["personal_info" => $request->except("_token")]);
     }
 
-public function storeStep6($request): void
-{
-    $type = ShippingMethodEnum::from($request->type);
+ public function storeStep6($request): void
+    {
+        $type = ShippingMethodEnum::from($request->type);
 
-    Cache::put('order_type_' . auth()->id(), $type->value, now()->addMinutes(30));
+        Cache::put('order_type_' . Auth::id(), $type->value, now()->addMinutes(30));
 
-    if ($type === ShippingMethodEnum::PICKUP) {
-        $pickupAddress = $this->locationRepository->find($request->location_id);
+        if ($type === ShippingMethodEnum::PICKUP) {
+            $pickupAddress = $this->locationRepository->find($request->location_id);
 
-        $this->storeStepData(["pickup_info" => [
-            "id" => $pickupAddress->id,
-            "location_name" => $pickupAddress->name,
-            "line" => $pickupAddress->address_line,
-            "state" => $pickupAddress->state->name,
-            "country" => $pickupAddress->state->country->name,
-        ]]);
-        
+            $this->storeStepData([
+                "pickup_info" => [
+                    "id"            => $pickupAddress->id,
+                    "location_name" => $pickupAddress->name,
+                    "line"          => $pickupAddress->address_line,
+                    "state"         => $pickupAddress->state->name,
+                    "country"       => $pickupAddress->state->country->name,
+                ],
+                "shipping_info" => null 
+            ]);
 
-        Cache::put('pickup_contact_' . auth()->id(), [
-            'first_name' => $request->pickup_first_name,
-            'last_name'  => $request->pickup_last_name,
-            'email'      => $request->pickup_email,
-            'phone'      => $request->pickup_phone,
-        ], now()->addMinutes(30));
+            Cache::put('pickup_contact_' . Auth::id(), [
+                'first_name' => $request->pickup_first_name,
+                'last_name'  => $request->pickup_last_name,
+                'email'      => $request->pickup_email,
+                'phone'      => $request->pickup_phone,
+            ], now()->addMinutes(30));
+        }
+
+        if ($type === ShippingMethodEnum::SHIPPING) {
+            $shippingAddress = $this->shippingAddressRepository->find($request->shipping_id);
+
+            $this->storeStepData([
+                "shipping_info" => [
+                    "id"      => $shippingAddress->id,
+                    "label"   => $shippingAddress->label,
+                    "line"    => $shippingAddress->line,
+                    "state"   => $shippingAddress->state->name,
+                    "country" => $shippingAddress->state->country->name,
+                ],
+                "pickup_info" => null 
+            ]);
+        }
     }
-
-    if ($type === ShippingMethodEnum::SHIPPING) {
-        $shippingAddress = $this->shippingAddressRepository->find($request->shipping_id);
-
-        $this->storeStepData(["shipping_info" => [
-            "id" => $shippingAddress->id,
-            "label" => $shippingAddress->label,
-            "line" => $shippingAddress->line,
-            "state" => $shippingAddress->state->name,
-            "country" => $shippingAddress->state->country->name,
-        ]]);
-    }
-}
 
 
 public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
@@ -205,48 +211,53 @@ public function storeResource($validatedData = [], $relationsToStore = [], $rela
     $cacheKey = getOrderStepCacheKey();
     $orderStepData = Cache::get($cacheKey, []);
 
-        if (empty($orderStepData)) {
-            throw new Exception('Order step data not found in cache');
-        }
+    if (empty($orderStepData)) {
+        throw new Exception('Order step data not found in cache');
+    }
 
-        $orderData = [
-            'user_id' => $orderStepData['user_info']['id'] ?? null,
-            'subtotal' => $orderStepData['pricing_details']['sub_total'] ?? 0,
-            'total_price' => $orderStepData['pricing_details']['total'] ?? 0,
-            'discount_amount' => $orderStepData['pricing_details']['discount'] ?? 0,
-            'delivery_amount' => $orderStepData['pricing_details']['delivery'] ?? 0,
-            'tax_amount' => $orderStepData['pricing_details']['tax'] ?? 0,
-            'status' => StatusEnum::CONFIRMED,
-            'order_number' => 'TEMP-' . uniqid(),
-        ];
+    $orderData = [
+        'user_id'         => $orderStepData['user_info']['id'] ?? null,
+        'subtotal'        => $orderStepData['pricing_details']['sub_total'] ?? 0,
+        'total_price'     => $orderStepData['pricing_details']['total'] ?? 0,
+        'discount_amount' => $orderStepData['pricing_details']['discount'] ?? 0,
+        'delivery_amount' => $orderStepData['pricing_details']['delivery'] ?? 0,
+        'tax_amount'      => $orderStepData['pricing_details']['tax'] ?? 0,
+        'status'          => StatusEnum::CONFIRMED,
+        'order_number'    => 'TEMP-' . uniqid(),
+    ];
 
-        $orderData = array_merge($orderData, $validatedData);
-        $order = $this->repository->create($orderData);
+    $orderData = array_merge($orderData, $validatedData);
+    $order = $this->repository->create($orderData);
 
-        if (!empty($orderStepData['specs'])) {
-            $this->attachSpecificationOptions($order, $orderStepData['specs']);
-        }
+    if (!empty($orderStepData['specs'])) {
+        $this->attachSpecificationOptions($order, $orderStepData['specs']);
+    }
 
-        $this->saveOrderAddress($order, $orderStepData['personal_info'], $orderStepData['shipping_info']);
+    $shippingInfo = $orderStepData['shipping_info'] ?? null;
+    $pickupInfo   = $orderStepData['pickup_info'] ?? null;
+    $personalInfo = $orderStepData['personal_info'] ?? [];
 
-    // FIXED: Use 'design_info' instead of 'designs'
+    $this->saveOrderAddress($order, $personalInfo, $shippingInfo, $pickupInfo);
+
     if (!empty($orderStepData['design_info'])) {
         $this->attachDesignToOrder($order, $orderStepData['design_info'], $orderStepData['pricing_details']);
     }
 
-        if (!empty($relationsToStore)) {
-            foreach ($relationsToStore as $relation => $data) {
-                $order->$relation()->create($data);
-            }
+    if (!empty($relationsToStore)) {
+        foreach ($relationsToStore as $relation => $data) {
+            $order->$relation()->create($data);
         }
-
-        if (!empty($relationsToLoad)) {
-            $order->load($relationsToLoad);
-        }
-
-        Cache::forget($cacheKey);
-        return $order;
     }
+
+    if (!empty($relationsToLoad)) {
+        $order->load($relationsToLoad);
+    }
+
+    Cache::forget($cacheKey);
+    Cache::forget('pickup_contact_' . Auth::id()); 
+
+    return $order;
+}
 
     private function attachSpecificationOptions($order, $specs): void
     {
@@ -269,22 +280,49 @@ public function storeResource($validatedData = [], $relationsToStore = [], $rela
         }
     }
 
-private function saveOrderAddress($order, $personalInfo, $shippingInfo)
+private function saveOrderAddress($order, $personalInfo, $shippingInfo = null, $pickupInfo = null)
 {
-    $order->OrderAddress()->create([
-        'order_id' => $order->id,
-        'type' => 'shipping',
-        'first_name' => $personalInfo['first_name'] ?? null,
-        'last_name' => $personalInfo['last_name'] ?? null,
-        'email' => $personalInfo['email'] ?? null,
-        'phone' => $personalInfo['phone_number'] ?? null,
-        'address_label' => $shippingInfo['label'] ?? null,
-        'address_line' => $shippingInfo['line'] ?? null,
-        'state' => $shippingInfo['state'] ?? null,
-        'country' => $shippingInfo['country'] ?? null,
-    ]);
-}
+    if ($shippingInfo) {
+        $order->OrderAddress()->create([
+            'order_id'      => $order->id,
+            'type'         => 'shipping',
+            'first_name'   => $personalInfo['first_name'] ?? null,
+            'last_name'    => $personalInfo['last_name'] ?? null,
+            'email'        => $personalInfo['email'] ?? null,
+            'phone'        => $personalInfo['phone_number'] ?? null,
+            'address_label'=> $shippingInfo['label'] ?? null,
+            'address_line' => $shippingInfo['line'] ?? null,
+            'state'        => $shippingInfo['state'] ?? null,
+            'country'      => $shippingInfo['country'] ?? null,
+        ]);
+    }
 
+    if ($pickupInfo) {
+        $pickupContactData = Cache::get('pickup_contact_' . Auth::id(), []);
+
+        $order->pickupContact()->create([
+            'first_name' => $pickupContactData['first_name'] ?? null,
+            'last_name'  => $pickupContactData['last_name'] ?? null,
+            'email'      => $pickupContactData['email'] ?? null,
+            'phone'      => $pickupContactData['phone'] ?? null,
+        ]);
+
+        $order->OrderAddress()->create([
+            'order_id'      => $order->id,
+            'type'         => 'pickup',
+            'location_id'  => $pickupInfo['id'] ?? null,
+            'location_name'=> $pickupInfo['location_name'] ?? null,
+            'address_label'=> $pickupInfo['location_name'] ?? null,
+            'address_line' => $pickupInfo['line'] ?? null,
+            'state'        => $pickupInfo['state'] ?? null,
+            'country'      => $pickupInfo['country'] ?? null,
+            'first_name'   => $pickupContactData['first_name'] ?? null,
+            'last_name'    => $pickupContactData['last_name'] ?? null,
+            'email'        => $pickupContactData['email'] ?? null,
+            'phone'        => $pickupContactData['phone'] ?? null,
+        ]);
+    }
+}
 private function attachDesignToOrder($order, $designInfo, $pricingDetails)
 {
     $design = Design::with(['product', 'productPrice'])->find($designInfo['id']);
