@@ -13,14 +13,14 @@
             </div>
 
 
-            <div id="locationList" class="mb-3"></div> 
+            <div id="locationList" class="mb-3"></div>
 
 
                 <div id="mapPlaceholder" style="height: 300px; background-color: #f0f0f0; border-radius: 8px;">
                     <p class="text-center text-muted pt-5">Map will display here based on search</p>
                 </div>
             </div>
-            
+
             <div class="d-flex justify-content-end m-2">
     <button class="btn btn-outline-secondary me-1" data-bs-dismiss="modal">cancel</button>
     <button class="btn btn-primary">confirm</button>
