@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\CartItem;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class CartService extends BaseService
 {
@@ -57,18 +59,44 @@ class CartService extends BaseService
         return $cart ?? null;
     }
 
-    public function deleteItemFromCart($designId, $cartId)
+    /**
+     * @throws ValidationException
+     */
+    public function deleteItemFromCart($designId)
     {
-        $this->handleTransaction(function () use ($designId, $cartId) {
-//            $design = $this->designRepository->find($designId);
-            $cart = $this->cartRepository->find($cartId);
-            $cart->cartItems()->detach($designId);
-            dd($cart->cartItems()
-                ->wherePivot('design_id', $designId)
-                ->first());
-            $cart->update(['price' => $cart->price - $cart->cartItems()->whereDesignId($designId)->first()->total_price]);
+        $userId = auth('sanctum')->id();
+        $cookieId = request()->cookie('cookie_id');
+        if (!$userId && !$cookieId) {
+            throw ValidationException::withMessages([
+                'authorization' => ['Either a logged-in user or a valid cookie must be provided.'],
+            ]);
+        }
+        $this->handleTransaction(function () use ($designId, $cookieId, $userId) {
+            $cart = $this->cartRepository->query()
+                ->where(function ($q) use ($cookieId, $userId) {
+                    if ($userId) {
+                        $q->whereUserId($userId);
+                    } else {
+                        $q->whereCookieId($cookieId);
+                    }
+                })->firstOrFail();
+            $cartItem = CartItem::where('design_id', $designId)
+                ->where('cart_id', $cart->id)
+                ->first();
+            if (!$cartItem) {
+                throw ValidationException::withMessages([
+                    'cart' => ['Design item not found in cart.'],
+                ]);
+            }
+            $itemPrice = $cartItem->design->total_price ?? $cartItem->total_price ?? 0;
+
+            $cartItem->delete();
+            $cart->update([
+                'price' => max(0, $cart->price - $itemPrice),
+            ]);
         });
     }
+
 
     public function applyDiscount($cartId)
     {
