@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\User\Design;
 
 
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Design\StoreDesignFinalizationRequest;
 use App\Http\Requests\Design\StoreDesignRequest;
@@ -11,6 +10,7 @@ use App\Http\Requests\Design\UpdateDesignRequest;
 use App\Http\Resources\Design\DesignFinalizationResource;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Design\DesignVersionResource;
+use App\Models\Design;
 use App\Services\DesignService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\Response;
 
 class DesignController extends Controller
 {
-    public function __construct(public DesignService $designService){}
+    public function __construct(public DesignService $designService)
+    {
+    }
 
     public function index()
     {
@@ -26,6 +28,7 @@ class DesignController extends Controller
         return Response::api(data: DesignResource::collection($designs)->response()->getData(true));
 
     }
+
     public function store(StoreDesignRequest $request)
     {
         $design = $this->designService->storeResource($request->only([
@@ -41,7 +44,7 @@ class DesignController extends Controller
 
     public function show($design)
     {
-        $design = $this->designService->showResource($design,['media','product']);
+        $design = $this->designService->showResource($design, ['media', 'product']);
         return Response::api(data: DesignResource::make($design->refresh()));
     }
 
@@ -61,17 +64,44 @@ class DesignController extends Controller
     {
         $designData = $this->designService->designFinalization($request);
 
-        return Response::api(data: DesignFinalizationResource::collection($designData['syncData'])->additional([
-            'sub_total' => $designData['sub_total'],
-            'quantity' => $designData['quantity'],
-        ]));
+        return Response::api(data: DesignFinalizationResource::collection($designData['syncData'])
+            ->additional([
+                'sub_total' => $designData['sub_total'],
+                'quantity' => $designData['quantity'],
+            ])->response()->getData(true)
+        );
+
 
     }
 
-    public function addQuantity(Request $request,$designId)
+    public function addQuantity(Request $request, $designId)
     {
-        $request->validate(['quantity'=>'required','integer','min:1']);
-        $this->designService->addQuantity($request,$designId);
+        $request->validate([
+            'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
+            'product_price_id' => ['required_without:quantity', 'integer', 'exists:product_prices,id',
+                function ($attribute, $value, $fail) use ($designId) {
+                    $design = Design::find($designId);
+                    if (!$design || !$design->product->prices->pluck('id')->contains($value)) {
+                        $fail('The selected product price is not valid for the current design.');
+                    }
+                }
+            ],
+        ]);
+        $this->designService->addQuantity($request, $designId);
         return Response::api();
+    }
+
+    public function priceDetails($designId)
+    {
+        $specs = $this->designService->priceDetails($designId);
+        return Response::api(data: DesignFinalizationResource::collection($specs));
+    }
+
+    public function getQuantities($designId)
+    {
+        $quantities = $this->designService->getQuantities($designId);
+        $quantities = $quantities ?: (object) [];
+        return Response::api(data: $quantities);
+
     }
 }

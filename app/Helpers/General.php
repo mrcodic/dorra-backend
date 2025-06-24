@@ -1,5 +1,6 @@
 <?php
 
+use App\Repositories\Implementations\SettingRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -54,4 +55,13 @@ function getTotalPrice($discount, $subtotal): float|int
     $tax = 0.1;
     $delivery = 30;
     return $subtotal - $discountAmount + ($tax * $subtotal) + $delivery;
+}
+
+function getPriceAfterTax($tax, $subtotal): float|int
+{
+    return  $tax * $subtotal;
+}
+function setting(string $key, $default = null)
+{
+    return app(SettingRepository::class)->get($key, $default);
 }

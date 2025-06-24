@@ -49,12 +49,15 @@ Route::get('sub-categories', [MainController::class, 'subCategories']);
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 
-Route::apiResource('/designs', DesignController::class)->except(['destroy']);
+Route::get('designs/{design}/price-details',[DesignController::class, 'priceDetails']);
 Route::post('designs/{design}/add-quantity',[DesignController::class, 'addQuantity']);
+Route::get('designs/{design}/quantities',[DesignController::class, 'getQuantities']);
+Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 Route::post('/design-finalization', [DesignController::class, 'designFinalization']);
 
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
 
+Route::post('/carts/{cart}/apply-discount',[CartController::class, 'applyDiscount']);
 Route::apiResource('/carts',CartController::class)->only(['store','index','destroy']);
 
 Route::middleware('auth:sanctum')->group(function () {

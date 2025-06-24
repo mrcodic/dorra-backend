@@ -65,12 +65,12 @@ class DesignService extends BaseService
             $designs = $this->repository->query()
                 ->with('product')
                 ->where(function ($q) use ($cookieId, $userId) {
-                if ($userId) {
-                    $q->whereUserId($userId);
-                } elseif ($cookieId) {
-                    $q->whereCookieId($cookieId);
-                }
-            })->latest()->paginate();
+                    if ($userId) {
+                        $q->whereUserId($userId);
+                    } elseif ($cookieId) {
+                        $q->whereCookieId($cookieId);
+                    }
+                })->latest()->paginate();
         }
         return $designs ?? new LengthAwarePaginator(
             collect([]),
@@ -127,13 +127,23 @@ class DesignService extends BaseService
      */
     public function addQuantity($request, $id)
     {
-        $design = $this->repository->find( $id);
-        if ($design->product->has_custom_prices)
-        {
-            throw ValidationException::withMessages([
-                'custom_prices' => 'this product has custom prices',
-            ]);
+        $design = $this->repository->find($id);
+        if ($design->product->has_custom_prices) {
+            return $design->update($request->only(['product_price_id']));
+        } else {
+            return $design->update($request->only(['quantity']));
         }
-       return $design->update($request->only(['quantity']));
+    }
+
+    public function priceDetails($designId)
+    {
+        $design = $this->repository->find($designId);
+        return $design->specifications->load(['options']);
+    }
+
+    public function getQuantities($designId)
+    {
+        $design = $this->repository->find($designId);
+        return $design->product->prices->pluck('quantity','id')->toArray();
     }
 }

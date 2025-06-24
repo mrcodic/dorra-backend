@@ -17,8 +17,19 @@ class CartResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "designs" => DesignResource::collection( $this->whenLoaded('designs')),
-            'price' => $this->price,
+            "designs" => DesignResource::collection($this->whenLoaded('designs')),
+            'sub_total' => $this->designs->pluck('total_price')->sum(),
+            'total' => $this->price,
+            'tax' => [
+                'ratio' => setting('tax') * 100 . "%",
+                'value' => getPriceAfterTax(setting('tax'), $this->price),
+            ],
+            'delivery' => setting('delivery'),
+            'discount' => [
+                'ratio' => 0 . "%",
+                'value' => 0,
+            ],
         ];
     }
 }
+

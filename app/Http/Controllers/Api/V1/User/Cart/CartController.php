@@ -33,4 +33,9 @@ class CartController extends Controller
         $this->cartService->deleteItemFromCart($request->design_id,$cartId);
         return Response::api();
     }
+    public function applyDiscount($cartId)
+    {
+        $this->cartService->applyDiscount($cartId);
+        return Response::api();
+    }
 }
