@@ -126,6 +126,7 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'locations', 'as' => 'locations.', 'controller' => LocationController::class,], function () {
         Route::get('/data', [LocationController::class, 'getData'])->name('data');
         Route::get('/dashboard', [LocationController::class, 'dashboard'])->name('dashboard');
+        Route::get('/search', [LocationController::class, 'search'])->name('search');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/logistics', LocationController::class)->except('show');

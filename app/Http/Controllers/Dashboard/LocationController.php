@@ -74,4 +74,10 @@ public function store(Request $request)
     );
 }
 
+
+    public function search(Request $request)
+    {
+        return $this->locationService->search($request);
+    }
+
 }

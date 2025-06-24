@@ -117,10 +117,68 @@
         <button class="btn btn-primary" id="nextStep6" data-next-step>Next</button>
     </div>
 
-    @include('modals/select-location')
+    @include('modals.select-location')
     @include('modals.addresses.add-new-address',['countries' => $associatedData['countries'],'modelId'=>$orderData["user_info"]["id"] ?? 0])
 
 </div>
+
+
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAP_API_KEY"></script>
+<script>
+    let map;
+    let marker;
+
+    function initMap(lat = 30.0444, lng = 31.2357) { 
+        const defaultLocation = { lat: parseFloat(lat), lng: parseFloat(lng) };
+        map = new google.maps.Map(document.getElementById('mapPlaceholder'), {
+            zoom: 10,
+            center: defaultLocation,
+        });
+
+        marker = new google.maps.Marker({
+            position: defaultLocation,
+            map: map,
+        });
+    }
+
+    $(document).ready(function() {
+        $('#selectLocationModal').on('shown.bs.modal', function() {
+            initMap();
+        });
+
+        $('#locationSearch').on('input', function() {
+            console.log('Search query:', $(this).val());
+            const query = $(this).val();
+            if (query.length >= 2) {
+                $.ajax({
+                    url: "{{ route('locations.search') }}",
+                    method: 'GET',
+                    data: { search: query },
+                    success: function(response) {
+                        $('#locationList').html(response); 
+                    }
+                });
+            } else {
+                $('#locationList').html('');
+            }
+        });
+
+        // عند الضغط على نتيجة البحث
+        $(document).on('click', '.location-item', function() {
+            const lat = parseFloat($(this).data('lat'));
+            const lng = parseFloat($(this).data('lng'));
+            const name = $(this).data('name');
+
+            const newLocation = { lat: lat, lng: lng };
+            map.setCenter(newLocation);
+            marker.setPosition(newLocation);
+
+            $('#mapPlaceholder').find('p').hide();
+            $('#locationSearch').val(name);
+            $('#locationList').html('');
+        });
+    });
+</script>
 
 
 <script>
@@ -253,5 +311,8 @@
             }
         });
     });
-
 </script>
+
+
+
+

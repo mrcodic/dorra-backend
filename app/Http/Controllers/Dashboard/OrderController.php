@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Base\DashboardController;
-use App\Http\Requests\Design\StoreDesignFinalizationRequest;
-use App\Repositories\Interfaces\CategoryRepositoryInterface;
-use App\Repositories\Interfaces\CountryRepositoryInterface;
-use App\Repositories\Interfaces\TagRepositoryInterface;
-use App\Services\OrderService;
-
+use App\Models\Location;
 use Illuminate\Http\Request;
+use App\Services\OrderService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
+use App\Http\Controllers\Base\DashboardController;
+
+use App\Repositories\Interfaces\TagRepositoryInterface;
+use App\Repositories\Interfaces\CountryRepositoryInterface;
+use App\Http\Requests\Design\StoreDesignFinalizationRequest;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Http\Requests\Order\{StoreOrderRequest, UpdateOrderRequest};
 
 
@@ -169,5 +170,27 @@ public function editShippingAddresses(Request $request, $orderId)
     {
         return $this->orderService->downloadPDF();
     }
+
+
+        public function search(Request $request)
+        {
+            $query = $request->input('query');
+            $location = Location::where('name', 'LIKE', '%' . $query . '%')->first();
+            if ($location) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'name' => $location->name,
+                        'latitude' => $location->latitude,
+                        'longitude' => $location->longitude,
+                        'address' => $location->address_line,
+                    ]
+                ]);
+            }
+            return response()->json(['success' => false, 'message' => 'Location not found.']);
+        }
+
+
+
 
 }

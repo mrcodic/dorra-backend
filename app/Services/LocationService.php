@@ -6,6 +6,7 @@ use App\Enums\Location\DayEnum;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Requests\Location\StoreLocationRequest;
 use App\Repositories\Interfaces\LocationRepositoryInterface;
+use function Laravel\Prompts\search;
 
 
 
@@ -149,6 +150,31 @@ public function storeResource($validatedData, $relationsToStore = [], $relations
         
         return $coordinates;
     }
+
+
+
+
+public function search($request)
+{
+    $queryString = $request->search;
+
+    $locations = $this->repository->query()
+        ->when($request->filled('search'), function ($query) use ($queryString) {
+            $query->where(function ($q) use ($queryString) {
+                $q->where('name', 'like', '%' . $queryString . '%')
+                  ->orWhere('address_line', 'like', '%' . $queryString . '%')
+                  ->orWhereHas('state', function ($stateQuery) use ($queryString) {
+                      $stateQuery->where('name', 'like', '%' . $queryString . '%')
+                          ->orWhereHas('country', function ($countryQuery) use ($queryString) {
+                              $countryQuery->where('name', 'like', '%' . $queryString . '%');
+                          });
+                  });
+            });
+        })
+        ->get();
+
+    return view("dashboard.partials.filtered-locations", compact('locations'));
+}
 }
 
 

@@ -159,8 +159,8 @@ class OrderService extends BaseService
 
     public function storeStep6($request): void
     {
+        
         $shippingAddress = $this->shippingAddressRepository->find($request->shipping_id);
-
         $this->storeStepData(["shipping_info" => [
             "id" => $shippingAddress->id,
             "label" => $shippingAddress->label,
