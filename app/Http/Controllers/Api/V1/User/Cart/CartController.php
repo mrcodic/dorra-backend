@@ -27,10 +27,10 @@ class CartController extends Controller
         return Response::api(data: $data );
     }
 
-    public function destroy(Request $request, $cartId)
+    public function destroy(Request $request)
     {
         $request->validate(['design_id' => 'required','exists:designs,id']);
-        $this->cartService->deleteItemFromCart($request->design_id,$cartId);
+        $this->cartService->deleteItemFromCart($request->design_id);
         return Response::api();
     }
     public function applyDiscount($cartId)

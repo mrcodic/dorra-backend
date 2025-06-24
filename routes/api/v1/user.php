@@ -58,7 +58,8 @@ Route::post('/design-finalization', [DesignController::class, 'designFinalizatio
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
 
 Route::post('/carts/{cart}/apply-discount',[CartController::class, 'applyDiscount']);
-Route::apiResource('/carts',CartController::class)->only(['store','index','destroy']);
+Route::delete('/carts',[CartController::class, 'destroy']);
+Route::apiResource('/carts',CartController::class)->only(['store','index']);
 
 Route::middleware('auth:sanctum')->group(function () {
 

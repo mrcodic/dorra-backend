@@ -14,8 +14,7 @@
             <div class="col-12 ">
                 <div class="card">
                     <div class="card-body ">
-                        <form id="editTemplateForm" enctype="multipart/form-data" method="post"
-                              action="{{ route('product-templates.update',$model->id) }}">
+                        <form id="editTemplateForm" enctype="multipart/form-data" method="post" action="{{ route('product-templates.update',$model->id) }}">
                             @csrf
                             @method("PUT")
                             <div class="flex-grow-1">
@@ -26,7 +25,7 @@
                                             <label for="width" class="label-text mb-1 width">Width</label>
                                             <input type="number" step="0.01" id="width" name="width" value="{{ $model->width }}"
                                                    class="form-control"
-                                                   placeholder="Enter width">
+                                                   placeholder="Enter width" disabled>
                                         </div>
 
                                         <!-- Height -->
@@ -34,13 +33,13 @@
                                             <label for="height" class="label-text mb-1">Height</label>
                                             <input type="number" step="0.01" id="height" name="height" value="{{ $model->height }}"
                                                    class="form-control"
-                                                   placeholder="Enter height">
+                                                   placeholder="Enter height" disabled>
                                         </div>
 
                                         <!-- Unit -->
                                         <div class="col-md-4 mb-2">
                                             <label for="unit" class="label-text mb-1">Unit</label>
-                                            <select id="unit" name="unit" class="form-select">
+                                            <select id="unit" name="unit" class="form-select" disabled>
                                                 <option value="">Select Unit</option>
                                                 @foreach(\App\Enums\Template\UnitEnum::cases() as $unit)
                                                     <option

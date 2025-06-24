@@ -122,9 +122,6 @@ class DesignService extends BaseService
         });
     }
 
-    /**
-     * @throws ValidationException
-     */
     public function addQuantity($request, $id)
     {
         $design = $this->repository->find($id);
@@ -135,7 +132,7 @@ class DesignService extends BaseService
         }
     }
 
-    public function priceDetails($designId)
+    public function priceDetails($designId): array
     {
         $design = $this->repository->find($designId);
         return [
