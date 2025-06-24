@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Order;
+use App\Models\Location;
 use Illuminate\Database\Eloquent\Model;
 
 class OrderAddress extends Model
@@ -18,4 +19,18 @@ class OrderAddress extends Model
     {
         return $this->belongsTo(ShippingAddress::class);
     }
+
+
+     public function location()
+    {
+        return $this->belongsTo(Location::class); // assuming you have a locations table and model
+    }
+
+    protected $casts = [
+    'shipping_method' => ShippingMethodEnum::class,
+
+];
+
 }
+
+

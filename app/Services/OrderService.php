@@ -12,11 +12,13 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Enums\Order\ShippingMethodEnum;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Interfaces\LocationRepositoryInterface;
 use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
 use App\Repositories\Interfaces\ProductPriceRepositoryInterface;
 use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
@@ -39,6 +41,7 @@ class OrderService extends BaseService
         public ProductRepositoryInterface                    $productRepository,
         public ShippingAddressRepositoryInterface            $shippingAddressRepository,
         public DesignRepositoryInterface                    $designRepository,
+        public LocationRepositoryInterface                   $locationRepository
     )
 
 
@@ -157,10 +160,26 @@ class OrderService extends BaseService
         $this->storeStepData(["personal_info" => $request->except("_token")]);
     }
 
-    public function storeStep6($request): void
-    {
-        
+public function storeStep6($request): void
+{
+    $type = ShippingMethodEnum::from($request->type);
+    Cache::put('order_type_' . auth()->id(), $type->value, now()->addMinutes(30));
+
+    if ($type === ShippingMethodEnum::PICKUP) {
+        $pickupAddress = $this->locationRepository->find($request->location_id);
+
+        $this->storeStepData(["pickup_info" => [
+            "id" => $pickupAddress->id,
+            "location_name" => $pickupAddress->name,
+            "line" => $pickupAddress->address_line,
+            "state" => $pickupAddress->state->name,
+            "country" => $pickupAddress->state->country->name,
+        ]]);
+    }
+
+    if ($type === ShippingMethodEnum::SHIPPING) {
         $shippingAddress = $this->shippingAddressRepository->find($request->shipping_id);
+
         $this->storeStepData(["shipping_info" => [
             "id" => $shippingAddress->id,
             "label" => $shippingAddress->label,
@@ -169,6 +188,7 @@ class OrderService extends BaseService
             "country" => $shippingAddress->state->country->name,
         ]]);
     }
+}
 
 public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
 {
