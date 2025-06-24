@@ -95,8 +95,9 @@
             <label class="form-label">Phone Number</label>
             <input type="tel" class="form-control" id="pickup_phone" name="pickup_phone">
         </div>
-        {{-- <input type="hidden" id="pickup_location_id" name="pickup_location_id" value="">  --}}
+        <input type="hidden" id="pickup_location_id" name="pickup_location_id" value=""> 
 
+        </div>
 
         <!-- Change Location Section -->
         {{-- <div id="changeLocationSection" style="display: none;">
@@ -322,9 +323,47 @@
     });
 
 
+    $(document).on('click', '.location-item', function() {
+    const lat = parseFloat($(this).data('lat'));
+    const lng = parseFloat($(this).data('lng'));
+    const name = $(this).data('name');
+    const locationId = $(this).data('id'); // Your location ID
 
+    console.log('Clicked Location:', {
+        lat: lat,
+        lng: lng,
+        name: name,
+        locationId: locationId
+    });
+
+    if (marker) marker.setMap(null);
+
+    const newLocation = { lat: lat, lng: lng };
+    map.setCenter(newLocation);
+    marker = new google.maps.Marker({
+        position: newLocation,
+        map: map,
+    });
+
+    $('#locationSearch').val(name);
+    $('#pickup_location_id').val(locationId); // Store location_id here
+    console.log('pickup_location_id set to:', $('#pickup_location_id').val());
+
+    $('#locationList').html('');
+});
+
+$('#confirmLocationBtn').click(function() {
+    const selectedLocationId = $('#pickup_location_id').val();
+    console.log('Confirm button clicked. Selected Location ID:', selectedLocationId);
+
+    if (!selectedLocationId) {
+        alert('Please select a location first.');
+        return;
+    }
+    // Close the modal
+    $('#selectLocationModal').modal('hide');
+});
 </script>
-
 
 
 

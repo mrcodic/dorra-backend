@@ -163,6 +163,7 @@ class OrderService extends BaseService
 public function storeStep6($request): void
 {
     $type = ShippingMethodEnum::from($request->type);
+
     Cache::put('order_type_' . auth()->id(), $type->value, now()->addMinutes(30));
 
     if ($type === ShippingMethodEnum::PICKUP) {
@@ -175,6 +176,14 @@ public function storeStep6($request): void
             "state" => $pickupAddress->state->name,
             "country" => $pickupAddress->state->country->name,
         ]]);
+        
+
+        Cache::put('pickup_contact_' . auth()->id(), [
+            'first_name' => $request->pickup_first_name,
+            'last_name'  => $request->pickup_last_name,
+            'email'      => $request->pickup_email,
+            'phone'      => $request->pickup_phone,
+        ], now()->addMinutes(30));
     }
 
     if ($type === ShippingMethodEnum::SHIPPING) {
@@ -189,6 +198,7 @@ public function storeStep6($request): void
         ]]);
     }
 }
+
 
 public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
 {
