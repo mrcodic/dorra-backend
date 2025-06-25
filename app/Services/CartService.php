@@ -2,49 +2,40 @@
 
 namespace App\Services;
 
+use App\Enums\DiscountCode\ScopeEnum;
 use App\Models\CartItem;
+use App\Models\Category;
+use App\Models\Product;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
+use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
+use App\Rules\ValidDiscountCode;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class CartService extends BaseService
 {
-    public function __construct(CartRepositoryInterface          $repository,
-                                public DesignRepositoryInterface $designRepository,
-                                public CartRepositoryInterface   $cartRepository,
+    public function __construct(CartRepositoryInterface                $repository,
+                                public DesignRepositoryInterface       $designRepository,
+                                public CartRepositoryInterface         $cartRepository,
+                                public DiscountCodeRepositoryInterface $discountCodeRepository,
     )
     {
         parent::__construct($repository);
     }
 
-    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    private function resolveUserCart()
     {
-        $model = $this->repository->query()->firstOrCreate([
-            'user_id' => Arr::get($validatedData, 'user_id'),
-            'cookie_id' => Arr::get($validatedData, 'cookie_id'),
-        ],
-            Arr::except($validatedData, 'design_id'));
-        $totalPrice = $model->cartItems->isNotEmpty() ? $model->cartItems->sum(fn($value) => $value->pivot->total_price) : 0;
-        $model->update(['price' => $totalPrice]);
-        $design = $this->designRepository->find($validatedData['design_id']);
-        $model->designs()->syncWithoutDetaching([
-            $validatedData['design_id'] => [
-                'status' => 1,
-                'sub_total' => $design->total_price,
-                'total_price' => $design->total_price,
-            ]
-        ]);
-        return $model->load($relationsToLoad);
-    }
-
-    public function getCurrentUserOrGuestCart()
-    {
-        $cookieId = request()->cookie('cookie_id');
         $userId = auth('sanctum')->id();
-        if ($userId || $cookieId) {
-            $cart = $this->repository->query()
+        $cookieId = request()->cookie('cookie_id');
+
+        if (!$userId && !$cookieId) {
+            throw ValidationException::withMessages([
+                'authorization' => ['Either a logged-in user or a valid cookie must be provided.'],
+            ]);
+        }
+        return $this->repository->query()
                 ->where(function ($q) use ($cookieId, $userId) {
                     if ($userId) {
                         $q->whereUserId($userId);
@@ -54,8 +45,39 @@ class CartService extends BaseService
                 })
                 ->with(['designs.product'])
                 ->first();
-        }
 
+    }
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    {
+
+        $model = $this->repository->query()->firstOrCreate([
+            'user_id' => Arr::get($validatedData, 'user_id'),
+            'cookie_id' => Arr::get($validatedData, 'cookie_id'),
+        ], Arr::except($validatedData, 'design_id'));
+
+        $design = $this->designRepository->find($validatedData['design_id']);
+
+        $model->designs()->syncWithoutDetaching([
+            $design->id => [
+                'status' => 1,
+                'sub_total' => $design->total_price,
+                'total_price' => $design->total_price,
+            ]
+        ]);
+
+        $totalPrice = $model->designs->sum(fn($design) => $design->total_price ?? 0);
+
+        $model->update(['price' => getTotalPrice(0,$totalPrice)]);
+
+        return $model->load($relationsToLoad);
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function getCurrentUserOrGuestCart()
+    {
+        $cart = $this->resolveUserCart();
         return $cart ?? null;
     }
 
@@ -64,22 +86,8 @@ class CartService extends BaseService
      */
     public function deleteItemFromCart($designId)
     {
-        $userId = auth('sanctum')->id();
-        $cookieId = request()->cookie('cookie_id');
-        if (!$userId && !$cookieId) {
-            throw ValidationException::withMessages([
-                'authorization' => ['Either a logged-in user or a valid cookie must be provided.'],
-            ]);
-        }
-        $this->handleTransaction(function () use ($designId, $cookieId, $userId) {
-            $cart = $this->cartRepository->query()
-                ->where(function ($q) use ($cookieId, $userId) {
-                    if ($userId) {
-                        $q->whereUserId($userId);
-                    } else {
-                        $q->whereCookieId($cookieId);
-                    }
-                })->firstOrFail();
+        $this->handleTransaction(function () use ($designId) {
+            $cart = $this->resolveUserCart();
             $cartItem = CartItem::where('design_id', $designId)
                 ->where('cart_id', $cart->id)
                 ->first();
@@ -98,8 +106,46 @@ class CartService extends BaseService
     }
 
 
-    public function applyDiscount($cartId)
+    public function applyDiscount($request)
     {
-        $subTotal = $this->repository->find($cartId)->designs->pluck('total_price')->sum();
+        $cart = $this->resolveUserCart();
+        $cart->load('cartItems.product');
+        $items = $cart->cartItems;
+        $discountCode = $this->discountCodeRepository->query()->whereCode($request->code)->firstOrFail();
+
+        $products = $items->pluck('product.id')->filter()->unique();
+        $allSameProduct = $products->count() === 1;
+        if ($allSameProduct) {
+            $product = Product::find($products->first());
+
+        }
+        $request->validate([
+            'code' => ['required', new ValidDiscountCode($product ?? null)],
+        ]);
+
+
+        $subTotal = $cart->price;
+        $discountValue = $discountCode->value;
+        $discountAmount = getDiscountAmount($discountValue, $subTotal);
+        $totalPrice = $subTotal - $discountAmount;
+
+        return [
+            'discount' => [
+                'ratio' => $discountValue,
+                'value' => $discountAmount,
+            ],
+            'total_price' => $totalPrice,
+        ];
+    }
+
+
+    public function cartInfo()
+    {
+        $cart = $this->resolveUserCart();
+        return [
+            'price' => $cart->price,
+            'items_count' => $cart->cartItems->count(),
+        ];
+
     }
 }

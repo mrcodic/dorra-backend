@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Jobs\ProcessBase64Image;
 use App\Jobs\RenderFabricJsonToPngJob;
+use App\Models\CartItem;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
@@ -122,14 +123,32 @@ class DesignService extends BaseService
         });
     }
 
+
     public function addQuantity($request, $id)
     {
         $design = $this->repository->find($id);
+
         if ($design->product->has_custom_prices) {
-            return $design->update($request->only(['product_price_id']));
+            $updated = $design->update($request->only(['product_price_id']));
         } else {
-            return $design->update($request->only(['quantity']));
+            $updated = $design->update($request->only(['quantity']));
         }
+
+        if ($design->cartItems->isNotEmpty()) {
+            collect($design->cartItems)->each(function ($cart) use ($design) {
+                $cartItem = CartItem::where('cart_id', $cart->id)
+                    ->where('design_id', $design->id)
+                    ->first();
+
+                if ($cartItem) {
+                    $cartItem->update([
+                        'sub_total' => $design->total_price
+                    ]);
+                }
+            });
+        }
+
+        return $updated;
     }
 
     public function priceDetails($designId): array

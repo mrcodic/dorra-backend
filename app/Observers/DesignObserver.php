@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Models\Cart;
 use App\Models\Design;
 
 use App\Jobs\CopyDesignMediaJob;
@@ -20,6 +21,7 @@ class DesignObserver
             'version' => $design->current_version,
         ]);
         CopyDesignMediaJob::dispatch($design, $designVersion);
+
     }
 
     /**
@@ -35,12 +37,14 @@ class DesignObserver
      */
     public function updated(Design $design): void
     {
+
         $designVersion = $design->versions()->create([
             'design_data' => $design->design_data,
             'version' => $design->current_version,
         ]);
 
         CopyDesignMediaJob::dispatch($design, $designVersion);
+
     }
 
     /**
