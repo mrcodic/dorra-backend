@@ -35,10 +35,10 @@
 
 
                     <div class="d-flex gap-1">
-                        <div class="form-group mb-2 col-6">
-                            <label for="createRestrictions" class="label-text mb-1">Restrictions</label>
-                            <input type="number" name="max_usage" id="createRestrictions" class="form-control" placeholder="Enter number of usage times">
-                        </div>
+                            <div class="form-group mb-2 col-6">
+                                <label for="createRestrictions" class="label-text mb-1">Maximum Usage Limits</label>
+                                <input type="number" name="max_usage" id="createRestrictions" class="form-control" placeholder="Enter number of usage times">
+                            </div>
                         <div class="form-group mb-2 col-6">
                             <label for="createExpiryDate" class="label-text mb-1">Expiry Date</label>
                             <input type="date" name="expired_at" id="createExpiryDate" class="form-control">

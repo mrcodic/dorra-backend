@@ -19,7 +19,7 @@ class StoreDiscountCodeRequest extends BaseRequest
             'code' => ['required', 'string', 'max:4', 'unique:discount_codes,code'],
             'type' => ['required', 'in:'.TypeEnum::getValuesAsString()],
             'value' => ['required', 'numeric', 'min:0'],
-            'max_usage' => ['nullable', 'integer', 'min:1'],
+            'max_usage' => ['required', 'integer', 'min:1'],
             'expired_at' => ['required', 'date', 'after:today'],
             'number_of_discount_codes' => ['nullable', 'integer', 'min:1'],
             'scope' => ['required', 'in:'.ScopeEnum::getValuesAsString()],
