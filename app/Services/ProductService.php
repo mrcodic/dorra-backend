@@ -10,6 +10,7 @@ use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Yajra\DataTables\Facades\DataTables;
@@ -222,9 +223,13 @@ class ProductService extends BaseService
     public function search($request)
     {
         $tagIds = is_array($request->tag_ids) ? $request->tag_ids : Arr::wrap($request->tag_ids);
-        $products = $this->repository->query()
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->search . '%');
+        $locale = App::getLocale();
+
+        return $this->repository->query()
+            ->when($request->filled('search'), function ($query) use ($request, $locale) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($request->search) . '%'
+                ]);
             })
             ->when($request->filled('category_id'), function ($query) use ($request) {
                 $query->where('category_id', $request->category_id);
@@ -232,12 +237,11 @@ class ProductService extends BaseService
             ->when(!empty($tagIds), function ($query) use ($tagIds) {
                 $query->whereHas('tags', function ($q) use ($tagIds) {
                     $q->whereIn('tags.id', $tagIds);
-                }, '=', count($tagIds)); // Ensure ALL tags are matched
+                }, '=', count($tagIds));
             })
             ->get();
-
-        return view("dashboard.partials.filtered-products", compact('products'));
     }
+
 
     public function productSpecifications($productId)
     {

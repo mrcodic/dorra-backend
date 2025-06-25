@@ -22,11 +22,9 @@ use App\Http\Controllers\Dashboard\{
     DiscountCodeController,
     SettingController,
     OfferController,
-    LogisticController
+    LocationController
 };
-use App\Http\Controllers\Dashboard\LocationController;
 use App\Http\Controllers\Shared\LibraryAssetController;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 
@@ -124,9 +122,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('/offers', OfferController::class)->except('show');
 
     Route::group(['prefix' => 'locations', 'as' => 'locations.', 'controller' => LocationController::class,], function () {
-        Route::get('/data', [LocationController::class, 'getData'])->name('data');
-        Route::get('/dashboard', [LocationController::class, 'dashboard'])->name('dashboard');
-        Route::get('/search', [LocationController::class, 'search'])->name('search');
+        Route::get('/data', 'getData')->name('data');
+        Route::get('/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/search', 'search')->name('search');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/logistics', LocationController::class)->except('show');

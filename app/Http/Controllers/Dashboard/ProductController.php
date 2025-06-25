@@ -52,6 +52,7 @@ class ProductController extends DashboardController
 
     public function search(Request $request)
     {
-        return $this->productService->search($request);
+        $products = $this->productService->search($request);
+        return  view("dashboard.partials.filtered-products", compact('products'));
     }
 }

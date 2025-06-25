@@ -63,7 +63,7 @@ public function store(Request $request)
     ]);
 
     $location = $this->locationService->storeResource($validatedData);
-    
+
     return Response::api(
         message: 'Location created successfully!',
         data: [
@@ -77,7 +77,8 @@ public function store(Request $request)
 
     public function search(Request $request)
     {
-        return $this->locationService->search($request);
+        $locations =  $this->locationService->search($request);
+        return view("dashboard.partials.filtered-locations", compact('locations'));
     }
 
 }
