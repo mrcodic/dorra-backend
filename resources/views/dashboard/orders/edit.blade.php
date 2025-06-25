@@ -49,20 +49,35 @@
 
 
                 <!-- Shipping Details -->
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="mb-0 fs-16 text-black">Shipping Details</h5>
+                @php
+                    $address = optional($model->OrderAddress->first());
+                @endphp
 
-                    <button type="button" class="lined-btn" data-bs-toggle="modal" data-bs-target="#editOrderShippingModal">
-                        Edit
-                    </button>
+                @if($address)
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0 fs-16 text-black">
+                            {{ $address->type === 'pickup' ? 'Pickup Details' : 'Shipping Details' }}
+                        </h5>
 
+                        <button type="button" class="lined-btn" data-bs-toggle="modal" data-bs-target="#editOrderShippingModal">
+                            Edit
+                        </button>
+                    </div>
 
-                </div>
-                <span class="text-black fs-16 fw-bold mb-1">Address:</span>
-                <div class="border rounded p-2 mb-2 text-black fs-5">
+                    <span class="text-black fs-16 fw-bold mb-1">
+                        {{ $address->type === 'pickup' ? 'Location:' : 'Address:' }}
+                    </span>
 
-                    {{ optional($model->OrderAddress->first())->address_line }}, {{ optional($model->OrderAddress->first())->address_label}},<br>{{ optional($model->OrderAddress->first())->state }}, {{ optional($model->OrderAddress->first())->country }}
-                </div>
+                    <div class="border rounded p-2 mb-2 text-black fs-5">
+                        @if($address->type === 'pickup')
+                            {{ $address->location_name }}<br>
+                            {{ $address->state }}, {{ $address->country }}
+                        @else
+                            {{ $address->address_line }}, {{ $address->address_label }}<br>
+                            {{ $address->state }}, {{ $address->country }}
+                        @endif
+                    </div>
+                @endif
                 <span class="text-black fs-16 fw-bold mb-1">Delivery Instructions:</span>
                 <div class="border rounded p-1 mb-2 text-black fs-5">
 
@@ -410,6 +425,12 @@
     handleAjaxFormSubmit('.delete-design-form', {
         successMessage: 'design deleted successfully!',
     });
+
+
+
+
+
+   
 
 </script>
 @endsection

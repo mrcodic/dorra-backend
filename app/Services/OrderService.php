@@ -6,6 +6,7 @@ use Exception;
 use App\Models\Order;
 use App\Models\Design;
 use App\Models\Product;
+use App\Models\Location;
 use App\Enums\Order\StatusEnum;
 use App\Models\ShippingAddress;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -48,9 +49,10 @@ class OrderService extends BaseService
 
     {
         $this->relations = [
-            'user.addresses.state.country',
-            'OrderAddress'
-        ];
+        'user.addresses.state.country',
+        'OrderAddress',
+        'pickupContact'
+    ];
         parent::__construct($repository);
     }
 
@@ -489,19 +491,195 @@ class OrderService extends BaseService
                 $totalPrice = $basePrice * $quantity;
             }
 
-            $pivotData[$design->id] = [
-                'quantity' => $quantity,
-                'base_price' => $basePrice,
-                'custom_product_price' => $customProductPrice,
-                'total_price' => $totalPrice,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+        $pivotData[$design->id] = [
+            'quantity' => $quantity,
+            'base_price' => $basePrice,
+            'custom_product_price' => $customProductPrice,
+            'total_price' => $totalPrice,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+    }
+
+    if (!empty($pivotData)) {
+        $order->designs()->attach($pivotData);
+    }
+}
+
+    public function applyDiscountCode($request)
+    {
+        $orderStepData = Cache::get(getOrderStepCacheKey());
+        if (!$orderStepData || !isset($orderStepData['product_id'])) {
+            throw new \Exception('Product information not found in order data');
         }
 
-        if (!empty($pivotData)) {
-            $order->designs()->attach($pivotData);
+        $product = Product::find($orderStepData['product_id']);
+        $category = $product->category;
+        $validated = $request->validate([
+            'code' => ['required', 'string', new ValidDiscountCode($product, $category)],
+        ]);
+        return $this->discountCodeRepository->query()->where($validated)->first();
+    }
+
+
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+{
+    $model = $this->repository->update($validatedData, $id);
+
+    if (isset($validatedData['first_name']) || isset($validatedData['last_name']) || isset($validatedData['email']) || isset($validatedData['phone'])) {
+        $orderAddress = $model->OrderAddress()->first();
+        if ($orderAddress) {
+            $orderAddress->update([
+                'first_name'   => $validatedData['first_name'] ?? $orderAddress->first_name,
+                'last_name'    => $validatedData['last_name'] ?? $orderAddress->last_name,
+                'email'        => $validatedData['email'] ?? $orderAddress->email,
+                'phone'        => $validatedData['phone'] ?? $orderAddress->phone,
+            ]);
+        }
+    }
+    return $model->load($relationsToLoad);
+}
+
+public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
+{
+    $model = $this->repository->find($id);
+
+    if (!$model) {
+        throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
+    }
+
+    $typeMap = [
+        '1' => 'shipping',
+        '2' => 'pickup',
+    ];
+
+    $type = $typeMap[$validatedData['type']] ?? $validatedData['type'];
+
+    if ($type === 'shipping' && isset($validatedData['shipping_address_id']) && $validatedData['shipping_address_id'] !== null) {
+        $newAddressId = $validatedData['shipping_address_id'];
+        $shippingAddress = ShippingAddress::with(['state.country'])->findOrFail($newAddressId);
+
+        $orderAddress = $model->OrderAddress()->where('type', 'shipping')->first();
+
+        $addressData = [
+            'shipping_address_id' => $newAddressId,
+            'address_label'       => $shippingAddress->label,
+            'address_line'        => $shippingAddress->line,
+            'state'               => optional($shippingAddress->state)->name,
+            'country'             => optional($shippingAddress->state?->country)->name,
+        ];
+
+        if ($orderAddress) {
+            $orderAddress->update($addressData);
+        } else {
+            $model->OrderAddress()->create(array_merge([
+                'order_id' => $model->id,
+                'type'     => 'shipping',
+            ], $addressData));
+        }
+
+        $pickupAddress = $model->OrderAddress()->where('type', 'pickup')->first();
+        if ($pickupAddress) {
+            $pickupAddress->delete();
+        }
+
+        $pickupContact = $model->pickupContact;
+        if ($pickupContact) {
+            $pickupContact->delete();
         }
     }
 
+    if ($type === 'pickup' && isset($validatedData['location_id']) && $validatedData['location_id'] !== null) {
+        $location = Location::with(['state','state.country'])->findOrFail($validatedData['location_id']);
+
+        $pickupAddress = $model->OrderAddress()->where('type', 'pickup')->first();
+
+        $pickupAddressData = [
+            'location_id'   => $location->id,
+            'location_name' => $location->name,
+            'address_label' => $location->name,
+            'address_line'  => $location->address_line,
+            'state'         => is_object($location->state) ? $location->state->name : ($location->state ?? 'Unknown'),
+            'country'       => $location->country ?? $location->state?->country?->name ?? 'Unknown',
+        ];
+
+        if ($pickupAddress) {
+            $pickupAddress->update($pickupAddressData);
+        } else {
+            $model->OrderAddress()->create(array_merge([
+                'order_id' => $model->id,
+                'type'     => 'pickup',
+            ], $pickupAddressData));
+        }
+
+        $pickupContactData = [
+            'first_name' => $validatedData['pickup_first_name'] ?? null,
+            'last_name'  => $validatedData['pickup_last_name'] ?? null,
+            'email'      => $validatedData['pickup_email'] ?? null,
+            'phone'      => $validatedData['pickup_phone'] ?? null,
+        ];
+
+        $pickupContactData = array_filter($pickupContactData, function ($value) {
+            return $value !== null;
+        });
+
+        $pickupContact = $model->pickupContact;
+
+        if ($pickupContact) {
+            if (!empty($pickupContactData)) {
+                $pickupContact->update($pickupContactData);
+            }
+        } else {
+            if (!empty($pickupContactData)) {
+                $model->pickupContact()->create(array_merge([
+                    'order_id' => $model->id,
+                ], $pickupContactData));
+            }
+        }
+
+        $shippingAddress = $model->OrderAddress()->where('type', 'shipping')->first();
+        if ($shippingAddress) {
+            $shippingAddress->delete();
+        }
+    }
+
+    $freshModel = $model->fresh();
+    $loadedModel = $freshModel->load(!empty($relationsToLoad) ? $relationsToLoad : ['OrderAddress', 'pickupContact']);
+
+    return $loadedModel;
+}
+    public function deleteDesignFromOrder($orderId, $designId)
+    {
+        return DB::transaction(function () use ($orderId, $designId) {
+            $order = Order::with(['orderItems'])->findOrFail($orderId);
+
+            $orderItem = $order->orderItems()->where('design_id', $designId)->first();
+
+            if (!$orderItem) {
+                throw new Exception('Design not found in this order.');
+            }
+
+            $orderItem->delete();
+
+            $subtotal = $order->orderItems()->sum(DB::raw('quantity * base_price'));
+            $totalPrice = $subtotal + $order->delivery_amount + $order->tax_amount - $order->discount_amount;
+
+            $order->update([
+                'subtotal'    => $subtotal,
+                'total_price' => $totalPrice
+            ]);
+
+            return $order->refresh();
+        });
+    }
+
+
+   public function downloadPDF()
+{
+    $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
+    $pdf = Pdf::loadView('dashboard.orders.steps.step7', compact('orderData'));
+    return $pdf->setPaper('a4')
+        ->setOption('defaultFont', 'Helvetica')
+        ->download('order-confirmation.pdf');
+}
 }

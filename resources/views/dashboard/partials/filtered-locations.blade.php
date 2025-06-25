@@ -1,3 +1,4 @@
+
 @forelse($locations as $location)
     <div class="d-flex align-items-center mb-1 location-item" 
          data-id="{{ $location->id }}"

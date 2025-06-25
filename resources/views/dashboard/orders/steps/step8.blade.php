@@ -25,7 +25,7 @@
 
     <!-- Navigation Buttons -->
     <div class="d-flex justify-content-end mt-3">
-        <button class="btn btn-outline-secondary me-1" data-prev-step>Back</button>
+        <button  class="btn btn-outline-secondary me-1" data-prev-step>Back</button>
         <form method="post" action="{{ route('orders.store') }}" id="order-form">
             @csrf
             <!-- Hidden inputs for each order data field with null checks -->
