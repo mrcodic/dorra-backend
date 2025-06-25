@@ -100,7 +100,6 @@ return [
     'not_in' => 'The selected :attribute is invalid.',
     'not_regex' => 'The :attribute format is invalid.',
     'numeric' => 'The :attribute must be a number.',
-    'password' => 'The password is incorrect.',
     'present' => 'The :attribute field must be present.',
     'prohibited' => 'The :attribute field is prohibited.',
     'prohibited_if' => 'The :attribute field is prohibited when :other is :value.',
@@ -130,6 +129,15 @@ return [
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
     'phone' => 'The :attribute field must be a valid number.',
+    'password' => [
+        'min' => 'The password must be at least :min characters.',
+        'letters' => 'The password must contain at least one letter.',
+        'mixed' => 'The password must include both uppercase and lowercase letters.',
+        'numbers' => 'The password must contain at least one number.',
+        'symbols' => 'The password must contain at least one special character.',
+        'uncompromised' => 'The given password has appeared in a data leak. Please choose a different password.',
+    ],
+
 
     /*
     |--------------------------------------------------------------------------
