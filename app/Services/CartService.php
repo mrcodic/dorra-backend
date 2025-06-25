@@ -31,9 +31,9 @@ class CartService extends BaseService
             'cookie_id' => Arr::get($validatedData, 'cookie_id'),
         ],
             Arr::except($validatedData, 'design_id'));
-        $totalPrice = $model->cartItems->isNotEmpty() ? $model->cartItems->sum(fn($value) => $value->pivot->total_price) : 0;
-        $model->update(['price' => $totalPrice]);
         $design = $this->designRepository->find($validatedData['design_id']);
+        $totalPrice = $model->cartItems->isNotEmpty() ? $model->cartItems->sum(fn($value) => $value->pivot->total_price) : $design->total_price;
+        $model->update(['price' => $totalPrice]);
         $model->designs()->syncWithoutDetaching([
             $validatedData['design_id'] => [
                 'status' => 1,

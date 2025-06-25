@@ -125,11 +125,19 @@ class DesignService extends BaseService
     public function addQuantity($request, $id)
     {
         $design = $this->repository->find($id);
+
         if ($design->product->has_custom_prices) {
-            return $design->update($request->only(['product_price_id']));
+            $updated = $design->update($request->only(['product_price_id']));
         } else {
-            return $design->update($request->only(['quantity']));
+            $updated = $design->update($request->only(['quantity']));
         }
+
+        if ($design->cartItems->isNotEmpty()) {
+            $design->cartItems[0]->pivot->update([
+                'sub_total' => $design->total_price
+            ]);
+        }
+        return $updated;
     }
 
     public function priceDetails($designId): array
