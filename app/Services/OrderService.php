@@ -397,42 +397,6 @@ class OrderService extends BaseService
         return $model->load($relationsToLoad);
     }
 
-    public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
-    {
-        $model = $this->repository->find($id);
-        if (!$model) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
-        }
-
-        if (isset($validatedData['shipping_address_id'])) {
-            $newAddressId = $validatedData['shipping_address_id'];
-            $shippingAddress = ShippingAddress::with(['state.country'])->findOrFail($newAddressId);
-
-            $orderAddress = $model->OrderAddress()->where('type', 'shipping')->first();
-
-            if ($orderAddress) {
-                $orderAddress->update([
-                    'shipping_address_id' => $newAddressId,
-                    'address_label' => $shippingAddress->label,
-                    'address_line' => $shippingAddress->line,
-                    'state' => optional($shippingAddress->state)->name,
-                    'country' => optional($shippingAddress->state?->country)->name,
-                ]);
-            } else {
-                $model->OrderAddress()->create([
-                    'order_id' => $model->id,
-                    'type' => 'shipping',
-                    'shipping_address_id' => $newAddressId,
-                    'address_label' => $shippingAddress->label,
-                    'address_line' => $shippingAddress->line,
-                    'state' => optional($shippingAddress->state)->name,
-                    'country' => optional($shippingAddress->state?->country)->name,
-                ]);
-            }
-        }
-
-        return $model->load(!empty($relationsToLoad) ? $relationsToLoad : ['OrderAddress']);
-    }
 
     public function deleteDesignFromOrder($orderId, $designId)
     {
@@ -504,40 +468,6 @@ class OrderService extends BaseService
     if (!empty($pivotData)) {
         $order->designs()->attach($pivotData);
     }
-}
-
-    public function applyDiscountCode($request)
-    {
-        $orderStepData = Cache::get(getOrderStepCacheKey());
-        if (!$orderStepData || !isset($orderStepData['product_id'])) {
-            throw new \Exception('Product information not found in order data');
-        }
-
-        $product = Product::find($orderStepData['product_id']);
-        $category = $product->category;
-        $validated = $request->validate([
-            'code' => ['required', 'string', new ValidDiscountCode($product, $category)],
-        ]);
-        return $this->discountCodeRepository->query()->where($validated)->first();
-    }
-
-
-    public function updateResource($validatedData, $id, $relationsToLoad = [])
-{
-    $model = $this->repository->update($validatedData, $id);
-
-    if (isset($validatedData['first_name']) || isset($validatedData['last_name']) || isset($validatedData['email']) || isset($validatedData['phone'])) {
-        $orderAddress = $model->OrderAddress()->first();
-        if ($orderAddress) {
-            $orderAddress->update([
-                'first_name'   => $validatedData['first_name'] ?? $orderAddress->first_name,
-                'last_name'    => $validatedData['last_name'] ?? $orderAddress->last_name,
-                'email'        => $validatedData['email'] ?? $orderAddress->email,
-                'phone'        => $validatedData['phone'] ?? $orderAddress->phone,
-            ]);
-        }
-    }
-    return $model->load($relationsToLoad);
 }
 
 public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
@@ -648,38 +578,8 @@ public function editShippingAddresses($validatedData, $id, $relationsToLoad = []
 
     return $loadedModel;
 }
-    public function deleteDesignFromOrder($orderId, $designId)
-    {
-        return DB::transaction(function () use ($orderId, $designId) {
-            $order = Order::with(['orderItems'])->findOrFail($orderId);
-
-            $orderItem = $order->orderItems()->where('design_id', $designId)->first();
-
-            if (!$orderItem) {
-                throw new Exception('Design not found in this order.');
-            }
-
-            $orderItem->delete();
-
-            $subtotal = $order->orderItems()->sum(DB::raw('quantity * base_price'));
-            $totalPrice = $subtotal + $order->delivery_amount + $order->tax_amount - $order->discount_amount;
-
-            $order->update([
-                'subtotal'    => $subtotal,
-                'total_price' => $totalPrice
-            ]);
-
-            return $order->refresh();
-        });
-    }
 
 
-   public function downloadPDF()
-{
-    $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
-    $pdf = Pdf::loadView('dashboard.orders.steps.step7', compact('orderData'));
-    return $pdf->setPaper('a4')
-        ->setOption('defaultFont', 'Helvetica')
-        ->download('order-confirmation.pdf');
-}
+
+
 }
