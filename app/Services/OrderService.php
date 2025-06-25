@@ -49,10 +49,10 @@ class OrderService extends BaseService
 
     {
         $this->relations = [
-        'user.addresses.state.country',
-        'OrderAddress',
-        'pickupContact'
-    ];
+            'user.addresses.state.country',
+            'orderAddress',
+            'pickupContact'
+        ];
         parent::__construct($repository);
     }
 
@@ -206,11 +206,26 @@ class OrderService extends BaseService
         }
     }
 
-//    public function checkout($request)
-//    {
-//        $this->cartService->getCurrentUserOrGuestCart();
-//        $this->repository->query()->create([]);
-//    }
+    public function checkout($request)
+    {
+        $cart = $this->cartService->getCurrentUserOrGuestCart();
+        $discountCode = $this->discountCodeRepository->find($request->discount_code_id);
+
+        $subTotal = $cart->cartItems()->sum('sub_total');
+        $this->handleTransaction(function () use ($cart, $discountCode, $subTotal) {
+            $order = $this->repository->query()->create([
+                'user_id' => Auth::id(),
+                'sub_total' => $subTotal,
+                'discount_amount' => getDiscountAmount($discountCode->value ?? 0, $subTotal),
+                'delivery_amount' => setting('delivery'),
+                'tax_amount' => setting('tax'),
+                'total_price' => getTotalPrice($discountCode->value ?? 0, $subTotal),
+                'status' => StatusEnum::PLACED,
+            ]);
+            $order->orderAddress()->create();
+        });
+
+    }
 
     public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
     {
@@ -289,7 +304,7 @@ class OrderService extends BaseService
     private function saveOrderAddress($order, $personalInfo, $shippingInfo = null, $pickupInfo = null)
     {
         if ($shippingInfo) {
-            $order->OrderAddress()->create([
+            $order->orderAddress()->create([
                 'order_id' => $order->id,
                 'type' => 'shipping',
                 'first_name' => $personalInfo['first_name'] ?? null,
@@ -313,7 +328,7 @@ class OrderService extends BaseService
                 'phone' => $pickupContactData['phone'] ?? null,
             ]);
 
-            $order->OrderAddress()->create([
+            $order->orderAddress()->create([
                 'order_id' => $order->id,
                 'type' => 'pickup',
                 'location_id' => $pickupInfo['id'] ?? null,
@@ -384,7 +399,7 @@ class OrderService extends BaseService
         $model = $this->repository->update($validatedData, $id);
 
         if (isset($validatedData['first_name']) || isset($validatedData['last_name']) || isset($validatedData['email']) || isset($validatedData['phone'])) {
-            $orderAddress = $model->OrderAddress()->first();
+            $orderAddress = $model->orderAddress()->first();
             if ($orderAddress) {
                 $orderAddress->update([
                     'first_name' => $validatedData['first_name'] ?? $orderAddress->first_name,
@@ -432,6 +447,115 @@ class OrderService extends BaseService
             ->download('order-confirmation.pdf');
     }
 
+    public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->repository->find($id);
+
+        if (!$model) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
+        }
+
+        $typeMap = [
+            '1' => 'shipping',
+            '2' => 'pickup',
+        ];
+
+        $type = $typeMap[$validatedData['type']] ?? $validatedData['type'];
+
+        if ($type === 'shipping' && isset($validatedData['shipping_address_id']) && $validatedData['shipping_address_id'] !== null) {
+            $newAddressId = $validatedData['shipping_address_id'];
+            $shippingAddress = ShippingAddress::with(['state.country'])->findOrFail($newAddressId);
+
+            $orderAddress = $model->orderAddress()->where('type', 'shipping')->first();
+
+            $addressData = [
+                'shipping_address_id' => $newAddressId,
+                'address_label' => $shippingAddress->label,
+                'address_line' => $shippingAddress->line,
+                'state' => optional($shippingAddress->state)->name,
+                'country' => optional($shippingAddress->state?->country)->name,
+            ];
+
+            if ($orderAddress) {
+                $orderAddress->update($addressData);
+            } else {
+                $model->orderAddress()->create(array_merge([
+                    'order_id' => $model->id,
+                    'type' => 'shipping',
+                ], $addressData));
+            }
+
+            $pickupAddress = $model->orderAddress()->where('type', 'pickup')->first();
+            if ($pickupAddress) {
+                $pickupAddress->delete();
+            }
+
+            $pickupContact = $model->pickupContact;
+            if ($pickupContact) {
+                $pickupContact->delete();
+            }
+        }
+
+        if ($type === 'pickup' && isset($validatedData['location_id']) && $validatedData['location_id'] !== null) {
+            $location = Location::with(['state', 'state.country'])->findOrFail($validatedData['location_id']);
+
+            $pickupAddress = $model->orderAddress()->where('type', 'pickup')->first();
+
+            $pickupAddressData = [
+                'location_id' => $location->id,
+                'location_name' => $location->name,
+                'address_label' => $location->name,
+                'address_line' => $location->address_line,
+                'state' => is_object($location->state) ? $location->state->name : ($location->state ?? 'Unknown'),
+                'country' => $location->country ?? $location->state?->country?->name ?? 'Unknown',
+            ];
+
+            if ($pickupAddress) {
+                $pickupAddress->update($pickupAddressData);
+            } else {
+                $model->orderAddress()->create(array_merge([
+                    'order_id' => $model->id,
+                    'type' => 'pickup',
+                ], $pickupAddressData));
+            }
+
+            $pickupContactData = [
+                'first_name' => $validatedData['pickup_first_name'] ?? null,
+                'last_name' => $validatedData['pickup_last_name'] ?? null,
+                'email' => $validatedData['pickup_email'] ?? null,
+                'phone' => $validatedData['pickup_phone'] ?? null,
+            ];
+
+            $pickupContactData = array_filter($pickupContactData, function ($value) {
+                return $value !== null;
+            });
+
+            $pickupContact = $model->pickupContact;
+
+            if ($pickupContact) {
+                if (!empty($pickupContactData)) {
+                    $pickupContact->update($pickupContactData);
+                }
+            } else {
+                if (!empty($pickupContactData)) {
+                    $model->pickupContact()->create(array_merge([
+                        'order_id' => $model->id,
+                    ], $pickupContactData));
+                }
+            }
+
+            $shippingAddress = $model->orderAddress()->where('type', 'shipping')->first();
+            if ($shippingAddress) {
+                $shippingAddress->delete();
+            }
+        }
+
+        $freshModel = $model->fresh();
+        $loadedModel = $freshModel->load(!empty($relationsToLoad) ? $relationsToLoad : ['orderAddress', 'pickupContact']);
+
+        return $loadedModel;
+    }
+
     private function attachDesignsToOrder($order, $designsData)
     {
         $pivotData = [];
@@ -455,131 +579,20 @@ class OrderService extends BaseService
                 $totalPrice = $basePrice * $quantity;
             }
 
-        $pivotData[$design->id] = [
-            'quantity' => $quantity,
-            'base_price' => $basePrice,
-            'custom_product_price' => $customProductPrice,
-            'total_price' => $totalPrice,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-    }
-
-    if (!empty($pivotData)) {
-        $order->designs()->attach($pivotData);
-    }
-}
-
-public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
-{
-    $model = $this->repository->find($id);
-
-    if (!$model) {
-        throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
-    }
-
-    $typeMap = [
-        '1' => 'shipping',
-        '2' => 'pickup',
-    ];
-
-    $type = $typeMap[$validatedData['type']] ?? $validatedData['type'];
-
-    if ($type === 'shipping' && isset($validatedData['shipping_address_id']) && $validatedData['shipping_address_id'] !== null) {
-        $newAddressId = $validatedData['shipping_address_id'];
-        $shippingAddress = ShippingAddress::with(['state.country'])->findOrFail($newAddressId);
-
-        $orderAddress = $model->OrderAddress()->where('type', 'shipping')->first();
-
-        $addressData = [
-            'shipping_address_id' => $newAddressId,
-            'address_label'       => $shippingAddress->label,
-            'address_line'        => $shippingAddress->line,
-            'state'               => optional($shippingAddress->state)->name,
-            'country'             => optional($shippingAddress->state?->country)->name,
-        ];
-
-        if ($orderAddress) {
-            $orderAddress->update($addressData);
-        } else {
-            $model->OrderAddress()->create(array_merge([
-                'order_id' => $model->id,
-                'type'     => 'shipping',
-            ], $addressData));
+            $pivotData[$design->id] = [
+                'quantity' => $quantity,
+                'base_price' => $basePrice,
+                'custom_product_price' => $customProductPrice,
+                'total_price' => $totalPrice,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
 
-        $pickupAddress = $model->OrderAddress()->where('type', 'pickup')->first();
-        if ($pickupAddress) {
-            $pickupAddress->delete();
-        }
-
-        $pickupContact = $model->pickupContact;
-        if ($pickupContact) {
-            $pickupContact->delete();
+        if (!empty($pivotData)) {
+            $order->designs()->attach($pivotData);
         }
     }
-
-    if ($type === 'pickup' && isset($validatedData['location_id']) && $validatedData['location_id'] !== null) {
-        $location = Location::with(['state','state.country'])->findOrFail($validatedData['location_id']);
-
-        $pickupAddress = $model->OrderAddress()->where('type', 'pickup')->first();
-
-        $pickupAddressData = [
-            'location_id'   => $location->id,
-            'location_name' => $location->name,
-            'address_label' => $location->name,
-            'address_line'  => $location->address_line,
-            'state'         => is_object($location->state) ? $location->state->name : ($location->state ?? 'Unknown'),
-            'country'       => $location->country ?? $location->state?->country?->name ?? 'Unknown',
-        ];
-
-        if ($pickupAddress) {
-            $pickupAddress->update($pickupAddressData);
-        } else {
-            $model->OrderAddress()->create(array_merge([
-                'order_id' => $model->id,
-                'type'     => 'pickup',
-            ], $pickupAddressData));
-        }
-
-        $pickupContactData = [
-            'first_name' => $validatedData['pickup_first_name'] ?? null,
-            'last_name'  => $validatedData['pickup_last_name'] ?? null,
-            'email'      => $validatedData['pickup_email'] ?? null,
-            'phone'      => $validatedData['pickup_phone'] ?? null,
-        ];
-
-        $pickupContactData = array_filter($pickupContactData, function ($value) {
-            return $value !== null;
-        });
-
-        $pickupContact = $model->pickupContact;
-
-        if ($pickupContact) {
-            if (!empty($pickupContactData)) {
-                $pickupContact->update($pickupContactData);
-            }
-        } else {
-            if (!empty($pickupContactData)) {
-                $model->pickupContact()->create(array_merge([
-                    'order_id' => $model->id,
-                ], $pickupContactData));
-            }
-        }
-
-        $shippingAddress = $model->OrderAddress()->where('type', 'shipping')->first();
-        if ($shippingAddress) {
-            $shippingAddress->delete();
-        }
-    }
-
-    $freshModel = $model->fresh();
-    $loadedModel = $freshModel->load(!empty($relationsToLoad) ? $relationsToLoad : ['OrderAddress', 'pickupContact']);
-
-    return $loadedModel;
-}
-
-
 
 
 }

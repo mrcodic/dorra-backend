@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[ObservedBy(OrderObserver::class)]
 class Order extends Model
@@ -20,7 +22,7 @@ class Order extends Model
         'order_number',
         'user_id',
         'delivery_method',
-        'payment_method',
+        'payment_method_id',
         'payment_status',
         'subtotal',
         'discount_amount',
@@ -47,7 +49,7 @@ class Order extends Model
     }
 
 
-     public function orderItems()
+     public function orderItems(): HasMany
      {
         return $this->hasMany(OrderItem::class);
     }
@@ -60,13 +62,13 @@ class Order extends Model
 
     }
 
-    public function OrderAddress()
+    public function orderAddress(): HasMany
     {
         return $this->hasMany(OrderAddress::class);
     }
 
 
-    public function pickupContact()
+    public function pickupContact(): HasOne
     {
         return $this->hasOne(PickupContact::class);
     }
