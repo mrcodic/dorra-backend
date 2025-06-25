@@ -25,7 +25,7 @@
 
                     <div class="form-group mb-2">
                         <label for="createDiscountValue" class="label-text mb-1">Discount Value</label>
-                        <input type="text" name="value" id="createDiscountValue" class="form-control" placeholder="Enter discount value here">
+                        <input type="number" name="value" id="createDiscountValue" class="form-control" placeholder="Enter discount value here">
                     </div>
 
                     <div class="form-group mb-2">
@@ -105,11 +105,26 @@
 </div>
 
 <script>
+
+
     $(function () {
         // Initialize Select2 in modal context
         $('.select2').select2({
             dropdownParent: $('#createCodeTemplateModal')
         });
+        $('#createDiscountValue').on('input', function () {
+            const type = $('#createDiscountType').val();
+            const value = parseFloat(this.value);
+
+            if (type === "{{ \App\Enums\DiscountCode\TypeEnum::PERCENTAGE->value }}" && value > 100) {
+                this.value = 100;
+            }
+
+            if (value < 1) {
+                this.value = 1;
+            }
+        });
+
 
         // Toggle between products and categories
         $('input[name="scope"]').on('change', function () {
