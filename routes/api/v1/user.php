@@ -57,7 +57,8 @@ Route::post('/design-finalization', [DesignController::class, 'designFinalizatio
 
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
 
-Route::post('/carts/{cart}/apply-discount',[CartController::class, 'applyDiscount']);
+Route::get('/cart-info',[CartController::class, 'cartInfo']);
+Route::post('/carts/apply-discount',[CartController::class, 'applyDiscount']);
 Route::delete('/carts',[CartController::class, 'destroy']);
 Route::apiResource('/carts',CartController::class)->only(['store','index']);
 

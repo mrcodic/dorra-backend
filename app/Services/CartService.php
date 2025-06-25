@@ -24,6 +24,28 @@ class CartService extends BaseService
         parent::__construct($repository);
     }
 
+    private function resolveUserCart()
+    {
+        $userId = auth('sanctum')->id();
+        $cookieId = request()->cookie('cookie_id');
+
+        if (!$userId && !$cookieId) {
+            throw ValidationException::withMessages([
+                'authorization' => ['Either a logged-in user or a valid cookie must be provided.'],
+            ]);
+        }
+        return $this->repository->query()
+                ->where(function ($q) use ($cookieId, $userId) {
+                    if ($userId) {
+                        $q->whereUserId($userId);
+                    } elseif ($cookieId) {
+                        $q->whereCookieId($cookieId);
+                    }
+                })
+                ->with(['designs.product'])
+                ->first();
+
+    }
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->repository->query()->firstOrCreate([
@@ -44,23 +66,12 @@ class CartService extends BaseService
         return $model->load($relationsToLoad);
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function getCurrentUserOrGuestCart()
     {
-        $cookieId = request()->cookie('cookie_id');
-        $userId = auth('sanctum')->id();
-        if ($userId || $cookieId) {
-            $cart = $this->repository->query()
-                ->where(function ($q) use ($cookieId, $userId) {
-                    if ($userId) {
-                        $q->whereUserId($userId);
-                    } elseif ($cookieId) {
-                        $q->whereCookieId($cookieId);
-                    }
-                })
-                ->with(['designs.product'])
-                ->first();
-        }
-
+        $cart = $this->resolveUserCart();
         return $cart ?? null;
     }
 
@@ -69,22 +80,8 @@ class CartService extends BaseService
      */
     public function deleteItemFromCart($designId)
     {
-        $userId = auth('sanctum')->id();
-        $cookieId = request()->cookie('cookie_id');
-        if (!$userId && !$cookieId) {
-            throw ValidationException::withMessages([
-                'authorization' => ['Either a logged-in user or a valid cookie must be provided.'],
-            ]);
-        }
-        $this->handleTransaction(function () use ($designId, $cookieId, $userId) {
-            $cart = $this->cartRepository->query()
-                ->where(function ($q) use ($cookieId, $userId) {
-                    if ($userId) {
-                        $q->whereUserId($userId);
-                    } else {
-                        $q->whereCookieId($cookieId);
-                    }
-                })->firstOrFail();
+        $this->handleTransaction(function () use ($designId) {
+            $cart = $this->resolveUserCart();
             $cartItem = CartItem::where('design_id', $designId)
                 ->where('cart_id', $cart->id)
                 ->first();
@@ -103,10 +100,9 @@ class CartService extends BaseService
     }
 
 
-    public function applyDiscount($request, $cartId)
+    public function applyDiscount($request)
     {
-        $cart = $this->cartRepository->find($cartId);
-
+        $cart = $this->resolveUserCart();
         $items = $cart->cartItems;
         $products = $items->map(function ($item) {
             return optional($item?->load('product')->product)->id;
@@ -127,6 +123,16 @@ class CartService extends BaseService
                 'value' => $discountAmount,
             ],
             'total_price' => $totalPrice,
+        ];
+
+    }
+
+    public function cartInfo()
+    {
+        $cart = $this->resolveUserCart();
+        return [
+            'price' => $cart->price,
+            'items_count' => $cart->cartItems->count(),
         ];
 
     }

@@ -12,31 +12,39 @@ use Illuminate\Support\Facades\Response;
 
 class CartController extends Controller
 {
-    public function __construct(public CartService $cartService){}
+    public function __construct(public CartService $cartService)
+    {
+    }
 
     public function store(AddToCartRequest $request)
     {
-        $this->cartService->storeResource($request->only(['price','design_id','user_id','cookie_id']));
+        $this->cartService->storeResource($request->only(['price', 'design_id', 'user_id', 'cookie_id']));
         return Response::api(message: "Item added to cart successfully");
     }
 
     public function index()
     {
-        $cart =  $this->cartService->getCurrentUserOrGuestCart();
-        $data =  $cart ? CartResource::make($cart) : (object)[];
-        return Response::api(data: $data );
+        $cart = $this->cartService->getCurrentUserOrGuestCart();
+        $data = $cart ? CartResource::make($cart) : (object)[];
+        return Response::api(data: $data);
     }
 
     public function destroy(Request $request)
     {
-        $request->validate(['design_id' => 'required','exists:designs,id']);
+        $request->validate(['design_id' => 'required', 'exists:designs,id']);
         $this->cartService->deleteItemFromCart($request->design_id);
         return Response::api();
     }
-    public function applyDiscount(Request $request,$cartId)
-    {
 
-       $data =  $this->cartService->applyDiscount($request, $cartId);
+    public function applyDiscount(Request $request)
+    {
+        $data = $this->cartService->applyDiscount($request);
+        return Response::api(data: $data);
+    }
+
+    public function cartInfo()
+    {
+        $data = $this->cartService->cartInfo();
         return Response::api(data: $data);
     }
 }
