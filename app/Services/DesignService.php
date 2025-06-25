@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Jobs\ProcessBase64Image;
 use App\Jobs\RenderFabricJsonToPngJob;
+use App\Models\CartItem;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
@@ -122,6 +123,7 @@ class DesignService extends BaseService
         });
     }
 
+
     public function addQuantity($request, $id)
     {
         $design = $this->repository->find($id);
@@ -133,10 +135,19 @@ class DesignService extends BaseService
         }
 
         if ($design->cartItems->isNotEmpty()) {
-            $design->cartItems[0]->pivot->update([
-                'sub_total' => $design->total_price
-            ]);
+            collect($design->cartItems)->each(function ($cart) use ($design) {
+                $cartItem = CartItem::where('cart_id', $cart->id)
+                    ->where('design_id', $design->id)
+                    ->first();
+
+                if ($cartItem) {
+                    $cartItem->update([
+                        'sub_total' => $design->total_price
+                    ]);
+                }
+            });
         }
+
         return $updated;
     }
 
