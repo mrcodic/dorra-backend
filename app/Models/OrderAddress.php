@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Order\ShippingMethodEnum;
 use App\Models\Order;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +24,7 @@ class OrderAddress extends Model
 
      public function location()
     {
-        return $this->belongsTo(Location::class); // assuming you have a locations table and model
+        return $this->belongsTo(Location::class);
     }
 
     protected $casts = [

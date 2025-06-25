@@ -12,12 +12,14 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Category\CategoryController,
     Design\DesignController,
     General\MainController,
+    Order\OrderController,
     Product\ProductController,
     Profile\PasswordController,
     Profile\ProfileController,
     Profile\UserNotificationTypeController,
     SaveController,
-    ShippingAddress\ShippingAddressController};
+    ShippingAddress\ShippingAddressController
+};
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
@@ -49,18 +51,25 @@ Route::get('sub-categories', [MainController::class, 'subCategories']);
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 
-Route::get('designs/{design}/price-details',[DesignController::class, 'priceDetails']);
-Route::post('designs/{design}/add-quantity',[DesignController::class, 'addQuantity']);
-Route::get('designs/{design}/quantities',[DesignController::class, 'getQuantities']);
-Route::apiResource('/designs', DesignController::class)->except(['destroy']);
-Route::post('/design-finalization', [DesignController::class, 'designFinalization']);
+Route::controller(DesignController::class)->group(function () {
+    Route::get('designs/{design}/price-details', 'priceDetails');
+    Route::post('designs/{design}/add-quantity', 'addQuantity');
+    Route::get('designs/{design}/quantities', 'getQuantities');
+    Route::apiResource('/designs', DesignController::class)->except(['destroy']);
+    Route::post('/design-finalization', 'designFinalization');
+    Route::get('/design-versions/{design_version}', 'getDesignVersions');
+});
 
-Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
+Route::controller(CartController::class)->group(function () {
+    Route::get('/cart-info', 'cartInfo');
+    Route::post('/carts/apply-discount', 'applyDiscount');
+    Route::delete('/carts', 'destroy');
+});
+Route::apiResource('/carts', CartController::class)->only(['store', 'index']);
 
-Route::get('/cart-info',[CartController::class, 'cartInfo']);
-Route::post('/carts/apply-discount',[CartController::class, 'applyDiscount']);
-Route::delete('/carts',[CartController::class, 'destroy']);
-Route::apiResource('/carts',CartController::class)->only(['store','index']);
+
+Route::post('checkout', [OrderController::class, 'checkout']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -88,6 +97,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 });
+
+
+
+
+
+
+
 
 
 Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);
