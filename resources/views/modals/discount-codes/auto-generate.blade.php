@@ -20,7 +20,7 @@
 
                     <div class="form-group mb-2">
                         <label for="createPrefix" class="label-text mb-1">Prefix (Write 4 char)</label>
-                        <input type="text" name="code" id="createPrefix" class="form-control" placeholder="Add prefix here">
+                        <input type="text" name="code" id="createPrefix" class="form-control" placeholder="Add prefix here" maxlength="4">
                     </div>
 
                     <div class="form-group mb-2">
