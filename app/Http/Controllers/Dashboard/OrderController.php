@@ -10,9 +10,11 @@ use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\Base\DashboardController;
 
 use App\Repositories\Interfaces\TagRepositoryInterface;
+use App\Repositories\Implementations\LocationRepository;
 use App\Repositories\Interfaces\CountryRepositoryInterface;
 use App\Http\Requests\Design\StoreDesignFinalizationRequest;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\LocationRepositoryInterface;
 use App\Http\Requests\Order\{StoreOrderRequest, UpdateOrderRequest};
 
 
@@ -23,6 +25,7 @@ class OrderController extends DashboardController
         public CategoryRepositoryInterface $categoryRepository,
         public TagRepositoryInterface $tagRepository,
         public CountryRepositoryInterface $countryRepository,
+        public LocationRepositoryInterface $LocationRepository
     ) {
         parent::__construct($orderService);
         $this->storeRequestClass = new StoreOrderRequest();
@@ -42,6 +45,7 @@ class OrderController extends DashboardController
             ],
             'edit' => [
                 'countries' => $this->countryRepository->query(['id', 'name'])->get(),
+                'locations' => $this->LocationRepository->query(['id', 'name' , 'address_line' , 'latitude' , 'longitude'])->get(),
                 ],
         
             ];
@@ -124,46 +128,55 @@ class OrderController extends DashboardController
     }
 
 
-public function editShippingAddresses(Request $request, $orderId)
-{
-    $validated = $request->validate([
-        'shipping_address_id' => ['required', 'exists:shipping_addresses,id'],
-    ]);
+    public function editShippingAddresses(Request $request, $orderId)
+    {
+         \Log::info('📥 Incoming form data:', $request->all());
 
-    $order = $this->orderService->editShippingAddresses($validated, $orderId);
+            $validatedData = $request->validate([
+                'shipping_address_id' => 'nullable|integer',
+                'location_id' => 'nullable|integer',
+                'type' => 'nullable|string',
+                'pickup_first_name' => 'nullable|string|max:255',
+                'pickup_last_name'  => 'nullable|string|max:255',
+                'pickup_email'      => 'nullable|email',
+                'pickup_phone'      => 'nullable|string',
+            ]);
 
-    return Response::api(
-        message: 'Shipping address updated successfully!',
-        data: [
-            'order_id'     => $order->id,
-            'order_number' => $order->order_number,
-            'redirect_url' => route('orders.index', $order->id),
-        ]
-    );
-}
+        $order = $this->orderService->editShippingAddresses($validatedData, $orderId);;
 
-    public function deleteDesign(Request $request, $orderId, $designId)
-{
-    try {
-        $order = $this->orderService->deleteDesignFromOrder($orderId, $designId);
 
         return Response::api(
-            message: 'Design deleted and order updated successfully!',
+            message: 'Shipping address updated successfully!',
             data: [
                 'order_id'     => $order->id,
                 'order_number' => $order->order_number,
                 'redirect_url' => route('orders.index', $order->id),
             ]
         );
-
-    } catch (Exception $e) {
-        return Response::api(
-            message: $e->getMessage(),
-            data: null,
-            status: 400
-        );
     }
-}
+
+        public function deleteDesign(Request $request, $orderId, $designId)
+    {
+        try {
+            $order = $this->orderService->deleteDesignFromOrder($orderId, $designId);
+
+            return Response::api(
+                message: 'Design deleted and order updated successfully!',
+                data: [
+                    'order_id'     => $order->id,
+                    'order_number' => $order->order_number,
+                    'redirect_url' => route('orders.index', $order->id),
+                ]
+            );
+
+        } catch (Exception $e) {
+            return Response::api(
+                message: $e->getMessage(),
+                data: null,
+                status: 400
+            );
+        }
+    }
 
     
     public function downloadPDF()

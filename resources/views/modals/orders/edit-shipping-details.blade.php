@@ -12,50 +12,46 @@
                     <input type="hidden" id="edit-tag-id">
 
                     <input type="hidden" name="order_id" value="{{ $model->id }}">
+                    <input type="hidden" name="location_id" id="selectedLocationId" value="{{ $locationId ?? '' }}">
+
 
                     <!-- Shipping Method Selection -->
+                    @php
+                        $address = $model->OrderAddress->first();
+                        $selectedType = $address?->type; 
+                    @endphp
+
                     <div class="mb-3" id="shippingMethodSection">
                         <label class="form-label fw-bold fs-5 mb-2">Shipping Method</label>
-                        <div class="d-flex gap-2 ">
+                        <div class="d-flex gap-2">
                             <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                                <input class="form-check-input" type="radio" name="shipping_method"
-                                    id="shipToCustomer" value="ship" checked>
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="type"
+                                    id="shipToCustomer"
+                                    value="{{ \App\Enums\Order\ShippingMethodEnum::SHIPPING->value }}"
+                                    @checked($selectedType === 'shipping')>
                                 <label class="form-check-label fs-4 text-black" for="shipToCustomer">
-                                    Ship to customer
+                                    {{ \App\Enums\Order\ShippingMethodEnum::SHIPPING->label() }}
                                 </label>
                             </div>
+
                             <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                                <input class="form-check-input" type="radio" name="shipping_method" id="pickUp"
-                                    value="pickup">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="type"
+                                    id="pickUp"
+                                    value="{{ \App\Enums\Order\ShippingMethodEnum::PICKUP->value }}"
+                                    @checked($selectedType === 'pickup')>
                                 <label class="form-check-label fs-4 text-black" for="pickUp">
-                                    Pick up
+                                    {{ \App\Enums\Order\ShippingMethodEnum::PICKUP->label() }}
                                 </label>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Ship to Customer Section -->
-                    {{-- <div id="shipSection">
-                        <!-- Existing Addresses -->
-                        <div class="d-flex gap-2 ">
-                            <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                                <input class="form-check-input" type="radio" name="address_id" id="address1" value="1">
-                                <label class="form-check-label fs-4 text-black" for="shipToCustomer">
-
-                                    <p>Home</p>
-                                    <p class="text-dark fs-16">15 street name, neighborhood</p>
-                                </label>
-                            </div>
-                            <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                                <input class="form-check-input" type="radio" name="address_id" id="address2" value="2">
-                                <label class="form-check-label fs-4 text-black" for="pickUp">
-                                    <p>Office</p>
-                                    <p class="text-dark fs-16">15 street name, neighborhood</p>
-                                </label>
-                            </div>
-                        </div> --}}
-
-                   
                     @php
                         $shippingAddressId = $model->OrderAddress->firstWhere('shipping_address_id', '!=', null)?->shipping_address_id;
                     @endphp
@@ -94,57 +90,81 @@
                         <div id="pickupSection" style="display: none;">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h5 class="form-label ">Pick up Location</h5>
-                                <button type="button" class="lined-btn">Change Location</button>
+                                        <button type="button" class="lined-btn" data-bs-toggle="modal" data-bs-target="#selectLocationModal">
+                                            Change Location
+                                        </button>
                             </div>
-                            <div class="border rounded-3 p-1 mb-2">
-                                <p class="text-black">Office</p>
-                                <p>789 Store Blvd, Los Angeles, CA</p>
-                                <p>Cairo, Egypt</p>
-                            </div>
+                                @php
+                                    $address = $model->OrderAddress->first();
+                                @endphp
 
+                                @if($address)
+                                    <div class="border rounded-3 p-1 mb-2">
+                                        <p class="text-black">{{ $address->location_name }}</p>
+                                        <p>{{ $address->state }} , {{ $address->country }}</p>
+                                    </div>
+                                @endif
                             <div class="mb-2">
                                 <label class="form-label fw-bold">Who's picking up the package?</label>
                             </div>
                             <div class="row g-2 mb-2">
                                 <div class="col">
                                     <label class="form-label">First Name</label>
-                                    <input type="text" class="form-control">
+                                    <input type="text" name="pickup_first_name" value="{{ optional($model->pickupContact)->first_name }}" class="form-control">
                                 </div>
                                 <div class="col">
                                     <label class="form-label">Last Name</label>
-                                    <input type="text" class="form-control">
+                                    <input type="text" name="pickup_last_name" value="{{ optional($model->pickupContact)->last_name }}" class="form-control">
                                 </div>
                             </div>
                             <div class="mb-2">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control">
+                                <input type="email" name="pickup_email" value="{{ optional($model->pickupContact)->email }}" class="form-control">
                             </div>
                             <div class="mb-2">
                                 <label class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control">
+                                <input type="tel" name="pickup_phone" value="{{ optional($model->pickupContact)->phone }}" class="form-control">
                             </div>
                         </div>
 
-                        <!-- Change Location Section -->
-                        <div id="changeLocationSection" style="display: none;">
-                            <div class="d-flex align-items-center gap-1 mb-3">
-                                <i data-feather="chevron-left" class="cursor-pointer" id="backToPickup"
-                                    style="cursor: pointer;"></i>
-                                <h5 class="fs-4 text-black mb-0">Change Pick up Location</h5>
-                            </div>
 
-                            <div class="mb-3">
-                                <input type="text" class="form-control" placeholder="Search for a location..."
-                                    id="locationSearch">
-                            </div>
+<div class="modal fade" id="selectLocationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow">
 
-                            <div id="mapPlaceholder"
-                                style="height: 300px; background-color: #f0f0f0; border-radius: 8px;">
-                                <p class="text-center text-muted pt-5">Map will display here based on search</p>
-                            </div>
-                        </div>
+            <!-- Header -->
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fs-4 fw-bold text-dark">Change Pick up Location</h5>
+            </div>
 
+            <!-- Body -->
+            <div class="modal-body">
+                @php
+                    $locationId = $model->OrderAddress->firstWhere('location_id', '!=', null)?->location_id;
+                @endphp
+
+                <div class="mb-3">
+                    <input type="text" class="form-control form-control-lg" placeholder="Search for a location..." id="locationSearch">
+                </div>
+
+                <div id="locationList" class="mb-3"></div>
+
+                <div style="background-color: #f0f0f0; border-radius: 8px;">
+                    <div id="googleMap" style="width: 100%; height: 400px;"></div>
+                </div>
+
+            </div>
+
+            <!-- Footer with Save button -->
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-primary" id="saveLocationBtn">
+                        Save Location
+                    </button>
                     </div>
+
+                </div>
+            </div>
+        </div>
                     <div class="modal-footer border-top-0">
                         <button type="button" class="btn btn-outline-secondary fs-5"
                             data-bs-dismiss="modal">Cancel</button>
@@ -216,7 +236,71 @@
 </div>
 
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDx7_example_REAL_KEY"></script>
+<script>
+    let map;
+    let marker;
 
+    function initMap(lat = 30.0444, lng = 31.2357) {
+        const defaultLocation = { lat: parseFloat(lat), lng: parseFloat(lng) };
+        map = new google.maps.Map(document.getElementById('googleMap'), {
+            zoom: 10,
+            center: defaultLocation,
+        });
+        marker = new google.maps.Marker({
+            position: defaultLocation,
+            map: map,
+        });
+    }
+
+    $(document).ready(function () {
+        $('#selectLocationModal').on('shown.bs.modal', function () {
+            setTimeout(function () {
+                if (!map) {
+                    initMap();
+                } else {
+                    google.maps.event.trigger(map, 'resize');
+                }
+            }, 300);
+        });
+
+        $('#locationSearch').on('input', function () {
+            const query = $(this).val();
+            if (query.length >= 2) {
+                $.ajax({
+                    url: "{{ route('locations.search') }}",
+                    method: 'GET',
+                    data: { search: query },
+                    success: function (response) {
+                        $('#locationList').html(response);
+                    }
+                });
+            } else {
+                $('#locationList').html('');
+            }
+        });
+
+        $(document).on('click', '.location-item', function () {
+            const lat = parseFloat($(this).data('lat'));
+            const lng = parseFloat($(this).data('lng'));
+            const name = $(this).data('name');
+            const id = $(this).data('id');
+
+            if (marker) marker.setMap(null);
+
+            const newLocation = { lat: lat, lng: lng };
+            map.setCenter(newLocation);
+            marker = new google.maps.Marker({
+                position: newLocation,
+                map: map,
+            });
+
+            $('#locationSearch').val(name);
+            $('#selectedLocationId').val(id);
+            $('#locationList').html('');
+        });
+    });
+</script>
 
 
 <script>
@@ -244,6 +328,10 @@
 </script>
 
 <script>
+
+
+
+
     document.addEventListener("DOMContentLoaded", function() {
         const shipRadio = document.getElementById("shipToCustomer");
         const pickupRadio = document.getElementById("pickUp");
@@ -302,5 +390,68 @@
         }
     });
 
+
+
+         $(document).ready(function () {
+        $('#saveLocationBtn').on('click', function () {
+            const selectedId = $('#selectedLocationId').val();
+            const selectedName = $('#locationSearch').val();
+
+            if (selectedId) {
+
+                console.log('✅ New location selected:');
+                    console.log('ID:', selectedId);
+                    console.log('Name:', selectedName);
+                $('#mainLocationIdInput').val(selectedId);
+
+                $('#selectedLocationName').text(selectedName);
+
+                $('#selectLocationModal').modal('hide');
+            } else {
+                alert("Please select a location first.");
+            }
+        });
+
+        $(document).on('click', '.location-item', function () {
+            const lat = parseFloat($(this).data('lat'));
+            const lng = parseFloat($(this).data('lng'));
+            const name = $(this).data('name');
+            const id = $(this).data('id');
+
+            if (marker) marker.setMap(null);
+
+            const newLocation = { lat: lat, lng: lng };
+            map.setCenter(newLocation);
+            marker = new google.maps.Marker({
+                position: newLocation,
+                map: map,
+            });
+
+            $('#locationSearch').val(name);
+            $('#selectedLocationId').val(id);
+            $('#locationList').html('');
+        });
+    });
+
+
+      $(document).on('click', '.location-item', function () {
+            const lat = parseFloat($(this).data('lat'));
+            const lng = parseFloat($(this).data('lng'));
+            const name = $(this).data('name');
+            const id = $(this).data('id');
+
+            if (marker) marker.setMap(null);
+
+            const newLocation = { lat: lat, lng: lng };
+            map.setCenter(newLocation);
+            marker = new google.maps.Marker({
+                position: newLocation,
+                map: map,
+            });
+
+            $('#locationSearch').val(name);       // تحديث اسم الموقع
+            $('#selectedLocationId').val(id);     // تحديث الـ hidden input
+            $('#locationList').html('');          // إخفاء النتائج
+        });
     // handle add new address
 </script>
