@@ -40,14 +40,39 @@
                     <label class="form-label fw-bold">Phone</label>
                     <input type="text" class="form-control" name="phone" value="{{ optional($model->OrderAddress->first())->phone }}" readonly>
                 </div>
-                <span class="text-black fs-16 fw-bold mb-1">Address:</span>
-                <div class="border rounded p-2 mb-2 text-black fs-5">
-                    {{ optional($model->OrderAddress->first())->address_line }}, {{ optional($model->OrderAddress->first())->address_label}},<br>{{ optional($model->OrderAddress->first())->state }}, {{ optional($model->OrderAddress->first())->country }}
-                </div>
+
+
+                @php
+                    $address = optional($model->OrderAddress->first());
+                @endphp
+
+                @if($address)
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0 fs-16 text-black">
+                            {{ $address->type === 'pickup' ? 'Pickup Details' : 'Shipping Details' }}
+                        </h5>
+                    </div>
+
+                    <span class="text-black fs-16 fw-bold mb-1">
+                        {{ $address->type === 'pickup' ? 'Location:' : 'Address:' }}
+                    </span>
+
+                    <div class="border rounded p-2 mb-2 text-black fs-5">
+                        @if($address->type === 'pickup')
+                            {{ $address->location_name }}<br>
+                            {{ $address->state }}, {{ $address->country }}
+                        @else
+                            {{ $address->address_line }}, {{ $address->address_label }}<br>
+                            {{ $address->state }}, {{ $address->country }}
+                        @endif
+                    </div>
+                @endif
                 <span class="text-black fs-16 fw-bold mb-1">Delivery Instructions:</span>
                 <div class="border rounded p-1 mb-2 text-black fs-5">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </div>
+
+
                 <div class="rounded p-1 d-flex align-items-center text-black" style="background-color: #FCF8FC;">
                     <i data-feather="truck" class="me-2"></i>
                     <div>

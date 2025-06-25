@@ -413,21 +413,32 @@ private function attachDesignToOrder($order, $designInfo, $pricingDetails)
     }
 
 
-    public function updateResource($validatedData, $id, $relationsToLoad = [])
+public function updateResource($validatedData, $id, $relationsToLoad = [])
 {
     $model = $this->repository->update($validatedData, $id);
 
-    if (isset($validatedData['first_name']) || isset($validatedData['last_name']) || isset($validatedData['email']) || isset($validatedData['phone'])) {
+    if (
+        isset($validatedData['first_name']) || 
+        isset($validatedData['last_name']) || 
+        isset($validatedData['email']) || 
+        isset($validatedData['phone'])
+    ) {
         $orderAddress = $model->OrderAddress()->first();
         if ($orderAddress) {
             $orderAddress->update([
-                'first_name'   => $validatedData['first_name'] ?? $orderAddress->first_name,
-                'last_name'    => $validatedData['last_name'] ?? $orderAddress->last_name,
-                'email'        => $validatedData['email'] ?? $orderAddress->email,
-                'phone'        => $validatedData['phone'] ?? $orderAddress->phone,
+                'first_name' => $validatedData['first_name'] ?? $orderAddress->first_name,
+                'last_name'  => $validatedData['last_name'] ?? $orderAddress->last_name,
+                'email'      => $validatedData['email'] ?? $orderAddress->email,
+                'phone'      => $validatedData['phone'] ?? $orderAddress->phone,
             ]);
         }
     }
+
+    if (isset($validatedData['status'])) {
+        $model->status = $validatedData['status'];
+        $model->save();
+    }
+
     return $model->load($relationsToLoad);
 }
 

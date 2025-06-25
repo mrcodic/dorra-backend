@@ -98,20 +98,27 @@
                     <p class="mb-1 fs-16 text-dark">Order Placed on:</p>
                     <p class="fs-16 text-black">{{ $model->created_at->format('F d, Y') }}</p>
                 </div>
-                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
-                <select class="form-select mb-4" name="order_status">
-                    <option value="confirmed">Completed</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                </select>
+             
+                    
+                    @php
+                        use App\Enums\Order\StatusEnum;
+                    @endphp
+
+                    <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
+                    <select class="form-select mb-4" name="status">
+                        @foreach (StatusEnum::cases() as $status)
+                            <option value="{{ $status->value }}"
+                                {{ (old('status', $model->status?->value) == $status->value) ? 'selected' : '' }}>
+                                {{ $status->label() }}
+                            </option>
+                        @endforeach
+                    </select>
 
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
 
                 @foreach ($model->designs as $design)
                     @php
-                        $product = $design->product; // assuming this relation exists
+                        $product = $design->product; 
                     @endphp
                     <div class="mb-1">
                         <div class="d-flex align-items-start justify-content-between">
