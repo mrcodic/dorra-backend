@@ -10,19 +10,8 @@ class OrderAddress extends Model
 {
 
 
-    protected $fillable = [
-        'order_id',
-        'type',
-        'shipping_address_id',
-        'location_id',
-        'location_name',
-        'address_label',
-        'address_line',
-        'state',
-        'country',
-    ];
-    
     protected $guarded = [];
+
 
     public function order()
     {
