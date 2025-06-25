@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DiscountCode\ScopeEnum;
 use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Product;
@@ -48,16 +49,14 @@ class CartService extends BaseService
     }
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        // Create or find the cart by user_id or cookie_id
+
         $model = $this->repository->query()->firstOrCreate([
             'user_id' => Arr::get($validatedData, 'user_id'),
             'cookie_id' => Arr::get($validatedData, 'cookie_id'),
         ], Arr::except($validatedData, 'design_id'));
 
-        // Get the design to be added
         $design = $this->designRepository->find($validatedData['design_id']);
 
-        // Attach or update the pivot data for the design in the cart
         $model->designs()->syncWithoutDetaching([
             $design->id => [
                 'status' => 1,
@@ -65,7 +64,7 @@ class CartService extends BaseService
                 'total_price' => $design->total_price,
             ]
         ]);
-        // Now recalculate the cart total after the sync
+
         $totalPrice = $model->designs->sum(fn($design) => $design->total_price ?? 0);
 
         $model->update(['price' => getTotalPrice(0,$totalPrice)]);
@@ -110,20 +109,26 @@ class CartService extends BaseService
     public function applyDiscount($request)
     {
         $cart = $this->resolveUserCart();
+        $cart->load('cartItems.product');
         $items = $cart->cartItems;
-        $products = $items->map(function ($item) {
-            return optional($item?->load('product')->product)->id;
-        })->filter()->unique();
+        $discountCode = $this->discountCodeRepository->query()->whereCode($request->code)->firstOrFail();
+
+        $products = $items->pluck('product.id')->filter()->unique();
         $allSameProduct = $products->count() === 1;
         if ($allSameProduct) {
-            $request->validate(['code' => ['required', new ValidDiscountCode(Product::find($products[0]))]]);
-        } else {
-            $request->validate(['code' => ['required', new ValidDiscountCode()]]);
+            $product = Product::find($products->first());
+
         }
-        $subTotal =$cart->price;
-        $discountValue = $this->discountCodeRepository->query()->where(['code' => $request->code])->value('value');
-        $discountAmount = getDiscountAmount($discountValue,$subTotal);
-        $totalPrice = getTotalPrice($discountValue,$subTotal);
+        $request->validate([
+            'code' => ['required', new ValidDiscountCode($product ?? null)],
+        ]);
+
+
+        $subTotal = $cart->price;
+        $discountValue = $discountCode->value;
+        $discountAmount = getDiscountAmount($discountValue, $subTotal);
+        $totalPrice = $subTotal - $discountAmount;
+
         return [
             'discount' => [
                 'ratio' => $discountValue,
@@ -131,8 +136,8 @@ class CartService extends BaseService
             ],
             'total_price' => $totalPrice,
         ];
-
     }
+
 
     public function cartInfo()
     {
