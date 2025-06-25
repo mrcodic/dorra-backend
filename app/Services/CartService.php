@@ -48,21 +48,28 @@ class CartService extends BaseService
     }
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
+        // Create or find the cart by user_id or cookie_id
         $model = $this->repository->query()->firstOrCreate([
             'user_id' => Arr::get($validatedData, 'user_id'),
             'cookie_id' => Arr::get($validatedData, 'cookie_id'),
-        ],
-            Arr::except($validatedData, 'design_id'));
+        ], Arr::except($validatedData, 'design_id'));
+
+        // Get the design to be added
         $design = $this->designRepository->find($validatedData['design_id']);
-        $totalPrice = $model->cartItems->isNotEmpty() ? $model->cartItems->sum(fn($value) => $value->pivot->total_price) : $design->total_price;
-        $model->update(['price' => $totalPrice]);
+
+        // Attach or update the pivot data for the design in the cart
         $model->designs()->syncWithoutDetaching([
-            $validatedData['design_id'] => [
+            $design->id => [
                 'status' => 1,
                 'sub_total' => $design->total_price,
                 'total_price' => $design->total_price,
             ]
         ]);
+        // Now recalculate the cart total after the sync
+        $totalPrice = $model->designs->sum(fn($design) => $design->total_price ?? 0);
+
+        $model->update(['price' => getTotalPrice(0,$totalPrice)]);
+
         return $model->load($relationsToLoad);
     }
 

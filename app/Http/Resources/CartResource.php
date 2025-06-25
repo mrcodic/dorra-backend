@@ -22,7 +22,7 @@ class CartResource extends JsonResource
             'total' => $this->price,
             'tax' => [
                 'ratio' => setting('tax') * 100 . "%",
-                'value' => getPriceAfterTax(setting('tax'), $this->price),
+                'value' => getPriceAfterTax(setting('tax'),$this->designs->pluck('total_price')->sum()),
             ],
             'delivery' => setting('delivery'),
             'discount' => [
