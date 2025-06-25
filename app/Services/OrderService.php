@@ -206,26 +206,26 @@ class OrderService extends BaseService
         }
     }
 
-//    public function checkout($request)
-//    {
-//        $cart = $this->cartService->getCurrentUserOrGuestCart();
-//        $discountCode = $this->discountCodeRepository->find($request->discount_code_id);
-//
-//        $subTotal = $cart->cartItems()->sum('sub_total');
-//        $this->handleTransaction(function () use ($cart, $discountCode, $subTotal) {
-//            $order = $this->repository->query()->create([
-//                'user_id' => Auth::id(),
-//                'sub_total' => $subTotal,
-//                'discount_amount' => getDiscountAmount($discountCode->value ?? 0, $subTotal),
-//                'delivery_amount' => setting('delivery'),
-//                'tax_amount' => setting('tax'),
-//                'total_price' => getTotalPrice($discountCode->value ?? 0, $subTotal),
-//                'status' => StatusEnum::PLACED,
-//            ]);
-//            $order->orderAddress()->create();
-//        });
-//
-//    }
+    public function checkout($request)
+    {
+        $cart = $this->cartService->getCurrentUserOrGuestCart();
+        $discountCode = $this->discountCodeRepository->find($request->discount_code_id);
+
+        $subTotal = $cart->cartItems()->sum('sub_total');
+        $this->handleTransaction(function () use ($cart, $discountCode, $subTotal) {
+            $order = $this->repository->query()->create([
+                'user_id' => Auth::id(),
+                'sub_total' => $subTotal,
+                'discount_amount' => getDiscountAmount($discountCode->value ?? 0, $subTotal),
+                'delivery_amount' => setting('delivery'),
+                'tax_amount' => setting('tax'),
+                'total_price' => getTotalPrice($discountCode->value ?? 0, $subTotal),
+                'status' => StatusEnum::PLACED,
+            ]);
+            $order->orderAddress()->create();
+        });
+
+    }
 
     public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
     {

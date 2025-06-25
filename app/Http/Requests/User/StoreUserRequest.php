@@ -51,7 +51,9 @@ class StoreUserRequest extends BaseRequest
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
             'label' => ['required', 'string', 'min:3'],
             'line' => ['required', 'string', 'min:3'],
-            'state_id' => ['required', 'integer', 'exists:states,id'],];
+            'state_id' => ['required', 'integer', 'exists:states,id'],
+            'status' => ['required', 'boolean'],
+            ];
 
 
     }
