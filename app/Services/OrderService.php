@@ -30,8 +30,7 @@ use App\Repositories\Interfaces\ProductSpecificationOptionRepositoryInterface;
 class OrderService extends BaseService
 {
 
-        protected array $relations;
-
+    protected array $relations;
 
 
     public function __construct(
@@ -42,8 +41,9 @@ class OrderService extends BaseService
         public UserRepositoryInterface                       $userRepository,
         public ProductRepositoryInterface                    $productRepository,
         public ShippingAddressRepositoryInterface            $shippingAddressRepository,
-        public DesignRepositoryInterface                    $designRepository,
-        public LocationRepositoryInterface                   $locationRepository
+        public DesignRepositoryInterface                     $designRepository,
+        public LocationRepositoryInterface                   $locationRepository,
+        public CartService                                   $cartService,
     )
 
 
@@ -57,43 +57,42 @@ class OrderService extends BaseService
     }
 
 
+    public function getData()
+    {
+        $orders = $this->repository
+            ->query()
+            ->with($this->relations)
+            ->withCount(['designs'])
+            ->when(request()->filled('search_value'), function ($query) {
+                $locale = app()->getLocale();
+                $search = request('search_value');
+                $query->where("order_number->{$locale}", 'LIKE', "%{$search}%");
+            })
+            ->latest();
 
-   public function getData()
-{
-    $orders = $this->repository
-        ->query()
-        ->with($this->relations)
-        ->withCount(['designs'])
-        ->when(request()->filled('search_value'), function ($query) {
-            $locale = app()->getLocale();
-            $search = request('search_value');
-            $query->where("order_number->{$locale}", 'LIKE', "%{$search}%");
-        })
-        ->latest();
-
-    return DataTables::of($orders)
-        ->addColumn('order_number', function ($order) {
-            return $order->order_number ?? '-';
-        })
-        ->addColumn('user_name', function ($order) {
-            return $order->user
-                ? ($order->user->first_name . ' ' . $order->user->last_name)
-                : 'No User';
-        })
-        ->addColumn('items', function ($order) {
-            return $order->designs_count ?? 0;
-        })
-        ->addColumn('total_price', function ($order) {
-            return $order->total_price ?? 0;
-        })
-        ->addColumn('status', function ($order) {
-            return $order->status ? $order->status->label() : 'No Status';
-        })
-        ->addColumn('added_date', function ($order) {
-            return $order->created_at ? $order->created_at->format('d/m/Y') : '-';
-        })
-        ->make();
-}
+        return DataTables::of($orders)
+            ->addColumn('order_number', function ($order) {
+                return $order->order_number ?? '-';
+            })
+            ->addColumn('user_name', function ($order) {
+                return $order->user
+                    ? ($order->user->first_name . ' ' . $order->user->last_name)
+                    : 'No User';
+            })
+            ->addColumn('items', function ($order) {
+                return $order->designs_count ?? 0;
+            })
+            ->addColumn('total_price', function ($order) {
+                return $order->total_price ?? 0;
+            })
+            ->addColumn('status', function ($order) {
+                return $order->status ? $order->status->label() : 'No Status';
+            })
+            ->addColumn('added_date', function ($order) {
+                return $order->created_at ? $order->created_at->format('d/m/Y') : '-';
+            })
+            ->make();
+    }
 
     public function storeStep1($request): void
     {
@@ -163,7 +162,7 @@ class OrderService extends BaseService
         $this->storeStepData(["personal_info" => $request->except("_token")]);
     }
 
- public function storeStep6($request): void
+    public function storeStep6($request): void
     {
         $type = ShippingMethodEnum::from($request->type);
 
@@ -174,20 +173,20 @@ class OrderService extends BaseService
 
             $this->storeStepData([
                 "pickup_info" => [
-                    "id"            => $pickupAddress->id,
+                    "id" => $pickupAddress->id,
                     "location_name" => $pickupAddress->name,
-                    "line"          => $pickupAddress->address_line,
-                    "state"         => $pickupAddress->state->name,
-                    "country"       => $pickupAddress->state->country->name,
+                    "line" => $pickupAddress->address_line,
+                    "state" => $pickupAddress->state->name,
+                    "country" => $pickupAddress->state->country->name,
                 ],
-                "shipping_info" => null 
+                "shipping_info" => null
             ]);
 
             Cache::put('pickup_contact_' . Auth::id(), [
                 'first_name' => $request->pickup_first_name,
-                'last_name'  => $request->pickup_last_name,
-                'email'      => $request->pickup_email,
-                'phone'      => $request->pickup_phone,
+                'last_name' => $request->pickup_last_name,
+                'email' => $request->pickup_email,
+                'phone' => $request->pickup_phone,
             ], now()->addMinutes(30));
         }
 
@@ -196,70 +195,75 @@ class OrderService extends BaseService
 
             $this->storeStepData([
                 "shipping_info" => [
-                    "id"      => $shippingAddress->id,
-                    "label"   => $shippingAddress->label,
-                    "line"    => $shippingAddress->line,
-                    "state"   => $shippingAddress->state->name,
+                    "id" => $shippingAddress->id,
+                    "label" => $shippingAddress->label,
+                    "line" => $shippingAddress->line,
+                    "state" => $shippingAddress->state->name,
                     "country" => $shippingAddress->state->country->name,
                 ],
-                "pickup_info" => null 
+                "pickup_info" => null
             ]);
         }
     }
 
+//    public function checkout($request)
+//    {
+//        $this->cartService->getCurrentUserOrGuestCart();
+//        $this->repository->query()->create([]);
+//    }
 
-public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
-{
-    $cacheKey = getOrderStepCacheKey();
-    $orderStepData = Cache::get($cacheKey, []);
+    public function storeResource($validatedData = [], $relationsToStore = [], $relationsToLoad = [])
+    {
+        $cacheKey = getOrderStepCacheKey();
+        $orderStepData = Cache::get($cacheKey, []);
 
-    if (empty($orderStepData)) {
-        throw new Exception('Order step data not found in cache');
-    }
-
-    $orderData = [
-        'user_id'         => $orderStepData['user_info']['id'] ?? null,
-        'subtotal'        => $orderStepData['pricing_details']['sub_total'] ?? 0,
-        'total_price'     => $orderStepData['pricing_details']['total'] ?? 0,
-        'discount_amount' => $orderStepData['pricing_details']['discount'] ?? 0,
-        'delivery_amount' => $orderStepData['pricing_details']['delivery'] ?? 0,
-        'tax_amount'      => $orderStepData['pricing_details']['tax'] ?? 0,
-        'status'          => StatusEnum::CONFIRMED,
-        'order_number'    => 'TEMP-' . uniqid(),
-    ];
-
-    $orderData = array_merge($orderData, $validatedData);
-    $order = $this->repository->create($orderData);
-
-    if (!empty($orderStepData['specs'])) {
-        $this->attachSpecificationOptions($order, $orderStepData['specs']);
-    }
-
-    $shippingInfo = $orderStepData['shipping_info'] ?? null;
-    $pickupInfo   = $orderStepData['pickup_info'] ?? null;
-    $personalInfo = $orderStepData['personal_info'] ?? [];
-
-    $this->saveOrderAddress($order, $personalInfo, $shippingInfo, $pickupInfo);
-
-    if (!empty($orderStepData['design_info'])) {
-        $this->attachDesignToOrder($order, $orderStepData['design_info'], $orderStepData['pricing_details']);
-    }
-
-    if (!empty($relationsToStore)) {
-        foreach ($relationsToStore as $relation => $data) {
-            $order->$relation()->create($data);
+        if (empty($orderStepData)) {
+            throw new Exception('Order step data not found in cache');
         }
+
+        $orderData = [
+            'user_id' => $orderStepData['user_info']['id'] ?? null,
+            'subtotal' => $orderStepData['pricing_details']['sub_total'] ?? 0,
+            'total_price' => $orderStepData['pricing_details']['total'] ?? 0,
+            'discount_amount' => $orderStepData['pricing_details']['discount'] ?? 0,
+            'delivery_amount' => $orderStepData['pricing_details']['delivery'] ?? 0,
+            'tax_amount' => $orderStepData['pricing_details']['tax'] ?? 0,
+            'status' => StatusEnum::CONFIRMED,
+            'order_number' => 'TEMP-' . uniqid(),
+        ];
+
+        $orderData = array_merge($orderData, $validatedData);
+        $order = $this->repository->create($orderData);
+
+        if (!empty($orderStepData['specs'])) {
+            $this->attachSpecificationOptions($order, $orderStepData['specs']);
+        }
+
+        $shippingInfo = $orderStepData['shipping_info'] ?? null;
+        $pickupInfo = $orderStepData['pickup_info'] ?? null;
+        $personalInfo = $orderStepData['personal_info'] ?? [];
+
+        $this->saveOrderAddress($order, $personalInfo, $shippingInfo, $pickupInfo);
+
+        if (!empty($orderStepData['design_info'])) {
+            $this->attachDesignToOrder($order, $orderStepData['design_info'], $orderStepData['pricing_details']);
+        }
+
+        if (!empty($relationsToStore)) {
+            foreach ($relationsToStore as $relation => $data) {
+                $order->$relation()->create($data);
+            }
+        }
+
+        if (!empty($relationsToLoad)) {
+            $order->load($relationsToLoad);
+        }
+
+        Cache::forget($cacheKey);
+        Cache::forget('pickup_contact_' . Auth::id());
+
+        return $order;
     }
-
-    if (!empty($relationsToLoad)) {
-        $order->load($relationsToLoad);
-    }
-
-    Cache::forget($cacheKey);
-    Cache::forget('pickup_contact_' . Auth::id()); 
-
-    return $order;
-}
 
     private function attachSpecificationOptions($order, $specs): void
     {
@@ -282,82 +286,151 @@ public function storeResource($validatedData = [], $relationsToStore = [], $rela
         }
     }
 
-private function saveOrderAddress($order, $personalInfo, $shippingInfo = null, $pickupInfo = null)
-{
-    if ($shippingInfo) {
-        $order->OrderAddress()->create([
-            'order_id'      => $order->id,
-            'type'         => 'shipping',
-            'first_name'   => $personalInfo['first_name'] ?? null,
-            'last_name'    => $personalInfo['last_name'] ?? null,
-            'email'        => $personalInfo['email'] ?? null,
-            'phone'        => $personalInfo['phone_number'] ?? null,
-            'address_label'=> $shippingInfo['label'] ?? null,
-            'address_line' => $shippingInfo['line'] ?? null,
-            'state'        => $shippingInfo['state'] ?? null,
-            'country'      => $shippingInfo['country'] ?? null,
+    private function saveOrderAddress($order, $personalInfo, $shippingInfo = null, $pickupInfo = null)
+    {
+        if ($shippingInfo) {
+            $order->OrderAddress()->create([
+                'order_id' => $order->id,
+                'type' => 'shipping',
+                'first_name' => $personalInfo['first_name'] ?? null,
+                'last_name' => $personalInfo['last_name'] ?? null,
+                'email' => $personalInfo['email'] ?? null,
+                'phone' => $personalInfo['phone_number'] ?? null,
+                'address_label' => $shippingInfo['label'] ?? null,
+                'address_line' => $shippingInfo['line'] ?? null,
+                'state' => $shippingInfo['state'] ?? null,
+                'country' => $shippingInfo['country'] ?? null,
+            ]);
+        }
+
+        if ($pickupInfo) {
+            $pickupContactData = Cache::get('pickup_contact_' . Auth::id(), []);
+
+            $order->pickupContact()->create([
+                'first_name' => $pickupContactData['first_name'] ?? null,
+                'last_name' => $pickupContactData['last_name'] ?? null,
+                'email' => $pickupContactData['email'] ?? null,
+                'phone' => $pickupContactData['phone'] ?? null,
+            ]);
+
+            $order->OrderAddress()->create([
+                'order_id' => $order->id,
+                'type' => 'pickup',
+                'location_id' => $pickupInfo['id'] ?? null,
+                'location_name' => $pickupInfo['location_name'] ?? null,
+                'address_label' => $pickupInfo['location_name'] ?? null,
+                'address_line' => $pickupInfo['line'] ?? null,
+                'state' => $pickupInfo['state'] ?? null,
+                'country' => $pickupInfo['country'] ?? null,
+                'first_name' => $pickupContactData['first_name'] ?? null,
+                'last_name' => $pickupContactData['last_name'] ?? null,
+                'email' => $pickupContactData['email'] ?? null,
+                'phone' => $pickupContactData['phone'] ?? null,
+            ]);
+        }
+    }
+
+    private function attachDesignToOrder($order, $designInfo, $pricingDetails)
+    {
+        $design = Design::with(['product', 'productPrice'])->find($designInfo['id']);
+
+        if (!$design) {
+            return;
+        }
+
+        $quantity = $pricingDetails['quantity'] ?? 1;
+
+        if ($design->product_price_id && $design->productPrice) {
+            $customProductPrice = $design->productPrice->price;
+            $basePrice = 0;
+            $totalPrice = $customProductPrice * $quantity;
+        } else {
+            $customProductPrice = 0;
+            $basePrice = $design->product ? $design->product->base_price : 0;
+            $totalPrice = $basePrice * $quantity;
+        }
+
+        $pivotData = [
+            $design->id => [
+                'quantity' => $quantity,
+                'base_price' => $basePrice,
+                'custom_product_price' => $customProductPrice,
+                'total_price' => $totalPrice,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        ];
+
+        $order->designs()->attach($pivotData);
+    }
+
+    public function applyDiscountCode($request)
+    {
+        $orderStepData = Cache::get(getOrderStepCacheKey());
+        if (!$orderStepData || !isset($orderStepData['product_id'])) {
+            throw new \Exception('Product information not found in order data');
+        }
+
+        $product = Product::find($orderStepData['product_id']);
+        $category = $product->category;
+        $validated = $request->validate([
+            'code' => ['required', 'string', new ValidDiscountCode($product, $category)],
         ]);
+        return $this->discountCodeRepository->query()->where($validated)->first();
     }
 
-    if ($pickupInfo) {
-        $pickupContactData = Cache::get('pickup_contact_' . Auth::id(), []);
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->repository->update($validatedData, $id);
 
-        $order->pickupContact()->create([
-            'first_name' => $pickupContactData['first_name'] ?? null,
-            'last_name'  => $pickupContactData['last_name'] ?? null,
-            'email'      => $pickupContactData['email'] ?? null,
-            'phone'      => $pickupContactData['phone'] ?? null,
-        ]);
-
-        $order->OrderAddress()->create([
-            'order_id'      => $order->id,
-            'type'         => 'pickup',
-            'location_id'  => $pickupInfo['id'] ?? null,
-            'location_name'=> $pickupInfo['location_name'] ?? null,
-            'address_label'=> $pickupInfo['location_name'] ?? null,
-            'address_line' => $pickupInfo['line'] ?? null,
-            'state'        => $pickupInfo['state'] ?? null,
-            'country'      => $pickupInfo['country'] ?? null,
-            'first_name'   => $pickupContactData['first_name'] ?? null,
-            'last_name'    => $pickupContactData['last_name'] ?? null,
-            'email'        => $pickupContactData['email'] ?? null,
-            'phone'        => $pickupContactData['phone'] ?? null,
-        ]);
-    }
-}
-private function attachDesignToOrder($order, $designInfo, $pricingDetails)
-{
-    $design = Design::with(['product', 'productPrice'])->find($designInfo['id']);
-
-    if (!$design) {
-        return;
+        if (isset($validatedData['first_name']) || isset($validatedData['last_name']) || isset($validatedData['email']) || isset($validatedData['phone'])) {
+            $orderAddress = $model->OrderAddress()->first();
+            if ($orderAddress) {
+                $orderAddress->update([
+                    'first_name' => $validatedData['first_name'] ?? $orderAddress->first_name,
+                    'last_name' => $validatedData['last_name'] ?? $orderAddress->last_name,
+                    'email' => $validatedData['email'] ?? $orderAddress->email,
+                    'phone' => $validatedData['phone'] ?? $orderAddress->phone,
+                ]);
+            }
+        }
+        return $model->load($relationsToLoad);
     }
 
-    $quantity = $pricingDetails['quantity'] ?? 1;
 
-    if ($design->product_price_id && $design->productPrice) {
-        $customProductPrice = $design->productPrice->price;
-        $basePrice = 0;
-        $totalPrice = $customProductPrice * $quantity;
-    } else {
-        $customProductPrice = 0;
-        $basePrice = $design->product ? $design->product->base_price : 0;
-        $totalPrice = $basePrice * $quantity;
+    public function deleteDesignFromOrder($orderId, $designId)
+    {
+        return DB::transaction(function () use ($orderId, $designId) {
+            $order = Order::with(['orderItems'])->findOrFail($orderId);
+
+            $orderItem = $order->orderItems()->where('design_id', $designId)->first();
+
+            if (!$orderItem) {
+                throw new Exception('Design not found in this order.');
+            }
+
+            $orderItem->delete();
+
+            $subtotal = $order->orderItems()->sum(DB::raw('quantity * base_price'));
+            $totalPrice = $subtotal + $order->delivery_amount + $order->tax_amount - $order->discount_amount;
+
+            $order->update([
+                'subtotal' => $subtotal,
+                'total_price' => $totalPrice
+            ]);
+
+            return $order->refresh();
+        });
     }
 
-    $pivotData = [
-        $design->id => [
-            'quantity' => $quantity,
-            'base_price' => $basePrice,
-            'custom_product_price' => $customProductPrice,
-            'total_price' => $totalPrice,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]
-    ];
-
-    $order->designs()->attach($pivotData);
-}
+    public function downloadPDF()
+    {
+        $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
+        $pdf = Pdf::loadView('dashboard.orders.steps.step7', compact('orderData'));
+        return $pdf->setPaper('a4')
+            ->setOption('defaultFont', 'Helvetica')
+            ->download('order-confirmation.pdf');
+    }
 
     private function attachDesignsToOrder($order, $designsData)
     {
@@ -550,38 +623,8 @@ public function editShippingAddresses($validatedData, $id, $relationsToLoad = []
 
     return $loadedModel;
 }
-    public function deleteDesignFromOrder($orderId, $designId)
-    {
-        return DB::transaction(function () use ($orderId, $designId) {
-            $order = Order::with(['orderItems'])->findOrFail($orderId);
-
-            $orderItem = $order->orderItems()->where('design_id', $designId)->first();
-
-            if (!$orderItem) {
-                throw new Exception('Design not found in this order.');
-            }
-
-            $orderItem->delete();
-
-            $subtotal = $order->orderItems()->sum(DB::raw('quantity * base_price'));
-            $totalPrice = $subtotal + $order->delivery_amount + $order->tax_amount - $order->discount_amount;
-
-            $order->update([
-                'subtotal'    => $subtotal,
-                'total_price' => $totalPrice
-            ]);
-
-            return $order->refresh();
-        });
-    }
 
 
-   public function downloadPDF()
-{
-    $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
-    $pdf = Pdf::loadView('dashboard.orders.steps.step7', compact('orderData'));
-    return $pdf->setPaper('a4')
-        ->setOption('defaultFont', 'Helvetica')
-        ->download('order-confirmation.pdf');
-}
+
+
 }

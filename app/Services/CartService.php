@@ -131,6 +131,7 @@ class CartService extends BaseService
 
         return [
             'discount' => [
+                'id' => $discountCode->id,
                 'ratio' => $discountValue,
                 'value' => $discountAmount,
             ],
