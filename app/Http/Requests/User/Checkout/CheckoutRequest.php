@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User\Checkout;
 
-use App\Enums\Order\ShippingMethodEnum;
+use App\Enums\Order\OrderTypeEnum;
 use App\Models\CountryCode;
 use Illuminate\Foundation\Http\FormRequest;
 use Propaganistas\LaravelPhone\Rules\Phone;
@@ -44,17 +44,18 @@ class CheckoutRequest extends FormRequest
         return [
             'payment_method_id' => 'required|exists:payment_methods,id',
             'discount_code_id' => 'required|exists:discount_codes,id',
+            'country_code_id' => ['required', 'exists:country_codes,id'],
             'first_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
             'email' => ['required', 'email'],
             'full_phone_number' => ['nullable', 'string', new Phone($isoCode)],
-            'type' => ['required', 'in:'.ShippingMethodEnum::getValuesAsString()],
+            'type' => ['required', 'in:'.OrderTypeEnum::getValuesAsString()],
             'shipping_address_id' => ['required', 'exists:shipping_addresses,id'],
             'location_id' => ['required', 'exists:locations,id'],
-            'pickup_first_name' => ['required', 'string'],
-            'pickup_last_name' => ['required', 'string'],
-            'pickup_email' => ['required', 'email'],
-            'pickup_full_phone_number' => ['nullable', 'string', new Phone($isoCode)],
+            'pickup_contact_first_name' => ['required', 'string'],
+            'pickup_contact_last_name' => ['required', 'string'],
+            'pickup_contact_email' => ['required', 'email'],
+            'pickup_contact_phone_number' => ['nullable', 'string', new Phone($isoCode)],
 
         ];
     }

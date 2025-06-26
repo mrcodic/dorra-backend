@@ -162,14 +162,14 @@
     </script>
 <script>
       $(document).ready(function () {
-          handleAjaxFormSubmit("#order-form", {
+          handleAjaxFormSubmit(".order-form", {
             successMessage: "Order created successfully!",
             onSuccess: function (response, $form) {
-            resetForm: true,
+                window.location.href = "{{ route('orders.index') }}";
         }});
     });
-   
-   
+
+
 
 </script>
 @endsection

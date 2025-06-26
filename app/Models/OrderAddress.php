@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\Order\ShippingMethodEnum;
+use App\Enums\Order\OrderTypeEnum;
 use App\Models\Order;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Model;
@@ -31,7 +31,7 @@ class OrderAddress extends Model
     }
 
     protected $casts = [
-    'shipping_method' => ShippingMethodEnum::class,
+    'shipping_method' => OrderTypeEnum::class,
 
 ];
 

@@ -1,15 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User\Cart;
 
 use App\Enums\HttpEnum;
 use App\Http\Requests\Base\BaseRequest;
-use App\Models\Design;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class AddToCartRequest extends BaseRequest
 {

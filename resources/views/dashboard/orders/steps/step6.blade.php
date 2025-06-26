@@ -1,4 +1,3 @@
-
 <div id="step-6" class="step" style="display: none;">
 
     <h5 class="mb-2 fs-3 text-black">Personal Information</h5>
@@ -12,17 +11,17 @@
             <div class="d-flex gap-2">
                 <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
                     <input class="form-check-input" type="radio" name="type" id="shipToCustomer"
-                        value="{{ \App\Enums\Order\ShippingMethodEnum::SHIPPING->value }}" checked>
+                           value="{{ \App\Enums\Order\OrderTypeEnum::SHIPPING->value }}" checked>
                     <label class="form-check-label fs-4 text-black" for="shipToCustomer">
-                        {{ \App\Enums\Order\ShippingMethodEnum::SHIPPING->label() }}
+                        {{ \App\Enums\Order\OrderTypeEnum::SHIPPING->label() }}
                     </label>
                 </div>
 
                 <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
                     <input class="form-check-input" type="radio" name="type" id="pickUp"
-                        value="{{ \App\Enums\Order\ShippingMethodEnum::PICKUP->value }}">
+                           value="{{ \App\Enums\Order\OrderTypeEnum::PICKUP->value }}">
                     <label class="form-check-label fs-4 text-black" for="pickUp">
-                        {{ \App\Enums\Order\ShippingMethodEnum::PICKUP->label() }}
+                        {{ \App\Enums\Order\OrderTypeEnum::PICKUP->label() }}
                     </label>
                 </div>
             </div>
@@ -35,7 +34,8 @@
                 @if(!empty($orderData["user_info"]["id"]))
                     @foreach(\App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->get() as $shippingAddress)
                         <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                            <input class="form-check-input" type="radio" name="shipping_id" id="address{{ $shippingAddress->id }}"
+                            <input class="form-check-input" type="radio" name="shipping_id"
+                                   id="address{{ $shippingAddress->id }}"
                                    value="{{ $shippingAddress->id }}">
                             <label class="form-check-label fs-4 text-black" for="address{{ $shippingAddress->id }}">
                                 <p>{{ $shippingAddress->label }}</p>
@@ -51,14 +51,14 @@
             </div>
 
 
-
             <!-- Divider -->
             @if(!empty($orderData["user_info"]["id"]) && \App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->count() > 0)
                 <div class="text-center my-3 fw-bold">OR</div>
             @endif
 
             <!-- Add New Address -->
-            <button class="upload-card p-1 w-100 bg-white mt-2" data-bs-toggle="modal" data-bs-target="#addNewAddressModal">
+            <button class="upload-card p-1 w-100 bg-white mt-2" data-bs-toggle="modal"
+                    data-bs-target="#addNewAddressModal">
                 <i data-feather="plus"></i>Add New Address
             </button>
         </div>
@@ -76,25 +76,25 @@
             </div>
 
 
-        <div class="row g-2 mb-2">
-            <div class="col">
-                <label class="form-label">First Name</label>
-                <input type="text" class="form-control" id="pickup_first_name" name="pickup_first_name">
+            <div class="row g-2 mb-2">
+                <div class="col">
+                    <label class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="pickup_first_name" name="pickup_first_name">
+                </div>
+                <div class="col">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="pickup_last_name" name="pickup_last_name">
+                </div>
             </div>
-            <div class="col">
-                <label class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="pickup_last_name" name="pickup_last_name">
+            <div class="mb-2">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="pickup_email" name="pickup_email">
             </div>
-        </div>
-        <div class="mb-2">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-control" id="pickup_email" name="pickup_email">
-        </div>
-        <div class="mb-2">
-            <label class="form-label">Phone Number</label>
-            <input type="tel" class="form-control" id="pickup_phone" name="pickup_phone">
-        </div>
-        <input type="hidden" id="pickup_location_id" name="pickup_location_id" value=""> 
+            <div class="mb-2">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="pickup_phone" name="pickup_phone">
+            </div>
+            <input type="hidden" id="pickup_location_id" name="pickup_location_id" value="">
 
         </div>
 
@@ -127,14 +127,13 @@
 </div>
 
 
-
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDx7_example_REAL_KEY"></script>
 <script>
     let map;
     let marker;
 
     function initMap(lat = 30.0444, lng = 31.2357) {
-        const defaultLocation = { lat: parseFloat(lat), lng: parseFloat(lng) };
+        const defaultLocation = {lat: parseFloat(lat), lng: parseFloat(lng)};
         map = new google.maps.Map(document.getElementById('mapPlaceholder'), {
             zoom: 10,
             center: defaultLocation,
@@ -146,9 +145,9 @@
         });
     }
 
-    $(document).ready(function() {
-        $('#selectLocationModal').on('shown.bs.modal', function() {
-            setTimeout(function() { // Important for modal rendering
+    $(document).ready(function () {
+        $('#selectLocationModal').on('shown.bs.modal', function () {
+            setTimeout(function () { // Important for modal rendering
                 if (!map) {
                     initMap();
                 } else {
@@ -157,15 +156,15 @@
             }, 300);
         });
 
-        $('#locationSearch').on('input', function() {
+        $('#locationSearch').on('input', function () {
             const query = $(this).val();
             if (query.length >= 2) {
                 $.ajax({
                     url: "{{ route('locations.search') }}",
                     method: 'GET',
-                    data: { search: query },
-                    success: function(response) {
-                        $('#locationList').html(response); 
+                    data: {search: query},
+                    success: function (response) {
+                        $('#locationList').html(response);
                     }
                 });
             } else {
@@ -173,14 +172,14 @@
             }
         });
 
-        $(document).on('click', '.location-item', function() {
+        $(document).on('click', '.location-item', function () {
             const lat = parseFloat($(this).data('lat'));
             const lng = parseFloat($(this).data('lng'));
             const name = $(this).data('name');
 
             if (marker) marker.setMap(null);
 
-            const newLocation = { lat: lat, lng: lng };
+            const newLocation = {lat: lat, lng: lng};
             map.setCenter(newLocation);
             marker = new google.maps.Marker({
                 position: newLocation,
@@ -192,9 +191,6 @@
         });
     });
 </script>
-
-
-
 
 
 <script>
@@ -269,31 +265,31 @@
 </script>
 
 <script>
-    $('#nextStep6').click(function(e) {
+    $('#nextStep6').click(function (e) {
         e.preventDefault();
 
         const shippingMethod = parseInt($('input[name="type"]:checked').val()); // Now int not string
 
-       const data = {
-    type: shippingMethod, // send type (for Enum in PHP)
-    _token: '{{ csrf_token() }}'
-};
+        const data = {
+            type: shippingMethod, // send type (for Enum in PHP)
+            _token: '{{ csrf_token() }}'
+        };
 
-if (shippingMethod === {{ \App\Enums\Order\ShippingMethodEnum::SHIPPING->value }}) {
-    const shippingId = $('input[name="shipping_id"]:checked').val();
-    if (!shippingId) {
-        alert('Please select a shipping address');
-        return;
-    }
-    data.shipping_id = shippingId;
+        if (shippingMethod === {{ \App\Enums\Order\OrderTypeEnum::SHIPPING->value }}) {
+            const shippingId = $('input[name="shipping_id"]:checked').val();
+            if (!shippingId) {
+                alert('Please select a shipping address');
+                return;
+            }
+            data.shipping_id = shippingId;
 
-} else if (shippingMethod === {{ \App\Enums\Order\ShippingMethodEnum::PICKUP->value }}) {
-    data.pickup_first_name = $('#pickup_first_name').val();
-    data.pickup_last_name  = $('#pickup_last_name').val();
-    data.pickup_email      = $('#pickup_email').val();
-    data.pickup_phone      = $('#pickup_phone').val();
-    data.location_id       = $('#pickup_location_id').val();
-}
+        } else if (shippingMethod === {{ \App\Enums\Order\OrderTypeEnum::PICKUP->value }}) {
+            data.pickup_first_name = $('#pickup_first_name').val();
+            data.pickup_last_name = $('#pickup_last_name').val();
+            data.pickup_email = $('#pickup_email').val();
+            data.pickup_phone = $('#pickup_phone').val();
+            data.location_id = $('#pickup_location_id').val();
+        }
 
         // Button Loading
         $(this).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
@@ -303,7 +299,7 @@ if (shippingMethod === {{ \App\Enums\Order\ShippingMethodEnum::SHIPPING->value }
             type: "POST",
             data: data,
             dataType: "json",
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     $('#step-6').hide();
                     $('#step-7').show();
@@ -311,57 +307,57 @@ if (shippingMethod === {{ \App\Enums\Order\ShippingMethodEnum::SHIPPING->value }
                     alert('Error: ' + (response.message || 'Failed to save shipping information'));
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error('Error:', error);
                 alert('An error occurred while saving shipping information');
             },
-            complete: function() {
+            complete: function () {
                 $('#nextStep6').prop('disabled', false).html('Next');
             }
         });
     });
 
 
-    $(document).on('click', '.location-item', function() {
-    const lat = parseFloat($(this).data('lat'));
-    const lng = parseFloat($(this).data('lng'));
-    const name = $(this).data('name');
-    const locationId = $(this).data('id'); // Your location ID
+    $(document).on('click', '.location-item', function () {
+        const lat = parseFloat($(this).data('lat'));
+        const lng = parseFloat($(this).data('lng'));
+        const name = $(this).data('name');
+        const locationId = $(this).data('id'); // Your location ID
 
-    console.log('Clicked Location:', {
-        lat: lat,
-        lng: lng,
-        name: name,
-        locationId: locationId
+        console.log('Clicked Location:', {
+            lat: lat,
+            lng: lng,
+            name: name,
+            locationId: locationId
+        });
+
+        if (marker) marker.setMap(null);
+
+        const newLocation = {lat: lat, lng: lng};
+        map.setCenter(newLocation);
+        marker = new google.maps.Marker({
+            position: newLocation,
+            map: map,
+        });
+
+        $('#locationSearch').val(name);
+        $('#pickup_location_id').val(locationId); // Store location_id here
+        console.log('pickup_location_id set to:', $('#pickup_location_id').val());
+
+        $('#locationList').html('');
     });
 
-    if (marker) marker.setMap(null);
+    $('#confirmLocationBtn').click(function () {
+        const selectedLocationId = $('#pickup_location_id').val();
+        console.log('Confirm button clicked. Selected Location ID:', selectedLocationId);
 
-    const newLocation = { lat: lat, lng: lng };
-    map.setCenter(newLocation);
-    marker = new google.maps.Marker({
-        position: newLocation,
-        map: map,
+        if (!selectedLocationId) {
+            alert('Please select a location first.');
+            return;
+        }
+        // Close the modal
+        $('#selectLocationModal').modal('hide');
     });
-
-    $('#locationSearch').val(name);
-    $('#pickup_location_id').val(locationId); // Store location_id here
-    console.log('pickup_location_id set to:', $('#pickup_location_id').val());
-
-    $('#locationList').html('');
-});
-
-$('#confirmLocationBtn').click(function() {
-    const selectedLocationId = $('#pickup_location_id').val();
-    console.log('Confirm button clicked. Selected Location ID:', selectedLocationId);
-
-    if (!selectedLocationId) {
-        alert('Please select a location first.');
-        return;
-    }
-    // Close the modal
-    $('#selectLocationModal').modal('hide');
-});
 </script>
 
 

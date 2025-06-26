@@ -8,6 +8,15 @@ use App\Models\Order;
 
 class OrderObserver
 {
+    public function creating(Order $order)
+    {
+        $now = now();
+        $dateString = $now->format('d-m-Y');
+        $count = Order::whereDate('created_at', $now->toDateString())->count() + 1;
+        $increment = str_pad($count, 3, '0', STR_PAD_LEFT);
+        $order->order_number = "#ORD-{$dateString}-{$increment}";
+    }
+
     /**
      * Handle the Order "created" event.
      */
@@ -17,7 +26,6 @@ class OrderObserver
         {
             $order->update(["status"=> StatusEnum::CONFIRMED]);
         }
-        $order->update(["order_number"=> "#ORD-{$order->created_at->format('d-m-Y')}-0{$order->id}"]);
     }
     /**
      * Handle the Order "updated" event.

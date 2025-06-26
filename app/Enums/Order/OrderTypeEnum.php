@@ -4,7 +4,7 @@ namespace App\Enums\Order;
 
 use App\Helpers\EnumHelpers;
 
-enum ShippingMethodEnum: int
+enum OrderTypeEnum: int
 {
     use EnumHelpers;
 

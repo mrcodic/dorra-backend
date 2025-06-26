@@ -2,10 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Design;
-use App\Models\OrderItem;
-use App\Models\OrderAddress;
-use App\Models\PickupContact;
 use App\Enums\Order\StatusEnum;
 use App\Observers\OrderObserver;
 use Illuminate\Database\Eloquent\Model;

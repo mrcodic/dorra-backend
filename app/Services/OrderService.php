@@ -3,28 +3,23 @@
 namespace App\Services;
 
 use Exception;
-use App\Models\Order;
-use App\Models\Design;
-use App\Models\Product;
-use App\Models\Location;
-use App\Enums\Order\StatusEnum;
-use App\Models\ShippingAddress;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use App\Enums\Order\ShippingMethodEnum;
+use App\DTOs\Order\{OrderData, OrderAddressData, OrderItemData, PickupContactData};
+use App\Enums\Order\{StatusEnum, OrderTypeEnum};
+use App\Models\{Order, Design, Product, Location, ShippingAddress};
+use Illuminate\Support\Facades\{DB, Auth, Cache};
 use Yajra\DataTables\Facades\DataTables;
-use App\Repositories\Interfaces\UserRepositoryInterface;
-use App\Repositories\Interfaces\OrderRepositoryInterface;
-use App\Repositories\Interfaces\DesignRepositoryInterface;
-use App\Repositories\Interfaces\ProductRepositoryInterface;
-use App\Repositories\Interfaces\LocationRepositoryInterface;
-use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
-use App\Repositories\Interfaces\ProductPriceRepositoryInterface;
-use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
-use App\Repositories\Interfaces\ProductSpecificationOptionRepositoryInterface;
+use App\Repositories\Interfaces\{UserRepositoryInterface,
+    OrderRepositoryInterface,
+    DesignRepositoryInterface,
+    ProductRepositoryInterface,
+    LocationRepositoryInterface,
+    DiscountCodeRepositoryInterface,
+    ProductPriceRepositoryInterface,
+    ShippingAddressRepositoryInterface,
+    ProductSpecificationOptionRepositoryInterface
+};
 
 
 class OrderService extends BaseService
@@ -49,10 +44,10 @@ class OrderService extends BaseService
 
     {
         $this->relations = [
-        'user.addresses.state.country',
-        'OrderAddress',
-        'pickupContact'
-    ];
+            'user.addresses.state.country',
+            'orderAddress',
+            'pickupContact'
+        ];
         parent::__construct($repository);
     }
 
@@ -94,6 +89,15 @@ class OrderService extends BaseService
             ->make();
     }
 
+    public function storeStepData(array $stepData): void
+    {
+        $cacheKey = getOrderStepCacheKey();
+        $existing = Cache::get($cacheKey, []);
+        $merged = array_merge($existing, $stepData);
+
+        Cache::put($cacheKey, $merged, now()->addHours(1));
+    }
+
     public function storeStep1($request): void
     {
         $request->validate(["user_id" => ["required", "exists:users,id"]]);
@@ -106,16 +110,6 @@ class OrderService extends BaseService
         ]]);
 
     }
-
-    public function storeStepData(array $stepData): void
-    {
-        $cacheKey = getOrderStepCacheKey();
-        $existing = Cache::get($cacheKey, []);
-        $merged = array_merge($existing, $stepData);
-
-        Cache::put($cacheKey, $merged, now()->addHours(1));
-    }
-
 
     public function storeStep2($request): void
     {
@@ -151,7 +145,6 @@ class OrderService extends BaseService
             ]]);
     }
 
-
     public function storeStep4($request): void
     {
         $this->storeStepData(["pricing_details" => $request->all()['orderData']]);
@@ -164,11 +157,11 @@ class OrderService extends BaseService
 
     public function storeStep6($request): void
     {
-        $type = ShippingMethodEnum::from($request->type);
+        $type = OrderTypeEnum::from($request->type);
 
         Cache::put('order_type_' . Auth::id(), $type->value, now()->addMinutes(30));
 
-        if ($type === ShippingMethodEnum::PICKUP) {
+        if ($type === OrderTypeEnum::PICKUP) {
             $pickupAddress = $this->locationRepository->find($request->location_id);
 
             $this->storeStepData([
@@ -190,7 +183,7 @@ class OrderService extends BaseService
             ], now()->addMinutes(30));
         }
 
-        if ($type === ShippingMethodEnum::SHIPPING) {
+        if ($type === OrderTypeEnum::SHIPPING) {
             $shippingAddress = $this->shippingAddressRepository->find($request->shipping_id);
 
             $this->storeStepData([
@@ -204,27 +197,6 @@ class OrderService extends BaseService
                 "pickup_info" => null
             ]);
         }
-    }
-
-    public function checkout($request)
-    {
-        $cart = $this->cartService->getCurrentUserOrGuestCart();
-        $discountCode = $this->discountCodeRepository->find($request->discount_code_id);
-
-        $subTotal = $cart->cartItems()->sum('sub_total');
-        $this->handleTransaction(function () use ($cart, $discountCode, $subTotal) {
-            $order = $this->repository->query()->create([
-                'user_id' => Auth::id(),
-                'sub_total' => $subTotal,
-                'discount_amount' => getDiscountAmount($discountCode->value ?? 0, $subTotal),
-                'delivery_amount' => setting('delivery'),
-                'tax_amount' => setting('tax'),
-                'total_price' => getTotalPrice($discountCode->value ?? 0, $subTotal),
-                'status' => StatusEnum::PLACED,
-            ]);
-            $order->orderAddress()->create();
-        });
-
     }
 
 
@@ -244,8 +216,6 @@ class OrderService extends BaseService
             'discount_amount' => $orderStepData['pricing_details']['discount'] ?? 0,
             'delivery_amount' => $orderStepData['pricing_details']['delivery'] ?? 0,
             'tax_amount' => $orderStepData['pricing_details']['tax'] ?? 0,
-            'status' => StatusEnum::CONFIRMED,
-            'order_number' => 'TEMP-' . uniqid(),
         ];
 
         $orderData = array_merge($orderData, $validatedData);
@@ -305,7 +275,7 @@ class OrderService extends BaseService
     private function saveOrderAddress($order, $personalInfo, $shippingInfo = null, $pickupInfo = null)
     {
         if ($shippingInfo) {
-            $order->OrderAddress()->create([
+            $order->orderAddress()->create([
                 'order_id' => $order->id,
                 'type' => 'shipping',
                 'first_name' => $personalInfo['first_name'] ?? null,
@@ -329,7 +299,7 @@ class OrderService extends BaseService
                 'phone' => $pickupContactData['phone'] ?? null,
             ]);
 
-            $order->OrderAddress()->create([
+            $order->orderAddress()->create([
                 'order_id' => $order->id,
                 'type' => 'pickup',
                 'location_id' => $pickupInfo['id'] ?? null,
@@ -380,7 +350,7 @@ class OrderService extends BaseService
         $order->designs()->attach($pivotData);
     }
 
- 
+
     public function deleteDesignFromOrder($orderId, $designId)
     {
         return DB::transaction(function () use ($orderId, $designId) {
@@ -406,15 +376,6 @@ class OrderService extends BaseService
         });
     }
 
-    public function downloadPDF()
-    {
-        $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
-        $pdf = Pdf::loadView('dashboard.orders.steps.step7', compact('orderData'));
-        return $pdf->setPaper('a4')
-            ->setOption('defaultFont', 'Helvetica')
-            ->download('order-confirmation.pdf');
-    }
-
     private function attachDesignsToOrder($order, $designsData)
     {
         $pivotData = [];
@@ -438,20 +399,167 @@ class OrderService extends BaseService
                 $totalPrice = $basePrice * $quantity;
             }
 
-        $pivotData[$design->id] = [
-            'quantity' => $quantity,
-            'base_price' => $basePrice,
-            'custom_product_price' => $customProductPrice,
-            'total_price' => $totalPrice,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
+            $pivotData[$design->id] = [
+                'quantity' => $quantity,
+                'base_price' => $basePrice,
+                'custom_product_price' => $customProductPrice,
+                'total_price' => $totalPrice,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        if (!empty($pivotData)) {
+            $order->designs()->attach($pivotData);
+        }
     }
 
-    if (!empty($pivotData)) {
-        $order->designs()->attach($pivotData);
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->repository->update($validatedData, $id);
+
+        if (
+            isset($validatedData['first_name']) ||
+            isset($validatedData['last_name']) ||
+            isset($validatedData['email']) ||
+            isset($validatedData['phone'])
+        ) {
+            $orderAddress = $model->orderAddress()->first();
+            if ($orderAddress) {
+                $orderAddress->update([
+                    'first_name' => $validatedData['first_name'] ?? $orderAddress->first_name,
+                    'last_name' => $validatedData['last_name'] ?? $orderAddress->last_name,
+                    'email' => $validatedData['email'] ?? $orderAddress->email,
+                    'phone' => $validatedData['phone'] ?? $orderAddress->phone,
+                ]);
+            }
+        }
+
+        if (isset($validatedData['status'])) {
+            $model->status = $validatedData['status'];
+            $model->save();
+        }
+
+        return $model->load($relationsToLoad);
     }
-}
+
+    public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->repository->find($id);
+
+        if (!$model) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
+        }
+
+        $typeMap = [
+            '1' => 'shipping',
+            '2' => 'pickup',
+        ];
+
+        $type = $typeMap[$validatedData['type']] ?? $validatedData['type'];
+
+        if ($type === 'shipping' && isset($validatedData['shipping_address_id']) && $validatedData['shipping_address_id'] !== null) {
+            $newAddressId = $validatedData['shipping_address_id'];
+            $shippingAddress = ShippingAddress::with(['state.country'])->findOrFail($newAddressId);
+
+            $orderAddress = $model->orderAddress()->where('type', 'shipping')->first();
+
+            $addressData = [
+                'shipping_address_id' => $newAddressId,
+                'address_label' => $shippingAddress->label,
+                'address_line' => $shippingAddress->line,
+                'state' => optional($shippingAddress->state)->name,
+                'country' => optional($shippingAddress->state?->country)->name,
+            ];
+
+            if ($orderAddress) {
+                $orderAddress->update($addressData);
+            } else {
+                $model->orderAddress()->create(array_merge([
+                    'order_id' => $model->id,
+                    'type' => 'shipping',
+                ], $addressData));
+            }
+
+            $pickupAddress = $model->orderAddress()->where('type', 'pickup')->first();
+            if ($pickupAddress) {
+                $pickupAddress->delete();
+            }
+
+            $pickupContact = $model->pickupContact;
+            if ($pickupContact) {
+                $pickupContact->delete();
+            }
+        }
+
+        if ($type === 'pickup' && isset($validatedData['location_id']) && $validatedData['location_id'] !== null) {
+            $location = Location::with(['state', 'state.country'])->findOrFail($validatedData['location_id']);
+
+            $pickupAddress = $model->orderAddress()->where('type', 'pickup')->first();
+
+            $pickupAddressData = [
+                'location_id' => $location->id,
+                'location_name' => $location->name,
+                'address_label' => $location->name,
+                'address_line' => $location->address_line,
+                'state' => is_object($location->state) ? $location->state->name : ($location->state ?? 'Unknown'),
+                'country' => $location->country ?? $location->state?->country?->name ?? 'Unknown',
+            ];
+
+            if ($pickupAddress) {
+                $pickupAddress->update($pickupAddressData);
+            } else {
+                $model->orderAddress()->create(array_merge([
+                    'order_id' => $model->id,
+                    'type' => 'pickup',
+                ], $pickupAddressData));
+            }
+
+            $pickupContactData = [
+                'first_name' => $validatedData['pickup_first_name'] ?? null,
+                'last_name' => $validatedData['pickup_last_name'] ?? null,
+                'email' => $validatedData['pickup_email'] ?? null,
+                'phone' => $validatedData['pickup_phone'] ?? null,
+            ];
+
+            $pickupContactData = array_filter($pickupContactData, function ($value) {
+                return $value !== null;
+            });
+
+            $pickupContact = $model->pickupContact;
+
+            if ($pickupContact) {
+                if (!empty($pickupContactData)) {
+                    $pickupContact->update($pickupContactData);
+                }
+            } else {
+                if (!empty($pickupContactData)) {
+                    $model->pickupContact()->create(array_merge([
+                        'order_id' => $model->id,
+                    ], $pickupContactData));
+                }
+            }
+
+            $shippingAddress = $model->orderAddress()->where('type', 'shipping')->first();
+            if ($shippingAddress) {
+                $shippingAddress->delete();
+            }
+        }
+
+        $freshModel = $model->fresh();
+        $loadedModel = $freshModel->load(!empty($relationsToLoad) ? $relationsToLoad : ['orderAddress', 'pickupContact']);
+
+        return $loadedModel;
+    }
+
+    public function downloadPDF()
+    {
+        $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
+        $pdf = Pdf::loadView('dashboard.orders.steps.step7', compact('orderData'));
+        return $pdf->setPaper('a4')
+            ->setOption('defaultFont', 'Helvetica')
+            ->download('order-confirmation.pdf');
+    }
 
     public function applyDiscountCode($request)
     {
@@ -468,145 +576,22 @@ class OrderService extends BaseService
         return $this->discountCodeRepository->query()->where($validated)->first();
     }
 
+    public function checkout($request)
+    {
+        $cart = $this->cartService->getCurrentUserOrGuestCart();
+        $discountCode = $this->discountCodeRepository->find($request->discount_code_id);
+        $subTotal = $cart->cartItems()->sum('sub_total');
 
-public function updateResource($validatedData, $id, $relationsToLoad = [])
-{
-    $model = $this->repository->update($validatedData, $id);
-
-    if (
-        isset($validatedData['first_name']) || 
-        isset($validatedData['last_name']) || 
-        isset($validatedData['email']) || 
-        isset($validatedData['phone'])
-    ) {
-        $orderAddress = $model->OrderAddress()->first();
-        if ($orderAddress) {
-            $orderAddress->update([
-                'first_name' => $validatedData['first_name'] ?? $orderAddress->first_name,
-                'last_name'  => $validatedData['last_name'] ?? $orderAddress->last_name,
-                'email'      => $validatedData['email'] ?? $orderAddress->email,
-                'phone'      => $validatedData['phone'] ?? $orderAddress->phone,
-            ]);
-        }
-    }
-
-    if (isset($validatedData['status'])) {
-        $model->status = $validatedData['status'];
-        $model->save();
-    }
-
-    return $model->load($relationsToLoad);
-}
-
-public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
-{
-    $model = $this->repository->find($id);
-
-    if (!$model) {
-        throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
-    }
-
-    $typeMap = [
-        '1' => 'shipping',
-        '2' => 'pickup',
-    ];
-
-    $type = $typeMap[$validatedData['type']] ?? $validatedData['type'];
-
-    if ($type === 'shipping' && isset($validatedData['shipping_address_id']) && $validatedData['shipping_address_id'] !== null) {
-        $newAddressId = $validatedData['shipping_address_id'];
-        $shippingAddress = ShippingAddress::with(['state.country'])->findOrFail($newAddressId);
-
-        $orderAddress = $model->OrderAddress()->where('type', 'shipping')->first();
-
-        $addressData = [
-            'shipping_address_id' => $newAddressId,
-            'address_label'       => $shippingAddress->label,
-            'address_line'        => $shippingAddress->line,
-            'state'               => optional($shippingAddress->state)->name,
-            'country'             => optional($shippingAddress->state?->country)->name,
-        ];
-
-        if ($orderAddress) {
-            $orderAddress->update($addressData);
-        } else {
-            $model->OrderAddress()->create(array_merge([
-                'order_id' => $model->id,
-                'type'     => 'shipping',
-            ], $addressData));
-        }
-
-        $pickupAddress = $model->OrderAddress()->where('type', 'pickup')->first();
-        if ($pickupAddress) {
-            $pickupAddress->delete();
-        }
-
-        $pickupContact = $model->pickupContact;
-        if ($pickupContact) {
-            $pickupContact->delete();
-        }
-    }
-
-    if ($type === 'pickup' && isset($validatedData['location_id']) && $validatedData['location_id'] !== null) {
-        $location = Location::with(['state','state.country'])->findOrFail($validatedData['location_id']);
-
-        $pickupAddress = $model->OrderAddress()->where('type', 'pickup')->first();
-
-        $pickupAddressData = [
-            'location_id'   => $location->id,
-            'location_name' => $location->name,
-            'address_label' => $location->name,
-            'address_line'  => $location->address_line,
-            'state'         => is_object($location->state) ? $location->state->name : ($location->state ?? 'Unknown'),
-            'country'       => $location->country ?? $location->state?->country?->name ?? 'Unknown',
-        ];
-
-        if ($pickupAddress) {
-            $pickupAddress->update($pickupAddressData);
-        } else {
-            $model->OrderAddress()->create(array_merge([
-                'order_id' => $model->id,
-                'type'     => 'pickup',
-            ], $pickupAddressData));
-        }
-
-        $pickupContactData = [
-            'first_name' => $validatedData['pickup_first_name'] ?? null,
-            'last_name'  => $validatedData['pickup_last_name'] ?? null,
-            'email'      => $validatedData['pickup_email'] ?? null,
-            'phone'      => $validatedData['pickup_phone'] ?? null,
-        ];
-
-        $pickupContactData = array_filter($pickupContactData, function ($value) {
-            return $value !== null;
+        $order= $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
+            $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
+            $order->orderItems()->create(OrderItemData::fromCartItems($cart->cartItems));
+            $order->orderAddress()->create(OrderAddressData::fromRequest($request));
+            if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
+                $order->pickupContact()->create(PickupContactData::fromRequest($request));
+            }
+            return $order;
         });
+        dd($order);
 
-        $pickupContact = $model->pickupContact;
-
-        if ($pickupContact) {
-            if (!empty($pickupContactData)) {
-                $pickupContact->update($pickupContactData);
-            }
-        } else {
-            if (!empty($pickupContactData)) {
-                $model->pickupContact()->create(array_merge([
-                    'order_id' => $model->id,
-                ], $pickupContactData));
-            }
-        }
-
-        $shippingAddress = $model->OrderAddress()->where('type', 'shipping')->first();
-        if ($shippingAddress) {
-            $shippingAddress->delete();
-        }
     }
-
-    $freshModel = $model->fresh();
-    $loadedModel = $freshModel->load(!empty($relationsToLoad) ? $relationsToLoad : ['OrderAddress', 'pickupContact']);
-
-    return $loadedModel;
-}
-
-
-
 }

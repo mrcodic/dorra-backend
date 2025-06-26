@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Api\V1\User\Cart;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AddToCartRequest;
+use App\Http\Requests\User\Cart\AddToCartRequest;
 use App\Http\Resources\CartResource;
-use App\Http\Resources\Design\DesignResource;
 use App\Services\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
