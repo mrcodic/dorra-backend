@@ -307,7 +307,7 @@
                                 const count = selectedCheckboxes.length;
 
                                 if (count > 0) {
-                                    $('#selected-count-text').text(`${count} Categor${count > 1 ? 'ies' : 'y'} are selected`);
+                                    $('#selected-count-text').text(`${count} Order${count > 1 ? 's' : ''} are selected`);
                                     $('#bulk-delete-container').show();
                                 } else {
                                     $('#bulk-delete-container').hide();

@@ -555,7 +555,7 @@ class OrderService extends BaseService
     public function downloadPDF()
     {
         $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
-        $pdf = Pdf::loadView('dashboard.orders.steps.step7', compact('orderData'));
+        $pdf = Pdf::loadView('dashboard.orders.pdf', compact('orderData'));
         return $pdf->setPaper('a4')
             ->setOption('defaultFont', 'Helvetica')
             ->download('order-confirmation.pdf');
