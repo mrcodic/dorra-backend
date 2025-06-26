@@ -32,25 +32,25 @@
 
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
-                    <input type="text" class="form-control" name="first_name" value="{{ optional($model->OrderAddress->first())->first_name }}">
+                    <input type="text" class="form-control" name="first_name" value="{{ optional($model->orderAddress->first())->first_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
-                    <input type="text" class="form-control" name="last_name" value="{{ optional($model->OrderAddress->first())->last_name }}">
+                    <input type="text" class="form-control" name="last_name" value="{{ optional($model->orderAddress->first())->last_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
-                    <input type="email" class="form-control" name="email" value="{{ optional($model->OrderAddress->first())->email }}">
+                    <input type="email" class="form-control" name="email" value="{{ optional($model->orderAddress->first())->email }}">
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone" value="{{ optional($model->OrderAddress->first())->phone }}">
+                    <input type="text" class="form-control" name="phone" value="{{ optional($model->orderAddress->first())->phone }}">
                 </div>
 
 
                 <!-- Shipping Details -->
                 @php
-                    $address = optional($model->OrderAddress->first());
+                    $address = optional($model->orderAddress->first());
                 @endphp
 
                 @if($address)
@@ -98,8 +98,8 @@
                     <p class="mb-1 fs-16 text-dark">Order Placed on:</p>
                     <p class="fs-16 text-black">{{ $model->created_at->format('F d, Y') }}</p>
                 </div>
-             
-                    
+
+
                     @php
                         use App\Enums\Order\StatusEnum;
                     @endphp
@@ -118,7 +118,7 @@
 
                 @foreach ($model->designs as $design)
                     @php
-                        $product = $design->product; 
+                        $product = $design->product;
                     @endphp
                     <div class="mb-1">
                         <div class="d-flex align-items-start justify-content-between">
@@ -437,7 +437,7 @@
 
 
 
-   
+
 
 </script>
 @endsection

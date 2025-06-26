@@ -11,7 +11,7 @@
 @section('content')
 <div class="container bg-white rounded-3 p-3">
     <div class="d-flex align-items-center justify-content-between mb-3">
-        <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">#1234567</span></div>
+        <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">{{ $model->order_number }}</span></div>
         <div class="d-flex align-items-center status-pill justify-content-center">
             <div class="status-icon me-1">
                 <i data-feather="check"></i>
@@ -26,24 +26,24 @@
                 <h5 class="mb-2 fs-16 text-black">Customer Details</h5>
                  <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
-                    <input type="text" class="form-control" name="first_name" value="{{ optional($model->OrderAddress->first())->first_name }}" readonly>
+                    <input type="text" class="form-control" name="first_name" value="{{ optional($model->orderAddress->first())->first_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
-                    <input type="text" class="form-control" name="last_name" value="{{ optional($model->OrderAddress->first())->last_name }}" readonly>
+                    <input type="text" class="form-control" name="last_name" value="{{ optional($model->orderAddress->first())->last_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
-                    <input type="email" class="form-control" name="email" value="{{ optional($model->OrderAddress->first())->email }}" readonly>
+                    <input type="email" class="form-control" name="email" value="{{ optional($model->orderAddress->first())->email }}" readonly>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone" value="{{ optional($model->OrderAddress->first())->phone }}" readonly>
+                    <input type="text" class="form-control" name="phone" value="{{ optional($model->orderAddress->first())->phone }}" readonly>
                 </div>
 
 
                 @php
-                    $address = optional($model->OrderAddress->first());
+                    $address = optional($model->orderAddress->first());
                 @endphp
 
                 @if($address)
@@ -91,7 +91,7 @@
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
                 <p >Completed</p>
 
-                
+
                 @foreach($model->designs as $design)
                     @php
                         $product = optional(optional($design->template)->product);
@@ -177,7 +177,7 @@
                     </div>
                 </div>
 
-                <div class="d-flex gap-2 justify-content-end ">         
+                <div class="d-flex gap-2 justify-content-end ">
                         <a class="btn btn-primary" href="/orders/1/edit" >Edit Order</a>
                 </div>
             </div>
