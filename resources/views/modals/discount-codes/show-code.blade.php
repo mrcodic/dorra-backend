@@ -8,6 +8,10 @@
                 </div>
                 <div class="modal-body flex-grow-1">
                     <div class="form-group mb-2">
+                        <label class="label-text mb-1">Code Name:</label>
+                        <input type="text" id="codeValue" class="form-control" readonly>
+                    </div>
+                    <div class="form-group mb-2">
                         <label class="label-text mb-1">Usage Times:</label>
                         <input type="text" id="usedCount" class="form-control" readonly>
                     </div>

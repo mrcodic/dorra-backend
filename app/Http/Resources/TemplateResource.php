@@ -42,9 +42,7 @@ class TemplateResource extends JsonResource
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
             'source_design_svg' => $this->image,
             'base64_preview_image' => $this->image,
-            'last_saved' => $this->updated_at->format('d/m/Y, g:i A')
-
-            ,
+            'last_saved' => $this->updated_at->format('d/m/Y, g:i A'),
 
         ];
     }

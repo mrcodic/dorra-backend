@@ -71,8 +71,6 @@ class DesignController extends Controller
                 'quantity' => $designData['quantity'],
             ])->response()->getData(true)
         );
-
-
     }
 
     public function addQuantity(Request $request, $designId)

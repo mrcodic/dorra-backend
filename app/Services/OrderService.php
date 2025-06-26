@@ -581,6 +581,7 @@ class OrderService extends BaseService
         $subTotal = $cart->cartItems()->sum('sub_total');
 
         $order= $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
+            dd(OrderData::fromCart($subTotal, $discountCode));
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
             $order->orderItems()->create(OrderItemData::fromCartItems($cart->cartItems));
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));

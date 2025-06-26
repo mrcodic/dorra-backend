@@ -29,7 +29,7 @@ class CheckoutRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -42,8 +42,8 @@ class CheckoutRequest extends FormRequest
         $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
 
         return [
-            'payment_method_id' => 'required|exists:payment_methods,id',
-            'discount_code_id' => 'required|exists:discount_codes,id',
+            'payment_method_id' => 'exists:payment_methods,id',
+            'discount_code_id' => 'exists:discount_codes,id',
             'country_code_id' => ['required', 'exists:country_codes,id'],
             'first_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
@@ -51,10 +51,10 @@ class CheckoutRequest extends FormRequest
             'full_phone_number' => ['nullable', 'string', new Phone($isoCode)],
             'type' => ['required', 'in:'.OrderTypeEnum::getValuesAsString()],
             'shipping_address_id' => ['required', 'exists:shipping_addresses,id'],
-            'location_id' => ['required', 'exists:locations,id'],
-            'pickup_contact_first_name' => ['required', 'string'],
-            'pickup_contact_last_name' => ['required', 'string'],
-            'pickup_contact_email' => ['required', 'email'],
+            'location_id' => [ 'exists:locations,id'],
+            'pickup_contact_first_name' => [ 'string'],
+            'pickup_contact_last_name' => [ 'string'],
+            'pickup_contact_email' => [ 'email'],
             'pickup_contact_phone_number' => ['nullable', 'string', new Phone($isoCode)],
 
         ];

@@ -40,6 +40,7 @@ const dt_user_table = $(".code-list-table").DataTable({
                         data-bs-target="#showCodeModal"
                         data-action="/discount-codes/${data}"
                         data-used="${row.used}"
+                        data-name="${row.code}"
                         data-type="${row.type}"
                         data-prefix="${row.prefix}"
                         data-value="${row.value}"
@@ -229,6 +230,7 @@ $('#showCodeModal').on('show.bs.modal', function (event) {
     const type = button.data('type');
     const prefix = button.data('prefix');
     const value = button.data('value');
+    const name = button.data('name');
     const usage = button.data('usage');
     const scope = button.data('scope');
     const expiredDate = button.data('expired_at');
@@ -238,6 +240,7 @@ $('#showCodeModal').on('show.bs.modal', function (event) {
     const action = button.data('action');
     // Set read-only value
     $(this).find('#usedCount').val(used || 0);
+    $(this).find('#codeValue').val(name || 0);
     // Store values in Edit button's data attributes
     const editBtn = $('#editDiscountBtn');
     editBtn.data('type', type);
