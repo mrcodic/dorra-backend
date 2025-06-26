@@ -1,4 +1,4 @@
-<div id="step-7" class="step" style="display: none;">
+<div id="step-7" class="step">
     <h5 class="mb-2 fs-3 text-black">Order Confirmation</h5>
 
     <!-- Wrapper for confirmation sections -->
@@ -161,3 +161,4 @@
     </div>
 
 
+</div>
