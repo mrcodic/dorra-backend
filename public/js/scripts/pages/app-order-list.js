@@ -38,12 +38,12 @@ var dt_user_table = $(".order-list-table").DataTable({
             <a href="/orders/${data}/edit" class="">
                 <i data-feather="edit"></i>
             </a>
-            <a href="#" class="text-danger open-delete-order-modal" 
+            <a href="#" class="text-danger open-delete-order-modal"
                data-id="${data}"
                data-name="${row.order_number}"
                data-action="/orders/${data}"
                data-bs-toggle="modal"
-               data-bs-target="#deleteOrdersModal">
+               data-bs-target="#deleteOrderModal">
                <i data-feather="trash-2"></i>
             </a>
         </div>
@@ -133,7 +133,7 @@ $(document).on('change', '#select-all-checkbox', function () {
 $(document).on('change', '.category-checkbox', function () {
     const totalCheckboxes = $('.category-checkbox').length;
     const checkedCheckboxes = $('.category-checkbox:checked').length;
-    
+
     $('#select-all-checkbox').prop('checked', totalCheckboxes === checkedCheckboxes);
     toggleBulkDeleteContainer();
 });
@@ -161,7 +161,7 @@ $(document).ready(function () {
         }).showToast();
         sessionStorage.removeItem("order_added");
     }
-    
+
     if (sessionStorage.getItem("order_updated") == "true") {
         Toastify({
             text: "Order updated successfully!",
@@ -178,7 +178,7 @@ $(document).ready(function () {
     $(document).on("click", ".delete-order", function (e) {
         e.preventDefault();
         const orderId = $(this).data("id");
-        
+
         // Show confirmation modal
         if (confirm("Are you sure you want to delete this order?")) {
             deleteOrder(orderId);
@@ -322,7 +322,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
                     close: true,
                 }).showToast();
 
-                
+
 
                 $('#bulk-delete-container').hide();
                 $('.category-checkbox').prop('checked', false);
@@ -353,7 +353,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
                 $(".category-list-table").DataTable().ajax.reload(null, false);
 
 
-                
+
 
             },
         });
