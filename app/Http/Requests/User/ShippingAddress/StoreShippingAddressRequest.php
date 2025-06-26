@@ -16,7 +16,8 @@ class StoreShippingAddressRequest extends BaseRequest
     public function prepareForValidation(): void
     {
         $this->merge([
-            'user_id' => $this->user()?->id,
+            'user_id' => $this->user('sanctum')?->id,
+            'cookie_id' => getCookieId('cookie_id')
         ]);
     }
 
@@ -31,7 +32,8 @@ class StoreShippingAddressRequest extends BaseRequest
             'label' => ['required', 'string', 'max:255'],
             'line' => ['required', 'string', 'max:500'],
             'state_id' => ['required', 'exists:states,id'],
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => ['nullable', 'exists:users,id'],
+            'cookie_id' => ['nullable'],
             ];
 
     }

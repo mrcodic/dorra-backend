@@ -2,15 +2,14 @@
 
 namespace App\Services;
 
-use App\Enums\DiscountCode\ScopeEnum;
-use App\Models\CartItem;
-use App\Models\Category;
-use App\Models\Product;
-use App\Repositories\Interfaces\CartRepositoryInterface;
-use App\Repositories\Interfaces\DesignRepositoryInterface;
-use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
+
+use App\Enums\DiscountCode\TypeEnum;
+use App\Models\{CartItem, Product};
+use App\Repositories\Interfaces\{DiscountCodeRepositoryInterface,
+    CartRepositoryInterface,
+    DesignRepositoryInterface
+};
 use App\Rules\ValidDiscountCode;
-use Dflydev\DotAccessData\Data;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
@@ -36,17 +35,18 @@ class CartService extends BaseService
             ]);
         }
         return $this->repository->query()
-                ->where(function ($q) use ($cookieId, $userId) {
-                    if ($userId) {
-                        $q->whereUserId($userId);
-                    } elseif ($cookieId) {
-                        $q->whereCookieId($cookieId);
-                    }
-                })
-                ->with(['designs.product'])
-                ->first();
+            ->where(function ($q) use ($cookieId, $userId) {
+                if ($userId) {
+                    $q->whereUserId($userId);
+                } elseif ($cookieId) {
+                    $q->whereCookieId($cookieId);
+                }
+            })
+            ->with(['designs.product'])
+            ->first();
 
     }
+
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
 
@@ -67,7 +67,7 @@ class CartService extends BaseService
 
         $totalPrice = $model->designs->sum(fn($design) => $design->total_price ?? 0);
 
-        $model->update(['price' => getTotalPrice(0,$totalPrice)]);
+        $model->update(['price' => getTotalPrice(0, $totalPrice)]);
 
         return $model->load($relationsToLoad);
     }
@@ -125,8 +125,9 @@ class CartService extends BaseService
 
 
         $subTotal = $cart->price;
-        $discountValue = $discountCode->value;
-        $discountAmount = getDiscountAmount($discountValue, $subTotal);
+        $discountValue = $discountCode->type == TypeEnum::PERCENTAGE ? $discountCode->value :
+            round(($discountCode->value / $subTotal) * 100, 2);;
+        $discountAmount = getDiscountAmount($discountCode, $subTotal);
         $totalPrice = $subTotal - $discountAmount;
 
         return [

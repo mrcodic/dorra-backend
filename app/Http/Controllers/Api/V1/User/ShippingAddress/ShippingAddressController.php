@@ -16,7 +16,7 @@ class ShippingAddressController extends Controller
 
     public function index()
     {
-        $shippingAddresses = $this->shippingAddressService->getUserShippingAddresses(request()->user());
+        $shippingAddresses = $this->shippingAddressService->getUserOrGuestShippingAddresses();
         return Response::api(data: ShippingAddressResource::collection($shippingAddresses));
     }
 

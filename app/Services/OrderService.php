@@ -5,11 +5,11 @@ namespace App\Services;
 use Exception;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
-use App\DTOs\Order\{OrderData, OrderAddressData, OrderItemData, PickupContactData};
-use App\Enums\Order\{StatusEnum, OrderTypeEnum};
-use App\Models\{Order, Design, Product, Location, ShippingAddress};
-use Illuminate\Support\Facades\{DB, Auth, Cache};
+use App\Enums\Order\{OrderTypeEnum};
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\{DB, Auth, Cache};
+use App\Models\{Order, Design, Product, Location, ShippingAddress};
+use App\DTOs\Order\{OrderData, OrderAddressData, OrderItemData, PickupContactData};
 use App\Repositories\Interfaces\{UserRepositoryInterface,
     OrderRepositoryInterface,
     DesignRepositoryInterface,
@@ -580,17 +580,16 @@ class OrderService extends BaseService
         $discountCode = $this->discountCodeRepository->find($request->discount_code_id);
         $subTotal = $cart->cartItems()->sum('sub_total');
 
-        $order= $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
-            dd(OrderData::fromCart($subTotal, $discountCode));
+        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
-            $order->orderItems()->create(OrderItemData::fromCartItems($cart->cartItems));
+            $order->designs()->sync(OrderItemData::fromCartItems($cart->cartItems));
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
                 $order->pickupContact()->create(PickupContactData::fromRequest($request));
             }
             return $order;
         });
-        dd($order);
+
 
     }
 }

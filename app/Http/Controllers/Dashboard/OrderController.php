@@ -47,11 +47,11 @@ class OrderController extends DashboardController
                 'countries' => $this->countryRepository->query(['id', 'name'])->get(),
                 'locations' => $this->LocationRepository->query(['id', 'name' , 'address_line' , 'latitude' , 'longitude'])->get(),
                 ],
-        
+
             ];
 
         $this->methodRelations = [
-          
+
             'edit' => ['designs.template.product' , 'designs.product'],
         ];
 
@@ -106,8 +106,8 @@ class OrderController extends DashboardController
         return Response::api(
             message: "discount code applied successfully",
             data: [
-                "discount_amount" => getDiscountAmount($code->value, $orderStepData['pricing_details']['sub_total']),
-                "total" => getTotalPrice($code->value, $orderStepData['pricing_details']['sub_total']),
+                "discount_amount" => getDiscountAmount($code , $orderStepData['pricing_details']['sub_total']),
+                "total" => getTotalPrice($code, $orderStepData['pricing_details']['sub_total']),
             ]
         );
     }
@@ -178,7 +178,7 @@ class OrderController extends DashboardController
         }
     }
 
-    
+
     public function downloadPDF()
     {
         return $this->orderService->downloadPDF();

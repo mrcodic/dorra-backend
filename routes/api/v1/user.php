@@ -69,6 +69,8 @@ Route::apiResource('/carts', CartController::class)->only(['store', 'index']);
 
 
 Route::post('checkout', [OrderController::class, 'checkout']);
+Route::get('locations',[OrderController::class, 'searchLocations']);
+Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -80,21 +82,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/', 'update');
         Route::delete('/disconnect-account/{accountId}', 'disconnectAccount');
     });
+
     Route::delete('/media/{media}', [MainController::class, 'removeMedia']);
     Route::put('password/update', PasswordController::class);
     Route::get('notification-types', UserNotificationTypeController::class);
-
-    Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
     Route::controller(SaveController::class)->group(function () {
         Route::post('toggle-save', 'toggleSave');
         Route::delete('bulk-delete-saved', 'destroyBulk');
     });
 
-
     Route::get('states', [MainController::class, 'states']);
     Route::get('countries', [MainController::class, 'countries']);
-
 
 });
 

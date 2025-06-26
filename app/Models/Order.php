@@ -20,10 +20,10 @@ class Order extends Model
         'delivery_method',
         'payment_method_id',
         'payment_status',
-        'subtotal',
         'discount_amount',
         'delivery_amount',
         'tax_amount',
+        'subtotal',
         'total_price',
         'status',
     ];

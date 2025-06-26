@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\DiscountCode\TypeEnum;
 use App\Repositories\Implementations\SettingRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -18,7 +19,7 @@ function getCookieId($key): string
 {
     $cookie = request()->cookie($key);
     if (!$cookie) {
-        $cookie = (string) Str::uuid();
+        $cookie = (string)Str::uuid();
         cookie()->queue(cookie($key, $cookie, 60 * 24 * 30));
     }
     return $cookie;
@@ -44,9 +45,9 @@ function getOrderStepCacheKey(): string
     return 'order_step_data_guest_' . $cookieId;
 }
 
-function getDiscountAmount($discount, $subtotal): float|int
+function getDiscountAmount($discount, $subtotal)
 {
-    return $subtotal * $discount;
+    return $discount->type == TypeEnum::PERCENTAGE ? $subtotal * $discount->value : $discount->value;
 }
 
 function getTotalPrice($discount, $subtotal): float|int
@@ -59,8 +60,9 @@ function getTotalPrice($discount, $subtotal): float|int
 
 function getPriceAfterTax($tax, $subtotal): float|int
 {
-    return  $tax * $subtotal;
+    return $tax * $subtotal;
 }
+
 function setting(string $key, $default = null)
 {
     return app(SettingRepository::class)->get($key, $default);

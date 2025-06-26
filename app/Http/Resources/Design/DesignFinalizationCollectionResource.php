@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Design;
 
-use App\Http\Resources\Design\DesignFinalizationResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class DesignFinalizationCollectionResource extends JsonResource

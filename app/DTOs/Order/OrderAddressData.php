@@ -24,6 +24,7 @@ class OrderAddressData
             'type' => $type->value,
             'location_id' => $location?->id,
             'location_name' => $location?->name,
+            'location_link' => $location?->link,
             'shipping_address_id' => $shipping?->id,
 
 
@@ -32,7 +33,7 @@ class OrderAddressData
                 : ($location?->label ?? 'Pickup Location'),
 
             'address_line' => $type === OrderTypeEnum::SHIPPING
-                ? $shipping?->address_line
+                ? $shipping?->line
                 : $location?->address_line,
 
             'state' => $type === OrderTypeEnum::SHIPPING

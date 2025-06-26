@@ -11,11 +11,11 @@ class OrderData
     {
         return [
             'user_id' => Auth::guard('sanctum')->id(),
-            'sub_total' => $subTotal,
-            'discount_amount' => getDiscountAmount($discountCode->value ?? 0, $subTotal),
+            'subtotal' => $subTotal,
+            'discount_amount' => getDiscountAmount($discountCode ?? 0, $subTotal),
             'delivery_amount' => setting('delivery') ?? 30,
             'tax_amount' => setting('tax'),
-            'total_price' => getTotalPrice($discountCode->value ?? 0, $subTotal),
+            'total_price' => getTotalPrice($discountCode ?? 0, $subTotal),
             'status' => StatusEnum::PLACED,
         ];
     }

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Repositories\Implementations\SocialAccountRepository;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
+use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
@@ -18,10 +19,11 @@ class AuthService
 {
     use OtpTrait;
 
-    public function __construct(public UserRepositoryInterface   $userRepository,
-                                public SocialAccountRepository   $socialAccountRepository,
-                                public DesignRepositoryInterface $designRepository,
-                                public CartRepositoryInterface $cartRepository,
+    public function __construct(public UserRepositoryInterface            $userRepository,
+                                public SocialAccountRepository            $socialAccountRepository,
+                                public DesignRepositoryInterface          $designRepository,
+                                public CartRepositoryInterface            $cartRepository,
+                                public ShippingAddressRepositoryInterface $shippingAddressRepository,
     )
     {
     }
@@ -92,8 +94,7 @@ class AuthService
 
         $oldCookieId = request()->cookie('cookie_id');
 
-        if ($oldCookieId)
-        {
+        if ($oldCookieId) {
             $this->designRepository->query()
                 ->whereNull('user_id')
                 ->whereCookieId($oldCookieId)
@@ -114,8 +115,7 @@ class AuthService
         $user = $request->user();
 
         $oldCookieId = request()->cookie('cookie_id');
-        if ($oldCookieId)
-        {
+        if ($oldCookieId) {
             $this->designRepository->query()
                 ->whereNotNull('user_id')
                 ->whereCookieId($oldCookieId)
@@ -125,9 +125,14 @@ class AuthService
                 ->whereNotNull('user_id')
                 ->whereCookieId($oldCookieId)
                 ->update(['cookie_id' => null]);
+
+            $this->shippingAddressRepository->query()
+                ->whereNotNull('user_id')
+                ->whereCookieId($oldCookieId)
+                ->update(['cookie_id' => null]);
         }
 
-        return  $user->currentAccessToken()->delete();
+        return $user->currentAccessToken()->delete();
     }
 
 
