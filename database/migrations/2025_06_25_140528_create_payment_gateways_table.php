@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('code')->unique();
+            $table->text('api_key')->nullable();
+            $table->json('config')->nullable();
             $table->boolean('active')->default(true);
             $table->timestamps();
         });
