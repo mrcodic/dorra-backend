@@ -67,9 +67,12 @@ Route::controller(CartController::class)->group(function () {
 });
 Route::apiResource('/carts', CartController::class)->only(['store', 'index']);
 
+Route::controller(OrderController::class)->group(function () {
+    Route::post('checkout', 'checkout');
+    Route::get('locations', 'searchLocations');
+    Route::get('track-order/{order}', 'trackOrder');
+});
 
-Route::post('checkout', [OrderController::class, 'checkout']);
-Route::get('locations',[OrderController::class, 'searchLocations']);
 Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
 
@@ -96,13 +99,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('countries', [MainController::class, 'countries']);
 
 });
-
-
-
-
-
-
-
 
 
 Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);

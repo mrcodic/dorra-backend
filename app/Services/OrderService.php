@@ -582,15 +582,19 @@ class OrderService extends BaseService
 
         return $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
-            $order->designs()->sync(OrderItemData::fromCartItems($cart->cartItems));
+            $order->orderItems()->createMany(OrderItemData::fromCartItems($cart->cartItems->load(['productPrice','product'])));
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
                 $order->pickupContact()->create(PickupContactData::fromRequest($request));
             }
-            $cart->cartItems()->delete();
+            $cart->cartItems()->detach();
+            $cart->update(['price' => 0]);
             return $order;
         });
+    }
 
-
+    public function trackOrder($id)
+    {
+       return $this->repository->find($id);
     }
 }

@@ -21,12 +21,19 @@ class OrderController extends Controller
     public function checkout(CheckoutRequest $request)
     {
         $order = $this->orderService->checkout($request);
-        return Response::api(data: ['number'=>$order->order_number]);
+        return Response::api(data: ['id' => $order->id,'number'=>$order->order_number]);
     }
 
     public function searchLocations(Request $request)
     {
         $locations = $this->locationService->search($request);
         return Response::api(data: LocationResource::collection($locations->load('state.country')));
+    }
+
+    public function trackOrder($id)
+    {
+       $order =  $this->orderService->trackOrder($id);
+        return Response::api(data: OrderResource::make($order));
+
     }
 }

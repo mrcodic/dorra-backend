@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 #[ObservedBy(OrderObserver::class)]
 class Order extends Model
 {
-    protected $fillable =[
+    protected $fillable = [
         'order_number',
         'user_id',
         'delivery_method',
@@ -32,6 +32,7 @@ class Order extends Model
         'status' => StatusEnum::class,
     ];
 
+
     public function totalPrice(): Attribute
     {
         return Attribute::get(function ($value) {
@@ -39,24 +40,18 @@ class Order extends Model
 
         });
     }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
 
-     public function orderItems(): HasMany
-     {
-        return $this->hasMany(OrderItem::class);
-    }
-
-    public function designs()
+    public function orderItems(): HasMany
     {
-        return $this->belongsToMany(Design::class, 'order_items', 'order_id', 'design_id')
-                    ->withPivot(['quantity', 'base_price', 'custom_product_price', 'total_price'])
-                    ->withTimestamps();
-
+        return $this->hasMany(OrderItem::class,'order_id');
     }
+
 
     public function orderAddress(): HasMany
     {
@@ -68,7 +63,6 @@ class Order extends Model
     {
         return $this->hasOne(PickupContact::class);
     }
-
 
 
 }
