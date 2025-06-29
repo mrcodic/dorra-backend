@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Dashboard\TemplateController;
+use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\LogoutController,
@@ -98,6 +99,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('states', [MainController::class, 'states']);
     Route::get('countries', [MainController::class, 'countries']);
+
+    Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
 });
 

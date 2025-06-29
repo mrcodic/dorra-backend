@@ -1,6 +1,7 @@
 <?php
 
-use App\Enums\DiscountCode\TypeEnum;
+
+use App\Models\{Design, Template};
 use App\Repositories\Implementations\SettingRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -70,4 +71,13 @@ function getPriceAfterTax($tax, $subtotal): float|int
 function setting(string $key, $default = null)
 {
     return app(SettingRepository::class)->get($key, $default);
+}
+
+function commentableModelClass(string $type): ?string
+{
+    return match ($type) {
+        'design' => Design::class,
+        'template' => Template::class,
+        default => null,
+    };
 }
