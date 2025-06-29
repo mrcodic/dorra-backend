@@ -160,7 +160,7 @@
                         'Enter discount value');
         });
 
-        // AJAX form submission
+
         // AJAX form submission
         $('#addDiscountForm').on('submit', function (e) {
             e.preventDefault();

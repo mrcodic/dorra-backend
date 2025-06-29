@@ -580,7 +580,7 @@ class OrderService extends BaseService
         $discountCode = $this->discountCodeRepository->find($request->discount_code_id);
         $subTotal = $cart->cartItems()->sum('sub_total');
 
-        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
+        return $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
             $order->designs()->sync(OrderItemData::fromCartItems($cart->cartItems));
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
