@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Mockup;
 use App\Enums\Product\StatusEnum;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough, MorphToMany};
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
+use Illuminate\Database\Eloquent\Builder;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough, MorphToMany};
 
 class Product extends Model implements HasMedia
 {
@@ -25,7 +26,7 @@ class Product extends Model implements HasMedia
         'status',
     ];
 
-    public $translatable = ['name','description',];
+    public $translatable = ['name', 'description',];
 
     protected function casts()
     {
@@ -37,7 +38,6 @@ class Product extends Model implements HasMedia
     {
         return Attribute::get(function ($value) {
             return fmod($value, 1) == 0.0 ? (int)$value : $value;
-
         });
     }
     public function rating(): Attribute
@@ -45,11 +45,11 @@ class Product extends Model implements HasMedia
         return Attribute::get(fn(?int $value) => $this->reviews?->pluck('rating')->avg());
     }
 
-    public function scopeWithReviewRating(Builder $builder,$rates): Builder
+    public function scopeWithReviewRating(Builder $builder, $rates): Builder
     {
         $rates = is_array($rates) ? $rates : explode(',', $rates);
-       return $builder->whereHas('reviews',function ($query) use ($rates){
-            $query->whereIn('rating',$rates);
+        return $builder->whereHas('reviews', function ($query) use ($rates) {
+            $query->whereIn('rating', $rates);
         });
     }
     public function category(): BelongsTo
@@ -59,7 +59,7 @@ class Product extends Model implements HasMedia
 
     public function subCategory(): BelongsTo
     {
-        return $this->belongsTo(Category::class,'sub_category_id');
+        return $this->belongsTo(Category::class, 'sub_category_id');
     }
 
     public function tags(): MorphToMany
@@ -82,8 +82,14 @@ class Product extends Model implements HasMedia
     }
     public function specificationOptions(): HasManyThrough
     {
-        return $this->hasManyThrough(ProductSpecificationOption::class, ProductSpecification::class,
-            'product_id', 'product_specification_id', 'id', 'id');
+        return $this->hasManyThrough(
+            ProductSpecificationOption::class,
+            ProductSpecification::class,
+            'product_id',
+            'product_specification_id',
+            'id',
+            'id'
+        );
     }
 
     public function prices(): HasMany
@@ -116,5 +122,11 @@ class Product extends Model implements HasMedia
     public function getExtraImagesUrl(): string
     {
         return $this->getFirstMediaUrl('product_extra_images');
+    }
+
+
+    public function mockups()
+    {
+        return $this->hasMany(Mockup::class);
     }
 }
