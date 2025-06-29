@@ -47,8 +47,15 @@ function getOrderStepCacheKey(): string
 
 function getDiscountAmount($discount, $subtotal)
 {
-    return $discount->type == TypeEnum::PERCENTAGE ? $subtotal * $discount->value : $discount->value;
+    if (!is_object($discount)) {
+        return 0;
+    }
+
+    return $discount->type == TypeEnum::PERCENTAGE
+        ? $subtotal * ($discount->value / 100)
+        : $discount->value;
 }
+
 
 function getTotalPrice($discount, $subtotal): float|int
 {
