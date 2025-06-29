@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\User\Order;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Checkout\CheckoutRequest;
 use App\Http\Resources\LocationResource;
+use App\Http\Resources\OrderResource;
 use App\Services\LocationService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
