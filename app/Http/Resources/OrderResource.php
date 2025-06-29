@@ -33,7 +33,7 @@ class OrderResource extends JsonResource
             'statuses' => $statuses,
             'shipping_address' => $this->orderAddress,
             'items' => $this->orderItems,
-            'sub_total' => $this->designs->pluck('total_price')->sum(),
+            'sub_total' => $this->orderItems->pluck('total_price')->sum(),
             'total' => $this->price,
             'tax' => [
                 'ratio' => setting('tax') * 100 . "%",
