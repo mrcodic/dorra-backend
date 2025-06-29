@@ -587,6 +587,7 @@ class OrderService extends BaseService
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
                 $order->pickupContact()->create(PickupContactData::fromRequest($request));
             }
+            $cart->cartItems()->delete();
             return $order;
         });
 
