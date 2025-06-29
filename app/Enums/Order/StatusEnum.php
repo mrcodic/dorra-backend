@@ -24,5 +24,15 @@ enum StatusEnum : int
         };
     }
 
+    public static function toArray(): array
+    {
+        return collect(self::cases())->map(function ($case) {
+            return [
+                'value' => $case->value,
+                'label' => $case->label(),
+            ];
+        })->toArray();
+    }
+
 
 }

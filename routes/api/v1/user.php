@@ -71,6 +71,7 @@ Route::controller(OrderController::class)->group(function () {
     Route::post('checkout', 'checkout');
     Route::get('locations', 'searchLocations');
     Route::get('track-order/{order}', 'trackOrder');
+    Route::get('order-statuses', 'orderStatuses');
 });
 
 Route::apiResource('shipping-addresses', ShippingAddressController::class);

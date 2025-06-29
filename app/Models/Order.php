@@ -49,13 +49,13 @@ class Order extends Model
 
     public function orderItems(): HasMany
     {
-        return $this->hasMany(OrderItem::class,'order_id');
+        return $this->hasMany(OrderItem::class);
     }
 
 
-    public function orderAddress(): HasMany
+    public function orderAddress(): HasOne
     {
-        return $this->hasMany(OrderAddress::class);
+        return $this->hasOne(OrderAddress::class);
     }
 
 

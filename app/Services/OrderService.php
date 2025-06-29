@@ -5,7 +5,7 @@ namespace App\Services;
 use Exception;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
-use App\Enums\Order\{OrderTypeEnum};
+use App\Enums\Order\{OrderTypeEnum, StatusEnum};
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\{DB, Auth, Cache};
 use App\Models\{Order, Design, Product, Location, ShippingAddress};
@@ -89,15 +89,6 @@ class OrderService extends BaseService
             ->make();
     }
 
-    public function storeStepData(array $stepData): void
-    {
-        $cacheKey = getOrderStepCacheKey();
-        $existing = Cache::get($cacheKey, []);
-        $merged = array_merge($existing, $stepData);
-
-        Cache::put($cacheKey, $merged, now()->addHours(1));
-    }
-
     public function storeStep1($request): void
     {
         $request->validate(["user_id" => ["required", "exists:users,id"]]);
@@ -109,6 +100,15 @@ class OrderService extends BaseService
             "phone_number" => $user->phone_number,
         ]]);
 
+    }
+
+    public function storeStepData(array $stepData): void
+    {
+        $cacheKey = getOrderStepCacheKey();
+        $existing = Cache::get($cacheKey, []);
+        $merged = array_merge($existing, $stepData);
+
+        Cache::put($cacheKey, $merged, now()->addHours(1));
     }
 
     public function storeStep2($request): void
@@ -376,44 +376,6 @@ class OrderService extends BaseService
         });
     }
 
-    private function attachDesignsToOrder($order, $designsData)
-    {
-        $pivotData = [];
-
-        foreach ($designsData as $designData) {
-            $design = Design::with(['product', 'productPrice'])->find($designData['id']);
-
-            if (!$design) {
-                continue;
-            }
-
-            $quantity = $designData['quantity'] ?? 1;
-
-            if ($design->product_price_id && $design->productPrice) {
-                $customProductPrice = $design->productPrice->price;
-                $basePrice = 0;
-                $totalPrice = $customProductPrice * $quantity;
-            } else {
-                $customProductPrice = 0;
-                $basePrice = $design->product ? $design->product->base_price : 0;
-                $totalPrice = $basePrice * $quantity;
-            }
-
-            $pivotData[$design->id] = [
-                'quantity' => $quantity,
-                'base_price' => $basePrice,
-                'custom_product_price' => $customProductPrice,
-                'total_price' => $totalPrice,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        if (!empty($pivotData)) {
-            $order->designs()->attach($pivotData);
-        }
-    }
-
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
@@ -582,7 +544,7 @@ class OrderService extends BaseService
 
         return $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
-            $order->orderItems()->createMany(OrderItemData::fromCartItems($cart->cartItems->load(['productPrice','product'])));
+            $order->orderItems()->createMany(OrderItemData::fromCartItems($cart->cartItems->load(['productPrice', 'product'])));
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
                 $order->pickupContact()->create(PickupContactData::fromRequest($request));
@@ -595,6 +557,49 @@ class OrderService extends BaseService
 
     public function trackOrder($id)
     {
-       return $this->repository->find($id);
+        return $this->repository->find($id);
+    }
+
+    public function orderStatuses(): array
+    {
+        return StatusEnum::toArray();
+    }
+
+    private function attachDesignsToOrder($order, $designsData)
+    {
+        $pivotData = [];
+
+        foreach ($designsData as $designData) {
+            $design = Design::with(['product', 'productPrice'])->find($designData['id']);
+
+            if (!$design) {
+                continue;
+            }
+
+            $quantity = $designData['quantity'] ?? 1;
+
+            if ($design->product_price_id && $design->productPrice) {
+                $customProductPrice = $design->productPrice->price;
+                $basePrice = 0;
+                $totalPrice = $customProductPrice * $quantity;
+            } else {
+                $customProductPrice = 0;
+                $basePrice = $design->product ? $design->product->base_price : 0;
+                $totalPrice = $basePrice * $quantity;
+            }
+
+            $pivotData[$design->id] = [
+                'quantity' => $quantity,
+                'base_price' => $basePrice,
+                'custom_product_price' => $customProductPrice,
+                'total_price' => $totalPrice,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        if (!empty($pivotData)) {
+            $order->designs()->attach($pivotData);
+        }
     }
 }

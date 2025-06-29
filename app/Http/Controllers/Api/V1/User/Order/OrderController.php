@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Api\V1\User\Order;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Checkout\CheckoutRequest;
 use App\Http\Resources\LocationResource;
-use App\Http\Resources\OrderResource;
+use App\Http\Resources\Order\OrderResource;
 use App\Services\LocationService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
@@ -22,7 +22,7 @@ class OrderController extends Controller
     public function checkout(CheckoutRequest $request)
     {
         $order = $this->orderService->checkout($request);
-        return Response::api(data: ['id' => $order->id,'number'=>$order->order_number]);
+        return Response::api(data: ['id' => $order->id, 'number' => $order->order_number]);
     }
 
     public function searchLocations(Request $request)
@@ -33,8 +33,13 @@ class OrderController extends Controller
 
     public function trackOrder($id)
     {
-       $order =  $this->orderService->trackOrder($id);
-        return Response::api(data: OrderResource::make($order));
+        $order = $this->orderService->trackOrder($id);
+        return Response::api(data: OrderResource::make($order->load(['orderAddress', 'orderItems'])));
 
+    }
+
+    public function orderStatuses()
+    {
+        return Response::api(data: $this->orderService->orderStatuses());
     }
 }
