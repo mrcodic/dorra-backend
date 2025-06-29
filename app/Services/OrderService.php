@@ -577,7 +577,7 @@ class OrderService extends BaseService
     public function checkout($request)
     {
         $cart = $this->cartService->getCurrentUserOrGuestCart();
-        $discountCode = $this->discountCodeRepository->find($request->discount_code_id);
+        $discountCode = $request->discount_code_id ? $this->discountCodeRepository->find($request->discount_code_id) : 0;
         $subTotal = $cart->cartItems()->sum('sub_total');
 
         return $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
