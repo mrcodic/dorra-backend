@@ -50,10 +50,7 @@ function getDiscountAmount($discount, $subtotal)
     if (!is_object($discount)) {
         return 0;
     }
-
-    return $discount->type == TypeEnum::PERCENTAGE
-        ? $subtotal * ($discount->value / 100)
-        : $discount->value;
+    return $subtotal * $discount->value;
 }
 
 

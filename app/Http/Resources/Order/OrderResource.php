@@ -27,8 +27,6 @@ class OrderResource extends JsonResource
             ? ($this->discount_amount) / $this->subtotal
             : 0;
 
-
-
         return [
             'id' => $this->id,
             'number' => $this->order_number,
@@ -47,7 +45,7 @@ class OrderResource extends JsonResource
             ],
             'delivery' => setting('delivery'),
             'discount' => [
-                'ratio' => round($paidRatio * 100, 2) . '%',
+                'ratio' => round($paidRatio * 100) . '%',
                 'value' => $this->discount_amount,
             ],
 

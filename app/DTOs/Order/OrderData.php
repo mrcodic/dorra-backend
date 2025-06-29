@@ -9,7 +9,7 @@ class OrderData
 {
     public static function fromCart($subTotal, $discountCode): array
     {
-        dd( getDiscountAmount($discountCode ?? 0, $subTotal));
+//        dd($discountCode, getDiscountAmount($discountCode ?? 0, $subTotal));
         return [
             'user_id' => Auth::guard('sanctum')->id(),
             'subtotal' => $subTotal,
