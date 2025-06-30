@@ -77,6 +77,10 @@ class User extends Authenticatable implements HasMedia
     {
         return Attribute::get(fn(?bool $value) => $value == 0 ? 'Blocked' : 'Active');
     }
+    public function getNameAttribute(): string
+    {
+        return $this->first_name . ' '. $this->last_name;
+    }
 
     protected function image(): Attribute
     {

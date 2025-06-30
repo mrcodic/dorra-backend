@@ -64,7 +64,15 @@ class DesignService extends BaseService
         $userId = auth('sanctum')->id();
         if ($userId || $cookieId) {
             $designs = $this->repository->query()
-                ->with('product')
+                ->with(['product' => function ($q) {
+                    $q->select('products.id', 'products.name');
+                },
+                    'product.category' => function ($q) {
+                        $q->select('id', 'name');
+                    },
+                    'user' => function ($q) {
+                        $q->select('id', 'first_name', 'last_name');
+                    },])
                 ->where(function ($q) use ($cookieId, $userId) {
                     if ($userId) {
                         $q->whereUserId($userId);

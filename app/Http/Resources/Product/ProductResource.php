@@ -16,22 +16,22 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
+            'id' => $this->when(isset($this->id), $this->id),
+            'name' => $this->when(isset($this->name), $this->name),
+            'description' => $this->when(isset($this->description), $this->description),
             'category' => CategoryResource::make($this->whenLoaded('category')),
-            'has_custom_prices' => $this->when($this->has_custom_prices,true,false),
-            'base_price' => $this->base_price,
-            'custom_prices' =>ProductPriceResource::collection($this->whenLoaded('prices')),
-            'rating' => $this->whenLoaded('reviews','rating'),
-            'reviews_count' => $this->whenLoaded('reviews','reviews_count'),
-            'main_image' => MediaResource::make($this->getFirstMedia('product_main_image')),
+            'has_custom_prices' => $this->when(isset($this->has_custom_prices), $this->has_custom_prices),
+            'base_price' => $this->when(isset($this->base_price), $this->base_price),
+            'custom_prices' => ProductPriceResource::collection($this->whenLoaded('prices')),
+            'rating' => $this->when(isset($this->rating), $this->rating),
+            'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
+            'main_image' => $this->whenLoaded('media', function () {
+                return MediaResource::make($this->getFirstMedia('product_main_image'));
+            }),
             'all_product_images' => $this->whenLoaded('media', function () {
                 return MediaResource::collection($this->getAllProductImages());
             }),
-
         ];
     }
 }

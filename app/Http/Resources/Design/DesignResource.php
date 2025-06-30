@@ -2,8 +2,10 @@
 
 namespace App\Http\Resources\Design;
 
+use App\Http\Resources\CategoryResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\TemplateResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,10 +20,12 @@ class DesignResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'design_data' => $this->design_data,
+            'design_data' => $this->when(request('design_data') == true, $this->design_data),
             'design_image' => $this->getFirstMediaUrl('designs'),
             'current_version' => $this->current_version,
             'product' => ProductResource::make($this->whenLoaded('product')),
+            'owner' => UserResource::make($this->whenLoaded('user')),
+            'category' => CategoryResource::make($this->whenLoaded('category')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
             'placed_on' => optional($this->pivot)->created_at?->format('d/m/Y'),
             'price' => $this->total_price,

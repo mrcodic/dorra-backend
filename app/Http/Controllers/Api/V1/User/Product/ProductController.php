@@ -18,7 +18,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = $this->productService->getAll(relations: ['reviews']);
+        $products = $this->productService->getAll(relations: ['reviews','category:name']);
         $productResourceCollection = $products instanceof LengthAwarePaginator ?
             ProductResource::collection($products)->response()->getData()
             : ProductResource::collection($products);
@@ -29,13 +29,11 @@ class ProductController extends Controller
     public function show(Product $product, Request $request)
     {
         return Response::api(data: ProductResource::make($this->productService->showResource($product->id, [
-            'category',
+            'category:id,name',
             'templates',
-            'prices' => function ($query) use ($request) {
-                if ($request->query('all_prices') !== 'true') {
-                    $query->limit(5);
-                }
-            },])));
+            'media' => fn($q) => $q->where('collection_name', 'product_extra_images'),
+            'prices' => fn($q) => $request->query('all_prices') !== 'true' ? $q->limit(5) : null,
+        ])));
     }
 
 
