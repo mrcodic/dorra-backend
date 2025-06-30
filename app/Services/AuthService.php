@@ -91,6 +91,19 @@ class AuthService
 
         $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
         $user->token = $plainTextToken;
+
+        $oldCookieId = request()->cookie('cookie_id');
+        if ($oldCookieId) {
+            $this->designRepository->query()
+                ->whereNull('user_id')
+                ->whereCookieId($oldCookieId)
+                ->update(['user_id' => $user->id]);
+
+            $this->cartRepository->query()
+                ->whereNull('user_id')
+                ->whereCookieId($oldCookieId)
+                ->update(['user_id' => $user->id]);
+        }
         return $user;
     }
 
