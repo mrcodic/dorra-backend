@@ -19,13 +19,13 @@ class ProductService extends BaseService
 {
 
     public BaseRepositoryInterface $repository;
-    protected array $relations;
+
 
     public function __construct(ProductRepositoryInterface                     $repository,
                                 public ProductSpecificationRepositoryInterface $specificationRepository,
     )
     {
-        $this->relations = ['category', 'tags', 'reviews'];
+
 
         parent::__construct($repository);
     }
