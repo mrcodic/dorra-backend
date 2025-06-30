@@ -16,12 +16,12 @@ class CategoryController extends Controller
 
     public function index()
     {
-        return Response::api(data: CategoryResource::collection($this->categoryService->getAll()));
+        return Response::api(data: CategoryResource::collection($this->categoryService->getAll(relations: ['media'])));
     }
 
     public function show($id)
     {
-        return Response::api(data: CategoryResource::make($this->categoryService->showResource($id)));
+        return Response::api(data: CategoryResource::make($this->categoryService->showResource($id,['media'])));
     }
 
     public function getSubCategories()
