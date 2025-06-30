@@ -30,6 +30,12 @@
             "url": "/product-templates"
         },
         {
+            "name": "Mockups",
+            "icon": "mockup.svg",
+            "slug": "",
+            "url": ""
+        },
+        {
             "name": "Categories",
             "icon": "Category.svg",
             "slug": "",
