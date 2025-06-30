@@ -42,7 +42,7 @@ class Product extends Model implements HasMedia
     }
     public function rating(): Attribute
     {
-        return Attribute::get(fn(?int $value) => $this->reviews?->pluck('rating')->avg());
+        return Attribute::get(fn(?int $value) => $this->load('reviews:rating')->reviews?->pluck('rating')->avg());
     }
 
     public function scopeWithReviewRating(Builder $builder, $rates): Builder

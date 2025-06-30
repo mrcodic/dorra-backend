@@ -118,4 +118,8 @@ class Design extends Model implements HasMedia
             ->withTimestamps();
     }
 
+    public function folders()
+    {
+        return $this->belongsToMany(Folder::class) ->withTimestamps();
+    }
 }

@@ -42,7 +42,7 @@ class CartService extends BaseService
                     $q->whereCookieId($cookieId);
                 }
             })
-            ->with(['designs.product.reviews'])
+            ->with(['designs.product'])
             ->first();
 
     }
@@ -144,8 +144,8 @@ class CartService extends BaseService
     {
         $cart = $this->resolveUserCart();
         return [
-            'price' => $cart->price,
-            'items_count' => $cart->cartItems->count(),
+            'price' => $cart?->price ?? 0,
+            'items_count' => $cart?->cartItems->count() ?? 0,
         ];
 
     }
