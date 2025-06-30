@@ -114,17 +114,18 @@ class AuthService
         $oldCookieId = request()->cookie('cookie_id');
         if ($oldCookieId) {
             $this->designRepository->query()
-                ->whereNotNull('user_id')
+                ->whereUserId(auth('sanctum')->id())
                 ->whereCookieId($oldCookieId)
                 ->update(['cookie_id' => null]);
 
             $this->cartRepository->query()
-                ->whereNotNull('user_id')
+                ->whereUserId(auth('sanctum')->id())
                 ->whereCookieId($oldCookieId)
                 ->update(['cookie_id' => null]);
 
+
             $this->shippingAddressRepository->query()
-                ->whereNotNull('user_id')
+                ->whereUserId(auth('sanctum')->id())
                 ->whereCookieId($oldCookieId)
                 ->update(['cookie_id' => null]);
         }
