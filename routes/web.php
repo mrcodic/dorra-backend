@@ -24,6 +24,7 @@ use App\Http\Controllers\Dashboard\{
     OfferController,
     LocationController
 };
+use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Route;
 
@@ -206,6 +207,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('product-specifications', ProductSpecificationController::class)->name('products.specifications.create');
         Route::get('product-specifications/{product}', [ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
+        Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
     });
 

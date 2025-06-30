@@ -23,7 +23,7 @@ class CommentController extends Controller
     public function index(Request $request)
     {
         $comments = $this->commentService->getComments($request);
-        return Response::api(data: CommentResource::collection($comments));
+        return Response::api(data: $comments ? CommentResource::collection($comments->load(['replies.owner', 'owner'])) : collect([]),);
 
     }
 

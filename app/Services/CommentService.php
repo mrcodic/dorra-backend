@@ -16,6 +16,11 @@ class CommentService extends BaseService
 
     public function getComments(Request $request)
     {
+        if (
+            !$request->filled('commentable_type') || !$request->filled('commentable_id')
+        ) {
+            return null;
+        }
         return $this->repository->query()
             ->when(
                 $request->filled('commentable_type') && $request->filled('commentable_id'),
@@ -26,7 +31,7 @@ class CommentService extends BaseService
                             ->where('commentable_id', $request->commentable_id);
                     }
                 }
-            )
+            )->whereNull('parent_id')
             ->get();
     }
 

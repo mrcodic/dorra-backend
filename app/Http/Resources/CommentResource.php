@@ -19,6 +19,7 @@ class CommentResource extends JsonResource
             'body' => $this->body,
             'position_x' => $this->position_x,
             'position_y' => $this->position_y,
+            'created_since' => $this->created_at->diffForHumans(),
             'owner' => UserResource::make($this->whenLoaded('owner')),
             'replies' => CommentResource::collection($this->whenLoaded('replies')),
         ];
