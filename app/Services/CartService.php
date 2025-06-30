@@ -42,7 +42,7 @@ class CartService extends BaseService
                     $q->whereCookieId($cookieId);
                 }
             })
-            ->with(['designs.product'])
+            ->with(['designs.product.reviews'])
             ->first();
 
     }
@@ -51,7 +51,6 @@ class CartService extends BaseService
     {
 
         $model = $this->repository->query()->firstOrCreate([
-            'user_id' => Arr::get($validatedData, 'user_id'),
             'cookie_id' => Arr::get($validatedData, 'cookie_id'),
         ], Arr::except($validatedData, 'design_id'));
 

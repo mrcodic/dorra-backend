@@ -25,7 +25,7 @@ class ProductResource extends JsonResource
             'base_price' => $this->when(isset($this->base_price), $this->base_price),
             'custom_prices' => ProductPriceResource::collection($this->whenLoaded('prices')),
             'rating' => $this->when(isset($this->rating), $this->rating),
-            'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
+            'reviews_count' => $this->whenLoaded('reviews',fn() => $this->reviews_count),
             'main_image' => $this->whenLoaded('media', function () {
                 return MediaResource::make($this->getFirstMedia('product_main_image'));
             }),
