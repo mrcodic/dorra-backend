@@ -151,6 +151,9 @@ return [
     */
 
     'custom' => [
+            'designs.*' => [
+                'exists' => 'The selected design does not exist in your account or is invalid.',
+            ],
         'addresses.*.label' => [
             'required' => 'Each address must have a label (e.g., Home, Work).',
             'min' => 'The address label must be at least :min characters.',

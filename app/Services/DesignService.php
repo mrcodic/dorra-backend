@@ -33,6 +33,7 @@ class DesignService extends BaseService
             $design = $this->handleTransaction(function () use ($validatedData) {
                 $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id'],
                     'user_id' => $validatedData['user_id']], $validatedData);
+                $design->users()->attach($validatedData['user_id']);
                 $this->templateRepository
                     ->find($validatedData['template_id'])
                     ->getFirstMedia('templates')
@@ -172,4 +173,6 @@ class DesignService extends BaseService
         $design = $this->repository->find($designId);
         return $design->product->prices->pluck('quantity','id')->toArray();
     }
+
+
 }

@@ -105,4 +105,25 @@ class DesignController extends Controller
         return Response::api(data: $quantities);
 
     }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'designs' => ['required', 'array'],
+            'designs.*' => ['nullable', 'string', 'exists:designs,id',function ($attribute, $value, $fail) {
+                $design = Design::find($value);
+                if ($design && $design->user_id != auth('sanctum')->id()) {
+                    $fail("The selected design does not belong to you");
+                }
+            }]
+        ]);
+        $this->designService->bulkDeleteResources($request->designs);
+        return Response::api();
+    }
+
+    public function owners()
+    {
+        
+    }
+
 }

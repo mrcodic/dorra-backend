@@ -28,7 +28,13 @@ class AppServiceProvider extends ServiceProvider
     {
         Fortify::loginView(fn () => view('dashboard.auth.login'));
 
-        Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "Request completed successfully", $data = [], $errors = []) {
+        Response::macro('api', function (
+            $statusCode = HttpEnum::OK,
+            $message = "Request completed successfully",
+            $data = [],
+            $errors = [],
+            $meta = []
+        ) {
             $response = [
                 'status' => $statusCode->value,
                 'success' => $statusCode->value < HttpEnum::BAD_REQUEST->value,
@@ -38,8 +44,7 @@ class AppServiceProvider extends ServiceProvider
                 $response['errors'] = $errors;
             }
             if (!empty($data)) {
-                if ($data instanceof LengthAwarePaginator)
-                {
+                if ($data instanceof LengthAwarePaginator) {
                     $response['data'] = $data->items();
                     $response['pagination'] = [
                         'total' => $data->total(),
@@ -53,15 +58,18 @@ class AppServiceProvider extends ServiceProvider
                     if ($data instanceof ResourceCollection) {
                         return $data->response()->setStatusCode($statusCode->value);
                     }
-                }
-                else{
+                } else {
                     $response['data'] = $data;
                 }
+            }
 
+            if (!empty($meta)) {
+                $response['meta'] = $meta;
             }
 
             return response()->json($response, $statusCode->value);
         });
-         Model::preventLazyLoading(! app()->isProduction());
+
+        Model::preventLazyLoading(! app()->isProduction());
     }
 }

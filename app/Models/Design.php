@@ -120,6 +120,11 @@ class Design extends Model implements HasMedia
 
     public function folders()
     {
-        return $this->belongsToMany(Folder::class) ->withTimestamps();
+        return $this->belongsToMany(Folder::class)->withTimestamps();
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
     }
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Cart\CartController,
     Category\CategoryController,
     Design\DesignController,
+    Folder\FolderController,
     General\MainController,
     Order\OrderController,
     Product\ProductController,
@@ -19,8 +20,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\ProfileController,
     Profile\UserNotificationTypeController,
     SaveController,
-    ShippingAddress\ShippingAddressController
-};
+    ShippingAddress\ShippingAddressController};
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
@@ -52,14 +52,6 @@ Route::get('sub-categories', [MainController::class, 'subCategories']);
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 
-Route::controller(DesignController::class)->group(function () {
-    Route::get('designs/{design}/price-details', 'priceDetails');
-    Route::post('designs/{design}/add-quantity', 'addQuantity');
-    Route::get('designs/{design}/quantities', 'getQuantities');
-    Route::apiResource('/designs', DesignController::class)->except(['destroy']);
-    Route::post('/design-finalization', 'designFinalization');
-    Route::get('/design-versions/{design_version}', 'getDesignVersions');
-});
 
 Route::controller(CartController::class)->group(function () {
     Route::get('/cart-info', 'cartInfo');
@@ -97,10 +89,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('bulk-delete-saved', 'destroyBulk');
     });
 
+
+    Route::controller(DesignController::class)->prefix('designs/')->group(function () {
+        Route::post('bulk-delete', 'bulkDelete');
+        Route::post('owners', 'owners');
+        Route::get('{design}/price-details', 'priceDetails');
+        Route::post('{design}/add-quantity', 'addQuantity');
+        Route::get('{design}/quantities', 'getQuantities');
+        Route::post('design-finalization', 'designFinalization');
+    });
+    Route::get('/design-versions/{design_version}', [DesignController::class,'getDesignVersions']);
+    Route::apiResource('/designs', DesignController::class)->except(['destroy']);
+
     Route::get('states', [MainController::class, 'states']);
     Route::get('countries', [MainController::class, 'countries']);
 
     Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
+
+    Route::post('designs/assign-to-folder', [FolderController::class,'assignDesignsToFolder']);
+    Route::post('folders/bulk-delete', [FolderController::class,'bulkDelete']);
+    Route::apiResource('folders', FolderController::class)->only(['store', 'index']);
 
 });
 

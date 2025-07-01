@@ -28,7 +28,8 @@ class TemplateController extends DashboardController
         public ProductRepositoryInterface              $productRepository,
         public TemplateRepositoryInterface             $templateRepository,
         public TagRepositoryInterface                  $tagRepository,
-        public ProductSpecificationRepositoryInterface $productSpecificationRepository
+        public ProductSpecificationRepositoryInterface $productSpecificationRepository,
+        public ProductRepositoryInterface $productRepositoryInterface,
 
     )
     {
@@ -109,7 +110,16 @@ class TemplateController extends DashboardController
             $templates = $this->templateRepository->query()->with('product')->whereProductId($productId)->live()->get();
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
         }
-        return Response::api(data: TemplateResource::collection($templates)->response()->getData(true));
+        $templateData = TemplateResource::collection($templates)->response()->getData(true);
+        return Response::api(
+            data: $templateData['data'],
+            meta: [
+                'product' => [
+                    'name' => $this->productRepositoryInterface->find($productId)->name
+                ]
+            ]
+        );
+
 
     }
 
