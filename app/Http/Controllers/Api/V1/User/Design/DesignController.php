@@ -11,6 +11,7 @@ use App\Http\Resources\Design\DesignFinalizationCollectionResource;
 use App\Http\Resources\Design\DesignFinalizationResource;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Design\DesignVersionResource;
+use App\Http\Resources\UserResource;
 use App\Models\Design;
 use App\Services\DesignService;
 use Illuminate\Http\Request;
@@ -101,7 +102,7 @@ class DesignController extends Controller
     public function getQuantities($designId)
     {
         $quantities = $this->designService->getQuantities($designId);
-        $quantities = $quantities ?: (object) [];
+        $quantities = $quantities ?: (object)[];
         return Response::api(data: $quantities);
 
     }
@@ -110,7 +111,7 @@ class DesignController extends Controller
     {
         $request->validate([
             'designs' => ['required', 'array'],
-            'designs.*' => ['nullable', 'string', 'exists:designs,id',function ($attribute, $value, $fail) {
+            'designs.*' => ['nullable', 'string', 'exists:designs,id', function ($attribute, $value, $fail) {
                 $design = Design::find($value);
                 if ($design && $design->user_id != auth('sanctum')->id()) {
                     $fail("The selected design does not belong to you");
@@ -123,7 +124,10 @@ class DesignController extends Controller
 
     public function owners()
     {
-        
+        $owners = $this->designService->owners();
+        return Response::api(data: UserResource::collection($owners));
+
+
     }
 
 }

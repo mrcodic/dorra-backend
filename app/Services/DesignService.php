@@ -72,7 +72,7 @@ class DesignService extends BaseService
                     'user' => function ($q) {
                         $q->select('id', 'first_name', 'last_name');
                     },
-                    ])
+                ])
                 ->where(function ($q) use ($cookieId, $userId) {
                     if ($userId) {
                         $q->whereUserId($userId);
@@ -171,8 +171,11 @@ class DesignService extends BaseService
     public function getQuantities($designId)
     {
         $design = $this->repository->find($designId);
-        return $design->product->prices->pluck('quantity','id')->toArray();
+        return $design->product->prices->pluck('quantity', 'id')->toArray();
     }
 
+    public function owners()
+    {
 
+    }
 }

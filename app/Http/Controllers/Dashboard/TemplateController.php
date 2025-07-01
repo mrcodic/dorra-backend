@@ -110,14 +110,17 @@ class TemplateController extends DashboardController
             $templates = $this->templateRepository->query()->with('product')->whereProductId($productId)->live()->get();
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
         }
-        $templateData = TemplateResource::collection($templates)->response()->getData(true);
-        return Response::api(
-            data: $templateData['data'],
-            meta: [
+        $templateData = TemplateResource::collection($templates)
+            ->additional([
                 'product' => [
                     'name' => $this->productRepositoryInterface->find($productId)->name
                 ]
-            ]
+            ])
+            ->response()
+            ->getData(true);
+
+        return Response::api(
+            data: $templateData 
         );
 
 
