@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\V1\User\General\MainController;
-use App\Http\Controllers\Dashboard\{
-    AdminController,
+use App\Http\Controllers\Dashboard\{AdminController,
     FaqController,
     InvoiceController,
     MessageController,
+    MockupController,
     OrderController,
     PermissionController,
     ProductController,
@@ -22,8 +22,7 @@ use App\Http\Controllers\Dashboard\{
     DiscountCodeController,
     SettingController,
     OfferController,
-    LocationController
-};
+    LocationController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Route;
@@ -161,6 +160,12 @@ Route::middleware('auth')->group(function () {
         Route::get('settings/payments', 'payments')->name('settings.payments');
         Route::get('settings/notifications', 'notifications')->name('settings.notifications');
     });
+
+    Route::group(['prefix' => 'mockups', 'as' => 'mockups.', 'controller' => MockupController::class,], function () {
+        Route::get('/data',  'getData')->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::resource('/mockups', MockupController::class);
 
 
     Route::prefix('api/v1/')->group(function () {

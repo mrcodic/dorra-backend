@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Templates')
-@section('main-page', 'Templates')
+@section('title', 'Mockups')
+@section('main-page', 'Mockups')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -45,7 +45,7 @@
                                     class="form-control ps-5 border rounded-3"
                                     name="search_value"
                                     id="search-category-form"
-                                    placeholder="Search template..."
+                                    placeholder="Search mockup..."
                                     style="height: 38px;">
                             </form>
                         </div>
@@ -60,16 +60,6 @@
                             </select>
                         </div>
 
-                        {{-- Tags Filter --}}
-                        {{--                    <div class="col-6 col-md-2">--}}
-                        {{--                        <select name="tags" class="form-select filter-status select2" data-placeholder="Tags">--}}
-                        {{--                            <option value="">Tags</option>--}}
-                        {{--                            @foreach($associatedData['tags'] as $tag)--}}
-                        {{--                            <option value="{{ $tag->id }}">{{ $tag->getTranslation('name', app()->getLocale()) }}</option>--}}
-                        {{--                            @endforeach--}}
-                        {{--                        </select>--}}
-                        {{--                    </div>--}}
-
                         {{-- Product Filter --}}
                         <div class="col-6 col-md-2">
                             <select name="product" class="form-select filter-product select2"
@@ -81,50 +71,22 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
 
-                    {{-- Divider --}}
-                    <div class="col-12 ">
-                        <hr class="my-2">
-                    </div>
-
-                    {{-- Buttons Row --}}
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-1">
-
-                        <div class="col-12 col-md-1">
-                            <select name="per_page"
-                                    class="form-select filter-paginate-number">
-                                <option value="" disabled {{ request('per_page') === null ? 'selected' : '' }}>Show
-                                </option>
-                                <option value="16" @selected(request('per_page') == 16 )>16</option>
-                                <option value="16" @selected(request('per_page') == 16 )>16</option>
-                                <option value="50" @selected(request('per_page') == 50 )>50</option>
-                                <option value="80" @selected(request('per_page') == 80 )>80</option> {{-- add --}}
-                                <option value="100" @selected(request('per_page') == 100)>100</option>
-                                <option value="all" @selected(request('per_page') == 'all')>All</option>
-                            </select>
-
-
-                        </div>
-
-                        {{-- Action Buttons --}}
-                        <div class="col-4 d-flex gap-1">
-                            <a class="btn btn-outline-secondary w-100 w-md-auto"
-                               href="{{ config('services.editor_url') }}" target="_blank">
-                                <i data-feather="upload"></i>
-                                Upload Template
-                            </a>
-                            <a class="btn btn-primary w-100 w-md-auto" href="{{ route('product-templates.create') }}">
+                        <div class="col-6 col-md-2">
+                            <a class="btn btn-outline-secondary"  data-bs-toggle="modal"
+                               data-bs-target="#addMockupModal" href="">
                                 <i data-feather="plus"></i>
-                                Create Template
+                                Create Mockup
                             </a>
                         </div>
                     </div>
-                </div>
+
+
+                    </div>
 
 
                 <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="templates-container">
-                    @include("dashboard.partials.filtered-templates")
+                    @include("dashboard.partials.filtered-mockups")
                 </div>
                 <div id="pagination-container">
                     @if ($data instanceof \Illuminate\Pagination\LengthAwarePaginator)
@@ -138,12 +100,12 @@
             <!-- Bulk Delete Bar -->
             <div id="bulk-delete-container" class="my-2 bulk-delete-container " style="display: none;">
                 <div class="delete-container mx-auto">
-                    <p id="selected-count-text">0 Templates are selected</p>
+                    <p id="selected-count-text">0 Mockups are selected</p>
 
                     <button type="button" id="delete-selected-btn"
                             class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns"
                             data-bs-toggle="modal"
-                            data-bs-target="#deleteTemplatesModal">
+                            data-bs-target="#deleteMockupsModal">
                         <i data-feather="trash-2"></i> Delete Selected
                     </button>
                 </div>
@@ -152,15 +114,18 @@
 
         </div>
 
+
+        @include('modals.mockups.add-mockup')
+        @include('modals.mockups.edit-mockup')
         @include('modals.delete',[
-        'id' => 'deleteTemplateModal',
-        'formId' => 'deleteTemplateForm',
-        'title' => 'Delete Template',
+        'id' => 'deleteMockupModal',
+        'formId' => 'deleteMockupForm',
+        'title' => 'Delete Mockup',
         ])
         @include('modals.delete',[
-        'id' => 'deleteTemplatesModal',
+        'id' => 'deleteMockupsModal',
         'formId' => 'bulk-delete-form',
-        'title' => 'Delete Templates',
+        'title' => 'Delete Mockups',
         'confirmText' => 'Are you sure you want to delete this items?',
         ])
 
@@ -189,7 +154,10 @@
 @endsection
 
 @section('page-script')
+    <script src="{{ asset('js/scripts/pages/app-mockup-list.js') }}?v={{ time() }}"></script>
+
     <script>
+
         $(document).ready(function () {
             $('.select2').select2({
                 placeholder: function () {
@@ -200,29 +168,28 @@
             });
         });
 
-        const templatesDataUrl = "{{ route('templates.data') }}";
-        const showTemplateUrl = "{{ config("services.editor_url ") }}";
+        const mockupsDataUrl = "{{ route('mockups.data') }}";
+
 
         const locale = "{{ app()->getLocale() }}";
     </script>
 
 
     {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-template-list.js') }}?v={{ time() }}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const bulkContainer = document.getElementById("bulk-delete-container");
 
             function updateSelectionStatus() {
-                const selectedCheckboxes = document.querySelectorAll("input[name='selected_templates[]']:checked");
+                const selectedCheckboxes = document.querySelectorAll("input[name='selected_mockups[]']:checked");
                 const count = selectedCheckboxes.length;
 
-                document.getElementById("selected-count-text").textContent = `${count} Templates are selected`;
+                document.getElementById("selected-count-text").textContent = `${count} Mockups are selected`;
                 bulkContainer.style.display = count > 0 ? "flex" : "none";
             }
 
             // Attach listener
-            document.querySelectorAll("input[name='selected_templates[]']").forEach(cb => {
+            document.querySelectorAll("input[name='selected_mockups[]']").forEach(cb => {
                 cb.addEventListener("change", updateSelectionStatus);
             });
         });

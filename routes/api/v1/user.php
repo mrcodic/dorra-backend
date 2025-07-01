@@ -92,7 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::controller(DesignController::class)->prefix('designs/')->group(function () {
         Route::post('bulk-delete', 'bulkDelete');
-        Route::post('owners', 'owners');
+        Route::get('owners', 'owners');
         Route::get('{design}/price-details', 'priceDetails');
         Route::post('{design}/add-quantity', 'addQuantity');
         Route::get('{design}/quantities', 'getQuantities');

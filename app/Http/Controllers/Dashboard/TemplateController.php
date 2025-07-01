@@ -62,7 +62,7 @@ class TemplateController extends DashboardController
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination ,perPage: request('per_page',16));
         $associatedData = $this->getAssociatedData('index');
         if (request()->ajax()) {
-            $cards = view('dashboard.templates.partials.filtered-templates', compact('data'))->render();
+            $cards = view('dashboard.partials.filtered-templates', compact('data'))->render();
 
             $pagination = '';
             if ($data instanceof \Illuminate\Pagination\LengthAwarePaginator) {
@@ -120,7 +120,7 @@ class TemplateController extends DashboardController
             ->getData(true);
 
         return Response::api(
-            data: $templateData 
+            data: $templateData
         );
 
 

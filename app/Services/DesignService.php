@@ -177,5 +177,13 @@ class DesignService extends BaseService
     public function owners()
     {
 
+       return auth('sanctum')->user()
+           ->userDesigns()
+           ->with('owner:id,first_name,last_name')
+           ->get()
+           ->pluck('owner')
+           ->unique('id')
+           ->values();
+
     }
 }

@@ -1,6 +1,7 @@
 <?php
+namespace App\Services;
 
-use App\Services\BaseService;
+
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 
@@ -30,8 +31,7 @@ class MockupService extends BaseService
             ->query(['id', 'name', 'product_id', 'created_at'])
             ->with(['product:id,name'])
             ->when(request()->filled('search_value'), function ($q) {
-                $locale = app()->getLocale();
-                $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
+                $q->where("name", 'LIKE', '%' . request('search_value') . '%');
             })
             ->when(request()->filled('product_id'), fn($q) => $q->whereProductId(request('product_id')))
             ->latest();
@@ -41,6 +41,7 @@ class MockupService extends BaseService
                 ? $query->get()
                 : $query->paginate($pageSize)->withQueryString();
         }
+
 
         return $this->repository->all(
             $paginate,

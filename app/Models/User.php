@@ -140,6 +140,10 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->hasMany(Design::class);
     }
+    public function userDesigns(): BelongsToMany
+    {
+        return $this->belongsToMany(Design::class);
+    }
 
 
 }
