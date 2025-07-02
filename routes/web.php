@@ -217,7 +217,7 @@ Route::middleware('auth')->group(function () {
         Route::get('mockups/{mockup}', [MockupController::class,'show']);
         Route::get('recent-mockups', [MockupController::class,'recentMockups']);
         Route::get('mockup-types', [MockupController::class,'mockupTypes']);
-
+        Route::delete('mockups/{mockup}', [MockupController::class,'destroy']);
     });
 
 });
