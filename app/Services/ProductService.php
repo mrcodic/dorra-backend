@@ -11,6 +11,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Yajra\DataTables\Facades\DataTables;
@@ -145,6 +146,12 @@ class ProductService extends BaseService
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
+        if (request()->has('deleted_old_images')) {
+            collect(request()->deleted_old_images)->each(function ($id) {
+                Media::find($id)?->delete();
+            });
+        }
+
         if (isset($validatedData['base_price'])) {
             $product->prices()->delete();
         }
@@ -215,7 +222,7 @@ class ProductService extends BaseService
             handleMediaUploads($validatedData['image'], $product, 'product_main_image', clearExisting: true);
         }
         if (isset($validatedData['images'])) {
-            handleMediaUploads($validatedData['images'], $product, 'product_extra_images', clearExisting: true);
+            handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
 
         }
         return $product;
