@@ -57,7 +57,7 @@ class MockupService extends BaseService
         );
     }
 
-    public function showResource($id, $relations = [])
+    public function showAndUpdateRecent($id)
     {
         $mockup = $this->repository->find($id);
         return auth('web')->user()->recentMockups()->syncWithoutDetaching([$mockup->id]);

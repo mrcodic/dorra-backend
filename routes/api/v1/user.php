@@ -127,6 +127,5 @@ Route::apiResource('library-assets', LibraryAssetController::class)->only(['stor
 Route::get('mockups', [MockupController::class,'index']);
 Route::get('mockup-types', [MockupController::class,'mockupTypes']);
 Route::delete('mockups/{mockup}', [MockupController::class,'destroy']);
-
-Route::get('mockups/{mockup}', [MockupController::class,'show']);
+Route::get('mockups/{mockup}', [MockupController::class,'showAndUpdateRecent']);
 

@@ -214,7 +214,7 @@ Route::middleware('auth')->group(function () {
         Route::get('product-specifications/{product}', [ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
         Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
         Route::get('mockups', [MockupController::class,'index']);
-        Route::get('mockups/{mockup}', [MockupController::class,'show']);
+        Route::get('mockups/{mockup}', [MockupController::class,'showAndUpdateRecent']);
         Route::get('recent-mockups', [MockupController::class,'recentMockups']);
         Route::get('mockup-types', [MockupController::class,'mockupTypes']);
         Route::delete('mockups/{mockup}', [MockupController::class,'destroy']);
