@@ -28,12 +28,6 @@ class CartService extends BaseService
     {
         $userId = auth('sanctum')->id();
         $cookieId = request()->cookie('cookie_id');
-
-        if (!$userId && !$cookieId) {
-            throw ValidationException::withMessages([
-                'authorization' => ['Either a logged-in user or a valid cookie must be provided.'],
-            ]);
-        }
         return $this->repository->query()
             ->where(function ($q) use ($cookieId, $userId) {
                 if ($userId) {
@@ -140,7 +134,7 @@ class CartService extends BaseService
     }
 
 
-    public function cartInfo()
+    public function cartInfo(): array
     {
         $cart = $this->resolveUserCart();
         return [

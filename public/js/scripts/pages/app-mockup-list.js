@@ -95,7 +95,7 @@ $(document).ready(function () {
 
 function fetchTemplates(page = 1) {
     $.ajax({
-        url: '/product-templates',
+        url: '/mockups',
         type: 'GET',
         data: {
             page,

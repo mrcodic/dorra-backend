@@ -12,7 +12,7 @@
                         <div class="form-group mb-2">
                             <label for="templateName" class="label-text mb-1">Mockup Name</label>
                             <input type="text" id="templateName" class="form-control" name="name"
-                                   placeholder="Template Name">
+                                   placeholder="Mockup Name">
                         </div>
 
                         <div class="form-group mb-2">

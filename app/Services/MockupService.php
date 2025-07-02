@@ -28,7 +28,7 @@ class MockupService extends BaseService
 
 
         $query = $this->repository
-            ->query(['id', 'name', 'product_id', 'created_at'])
+            ->query()
             ->with(['product:id,name'])
             ->when(request()->filled('search_value'), function ($q) {
                 $q->where("name", 'LIKE', '%' . request('search_value') . '%');

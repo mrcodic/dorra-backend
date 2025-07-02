@@ -27,8 +27,12 @@
 
             </div>
             <div class="d-flex justify-content-around p-2">
-                <button type="button" class="btn  btn-outline-secondary">Show</button>
-                <button type="button" class="btn  btn-outline-secondary">Edit</button>
+                <button type="button" class="btn  btn-outline-secondary show-mockup-btn" data-image="{{ $mockup->getFirstMediaUrl('mockups') }}" data-bs-toggle="modal" data-bs-target="#showMockupModal">Show</button>
+                <button type="button" class="btn  btn-outline-secondary"  data-bs-toggle="modal"
+                        data-bs-target="#editMockupModal"
+                        data-name="{{ $mockup->name }}"
+                        data-type="{{ $mockup->name }}"
+                >Edit</button>
                 <button  class="btn  btn-outline-danger open-delete-mockup-modal"
                         data-id="{{ $mockup->id }}"
                         data-bs-toggle="modal"
@@ -69,6 +73,12 @@
         }
     });
     $(document).ready(function() {
+
+            $(".show-mockup-btn").on("click", function(){
+                var imgUrl = $(this).data("image");
+                $("#showMockupModal img").attr("src", imgUrl);
+            });
+
         handleAjaxFormSubmit('.change-status-form', {
             successMessage: '✅ Status updated successfully!',
             onSuccess: function(response, $form) {
