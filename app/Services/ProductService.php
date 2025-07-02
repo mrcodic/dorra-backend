@@ -194,7 +194,7 @@ class ProductService extends BaseService
                 );
 
                 if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
-                    handleMediaUploads([$option['image']], $productOption);
+                    handleMediaUploads([$option['image']], $productOption, clearExisting: true);
                 }
             });
         }
@@ -215,7 +215,7 @@ class ProductService extends BaseService
             handleMediaUploads($validatedData['image'], $product, 'product_main_image', clearExisting: true);
         }
         if (isset($validatedData['images'])) {
-            handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
+            handleMediaUploads($validatedData['images'], $product, 'product_extra_images', clearExisting: true);
 
         }
         return $product;
