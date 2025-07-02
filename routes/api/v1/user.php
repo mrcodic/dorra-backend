@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\Dashboard\MockupController;
 use App\Http\Controllers\Dashboard\TemplateController;
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\LibraryAssetController;
@@ -123,3 +124,7 @@ Route::post("orders/template-customizations", [\App\Http\Controllers\Dashboard\O
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
+Route::get('mockups', [MockupController::class,'index']);
+Route::get('mockup-types', [MockupController::class,'mockupTypes']);
+Route::get('mockups/{mockup}', [MockupController::class,'show']);
+

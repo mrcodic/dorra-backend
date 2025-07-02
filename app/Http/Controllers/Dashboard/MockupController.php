@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Enums\Mockup\TypeEnum;
 use App\Http\Controllers\Base\DashboardController;
 
 
+use App\Http\Resources\MockupResource;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\MockupService;
 use Illuminate\Support\Facades\Response;
@@ -38,13 +40,15 @@ class MockupController extends DashboardController
         $this->methodRelations = [
             'index' => ['product'],
         ];
+        $this->resourceClass = MockupResource::class;
     }
     public function index()
     {
-
-
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination ,perPage: request('per_page',16));
         $associatedData = $this->getAssociatedData('index');
+        if (request()->expectsJson()) {
+            return Response::api(data: MockupResource::collection($data)->response()->getData(true));
+        }
         if (request()->ajax()) {
             $cards = view('dashboard.partials.filtered-mockups', compact('data'))->render();
 
@@ -64,4 +68,18 @@ class MockupController extends DashboardController
 
         return view("dashboard.mockups.index", get_defined_vars());
     }
+
+    public function mockupTypes()
+    {
+        return Response::api(data: TypeEnum::toArray());
+    }
+
+    public function recentMockups()
+    {
+        $recentMockups = $this->mockupService->recentMockups();
+        return Response::api(data: MockupResource::collection($recentMockups));
+
+    }
+
+
 }

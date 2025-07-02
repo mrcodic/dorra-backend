@@ -36,21 +36,9 @@ class DashboardController extends Controller
     ];
 
 
-
-    public function __construct(public BaseService $service){}
-
-    protected function getAssociatedData(string $context = 'shared'): array
+    public function __construct(public BaseService $service)
     {
-        $shared = $this->assoiciatedData['shared'] ?? [];
-        $custom = $this->assoiciatedData[$context] ?? [];
-        return $this->mergeSharedVariables ? array_merge($shared, $custom) : $custom;
-
     }
-    protected function getRelations(string $method): array
-    {
-        return $this->methodRelations[$method] ?? [];
-    }
-
 
     /**
      * Display a listing of the resource.
@@ -62,13 +50,26 @@ class DashboardController extends Controller
         return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());
     }
 
+    protected function getRelations(string $method): array
+    {
+        return $this->methodRelations[$method] ?? [];
+    }
+
+    protected function getAssociatedData(string $context = 'shared'): array
+    {
+        $shared = $this->assoiciatedData['shared'] ?? [];
+        $custom = $this->assoiciatedData[$context] ?? [];
+        return $this->mergeSharedVariables ? array_merge($shared, $custom) : $custom;
+
+    }
+
     /**
      * Show the form for creating a new resource.
      */
     public function create(): View|Application|Factory
     {
         $associatedData = $this->getAssociatedData('create');
-        return view(self::BASE_FOLDER . "{$this->createView}",get_defined_vars());
+        return view(self::BASE_FOLDER . "{$this->createView}", get_defined_vars());
     }
 
     /**
@@ -78,8 +79,8 @@ class DashboardController extends Controller
     {
         $validatedData = $request->validate($this->storeRequestClass->rules());
         $model = $this->service->storeResource($validatedData, $this->relationsToStore, $this->getRelations('store'));
-        return $this->resourceClass ?  Response::api(data: $this->resourceClass::make($model))
-        :  Response::api(data: $model);
+        return $this->resourceClass ? Response::api(data: $this->resourceClass::make($model))
+            : Response::api(data: $model);
     }
 
     /**
@@ -91,6 +92,10 @@ class DashboardController extends Controller
         $associatedData = $this->getAssociatedData('show');
         if (request()->ajax()) {
             return Response::api(data: $model);
+        }
+        if (request()->expectsJson()) {
+            return $this->resourceClass ? Response::api(data: $this->resourceClass::make($model))
+                : Response::api(data: $model);
         }
         return view(self::BASE_FOLDER . "{$this->showView}", get_defined_vars());
     }
@@ -113,8 +118,8 @@ class DashboardController extends Controller
     {
         $validatedData = $request->validate($this->updateRequestClass->rules($id));
         $resource = $this->service->updateResource($validatedData, $id, $this->getRelations('update'));
-        return $this->resourceClass ?  Response::api(data: $this->resourceClass::make($resource))
-            :  Response::api(data: $resource);
+        return $this->resourceClass ? Response::api(data: $this->resourceClass::make($resource))
+            : Response::api(data: $resource);
 
     }
 
@@ -132,7 +137,7 @@ class DashboardController extends Controller
     {
         $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:'.$this->resourceTable.',id'
+            'ids.*' => 'exists:' . $this->resourceTable . ',id'
         ]);
         $this->service->bulkDeleteResources($request->ids);
         return Response::api(data: $request->ids);

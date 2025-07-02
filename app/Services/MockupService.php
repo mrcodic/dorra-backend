@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 
@@ -15,17 +16,16 @@ class MockupService extends BaseService
     }
 
 
-
     public function getAll(
         $relations = [],
         bool $paginate = false,
         $columns = ['*'],
         $perPage = 16
-    ) {
+    )
+    {
 
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
-
 
         $query = $this->repository
             ->query()
@@ -35,6 +35,9 @@ class MockupService extends BaseService
             })
             ->when(request()->filled('product_id'), fn($q) => $q->whereProductId(request('product_id')))
             ->when(request()->filled('type'), fn($q) => $q->whereType(request('type')))
+            ->when(request()->filled('search'), function ($q) {
+                $q->where('name', 'like', '%' . request('search') . '%');
+            })
             ->latest();
 
         if (request()->ajax()) {
@@ -42,8 +45,9 @@ class MockupService extends BaseService
                 ? $query->get()
                 : $query->paginate($pageSize)->withQueryString();
         }
-
-
+        if (request()->expectsJson()) {
+            return $query->paginate($pageSize);
+        }
         return $this->repository->all(
             $paginate,
             $columns,
@@ -51,5 +55,16 @@ class MockupService extends BaseService
             filters: $this->filters,
             perPage: $pageSize ?? $perPage
         );
+    }
+
+    public function showResource($id, $relations = [])
+    {
+        $mockup = $this->repository->find($id);
+        return auth('web')->user()->recentMockups()->syncWithoutDetaching([$mockup->id]);
+    }
+
+    public function recentMockups()
+    {
+        return auth('web')->user()->recentMockups()->take(5)->get();
     }
 }
