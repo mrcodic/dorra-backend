@@ -6,6 +6,7 @@ use App\Repositories\Base\BaseRepositoryInterface;
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class BaseService
 {
@@ -51,6 +52,12 @@ class BaseService
         if ($files) {
             handleMediaUploads($files, $model, clearExisting: true);
         }
+        if (request()->has('deleted_old_images')) {
+            collect(request()->deleted_old_images)->each(function ($id) {
+                Media::find($id)?->delete();
+            });
+        }
+
         return $model->load($relationsToLoad);
     }
 

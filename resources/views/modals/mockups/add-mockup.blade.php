@@ -27,7 +27,7 @@
 
                         <div class="form-group mb-2">
                             <label for="productsSelect" class="label-text mb-1">Product</label>
-                            <select id="productsSelect" name="product_id" class="form-select select2" multiple>
+                            <select id="productsSelect" name="product_id" class="form-select" >
                                 <option value="" disabled>Choose product</option>
                                 @foreach($associatedData['products'] as $product)
                                     <option
@@ -105,12 +105,7 @@
 <script>
 
     $(document).ready(function () {
-        $('#productsSelect').select2({
-            placeholder: 'Choose product',
-            allowClear: true,
-            width: '100%',
-            dropdownParent: $('#addMockupModal')
-        });
+
         handleAjaxFormSubmit("#addMockupForm", {
             successMessage: "Mockup Created Successfully",
             onSuccess: function () {

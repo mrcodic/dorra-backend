@@ -118,7 +118,6 @@
 
 
         @include('modals.mockups.add-mockup')
-        @include('modals.mockups.edit-mockup')
         @include('modals.mockups.show-mockup')
         @include('modals.delete',[
         'id' => 'deleteMockupModal',

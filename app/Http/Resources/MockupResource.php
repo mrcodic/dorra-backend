@@ -21,6 +21,7 @@ class MockupResource extends JsonResource
             'type' => $this->when(isset($this->type), $this->type->label()),
             'colors' => $this->when(isset($this->colors), $this->colors),
             'product' => ProductResource::make($this->whenLoaded('product')),
+            'mockup_url' => $this->getFirstMediaUrl('mockups'),
         ];
     }
 }

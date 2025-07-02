@@ -28,7 +28,7 @@
 
                         <div class="form-group mb-2">
                             <label for="edit-products-select" class="label-text mb-1">Product</label>
-                            <select id="edit-products-select" name="product_id" class="form-select select2" multiple>
+                            <select id="edit-products-select" name="product_id" class="form-select">
                                 <option value="" disabled>Choose product</option>
                                 @foreach($associatedData['products'] as $product)
                                     <option
@@ -76,7 +76,9 @@
                                         </div>
                                         <button type="button" id="edit-remove-image"
                                                 class="btn btn-sm position-absolute text-danger"
-                                                style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                style="top: 5px; right: 5px; background-color: #FFEEED"
+                                                data-image-id="{{ $mockup->getFirstMedia('mockups')?->id }}"
+                                        >
                                             <i data-feather="trash"></i>
                                         </button>
                                     </div>
@@ -108,12 +110,7 @@
                 location.reload();
             }
         })
-        $('#edit-products-select').select2({
-            placeholder: 'Choose product',
-            allowClear: true,
-            width: '100%',
-            dropdownParent: $('#editMockupModal')
-        });
+     
 
         const editPickr = Pickr.create({
             el: '#edit-color-picker-trigger',
@@ -168,6 +165,14 @@
         let editProgressBar = $('#edit-upload-progress-bar');
         let editUploadedImage = $('#edit-uploaded-image');
         let editRemoveButton = $('#edit-remove-image');
+        let imageId = $(this).data('image-id');
+        if (imageId) {
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'deleted_old_images[]',
+                value: imageId
+            }).appendTo('#editMockupForm');
+        }
 
         editUploadArea.on('click', function () {
             editInput.click();
