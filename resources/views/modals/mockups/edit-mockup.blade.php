@@ -13,7 +13,7 @@
                         <div class="form-group mb-2">
                             <label for="edit-mockup-name" class="label-text mb-1">Mockup Name</label>
                             <input type="text" id="edit-mockup-name" class="form-control" name="name"
-                                   placeholder="Mockup Name">
+                                placeholder="Mockup Name">
                         </div>
 
                         <div class="form-group mb-2">
@@ -21,7 +21,7 @@
                             <select id="edit-mockup-type" name="type" class="form-select">
                                 <option value="" disabled>select mockup type</option>
                                 @foreach(\App\Enums\Mockup\TypeEnum::cases() as $type)
-                                    <option value="{{ $type->value }}"> {{ $type->label() }}</option>
+                                <option value="{{ $type->value }}"> {{ $type->label() }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -31,19 +31,25 @@
                             <select id="edit-products-select" name="product_id" class="form-select">
                                 <option value="" disabled>Choose product</option>
                                 @foreach($associatedData['products'] as $product)
-                                    <option
-                                        value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
+                                <option
+                                    value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
                                 @endforeach
                             </select>
                         </div>
+                        
+                        <!-- Colors Section -->
                         <div class="form-group mb-2">
-                            <label class="label-text mb-1">Colors</label>
-                            <button id="edit-color-picker-trigger" type="button">Pick colors</button>
-                            <ul id="edit-selected-colors"></ul>
+                            <label class="label-text mb-1 d-block">Colors</label>
+                            <div class="d-flex flex-wrap align-items-center gap-1">
+                                <button type="button" id="openEditColorPicker" class="gradient-edit-picker-trigger border"></button>
+                                <div id="edit-selected-colors" class="d-flex gap-1 flex-wrap align-items-center">
+                                    <div id="previous-colors" class="d-flex flex-wrap gap-1"></div>
+                                </div>
+                            </div>
                             <input type="hidden" name="colors[]" id="edit-colorsInput">
-                            <div id="previous-colors" class="d-flex flex-wrap gap-2 mt-2"></div>
-
                         </div>
+
+
                         <div class="col-md-12">
                             <div class="mb-1">
                                 <label class="form-label label-text" for="edit-product-image-main">Mockup File</label>
@@ -62,14 +68,14 @@
                                     <!-- Progress Bar -->
                                     <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
                                         <div id="edit-upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
-                                             style="width: 0%"></div>
+                                            style="width: 0%"></div>
                                     </div>
 
                                     <!-- Uploaded Image Preview -->
                                     <div id="edit-uploaded-image"
-                                         class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                        class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
                                         <img src="" alt="Uploaded" class="img-fluid rounded"
-                                             style="width: 50px; height: 50px; object-fit: cover;">
+                                            style="width: 50px; height: 50px; object-fit: cover;">
                                         <div id="edit-file-details" class="file-details">
                                             <div class="file-name fw-bold"></div>
                                             <div class="file-size text-muted small"></div>
@@ -93,32 +99,74 @@
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Save Chenges</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                              aria-hidden="true"></span>
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<style>
+    .gradient-edit-picker-trigger{
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-image: url('/images/AddColor.svg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+    .selected-color-wrapper:hover .remove-color-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
+
+    .remove-color-btn {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #F4F6F6 !important;
+        color: #424746 !important;
+        border-radius: 5px;
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        line-height: 1;
+        padding: 1px;
+        display: none;
+    }
+
+    .selected-color-wrapper:hover .remove-color-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         handleAjaxFormSubmit("#editMockupForm", {
-            successMessage: "Mockup Created Successfully",
-            onSuccess: function () {
+            successMessage: "Mockup Updated Successfully",
+            onSuccess: function() {
                 $('#editMockupModal').modal('hide');
                 location.reload();
             }
         })
      
 
+        // ----------------------- Color Picker ----------------------------
+        const dummyEditElement = document.createElement('div');
+        document.body.appendChild(dummyEditElement);
+
         const editPickr = Pickr.create({
-            el: '#edit-color-picker-trigger',
+            el: dummyEditElement,
             theme: 'classic',
-            default: '#ff0000',
             components: {
-                preview: true,
-                opacity: true,
+                preview: false,
+                opacity: false,
                 hue: true,
                 interaction: {
                     input: true,
@@ -129,36 +177,92 @@
         });
 
         let editSelectedColors = [];
+        let editPreviousColors = [];
 
+        $('#openEditColorPicker').on('click', function() {
+            const trigger = document.getElementById('openEditColorPicker');
+            const rect = trigger.getBoundingClientRect();
+           const modalScrollTop = document.querySelector('#editMockupModal .modal-body')?.scrollTop || 0;
+
+
+            editPickr.show();
+
+            setTimeout(() => {
+                const pickerPanel = document.querySelector('.pcr-app');
+                if (pickerPanel) {
+                    pickerPanel.style.position = 'absolute';
+                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
+                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                    pickerPanel.style.zIndex = 9999;
+                }
+            }, 0);
+        });
         editPickr.on('save', (color) => {
             const hex = color.toHEXA().toString();
-            if (!editSelectedColors.includes(hex)) {
+            if (!editSelectedColors.includes(hex) && !editPreviousColors.includes(hex)) {
                 editSelectedColors.push(hex);
-                renderEditSelectedColors();
+                renderAllColors();
             }
             editPickr.hide();
         });
 
-        function renderEditSelectedColors() {
-            const ul = document.getElementById('edit-selected-colors');
-            ul.innerHTML = '';
-            editSelectedColors.forEach(c => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span class="color-dot rounded-circle" style="background:${c}; display:inline-block; width:20px; height:20px; border:1px solid #ccc;"></span>
-                    <button type="button" onclick="removeEditColor('${c}')" class="btn btn-sm text-danger ms-1">x</button>
-                `;
-                ul.appendChild(li);
-            });
-            $('#edit-colorsInput').val(editSelectedColors.join(','));
+
+
+
+        function updateCombinedColors() {
+            const allColors = [...editPreviousColors, ...editSelectedColors];
+            $('#edit-colorsInput').val(allColors.join(','));
         }
 
-        window.removeEditColor = function (hex) {
-            editSelectedColors = editSelectedColors.filter(c => c !== hex);
-            renderEditSelectedColors();
+        function renderAllColors() {
+            const container = document.getElementById('edit-selected-colors');
+            container.innerHTML = '';
+
+            const combined = [...editPreviousColors.map(c => ({
+                color: c,
+                isPrevious: true
+            })), ...editSelectedColors.map(c => ({
+                color: c,
+                isPrevious: false
+            }))];
+
+            combined.forEach(({
+                color,
+                isPrevious
+            }) => {
+                const item = document.createElement('span');
+                item.innerHTML = `
+            <div class="selected-color-wrapper position-relative">
+                <div class="selected-color-dot" style="background-color: #fff;">
+                    <div class="selected-color-inner" style="background-color: ${color};"></div>
+                </div>
+                <button type="button" class="remove-color-btn" onclick="${isPrevious ? `removePreviousColor('${color}')` : `removeEditColor('${color}')`}">×</button>
+            </div>
+        `;
+                container.appendChild(item);
+            });
+
+            updateCombinedColors();
+        }
+
+
+        // Used when opening the modal
+        window.setPreviousColors = function(colorsArray) {
+            editPreviousColors = colorsArray || [];
+            renderAllColors();
         };
 
+        window.removeEditColor = function(hex) {
+            editSelectedColors = editSelectedColors.filter(c => c !== hex);
+            renderAllColors();
+        };
 
+        window.removePreviousColor = function(hex) {
+            editPreviousColors = editPreviousColors.filter(c => c !== hex);
+            renderAllColors();
+        };
+
+        // ----------------------- File Upload ----------------------------
         let editInput = $('#edit-product-image-main');
         let editUploadArea = $('#edit-upload-area');
         let editProgress = $('#edit-upload-progress');
@@ -174,25 +278,25 @@
             }).appendTo('#editMockupForm');
         }
 
-        editUploadArea.on('click', function () {
+        editUploadArea.on('click', function() {
             editInput.click();
         });
 
-        editInput.on('change', function (e) {
+        editInput.on('change', function(e) {
             handleEditFiles(e.target.files);
         });
 
-        editUploadArea.on('dragover', function (e) {
+        editUploadArea.on('dragover', function(e) {
             e.preventDefault();
             editUploadArea.addClass('dragover');
         });
 
-        editUploadArea.on('dragleave', function (e) {
+        editUploadArea.on('dragleave', function(e) {
             e.preventDefault();
             editUploadArea.removeClass('dragover');
         });
 
-        editUploadArea.on('drop', function (e) {
+        editUploadArea.on('drop', function(e) {
             e.preventDefault();
             editUploadArea.removeClass('dragover');
             handleEditFiles(e.originalEvent.dataTransfer.files);
@@ -209,7 +313,7 @@
                 editProgressBar.css('width', '0%');
 
                 let fakeProgress = 0;
-                let interval = setInterval(function () {
+                let interval = setInterval(function() {
                     fakeProgress += 10;
                     editProgressBar.css('width', fakeProgress + '%');
 
@@ -217,7 +321,7 @@
                         clearInterval(interval);
 
                         let reader = new FileReader();
-                        reader.onload = function (e) {
+                        reader.onload = function(e) {
                             editUploadedImage.find('img').attr('src', e.target.result);
                             editUploadedImage.removeClass('d-none');
                             editProgress.addClass('d-none');
@@ -230,9 +334,10 @@
             }
         }
 
-        editRemoveButton.on('click', function () {
+        editRemoveButton.on('click', function() {
             editUploadedImage.addClass('d-none');
             editInput.val('');
         });
+
     });
 </script>
