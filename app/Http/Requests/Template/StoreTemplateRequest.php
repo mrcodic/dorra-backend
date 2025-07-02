@@ -5,6 +5,7 @@ namespace App\Http\Requests\Template;
 use App\Enums\Template\TypeEnum;
 use App\Enums\Template\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Rules\DimensionWithinUnitRange;
 use Illuminate\Validation\Rule;
 
 
@@ -49,9 +50,9 @@ class StoreTemplateRequest extends BaseRequest
             'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
-            'height' => ["sometimes"],
-            'width' => ["sometimes"],
             'unit' => ["sometimes","integer","in:".UnitEnum::getValuesAsString()],
+            'height' => ['sometimes', 'numeric', new DimensionWithinUnitRange()],
+            'width'  => ['sometimes', 'numeric', new DimensionWithinUnitRange()],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
 //            'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],

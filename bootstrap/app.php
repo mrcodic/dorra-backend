@@ -43,21 +43,20 @@ return Application::configure(basePath: dirname(__DIR__))
 
 
 
-//        $exceptions->render(function (Throwable $e, $request) {
-//            if (
-//                $e instanceof ModelNotFoundException ||
-//                $e instanceof NotFoundHttpException
-//            ) {
-//                if ($request->is('api/v1/*')) {
-//                    return Response::api(\App\Enums\HttpEnum::NOT_FOUND,errors: [
-//                            ['message' => 'Resource not found.']
-//                        ]
-//                   );
-//                }
-//                abort(404);
-//            }
-//
-//            return null;
-//        });
+        $exceptions->render(function (Throwable $e, $request) {
+            if (
+                $e instanceof ModelNotFoundException ||
+                $e instanceof NotFoundHttpException
+            ) {
+                if ($request->expectsJson()) {
+                    return Response::api(\App\Enums\HttpEnum::NOT_FOUND,
+                        message: 'Something went wrong',
+                        errors: [
+                            ['message' => 'Resource not found.']
+                        ]
+                   );
+                }
+            }
+        });
 
     })->create();

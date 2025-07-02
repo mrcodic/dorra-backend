@@ -80,6 +80,18 @@ class MockupController extends DashboardController
         return Response::api(data: MockupResource::collection($recentMockups));
 
     }
+    public function showAndUpdateRecent($id)
+    {
+        $mockup = $this->mockupService->showAndUpdateRecent($id);
+        return Response::api(data: MockupResource::make($mockup));
+
+    }
+
+    public function destroyRecentMockup($id)
+    {
+        $mockup = $this->mockupService->destroyRecentMockup($id);
+        return Response::api(data: MockupResource::make($mockup));
+    }
 
 
 }
