@@ -12,7 +12,7 @@
                         <div class="form-group mb-2">
                             <label for="templateName" class="label-text mb-1">Mockup Name</label>
                             <input type="text" id="templateName" class="form-control" name="name"
-                                   placeholder="Mockup Name">
+                                placeholder="Mockup Name">
                         </div>
 
                         <div class="form-group mb-2">
@@ -20,7 +20,7 @@
                             <select id="mockup-type" name="type" class="form-select">
                                 <option value="" disabled>select mockup type</option>
                                 @foreach(\App\Enums\Mockup\TypeEnum::cases() as $type)
-                                    <option value="{{ $type->value }}"> {{ $type->label() }}</option>
+                                <option value="{{ $type->value }}"> {{ $type->label() }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -30,24 +30,29 @@
                             <select id="productsSelect" name="product_id" class="form-select select2" multiple>
                                 <option value="" disabled>Choose product</option>
                                 @foreach($associatedData['products'] as $product)
-                                    <option
-                                        value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
+                                <option
+                                    value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group mb-2">
-                            <label for="tagsSelect" class="label-text mb-1">Colors</label>
-                            <button id="color-picker-trigger">Pick colors</button>
-                            <ul id="selected-colors"></ul>
+                        <div class="mb-2">
+                            <label class="label-text mb-1 d-block">Colors</label>
+                            <div class="d-flex flex-wrap align-items-center gap-1">
+                                <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+
+                                <span id="selected-colors" class=" d-flex gap-1 flex-wrap align-items-center"></span>
+                            </div>
                             <input type="hidden" name="colors[]" id="colorsInput">
+
                         </div>
+
                         <div class="col-md-12">
                             <div class="mb-1">
                                 <label class="form-label label-text" for="product-image-main">Mockup File</label>
 
                                 <!-- Hidden real input -->
                                 <input type="file" name="image" id="product-image-main" class="form-control d-none"
-                                       accept="image/*">
+                                    accept="image/*">
 
                                 <!-- Custom Upload Card -->
                                 <div id="upload-area" class="upload-card">
@@ -62,22 +67,22 @@
                                     <!-- Progress Bar -->
                                     <div id="upload-progress" class="progress mt-2 d-none w-50">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                             style="width: 0%"></div>
+                                            style="width: 0%"></div>
                                     </div>
 
 
                                     <!-- Uploaded Image Preview -->
                                     <div id="uploaded-image"
-                                         class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                        class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
                                         <img src="" alt="Uploaded" class="img-fluid rounded"
-                                             style="width: 50px; height: 50px; object-fit: cover;">
+                                            style="width: 50px; height: 50px; object-fit: cover;">
                                         <div id="file-details" class="file-details">
                                             <div class="file-name fw-bold"></div>
                                             <div class="file-size text-muted small"></div>
                                         </div>
                                         <button type="button" id="remove-image"
-                                                class="btn btn-sm position-absolute text-danger"
-                                                style="top: 5px; right: 5px; background-color: #FFEEED">
+                                            class="btn btn-sm position-absolute text-danger"
+                                            style="top: 5px; right: 5px; background-color: #FFEEED">
                                             <i data-feather="trash"></i>
                                         </button>
                                     </div>
@@ -93,7 +98,7 @@
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Create</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                              aria-hidden="true"></span>
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </form>
@@ -101,10 +106,71 @@
     </div>
 </div>
 
+<style>
+    .gradient-picker-trigger{
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-image: url('/images/AddColor.svg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+
+
+    .selected-color-wrapper {
+        position: relative;
+        width: 28px;
+        height: 28px;
+    }
+
+    .selected-color-dot {
+        width: 100%;
+        height: 100%;
+        padding: 1px;
+        border-radius: 50%;
+        border: 2px solid #ccc;
+        box-sizing: border-box;
+        background-clip: content-box;
+    }
+
+    .selected-color-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+    }
+
+    .remove-color-btn {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #F4F6F6 !important;
+        color: #424746 !important;
+        border-radius: 5px;
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        line-height: 1;
+        padding: 1px;
+        display: none;
+
+
+
+    }
+
+    .selected-color-wrapper:hover .remove-color-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+
 
 <script>
-
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('#productsSelect').select2({
             placeholder: 'Choose product',
             allowClear: true,
@@ -113,13 +179,13 @@
         });
         handleAjaxFormSubmit("#addMockupForm", {
             successMessage: "Mockup Created Successfully",
-            onSuccess: function () {
+            onSuccess: function() {
                 $('#addMockupModal').modal('hide');
                 location.reload();
             }
         })
     });
-    $(document).ready(function () {
+    $(document).ready(function() {
         let input = $('#product-image-main');
         let uploadArea = $('#upload-area');
         let progress = $('#upload-progress');
@@ -128,27 +194,27 @@
         let removeButton = $('#remove-image');
 
         // Click on the upload area triggers the hidden input
-        uploadArea.on('click', function () {
+        uploadArea.on('click', function() {
             input.click();
         });
 
         // Handle file selection
-        input.on('change', function (e) {
+        input.on('change', function(e) {
             handleFiles(e.target.files);
         });
 
         // Handle Drag & Drop
-        uploadArea.on('dragover', function (e) {
+        uploadArea.on('dragover', function(e) {
             e.preventDefault();
             uploadArea.addClass('dragover');
         });
 
-        uploadArea.on('dragleave', function (e) {
+        uploadArea.on('dragleave', function(e) {
             e.preventDefault();
             uploadArea.removeClass('dragover');
         });
 
-        uploadArea.on('drop', function (e) {
+        uploadArea.on('drop', function(e) {
             e.preventDefault();
             uploadArea.removeClass('dragover');
             handleFiles(e.originalEvent.dataTransfer.files);
@@ -171,7 +237,7 @@
 
                 // Fake loading effect
                 let fakeProgress = 0;
-                let interval = setInterval(function () {
+                let interval = setInterval(function() {
                     fakeProgress += 10;
                     progressBar.css('width', fakeProgress + '%');
 
@@ -180,7 +246,7 @@
 
                         // Preview image
                         let reader = new FileReader();
-                        reader.onload = function (e) {
+                        reader.onload = function(e) {
                             uploadedImage.find('img').attr('src', e.target.result);
                             uploadedImage.removeClass('d-none');
                             progress.addClass('d-none');
@@ -196,19 +262,21 @@
         }
 
         // Remove image
-        removeButton.on('click', function () {
+        removeButton.on('click', function() {
             uploadedImage.addClass('d-none');
             input.val(''); // Clear the input
         });
     });
-    $(document).ready(function () {
+    $(document).ready(function() {
+        const dummyElement = document.createElement('div');
+        document.body.appendChild(dummyElement); // <-- append to body
+
         const pickr = Pickr.create({
-            el: '#color-picker-trigger',
+            el: dummyElement,
             theme: 'classic',
-            default: '#ff0000',
             components: {
-                preview: true,
-                opacity: true,
+                preview: false,
+                opacity: false,
                 hue: true,
                 interaction: {
                     input: true,
@@ -218,14 +286,34 @@
             }
         });
 
-        let selectedColors = []; // store colors
+        let selectedColors = [];
+
+        $('#openColorPicker').on('click', function() {
+            const trigger = document.getElementById('openColorPicker');
+            const rect = trigger.getBoundingClientRect();
+
+            // Show the picker first so it gets rendered
+            pickr.show();
+
+            // Wait for next frame to ensure it's in the DOM
+            setTimeout(() => {
+                const pickerPanel = document.querySelector('.pcr-app');
+
+                if (pickerPanel) {
+                    pickerPanel.style.position = 'absolute';
+                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
+                    pickerPanel.style.top = `${rect.bottom + window.scrollY + 5}px`; // 5px gap
+                    pickerPanel.style.zIndex = 9999; // Ensure it's on top
+                }
+            }, 0);
+        });
+
 
         pickr.on('save', (color) => {
             const hex = color.toHEXA().toString();
 
             if (!selectedColors.includes(hex)) {
                 selectedColors.push(hex);
-
                 renderSelectedColors();
             }
 
@@ -238,20 +326,22 @@
             selectedColors.forEach(c => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                <span class="color-dot rounded-circle" style="background:${c}; display:inline-block; width:20px; height:20px; border:1px solid #ccc;"></span>
-                <button type="button" onclick="removeColor('${c}')" class="btn btn-sm text-danger ms-1">x</button>
+                <div class="selected-color-wrapper">
+                    <div class="selected-color-dot" style="background-color: #fff;">
+                        <div class="selected-color-inner" style="background-color: ${c};"></div>
+                    </div>
+                    <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
+                </div>
             `;
                 ul.appendChild(li);
             });
-            // update hidden input with JSON array or comma-separated string
-            $('#colorsInput').val(selectedColors.join(','));
 
+            $('#colorsInput').val(selectedColors.join(','));
         }
 
-        window.removeColor = function (hex) {
+        window.removeColor = function(hex) {
             selectedColors = selectedColors.filter(c => c !== hex);
             renderSelectedColors();
         };
     });
-
 </script>
