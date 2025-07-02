@@ -164,7 +164,7 @@
 
                                         </div>
 
-                                        <button type="submit"
+                                        <button type="button"
                                             class="btn btn-sm position-absolute text-danger remove-old-image"
                                             data-image-id="{{ $image->id }}"
                                             style="top: 5px; right: 5px; background-color: #FFEEED">
@@ -1174,33 +1174,47 @@
                 }
             });
         });
+        $(document).on('click', '.remove-old-image', function() {
+            let btn = $(this);
+            let imageId = btn.data('image-id');
+
+            // Optionally, add a hidden input to track removed images
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'deleted_old_images[]',
+                value: imageId
+            }).appendTo('form');
+
+            // remove preview
+            btn.closest('.uploaded-image').remove();
+        });
 
         //Remove Extra Image
-        $('.remove-old-image').on('click', function(e) {
-            e.preventDefault();
-            var button = $(this);
-            var imageId = button.data('image-id');
-            var imageElement = button.closest('.uploaded-image');
-            $.ajax({
-                url: '{{ url("api/media") }}/' + imageId,
-                method: "DELETE",
-                success: function(response) {
-                    imageElement.remove();
-                    Toastify({
-                        text: "Image Removed Successfully",
-                        duration: 4000,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#28a745",
-                        close: true
-                    }).showToast();
-                },
-                error: function(xhr) {
-                    console.log(xhr.responseJson.errors)
-                }
-            })
+        {{--$('.remove-old-image').on('click', function(e) {--}}
+        {{--    e.preventDefault();--}}
+        {{--    var button = $(this);--}}
+        {{--    var imageId = button.data('image-id');--}}
+        {{--    var imageElement = button.closest('.uploaded-image');--}}
+        {{--    $.ajax({--}}
+        {{--        url: '{{ url("api/media") }}/' + imageId,--}}
+        {{--        method: "DELETE",--}}
+        {{--        success: function(response) {--}}
+        {{--            imageElement.remove();--}}
+        {{--            Toastify({--}}
+        {{--                text: "Image Removed Successfully",--}}
+        {{--                duration: 4000,--}}
+        {{--                gravity: "top",--}}
+        {{--                position: "right",--}}
+        {{--                backgroundColor: "#28a745",--}}
+        {{--                close: true--}}
+        {{--            }).showToast();--}}
+        {{--        },--}}
+        {{--        error: function(xhr) {--}}
+        {{--            console.log(xhr.responseJson.errors)--}}
+        {{--        }--}}
+        {{--    })--}}
 
-        });
+        {{--});--}}
     });
 </script>
 <script>

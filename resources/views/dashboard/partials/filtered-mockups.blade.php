@@ -62,7 +62,7 @@
         <img src="{{ asset('images/Empty.png') }}" alt="No Templates" style="max-width: 200px;" class="mb-2">
 
         <!-- Empty Message -->
-        <p class="mb-2 text-secondary">You didn’t create any mockups yet.</p>
+        <p class="mb-2 text-secondary">Nothing to show yet.</p>
 
         <!-- Create Button -->
         <a class="btn btn-primary" data-bs-toggle="modal"
