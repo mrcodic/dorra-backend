@@ -39,7 +39,7 @@
                             <label for="tagsSelect" class="label-text mb-1">Colors</label>
                             <button id="color-picker-trigger">Pick colors</button>
                             <ul id="selected-colors"></ul>
-                            <input type="hidden" name="colors" id="colorsInput">
+                            <input type="hidden" name="colors[]" id="colorsInput">
                         </div>
                         <div class="col-md-12">
                             <div class="mb-1">
@@ -244,7 +244,8 @@
                 ul.appendChild(li);
             });
             // update hidden input with JSON array or comma-separated string
-            $('#colorsInput').val(JSON.stringify(selectedColors));
+            $('#colorsInput').val(selectedColors.join(','));
+
         }
 
         window.removeColor = function (hex) {

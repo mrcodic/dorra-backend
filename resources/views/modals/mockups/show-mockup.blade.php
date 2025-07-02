@@ -24,12 +24,8 @@
               display: flex;
               align-items: center;
               gap: 8px;
-              ">
-                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #FF0000;"></div>
-                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #00FF00;"></div>
-                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #0000FF;"></div>
-                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #FFFF00;"></div>
-                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #FF00FF;"></div>
+              " class="colors-container">
+
                     </div>
                 </div>
             </div>

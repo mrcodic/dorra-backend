@@ -33,10 +33,19 @@ class StoreMockupRequest extends BaseRequest
             ],
             'type' => ['required', Rule::in(TypeEnum::values())],
             'product_id' => ['required','integer', Rule::exists(Product::class, 'id')],
-            'colors' => ['required'],
-            'image' => ['required', 'image', 'mimes:png,'],
+            'colors' => ['required','array'],
+            'colors.*' => ['required','string'],
+            'image' => ['required', 'image', 'mimes:png'],
         ];
 
+    }
+    public function messages()
+    {
+        return [
+            'image.mimes' => 'The image must be a PNG file.',
+            'image.required' => 'Please upload an image.',
+            'image.image' => 'The file must be an image.',
+        ];
     }
 
 }

@@ -34,6 +34,7 @@ class MockupService extends BaseService
                 $q->where("name", 'LIKE', '%' . request('search_value') . '%');
             })
             ->when(request()->filled('product_id'), fn($q) => $q->whereProductId(request('product_id')))
+            ->when(request()->filled('type'), fn($q) => $q->whereType(request('type')))
             ->latest();
 
         if (request()->ajax()) {

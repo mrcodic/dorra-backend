@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Mockup;
 
+use App\Enums\Mockup\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
+use App\Models\Product;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Propaganistas\LaravelPhone\Rules\Phone;
@@ -27,21 +29,15 @@ class UpdateMockupRequest extends BaseRequest
     public function rules($id): array
     {
         return [
-            'name.en' => [
+            'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('categories', 'name->en')->ignore($id),
             ],
-            'name.ar' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('categories', 'name->ar')->ignore($id),
-            ],
-            'description.en' => ['nullable', 'string'],
-            'description.ar' => ['nullable', 'string'],
-            'image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'type' => ['required', Rule::in(TypeEnum::values())],
+            'product_id' => ['required','integer', Rule::exists(Product::class, 'id')],
+            'colors' => ['sometimes','array'],
+            'image' => ['sometimes', 'image', 'mimes:png,'],
         ];
     }
 

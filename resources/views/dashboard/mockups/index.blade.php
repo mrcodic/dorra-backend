@@ -50,15 +50,7 @@
                             </form>
                         </div>
 
-                        {{-- Status Filter --}}
-                        <div class="col-6 col-md-2">
-                            <select name="status" class="form-select filter-status select2" data-placeholder="Status">
-                                <option value="">Status</option>
-                                @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
-                                    <option value="{{ $status->value }}">{{ $status->label() }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+
 
                         {{-- Product Filter --}}
                         <div class="col-6 col-md-2">
@@ -68,6 +60,16 @@
                                 @foreach($associatedData['products'] as $product)
                                     <option
                                         value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Type Filter --}}
+                        <div class="col-6 col-md-2">
+                            <select name="type" class="form-select filter-type select2" data-placeholder="Type">
+                                <option value="">Type</option>
+                                @foreach(\App\Enums\Mockup\TypeEnum::cases() as $type)
+                                    <option value="{{ $type->value }}">{{ $type->label() }}</option>
                                 @endforeach
                             </select>
                         </div>
