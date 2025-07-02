@@ -1,9 +1,9 @@
 
 $(document).ready(function () {
-    fetchTemplates();
+    fetchMockups();
 
     $('.filter-type, .filter-product, #search-category-form, .filter-paginate-number').on('change keyup', function () {
-        fetchTemplates();
+        fetchMockups();
     });
 
 
@@ -23,7 +23,15 @@ $(document).ready(function () {
             location.reload();
         }
     });
-
+    function removeMockupCards(ids) {
+        if (Array.isArray(ids)) {
+            ids.forEach(function (id) {
+                $('[data-mockup-id="' + id + '"]').fadeOut(300, function () {
+                    $(this).remove();
+                });
+            });
+        }
+    }
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();
         const selectedIds = $(".category-checkbox:checked").map(function () {
@@ -52,7 +60,7 @@ $(document).ready(function () {
                     close: true,
                 }).showToast();
 
-                removeTemplateCards(response.data);
+                removeMockupCards(response.data);
 
                 $('#bulk-delete-container').hide();
                 $('.category-checkbox').prop('checked', false);
@@ -88,7 +96,7 @@ $(document).ready(function () {
 });
 
 
-function fetchTemplates(page = 1) {
+function fetchMockups(page = 1) {
     $.ajax({
         url: '/mockups',
         type: 'GET',
@@ -106,12 +114,12 @@ function fetchTemplates(page = 1) {
         error: xhr => console.error('Failed to fetch templates:', xhr)
     });
 
-    $('.filter-paginate-number').on('change', () => fetchTemplates(1));
+    $('.filter-paginate-number').on('change', () => fetchMockups(1));
     $(document).on('click', '#pagination-container a.page-link', function (e) {
         e.preventDefault();
         const url = new URL($(this).attr('href'), location.origin);
         const page = url.searchParams.get('page') || 1;
-        fetchTemplates(page);
+        fetchMockups(page);
     });
 
     // Checkbox select all
