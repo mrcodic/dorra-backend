@@ -67,4 +67,9 @@ class MockupService extends BaseService
     {
         return auth('web')->user()->recentMockups()->take(5)->get();
     }
+
+    public function destroyRecentMockup($id)
+    {
+        return auth('web')->user()->recentMockups()->detach($id);
+    }
 }

@@ -213,11 +213,14 @@ Route::middleware('auth')->group(function () {
         Route::post('product-specifications', ProductSpecificationController::class)->name('products.specifications.create');
         Route::get('product-specifications/{product}', [ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
         Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
-        Route::get('mockups', [MockupController::class,'index']);
-        Route::get('mockups/{mockup}', [MockupController::class,'showAndUpdateRecent']);
-        Route::get('recent-mockups', [MockupController::class,'recentMockups']);
-        Route::get('mockup-types', [MockupController::class,'mockupTypes']);
-        Route::delete('mockups/{mockup}', [MockupController::class,'destroy']);
+        Route::controller(MockupController::class)->group(function () {
+            Route::get('mockups','index');
+            Route::get('mockups/{mockup}','showAndUpdateRecent');
+            Route::get('recent-mockups','recentMockups');
+            Route::get('mockup-types','mockupTypes');
+            Route::delete('recent-mockups/{mockup}','destroyRecentMockup');
+        });
+
     });
 
 });

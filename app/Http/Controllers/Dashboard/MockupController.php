@@ -87,5 +87,11 @@ class MockupController extends DashboardController
 
     }
 
+    public function destroyRecentMockup($id)
+    {
+        $mockup = $this->mockupService->destroyRecentMockup($id);
+        return Response::api(data: MockupResource::make($mockup));
+    }
+
 
 }
