@@ -159,6 +159,13 @@
     <script src="{{ asset('js/scripts/pages/app-mockup-list.js') }}?v={{ time() }}"></script>
 
     <script>
+        handleAjaxFormSubmit("#editMockupForm", {
+            successMessage: "Mockup Updated Successfully",
+            onSuccess: function() {
+                $('#editMockupModal').modal('hide');
+                location.reload();
+            }
+        })
 
         $(document).ready(function () {
             $('.select2').select2({

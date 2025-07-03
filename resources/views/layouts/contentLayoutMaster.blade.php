@@ -34,6 +34,7 @@ $configData = Helper::applClasses();
 
     {{-- Include core + vendor Styles --}}
   @include('panels/styles')
+    @stack('styles')
 
 </head>
 <!-- END: Head-->
@@ -106,3 +107,4 @@ $configData = Helper::applClasses();
     }
 
 </script>
+@stack('scripts')

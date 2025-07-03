@@ -53,6 +53,7 @@ class BaseService
             handleMediaUploads($files, $model, clearExisting: true);
         }
         if (request()->has('deleted_old_images')) {
+            dd("asdfds");
             collect(request()->deleted_old_images)->each(function ($id) {
                 Media::find($id)?->delete();
             });
