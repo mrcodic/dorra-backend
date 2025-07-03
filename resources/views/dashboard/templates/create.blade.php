@@ -114,15 +114,15 @@
                                         <select id="productsSelect" class="form-select select2" name="product_id" @if(session('product_type') != "other") readonly @endif>
                                             <option value="" disabled>Choose Product</option>
                                             @foreach($associatedData['products'] as $product)
-                                                @if(strtolower($product->getTranslation('name', 'en')) == 't-shirt')
+
                                                     <option
                                                         value="{{ $product->id }}"
-                                                        {{ session('product_type') == 'T-shirt' ? 'selected' : '' }}
+                                                        {{ session('product_type') == $product->getTranslation('name', 'en') ? 'selected' : '' }}
                                                     >
                                                         {{ $product->getTranslation('name', app()->getLocale()) }}
                                                     </option>
-                                                @endif
                                             @endforeach
+
                                         </select>
                                     </div>
 

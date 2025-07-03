@@ -45,10 +45,18 @@ class TemplateController extends DashboardController
         $this->resourceTable = 'templates';
         $this->resourceClass = TemplateResource::class;
         $this->assoiciatedData = [
-            'shared' => [
-                'products' => $this->productRepository->all(),
+            'create' => [
+                'products' => $this->productRepository->query()
+                    ->when(
+                        session('product_type') == 'other',
+                        fn($query) => $query->where('name->en', '!=', 'T-shirt'),
+                        fn($query) => $query->where('name->en', 'T-shirt')
+                    )
+                    ->get(),
             ],
+
             'index' => [
+                'products' => $this->productRepository->all(),
                 'tags' => $this->tagRepository->all(),
             ],
         ];
@@ -64,7 +72,7 @@ class TemplateController extends DashboardController
         if (!$isProductFound) {
             return view("dashboard.errors.product");
         }
-        return view("dashboard.templates.create",['associatedData' => $this->assoiciatedData['shared']]);
+        return view("dashboard.templates.create",['associatedData' => $this->assoiciatedData['create']]);
     }
 
     public function index()
