@@ -36,7 +36,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        
+
                         <!-- Colors Section -->
                         <div class="form-group mb-2">
                             <label class="label-text mb-1 d-block">Colors</label>
@@ -81,10 +81,9 @@
                                             <div class="file-size text-muted small"></div>
                                         </div>
                                         <button type="button" id="edit-remove-image"
-                                                class="btn btn-sm position-absolute text-danger"
-                                                style="top: 5px; right: 5px; background-color: #FFEEED"
-                                                data-image-id="{{ $mockup->getFirstMedia('mockups')?->id }}"
-                                        >
+                                            class="btn btn-sm position-absolute text-danger"
+                                            style="top: 5px; right: 5px; background-color: #FFEEED"
+                                            data-image-id="{{ $mockup->getFirstMedia('mockups')?->id }}">
                                             <i data-feather="trash"></i>
                                         </button>
                                     </div>
@@ -107,17 +106,25 @@
     </div>
 </div>
 <style>
-    .gradient-edit-picker-trigger{
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-image: url('/images/AddColor.svg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        border: 1px solid #ccc;
-        cursor: pointer;
-    }
+.gradient-edit-picker-trigger {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-image: url('/images/AddColor.svg') !important; /* force override */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Hide any accidental injected .pcr-button */
+.gradient-edit-picker-trigger .pcr-button {
+    display: none !important;
+}
+
+
     .selected-color-wrapper:hover .remove-color-btn {
         display: flex;
         align-items: center;
@@ -147,43 +154,48 @@
     }
 </style>
 <script>
-    $(document).ready(function() {
-        handleAjaxFormSubmit("#editMockupForm", {
-            successMessage: "Mockup Updated Successfully",
-            onSuccess: function() {
-                $('#editMockupModal').modal('hide');
-                location.reload();
-            }
-        })
-     
+    let editPickr; // Declare it in a broader scope
 
-        // ----------------------- Color Picker ----------------------------
-        const dummyEditElement = document.createElement('div');
-        document.body.appendChild(dummyEditElement);
+    $(document).ready(function () {
+        // Only initialize Pickr once
+        if (!editPickr) {
+            const dummyEditElement = document.createElement('div');
+            dummyEditElement.style.display = 'none';
+            document.body.appendChild(dummyEditElement);
 
-        const editPickr = Pickr.create({
-            el: dummyEditElement,
-            theme: 'classic',
-            components: {
-                preview: false,
-                opacity: false,
-                hue: true,
-                interaction: {
-                    input: true,
-                    save: true,
-                    clear: true
+            editPickr = Pickr.create({
+                el: dummyEditElement,
+                theme: 'classic',
+                components: {
+                    preview: false,
+                    opacity: false,
+                    hue: true,
+                    interaction: {
+                        input: true,
+                        save: true,
+                        clear: true
+                    }
                 }
-            }
-        });
+            });
+
+            // Handle save
+            editPickr.on('save', (color) => {
+                const hex = color.toHEXA().toString();
+                if (!editSelectedColors.includes(hex) && !editPreviousColors.includes(hex)) {
+                    editSelectedColors.push(hex);
+                    renderAllColors();
+                }
+                editPickr.hide();
+            });
+        }
 
         let editSelectedColors = [];
         let editPreviousColors = [];
 
-        $('#openEditColorPicker').on('click', function() {
+        $('#openEditColorPicker').on('click', function () {
             const trigger = document.getElementById('openEditColorPicker');
             const rect = trigger.getBoundingClientRect();
-           const modalScrollTop = document.querySelector('#editMockupModal .modal-body')?.scrollTop || 0;
-
+            const modalScrollTop = document.querySelector('#editMockupModal .modal-body')?.scrollTop || 0;
 
             editPickr.show();
 
@@ -197,17 +209,22 @@
                 }
             }, 0);
         });
-        editPickr.on('save', (color) => {
-            const hex = color.toHEXA().toString();
-            if (!editSelectedColors.includes(hex) && !editPreviousColors.includes(hex)) {
-                editSelectedColors.push(hex);
-                renderAllColors();
-            }
-            editPickr.hide();
-        });
 
+        // The rest of your functions for rendering/removing colors...
+        window.setPreviousColors = function (colorsArray) {
+            editPreviousColors = colorsArray || [];
+            renderAllColors();
+        };
 
+        window.removeEditColor = function (hex) {
+            editSelectedColors = editSelectedColors.filter(c => c !== hex);
+            renderAllColors();
+        };
 
+        window.removePreviousColor = function (hex) {
+            editPreviousColors = editPreviousColors.filter(c => c !== hex);
+            renderAllColors();
+        };
 
         function updateCombinedColors() {
             const allColors = [...editPreviousColors, ...editSelectedColors];
@@ -226,41 +243,36 @@
                 isPrevious: false
             }))];
 
-            combined.forEach(({
-                color,
-                isPrevious
-            }) => {
+            combined.forEach(({ color, isPrevious }) => {
                 const item = document.createElement('span');
                 item.innerHTML = `
-            <div class="selected-color-wrapper position-relative">
-                <div class="selected-color-dot" style="background-color: #fff;">
-                    <div class="selected-color-inner" style="background-color: ${color};"></div>
-                </div>
-                <button type="button" class="remove-color-btn" onclick="${isPrevious ? `removePreviousColor('${color}')` : `removeEditColor('${color}')`}">×</button>
-            </div>
-        `;
+                    <div class="selected-color-wrapper position-relative">
+                        <div class="selected-color-dot" style="background-color: #fff;">
+                            <div class="selected-color-inner" style="background-color: ${color};"></div>
+                        </div>
+                        <button type="button" class="remove-color-btn" onclick="${isPrevious ? `removePreviousColor('${color}')` : `removeEditColor('${color}')`}">×</button>
+                    </div>
+                `;
                 container.appendChild(item);
             });
 
             updateCombinedColors();
         }
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        handleAjaxFormSubmit("#editMockupForm", {
+            successMessage: "Mockup Updated Successfully",
+            onSuccess: function() {
+                $('#editMockupModal').modal('hide');
+                location.reload();
+            }
+        })
 
 
-        // Used when opening the modal
-        window.setPreviousColors = function(colorsArray) {
-            editPreviousColors = colorsArray || [];
-            renderAllColors();
-        };
 
-        window.removeEditColor = function(hex) {
-            editSelectedColors = editSelectedColors.filter(c => c !== hex);
-            renderAllColors();
-        };
-
-        window.removePreviousColor = function(hex) {
-            editPreviousColors = editPreviousColors.filter(c => c !== hex);
-            renderAllColors();
-        };
 
         // ----------------------- File Upload ----------------------------
         let editInput = $('#edit-product-image-main');
