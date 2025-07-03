@@ -44,10 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
 
         $exceptions->render(function (Throwable $e, $request) {
-            if (
-                $e instanceof ModelNotFoundException ||
-                $e instanceof NotFoundHttpException
-            ) {
+            if ($e instanceof ModelNotFoundException) {
                 if ($request->expectsJson()) {
                     return Response::api(\App\Enums\HttpEnum::NOT_FOUND,
                         message: 'Something went wrong',
@@ -55,6 +52,16 @@ return Application::configure(basePath: dirname(__DIR__))
                             ['message' => 'Resource not found.']
                         ]
                    );
+                }
+            }
+            if ($e instanceof NotFoundHttpException) {
+                if ($request->expectsJson()) {
+                    return Response::api(\App\Enums\HttpEnum::NOT_FOUND,
+                        message: 'Something went wrong',
+                        errors: [
+                            ['message' => 'Route not found.']
+                        ]
+                    );
                 }
             }
         });

@@ -13,7 +13,7 @@
                         <div class="form-group mb-2">
                             <label for="edit-mockup-name" class="label-text mb-1">Mockup Name</label>
                             <input type="text" id="edit-mockup-name" class="form-control" name="name"
-                                placeholder="Mockup Name">
+                                   placeholder="Mockup Name">
                         </div>
 
                         <div class="form-group mb-2">
@@ -21,7 +21,7 @@
                             <select id="edit-mockup-type" name="type" class="form-select">
                                 <option value="" disabled>select mockup type</option>
                                 @foreach(\App\Enums\Mockup\TypeEnum::cases() as $type)
-                                <option value="{{ $type->value }}"> {{ $type->label() }}</option>
+                                    <option value="{{ $type->value }}"> {{ $type->label() }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -31,8 +31,8 @@
                             <select id="edit-products-select" name="product_id" class="form-select">
                                 <option value="" disabled>Choose product</option>
                                 @foreach($associatedData['products'] as $product)
-                                <option
-                                    value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
+                                    <option
+                                        value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -68,24 +68,25 @@
                                     <!-- Progress Bar -->
                                     <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
                                         <div id="edit-upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
-                                            style="width: 0%"></div>
+                                             style="width: 0%"></div>
                                     </div>
 
                                     <!-- Uploaded Image Preview -->
                                     <div id="edit-uploaded-image"
-                                        class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                         class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
                                         <img src="" alt="Uploaded" class="img-fluid rounded"
-                                            style="width: 50px; height: 50px; object-fit: cover;">
+                                             style="width: 50px; height: 50px; object-fit: cover;">
                                         <div id="edit-file-details" class="file-details">
                                             <div class="file-name fw-bold"></div>
                                             <div class="file-size text-muted small"></div>
                                         </div>
-                                        <button type="button" id="edit-remove-image"
-                                            class="btn btn-sm position-absolute text-danger"
-                                            style="top: 5px; right: 5px; background-color: #FFEEED"
-                                            data-image-id="{{ $mockup->getFirstMedia('mockups')?->id }}">
-                                            <i data-feather="trash"></i>
-                                        </button>
+{{--                                        <button type="button" id="edit-remove-image"--}}
+{{--                                                class="btn btn-sm position-absolute text-danger"--}}
+{{--                                                style="top: 5px; right: 5px; background-color: #FFEEED"--}}
+{{--                                                data-image-id="{{ $mockup->getFirstMedia('mockups')?->id }}"--}}
+{{--                                        >--}}
+{{--                                            <i data-feather="trash"></i>--}}
+{{--                                        </button>--}}
                                     </div>
                                 </div>
                             </div>
@@ -98,13 +99,14 @@
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Save Chenges</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                            aria-hidden="true"></span>
+                              aria-hidden="true"></span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 <style>
     .gradient-edit-picker-trigger {
         width: 40px;
