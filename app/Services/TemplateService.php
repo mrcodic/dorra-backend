@@ -87,7 +87,7 @@ class TemplateService extends BaseService
             if (empty($validatedData['height'])) {
                 $validatedData['height']= 4800;
             }
-            if (empty($data['width'])) {
+            if (empty($validatedData['width'])) {
                 $validatedData['width'] =3600;
             }
             if (empty($data['unit'])) {
