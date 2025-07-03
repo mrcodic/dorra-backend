@@ -79,6 +79,80 @@
     </div>
 @endforelse
 <script !src="">
+    function renderAllColors() {
+        const container = document.getElementById('edit-selected-colors');
+        container.innerHTML = '';
+
+        editPreviousColors.forEach(color => {
+            const item = document.createElement('span');
+            item.innerHTML = `
+            <div class="selected-color-wrapper position-relative">
+                <div class="selected-color-dot" style="background-color: #fff;">
+                    <div class="selected-color-inner" style="background-color: ${color};"></div>
+                </div>
+                <button type="button" class="remove-color-btn" onclick="removePreviousColor('${color}')">×</button>
+            </div>
+        `;
+            container.appendChild(item);
+        });
+        handleAjaxFormSubmit('.change-status-form', {
+            successMessage: '✅ Status updated successfully!',
+            onSuccess: function (response, $form) {
+                console.log('Success:', response);
+
+                const templateId = response.data.id;
+                const status = response.data.status.value; // assuming this contains status enum value
+                const statusLabel = response.data.status.label;
+                const designData = response.data.design_data; // assuming design_data returned from server
+
+                // Update status label text
+                const $statusLabel = $('.template-status-label[data-template-id="' + templateId + '"]');
+                if ($statusLabel.length) {
+                    $statusLabel.text(statusLabel);
+                }
+
+                // Find the template card div by data-template-id
+                const $mockupCard = $('[data-template-id="' + templateId + '"]');
+
+                if ($mockupCard.length) {
+                    // Find publish button
+                    const $publishBtn = $mockupCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}"]').siblings('button');
+                    // Find draft button
+                    const $draftBtn = $mockupCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}"]').siblings('button');
+                    // Find live button
+                    const $liveBtn = $mockupCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::LIVE }}"]').siblings('button');
+
+                    // Logic to enable/disable buttons, example (adjust according to your rules):
+
+                    // Enable Publish if design_data exists and status not published
+                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::PUBLISHED->value }}) {
+                        $publishBtn.removeClass('disabled').prop('disabled', false);
+                    } else {
+                        $publishBtn.addClass('disabled').prop('disabled', true);
+                    }
+
+                    // Enable Draft if design_data exists and status not drafted
+                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::DRAFTED->value }}) {
+                        $draftBtn.removeClass('disabled').prop('disabled', false);
+                    } else {
+                        $draftBtn.addClass('disabled').prop('disabled', true);
+                    }
+
+                    // Enable Live if design_data exists and status not live (adjust this condition if needed)
+                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::LIVE->value }}) {
+                        $liveBtn.removeClass('disabled').prop('disabled', false);
+                    } else {
+                        $liveBtn.addClass('disabled').prop('disabled', true);
+                    }
+                }
+            },
+
+            onError: function (xhr, $form) {
+                console.error('Error:', xhr);
+            },
+            resetForm: false,
+        });
+    }
     document.addEventListener("DOMContentLoaded", function () {
         if (window.feather) {
             feather.replace();
@@ -146,27 +220,15 @@
                 colors = [];
             }
 
-            $("#editMockupModal #editMockupForm").attr('action',"{{ route("mockups.update",':id') }}".replace(':id',id));
+            $("#editMockupModal #editMockupForm").attr('action', "{{ route("mockups.update",':id') }}".replace(':id', id));
             $("#editMockupModal #edit-mockup-name").val(name);
             $("#editMockupModal #edit-mockup-type").val(type);
             $("#editMockupModal #edit-products-select").val(productId).trigger("change");
-            $("#editMockupModal #edit-colorsInput").val(colors.join(", "));
-        //
-        //     const previousColorsContainer = $("#editMockupModal #previous-colors");
-        //     previousColorsContainer.empty();
-        //
-        //     colors.forEach(color => {
-        //         previousColorsContainer.append(`
-        //     <div style="
-        //         width: 32px;
-        //         height: 32px;
-        //         border-radius: 50%;
-        //         background: ${color};
-        //         border: 1px solid #ccc;
-        //     "></div>
-        // `);
-        //     });
-        //
+            // $("#editMockupModal #edit-colorsInput").val(colors.join(", "));
+            editPreviousColors = colors;
+
+            // rerender the colors
+            renderAllColors();
             $("#editMockupModal #edit-uploaded-image img").attr("src", imgUrl);
             $("#editMockupModal #edit-uploaded-image").removeClass("d-none");
             $("#editMockupModal #file-details .file-name").text(imgUrl.split('/').pop());
@@ -176,63 +238,5 @@
             $("#editMockupModal #edit-upload-progress .progress-bar").css("width", "0%");
         });
 
-
-        handleAjaxFormSubmit('.change-status-form', {
-            successMessage: '✅ Status updated successfully!',
-            onSuccess: function (response, $form) {
-                console.log('Success:', response);
-
-                const templateId = response.data.id;
-                const status = response.data.status.value; // assuming this contains status enum value
-                const statusLabel = response.data.status.label;
-                const designData = response.data.design_data; // assuming design_data returned from server
-
-                // Update status label text
-                const $statusLabel = $('.template-status-label[data-template-id="' + templateId + '"]');
-                if ($statusLabel.length) {
-                    $statusLabel.text(statusLabel);
-                }
-
-                // Find the template card div by data-template-id
-                const $mockupCard = $('[data-template-id="' + templateId + '"]');
-
-                if ($mockupCard.length) {
-                    // Find publish button
-                    const $publishBtn = $mockupCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}"]').siblings('button');
-                    // Find draft button
-                    const $draftBtn = $mockupCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}"]').siblings('button');
-                    // Find live button
-                    const $liveBtn = $mockupCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::LIVE }}"]').siblings('button');
-
-                    // Logic to enable/disable buttons, example (adjust according to your rules):
-
-                    // Enable Publish if design_data exists and status not published
-                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::PUBLISHED->value }}) {
-                        $publishBtn.removeClass('disabled').prop('disabled', false);
-                    } else {
-                        $publishBtn.addClass('disabled').prop('disabled', true);
-                    }
-
-                    // Enable Draft if design_data exists and status not drafted
-                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::DRAFTED->value }}) {
-                        $draftBtn.removeClass('disabled').prop('disabled', false);
-                    } else {
-                        $draftBtn.addClass('disabled').prop('disabled', true);
-                    }
-
-                    // Enable Live if design_data exists and status not live (adjust this condition if needed)
-                    if (designData && status !== {{ \App\Enums\Template\StatusEnum::LIVE->value }}) {
-                        $liveBtn.removeClass('disabled').prop('disabled', false);
-                    } else {
-                        $liveBtn.addClass('disabled').prop('disabled', true);
-                    }
-                }
-            },
-
-            onError: function (xhr, $form) {
-                console.error('Error:', xhr);
-            },
-            resetForm: false,
-        });
     });
 </script>

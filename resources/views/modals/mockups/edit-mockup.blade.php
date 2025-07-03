@@ -46,7 +46,7 @@
                                     <div id="previous-colors" class="d-flex flex-wrap gap-1"></div>
                                 </div>
                             </div>
-                            <div id="colorsInputContainer"></div>
+                            <div id="editColorsInputContainer"></div>
                         </div>
 
 
@@ -150,14 +150,11 @@
 </style>
 <script>
     let editPickr; // broader scope
-
+    let editPreviousColors = []; // global scope
     $(document).ready(function() {
-        let editSelectedColors = [];
 
-        let editPreviousColors = @json($mockup->colors);
-        console.log(editPreviousColors)
-        // immediately render existing colors from DB
-        renderAllColors();
+
+        let editSelectedColors = [];
 
         // Only initialize Pickr once
         if (!editPickr) {
@@ -235,7 +232,7 @@
             });
 
             // also update hidden inputs
-            const colorInputContainer = document.getElementById('colorsInputContainer');
+            const colorInputContainer = document.getElementById('editColorsInputContainer');
             colorInputContainer.innerHTML = '';
             editPreviousColors.forEach(color => {
                 const hiddenInput = document.createElement('input');
