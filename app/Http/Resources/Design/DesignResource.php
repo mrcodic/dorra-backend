@@ -20,11 +20,12 @@ class DesignResource extends JsonResource
     {
         return [
             'id' => $this->id,
+//            'name'=> $this
             'design_data' => $this->when(request('design_data') == true, $this->design_data),
             'design_image' => $this->getFirstMediaUrl('designs'),
             'current_version' => $this->current_version,
             'product' => ProductResource::make($this->whenLoaded('product')),
-            'owner' => UserResource::make($this->whenLoaded('user')),
+            'owner' => UserResource::make($this->whenLoaded('owner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
             'placed_on' => optional($this->pivot)->created_at?->format('d/m/Y'),
