@@ -106,7 +106,6 @@
         </div>
     </div>
 </div>
-@push('scripts')
     <script !src="">
 
         $(document).ready(function() {
@@ -296,8 +295,6 @@
         });
 
     </script>
-@endpush
-@push('styles')
 
 <style>
 .gradient-edit-picker-trigger {
