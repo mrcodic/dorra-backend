@@ -49,11 +49,18 @@ class TemplateController extends DashboardController
                 'products' => $this->productRepository->query()
                     ->when(
                         session('product_type') == 'other',
-                        fn($query) => $query->where('name->en', '!=', 'T-shirt'),
-                        fn($query) => $query->where('name->en', 'T-shirt')
+                        fn($query) => $query->whereRaw(
+                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.en'))) != ?",
+                            ['t-shirt']
+                        ),
+                        fn($query) => $query->whereRaw(
+                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.en'))) = ?",
+                            ['t-shirt']
+                        )
                     )
                     ->get(),
             ],
+
 
             'index' => [
                 'products' => $this->productRepository->all(),
