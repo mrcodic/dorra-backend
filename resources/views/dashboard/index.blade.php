@@ -381,6 +381,13 @@ $discountTypes = [
 <script src="{{ asset(mix('js/scripts/pages/dashboard-analytics.js')) }}"></script>
 <!-- Vists and Sales chart -->
 <script>
+    handleAjaxFormSubmit("#editMockupForm", {
+        successMessage: "Mockup Updated Successfully",
+        onSuccess: function() {
+            $('#editMockupModal').modal('hide');
+            location.reload();
+        }
+    })
     document.addEventListener('DOMContentLoaded', function() {
         const yearSelect = document.getElementById('yearSelect');
         const currentYear = new Date().getFullYear();

@@ -261,16 +261,6 @@
 
 <script>
     $(document).ready(function() {
-        handleAjaxFormSubmit("#editMockupForm", {
-            successMessage: "Mockup Updated Successfully",
-            onSuccess: function() {
-                $('#editMockupModal').modal('hide');
-                location.reload();
-            }
-        })
-
-
-
 
         // ----------------------- File Upload ----------------------------
         let editInput = $('#edit-product-image-main');
