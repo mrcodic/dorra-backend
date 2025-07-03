@@ -101,7 +101,6 @@ class MainController extends Controller
             exec($cmd, $output, $returnVar);
 
             if ($returnVar !== 0) {
-                dd($output, $returnVar);
                 Log::error('Fabric render job failed', ['cmd' => $cmd, 'output' => implode("\n", $output)]);
                 throw new \Exception("Failed to render PNG from Fabric JSON");
             }
