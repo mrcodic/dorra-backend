@@ -106,38 +106,31 @@
     </div>
 </div>
 <style>
-.gradient-edit-picker-trigger {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-image: url('/images/AddColor.svg') !important; /* force override */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    position: relative;
-}
-
-/* Hide any accidental injected .pcr-button */
-.gradient-edit-picker-trigger .pcr-button {
-    display: none !important;
-}
-
-
-    .selected-color-wrapper:hover .remove-color-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .gradient-edit-picker-trigger {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-image: url('/images/AddColor.svg') !important;
+        /* force override */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        position: relative;
     }
 
-
+    /* Hide any accidental injected .pcr-button */
+    .gradient-edit-picker-trigger .pcr-button {
+        display: none !important;
+    }
     .remove-color-btn {
         position: absolute;
         top: -5px;
         right: -5px;
         background-color: #F4F6F6 !important;
         color: #424746 !important;
+        border: none !important;
         border-radius: 5px;
         width: 16px;
         height: 16px;
@@ -156,7 +149,7 @@
 <script>
     let editPickr; // Declare it in a broader scope
 
-    $(document).ready(function () {
+    $(document).ready(function() {
         // Only initialize Pickr once
         if (!editPickr) {
             const dummyEditElement = document.createElement('div');
@@ -192,7 +185,7 @@
         let editSelectedColors = [];
         let editPreviousColors = [];
 
-        $('#openEditColorPicker').on('click', function () {
+        $('#openEditColorPicker').on('click', function() {
             const trigger = document.getElementById('openEditColorPicker');
             const rect = trigger.getBoundingClientRect();
             const modalScrollTop = document.querySelector('#editMockupModal .modal-body')?.scrollTop || 0;
@@ -200,7 +193,7 @@
             editPickr.show();
 
             setTimeout(() => {
-                const pickerPanel = document.querySelector('.pcr-app');
+               const pickerPanel = document.querySelector('.pcr-app.visible');
                 if (pickerPanel) {
                     pickerPanel.style.position = 'absolute';
                     pickerPanel.style.left = `${rect.left + window.scrollX}px`;
@@ -211,17 +204,17 @@
         });
 
         // The rest of your functions for rendering/removing colors...
-        window.setPreviousColors = function (colorsArray) {
+        window.setPreviousColors = function(colorsArray) {
             editPreviousColors = colorsArray || [];
             renderAllColors();
         };
 
-        window.removeEditColor = function (hex) {
+        window.removeEditColor = function(hex) {
             editSelectedColors = editSelectedColors.filter(c => c !== hex);
             renderAllColors();
         };
 
-        window.removePreviousColor = function (hex) {
+        window.removePreviousColor = function(hex) {
             editPreviousColors = editPreviousColors.filter(c => c !== hex);
             renderAllColors();
         };
@@ -243,7 +236,10 @@
                 isPrevious: false
             }))];
 
-            combined.forEach(({ color, isPrevious }) => {
+            combined.forEach(({
+                color,
+                isPrevious
+            }) => {
                 const item = document.createElement('span');
                 item.innerHTML = `
                     <div class="selected-color-wrapper position-relative">

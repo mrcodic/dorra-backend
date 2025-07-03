@@ -27,7 +27,7 @@
 
                         <div class="form-group mb-2">
                             <label for="productsSelect" class="label-text mb-1">Product</label>
-                            <select id="productsSelect" name="product_id" class="form-select" >
+                            <select id="productsSelect" name="product_id" class="form-select">
                                 <option value="" disabled>Choose product</option>
                                 @foreach($associatedData['products'] as $product)
                                 <option
@@ -39,6 +39,7 @@
                             <label class="label-text mb-1 d-block">Colors</label>
                             <div class="d-flex flex-wrap align-items-center gap-1">
                                 <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+
 
                                 <span id="selected-colors" class=" d-flex gap-1 flex-wrap align-items-center"></span>
                             </div>
@@ -107,7 +108,7 @@
 </div>
 
 <style>
-    .gradient-picker-trigger{
+    .gradient-picker-trigger {
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -117,11 +118,16 @@
         background-repeat: no-repeat;
         border: 1px solid #ccc;
         cursor: pointer;
+        position: relative;
+    }
+
+    /* Hide any accidental injected .pcr-button */
+    .gradient-picker-trigger .pcr-button {
+        display: none !important;
     }
 
 
     .selected-color-wrapper {
-        position: relative;
         width: 28px;
         height: 28px;
     }
@@ -155,9 +161,6 @@
         line-height: 1;
         padding: 1px;
         display: none;
-
-
-
     }
 
     .selected-color-wrapper:hover .remove-color-btn {
@@ -170,8 +173,7 @@
 
 
 <script>
-
-    $(document).ready(function () {
+    $(document).ready(function() {
 
         handleAjaxFormSubmit("#addMockupForm", {
             successMessage: "Mockup Created Successfully",
@@ -263,11 +265,24 @@
             input.val(''); // Clear the input
         });
     });
-    $(document).ready(function() {
-        const dummyElement = document.createElement('div');
-        document.body.appendChild(dummyElement); // <-- append to body
 
-        const pickr = Pickr.create({
+
+
+
+let selectedColors = [];
+let pickrInstance = null;
+
+$(document).ready(function () {
+    $('#addMockupModal').on('shown.bs.modal', function () {
+        // Destroy any existing instance
+        if (pickrInstance) pickrInstance.destroyAndRemove();
+
+        // Create hidden element for Pickr
+        const dummyElement = document.createElement('div');
+        document.body.appendChild(dummyElement);
+
+        // Initialize Pickr
+        pickrInstance = Pickr.create({
             el: dummyElement,
             theme: 'classic',
             components: {
@@ -282,62 +297,61 @@
             }
         });
 
-        let selectedColors = [];
-
-        $('#openColorPicker').on('click', function() {
-            const trigger = document.getElementById('openColorPicker');
-            const rect = trigger.getBoundingClientRect();
-
-            // Show the picker first so it gets rendered
-            pickr.show();
-
-            // Wait for next frame to ensure it's in the DOM
-            setTimeout(() => {
-                const pickerPanel = document.querySelector('.pcr-app');
-
-                if (pickerPanel) {
-                    pickerPanel.style.position = 'absolute';
-                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                    pickerPanel.style.top = `${rect.bottom + window.scrollY + 5}px`; // 5px gap
-                    pickerPanel.style.zIndex = 9999; // Ensure it's on top
-                }
-            }, 0);
-        });
-
-
-        pickr.on('save', (color) => {
+        // Save color
+        pickrInstance.on('save', (color) => {
             const hex = color.toHEXA().toString();
-
             if (!selectedColors.includes(hex)) {
                 selectedColors.push(hex);
                 renderSelectedColors();
             }
-
-            pickr.hide();
+            pickrInstance.hide();
         });
+    });
 
-        function renderSelectedColors() {
-            const ul = document.getElementById('selected-colors');
-            ul.innerHTML = '';
-            selectedColors.forEach(c => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                <div class="selected-color-wrapper">
+    $('#openColorPicker').on('click', function () {
+        const trigger = document.getElementById('openColorPicker');
+        const rect = trigger.getBoundingClientRect();
+        const modalScrollTop = document.querySelector('#addMockupModal .modal-body')?.scrollTop || 0;
+
+        if (pickrInstance) {
+            pickrInstance.show();
+
+            setTimeout(() => {
+                const pickerPanel = document.querySelector('.pcr-app.visible');
+                if (pickerPanel) {
+                    pickerPanel.style.position = 'absolute';
+                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
+                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                    pickerPanel.style.zIndex = 9999;
+                }
+            }, 0);
+        }
+    });
+
+    window.removeColor = function (hex) {
+        selectedColors = selectedColors.filter(c => c !== hex);
+        renderSelectedColors();
+    };
+
+    function renderSelectedColors() {
+        const ul = document.getElementById('selected-colors');
+        ul.innerHTML = '';
+
+        selectedColors.forEach(c => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="selected-color-wrapper position-relative">
                     <div class="selected-color-dot" style="background-color: #fff;">
                         <div class="selected-color-inner" style="background-color: ${c};"></div>
                     </div>
                     <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
                 </div>
             `;
-                ul.appendChild(li);
-            });
+            ul.appendChild(li);
+        });
 
-            $('#colorsInput').val(selectedColors.join(','));
-        }
+        $('#colorsInput').val(selectedColors.join(','));
+    }
+});
 
-        window.removeColor = function(hex) {
-            selectedColors = selectedColors.filter(c => c !== hex);
-            renderSelectedColors();
-        };
-    });
 </script>
