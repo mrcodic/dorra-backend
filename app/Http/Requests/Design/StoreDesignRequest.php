@@ -52,6 +52,8 @@ class StoreDesignRequest extends BaseRequest
             'user_id' => $userId,
             'cookie_id' => $cookie,
             'design_data' => $template?->design_data ?? $this->input('design_data'),
+            'name' => $template?->name,
+            'description' => $template?->description,
         ]);
     }
     public function withValidator(Validator $validator): void

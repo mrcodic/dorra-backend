@@ -371,6 +371,7 @@ $discountTypes = [
 
 
 
+
 @endsection
 
 @section('vendor-script')

@@ -11,11 +11,13 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough};
+use Spatie\Translatable\HasTranslations;
 
 #[ObservedBy(DesignObserver::class)]
 class Design extends Model implements HasMedia
 {
-    use HasUuids, InteractsWithMedia;
+    use HasUuids, InteractsWithMedia, HasTranslations;
+    public $translatable = ['name', 'description'];
 
     protected $fillable = [
         'cookie_id',
@@ -26,6 +28,8 @@ class Design extends Model implements HasMedia
         'current_version',
         'product_price_id',
         'quantity',
+        'name',
+        'description',
     ];
     protected $attributes = [
         'quantity' => 1

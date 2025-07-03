@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -13,9 +14,30 @@ class TemplateService extends BaseService
 {
     public BaseRepositoryInterface $repository;
 
-    public function __construct(TemplateRepositoryInterface $repository)
+    public function __construct(TemplateRepositoryInterface $repository
+        , public ProductRepositoryInterface                 $productRepository
+    )
     {
         parent::__construct($repository);
+
+    }
+
+    public function checkProductType($request)
+    {
+        $productType = session(['product_type' => $request->input('productType')]);
+        $product = $this->productRepository
+            ->query()
+            ->where('name->en', $productType)
+            ->first();
+        if ($productType == 'other') {
+            return true;
+        }
+        if (!$product) {
+            return false;
+        }
+
+        return true;
+
 
     }
 
@@ -32,7 +54,7 @@ class TemplateService extends BaseService
 
 
         $query = $this->repository
-            ->query(['id', 'name', 'product_id', 'status', 'created_at' , 'type' , 'height' , 'width' ])
+            ->query(['id', 'name', 'product_id', 'status', 'created_at', 'type', 'height', 'width'])
             ->with(['product:id,name', 'product.tags'])
             ->when(request()->filled('search_value'), function ($q) {
                 $locale = app()->getLocale();
@@ -42,20 +64,20 @@ class TemplateService extends BaseService
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
             ->latest();
 
-            if (request()->ajax()) {
-                return $pageSize === null
-                    ? $query->get()
-                    : $query->paginate($pageSize)->withQueryString();
-            }
-
-            return $this->repository->all(
-                $paginate,
-                $columns,
-                $relations,
-                filters: $this->filters,
-                perPage: $pageSize ?? $perPage
-            );
+        if (request()->ajax()) {
+            return $pageSize === null
+                ? $query->get()
+                : $query->paginate($pageSize)->withQueryString();
         }
+
+        return $this->repository->all(
+            $paginate,
+            $columns,
+            $relations,
+            filters: $this->filters,
+            perPage: $pageSize ?? $perPage
+        );
+    }
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
@@ -123,10 +145,10 @@ class TemplateService extends BaseService
                     $q->whereIn('tags.id', $tags);
                 });
             })
-            ->when($recent == true , function ($query) use ($recent) {
+            ->when($recent == true, function ($query) use ($recent) {
                 $query->whereNotNull('updated_at')
                     ->orderByDesc('updated_at')
-                ->take(10);
+                    ->take(10);
             }, function ($query) {
                 $query->oldest();
             })
@@ -146,7 +168,7 @@ class TemplateService extends BaseService
     public function storeTemplateAssets($request)
     {
         $validated = $request->validate(["file" => "required|file|mimes:svg"]);
-        return handleMediaUploads($validated['file'],Admin::find(1),"template_assets");
+        return handleMediaUploads($validated['file'], Admin::find(1), "template_assets");
 //        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user(),"template_assets");
 
     }

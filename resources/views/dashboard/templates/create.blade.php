@@ -1,3 +1,4 @@
+@dd(session('product_type'))
 @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Templates')
@@ -18,7 +19,7 @@
                             @csrf
                             <div class="flex-grow-1">
                                 <div class="">
-                                    <div class="row">
+                                    <div class="row @if(session('product_type') != "other")d-none @endif ">
                                         <!-- Width -->
                                         <div class="col-md-4 mb-2">
                                             <label for="edit-width" class="label-text mb-1">Width</label>
@@ -111,11 +112,11 @@
                                     {{--                                    </div>--}}
                                     <div class="form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
-                                        <select id="productsSelect" class="form-select select2" name="product_id">
+                                        <select id="productsSelect" class="form-select select2" name="product_id" @if(session('product_type') != "other")disabled @endif>
                                             <option value="" disabled>Choose Product</option>
                                             @foreach($associatedData['products'] as $product)
                                                 <option
-                                                    value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
+                                                    value="{{ $product->id }}" >{{ $product->getTranslation('name', app()->getLocale()) }}</option>
                                             @endforeach
                                         </select>
                                     </div>

@@ -1,6 +1,7 @@
 @php
 $configData = Helper::applClasses();
 @endphp
+
 <div
   class="main-menu menu-fixed {{ $configData['theme'] === 'dark' || $configData['theme'] === 'semi-dark' ? 'menu-dark' : 'menu-light' }} menu-accordion menu-shadow"
   data-scroll-to-active="true">
@@ -45,8 +46,17 @@ $configData = Helper::applClasses();
       <li class="nav-item {{ $custom_classes }} {{ $isActive }}">
 
 
-        <a href="{{ isset($menu->url) ? url($menu->url) : 'javascript:void(0)' }}" class="d-flex align-items-center gap-1"
-          target="{{ isset($menu->newTab) ? '_blank' : '_self' }}">
+          @if (!empty($menu->modalTarget))
+              <a href="javascript:void(0)"
+                 data-bs-toggle="modal"
+                 data-bs-target="{{ $menu->modalTarget }}"
+                 class="d-flex align-items-center gap-1">
+                  @else
+                      <a href="{{ isset($menu->url) ? url($menu->url) : 'javascript:void(0)' }}"
+                         class="d-flex align-items-center gap-1"
+                         target="{{ isset($menu->newTab) ? '_blank' : '_self' }}">
+                          @endif
+
           <!-- <i data-feather="{{ $menu->icon }}"></i> -->
         <img src="{{ asset('images/sidebar-icons/' . $menu->icon) }}" width="20" height="20" alt="{{ $menu->name }} icon" />
 

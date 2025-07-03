@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Template\{StoreTemplateRequest,
     StoreTranslatedTemplateRequest,
     UpdateTemplateRequest,
-    UpdateTranslatedTemplateRequest};
+    UpdateTranslatedTemplateRequest
+};
 
 
 class TemplateController extends DashboardController
@@ -29,7 +30,7 @@ class TemplateController extends DashboardController
         public TemplateRepositoryInterface             $templateRepository,
         public TagRepositoryInterface                  $tagRepository,
         public ProductSpecificationRepositoryInterface $productSpecificationRepository,
-        public ProductRepositoryInterface $productRepositoryInterface,
+        public ProductRepositoryInterface              $productRepositoryInterface,
 
     )
     {
@@ -44,7 +45,7 @@ class TemplateController extends DashboardController
         $this->resourceTable = 'templates';
         $this->resourceClass = TemplateResource::class;
         $this->assoiciatedData = [
-            'shared'=>[
+            'shared' => [
                 'products' => $this->productRepository->all(),
             ],
             'index' => [
@@ -52,14 +53,23 @@ class TemplateController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'index' => ["product.tags" ,"media"],
+            'index' => ["product.tags", "media"],
         ];
 
     }
 
+    public function checkProductType(Request $request)
+    {
+        $isProductFound = $this->templateService->checkProductType($request);
+        if (!$isProductFound) {
+            return view("dashboard.errors.product");
+        }
+        return view("dashboard.templates.create",['associatedData' => $this->assoiciatedData['shared']]);
+    }
+
     public function index()
     {
-        $data = $this->service->getAll($this->getRelations('index'), $this->usePagination ,perPage: request('per_page',16));
+        $data = $this->service->getAll($this->getRelations('index'), $this->usePagination, perPage: request('per_page', 16));
         $associatedData = $this->getAssociatedData('index');
         if (request()->ajax()) {
             $cards = view('dashboard.partials.filtered-templates', compact('data'))->render();
@@ -72,9 +82,9 @@ class TemplateController extends DashboardController
             }
 
             return Response::api(data: [
-                'cards'      => $cards,
+                'cards' => $cards,
                 'pagination' => $pagination,
-                'total'      => is_countable($data) ? count($data) : $data->total(),
+                'total' => is_countable($data) ? count($data) : $data->total(),
             ]);
         }
 
@@ -82,30 +92,30 @@ class TemplateController extends DashboardController
     }
 
     public function storeAndRedirect(StoreTranslatedTemplateRequest $request)
-{
-    $template  = $this->templateService->storeResource($request->validated());
-    return Response::api(data: [
-        "redirect_url" => config('services.editor_url') . 'templates/' . $template->id
-    ]);
-}
+    {
+        $template = $this->templateService->storeResource($request->validated());
+        return Response::api(data: [
+            "redirect_url" => config('services.editor_url') . 'templates/' . $template->id
+        ]);
+    }
 
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id,['specifications.options','product.prices'])));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices'])));
     }
 
     public function getProductTemplates()
     {
         $productId = request()->input('productId');
         $templates = $this->templateService->getProductTemplates($productId);
-        if(request()->ajax()) {
+        if (request()->ajax()) {
             if (!$productId) {
                 $cacheKey = getOrderStepCacheKey();
                 $stepData = Cache::get($cacheKey, []);
                 $productId = $stepData['product_id'] ?? null;
             }
             if (!$productId) {
-                return Response::api(HttpEnum::BAD_REQUEST, errors:['error' => 'Product not selected.']);
+                return Response::api(HttpEnum::BAD_REQUEST, errors: ['error' => 'Product not selected.']);
             }
             $templates = $this->templateRepository->query()->with('product')->whereProductId($productId)->live()->get();
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
@@ -128,8 +138,8 @@ class TemplateController extends DashboardController
 
     public function changeStatus(Request $request, $id)
     {
-        $request->validate(['status' => 'required','in:'.StatusEnum::getValuesAsString()]);
-       $template =  $this->templateService->updateResource(['status'=> $request->status],$id);
+        $request->validate(['status' => 'required', 'in:' . StatusEnum::getValuesAsString()]);
+        $template = $this->templateService->updateResource(['status' => $request->status], $id);
         return Response::api(data: TemplateResource::make($template));
     }
 
