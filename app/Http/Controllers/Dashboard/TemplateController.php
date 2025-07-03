@@ -99,6 +99,10 @@ class TemplateController extends DashboardController
         ]);
     }
 
+    public function create(): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
+    {
+
+}
     public function show($id)
     {
         return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices'])));

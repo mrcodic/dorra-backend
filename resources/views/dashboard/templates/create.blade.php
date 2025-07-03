@@ -1,4 +1,3 @@
-@dd(session('product_type'))
 @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Templates')
@@ -112,14 +111,21 @@
                                     {{--                                    </div>--}}
                                     <div class="form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
-                                        <select id="productsSelect" class="form-select select2" name="product_id" @if(session('product_type') != "other")disabled @endif>
+                                        <select id="productsSelect" class="form-select select2" name="product_id" @if(session('product_type') != "other") readonly @endif>
                                             <option value="" disabled>Choose Product</option>
                                             @foreach($associatedData['products'] as $product)
-                                                <option
-                                                    value="{{ $product->id }}" >{{ $product->getTranslation('name', app()->getLocale()) }}</option>
+                                                @if(strtolower($product->getTranslation('name', 'en')) == 't-shirt')
+                                                    <option
+                                                        value="{{ $product->id }}"
+                                                        {{ session('product_type') == 'T-shirt' ? 'selected' : '' }}
+                                                    >
+                                                        {{ $product->getTranslation('name', app()->getLocale()) }}
+                                                    </option>
+                                                @endif
                                             @endforeach
                                         </select>
                                     </div>
+
                                     <div class="form-group mb-2 d-none">
                                         <label class="label-text mb-1">Spec</label>
                                         <div class="row" id="specsContainer">

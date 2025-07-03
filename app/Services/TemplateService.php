@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Enums\Template\UnitEnum;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -22,9 +23,10 @@ class TemplateService extends BaseService
 
     }
 
-    public function checkProductType($request)
+    public function checkProductType($request): bool
     {
-        $productType = session(['product_type' => $request->input('productType')]);
+        session(['product_type' => $request->input('product_type')]);
+        $productType = session('product_type');
         $product = $this->productRepository
             ->query()
             ->where('name->en', $productType)
@@ -82,6 +84,16 @@ class TemplateService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
+            if (empty($validatedData['height'])) {
+                $validatedData['height']= 4800;
+            }
+            if (empty($data['width'])) {
+                $validatedData['width'] =3600;
+            }
+            if (empty($data['unit'])) {
+
+                $validatedData['unit'] = UnitEnum::PIXEL->value;
+            }
             $model = $this->repository->create($validatedData);
             if (isset($validatedData['specifications'])) {
                 $model->specifications()->attach($validatedData['specifications']);
@@ -99,6 +111,7 @@ class TemplateService extends BaseService
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }
+
         return $model->load($relationsToLoad);
     }
 
