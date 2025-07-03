@@ -113,7 +113,16 @@
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
                                         <select id="productsSelect" class="form-select select2" name="product_id" @if(session('product_type') != "other") readonly @endif>
                                             <option value="" disabled>Choose Product</option>
-                                            @foreach($associatedData['products'] as $product)
+                                            @if(session('product_type') == 'other')
+                                                @php
+                                                    $products = \App\Models\Product::query()->where('name->en','!=','T-shirt')->get();
+                                                @endphp
+                                            @else
+                                                @php
+                                                    $products = \App\Models\Product::query()->where('name->en','=','T-shirt')->get();
+                                                @endphp
+                                            @endif
+                                            @foreach($products as $product)
 
                                                     <option
                                                         value="{{ $product->id }}"

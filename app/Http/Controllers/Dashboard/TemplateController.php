@@ -48,13 +48,13 @@ class TemplateController extends DashboardController
             'create' => [
                 'products' => $this->productRepository->query()
                     ->when(
-                        session('product_type') == 'other',
+                        session('product_type') === 'other',
                         fn($query) => $query->whereRaw(
-                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.en'))) != ?",
+                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.en'))) NOT LIKE ?",
                             ['t-shirt']
                         ),
                         fn($query) => $query->whereRaw(
-                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.en'))) = ?",
+                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.en'))) LIKE ?",
                             ['t-shirt']
                         )
                     )
