@@ -69,7 +69,7 @@ class DesignService extends BaseService
                     'product.category' => function ($q) {
                         $q->select('id', 'name');
                     },
-                    'user' => function ($q) {
+                    'owner' => function ($q) {
                         $q->select('id', 'first_name', 'last_name');
                     },
                 ])
@@ -177,7 +177,7 @@ class DesignService extends BaseService
     public function owners()
     {
 
-       return auth('sanctum')->user()
+       return auth('sanctum')->owner()
            ->userDesigns()
            ->with('owner:id,first_name,last_name')
            ->get()

@@ -176,15 +176,18 @@
             // Handle save
             editPickr.on('save', (color) => {
                 const hex = color.toHEXA().toString();
-                if (!editSelectedColors.includes(hex) && !editPreviousColors.includes(hex)) {
-                    editSelectedColors.push(hex);
-                    renderAllColors();
+
+                // only add if not already present
+                if (!editPreviousColors.includes(hex)) {
+                    editPreviousColors.push(hex);
                 }
+
+                renderAllColors();
                 editPickr.hide();
             });
-        }
 
-        let editSelectedColors = [];
+
+            let editSelectedColors = [];
         let editPreviousColors = [];
 
         $('#openEditColorPicker').on('click', function() {
@@ -226,41 +229,33 @@
             $('#edit-colorsInput').val(allColors.join(','));
         }
 
-        function renderAllColors() {
-            const container = document.getElementById('edit-selected-colors');
-            container.innerHTML = '';
+            function renderAllColors() {
+                const container = document.getElementById('edit-selected-colors');
+                container.innerHTML = '';
 
-            const combined = [...editPreviousColors.map(c => ({
-                color: c,
-                isPrevious: true
-            })), ...editSelectedColors.map(c => ({
-                color: c,
-                isPrevious: false
-            }))];
+                editPreviousColors.forEach(color => {
+                    const item = document.createElement('span');
+                    item.innerHTML = `
+            <div class="selected-color-wrapper position-relative">
+                <div class="selected-color-dot" style="background-color: #fff;">
+                    <div class="selected-color-inner" style="background-color: ${color};"></div>
+                </div>
+                <button type="button" class="remove-color-btn" onclick="removePreviousColor('${color}')">×</button>
+            </div>
+        `;
+                    container.appendChild(item);
+                });
 
-            combined.forEach(({
-                color,
-                isPrevious
-            }) => {
-                const item = document.createElement('span');
-                item.innerHTML = `
-                    <div class="selected-color-wrapper position-relative">
-                        <div class="selected-color-dot" style="background-color: #fff;">
-                            <div class="selected-color-inner" style="background-color: ${color};"></div>
-                        </div>
-                        <button type="button" class="remove-color-btn" onclick="${isPrevious ? `removePreviousColor('${color}')` : `removeEditColor('${color}')`}">×</button>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
+                updateCombinedColors();
+            }
 
-            updateCombinedColors();
-        }
-    });
+        });
 </script>
 
 <script>
     $(document).ready(function() {
+
+
 
         // ----------------------- File Upload ----------------------------
         let editInput = $('#edit-product-image-main');

@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="{{ asset(mix('css/base/pages/dashboard-ecommerce.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/charts/chart-apex.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-toastr.css')) }}">
+
 @endsection
 
 @php
@@ -22,6 +23,8 @@ $discountTypes = [
 ['label' => 'Product', 'color' => '#222245', 'width' => '35%'],
 ];
 @endphp
+
+
 
 @section('content')
 <div class="card p-2">
