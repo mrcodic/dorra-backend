@@ -108,68 +108,7 @@
     </div>
 </div>
 
-<style>
-    .gradient-picker-trigger {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-image: url('/images/AddColor.svg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        border: 1px solid #ccc;
-        cursor: pointer;
-        position: relative;
-    }
 
-    /* Hide any accidental injected .pcr-button */
-    .gradient-picker-trigger .pcr-button {
-        display: none !important;
-    }
-
-
-    .selected-color-wrapper {
-        width: 28px;
-        height: 28px;
-    }
-
-    .selected-color-dot {
-        width: 100%;
-        height: 100%;
-        padding: 1px;
-        border-radius: 50%;
-        border: 2px solid #ccc;
-        box-sizing: border-box;
-        background-clip: content-box;
-    }
-
-    .selected-color-inner {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-    }
-
-    .remove-color-btn {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background-color: #F4F6F6 !important;
-        color: #424746 !important;
-        border-radius: 5px;
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-        line-height: 1;
-        padding: 1px;
-        display: none;
-    }
-
-    .selected-color-wrapper:hover .remove-color-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-</style>
 
 
 

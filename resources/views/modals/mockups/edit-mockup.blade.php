@@ -107,47 +107,6 @@
     </div>
 </div>
 
-<style>
-    .gradient-edit-picker-trigger {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-image: url('/images/AddColor.svg') !important;
-        /* force override */
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        border: 1px solid #ccc;
-        cursor: pointer;
-        position: relative;
-    }
-
-    /* Hide any accidental injected .pcr-button */
-    .gradient-edit-picker-trigger .pcr-button {
-        display: none !important;
-    }
-    .remove-color-btn {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background-color: #F4F6F6 !important;
-        color: #424746 !important;
-        border: none !important;
-        border-radius: 5px;
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-        line-height: 1;
-        padding: 1px;
-        display: none;
-    }
-
-    .selected-color-wrapper:hover .remove-color-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-</style>
 <script>
     let editPickr; // broader scope
     let editPreviousColors = []; // global scope
