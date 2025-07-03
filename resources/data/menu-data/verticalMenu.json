@@ -35,8 +35,8 @@
             "name": "Templates",
             "icon": "Templates.svg",
             "slug": "",
-            "url": "",
-            "modalTarget": "#templateModal"
+            "url": "/product-templates",
+            "modalTarget": ""
         },
         {
             "name": "Mockups",
