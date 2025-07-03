@@ -181,6 +181,7 @@
                                     name="product_type"
                                     id="codeTshirt"
                                     value="T-shirt"
+                                    required
                                 />
                                 <label class="form-check-label mb-0 flex-grow-1" for="codeTshirt">T-shirt</label>
                             </div>
@@ -191,6 +192,7 @@
                                     name="product_type"
                                     id="codeOther"
                                     value="other"
+                                    required
                                 />
                                 <label class="form-check-label mb-0 flex-grow-1" for="codeOther">Other</label>
                             </div>
