@@ -46,7 +46,7 @@
                                     <div id="previous-colors" class="d-flex flex-wrap gap-1"></div>
                                 </div>
                             </div>
-                            <input type="hidden" name="colors[]" id="edit-colorsInput">
+                            <div id="colorsInputContainer"></div>
                         </div>
 
 
@@ -149,9 +149,16 @@
     }
 </style>
 <script>
-    let editPickr; // Declare it in a broader scope
+    let editPickr; // broader scope
 
     $(document).ready(function() {
+        let editSelectedColors = [];
+
+        let editPreviousColors = @json($mockup->colors);
+        console.log(editPreviousColors)
+        // immediately render existing colors from DB
+        renderAllColors();
+
         // Only initialize Pickr once
         if (!editPickr) {
             const dummyEditElement = document.createElement('div');
@@ -173,22 +180,15 @@
                 }
             });
 
-            // Handle save
             editPickr.on('save', (color) => {
                 const hex = color.toHEXA().toString();
-
-                // only add if not already present
                 if (!editPreviousColors.includes(hex)) {
                     editPreviousColors.push(hex);
                 }
-
                 renderAllColors();
                 editPickr.hide();
             });
-
-
-            let editSelectedColors = [];
-        let editPreviousColors = [];
+        }
 
         $('#openEditColorPicker').on('click', function() {
             const trigger = document.getElementById('openEditColorPicker');
@@ -198,7 +198,7 @@
             editPickr.show();
 
             setTimeout(() => {
-               const pickerPanel = document.querySelector('.pcr-app.visible');
+                const pickerPanel = document.querySelector('.pcr-app.visible');
                 if (pickerPanel) {
                     pickerPanel.style.position = 'absolute';
                     pickerPanel.style.left = `${rect.left + window.scrollX}px`;
@@ -208,34 +208,22 @@
             }, 0);
         });
 
-        // The rest of your functions for rendering/removing colors...
-        window.setPreviousColors = function(colorsArray) {
-            editPreviousColors = colorsArray || [];
-            renderAllColors();
-        };
-
-        window.removeEditColor = function(hex) {
-            editSelectedColors = editSelectedColors.filter(c => c !== hex);
-            renderAllColors();
-        };
-
         window.removePreviousColor = function(hex) {
             editPreviousColors = editPreviousColors.filter(c => c !== hex);
             renderAllColors();
         };
 
         function updateCombinedColors() {
-            const allColors = [...editPreviousColors, ...editSelectedColors];
-            $('#edit-colorsInput').val(allColors.join(','));
+            $('#edit-colorsInput').val(editPreviousColors.join(','));
         }
 
-            function renderAllColors() {
-                const container = document.getElementById('edit-selected-colors');
-                container.innerHTML = '';
+        function renderAllColors() {
+            const container = document.getElementById('edit-selected-colors');
+            container.innerHTML = '';
 
-                editPreviousColors.forEach(color => {
-                    const item = document.createElement('span');
-                    item.innerHTML = `
+            editPreviousColors.forEach(color => {
+                const item = document.createElement('span');
+                item.innerHTML = `
             <div class="selected-color-wrapper position-relative">
                 <div class="selected-color-dot" style="background-color: #fff;">
                     <div class="selected-color-inner" style="background-color: ${color};"></div>
@@ -243,13 +231,22 @@
                 <button type="button" class="remove-color-btn" onclick="removePreviousColor('${color}')">×</button>
             </div>
         `;
-                    container.appendChild(item);
-                });
+                container.appendChild(item);
+            });
 
-                updateCombinedColors();
-            }
+            // also update hidden inputs
+            const colorInputContainer = document.getElementById('colorsInputContainer');
+            colorInputContainer.innerHTML = '';
+            editPreviousColors.forEach(color => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'colors[]';
+                hiddenInput.value = color;
+                colorInputContainer.appendChild(hiddenInput);
+            });
+        }
 
-        });
+    });
 </script>
 
 <script>

@@ -151,22 +151,22 @@
             $("#editMockupModal #edit-mockup-type").val(type);
             $("#editMockupModal #edit-products-select").val(productId).trigger("change");
             $("#editMockupModal #edit-colorsInput").val(colors.join(", "));
-
-            const previousColorsContainer = $("#editMockupModal #previous-colors");
-            previousColorsContainer.empty();
-
-            colors.forEach(color => {
-                previousColorsContainer.append(`
-            <div style="
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                background: ${color};
-                border: 1px solid #ccc;
-            "></div>
-        `);
-            });
-
+        //
+        //     const previousColorsContainer = $("#editMockupModal #previous-colors");
+        //     previousColorsContainer.empty();
+        //
+        //     colors.forEach(color => {
+        //         previousColorsContainer.append(`
+        //     <div style="
+        //         width: 32px;
+        //         height: 32px;
+        //         border-radius: 50%;
+        //         background: ${color};
+        //         border: 1px solid #ccc;
+        //     "></div>
+        // `);
+        //     });
+        //
             $("#editMockupModal #edit-uploaded-image img").attr("src", imgUrl);
             $("#editMockupModal #edit-uploaded-image").removeClass("d-none");
             $("#editMockupModal #file-details .file-name").text(imgUrl.split('/').pop());

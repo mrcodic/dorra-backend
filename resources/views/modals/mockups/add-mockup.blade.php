@@ -43,7 +43,8 @@
 
                                 <span id="selected-colors" class=" d-flex gap-1 flex-wrap align-items-center"></span>
                             </div>
-                            <input type="hidden" name="colors[]" id="colorsInput">
+{{--                            <input type="hidden" name="colors[]" id="colorsInput">--}}
+                            <div id="colorsInputContainer"></div>
 
                         </div>
 
@@ -337,21 +338,30 @@ $(document).ready(function () {
         const ul = document.getElementById('selected-colors');
         ul.innerHTML = '';
 
+        const container = document.getElementById('colorsInputContainer');
+        container.innerHTML = ''; // Clear previous
+
         selectedColors.forEach(c => {
             const li = document.createElement('li');
             li.innerHTML = `
-                <div class="selected-color-wrapper position-relative">
-                    <div class="selected-color-dot" style="background-color: #fff;">
-                        <div class="selected-color-inner" style="background-color: ${c};"></div>
-                    </div>
-                    <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
+            <div class="selected-color-wrapper position-relative">
+                <div class="selected-color-dot" style="background-color: #fff;">
+                    <div class="selected-color-inner" style="background-color: ${c};"></div>
                 </div>
-            `;
+                <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
+            </div>
+        `;
             ul.appendChild(li);
-        });
 
-        $('#colorsInput').val(selectedColors.join(','));
+            // Add a hidden input for each color
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'colors[]';
+            hiddenInput.value = c;
+            container.appendChild(hiddenInput);
+        });
     }
+
 });
 
 </script>
