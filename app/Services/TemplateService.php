@@ -90,8 +90,7 @@ class TemplateService extends BaseService
             if (empty($validatedData['width'])) {
                 $validatedData['width'] =3600;
             }
-            if (empty($data['unit'])) {
-
+            if (empty($validatedData['unit'])) {
                 $validatedData['unit'] = UnitEnum::PIXEL->value;
             }
             $model = $this->repository->create($validatedData);
