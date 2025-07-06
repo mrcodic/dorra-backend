@@ -50,7 +50,8 @@
         const selected = document.querySelector('input[name="product_type"]:checked');
         if (selected) {
             const url = this.action + '?product_type=' + encodeURIComponent(selected.value);
-            window.location.href = url;
+            window.open(url, '_blank'); 
         }
     });
+
 </script>
