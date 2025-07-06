@@ -3,6 +3,7 @@
 namespace App\Http\Requests\User\SavedItems;
 
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Design;
 use App\Models\Product;
 use Illuminate\Validation\Validator;
 
@@ -24,24 +25,29 @@ class ToggleSaveRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'savable_type' => ['required', 'string','in:product,project'],
-            'savable_id' => ['required', 'integer'],
+            'savable_type' => ['required', 'in:product,design'],
+            'savable_ids' => ['required', 'array'],
+            'savable_ids.*' => ['required', 'integer', 'min:1'],
         ];
     }
+
 
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
             $type = $this->input('savable_type');
-            $id = $this->input('savable_id');
+            $ids = $this->input('savable_ids');
             $modelMap = [
                 'product' => Product::class,
-//                'project' => Project::class,
+                'design' => Design::class,
             ];
             $model = $modelMap[$type];
-           if (!$model::whereKey($id)->exists()) {
-               $validator->errors()->add('saveable_id', ucfirst($type) . ' not found.');
-           }
+            $this->collect($ids)->each(function ($id) use ($model, $modelMap,$type,$validator) {
+                if (!$model::whereKey($id)->exists()) {
+                    $validator->errors()->add('saveable_id', ucfirst($type) . ' not found.');
+                }
+            });
+
         });
     }
 }

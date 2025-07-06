@@ -64,6 +64,16 @@ return Application::configure(basePath: dirname(__DIR__))
                     );
                 }
             }
+            if ($e instanceof InvalidArgumentException) {
+                if ($request->expectsJson()) {
+                    return Response::api(\App\Enums\HttpEnum::BAD_REQUEST,
+                        message: 'Something went wrong',
+                        errors: [
+                            ['message' =>  $e->getMessage()]
+                        ]
+                    );
+                }
+            }
         });
 
     })->create();

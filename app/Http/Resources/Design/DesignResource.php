@@ -32,6 +32,9 @@ class DesignResource extends JsonResource
             'placed_on' => optional($this->pivot)->created_at?->format('d/m/Y'),
             'price' => $this->total_price,
             'quantity' => $this->productPrice?->quantity ?? $this->quantity,
+            'is_owner' => $this->owner->id == auth('sanctum')->user()->id,
+            'type' => 'design',
+
         ];
     }
 }

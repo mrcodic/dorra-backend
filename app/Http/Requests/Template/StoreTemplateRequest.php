@@ -17,8 +17,6 @@ class StoreTemplateRequest extends BaseRequest
         return true;
     }
 
-
-
     public function rules(): array
     {
         return [

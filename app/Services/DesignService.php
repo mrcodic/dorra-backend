@@ -72,6 +72,9 @@ class DesignService extends BaseService
                     'owner' => function ($q) {
                         $q->select('id', 'first_name', 'last_name');
                     },
+                    'template' => function ($q) {
+                        $q->select('id', 'name', 'description');
+                    },
                 ])
                 ->where(function ($q) use ($cookieId, $userId) {
                     if ($userId) {
@@ -79,7 +82,16 @@ class DesignService extends BaseService
                     } elseif ($cookieId) {
                         $q->whereCookieId($cookieId);
                     }
-                })->latest()->paginate();
+                })
+             ->when(request()->filled('owner_id'), function ($q) {
+                    $q->where('user_id', request('owner_id'));
+                })->when(request()->filled('category_id'), function ($q) {
+                    $q->whereHas('product.category', function ($query) {
+                        $query->whereId(request('category_id'));
+                    });
+                })
+                ->orderBy('created_at',request('date','desc'))
+                ->paginate();
         }
         return $designs ?? new LengthAwarePaginator(
             collect([]),
@@ -177,13 +189,13 @@ class DesignService extends BaseService
     public function owners()
     {
 
-       return auth('sanctum')->owner()
-           ->userDesigns()
-           ->with('owner:id,first_name,last_name')
-           ->get()
-           ->pluck('owner')
-           ->unique('id')
-           ->values();
+        return auth('sanctum')->user()
+            ->userDesigns()
+            ->with('owner:id,first_name,last_name')
+            ->get()
+            ->pluck('owner')
+            ->unique('id')
+            ->values();
 
     }
 }
