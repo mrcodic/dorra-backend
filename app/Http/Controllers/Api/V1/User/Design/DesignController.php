@@ -40,6 +40,8 @@ class DesignController extends Controller
             'design_data',
             'design_image',
             'current_version',
+            'name',
+            'description',
         ]), relationsToLoad: ['product']);
         return Response::api(data: DesignResource::make($design->refresh()));
     }

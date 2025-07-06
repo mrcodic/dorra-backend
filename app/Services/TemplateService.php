@@ -103,7 +103,7 @@ class TemplateService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
 
-            // put your product-type logic HERE
+
             if (($validatedData['product_type'] ?? null) === 'T-shirt') {
                     $tShirtProduct = $this->productRepository
                     ->query()
@@ -124,12 +124,11 @@ class TemplateService extends BaseService
                 }
             }
 
-            // fallback defaults:
             if (empty($validatedData['height'])) {
-                $validatedData['height'] = 4800;
+                $validatedData['height'] = 650;
             }
             if (empty($validatedData['width'])) {
-                $validatedData['width'] = 3600;
+                $validatedData['width'] = 650;
             }
             if (empty($validatedData['unit'])) {
                 $validatedData['unit'] = \App\Enums\Template\UnitEnum::PIXEL->value;
