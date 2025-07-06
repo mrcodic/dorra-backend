@@ -68,7 +68,7 @@ class TemplateController extends DashboardController
             ],
             'edit' => [
                 'products' => $this->productRepository->all(),
-            
+
             ],
         ];
         $this->methodRelations = [
@@ -84,6 +84,13 @@ class TemplateController extends DashboardController
             return view("dashboard.errors.product");
         }
         return view("dashboard.templates.create",['associatedData' => $this->assoiciatedData['create']]);
+    }
+
+    public function checkProductTypeInEditor(Request $request)
+    {
+        $request->validate(['product_type'=>['required','string','in:T-shirt,other']]);
+        $isProductFound = $this->templateService->checkProductTypeInEditor($request);
+
     }
 
     public function index()
@@ -118,10 +125,6 @@ class TemplateController extends DashboardController
         ]);
     }
 
-    public function create(): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
-    {
-
-}
     public function show($id)
     {
         return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices'])));
