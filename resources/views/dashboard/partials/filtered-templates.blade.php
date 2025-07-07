@@ -81,12 +81,8 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div class="text-16">Dimensions: <span class="text-black">
-                            @if($template->unit == \App\Enums\Template\UnitEnum::CM)
-                                    {{ round($template->height /2.54  , 2)  }} × {{ round($template->width /2.54  ,2) }}
-                                @else
-                                    {{ round($template->height, 2)  }} × {{ round($template->width,2) }}
-                                @endif
-                            pixel</span>
+                                {{ $template->height  }} × {{ $template->width }}
+                                {{ $template->unit->label() }}</span>
                         </div>
 
                         <span class="badge text-light p-75 px-2 template-status-label"
