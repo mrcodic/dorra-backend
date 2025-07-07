@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\User\Product;
 
+use App\Enums\Product\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Product\ProductResource;
 use App\Models\Product;
@@ -35,6 +36,19 @@ class ProductController extends Controller
             'prices' => fn($q) => $request->query('all_prices') !== 'true' ? $q->limit(5) : null,
         ])));
     }
+
+    public function productTypes()
+    {
+        $types = collect(TypeEnum::availableTypes())
+            ->map(fn($type) => [
+                'value' => $type->value,
+                'label' => $type->label(),
+            ])
+            ->values();
+
+        return Response::api(data: $types);
+    }
+
 
 
 }

@@ -51,6 +51,7 @@ Route::prefix('login')->controller(LoginController::class)->group(function () {
 Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
 Route::get('sub-categories', [MainController::class, 'subCategories']);
 
+Route::get('product-types', [ProductController::class, 'productTypes']);
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 
@@ -119,6 +120,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('invitation.accept')
             ->middleware('signed');
     });
+
 
 
 });

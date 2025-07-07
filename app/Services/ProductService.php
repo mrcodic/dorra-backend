@@ -77,10 +77,18 @@ class ProductService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 9)
     {
+        $productType = request('product_type');
+
         $query = QueryBuilder::for(Product::class)
             ->select($columns)
             ->with($relations)
             ->withCount('reviews')
+            ->when($productType === 'T-shirt', fn($q) =>
+            $q->where('name->en', 'T-shirt')
+            )
+            ->when($productType === 'other', fn($q) =>
+            $q->where('name->en', '!=', 'T-shirt')
+            )
             ->allowedFilters([
                 AllowedFilter::partial('category.id'),
                 AllowedFilter::custom('sub_categories', new SubCategoryFilter()),
@@ -94,6 +102,7 @@ class ProductService extends BaseService
 
         return $query->paginate($perPage);
     }
+
 
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])

@@ -10,28 +10,19 @@
             <form action="{{ route("check.product.type") }}" method="post">
                 @csrf
                 <div class="modal-body flex-grow-1 d-flex flex-column gap-2">
+                    @foreach(\App\Enums\Product\TypeEnum::availableTypes() as $type)
                     <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
                         <input
                             class="form-check-input me-2"
                             type="radio"
                             name="product_type"
-                            id="codeTshirt"
-                            value="T-shirt"
+                            id="Tshirt"
+                            value="{{$type}}"
                             required
                         />
-                        <label class="form-check-label mb-0 flex-grow-1" for="codeTshirt">T-shirt</label>
+                        <label class="form-check-label mb-0 flex-grow-1" for="Tshirt">{{ $type->label() }}</label>
                     </div>
-                    <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
-                        <input
-                            class="form-check-input me-2"
-                            type="radio"
-                            name="product_type"
-                            id="codeOther"
-                            value="other"
-                            required
-                        />
-                        <label class="form-check-label mb-0 flex-grow-1" for="codeOther">Other</label>
-                    </div>
+                    @endforeach
                 </div>
                 <div class="modal-footer border-top-0 d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
