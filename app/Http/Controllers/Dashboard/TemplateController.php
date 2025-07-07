@@ -68,7 +68,7 @@ class TemplateController extends DashboardController
             ],
             'edit' => [
                 'products' => $this->productRepository->all(),
-            
+
             ],
         ];
         $this->methodRelations = [
