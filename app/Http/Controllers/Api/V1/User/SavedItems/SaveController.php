@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\User;
+namespace App\Http\Controllers\Api\V1\User\SavedItems;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\SavedItems\DeleteSaveRequest;
 use App\Http\Requests\User\SavedItems\ToggleSaveRequest;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Product\ProductResource;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 class SaveController extends Controller

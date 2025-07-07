@@ -1,10 +1,6 @@
 <?php
 
 
-use App\Http\Controllers\Dashboard\MockupController;
-use App\Http\Controllers\Dashboard\TemplateController;
-use App\Http\Controllers\Shared\CommentController;
-use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\LogoutController,
     Auth\OtpController,
@@ -15,16 +11,21 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Design\DesignController,
     Folder\FolderController,
     General\MainController,
+    Invitation\InvitationController,
     Order\OrderController,
     Product\ProductController,
     Profile\PasswordController,
     Profile\ProfileController,
     Profile\UserNotificationTypeController,
-    SaveController,
-    ShippingAddress\ShippingAddressController};
+    SavedItems\SaveController,
+    ShippingAddress\ShippingAddressController
+};
+use App\Http\Controllers\Dashboard\MockupController;
+use App\Http\Controllers\Dashboard\TemplateController;
+use App\Http\Controllers\Shared\CommentController;
+use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 
 Route::get('country-codes', [MainController::class, 'countryCodes']);
@@ -100,7 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('{design}/quantities', 'getQuantities');
         Route::post('design-finalization', 'designFinalization');
     });
-    Route::get('/design-versions/{design_version}', [DesignController::class,'getDesignVersions']);
+    Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
     Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 
     Route::get('states', [MainController::class, 'states']);
@@ -108,9 +109,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
-    Route::post('designs/assign-to-folder', [FolderController::class,'assignDesignsToFolder']);
-    Route::post('folders/bulk-delete', [FolderController::class,'bulkDelete']);
+    Route::post('designs/assign-to-folder', [FolderController::class, 'assignDesignsToFolder']);
+    Route::post('folders/bulk-delete', [FolderController::class, 'bulkDelete']);
     Route::apiResource('folders', FolderController::class)->only(['store', 'index']);
+
+    Route::prefix('invitations/')->controller(InvitationController::class)->group(function () {
+        Route::post('send', 'send')->name('invitation.send');
+        Route::get('accept', 'accept')
+            ->name('invitation.accept')
+            ->middleware('signed');
+    });
+
 
 });
 
@@ -126,8 +135,8 @@ Route::post("convert-fabric-json", [MainController::class, 'convertFabricJson'])
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
-Route::get('mockups', [MockupController::class,'index']);
-Route::get('mockup-types', [MockupController::class,'mockupTypes']);
-Route::delete('mockups/{mockup}', [MockupController::class,'destroy']);
-Route::get('mockups/{mockup}', [MockupController::class,'showAndUpdateRecent']);
+Route::get('mockups', [MockupController::class, 'index']);
+Route::get('mockup-types', [MockupController::class, 'mockupTypes']);
+Route::delete('mockups/{mockup}', [MockupController::class, 'destroy']);
+Route::get('mockups/{mockup}', [MockupController::class, 'showAndUpdateRecent']);
 

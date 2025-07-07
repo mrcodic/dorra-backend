@@ -142,7 +142,7 @@ class User extends Authenticatable implements HasMedia
     }
     public function userDesigns(): BelongsToMany
     {
-        return $this->belongsToMany(Design::class);
+        return $this->belongsToMany(Design::class)->withTimestamps();
     }
 
 

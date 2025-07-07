@@ -14,10 +14,10 @@ return new class extends Migration
     {
         Schema::create('invitations', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Team::class)->constrained()->cascadeOnDelete();
-            $table->foreignUuid('design_id')->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Team::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignUuid('design_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('email');
-            $table->tinyInteger('status');
+            $table->tinyInteger('status')->default(1);
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
