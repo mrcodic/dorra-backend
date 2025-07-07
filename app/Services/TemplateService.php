@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Enums\Template\UnitEnum;
 use App\Jobs\ProcessBase64Image;
+use App\Jobs\RenderFabricJsonToPngJob;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
@@ -55,8 +56,7 @@ class TemplateService extends BaseService
             throw ValidationException::withMessages([
                 'product_type' => 'You must create product called T-shirt to upload template for it'
             ]);
-        }
-        else{
+        } else {
             return $productType;
         }
     }
@@ -105,7 +105,7 @@ class TemplateService extends BaseService
 
 
             if (($validatedData['product_type'] ?? null) === 'T-shirt') {
-                    $tShirtProduct = $this->productRepository
+                $tShirtProduct = $this->productRepository
                     ->query()
                     ->where('name->en', $validatedData['product_type'])
                     ->first();
@@ -141,7 +141,7 @@ class TemplateService extends BaseService
             }
 
             if (isset($validatedData['base64_preview_image'])) {
-                \App\Jobs\ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+                RenderFabricJsonToPngJob::dispatch($validatedData['base64_preview_image'], $model, 'templates');
             }
 
             return $model->refresh();
