@@ -57,7 +57,7 @@ class OrderService extends BaseService
         $orders = $this->repository
             ->query()
             ->with($this->relations)
-            ->withCount(['designs'])
+            ->withCount(['orderItems'])
             ->when(request()->filled('search_value'), function ($query) {
                 $locale = app()->getLocale();
                 $search = request('search_value');
@@ -75,7 +75,7 @@ class OrderService extends BaseService
                     : 'No User';
             })
             ->addColumn('items', function ($order) {
-                return $order->designs_count ?? 0;
+                return $order->orderItems_count ?? 0;
             })
             ->addColumn('total_price', function ($order) {
                 return $order->total_price ?? 0;
@@ -347,7 +347,7 @@ class OrderService extends BaseService
             ]
         ];
 
-        $order->designs()->attach($pivotData);
+        $order->orderItems()->attach($pivotData);
     }
 
 
@@ -599,7 +599,7 @@ class OrderService extends BaseService
         }
 
         if (!empty($pivotData)) {
-            $order->designs()->attach($pivotData);
+            $order->orderItems()->attach($pivotData);
         }
     }
 }
