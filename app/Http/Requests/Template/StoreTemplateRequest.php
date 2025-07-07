@@ -51,7 +51,7 @@ class StoreTemplateRequest extends BaseRequest
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file'],
-            'product_type' => ['required', 'in:T-shirt,other'],
+            'product_type' => ['sometimes', 'in:T-shirt,other'],
         ];
     }
 

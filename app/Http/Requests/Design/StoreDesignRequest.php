@@ -4,6 +4,7 @@ namespace App\Http\Requests\Design;
 
 use App\Enums\Template\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Product;
 use App\Models\Template;
 use App\Rules\DimensionWithinUnitRange;
 use Illuminate\Support\Facades\Auth;
@@ -68,8 +69,20 @@ class StoreDesignRequest extends BaseRequest
                     $validator->errors()->add('template_id', 'The selected template does not have any media attached.');
                 }
             }
+
+            if ($this->input('product_type') === 'T-shirt') {
+                $product = Product::where('name->en', 'T-shirt')->first();
+                if (!$product) {
+                    $validator->errors()->add('product_id', 'No product named T-shirt exists.');
+                } else {
+                    $this->merge([
+                        'product_id' => $product->id
+                    ]);
+                }
+            }
         });
     }
+
 
     protected function passedValidation()
     {
