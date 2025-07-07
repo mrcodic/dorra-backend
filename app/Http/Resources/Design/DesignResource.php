@@ -20,7 +20,7 @@ class DesignResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name'=> $this->when(isset($this->name),$this->name),
+            'name'=> $this->name,
             'description'=> $this->description,
             'design_data' => $this->when(request('design_data') == true, $this->design_data),
             'design_image' => $this->getFirstMediaUrl('designs'),
