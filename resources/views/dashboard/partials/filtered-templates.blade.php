@@ -82,12 +82,12 @@
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div class="text-16">Dimensions: <span class="text-black">
                                 {{ $template->height  }} × {{ $template->width }}
-                                {{ $template->unit->label() }}</span>
+                                {{ $template->unit?->label() }}</span>
                         </div>
 
                         <span class="badge text-light p-75 px-2 template-status-label"
                               style="background-color: #222245">
-                        {{ $template->type->label() }}
+                        {{ $template->type?->label() }}
                     </span>
                     </div>
                     <p class="fs-4 mb-1"
