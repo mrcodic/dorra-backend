@@ -74,7 +74,7 @@ class TemplateService extends BaseService
 
 
         $query = $this->repository
-            ->query(['id', 'name', 'product_id', 'status', 'created_at', 'type', 'height', 'width'])
+            ->query()
             ->with(['product:id,name', 'product.tags'])
             ->when(request()->filled('search_value'), function ($q) {
                 $locale = app()->getLocale();
