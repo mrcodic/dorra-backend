@@ -9,6 +9,7 @@ use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
+use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TemplateService extends BaseService
@@ -37,10 +38,27 @@ class TemplateService extends BaseService
         if (!$product) {
             return false;
         }
-
         return true;
+    }
 
-
+    /**
+     * @throws ValidationException
+     */
+    public function checkProductTypeInEditor($request)
+    {
+        $productType = $request->product_type;
+        $product = $this->productRepository
+            ->query()
+            ->where('name->en', $productType)
+            ->first();
+        if (!$product && $productType == 'T-shirt') {
+            throw ValidationException::withMessages([
+                'product_type' => 'You must create product called T-shirt to upload template for it'
+            ]);
+        }
+        else{
+            return $productType;
+        }
     }
 
     public function getAll(
@@ -83,31 +101,52 @@ class TemplateService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
+
+
+            if (($validatedData['product_type'] ?? null) === 'T-shirt') {
+                    $tShirtProduct = $this->productRepository
+                    ->query()
+                    ->where('name->en', $validatedData['product_type'])
+                    ->first();
+                if (!$tShirtProduct) {
+                    throw ValidationException::withMessages(['product_type' => 'You must create product called T-shirt to upload template for it.']);
+                }
+
+                $validatedData['product_id'] = $tShirtProduct->id;
+
+            } elseif (($validatedData['product_type'] ?? null) === 'other') {
+                foreach (['width', 'height', 'unit', 'product_id'] as $field) {
+                    if (empty($validatedData[$field])) {
+                        throw ValidationException::withMessages(['product_type' => "{$field} is required when product_type is 'other'."]);
+
+                    }
+                }
+            }
+
             if (empty($validatedData['height'])) {
-                $validatedData['height']= 4800;
+                $validatedData['height'] = 650;
             }
             if (empty($validatedData['width'])) {
-                $validatedData['width'] =3600;
+                $validatedData['width'] = 650;
             }
             if (empty($validatedData['unit'])) {
-                $validatedData['unit'] = UnitEnum::PIXEL->value;
+                $validatedData['unit'] = \App\Enums\Template\UnitEnum::PIXEL->value;
             }
+
             $model = $this->repository->create($validatedData);
+
             if (isset($validatedData['specifications'])) {
                 $model->specifications()->attach($validatedData['specifications']);
             }
+
             if (isset($validatedData['base64_preview_image'])) {
-                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+                \App\Jobs\ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
             }
 
             return $model->refresh();
         });
-        /*if (isset($validatedData['design_data']))
-        {
-            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'templates');
-        }*/
+
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model);
         }

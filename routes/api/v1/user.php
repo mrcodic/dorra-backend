@@ -86,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notification-types', UserNotificationTypeController::class);
 
     Route::controller(SaveController::class)->group(function () {
+        Route::get('saved-items', 'savedItems');
         Route::post('toggle-save', 'toggleSave');
         Route::delete('bulk-delete-saved', 'destroyBulk');
     });

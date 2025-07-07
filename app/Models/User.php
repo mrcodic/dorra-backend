@@ -121,10 +121,10 @@ class User extends Authenticatable implements HasMedia
         return $this->morphedByMany(Product::class, 'savable','saves')->withTimestamps();
     }
 
-/*    public function savedProjects(): MorphToMany
+    public function savedDesigns(): MorphToMany
     {
-        return $this->morphedByMany(Project::class, 'savable','saves')->withTimestamps();
-    }*/
+        return $this->morphedByMany(Design::class, 'savable','saves')->withTimestamps();
+    }
 
     public function teams(): BelongsToMany
     {

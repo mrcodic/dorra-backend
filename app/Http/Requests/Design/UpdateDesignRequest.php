@@ -27,9 +27,11 @@ class UpdateDesignRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'design_data' => ['required', 'json'],
+            'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string', 'required_without:design_image'],
             'design_image' => ['sometimes', 'file', 'mimetypes:image/svg+xml', 'max:2048', 'required_without:base64_preview_image'],
+            'name' => ['sometimes','string','max:255'],
+            'description' => ['sometimes','string','max:1000'],
         ];
     }
 

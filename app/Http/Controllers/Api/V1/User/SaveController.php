@@ -5,20 +5,48 @@ namespace App\Http\Controllers\Api\V1\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\SavedItems\DeleteSaveRequest;
 use App\Http\Requests\User\SavedItems\ToggleSaveRequest;
+use App\Http\Resources\Design\DesignResource;
+use App\Http\Resources\Product\ProductResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 class SaveController extends Controller
 {
+
+    public function savedItems()
+    {
+        $user = auth('sanctum')->user();
+        $savedProducts = $user->savedProducts()
+            ->with('category')
+            ->get();
+
+        $savedDesigns = $user->savedDesigns()
+            ->with('product.category')
+            ->get();
+        return Response::api(data: [
+            'designs' => $savedDesigns->isNotEmpty() ? DesignResource::collection($savedDesigns) : [],
+            'products' => $savedProducts->isNotEmpty() ? ProductResource::collection($savedProducts) : [],
+        ]);
+
+    }
     public function toggleSave(ToggleSaveRequest $request)
     {
         $relation = "saved".ucfirst($request->savable_type)."s";
-        $request->user()->$relation()->toggle($request->savable_id);
-        $isNowSaved = $request->user()->$relation()->whereKey($request->savable_id)->exists();
+        $saved = [];
+        $unsaved = [];
+        collect($request->savable_ids)->map(function ($id) use ($request, $relation, &$saved, &$unsaved) {
+            $request->user()->$relation()->toggle($id);
+            $isNowSaved = $request->user()->$relation()->whereKey($id)->exists();
+            if ($isNowSaved) {
+                $saved[] = $id;
+            } else {
+                $unsaved[] = $id;
+            }
+        });
         return Response::api(data: [
-            'status' => $isNowSaved ? 'saved' : 'unsaved',
-            'saveable_type' => $request->savable_type,
-            'saveable_id' => $request->savable_id
+            'saved' => $saved,
+            'unsaved' => $unsaved,
+            'savable_type' => $request->savable_type,
         ]);
     }
 

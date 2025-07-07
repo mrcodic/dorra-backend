@@ -144,7 +144,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/store-templates', [TemplateController::class, 'storeAndRedirect'])->name('templates.redirect.store');
 
     Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status");
-    Route::resource('/product-templates', TemplateController::class);
+    Route::post('product-templates/create', [TemplateController::class, 'checkProductType'])->name("check.product.type");
+    Route::resource('/product-templates', TemplateController::class)->except('create');
 
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);
@@ -205,7 +206,6 @@ Route::middleware('auth')->group(function () {
         Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
         Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
         Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
-        Route::post('check-product-type', [TemplateController::class, 'checkProductType'])->name("check.product.type");
 
         Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 
@@ -213,7 +213,9 @@ Route::middleware('auth')->group(function () {
 
         Route::post('product-specifications', ProductSpecificationController::class)->name('products.specifications.create');
         Route::get('product-specifications/{product}', [ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
+
         Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
+
         Route::controller(MockupController::class)->group(function () {
             Route::get('mockups','index');
             Route::get('mockups/{mockup}','showAndUpdateRecent');
@@ -221,6 +223,9 @@ Route::middleware('auth')->group(function () {
             Route::get('mockup-types','mockupTypes');
             Route::delete('recent-mockups/{mockup}','destroyRecentMockup');
         });
+
+        Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);
+
 
     });
 

@@ -7,59 +7,52 @@ use App\Enums\Template\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Rules\DimensionWithinUnitRange;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Validation\Validator;
+use App\Models\Product;
 
 class StoreTemplateRequest extends BaseRequest
 {
-    /**
-     * Determine if the v1 is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            'name.en' => [
-                'required',
-                'string',
-                'max:255',
+            'name.en' => ['required', 'string', 'max:255'],
+            'name.ar' => ['required', 'string', 'max:255'],
+            'description.en' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
+            'type' => ['sometimes', 'in:' . TypeEnum::getValuesAsString()],
+            'unit' => [
+                Rule::requiredIf($this->input('product_type') === 'other'),
+                'integer',
+                'in:' . UnitEnum::getValuesAsString(),
             ],
-            'name.ar' => [
-                'required',
-                'string',
-                'max:255',
+            'height' => [
+                Rule::requiredIf($this->input('product_type') === 'other'),
+                'numeric',
+                new DimensionWithinUnitRange()
             ],
-            'description.en' => [
-                'nullable',
-                'string',
+            'width' => [
+                Rule::requiredIf($this->input('product_type') === 'other'),
+                'numeric',
+                new DimensionWithinUnitRange()
             ],
-            'description.ar' => [
-                'nullable',
-                'string',
+            'product_id' => [
+                Rule::requiredIf($this->input('product_type') === 'other'),
+                'exists:products,id'
             ],
-            'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
-            'product_id' => ['required', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
-            'unit' => ["nullable","integer","in:".UnitEnum::getValuesAsString()],
-            'height' => ['nullable', 'numeric', new DimensionWithinUnitRange()],
-            'width'  => ['nullable', 'numeric', new DimensionWithinUnitRange()],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
-//            'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
-            'source_design_svg' => ['nullable'],
+            'source_design_svg' => ['nullable','file'],
+            'product_type' => ['required', 'in:T-shirt,other'],
         ];
-
     }
+
 
 
 }

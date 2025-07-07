@@ -20,8 +20,8 @@ class DesignResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name'=> "test",
-            'description'=> "test",
+            'name'=> $this->when(isset($this->name),$this->name),
+            'description'=> $this->description,
             'design_data' => $this->when(request('design_data') == true, $this->design_data),
             'design_image' => $this->getFirstMediaUrl('designs'),
             'current_version' => $this->current_version,
@@ -32,6 +32,9 @@ class DesignResource extends JsonResource
             'placed_on' => optional($this->pivot)->created_at?->format('d/m/Y'),
             'price' => $this->total_price,
             'quantity' => $this->productPrice?->quantity ?? $this->quantity,
+            'is_owner' => $this->owner->id == auth('sanctum')->user()->id,
+            'type' => 'design',
+
         ];
     }
 }
