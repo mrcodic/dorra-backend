@@ -77,7 +77,9 @@
                 </h6>
 
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <div class="text-16">Dimensions: <span class="text-black">{{ round($template->height /2.54  , 2)  }} × {{ round($template->width /2.54  ,2) }} pixel</span>
+                    <div class="text-16">Dimensions: <span class="text-black">
+                            {{$template->height_pixel }} × {{$template->width_pixel}}
+                            pixel</span>
                     </div>
 
                     <span class="badge text-light p-75 px-2 template-status-label" style="background-color: #222245">
