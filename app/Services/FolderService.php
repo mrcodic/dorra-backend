@@ -40,9 +40,16 @@ class FolderService extends BaseService
 
     public function bulkDeleteResources($ids)
     {
-        return $this->repository->query()->whereIn('id', $ids)->delete();
+        $folders= $this->repository->query()->whereIn('id', $ids)->get();
 
+        collect($folders)->each(function ($folder) {
+            collect($folder->designs)->each(function ($design) {
+                $design->delete();
+
+            });
+        });
     }
+
 
 
 }

@@ -33,7 +33,6 @@ class DesignService extends BaseService
             $design = $this->handleTransaction(function () use ($validatedData) {
                 $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id'],
                     'user_id' => $validatedData['user_id']], $validatedData);
-                $design->users()->attach($validatedData['user_id']);
                 $this->templateRepository
                     ->find($validatedData['template_id'])
                     ->getFirstMedia('templates')
@@ -46,6 +45,8 @@ class DesignService extends BaseService
             $design = $this->repository->query()->create($validatedData);
 //            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $design, 'designs');
         }
+        $design->users()->attach($validatedData['user_id']);
+
         return $design->load($relationsToLoad);
     }
 
