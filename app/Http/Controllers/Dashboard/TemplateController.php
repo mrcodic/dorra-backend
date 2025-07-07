@@ -35,7 +35,7 @@ class TemplateController extends DashboardController
     )
     {
         parent::__construct($templateService);
-        $this->storeRequestClass = new StoreTemplateRequest();
+        $this->storeRequestClass = new StoreTranslatedTemplateRequest();
         $this->updateRequestClass = new UpdateTranslatedTemplateRequest();
         $this->indexView = 'templates.index';
         $this->createView = 'templates.create';

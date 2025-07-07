@@ -42,13 +42,17 @@ class DesignController extends Controller
             'current_version',
             'name',
             'description',
+            'height',
+            'width',
+            'unit',
+            'product_id'
         ]), relationsToLoad: ['product']);
-        return Response::api(data: DesignResource::make($design->refresh()));
+        return Response::api(data: ['id'=> $design->id]);
     }
 
     public function show($design)
     {
-        $design = $this->designService->showResource($design, ['media', 'product',]);
+        $design = $this->designService->showResource($design, ['media', 'product','directProduct']);
         return Response::api(data: DesignResource::make($design->refresh()));
     }
 

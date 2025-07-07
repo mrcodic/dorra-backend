@@ -12,15 +12,25 @@ class DesignObserver
     /**
      * Handle the Design "created" event.
      */
-
+    public function creating(Design $design)
+    {
+        if ($design->tempalte_id)
+        {
+            $design->current_version += 1;
+        }
+    }
     public function saved(Design $design): void
     {
         $design->refresh();
-        $designVersion = $design->versions()->create([
-            'design_data' => $design->design_data,
-            'version' => $design->current_version,
-        ]);
-        CopyDesignMediaJob::dispatch($design, $designVersion);
+        if ($design->tempalte_id)
+        {
+            $designVersion = $design->versions()->create([
+                'design_data' => $design->design_data,
+                'version' => $design->current_version,
+            ]);
+            CopyDesignMediaJob::dispatch($design, $designVersion);
+        }
+
 
     }
 
@@ -29,7 +39,10 @@ class DesignObserver
      */
     public function updating(Design $design): void
     {
-        $design->current_version += 1;
+        if ($design->wasChanged('design_data')) {
+            $design->current_version += 1;
+
+        }
     }
 
     /**
@@ -37,13 +50,14 @@ class DesignObserver
      */
     public function updated(Design $design): void
     {
+        if ($design->wasChanged('design_data')) {
+            $designVersion = $design->versions()->create([
+                'design_data' => $design->design_data,
+                'version' => $design->current_version,
+            ]);
 
-        $designVersion = $design->versions()->create([
-            'design_data' => $design->design_data,
-            'version' => $design->current_version,
-        ]);
-
-        CopyDesignMediaJob::dispatch($design, $designVersion);
+            CopyDesignMediaJob::dispatch($design, $designVersion);
+        }
 
     }
 

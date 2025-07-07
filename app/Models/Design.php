@@ -30,9 +30,14 @@ class Design extends Model implements HasMedia
         'quantity',
         'name',
         'description',
+        'height',
+        'width',
+        'unit',
+        'product_id'
     ];
     protected $attributes = [
-        'quantity' => 1
+        'quantity' => 1,
+        'current_version' => 0
     ];
 
     public function quantity(): Attribute
@@ -63,6 +68,10 @@ class Design extends Model implements HasMedia
             'template_id',
             'product_id'
         );
+    }
+    public function directProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
 

@@ -40,19 +40,20 @@ class StoreTemplateRequest extends BaseRequest
                 'numeric',
                 new DimensionWithinUnitRange()
             ],
+
             'product_id' => [
                 Rule::requiredIf($this->input('product_type') === 'other'),
+                'prohibits:product_type,T-shirt',
                 'exists:products,id'
             ],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
-            'source_design_svg' => ['nullable','file'],
+            'source_design_svg' => ['nullable', 'file'],
             'product_type' => ['required', 'in:T-shirt,other'],
         ];
     }
-
 
 
 }
