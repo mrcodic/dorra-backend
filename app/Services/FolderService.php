@@ -50,6 +50,13 @@ class FolderService extends BaseService
         });
     }
 
-
+    public function updateResource($validatedData, $id, $relationsToLoad =[])
+    {
+        $model = $this->repository->update($validatedData, $id);
+        if (!empty($validatedData['designs'])) {
+            $model->designs()->sync($validatedData['designs']);
+        }
+        return $model->load($relationsToLoad);
+    }
 
 }

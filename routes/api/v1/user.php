@@ -112,7 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('designs/assign-to-folder', [FolderController::class, 'assignDesignsToFolder']);
     Route::post('folders/bulk-delete', [FolderController::class, 'bulkDelete']);
-    Route::apiResource('folders', FolderController::class)->only(['store', 'index']);
+    Route::apiResource('folders', FolderController::class)->except(['destroy']);
 
     Route::prefix('invitations/')->controller(InvitationController::class)->group(function () {
         Route::post('send', 'send')->name('invitation.send');

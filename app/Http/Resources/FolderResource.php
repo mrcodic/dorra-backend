@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\Design\DesignResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,6 +20,7 @@ class FolderResource extends JsonResource
             'name' => $this->when(isset($this->name), $this->name),
             'description' => $this->when(isset($this->description), $this->description),
             'designs_count' => $this->when(isset($this->designs_count), $this->designs_count),
+            'designs' => DesignResource::collection($this->whenLoaded('designs')),
         ];
     }
 }
