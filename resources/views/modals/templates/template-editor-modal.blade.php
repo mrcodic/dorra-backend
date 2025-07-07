@@ -15,11 +15,11 @@
                                 class="form-check-input me-2"
                                 type="radio"
                                 name="product_type"
-                                id="codeTshirt"
+                                id="{{$type}}"
                                 value="{{$type}}"
                                 required
                             />
-                            <label class="form-check-label mb-0 flex-grow-1" for="codeTshirt">{{ $type->label() }}</label>
+                            <label class="form-check-label mb-0 flex-grow-1" for="{{$type}}">{{ $type->label() }}</label>
                         </div>
                     @endforeach
                 </div>
