@@ -136,10 +136,11 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Review::class);
     }
 
-    public function designs()
+    public function designs(): MorphToMany
     {
         return $this->morphToMany(Design::class, 'designable', 'designables');
     }
+
 
     public function userDesigns(): BelongsToMany
     {

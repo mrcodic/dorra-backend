@@ -39,11 +39,15 @@ class Design extends Model implements HasMedia
         'quantity' => 1,
         'current_version' => 0
     ];
-    public function designable()
+    public function users()
     {
         return $this->morphedByMany(User::class, 'designable', 'designables');
     }
 
+    public function folders()
+    {
+        return $this->morphedByMany(Folder::class, 'designable', 'designables');
+    }
 
     public function quantity(): Attribute
     {
@@ -136,13 +140,5 @@ class Design extends Model implements HasMedia
             ->withTimestamps();
     }
 
-    public function folders()
-    {
-        return $this->belongsToMany(Folder::class)->withTimestamps();
-    }
 
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class,'design_user')->withTimestamps();
-    }
 }

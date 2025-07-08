@@ -29,13 +29,7 @@ class FolderService extends BaseService
         $model = $this->repository->create($validatedData);
 
         if (!empty($validatedData['designs'])) {
-            collect($validatedData['designs'])->each(function ($designId) use ($model) {
-                $design = $this->designRepository->find($designId);
-
-                $design->designable_id = $model->id;
-                $design->designable_type = get_class($model);
-                $design->save();
-            });
+            $model->designs()->sync($validatedData['designs']);
         }
 
         return $model->load($relationsToLoad);
