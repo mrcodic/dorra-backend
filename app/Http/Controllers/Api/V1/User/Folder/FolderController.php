@@ -22,7 +22,7 @@ class FolderController extends Controller
     public function index()
     {
         $folders = $this->folderService->getUserFolders();
-        return Response::api(data: FolderResource::collection($folders->load('designs')));
+        return Response::api(data: FolderResource::collection($folders->load(['designs.owner','designs.directProduct','designs.product'])));
     }
 
     public function store(StoreFolderRequest $request)
@@ -71,6 +71,35 @@ class FolderController extends Controller
             }]
         ]);
         $this->folderService->bulkDeleteResources($request->folders);
+        return Response::api();
+    }
+
+    public function bulkForceDelete(Request $request)
+    {
+        $request->validate([
+            'folders' => ['required', 'array'],
+            'folders.*' => ['nullable', 'integer', 'exists:folders,id', function ($attribute, $value, $fail) {
+                $folder = Folder::find($value);
+                if ($folder && $folder->user_id != auth('sanctum')->id()) {
+                    $fail("The selected Folder does not belong to you");
+                }
+            }]
+        ]);
+        $this->folderService->bulkForceDeleteResources($request->folders);
+        return Response::api();
+    }
+    public function bulkRestore(Request $request)
+    {
+        $request->validate([
+            'folders' => ['required', 'array'],
+            'folders.*' => ['nullable', 'integer', 'exists:folders,id', function ($attribute, $value, $fail) {
+                $folder = Folder::find($value);
+                if ($folder && $folder->user_id != auth('sanctum')->id()) {
+                    $fail("The selected Folder does not belong to you");
+                }
+            }]
+        ]);
+        $this->folderService->bulkRestore($request->folders);
         return Response::api();
     }
 }

@@ -21,6 +21,7 @@ class FolderResource extends JsonResource
             'description' => $this->when(isset($this->description), $this->description),
             'designs_count' => $this->when(isset($this->designs_count), $this->designs_count),
             'designs' => DesignResource::collection($this->whenLoaded('designs')),
+            'delete_since' => $this->deleted_at?->diffForHumans(),
         ];
     }
 }

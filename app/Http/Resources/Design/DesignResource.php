@@ -34,6 +34,7 @@ class DesignResource extends JsonResource
             'quantity' => $this->productPrice?->quantity ?? $this->quantity,
             'ownered_by_me' => $this->owner->id == auth('sanctum')->user()->id,
             'type' => 'design',
+            'delete_since' => $this->deleted_at?->diffForHumans(),
 
         ];
     }
