@@ -46,6 +46,8 @@ class FolderService extends BaseService
         $folders= $this->repository->query()->whereIn('id', $ids)->get();
 
         collect($folders)->each(function ($folder) {
+            $folder->designs()->detach();
+            $folder->delete();
             collect($folder->designs)->each(function ($design) {
                 $design->delete();
 
