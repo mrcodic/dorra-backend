@@ -14,9 +14,9 @@ class Folder extends Model
         'user_id',
     ];
 
-    public function designs(): MorphMany
+    public function designs()
     {
-        return $this->morphMany(Design::class, 'designable');
+        return $this->morphToMany(Design::class, 'designable', 'designables');
     }
 
 

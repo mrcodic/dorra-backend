@@ -47,9 +47,10 @@ class DesignService extends BaseService
             $design = $this->repository->query()->create($validatedData);
 //            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $design, 'designs');
         }
-        $design->designable()->associate(
+        $design->designable()->attach(
             $this->userRepository->find($validatedData['user_id'])
-        )->save();
+        );
+
         return $design->load($relationsToLoad);
     }
 

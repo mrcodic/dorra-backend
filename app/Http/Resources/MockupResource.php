@@ -38,6 +38,10 @@ class MockupResource extends JsonResource
             'colors' => $this->when(isset($this->colors), $this->colors),
             'product' => ProductResource::make($this->whenLoaded('product')),
             'mockup_url' => $this->getFirstMediaUrl('mockups'),
+            'base_url'      => $img('basic_tshirt_front.png'),
+            'shadow_url'    => $img('1678793789014.darkBlend1.png'),
+            'mask_url'      => $img('mask.png'),
+            'disp_url'      => $img('1678793789014.darkBlend1.png'),
         ];
     }
 }

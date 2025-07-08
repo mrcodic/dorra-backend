@@ -39,10 +39,11 @@ class Design extends Model implements HasMedia
         'quantity' => 1,
         'current_version' => 0
     ];
-    public function disignable()
+    public function designable()
     {
-        return $this->morphTo();
+        return $this->morphedByMany(User::class, 'designable', 'designables');
     }
+
 
     public function quantity(): Attribute
     {
