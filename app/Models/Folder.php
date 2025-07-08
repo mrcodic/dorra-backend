@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, MorphMany};
 
 
 class Folder extends Model
@@ -14,10 +14,11 @@ class Folder extends Model
         'user_id',
     ];
 
-    public function designs(): BelongsToMany
+    public function designs(): MorphMany
     {
-        return $this->belongsToMany(Design::class)->withTimestamps();
+        return $this->morphMany(Design::class, 'designable');
     }
+
 
     public function user(): BelongsTo
     {

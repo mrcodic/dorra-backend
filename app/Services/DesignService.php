@@ -10,6 +10,7 @@ use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 
@@ -22,6 +23,7 @@ class DesignService extends BaseService
         DesignRepositoryInterface                   $repository,
         public TemplateRepositoryInterface          $templateRepository,
         public ProductSpecificationOptionRepository $optionRepository,
+        public UserRepositoryInterface $userRepository,
     )
     {
         parent::__construct($repository);
@@ -45,8 +47,9 @@ class DesignService extends BaseService
             $design = $this->repository->query()->create($validatedData);
 //            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $design, 'designs');
         }
-        $design->users()->attach($validatedData['user_id']);
-
+        $design->designable()->associate(
+            $this->userRepository->find($validatedData['user_id'])
+        )->save();
         return $design->load($relationsToLoad);
     }
 

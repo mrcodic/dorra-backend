@@ -39,6 +39,10 @@ class Design extends Model implements HasMedia
         'quantity' => 1,
         'current_version' => 0
     ];
+    public function disignable()
+    {
+        return $this->morphTo();
+    }
 
     public function quantity(): Attribute
     {

@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\Interfaces\{FolderRepositoryInterface};
+use App\Repositories\Interfaces\{DesignRepositoryInterface, FolderRepositoryInterface};
 use Illuminate\Http\Request;
 
 
 class FolderService extends BaseService
 {
-    public function __construct(FolderRepositoryInterface $repository)
+    public function __construct(FolderRepositoryInterface $repository,public DesignRepositoryInterface $designRepository)
     {
         parent::__construct($repository);
     }
@@ -27,7 +27,13 @@ class FolderService extends BaseService
     {
         $model = $this->repository->create($validatedData);
         if (!empty($validatedData['designs'])) {
-            $model->designs()->sync($validatedData['designs']);
+            collect($validatedData['designs'])->each(function ($designId) use ($model) {
+                $this->designRepository->find($designId)
+                    ->designable()
+                    ->associate($model)
+                    ->save();
+            });
+
         }
 
         return $model->load($relationsToLoad);
