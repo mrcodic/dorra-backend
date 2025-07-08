@@ -17,12 +17,13 @@ class FolderService extends BaseService
     {
         return $this->repository->query()
             ->withCount('designs')
-            ->when(request()->filled('search'),
-                fn($query) => $query->where('name', 'like', '%' . request()->search . '%'))
-            ->whereBelongsTo(auth('sanctum')->user())
+            ->when(request()->filled('search'), function ($query) {
+                $search = request('search');
+                $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->where('user_id', auth('sanctum')->id())
             ->get();
     }
-
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->repository->create($validatedData);
