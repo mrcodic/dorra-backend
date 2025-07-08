@@ -22,6 +22,7 @@ class FolderService extends BaseService
                 $query->where('name', 'like', '%' . $search . '%');
             })
             ->where('user_id', auth('sanctum')->id())
+            ->orderBy('created_at',request('date','desc'))
             ->get();
     }
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
@@ -50,7 +51,6 @@ class FolderService extends BaseService
             $folder->delete();
             collect($folder->designs)->each(function ($design) {
                 $design->delete();
-
             });
         });
     }
