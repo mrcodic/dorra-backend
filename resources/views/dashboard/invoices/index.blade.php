@@ -75,7 +75,6 @@
                             </th>
                             <th>Order Number</th>
                             <th>Customer</th>
-                            <th>Items</th>
                             <th>Price</th>
                             <th>Order Status</th>
                             <th>Added Date</th>
@@ -135,7 +134,7 @@
     </script>
 
     {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-order-list.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-invoices-list.js') }}?v={{ time() }}"></script>
     <script src="https://unpkg.com/feather-icons"></script>
 
     <script>
