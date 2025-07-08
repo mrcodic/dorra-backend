@@ -41,12 +41,12 @@ class Design extends Model implements HasMedia
     ];
     public function users()
     {
-        return $this->morphedByMany(User::class, 'designable', 'designables');
+        return $this->morphedByMany(User::class, 'designable', 'designables')->withTimestamps();
     }
 
     public function folders()
     {
-        return $this->morphedByMany(Folder::class, 'designable', 'designables');
+        return $this->morphedByMany(Folder::class, 'designable', 'designables')->withTimestamps();
     }
 
     public function quantity(): Attribute

@@ -29,7 +29,7 @@ class FolderService extends BaseService
         $model = $this->repository->create($validatedData);
 
         if (!empty($validatedData['designs'])) {
-            $model->designs()->sync($validatedData['designs']);
+            $model->designs()->attach($validatedData['designs']);
         }
 
         return $model->load($relationsToLoad);
@@ -38,7 +38,7 @@ class FolderService extends BaseService
 
     public function assignDesignsToFolder($validatedData)
     {
-       return $this->repository->query()->find($validatedData['folder_id'])->designs()->sync($validatedData['designs']);
+       return $this->repository->query()->find($validatedData['folder_id'])->designs()->syncWithoutDetaching($validatedData['designs']);
     }
 
     public function bulkDeleteResources($ids)
@@ -57,7 +57,7 @@ class FolderService extends BaseService
     {
         $model = $this->repository->update($validatedData, $id);
         if (!empty($validatedData['designs'])) {
-            $model->designs()->sync($validatedData['designs']);
+            $model->designs()->syncWithoutDetaching($validatedData['designs']);
         }
         return $model->load($relationsToLoad);
     }
