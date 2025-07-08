@@ -50,7 +50,7 @@ class FolderController extends Controller
             'designs' => ['required', 'array'],
             'designs.*' => ['nullable', 'string', 'exists:designs,id', function ($attribute, $value, $fail) {
                 $design = Design::find($value);
-                if ($design && !$design->users()->pluck('user_id')->contains(auth('sanctum')->id())) {
+                if ($design && !$design->users()->pluck('id')->contains(auth('sanctum')->id())) {
                     $fail("The selected design does not belong to you or you are not a member of this design.");
                 }
             }]
