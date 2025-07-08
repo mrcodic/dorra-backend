@@ -203,4 +203,19 @@ class DesignService extends BaseService
             ->values();
 
     }
+    public function bulkForceResources($ids)
+    {
+        return $this->repository->query()->withTrashed()->whereIn('id', $ids)->forceDelete();
+    }
+    public function trash()
+    {
+        return $this->repository->query()
+            ->onlyTrashed()
+            ->with(['product.category','owner'])
+            ->whereHas('users', function ($query) {
+                $query->where('user_id', auth('sanctum')->id());
+            })
+            ->get();
+    }
+
 }

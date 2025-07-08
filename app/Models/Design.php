@@ -5,6 +5,7 @@ namespace App\Models;
 
 use App\Observers\DesignObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -16,7 +17,7 @@ use Spatie\Translatable\HasTranslations;
 #[ObservedBy(DesignObserver::class)]
 class Design extends Model implements HasMedia
 {
-    use HasUuids, InteractsWithMedia, HasTranslations;
+    use HasUuids, InteractsWithMedia, HasTranslations, softDeletes;
     public $translatable = ['name', 'description'];
 
     protected $fillable = [

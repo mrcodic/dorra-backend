@@ -10,15 +10,18 @@ use App\Http\Controllers\Controller;
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Services\CategoryService;
+use App\Services\DesignService;
+use App\Services\FolderService;
 use App\Services\ReviewService;
 use App\Services\TagService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
     CountryResource,
+    Design\DesignResource,
+    FolderResource,
     MediaResource,
     StateResource,
-    TagResource
-};
+    TagResource};
 use App\Repositories\Interfaces\{CategoryRepositoryInterface, CountryRepositoryInterface, StateRepositoryInterface};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -33,6 +36,8 @@ class MainController extends Controller
         public StateRepositoryInterface   $stateRepository,
         public CategoryService            $categoryService,
         public TagService                 $tagService,
+        public DesignService $designService,
+        public FolderService $folderService,
     )
     {
     }
@@ -133,5 +138,14 @@ class MainController extends Controller
         $model = ($request->resource)::find($id);
         $media = addMediaToResource($request->allFiles(), $model, clearExisting: true);
         return Response::api(data: $media);
+    }
+
+    public function trash()
+    {
+        return Response::api(data: [
+           'designs' => DesignResource::collection($this->designService->trash()),
+            'folders' => FolderResource::collection($this->folderService->trash())
+        ]);
+
     }
 }

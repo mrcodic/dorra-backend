@@ -47,11 +47,24 @@ class FolderService extends BaseService
         $folders= $this->repository->query()->whereIn('id', $ids)->get();
 
         collect($folders)->each(function ($folder) {
-            $folder->designs()->detach();
-            $folder->delete();
             collect($folder->designs)->each(function ($design) {
                 $design->delete();
             });
+            $folder->designs()->detach();
+            $folder->delete();
+
+        });
+    }
+    public function bulkForceDeleteResources($ids)
+    {
+        $folders= $this->repository->query()->withTrashed()->whereIn('id', $ids)->get();
+
+        collect($folders)->each(function ($folder) {
+            collect($folder->designs)->each(function ($design) {
+                $design->forceDelete();
+            });
+            $folder->designs()->detach();
+            $folder->forceDelete();
         });
     }
 
@@ -62,6 +75,14 @@ class FolderService extends BaseService
             $model->designs()->syncWithoutDetaching($validatedData['designs']);
         }
         return $model->load($relationsToLoad);
+    }
+    public function trash()
+    {
+        return $this->repository->query()
+            ->onlyTrashed()
+            ->withCount('designs')
+            ->where('user_id', auth('sanctum')->id())
+            ->get();
     }
 
 }

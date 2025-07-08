@@ -95,7 +95,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::controller(DesignController::class)->prefix('designs/')->group(function () {
+        Route::post('bulk-restore', 'bulkRestore');
         Route::post('bulk-delete', 'bulkDelete');
+        Route::post('bulk-force-delete', 'bulkForceDelete');
         Route::get('owners', 'owners');
         Route::get('{design}/price-details', 'priceDetails');
         Route::post('{design}/add-quantity', 'addQuantity');
@@ -111,7 +113,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
     Route::post('designs/assign-to-folder', [FolderController::class, 'assignDesignsToFolder']);
-    Route::post('folders/bulk-delete', [FolderController::class, 'bulkDelete']);
+    Route::prefix('folders/')->controller(FolderController::class)->group(function () {
+        Route::post('bulk-delete',  'bulkDelete');
+        Route::post('bulk-force-delete',  'bulkForceDelete');
+        Route::post('bulk-restore',  'bulkRestore');
+    });
+
     Route::apiResource('folders', FolderController::class)->except(['destroy']);
 
     Route::prefix('invitations/')->controller(InvitationController::class)->group(function () {
@@ -120,6 +127,8 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('invitation.accept')
             ->middleware('signed');
     });
+
+    Route::get('trash',[MainController::class, 'trash'])->name('trash');
 
 
 
