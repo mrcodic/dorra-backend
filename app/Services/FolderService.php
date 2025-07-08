@@ -27,18 +27,20 @@ class FolderService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->repository->create($validatedData);
+
         if (!empty($validatedData['designs'])) {
             collect($validatedData['designs'])->each(function ($designId) use ($model) {
-                $this->designRepository->find($designId)
-                    ->designable()
-                    ->associate($model)
-                    ->save();
-            });
+                $design = $this->designRepository->find($designId);
 
+                $design->designable_id = $model->id;
+                $design->designable_type = get_class($model);
+                $design->save();
+            });
         }
 
         return $model->load($relationsToLoad);
     }
+
 
     public function assignDesignsToFolder($validatedData)
     {
