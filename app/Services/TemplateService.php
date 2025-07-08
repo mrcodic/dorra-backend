@@ -141,7 +141,7 @@ class TemplateService extends BaseService
             }
 
             if (isset($validatedData['base64_preview_image'])) {
-                RenderFabricJsonToPngJob::dispatch($validatedData['base64_preview_image'], $model, 'templates');
+                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
             }
 
             return $model->refresh();

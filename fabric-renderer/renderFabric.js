@@ -28,7 +28,7 @@ if (!inputJsonPath || !outputPngPath) {
     const width = 1000;
     const height = 1000;
 
-    await page.setViewport({ width, height });
+    await page.setViewport({width, height});
 
     let renderDone;
     const renderPromise = new Promise(resolve => {
@@ -59,26 +59,45 @@ if (!inputJsonPath || !outputPngPath) {
         <body>
             <canvas id="c" width="${width}" height="${height}"></canvas>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
-            <script>
-                const canvas = new fabric.Canvas('c');
-                const json = ${safeJsonString};
-                canvas.loadFromJSON(json, () => {
-                    canvas.renderAll();
-                    const waitForImages = () => {
-                        const objects = canvas.getObjects();
-                        const loading = objects.filter(obj =>
-                            obj.type === 'image' && (!obj._element || !obj._element.complete)
-                        );
-                        if (loading.length > 0) {
-                            setTimeout(waitForImages, 200);
-                        } else {
-                            canvas.renderAll();
-                            setTimeout(() => window.notifyRendered(), 300);
-                        }
-                    };
-                    waitForImages();
-                });
-            </script>
+<script>
+    const canvas = new fabric.Canvas('c');
+    const json = ${safeJsonString};
+
+    canvas.loadFromJSON(json, () => {
+        canvas.renderAll();
+
+        // Auto-resize canvas to fit all objects
+        const bounds = canvas.getObjects().reduce(
+            (acc, obj) => {
+                const objRight = obj.left + obj.getScaledWidth();
+                const objBottom = obj.top + obj.getScaledHeight();
+                return {
+                    maxX: Math.max(acc.maxX, objRight),
+                    maxY: Math.max(acc.maxY, objBottom)
+                };
+            },
+            { maxX: 0, maxY: 0 }
+        );
+
+        canvas.setDimensions({ width: bounds.maxX + 50, height: bounds.maxY + 50 });
+        canvas.renderAll();
+
+        const waitForImages = () => {
+            const objects = canvas.getObjects();
+            const loading = objects.filter(obj =>
+                obj.type === 'image' && (!obj._element || !obj._element.complete)
+            );
+            if (loading.length > 0) {
+                setTimeout(waitForImages, 200);
+            } else {
+                canvas.renderAll();
+                setTimeout(() => window.notifyRendered(), 300);
+            }
+        };
+        waitForImages();
+    });
+</script>
+
         </body>
         </html>
     `);
@@ -86,7 +105,7 @@ if (!inputJsonPath || !outputPngPath) {
     await renderPromise;
 
     const element = await page.$('canvas');
-    await element.screenshot({ path: outputPngPath, omitBackground: true });
+    await element.screenshot({path: outputPngPath, omitBackground: true});
 
     await browser.close();
     console.log('✅ PNG saved to', outputPngPath);
