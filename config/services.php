@@ -50,5 +50,13 @@ return [
     ],
 
     'editor_url' => env('FRONT_END_EDITOR_URL'),
+    'paymob' => [
+        'api_key' => env('PAYMOB_API_KEY'),
+        'iframe_id' => env('PAYMOB_IFRAME_ID'),
+        'integration_id' => env('PAYMOB_INTEGRATION_ID'),
+        'hmac' => env('PAYMOB_HMAC'),
+        'currency' => 'EGP',
+    ],
+
 
 ];
