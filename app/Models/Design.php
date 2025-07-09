@@ -23,6 +23,7 @@ class Design extends Model implements HasMedia
     protected $fillable = [
         'cookie_id',
         'user_id',
+        'guest_id',
         'order_id',
         'template_id',
         'design_data',

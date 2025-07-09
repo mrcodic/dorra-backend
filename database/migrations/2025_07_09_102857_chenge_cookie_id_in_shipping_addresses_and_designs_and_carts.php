@@ -14,16 +14,16 @@ return new class extends Migration
     {
         Schema::table('shipping_addresses', function (Blueprint $table) {
              $table->dropColumn('cookie_id');
-             $table->foreignIdFor(Guest::class)->nullable()->constrained()->nullOnDelete();
+             $table->foreignIdFor(Guest::class)->after('user_id')->nullable()->constrained()->nullOnDelete();
         });
         Schema::table('designs', function (Blueprint $table) {
              $table->dropColumn('cookie_id');
-            $table->foreignIdFor(Guest::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(Guest::class)->after('user_id')->nullable()->constrained()->nullOnDelete();
 
         });
         Schema::table('carts', function (Blueprint $table) {
              $table->dropColumn('cookie_id');
-            $table->foreignIdFor(Guest::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(Guest::class)->after('user_id')->nullable()->constrained()->nullOnDelete();
 
         });
     }
