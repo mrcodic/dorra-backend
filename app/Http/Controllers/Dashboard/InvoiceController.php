@@ -17,6 +17,11 @@ class InvoiceController extends DashboardController
         $this->editView = 'invoices.edit';
         $this->usePagination = true;
         $this->resourceTable = 'invoices';
+        $this->methodRelations = [
+
+            'edit' => ['order' , 'user' , 'designs'],
+        ];
+
     }
 
     public function getData(): JsonResponse

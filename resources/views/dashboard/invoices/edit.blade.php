@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
-@section('title', 'Edit orderss')
-@section('main-page', 'Orders')
-@section('sub-page', 'Edit Orders')
+@section('title', 'Edit Invoice ')
+@section('main-page', 'Invoice')
+@section('sub-page', 'Edit Invoice')
 
 @section('vendor-style')
 <!-- Vendor CSS Files -->
@@ -10,47 +10,78 @@
 
 @section('content')
 <div class="container bg-white rounded-3 p-3">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">#1234567</span></div>
-        <div class="d-flex align-items-center status-pill justify-content-center">
-            <div class="status-icon me-1">
-                <i data-feather="check"></i> <!-- You can dynamically change the icon -->
-            </div>
-            <span class="status-text">Confirmed</span>
+    <div class="mb-3">
+        <label for="order_number" class="form-label fw-bold text-dark">Invoice Number:</label>
+        <input type="text" id="order_number" value="{{ $model->invoice_number }}" name="order_number"
+               class="form-control form-control-lg fw-bold"
+               value="#1234567"
+               readonly>
+
+    <div class="d-flex align-items-center status-pill justify-content-center">
+        {{-- محتوى الحالة أو أي زر إضافي هنا --}}
+    </div>
+</div>
+    <form>
+      <div class="row">
+    <!-- Left Column -->
+
+    <div class="row">
+
+        <div class="mb-2">
+            <label class="form-label fw-bold">Issued Date</label>
+            <input type="text" class="form-control" value="{{ $model->issued_date }}" name="issued_date" value="10/20/2025" readonly>
+        </div>
+
+    <!-- Left side: Inputs -->
+    <div class="col-md-8">
+        <h5 class="mb-2 fs-16 text-black">Customer Details</h5>
+
+        <div class="mb-2">
+            <label class="form-label fw-bold">Name</label>
+            <input type="text" class="form-control" value="{{ $model->user->first_name }}"  name="name" value="John Doe" readonly>
+        </div>
+        <div class="mb-2">
+            <label class="form-label fw-bold">Email</label>
+            <input type="email" class="form-control" value="{{ $model->user->email }}" name="email" value="john@example.com" readonly>
+        </div>
+        <div class="mb-2">
+            <label class="form-label fw-bold">Phone</label>
+            <input type="text" class="form-control" value="{{ $model->user->phone_number }}" name="phone" value="+1 123 456 7890" readonly>
         </div>
     </div>
-    <form>
-        <div class="row">
-            <!-- Left Column -->
-            <div class="col-12 col-md-4">
-                <!-- Customer Details -->
-                <h5 class="mb-2 fs-16 text-black">Customer Details</h5>
 
-                <div class="mb-2">
-                    <label class="form-label fw-bold">Name</label>
-                    <input type="text" class="form-control" name="name" value="John Doe">
-                </div>
-                <div class="mb-2">
-                    <label class="form-label fw-bold">Email</label>
-                    <input type="email" class="form-control" name="email" value="john@example.com">
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone" value="+1 123 456 7890">
-                </div>
+    <!-- Right side: Radios -->
+<div class="col-md-4">
+    <h5 class="mb-2 fs-16 text-black">Invoice Status</h5>
+    @foreach (\App\Enums\Invoice\InvoiceStatusEnum::cases() as $status)
+        <div class="form-check mb-2">
+            <input class="form-check-input"
+                   type="radio"
+                   name="status"
+                   id="status_{{ $status->value }}"
+                   value="{{ $status->value }}"
+                   style="transform: scale(1.5); margin-right: 10px;"
+                   {{ old('status') == $status->value ? 'checked' : '' }}>
+            <label class="form-check-label fw-bold fs-5" for="status_{{ $status->value }}">
+                {{ $status->label() }}
+            </label>
+        </div>
+    @endforeach
+</div>
+
 
 
                 <!-- Shipping Details -->
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="mb-0 fs-16 text-black">Shipping Details</h5>
+                    {{-- <h5 class="mb-0 fs-16 text-black">Shipping Details</h5>
 
                     <button type="button" class="lined-btn" data-bs-toggle="modal" data-bs-target="#editOrderShippingModal">
                         Edit
-                    </button>
+                    </button> --}}
 
 
                 </div>
-                <span class="text-black fs-16 fw-bold mb-1">Address:</span>
+                {{-- <span class="text-black fs-16 fw-bold mb-1">Address:</span>
                 <div class="border rounded p-2 mb-2 text-black fs-5">
 
                     1234 Example St, Suite 100<br>City, Country
@@ -67,22 +98,15 @@
                         <p class="fs-4">Estimated delivery time</p>
                         <div class="fs-16">Tomorrow, 2:00 PM - 4:00 PM</div>
                     </div>
-                </div>
+                </div> --}}
             </div>
             <!-- Right Column -->
             <div class="col-12 col-md-8">
-                <div class="p-1 rounded" style="background-color: #FCF8FC;">
+                {{-- <div class="p-1 rounded" style="background-color: #FCF8FC;">
                     <p class="mb-1 fs-16 text-dark">Order Placed on:</p>
-                    <p class="fs-16 text-black">April 30, 2025</p>
+                    <p class="fs-16 text-black">April 30, 2025</p> --}}
                 </div>
-                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
-                <select class="form-select mb-4" name="order_status">
-                    <option value="confirmed">Completed</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                </select>
+              
                 <!-- Items List -->
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
                 <div class="mb-1">
@@ -118,6 +142,17 @@
                     </div>
                 </div>
 
+
+                 <form id="discount-code-form" action="{{ route('orders.apply-discount-code') }}" method="post">
+            <div class="input-group">
+                @csrf
+                <input type="text" class="form-control" name="code" placeholder="Enter discount code">
+                <button class="btn btn-secondary" type="submit">Apply</button>
+            </div>
+            <div id="discount-code-error" class="invalid-feedback d-block text-danger mt-1" style="display: none;"></div>
+            <div id="discount-code-success" class="valid-feedback d-block text-success mt-1" style="display: none;"></div>
+        </form>
+
                 <!-- Pricing Summary -->
                 <h5 class="mt-3 mb-1 text-black fs-16">Pricing Details</h5>
                 <div class="d-flex justify-content-between mb-1">
@@ -151,15 +186,7 @@
                 </div>
 
                 <!-- Status Display -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Order Status</label>
-                    <div class="d-flex align-items-center status-pill justify-content-center">
-                        <div class="status-icon me-1">
-                            <i data-feather="check"></i> <!-- You can dynamically change the icon -->
-                        </div>
-                        <span class="status-text">Confirmed</span>
-                    </div>
-                </div>
+              
 
                 <!-- Action Buttons -->
                 <div class="d-flex gap-2 justify-content-between ">
@@ -167,7 +194,7 @@
 
                     <button class="btn btn-outline-secondary">Discard Changes</button>
                     <div class="d-flex gap-1">
-                        <button class="btn btn-outline-secondary">Cancel Order</button>
+                        <button class="btn btn-outline-secondary">Cancel invoice</button>
                         <button class="btn btn-primary">Save changes</button>
                     </div>
                 </div>
@@ -175,7 +202,6 @@
         </div>
     </form>
 </div>
-@include("modals.orders.edit-shipping-details")
 
 @endsection
 
