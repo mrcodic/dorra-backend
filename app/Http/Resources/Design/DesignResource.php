@@ -18,6 +18,8 @@ class DesignResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
+
         return [
             'id' => $this->id,
             'name'=> $this->name,
@@ -35,7 +37,8 @@ class DesignResource extends JsonResource
             'ownered_by_me' => $this->owner?->id == auth('sanctum')->user()?->id,
             'type' => 'design',
             'delete_since' => $this->deleted_at?->diffForHumans(),
-            'is_saved' => $this->saves->pluck('savable_id')->contains('savable_id',$this->id),
+            'is_saved' => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id()),
+
 
         ];
     }
