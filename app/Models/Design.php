@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough, MorphMany};
 use Spatie\Translatable\HasTranslations;
 
 #[ObservedBy(DesignObserver::class)]
@@ -23,6 +23,7 @@ class Design extends Model implements HasMedia
     protected $fillable = [
         'cookie_id',
         'user_id',
+        'guest_id',
         'order_id',
         'template_id',
         'design_data',
@@ -43,6 +44,11 @@ class Design extends Model implements HasMedia
     public function users()
     {
         return $this->morphedByMany(User::class, 'designable', 'designables')->withTimestamps();
+    }
+
+    public function saves(): MorphMany
+    {
+        return $this->morphMany(Save::class, 'savable');
     }
 
     public function folders()

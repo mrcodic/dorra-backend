@@ -33,6 +33,7 @@ class ProductResource extends JsonResource
             'all_product_images' => $this->whenLoaded('media', function () {
                 return MediaResource::collection($this->getAllProductImages());
             }),
+            'is_saved' => $this->saves->contains('id'),
         ];
     }
 }

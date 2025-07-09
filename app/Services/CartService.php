@@ -17,12 +17,13 @@ use Illuminate\Validation\ValidationException;
 class CartService extends BaseService
 {
     public function __construct(
-        CartRepositoryInterface $repository,
-        public DesignRepositoryInterface $designRepository,
-        public CartRepositoryInterface $cartRepository,
+        CartRepositoryInterface                $repository,
+        public DesignRepositoryInterface       $designRepository,
+        public CartRepositoryInterface         $cartRepository,
         public DiscountCodeRepositoryInterface $discountCodeRepository,
-        public GuestRepositoryInterface $guestRepository,
-    ) {
+        public GuestRepositoryInterface        $guestRepository,
+    )
+    {
         parent::__construct($repository);
     }
 
@@ -38,10 +39,18 @@ class CartService extends BaseService
             $guestId = $guest->id;
         }
 
-        $cart = $this->repository->query()->firstOrCreate([
-            'user_id' => $userId,
-            'guest_id' => $guestId,
-        ], Arr::except($validatedData, ['design_id', 'cookie_id']));
+        $cart = $this->repository->query()
+            ->when($userId, fn($query) => $query->where('user_id', $userId))
+            ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
+            ->first();
+
+        if (!$cart) {
+            $cart = $this->repository->query()->create([
+                'user_id' => $userId,
+                'guest_id' => $guestId,
+                ...Arr::except($validatedData, ['design_id', 'cookie_id']),
+            ]);
+        }
 
         $design = $this->designRepository->find($validatedData['design_id']);
 
@@ -57,8 +66,9 @@ class CartService extends BaseService
 
         $cart->update(['price' => getTotalPrice(0, $totalPrice)]);
 
-        return $cart->load($relationsToLoad);
+        return $cart->load(['designs.product']);
     }
+
 
     /**
      * @throws ValidationException

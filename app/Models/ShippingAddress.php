@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class ShippingAddress extends Model
 {
-    protected $fillable =['label', 'line', 'state_id', 'user_id', 'cookie_id'];
+    protected $fillable =['label', 'line', 'state_id', 'user_id', 'guest_id',
+    ];
 
     public function state()
     {

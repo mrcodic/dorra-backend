@@ -36,7 +36,7 @@ class DesignController extends Controller
         $design = $this->designService->storeResource($request->only([
             'template_id',
             'user_id',
-            'cookie_id',
+            'guest_id',
             'design_data',
             'design_image',
             'current_version',
