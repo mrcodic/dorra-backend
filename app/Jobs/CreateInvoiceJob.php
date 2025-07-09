@@ -25,10 +25,7 @@ class CreateInvoiceJob implements ShouldQueue
      */
 public function handle(): void
 {
-    if (!$this->order->invoice) {
-        $orderItem = $this->order->orderItems;
-
-
+   
 
         $invoice = Invoice::updateOrCreate([
             'order_id' => $this->order->id,
@@ -50,5 +47,4 @@ public function handle(): void
             $invoice->designs()->sync($designIds);
         }
     }
-}
 }

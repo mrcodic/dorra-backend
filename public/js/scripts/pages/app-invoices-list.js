@@ -278,7 +278,7 @@ $(document).ready(function () {
         if (selectedIds.length === 0) return;
 
         $.ajax({
-            url: "orders/bulk-delete",
+            url: "invoices/bulk-delete",
             method: "POST",
             data: {
                 ids: selectedIds,
