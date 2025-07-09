@@ -27,7 +27,9 @@ class ProductService extends BaseService
                                 public ProductSpecificationRepositoryInterface $specificationRepository,
     )
     {
-    $this->relations = ['category','tags','reviews'];
+    $this->relations = ['category','tags','reviews',  'saves' => function ($query) {
+        $query->where('user_id', auth('sanctum')->id());
+    },];
 
         parent::__construct($repository);
     }
