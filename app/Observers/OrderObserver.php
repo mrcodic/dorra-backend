@@ -2,9 +2,10 @@
 
 namespace App\Observers;
 
-use App\Enums\Order\StatusEnum;
 use App\Models\Admin;
 use App\Models\Order;
+use App\Jobs\CreateInvoiceJob;
+use App\Enums\Order\StatusEnum;
 
 class OrderObserver
 {
@@ -32,7 +33,13 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-        //
+         if (
+            $order->isDirty('status') && 
+            $order->status === StatusEnum::CONFIRMED &&
+            !$order->invoice
+        ) {
+            CreateInvoiceJob::dispatch($order);
+        }
     }
 
     /**
