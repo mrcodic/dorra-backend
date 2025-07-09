@@ -6,7 +6,6 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\TemplateResource;
 use App\Http\Resources\UserResource;
-use App\Models\Design;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -36,7 +35,7 @@ class DesignResource extends JsonResource
             'ownered_by_me' => $this->owner?->id == auth('sanctum')->user()?->id,
             'type' => 'design',
             'delete_since' => $this->deleted_at?->diffForHumans(),
-            'is_saved' => Design::with(['saves' => fn($q) => $q->where('user_id', auth()->id())])->get(),
+            'is_saved' => $this->saves->pluck('savable_id')->contains('savable_id',$this->id),
 
         ];
     }
