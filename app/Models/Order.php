@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Invoice;
 use App\Enums\Order\StatusEnum;
 use App\Observers\OrderObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[ObservedBy(OrderObserver::class)]
 class Order extends Model
@@ -64,6 +65,13 @@ class Order extends Model
     {
         return $this->hasOne(PickupContact::class);
     }
+
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
+    
 
 
 }
