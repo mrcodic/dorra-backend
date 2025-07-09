@@ -21,7 +21,7 @@ class InvoiceService extends BaseService
         ->query(['id', 'invoice_number', 'created_at', 'user_id', 'order_id', 'design_id' , 
         'quantity', 'subtotal', 'discount_amount', 'delivery_amount', 'tax_amount', 
         'total_price', 'status', 'issued_date'])
-            ->with(['order', 'user', 'design'])
+            ->with(['order', 'user', 'designs'])
             ->when(request()->filled('search_value'), function ($query) {
                 $locale = app()->getLocale();
                 $search = request('search_value');
