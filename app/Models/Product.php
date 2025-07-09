@@ -10,11 +10,13 @@ use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough, MorphToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough, MorphMany, MorphToMany};
 
 class Product extends Model implements HasMedia
 {
     use InteractsWithMedia, HasTranslations;
+
+    public $translatable = ['name', 'description',];
     protected $fillable = [
         'name',
         'description',
@@ -26,20 +28,13 @@ class Product extends Model implements HasMedia
         'status',
     ];
 
-    public $translatable = ['name', 'description',];
-
-    protected function casts()
-    {
-        return [
-            'status' => StatusEnum::class,
-        ];
-    }
     public function price(): Attribute
     {
         return Attribute::get(function ($value) {
             return fmod($value, 1) == 0.0 ? (int)$value : $value;
         });
     }
+
     public function rating(): Attribute
     {
         return Attribute::get(fn(?int $value) => $this->load('reviews:rating')->reviews?->pluck('rating')->avg());
@@ -52,6 +47,7 @@ class Product extends Model implements HasMedia
             $query->whereIn('rating', $rates);
         });
     }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class)->withDefault(['name' => 'uncategorized']);
@@ -76,10 +72,12 @@ class Product extends Model implements HasMedia
     {
         return $this->hasMany(ProductSpecification::class);
     }
+
     public function templates(): HasMany
     {
         return $this->hasMany(Template::class);
     }
+
     public function specificationOptions(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -107,6 +105,16 @@ class Product extends Model implements HasMedia
         return $this->morphToMany(User::class, 'savable');
     }
 
+    public function mockups(): HasMany
+    {
+        return $this->hasMany(Mockup::class);
+    }
+
+    public function saves(): MorphMany
+    {
+        return $this->morphMany(Save::class, 'savable');
+    }
+
     public function getAllProductImages()
     {
         return $this->getMedia('product_extra_images')
@@ -118,15 +126,17 @@ class Product extends Model implements HasMedia
         return $this->getFirstMediaUrl('product_main_image');
     }
 
-
     public function getExtraImagesUrl(): string
     {
         return $this->getFirstMediaUrl('product_extra_images');
     }
 
-
-    public function mockups()
+    protected function casts()
     {
-        return $this->hasMany(Mockup::class);
+        return [
+            'status' => StatusEnum::class,
+        ];
     }
+
+
 }
