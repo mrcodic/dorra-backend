@@ -26,20 +26,15 @@ class CreateInvoiceJob implements ShouldQueue
 public function handle(): void
 {
     if (!$this->order->invoice) {
-        $orderItem = $this->order->orderItems->first();
+        $orderItem = $this->order->orderItems;
 
-        if (!$orderItem) {
-            Log::warning("Order #{$this->order->id} has no order items.");
-            return;
-        }
 
-        Invoice::updateOrCreate([
+
+        $invoice = Invoice::updateOrCreate([
             'order_id' => $this->order->id,
         ], [
             'invoice_number' => $this->order->order_number,
             'user_id' => $this->order->user_id,
-            'design_id' => $orderItem->design_id,
-            'quantity' => $orderItem->quantity,
             'subtotal' => $this->order->subtotal,
             'discount_amount' => $this->order->discount_amount,
             'delivery_amount' => $this->order->delivery_amount,
@@ -48,6 +43,12 @@ public function handle(): void
             'status' => $this->order->status,
             'issued_date' => now(),
         ]);
+
+        $designIds = $this->order->orderItems->pluck('design_id')->filter()->unique();
+
+        if ($designIds->isNotEmpty()) {
+            $invoice->designs()->sync($designIds);
+        }
     }
 }
 }

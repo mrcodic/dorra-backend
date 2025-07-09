@@ -17,48 +17,31 @@ class InvoiceService extends BaseService
 
     public function getData(): JsonResponse
     {
-        $categories = $this->repository
-            ->query(['id', 'name', 'description', 'created_at'])
-            ->with(['products', 'children'])
-            ->withCount(['children', 'products'])
+        $invoices = $this->repository
+        ->query(['id', 'invoice_number', 'created_at', 'user_id', 'order_id', 'design_id' , 
+        'quantity', 'subtotal', 'discount_amount', 'delivery_amount', 'tax_amount', 
+        'total_price', 'status', 'issued_date'])
+            ->with(['order', 'user', 'design'])
             ->when(request()->filled('search_value'), function ($query) {
                 $locale = app()->getLocale();
                 $search = request('search_value');
-                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+                $query->where("invoice_number->{$locale}", 'LIKE', "%{$search}%");
             })
             ->latest();
 
-        return DataTables::of($categories)
-            ->addColumn('name', function ($category) {
-                return $category->getTranslation('name', app()->getLocale());
-            })
-            ->addColumn('name_en', function ($category) {
-                return $category->getTranslation('name', 'en');
-            })
-            ->addColumn('name_ar', function ($category) {
-                return $category->getTranslation('name', 'ar');
-            })
-            ->addColumn('description_en', function ($category) {
-                return $category->getTranslation('description', 'en');
-            })
-            ->addColumn('description_ar', function ($category) {
-                return $category->getTranslation('description', 'ar');
-            })
-            ->addColumn('image', function ($category) {
-                return $category->getFirstMediaUrl('categories');
-            })
-            ->addColumn('added_date', function ($category) {
-                return $category->created_at?->format('d/n/Y');
-            })
-            ->addColumn('show_date', function ($category) {
-                return $category->created_at?->format('Y-m-d');
-            })
-            ->addColumn('sub_categories', function ($category) {
-                return $category->children_count;
-            })
-            ->addColumn('no_of_products', function ($category) {
-                return $category->products_count;
-            })
-            ->make(true);
+         return DataTables::of($invoices)
+        ->addColumn('invoice_number', function ($invoice) {
+            return $invoice->invoice_number;
+        })
+        ->addColumn('user_name', function ($invoice) {
+            return optional($invoice->user)->first_name . ' ' . optional($invoice->user)->last_name;
+        })
+        ->addColumn('total_price', function ($invoice) {
+            return $invoice->total_price;
+        })
+        ->addColumn('issued_date', function ($invoice) {
+            return $invoice->issued_date;
+        })
+        ->make(true);
     }
 }
