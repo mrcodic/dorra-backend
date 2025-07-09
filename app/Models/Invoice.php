@@ -27,4 +27,9 @@ class Invoice extends Model
     {
         return $this->belongsTo(Design::class);
     }
+
+        public function designs()
+    {
+        return $this->morphToMany(Design::class, 'designable', 'designables')->withTimestamps();
+    }
 }

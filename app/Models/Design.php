@@ -141,5 +141,10 @@ class Design extends Model implements HasMedia
             ->withTimestamps();
     }
 
+    public function invoices()
+    {
+        return $this->morphedByMany(Invoice::class, 'designable', 'designables')->withTimestamps();
+    }
+
 
 }

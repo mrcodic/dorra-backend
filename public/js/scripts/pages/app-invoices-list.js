@@ -20,27 +20,27 @@ var dt_user_table = $(".order-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
-        { data: "order_number" },
+        { data: "invoice_number" },
         { data: "user_name" },
         { data: "total_price" },
         { data: "status" },
-        { data: "added_date" },
+        { data: "issued_date" },
         {
             data: "id",
             orderable: false,
            render: function(data, type, row) {
     return `
         <div class="d-flex gap-1">
-            <a href="/orders/${data}" class="">
+            <a href="/invoices/${data}" class="">
                 <i data-feather="file-text"></i>
             </a>
-            <a href="/orders/${data}/edit" class="">
+            <a href="/invoices/${data}/edit" class="">
                 <i data-feather="edit"></i>
             </a>
             <a href="#" class="text-danger open-delete-order-modal"
                data-id="${data}"
                data-name="${row.order_number}"
-               data-action="/orders/${data}"
+               data-action="/invoices/${data}"
                data-bs-toggle="modal"
                data-bs-target="#deleteOrderModal">
                <i data-feather="trash-2"></i>
