@@ -57,11 +57,11 @@
         <div class="form-check mb-2">
             <input class="form-check-input"
                    type="radio"
-                   name="status"
+                   name="invoice_status"
                    id="status_{{ $status->value }}"
                    value="{{ $status->value }}"
                    style="transform: scale(1.5); margin-right: 10px;"
-                   {{ old('status') == $status->value ? 'checked' : '' }}>
+                   {{ old('invoice_status', $model->invoice_status->value ?? 2) == $status->value ? 'checked' : '' }}>
             <label class="form-check-label fw-bold fs-5" for="status_{{ $status->value }}">
                 {{ $status->label() }}
             </label>
@@ -108,39 +108,49 @@
                 </div>
               
                 <!-- Items List -->
-                <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
-                <div class="mb-1">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="d-flex">
-                            <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
-                            <div>
-                                <div class="fw-bold text-black fs-16">Product Name 1</div>
-                                <div class="text-dark fs-5">Qty: 2</div>
+                 @foreach ($model->designs as $design)
+                    @php
+                        $product = $design->product;
+                    @endphp
+                    <div class="mb-1">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="d-flex">
+                                <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+                                <div>
+                                    <div class="fw-bold text-black fs-16">
+                                        {{ $product->name ?? 'No Product Found' }}
+                                    </div>
+                                    <div class="text-dark fs-5">
+                                        Qty: {{ $design->quantity }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-black">
+                                    ${{ number_format($product->base_price ?? 0, 2) }}
+                                </div>
+                                @if ($model->designs->count() > 1 )
+                                    <form class="delete-design-form d-inline" method="POST" action="{{ route('orders.orderItems.delete', ['orderId' => $model->id, 'designId' => $design->id]) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn" data-design-id="{{ $design->id }}">
+                                            Delete
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
-                        <div class="text-end">
-                            <div class="fw-bold text-black">$40.00</div>
-                            <button class="btn btn-sm btn-outline-danger mt-1">Delete</button>
-                        </div>
                     </div>
-                </div>
+                @endforeach
 
-                <!-- Repeat for more items -->
-                <div class="mb-3 border-bottom pb-2">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="d-flex">
-                            <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
-                            <div>
-                                <div class="fw-bold text-black fs-16">Product Name 1</div>
-                                <div class="text-dark fs-5">Qty: 2</div>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold text-black">$40.00</div>
-                            <button class="btn btn-sm btn-outline-danger mt-1">Delete</button>
-                        </div>
-                    </div>
-                </div>
+                
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+          
+                <hr>
 
 
                  <form id="discount-code-form" action="{{ route('orders.apply-discount-code') }}" method="post">
@@ -157,32 +167,32 @@
                 <h5 class="mt-3 mb-1 text-black fs-16">Pricing Details</h5>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">Subtotal</span>
-                    <span class="fs-4 text-black fw-bold">$65.00</span>
+                    <span class="fs-4 text-black fw-bold">{{$model->subtotal}}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">Discount</span>
-                    <span class="fs-16 text-black">-$5.00</span>
+                    <span class="fs-16 text-black">-{{$model->discount_amount}}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
                         Delivery
                         <i data-feather="info" data-bs-toggle="tooltip" title="Delivery charges may vary based on location."></i>
                     </span>
-                    <span class="fs-16 text-black">$5.00</span>
+                    <span class="fs-16 text-black">${{$model->delivery_amount}}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
                         Tax
                         <i data-feather="info" data-bs-toggle="tooltip" title="Tax is calculated as per applicable laws."></i>
                     </span>
-                    <span class="fs-16 text-black">$3.00</span>
+                    <span class="fs-16 text-black">${{ $model->tax_amount }}</span>
                 </div>
 
                 <hr class="border-dashed my-1">
 
                 <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
                     <span class="fs-4 text-black ">Total</span>
-                    <span class="fs-4 text-black fw-bold">$68.00</span>
+                    <span class="fs-4 text-black fw-bold">${{$model->total_price}}</span>
                 </div>
 
                 <!-- Status Display -->
