@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Repositories\Implementations\SocialAccountRepository;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
+use App\Repositories\Interfaces\GuestRepositoryInterface;
 use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
@@ -24,6 +25,7 @@ class AuthService
                                 public DesignRepositoryInterface          $designRepository,
                                 public CartRepositoryInterface            $cartRepository,
                                 public ShippingAddressRepositoryInterface $shippingAddressRepository,
+                                public GuestRepositoryInterface           $guestRepository,
     )
     {
     }
@@ -92,42 +94,68 @@ class AuthService
         $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
         $user->token = $plainTextToken;
 
-        $oldCookieId = request()->cookie('cookie_id');
-        if ($oldCookieId) {
-            $this->designRepository->query()
-                ->whereNull('user_id')
-                ->whereCookieId($oldCookieId)
-                ->update(['user_id' => $user->id]);
+        $cookieValue = request()->cookie('cookie_id');
 
-            $this->cartRepository->query()
-                ->whereNull('user_id')
-                ->whereCookieId($oldCookieId)
-                ->update(['user_id' => $user->id]);
+        if ($cookieValue) {
+            $guest = $this->guestRepository->query()
+                ->where('cookie_value', $cookieValue)
+                ->first();
+
+            if ($guest) {
+                $this->designRepository->query()
+                    ->whereNull('user_id')
+                    ->where('guest_id', $guest->id)
+                    ->update(['user_id' => $user->id]);
+
+                $this->cartRepository->query()
+                    ->whereNull('user_id')
+                    ->where('guest_id', $guest->id)
+                    ->update(['user_id' => $user->id]);
+
+                $this->shippingAddressRepository->query()
+                    ->whereNull('user_id')
+                    ->where('guest_id', $guest->id)
+                    ->update(['user_id' => $user->id]);
+            }
         }
+
         return $user;
     }
+
 
     public function logout($request)
     {
         $user = $request->user();
+        $cookieValue = request()->cookie('cookie_id');
 
-        $oldCookieId = request()->cookie('cookie_id');
-        if ($oldCookieId) {
+        if ($cookieValue) {
+
+            $guest = $this->guestRepository->query()
+                ->firstOrCreate(['cookie_value' => $cookieValue]);
+
+            $guestId = $guest->id;
+            $userId = $user->id;
+
             $this->designRepository->query()
-                ->whereUserId(auth('sanctum')->id())
-                ->whereCookieId($oldCookieId)
-                ->update(['cookie_id' => null]);
+                ->where('user_id', $userId)
+                ->update([
+                    'guest_id' => $guestId,
+                    'user_id' => null
+                ]);
 
             $this->cartRepository->query()
-                ->whereUserId(auth('sanctum')->id())
-                ->whereCookieId($oldCookieId)
-                ->update(['cookie_id' => null]);
-
+                ->where('user_id', $userId)
+                ->update([
+                    'guest_id' => $guestId,
+                    'user_id' => null
+                ]);
 
             $this->shippingAddressRepository->query()
-                ->whereUserId(auth('sanctum')->id())
-                ->whereCookieId($oldCookieId)
-                ->update(['cookie_id' => null]);
+                ->where('user_id', $userId)
+                ->update([
+                    'guest_id' => $guestId,
+                    'user_id' => null
+                ]);
         }
 
         return $user->currentAccessToken()->delete();

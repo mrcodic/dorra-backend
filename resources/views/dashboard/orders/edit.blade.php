@@ -138,7 +138,7 @@
                                     ${{ number_format($product->base_price ?? 0, 2) }}
                                 </div>
                                 @if ($model->orderItems->count() > 1 )
-                                    <form class="delete-design-form d-inline" method="POST" action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $design->id]) }}">
+                                    <form class="delete-design-form d-inline" method="POST" action="{{ route('orders.orderItems.delete', ['orderId' => $model->id, 'designId' => $design->id]) }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn" data-design-id="{{ $design->id }}">
