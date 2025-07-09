@@ -89,9 +89,11 @@ class DesignService extends BaseService
                 ->with([
                     'product.category' => fn($q) => $q->select('id', 'name'),
                     'product.saves' => fn($q) => $q->select('id'),
+                    'saves' => function ($query) {
+                        $query->where('user_id', auth('sanctum')->id());
+                    },
                     'owner' => fn($q) => $q->select('id', 'first_name', 'last_name'),
                     'template' => fn($q) => $q->select('id', 'name', 'description'),
-                    'saves' => fn($q) => $q->select('id'),
                 ])
                 ->when($userId, fn($q) => $q->where('user_id', $userId))
                 ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
