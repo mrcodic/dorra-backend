@@ -195,7 +195,7 @@ class DesignService extends BaseService
     {
 
         return auth('sanctum')->user()
-            ->userDesigns()
+            ->designs()
             ->with('owner:id,first_name,last_name')
             ->get()
             ->pluck('owner')

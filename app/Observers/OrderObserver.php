@@ -32,7 +32,7 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-        //
+
     }
 
     /**
