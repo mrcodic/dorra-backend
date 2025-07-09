@@ -129,7 +129,7 @@
                                         {{ $product->name ?? 'No Product Found' }}
                                     </div>
                                     <div class="text-dark fs-5">
-                                        Qty: {{ $design->pivot->quantity }}
+                                        Qty: {{ $design->pivot?->quantity }}
                                     </div>
                                 </div>
                             </div>
