@@ -62,6 +62,6 @@ class AppServiceProvider extends ServiceProvider
 
             return response()->json($response, $statusCode->value);
         });
-         Model::preventLazyLoading(! app()->isProduction());
+//         Model::preventLazyLoading(! app()->isProduction());
     }
 }

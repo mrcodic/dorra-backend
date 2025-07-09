@@ -88,6 +88,7 @@ class DesignService extends BaseService
             $designs = $this->repository->query()
                 ->with([
                     'product.category' => fn($q) => $q->select('id', 'name'),
+                    'product.saves' => fn($q) => $q->select('id'),
                     'owner' => fn($q) => $q->select('id', 'first_name', 'last_name'),
                     'template' => fn($q) => $q->select('id', 'name', 'description'),
                     'saves' => fn($q) => $q->select('id'),
