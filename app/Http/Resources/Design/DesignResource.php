@@ -35,7 +35,7 @@ class DesignResource extends JsonResource
             'ownered_by_me' => $this->owner?->id == auth('sanctum')->user()?->id,
             'type' => 'design',
             'delete_since' => $this->deleted_at?->diffForHumans(),
-            'is_saved' => $this->saves->contains('id'),
+            'is_saved' => $this->saves->contains('id',$this->id),
 
         ];
     }
