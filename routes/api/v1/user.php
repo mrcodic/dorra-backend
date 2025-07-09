@@ -55,6 +55,18 @@ Route::get('product-types', [ProductController::class, 'productTypes']);
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 
+Route::controller(DesignController::class)->prefix('designs/')->group(function () {
+    Route::post('bulk-restore', 'bulkRestore');
+    Route::post('bulk-delete', 'bulkDelete');
+    Route::post('bulk-force-delete', 'bulkForceDelete');
+    Route::get('owners', 'owners');
+    Route::get('{design}/price-details', 'priceDetails');
+    Route::post('{design}/add-quantity', 'addQuantity');
+    Route::get('{design}/quantities', 'getQuantities');
+    Route::post('design-finalization', 'designFinalization');
+});
+Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
+Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 
 Route::controller(CartController::class)->group(function () {
     Route::get('/cart-info', 'cartInfo');
@@ -93,20 +105,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('bulk-delete-saved', 'destroyBulk');
     });
 
-
-    Route::controller(DesignController::class)->prefix('designs/')->group(function () {
-        Route::post('bulk-restore', 'bulkRestore');
-        Route::post('bulk-delete', 'bulkDelete');
-        Route::post('bulk-force-delete', 'bulkForceDelete');
-        Route::get('owners', 'owners');
-        Route::get('{design}/price-details', 'priceDetails');
-        Route::post('{design}/add-quantity', 'addQuantity');
-        Route::get('{design}/quantities', 'getQuantities');
-        Route::post('design-finalization', 'designFinalization');
-    });
-    Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
-    Route::apiResource('/designs', DesignController::class)->except(['destroy']);
-
     Route::get('states', [MainController::class, 'states']);
     Route::get('countries', [MainController::class, 'countries']);
 
@@ -114,9 +112,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('designs/assign-to-folder', [FolderController::class, 'assignDesignsToFolder']);
     Route::prefix('folders/')->controller(FolderController::class)->group(function () {
-        Route::post('bulk-delete',  'bulkDelete');
-        Route::post('bulk-force-delete',  'bulkForceDelete');
-        Route::post('bulk-restore',  'bulkRestore');
+        Route::post('bulk-delete', 'bulkDelete');
+        Route::post('bulk-force-delete', 'bulkForceDelete');
+        Route::post('bulk-restore', 'bulkRestore');
     });
 
     Route::apiResource('folders', FolderController::class)->except(['destroy']);
@@ -128,8 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('signed');
     });
 
-    Route::get('trash',[MainController::class, 'trash'])->name('trash');
-
+    Route::get('trash', [MainController::class, 'trash'])->name('trash');
 
 
 });
