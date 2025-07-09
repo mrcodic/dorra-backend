@@ -38,7 +38,7 @@ class OrderObserver
             $order->status === StatusEnum::CONFIRMED &&
             !$order->invoice
         ) {
-            CreateInvoiceJob::dispatch($order);
+            CreateInvoiceJob::dispatch($order->load('orderItems'));
         }
     }
 

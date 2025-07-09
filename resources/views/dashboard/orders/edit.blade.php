@@ -116,7 +116,7 @@
 
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
 
-                @foreach ($model->designs as $design)
+                @foreach ($model->orderItems as $design)
                     @php
                         $product = $design->product;
                     @endphp
