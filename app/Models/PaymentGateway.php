@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PaymentGateway extends Model
 {
+    protected $casts = [
+        'config' => 'array',
+    ];
     public function scopeActive(Builder $builder): Builder
     {
         return $builder->where('active', true);

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs;
+namespace App\DTOs\Template;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;

@@ -2,15 +2,19 @@
 
 namespace App\Services;
 
+use App\DTOs\Payment\PaymentRequestData;
+use App\Services\Payment\PaymentGatewayFactory;
 use Exception;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
+use Illuminate\Http\Response;
 use App\Enums\Order\{OrderTypeEnum, StatusEnum};
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\{DB, Auth, Cache};
 use App\Models\{Order, Design, Product, Location, ShippingAddress};
 use App\DTOs\Order\{OrderData, OrderAddressData, OrderItemData, PickupContactData};
-use App\Repositories\Interfaces\{UserRepositoryInterface,
+use App\Repositories\Interfaces\{PaymentMethodRepositoryInterface,
+    UserRepositoryInterface,
     OrderRepositoryInterface,
     DesignRepositoryInterface,
     ProductRepositoryInterface,
@@ -39,6 +43,8 @@ class OrderService extends BaseService
         public DesignRepositoryInterface                     $designRepository,
         public LocationRepositoryInterface                   $locationRepository,
         public CartService                                   $cartService,
+        public PaymentGatewayFactory                         $paymentFactory,
+        public PaymentMethodRepositoryInterface              $paymentMethodRepository,
     )
 
 
@@ -350,7 +356,6 @@ class OrderService extends BaseService
         $order->orderItems()->attach($pivotData);
     }
 
-
     public function deleteDesignFromOrder($orderId, $designId)
     {
         return DB::transaction(function () use ($orderId, $designId) {
@@ -514,7 +519,7 @@ class OrderService extends BaseService
         return $loadedModel;
     }
 
-    public function downloadPDF()
+    public function downloadPDF(): Response
     {
         $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
         $pdf = Pdf::loadView('dashboard.orders.pdf', compact('orderData'));
@@ -551,7 +556,14 @@ class OrderService extends BaseService
             }
             $cart->cartItems()->detach();
             $cart->update(['price' => 0]);
-            return $order;
+            $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
+            $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
+            $dto = PaymentRequestData::fromArray(['order' => $order, 'user' => auth('sanctum')->user(), 'method' => $selectedPaymentMethod]);
+            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray());
+            return [
+                'order' => $order,
+                'payment_details' => $paymentDetails,
+            ];
         });
     }
 
@@ -602,4 +614,6 @@ class OrderService extends BaseService
             $order->orderItems()->attach($pivotData);
         }
     }
+
+
 }

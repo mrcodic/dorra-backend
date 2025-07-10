@@ -52,6 +52,8 @@ return [
     'editor_url' => env('FRONT_END_EDITOR_URL'),
     'paymob' => [
         'base_url' => env('PAYMOB_BASE_URL'),
+        'redirection_url' => env('PAYMOB_REDIRECTION_URL'),
+        'notification_url' => env('PAYMOB_NOTIFICATION_URL'),
         'api_key' => env('PAYMOB_API_KEY'),
         'public_key' => env('PAYMOB_PUBLIC_API_KEY'),
         'secret_key' => env('PAYMOB_SECRET_KEY'),

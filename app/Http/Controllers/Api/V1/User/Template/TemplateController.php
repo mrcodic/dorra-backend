@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\User\Template;
 
 
 use App\Actions\Template\StoreTemplate;
-use App\DTOs\TemplateData;
+use App\DTOs\Template\TemplateData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Template\StoreTemplateRequest;
 use App\Http\Requests\Template\UpdateTemplateRequest;

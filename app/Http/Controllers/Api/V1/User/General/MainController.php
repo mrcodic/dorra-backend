@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\User\General;
 
 
-use App\Enums\HttpEnum;
+
 use App\Enums\Template\TypeEnum;
 use App\Enums\Template\UnitEnum;
 use App\Http\Controllers\Controller;
@@ -12,7 +12,6 @@ use App\Models\GlobalAsset;
 use App\Services\CategoryService;
 use App\Services\DesignService;
 use App\Services\FolderService;
-use App\Services\ReviewService;
 use App\Services\TagService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
@@ -20,9 +19,10 @@ use App\Http\Resources\{CategoryResource,
     Design\DesignResource,
     FolderResource,
     MediaResource,
+    PaymentResource,
     StateResource,
     TagResource};
-use App\Repositories\Interfaces\{CategoryRepositoryInterface, CountryRepositoryInterface, StateRepositoryInterface};
+use App\Repositories\Interfaces\{PaymentMethodRepositoryInterface, CountryRepositoryInterface, StateRepositoryInterface};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -38,6 +38,7 @@ class MainController extends Controller
         public TagService                 $tagService,
         public DesignService $designService,
         public FolderService $folderService,
+        public PaymentMethodRepositoryInterface $paymentMethodRepository,
     )
     {
     }
@@ -146,6 +147,12 @@ class MainController extends Controller
            'designs' => DesignResource::collection($this->designService->trash()),
             'folders' => FolderResource::collection($this->folderService->trash())
         ]);
+
+    }
+
+    public function paymentMethods()
+    {
+        return Response::api(data: PaymentResource::collection($this->paymentMethodRepository->all()));
 
     }
 }
