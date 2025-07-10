@@ -2,15 +2,18 @@
 
 namespace App\Services;
 
+
 use Exception;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
+use Illuminate\Http\Response;
 use App\Enums\Order\{OrderTypeEnum, StatusEnum};
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\{DB, Auth, Cache};
 use App\Models\{Order, Design, Product, Location, ShippingAddress};
 use App\DTOs\Order\{OrderData, OrderAddressData, OrderItemData, PickupContactData};
-use App\Repositories\Interfaces\{UserRepositoryInterface,
+use App\Repositories\Interfaces\{
+    UserRepositoryInterface,
     OrderRepositoryInterface,
     DesignRepositoryInterface,
     ProductRepositoryInterface,
@@ -39,6 +42,7 @@ class OrderService extends BaseService
         public DesignRepositoryInterface                     $designRepository,
         public LocationRepositoryInterface                   $locationRepository,
         public CartService                                   $cartService,
+
     )
 
 
@@ -57,7 +61,7 @@ class OrderService extends BaseService
         $orders = $this->repository
             ->query()
             ->with($this->relations)
-            ->withCount(['designs'])
+            ->withCount(['orderItems'])
             ->when(request()->filled('search_value'), function ($query) {
                 $locale = app()->getLocale();
                 $search = request('search_value');
@@ -75,7 +79,7 @@ class OrderService extends BaseService
                     : 'No User';
             })
             ->addColumn('items', function ($order) {
-                return $order->designs_count ?? 0;
+                return $order->orderItems_count ?? 0;
             })
             ->addColumn('total_price', function ($order) {
                 return $order->total_price ?? 0;
@@ -347,9 +351,8 @@ class OrderService extends BaseService
             ]
         ];
 
-        $order->designs()->attach($pivotData);
+        $order->orderItems()->attach($pivotData);
     }
-
 
     public function deleteDesignFromOrder($orderId, $designId)
     {
@@ -514,7 +517,7 @@ class OrderService extends BaseService
         return $loadedModel;
     }
 
-    public function downloadPDF()
+    public function downloadPDF(): Response
     {
         $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
         $pdf = Pdf::loadView('dashboard.orders.pdf', compact('orderData'));
@@ -539,9 +542,11 @@ class OrderService extends BaseService
     public function checkout($request)
     {
         $cart = $this->cartService->getCurrentUserOrGuestCart();
+        if ($cart->cartItems->isEmpty()) {
+           return  false;
+        }
         $discountCode = $request->discount_code_id ? $this->discountCodeRepository->find($request->discount_code_id) : 0;
         $subTotal = $cart->cartItems()->sum('sub_total');
-
         return $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
             $order->orderItems()->createMany(OrderItemData::fromCartItems($cart->cartItems->load(['productPrice', 'product'])));
@@ -551,6 +556,7 @@ class OrderService extends BaseService
             }
             $cart->cartItems()->detach();
             $cart->update(['price' => 0]);
+
             return $order;
         });
     }
@@ -599,7 +605,9 @@ class OrderService extends BaseService
         }
 
         if (!empty($pivotData)) {
-            $order->designs()->attach($pivotData);
+            $order->orderItems()->attach($pivotData);
         }
     }
+
+
 }

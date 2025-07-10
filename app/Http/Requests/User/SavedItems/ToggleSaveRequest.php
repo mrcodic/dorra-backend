@@ -27,7 +27,7 @@ class ToggleSaveRequest extends BaseRequest
         return [
             'savable_type' => ['required', 'in:product,design'],
             'savable_ids' => ['required', 'array'],
-            'savable_ids.*' => ['required', 'integer', 'min:1'],
+            'savable_ids.*' => ['required', 'min:1'],
         ];
     }
 

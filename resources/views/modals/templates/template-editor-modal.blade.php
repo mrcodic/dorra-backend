@@ -9,28 +9,19 @@
             </div>
             <form id="templateProductForm" action="{{ config('services.editor_url') }}" method="get"  target="_blank">
                 <div class="modal-body flex-grow-1 d-flex flex-column gap-2">
-                    <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
-                        <input
-                            class="form-check-input me-2"
-                            type="radio"
-                            name="product_type"
-                            id="tshirt"
-                            value="T-shirt"
-                            required
-                        />
-                        <label class="form-check-label mb-0 flex-grow-1" for="tshirt">T-shirt</label>
-                    </div>
-                    <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
-                        <input
-                            class="form-check-input me-2"
-                            type="radio"
-                            name="product_type"
-                            id="other"
-                            value="other"
-                            required
-                        />
-                        <label class="form-check-label mb-0 flex-grow-1" for="other">Other</label>
-                    </div>
+                    @foreach(\App\Enums\Product\TypeEnum::availableTypes() as $type)
+                        <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
+                            <input
+                                class="form-check-input me-2"
+                                type="radio"
+                                name="product_type"
+                                id="{{$type->value}}editor"
+                                value="{{$type}}"
+                                required
+                            />
+                            <label class="form-check-label mb-0 flex-grow-1" for="{{$type->value}}editor">{{ $type->label() }}</label>
+                        </div>
+                    @endforeach
                 </div>
                 <div class="modal-footer border-top-0 d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>

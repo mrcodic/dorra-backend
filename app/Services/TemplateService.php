@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Enums\Template\UnitEnum;
 use App\Jobs\ProcessBase64Image;
+use App\Jobs\RenderFabricJsonToPngJob;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
@@ -55,8 +56,7 @@ class TemplateService extends BaseService
             throw ValidationException::withMessages([
                 'product_type' => 'You must create product called T-shirt to upload template for it'
             ]);
-        }
-        else{
+        } else {
             return $productType;
         }
     }
@@ -74,7 +74,7 @@ class TemplateService extends BaseService
 
 
         $query = $this->repository
-            ->query(['id', 'name', 'product_id', 'status', 'created_at', 'type', 'height', 'width'])
+            ->query()
             ->with(['product:id,name', 'product.tags'])
             ->when(request()->filled('search_value'), function ($q) {
                 $locale = app()->getLocale();
@@ -105,7 +105,7 @@ class TemplateService extends BaseService
 
 
             if (($validatedData['product_type'] ?? null) === 'T-shirt') {
-                    $tShirtProduct = $this->productRepository
+                $tShirtProduct = $this->productRepository
                     ->query()
                     ->where('name->en', $validatedData['product_type'])
                     ->first();
@@ -141,7 +141,38 @@ class TemplateService extends BaseService
             }
 
             if (isset($validatedData['base64_preview_image'])) {
-                \App\Jobs\ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+//                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+                if (preg_match('/^data:image\/(\w+);base64,/', $validatedData['base64_preview_image'], $type)) {
+                    $imageData = substr($validatedData['base64_preview_image'], strpos($validatedData['base64_preview_image'], ',') + 1);
+                    $type = strtolower($type[1]);
+
+                    if (!in_array($type, ['jpg', 'jpeg', 'png', 'gif'])) {
+                        throw new \Exception('Invalid image type');
+                    }
+
+                    $imageData = base64_decode($imageData);
+                    if ($imageData === false) {
+                        throw new \Exception('base64_decode failed');
+                    }
+                } else {
+                    throw new \Exception('Invalid base64 format');
+                }
+
+                $tempFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid() . '.' . $type;
+
+                if (file_put_contents($tempFilePath, $imageData) === false) {
+                    throw new \Exception('Failed to write temp file');
+                }
+                if ($model->hasMedia('templates')) {
+                    $model->clearMediaCollection('templates');
+                }
+                $model->addMedia($tempFilePath)
+                ->preservingOriginal()
+                    ->toMediaCollection('templates');
+                sleep(1);
+                if (file_exists($tempFilePath)) {
+                    unlink($tempFilePath);
+                }
             }
 
             return $model->refresh();

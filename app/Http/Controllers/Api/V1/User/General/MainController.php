@@ -3,23 +3,26 @@
 namespace App\Http\Controllers\Api\V1\User\General;
 
 
-use App\Enums\HttpEnum;
+
 use App\Enums\Template\TypeEnum;
 use App\Enums\Template\UnitEnum;
 use App\Http\Controllers\Controller;
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Services\CategoryService;
-use App\Services\ReviewService;
+use App\Services\DesignService;
+use App\Services\FolderService;
 use App\Services\TagService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
     CountryResource,
+    Design\DesignResource,
+    FolderResource,
     MediaResource,
+    PaymentResource,
     StateResource,
-    TagResource
-};
-use App\Repositories\Interfaces\{CategoryRepositoryInterface, CountryRepositoryInterface, StateRepositoryInterface};
+    TagResource};
+use App\Repositories\Interfaces\{PaymentMethodRepositoryInterface, CountryRepositoryInterface, StateRepositoryInterface};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -33,6 +36,9 @@ class MainController extends Controller
         public StateRepositoryInterface   $stateRepository,
         public CategoryService            $categoryService,
         public TagService                 $tagService,
+        public DesignService $designService,
+        public FolderService $folderService,
+
     )
     {
     }
@@ -134,4 +140,15 @@ class MainController extends Controller
         $media = addMediaToResource($request->allFiles(), $model, clearExisting: true);
         return Response::api(data: $media);
     }
+
+    public function trash()
+    {
+        return Response::api(data: [
+           'designs' => DesignResource::collection($this->designService->trash()),
+            'folders' => FolderResource::collection($this->folderService->trash())
+        ]);
+
+    }
+
+
 }

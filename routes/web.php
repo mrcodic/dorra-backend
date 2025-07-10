@@ -95,7 +95,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::get('/pdf', 'downloadPDF')->name('pdf');
     });
-        Route::resource('/orders', OrderController::class);
+    Route::resource('/orders', OrderController::class);
 
     Route::group(['prefix' => 'invoices', 'as' => 'invoices.', 'controller' => InvoiceController::class,], function () {
         Route::get('/data', [InvoiceController::class, 'getData'])->name('data');

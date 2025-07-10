@@ -15,7 +15,7 @@ class PaymentGatewayFactory
             throw new \Exception("Gateway not found");
         }
         return match ($gatewayCode) {
-            'paymob' => new PaymobStrategy($gateway),
+            'paymob' => new PaymobStrategy( $this->paymentGatewayRepository, $gatewayCode),
             default => throw new \Exception("Unsupported gateway"),
         };
     }

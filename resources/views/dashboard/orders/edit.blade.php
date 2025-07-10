@@ -116,7 +116,7 @@
 
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
 
-                @foreach ($model->designs as $design)
+                @foreach ($model->orderItems as $design)
                     @php
                         $product = $design->product;
                     @endphp
@@ -129,7 +129,7 @@
                                         {{ $product->name ?? 'No Product Found' }}
                                     </div>
                                     <div class="text-dark fs-5">
-                                        Qty: {{ $design->pivot->quantity }}
+                                        Qty: {{ $design->pivot?->quantity }}
                                     </div>
                                 </div>
                             </div>
@@ -138,7 +138,7 @@
                                     ${{ number_format($product->base_price ?? 0, 2) }}
                                 </div>
                                 @if ($model->orderItems->count() > 1 )
-                                    <form class="delete-design-form d-inline" method="POST" action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $design->id]) }}">
+                                    <form class="delete-design-form d-inline" method="POST" action="{{ route('orders.orderItems.delete', ['orderId' => $model->id, 'designId' => $design->id]) }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn" data-design-id="{{ $design->id }}">

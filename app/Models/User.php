@@ -12,7 +12,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, MorphToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, MorphMany, MorphToMany};
 
 class User extends Authenticatable implements HasMedia
 {
@@ -136,14 +136,13 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Review::class);
     }
 
-    public function designs(): HasMany
+    public function designs(): MorphToMany
     {
-        return $this->hasMany(Design::class);
+        return $this->morphToMany(Design::class, 'designable', 'designables')->withTimestamps();
     }
-    public function userDesigns(): BelongsToMany
-    {
-        return $this->belongsToMany(Design::class);
-    }
+
+
+
 
 
 }

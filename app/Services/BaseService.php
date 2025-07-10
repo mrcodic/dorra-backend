@@ -75,6 +75,11 @@ class BaseService
         return $this->repository->query()->whereIn('id', $ids)->delete();
 
     }
+    public function bulkRestore($ids)
+    {
+        return $this->repository->query()->onlyTrashed()->whereIn('id', $ids)->restore();
+
+    }
 
 
 }

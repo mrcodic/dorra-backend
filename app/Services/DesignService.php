@@ -9,7 +9,9 @@ use App\Models\CartItem;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
+use App\Repositories\Interfaces\GuestRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 
@@ -22,6 +24,8 @@ class DesignService extends BaseService
         DesignRepositoryInterface                   $repository,
         public TemplateRepositoryInterface          $templateRepository,
         public ProductSpecificationOptionRepository $optionRepository,
+        public UserRepositoryInterface $userRepository,
+        public GuestRepositoryInterface $guestRepository,
     )
     {
         parent::__construct($repository);
@@ -33,7 +37,6 @@ class DesignService extends BaseService
             $design = $this->handleTransaction(function () use ($validatedData) {
                 $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id'],
                     'user_id' => $validatedData['user_id']], $validatedData);
-                $design->users()->attach($validatedData['user_id']);
                 $this->templateRepository
                     ->find($validatedData['template_id'])
                     ->getFirstMedia('templates')
@@ -44,55 +47,68 @@ class DesignService extends BaseService
 
         } else {
             $design = $this->repository->query()->create($validatedData);
-            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $design, 'designs');
+//            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $design, 'designs');
         }
+        if ($validatedData['user_id']){
+            $design->users()->attach(
+                $this->userRepository->find($validatedData['user_id'])
+            );
+        }
+
+
         return $design->load($relationsToLoad);
     }
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
-        RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'designs');
+//        RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'designs');
         if (isset($validatedData['base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
         }
         return $model->load($relationsToLoad);
     }
 
+
+
     public function getDesigns()
     {
-        $cookieId = request()->cookie('cookie_id');
         $userId = auth('sanctum')->id();
-        if ($userId || $cookieId) {
+        $cookieValue = request()->cookie('cookie_id');
+        $guestId = null;
+
+        if (!$userId && $cookieValue) {
+            $guest = $this->guestRepository->query()
+                ->where('cookie_value', $cookieValue)
+                ->first();
+            $guestId = $guest?->id;
+        }
+
+        if ($userId || $guestId) {
             $designs = $this->repository->query()
                 ->with([
-                    'product.category' => function ($q) {
-                        $q->select('id', 'name');
+                    'product.category' => fn($q) => $q->select('id', 'name'),
+                    'product.saves' => fn($q) => $q->select('id'),
+                    'saves' => function ($query) {
+                        $query->where('user_id', auth('sanctum')->id());
                     },
-                    'owner' => function ($q) {
-                        $q->select('id', 'first_name', 'last_name');
-                    },
-                    'template' => function ($q) {
-                        $q->select('id', 'name', 'description');
-                    },
+                    'owner' => fn($q) => $q->select('id', 'first_name', 'last_name'),
+                    'template' => fn($q) => $q->select('id', 'name', 'description'),
                 ])
-                ->where(function ($q) use ($cookieId, $userId) {
-                    if ($userId) {
-                        $q->whereUserId($userId);
-                    } elseif ($cookieId) {
-                        $q->whereCookieId($cookieId);
-                    }
-                })
-             ->when(request()->filled('owner_id'), function ($q) {
-                    $q->where('user_id', request('owner_id'));
-                })->when(request()->filled('category_id'), function ($q) {
-                    $q->whereHas('product.category', function ($query) {
-                        $query->whereId(request('category_id'));
-                    });
-                })
-                ->orderBy('created_at',request('date','desc'))
+                ->when($userId, fn($q) => $q->where('user_id', $userId))
+                ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
+                ->when(request()->filled('owner_id'), fn($q) =>
+                $q->where('user_id', request('owner_id'))
+                )
+                ->when(request()->filled('category_id'), fn($q) =>
+                $q->whereHas('product.category', fn($query) =>
+                $query->where('id', request('category_id'))
+                )
+                )
+                ->orderBy('created_at', request('date', 'desc'))
                 ->paginate();
         }
+
         return $designs ?? new LengthAwarePaginator(
             collect([]),
             0,
@@ -100,7 +116,6 @@ class DesignService extends BaseService
             LengthAwarePaginator::resolveCurrentPage(),
             ['path' => LengthAwarePaginator::resolveCurrentPath()]
         );
-
     }
 
     public function getDesignVersions($designId)
@@ -190,7 +205,7 @@ class DesignService extends BaseService
     {
 
         return auth('sanctum')->user()
-            ->userDesigns()
+            ->designs()
             ->with('owner:id,first_name,last_name')
             ->get()
             ->pluck('owner')
@@ -198,4 +213,19 @@ class DesignService extends BaseService
             ->values();
 
     }
+    public function bulkForceResources($ids)
+    {
+        return $this->repository->query()->withTrashed()->whereIn('id', $ids)->forceDelete();
+    }
+    public function trash()
+    {
+        return $this->repository->query()
+            ->onlyTrashed()
+            ->with(['product.category','owner'])
+            ->whereHas('users', function ($query) {
+                $query->where('user_id', auth('sanctum')->id());
+            })
+            ->get();
+    }
+
 }

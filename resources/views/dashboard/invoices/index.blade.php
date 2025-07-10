@@ -73,12 +73,11 @@
                             <th>
                                 <input type="checkbox" id="select-all-checkbox">
                             </th>
-                            <th>Order Number</th>
-                            <th>Customer</th>
-                            <th>Items</th>
+                            <th>Invoice Number</th>
+                            <th>Client</th>
                             <th>Price</th>
-                            <th>Order Status</th>
-                            <th>Added Date</th>
+                            <th>Invoice Status</th>
+                            <th> Issued <Datag></Datag>ate</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -130,12 +129,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        const ordersDataUrl = "{{ route('products.data') }}";
+        const ordersDataUrl = "{{ route('invoices.data') }}";
         const ordersCreateUrl = "{{ route('orders.create') }}";
     </script>
 
     {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-order-list.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-invoices-list.js') }}?v={{ time() }}"></script>
     <script src="https://unpkg.com/feather-icons"></script>
 
     <script>

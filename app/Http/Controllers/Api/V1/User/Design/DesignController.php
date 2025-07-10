@@ -36,19 +36,23 @@ class DesignController extends Controller
         $design = $this->designService->storeResource($request->only([
             'template_id',
             'user_id',
-            'cookie_id',
+            'guest_id',
             'design_data',
             'design_image',
             'current_version',
             'name',
             'description',
+            'height',
+            'width',
+            'unit',
+            'product_id'
         ]), relationsToLoad: ['product']);
-        return Response::api(data: DesignResource::make($design->refresh()));
+        return Response::api(data: DesignResource::make($design->refresh(['media', 'directProduct','product'])));
     }
 
     public function show($design)
     {
-        $design = $this->designService->showResource($design, ['media', 'product',]);
+        $design = $this->designService->showResource($design, ['media', 'product','directProduct']);
         return Response::api(data: DesignResource::make($design->refresh()));
     }
 
@@ -121,6 +125,34 @@ class DesignController extends Controller
             }]
         ]);
         $this->designService->bulkDeleteResources($request->designs);
+        return Response::api();
+    }
+    public function bulkForceDelete(Request $request)
+    {
+        $request->validate([
+            'designs' => ['required', 'array'],
+            'designs.*' => ['nullable', 'string', 'exists:designs,id', function ($attribute, $value, $fail) {
+                $design = Design::find($value);
+                if ($design && $design->user_id != auth('sanctum')->id()) {
+                    $fail("The selected design does not belong to you");
+                }
+            }]
+        ]);
+        $this->designService->bulkForceResources($request->designs);
+        return Response::api();
+    }
+    public function bulkRestore(Request $request)
+    {
+        $request->validate([
+            'designs' => ['required', 'array'],
+            'designs.*' => ['nullable', 'string', 'exists:designs,id', function ($attribute, $value, $fail) {
+                $design = Design::find($value);
+                if ($design && $design->user_id != auth('sanctum')->id()) {
+                    $fail("The selected design does not belong to you");
+                }
+            }]
+        ]);
+        $this->designService->bulkRestore($request->designs);
         return Response::api();
     }
 

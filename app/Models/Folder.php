@@ -3,21 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, MorphToMany};
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class Folder extends Model
 {
+    use softDeletes;
+
     protected $fillable = [
         'name',
         'description',
         'user_id',
     ];
 
-    public function designs(): BelongsToMany
+    public function designs(): MorphToMany
     {
-        return $this->belongsToMany(Design::class)->withTimestamps();
+        return $this->morphToMany(Design::class, 'designable', 'designables')->withTimestamps();
     }
+
 
     public function user(): BelongsTo
     {

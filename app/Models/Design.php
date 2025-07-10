@@ -5,23 +5,25 @@ namespace App\Models;
 
 use App\Observers\DesignObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough, MorphMany};
 use Spatie\Translatable\HasTranslations;
 
 #[ObservedBy(DesignObserver::class)]
 class Design extends Model implements HasMedia
 {
-    use HasUuids, InteractsWithMedia, HasTranslations;
+    use HasUuids, InteractsWithMedia, HasTranslations, softDeletes;
     public $translatable = ['name', 'description'];
 
     protected $fillable = [
         'cookie_id',
         'user_id',
+        'guest_id',
         'order_id',
         'template_id',
         'design_data',
@@ -30,10 +32,29 @@ class Design extends Model implements HasMedia
         'quantity',
         'name',
         'description',
+        'height',
+        'width',
+        'unit',
+        'product_id'
     ];
     protected $attributes = [
-        'quantity' => 1
+        'quantity' => 1,
+        'current_version' => 0
     ];
+    public function users()
+    {
+        return $this->morphedByMany(User::class, 'designable', 'designables')->withTimestamps();
+    }
+
+    public function saves(): MorphMany
+    {
+        return $this->morphMany(Save::class, 'savable');
+    }
+
+    public function folders()
+    {
+        return $this->morphedByMany(Folder::class, 'designable', 'designables')->withTimestamps();
+    }
 
     public function quantity(): Attribute
     {
@@ -63,6 +84,10 @@ class Design extends Model implements HasMedia
             'template_id',
             'product_id'
         );
+    }
+    public function directProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
 
@@ -122,13 +147,10 @@ class Design extends Model implements HasMedia
             ->withTimestamps();
     }
 
-    public function folders()
+    public function invoices()
     {
-        return $this->belongsToMany(Folder::class)->withTimestamps();
+        return $this->morphedByMany(Invoice::class, 'designable', 'designables')->withTimestamps();
     }
 
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class)->withTimestamps();
-    }
+
 }

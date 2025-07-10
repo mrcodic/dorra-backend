@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\User\Order;
 
 
+use App\Enums\HttpEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Checkout\CheckoutRequest;
 use App\Http\Resources\LocationResource;
@@ -22,6 +23,9 @@ class OrderController extends Controller
     public function checkout(CheckoutRequest $request)
     {
         $order = $this->orderService->checkout($request);
+        if (!$order) {
+            return Response::api(statusCode: HttpEnum::BAD_REQUEST, message: 'Bad request', errors: ['message' => 'Cart is empty.']);
+        }
         return Response::api(data: ['id' => $order->id, 'number' => $order->order_number]);
     }
 

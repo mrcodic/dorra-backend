@@ -20,21 +20,22 @@ class DesignResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name'=> $this->when(isset($this->name),$this->name),
+            'name'=> $this->name,
             'description'=> $this->description,
             'design_data' => $this->when(request('design_data') == true, $this->design_data),
             'design_image' => $this->getFirstMediaUrl('designs'),
             'current_version' => $this->current_version,
-            'product' => ProductResource::make($this->whenLoaded('product')),
+            'product' => ProductResource::make($this->whenLoaded('product') ?? $this->whenLoaded('directProduct')),
             'owner' => UserResource::make($this->whenLoaded('owner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
             'placed_on' => optional($this->pivot)->created_at?->format('d/m/Y'),
             'price' => $this->total_price,
             'quantity' => $this->productPrice?->quantity ?? $this->quantity,
-            'is_owner' => $this->owner->id == auth('sanctum')->user()->id,
+            'ownered_by_me' => $this->owner?->id == auth('sanctum')->user()?->id,
             'type' => 'design',
-
+            'delete_since' => $this->deleted_at?->diffForHumans(),
+            'is_saved' => $this->when(!$this->deleted_at,fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id()),)
         ];
     }
 }
