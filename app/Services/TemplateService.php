@@ -167,8 +167,9 @@ class TemplateService extends BaseService
                     $model->clearMediaCollection('templates');
                 }
                 $model->addMedia($tempFilePath)
+                ->preservingOriginal()
                     ->toMediaCollection('templates');
-
+                sleep(1);
                 if (file_exists($tempFilePath)) {
                     unlink($tempFilePath);
                 }
