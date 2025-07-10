@@ -43,7 +43,7 @@ class StoreTemplateRequest extends BaseRequest
 
             'product_id' => [
                 Rule::requiredIf($this->input('product_type') === 'other'),
-                'prohibits:product_type,T-shirt',
+                'prohibits:product_type:T-shirt',
                 'exists:products,id'
             ],
             'design_data' => ['sometimes', 'json'],

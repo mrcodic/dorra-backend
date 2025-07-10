@@ -34,7 +34,6 @@ class ProductResource extends JsonResource
                 return MediaResource::collection($this->getAllProductImages());
             }),
             'is_saved' => $this->when(!$this->deleted_at,fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id()),)
-
         ];
     }
 }

@@ -28,6 +28,7 @@ class PaymentRequestData
     public function toArray(): array
     {
         $amountCents = $this->order->total_price * 100;
+        dd($this->order->orderItems);
         return [
             'amount' => $amountCents,
             'method' => $this->method,
@@ -50,11 +51,12 @@ class PaymentRequestData
                 'last_name' => $this->user->last_name,
                 'email' => $this->user->email ?? 'invoice@more-english.net',
             ],
-            'items' => [[
+            'items' => $this->order->orderItems->mapWithKeys(fn($item) => [
+
                 'name' => Str::limit('test', 50, ''),
-                'amount' => $amountCents,
+                'amount' => $item->total_price * 100,
                 'quantity' => 1,
-            ]],
+            ])->toArray(),
         ];
     }
 }

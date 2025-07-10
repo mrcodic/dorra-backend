@@ -89,7 +89,7 @@ class AuthService
 
         $expiresAt = ($validatedData['remember'] ?? false)
             ? now()->addDays(30)
-            : now()->addHours(5);
+            : now()->addHours(10);
 
         $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
         $user->token = $plainTextToken;

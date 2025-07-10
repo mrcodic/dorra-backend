@@ -63,7 +63,6 @@ class CartService extends BaseService
         ]);
 
         $totalPrice = $cart->designs->sum(fn($design) => $design->total_price ?? 0);
-
         $cart->update(['price' => getTotalPrice(0, $totalPrice)]);
 
         return $cart->load(['designs.product']);

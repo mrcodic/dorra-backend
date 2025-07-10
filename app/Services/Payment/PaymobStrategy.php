@@ -10,15 +10,12 @@ use Illuminate\Support\Facades\Log;
 class PaymobStrategy implements PaymentGatewayStrategy
 {
     public string $baseUrl;
-    public string $redirectionUrl;
-    public string $notificationUrl;
-    protected array $config;
+    protected  $config;
 
     public function __construct(public PaymentGatewayRepositoryInterface $gatewayRepository,public $gatewayCode)
     {
         $this->baseUrl = config('services.paymob.base_url');
-        $this->redirectionUrl = config('services.paymob.redirection_url');
-        $this->notificationUrl = config('services.paymob.notification_url');
+
         $gateway = $this->gatewayRepository->query()
             ->whereCode($this->gatewayCode)
             ->active()
@@ -28,7 +25,7 @@ class PaymobStrategy implements PaymentGatewayStrategy
             throw new \Exception("Payment gateway [{$this->gatewayCode}] not found or inactive.");
         }
 
-        $this->config = $gateway->config;
+        $this->config = config('services.paymob');
     }
 
     public function pay(array $data): array
@@ -53,10 +50,10 @@ class PaymobStrategy implements PaymentGatewayStrategy
         $dto = PaymobIntentionData::fromArray(
             data: [
                 ...$data,
-                'redirection_url' => $this->redirectionUrl ?? '',
-                'notification_url' => $this->notificationUrl ?? '',
+                'redirection_url' => $this->config['redirection_url'] ?? '',
+                'notification_url' => $this->config['notification_url'] ?? '',
             ],
-            integrationId: $integrationIds[$paymentMethod] ?? throw new \Exception("Invalid payment method"),
+            integrationId: (int) $integrationIds[$paymentMethod] ?? throw new \Exception("Invalid payment method"),
             currency: $this->config['currency'] ?? 'EGP'
         );
 

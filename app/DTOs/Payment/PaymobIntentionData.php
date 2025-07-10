@@ -16,7 +16,7 @@ class PaymobIntentionData
         public int $expiration = 172800, // Default 2 days
     ) {}
 
-    public static function fromArray(array $data, string $integrationId, string $currency = 'EGP'): self
+    public static function fromArray(array $data, $integrationId, string $currency = 'EGP'): self
     {
         return new self(
             amount: $data['amount'] * 100,

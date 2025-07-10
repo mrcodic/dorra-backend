@@ -546,8 +546,7 @@ class OrderService extends BaseService
         $cart = $this->cartService->getCurrentUserOrGuestCart();
         $discountCode = $request->discount_code_id ? $this->discountCodeRepository->find($request->discount_code_id) : 0;
         $subTotal = $cart->cartItems()->sum('sub_total');
-
-        return $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
+        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
             $order->orderItems()->createMany(OrderItemData::fromCartItems($cart->cartItems->load(['productPrice', 'product'])));
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
@@ -556,15 +555,18 @@ class OrderService extends BaseService
             }
             $cart->cartItems()->detach();
             $cart->update(['price' => 0]);
-            $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
-            $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
-            $dto = PaymentRequestData::fromArray(['order' => $order, 'user' => auth('sanctum')->user(), 'method' => $selectedPaymentMethod]);
-            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray());
-            return [
-                'order' => $order,
-                'payment_details' => $paymentDetails,
-            ];
+
+            return $order;
         });
+
+        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
+        $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
+        $dto = PaymentRequestData::fromArray(['order' => $order, 'user' => auth('sanctum')->user(), 'method' => $selectedPaymentMethod]);
+        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray());
+        return [
+            'order' => $order,
+            'payment_details' => $paymentDetails,
+        ];
     }
 
     public function trackOrder($id)

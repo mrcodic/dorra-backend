@@ -22,6 +22,7 @@ class OrderController extends Controller
     public function checkout(CheckoutRequest $request)
     {
         $order = $this->orderService->checkout($request);
+
         return Response::api(data: ['id' => $order->id, 'number' => $order->order_number]);
     }
 
