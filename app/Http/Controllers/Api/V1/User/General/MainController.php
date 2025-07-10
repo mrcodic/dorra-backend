@@ -38,7 +38,7 @@ class MainController extends Controller
         public TagService                 $tagService,
         public DesignService $designService,
         public FolderService $folderService,
-        public PaymentMethodRepositoryInterface $paymentMethodRepository,
+
     )
     {
     }
@@ -150,9 +150,5 @@ class MainController extends Controller
 
     }
 
-    public function paymentMethods()
-    {
-        return Response::api(data: PaymentResource::collection($this->paymentMethodRepository->all()));
 
-    }
 }

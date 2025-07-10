@@ -84,6 +84,7 @@ class PaymobStrategy implements PaymentGatewayStrategy
         ];
     }
 
+
     public function refund(string $transactionId): bool
     {
         return true;

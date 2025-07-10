@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\DTOs\Payment\PaymentRequestData;
-use App\Services\Payment\PaymentGatewayFactory;
+
 use Exception;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
@@ -13,7 +12,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\{DB, Auth, Cache};
 use App\Models\{Order, Design, Product, Location, ShippingAddress};
 use App\DTOs\Order\{OrderData, OrderAddressData, OrderItemData, PickupContactData};
-use App\Repositories\Interfaces\{PaymentMethodRepositoryInterface,
+use App\Repositories\Interfaces\{
     UserRepositoryInterface,
     OrderRepositoryInterface,
     DesignRepositoryInterface,
@@ -43,8 +42,7 @@ class OrderService extends BaseService
         public DesignRepositoryInterface                     $designRepository,
         public LocationRepositoryInterface                   $locationRepository,
         public CartService                                   $cartService,
-        public PaymentGatewayFactory                         $paymentFactory,
-        public PaymentMethodRepositoryInterface              $paymentMethodRepository,
+
     )
 
 
@@ -544,9 +542,12 @@ class OrderService extends BaseService
     public function checkout($request)
     {
         $cart = $this->cartService->getCurrentUserOrGuestCart();
+        if ($cart->cartItems->isEmpty()) {
+           return  false;
+        }
         $discountCode = $request->discount_code_id ? $this->discountCodeRepository->find($request->discount_code_id) : 0;
         $subTotal = $cart->cartItems()->sum('sub_total');
-        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
+        return $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
             $order->orderItems()->createMany(OrderItemData::fromCartItems($cart->cartItems->load(['productPrice', 'product'])));
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
@@ -558,15 +559,6 @@ class OrderService extends BaseService
 
             return $order;
         });
-
-        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
-        $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
-        $dto = PaymentRequestData::fromArray(['order' => $order, 'user' => auth('sanctum')->user(), 'method' => $selectedPaymentMethod]);
-        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray());
-        return [
-            'order' => $order,
-            'payment_details' => $paymentDetails,
-        ];
     }
 
     public function trackOrder($id)

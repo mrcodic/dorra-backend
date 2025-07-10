@@ -13,13 +13,13 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     General\MainController,
     Invitation\InvitationController,
     Order\OrderController,
+    Payment\PaymentController,
     Product\ProductController,
     Profile\PasswordController,
     Profile\ProfileController,
     Profile\UserNotificationTypeController,
     SavedItems\SaveController,
-    ShippingAddress\ShippingAddressController
-};
+    ShippingAddress\ShippingAddressController};
 use App\Http\Controllers\Dashboard\MockupController;
 use App\Http\Controllers\Dashboard\TemplateController;
 use App\Http\Controllers\Shared\CommentController;
@@ -127,7 +127,11 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::get('trash', [MainController::class, 'trash'])->name('trash');
-    Route::get('payment-methods',[MainController::class, 'paymentMethods']);
+
+    Route::controller(PaymentController::class)->group(function () {
+        Route::get('payment-methods','paymentMethods');
+        Route::post('get-payment-link','getPaymentLink');
+    });
 
 
 });

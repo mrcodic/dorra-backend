@@ -141,7 +141,37 @@ class TemplateService extends BaseService
             }
 
             if (isset($validatedData['base64_preview_image'])) {
-                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+//                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+                if (preg_match('/^data:image\/(\w+);base64,/', $validatedData['base64_preview_image'], $type)) {
+                    $imageData = substr($validatedData['base64_preview_image'], strpos($validatedData['base64_preview_image'], ',') + 1);
+                    $type = strtolower($type[1]);
+
+                    if (!in_array($type, ['jpg', 'jpeg', 'png', 'gif'])) {
+                        throw new \Exception('Invalid image type');
+                    }
+
+                    $imageData = base64_decode($imageData);
+                    if ($imageData === false) {
+                        throw new \Exception('base64_decode failed');
+                    }
+                } else {
+                    throw new \Exception('Invalid base64 format');
+                }
+
+                $tempFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid() . '.' . $type;
+
+                if (file_put_contents($tempFilePath, $imageData) === false) {
+                    throw new \Exception('Failed to write temp file');
+                }
+                if ($model->hasMedia('templates')) {
+                    $model->clearMediaCollection('templates');
+                }
+                $model->addMedia($tempFilePath)
+                    ->toMediaCollection('templates');
+
+                if (file_exists($tempFilePath)) {
+                    unlink($tempFilePath);
+                }
             }
 
             return $model->refresh();
