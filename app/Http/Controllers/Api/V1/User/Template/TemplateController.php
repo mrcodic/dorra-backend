@@ -42,7 +42,7 @@ class TemplateController extends Controller
     public function index()
     {
         $templates = $this->templateService->getAll();
-        return Response::api(data: TemplateResource::collection($templates));
+        return Response::api(data: TemplateResource::collection($templates)->response()->getData(true));
     }
 
 
