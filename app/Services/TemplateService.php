@@ -102,8 +102,6 @@ class TemplateService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
-
-
             if (($validatedData['product_type'] ?? null) === 'T-shirt') {
                 $tShirtProduct = $this->productRepository
                     ->query()
@@ -169,10 +167,6 @@ class TemplateService extends BaseService
                 $model->addMedia($tempFilePath)
                 ->preservingOriginal()
                     ->toMediaCollection('templates');
-                sleep(1);
-                if (file_exists($tempFilePath)) {
-                    unlink($tempFilePath);
-                }
             }
 
             return $model->refresh();
