@@ -42,7 +42,13 @@ class DesignService extends BaseService
                     ->getFirstMedia('templates')
                     ->copy($design, 'designs');
 
-                return $design;
+                return $design->load([
+                    'media',
+                    'directProduct.prices',
+                    'product.prices',
+                    'template:id',
+                    'template.specifications.options',
+                ]);
             });
 
         } else {
@@ -56,7 +62,13 @@ class DesignService extends BaseService
         }
 
 
-        return $design->load($relationsToLoad);
+        return $design->load([
+            'media',
+            'directProduct.prices',
+            'product.prices',
+            'template:id',
+            'template.specifications.options',
+        ]);
     }
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])

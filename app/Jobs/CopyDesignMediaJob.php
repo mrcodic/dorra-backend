@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Jobs;
 
 use App\Models\Design;
@@ -11,22 +12,22 @@ use Illuminate\Queue\SerializesModels;
 
 class CopyDesignMediaJob implements ShouldQueue
 {
-use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-public Design $design;
-public DesignVersion $designVersion;
+    public Design $design;
+    public DesignVersion $designVersion;
 
-public function __construct(Design $design, DesignVersion $designVersion)
-{
-$this->design = $design;
-$this->designVersion = $designVersion;
-}
+    public function __construct(Design $design, DesignVersion $designVersion)
+    {
+        $this->design = $design;
+        $this->designVersion = $designVersion;
+    }
 
-public function handle(): void
-{
-$firstMedia = $this->design->getFirstMedia('designs');
-if ($firstMedia) {
-$firstMedia->copy($this->designVersion, 'design-versions');
-}
-}
+    public function handle(): void
+    {
+        $firstMedia = $this->design->getFirstMedia('designs');
+        if ($firstMedia) {
+            $firstMedia->copy($this->designVersion, 'design-versions');
+        }
+    }
 }

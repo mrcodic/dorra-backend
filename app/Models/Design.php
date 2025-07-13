@@ -152,5 +152,24 @@ class Design extends Model implements HasMedia
         return $this->morphedByMany(Invoice::class, 'designable', 'designables')->withTimestamps();
     }
 
+    public function isAddedToCart(): bool
+    {
+        $userId = auth('sanctum')->id();
+        $cookieId = request()->cookie('cookie_id');
+        $guestId = \App\Models\Guest::where('cookie_value', $cookieId)->value('id');
+
+        return $this->cartItems()
+            ->where(function ($q) use ($userId, $guestId) {
+                if ($userId) {
+                    $q->where('user_id', $userId);
+                }
+
+                if ($guestId) {
+                    $q->orWhere('guest_id', $guestId);
+                }
+            })
+            ->exists();
+    }
+
 
 }

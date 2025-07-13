@@ -3,6 +3,6 @@
 
  interface PaymentGatewayStrategy
  {
-     public function pay(array $data): array;
+     public function pay(array $payload, array $data): array;
      public function refund(string $transactionId): bool;
  }

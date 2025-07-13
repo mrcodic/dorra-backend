@@ -19,7 +19,7 @@ class PaymobIntentionData
     public static function fromArray(array $data, $integrationId, string $currency = 'EGP'): self
     {
         return new self(
-            amount: $data['amount'] * 100,
+            amount: $data['amount'],
             currency: $currency,
             paymentMethods: [$integrationId],
             billingData: $data['billing'] ?? [],

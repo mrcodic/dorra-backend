@@ -2,20 +2,20 @@
 
 namespace App\Services\Payment;
 
+use AllowDynamicProperties;
 use App\DTOs\Payment\PaymobIntentionData;
+use App\Models\Transaction;
 use App\Repositories\Interfaces\PaymentGatewayRepositoryInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class PaymobStrategy implements PaymentGatewayStrategy
+#[AllowDynamicProperties] class PaymobStrategy implements PaymentGatewayStrategy
 {
-    public string $baseUrl;
-    protected  $config;
 
-    public function __construct(public PaymentGatewayRepositoryInterface $gatewayRepository,public $gatewayCode)
+    public function __construct(public PaymentGatewayRepositoryInterface $gatewayRepository, public $gatewayCode)
     {
         $this->baseUrl = config('services.paymob.base_url');
-
+        $this->callback = config('services.paymob.callback');
         $gateway = $this->gatewayRepository->query()
             ->whereCode($this->gatewayCode)
             ->active()
@@ -28,18 +28,18 @@ class PaymobStrategy implements PaymentGatewayStrategy
         $this->config = config('services.paymob');
     }
 
-    public function pay(array $data): array
+    public function pay(array $payload, array $data): array
     {
-        $method = $data['method'];
+        $method = $payload['method'];
 
         if (!$method || !$method->active) {
             throw new \Exception("This payment method is not available");
         }
 
-        return $this->createPaymentIntention($data, $method->code);
+        return $this->createPaymentIntention($payload, $data, $method->code);
     }
 
-    protected function createPaymentIntention(array $data, string $paymentMethod): array
+    protected function createPaymentIntention(array $payload,array $data, string $paymentMethod): array
     {
         $integrationIds = [
             'paymob_card' => $this->config['card_integration_id'],
@@ -49,11 +49,11 @@ class PaymobStrategy implements PaymentGatewayStrategy
 
         $dto = PaymobIntentionData::fromArray(
             data: [
-                ...$data,
+                ...$payload,
                 'redirection_url' => $this->config['redirection_url'] ?? '',
                 'notification_url' => $this->config['notification_url'] ?? '',
             ],
-            integrationId: (int) $integrationIds[$paymentMethod] ?? throw new \Exception("Invalid payment method"),
+            integrationId: (int)$integrationIds[$paymentMethod] ?? throw new \Exception("Invalid payment method"),
             currency: $this->config['currency'] ?? 'EGP'
         );
 
@@ -63,7 +63,6 @@ class PaymobStrategy implements PaymentGatewayStrategy
         ])->post($this->baseUrl . '/v1/intention/', $dto->toArray());
 
         $result = $response->json();
-        dd($result);
         Log::info('Paymob Intention Response', ['response' => $result]);
 
         if ($response->failed() || empty($result['client_secret']) || empty($result['id'])) {
@@ -74,13 +73,42 @@ class PaymobStrategy implements PaymentGatewayStrategy
             throw new \Exception('Failed to create payment intention');
         }
 
-        return [
-            'checkout_url' => $this->baseUrl .'/unifiedcheckout/?publicKey='
+        $orderData = [
+            'checkout_url' => $this->baseUrl . '/unifiedcheckout/?publicKey='
                 . $this->config['public_key']
                 . '&clientSecret=' . $result['client_secret'],
-            'order_id' =>  $result['intention_order_id'],
+            'order_id' => $result['intention_order_id'],
+            'amount' => $result['intention_detail']['amount'],
             'intention_id' => $result['id'],
             'client_secret' => $result['client_secret'],
+        ];
+        return $this->storeTransaction($orderData, $data, $paymentMethod);
+    }
+
+    public function storeTransaction($orderData, $data, $paymentMethod): array
+    {
+        if (!$orderData) {
+            return ['error' => 'Could not create payment intention'];
+        }
+
+        $transaction = Transaction::create([
+            'user_id' => $data['user']->id,
+            'order_id' => $data['order']->id,
+            'amount' => $orderData['amount'],
+            'payment_method' => $paymentMethod,
+            'payment_status' => 'pending',
+            'transaction_id' => $orderData['order_id'] / 100,
+            'response_message' => json_encode($orderData),
+            'success_url' => request()->success_url ?? $this->callback,
+            'failure_url' => request()->failure_url ?? $this->callback,
+            'pending_url' => request()->pending_url ?? $this->callback,
+            'expiration_date' => now()->addDays(2),
+        ]);
+
+        return [
+            'transaction_id' => $transaction->transaction_id,
+            'amount' => $orderData['amount'],
+            'payment_url' => $orderData['checkout_url'],
         ];
     }
 

@@ -30,7 +30,7 @@ class PaymentRequestData
         $amountCents = (int) $this->order->total_price * 100;
         $baseItems = $this->order->orderItems->map(fn($item) => [
             'name' => Str::limit($item->design?->name ?? 'Item', 50, ''),
-            'amount' => (int) $item->total_price * 100,
+            'amount' => (int) round($item->total_price * 100),
             'quantity' => $item->design?->quantity ?? 1,
         ])->toArray();
 
@@ -38,29 +38,29 @@ class PaymentRequestData
 
         if (setting('delivery') > 0) {
             $extraItems[] = [
-                'name' => 'Delivery Fee',
-                'amount' => (int) setting('delivery')  * 100,
+                'name' => Str::limit( 'Delivery Fee', 50, ''),
+                'amount' => (int) round(setting('delivery')  * 100),
                 'quantity' => 1,
             ];
         }
 
         if (setting('tax') > 0) {
             $extraItems[] = [
-                'name' => 'Tax',
-                'amount' => (int) getPriceAfterTax(setting('tax'), $this->order->subtotal) * 100,
+                'name' => Str::limit( 'Tax', 50, ''),
+                'amount' => (int) round((int) getPriceAfterTax(setting('tax'), $this->order->subtotal) * 100),
                 'quantity' => 1,
             ];
         }
 
         if ($this->order->discount_amount > 0) {
             $extraItems[] = [
-                'name' => 'Discount',
-                'amount' =>  $this->order->discount_amount  * 100,
+                'name' => Str::limit( 'Discount', 50, ''),
+                'amount' => (int) round($this->order->discount_amount  * 100),
                 'quantity' => 1,
             ];
         }
         $allItems = array_merge($baseItems, $extraItems);
-//        dd($allItems,$amountCents);
+
         return [
             'amount' => $amountCents,
             'method' => $this->method,

@@ -46,8 +46,8 @@ class DesignController extends Controller
             'width',
             'unit',
             'product_id'
-        ]), relationsToLoad: ['product']);
-        return Response::api(data: DesignResource::make($design->refresh(['media', 'directProduct','product'])));
+        ]));
+        return Response::api(data: DesignResource::make($design));
     }
 
     public function show($design)

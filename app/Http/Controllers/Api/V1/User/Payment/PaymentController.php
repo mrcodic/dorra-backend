@@ -33,8 +33,12 @@ class PaymentController extends Controller
         $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
         $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
         $dto = PaymentRequestData::fromArray(['order' => $selectedOrder, 'user' => auth('sanctum')->user(), 'method' => $selectedPaymentMethod]);
-        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray());
+        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(),['order' => $selectedOrder, 'user' => auth('sanctum')->user()]);
         return Response::api(data: $paymentDetails);
     }
 
+    public function handleWebhook(Request $request)
+    {
+        dd($request->all());
+    }
 }

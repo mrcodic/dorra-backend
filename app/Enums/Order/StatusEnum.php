@@ -7,12 +7,15 @@ use App\Helpers\EnumHelpers;
 enum StatusEnum : int
 {
     use EnumHelpers;
+
     case PLACED = 1;
     case CONFIRMED = 2;
     case PREPARED = 3;
     case SHIPPED = 4;
     case DELIVERED = 5;
-
+    case PENDING = 6;
+    case PAID = 7;
+    case FAILED = 8;
     public function label()
     {
         return match ($this) {
