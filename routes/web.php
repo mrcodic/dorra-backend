@@ -22,7 +22,8 @@ use App\Http\Controllers\Dashboard\{AdminController,
     DiscountCodeController,
     SettingController,
     OfferController,
-    LocationController};
+    LocationController
+};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Route;
@@ -163,11 +164,10 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::group(['prefix' => 'mockups', 'as' => 'mockups.', 'controller' => MockupController::class,], function () {
-        Route::get('/data',  'getData')->name('data');
+        Route::get('/data', 'getData')->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/mockups', MockupController::class);
-
 
 
 });
@@ -219,11 +219,11 @@ Route::prefix('api/v1/')->group(function () {
     Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
     Route::controller(MockupController::class)->group(function () {
-        Route::get('mockups','index');
-        Route::get('mockups/{mockup}','showAndUpdateRecent');
-        Route::get('recent-mockups','recentMockups');
-        Route::get('mockup-types','mockupTypes');
-        Route::delete('recent-mockups/{mockup}','destroyRecentMockup');
+        Route::get('mockups', 'index');
+        Route::get('mockups/{mockup}', 'showAndUpdateRecent');
+        Route::get('recent-mockups', 'recentMockups');
+        Route::get('mockup-types', 'mockupTypes');
+        Route::delete('recent-mockups/{mockup}', 'destroyRecentMockup');
     });
 
     Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);
