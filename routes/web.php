@@ -169,64 +169,64 @@ Route::middleware('auth')->group(function () {
     Route::resource('/mockups', MockupController::class);
 
 
-    Route::prefix('api/v1/')->group(function () {
 
-        Route::controller(ReviewController::class)->group(function () {
-            Route::delete('reviews/{review}', 'deleteReview')->name('reviews.destroy');
-            Route::put('reviews/{ review}/reply', 'deleteReply')->name('reviews.reply.destroy');
-            Route::put('reviews/{review}', 'replyReview')->name('reviews.reply');
-        });
+});
+Route::prefix('api/v1/')->group(function () {
 
-        Route::controller(MainController::class)->group(function () {
-            Route::get('states', 'states')->name('states');
-            Route::get('sub-categories', 'subCategories')->name('sub-categories');
-            Route::get('template-types', 'templateTypes')->name('template-types');
-            Route::get('tags', 'tags')->name('tags');
-            Route::get('units', 'units')->name('units');
-            Route::delete('media/{media}', 'removeMedia')->name('remove-media');
-            Route::post('media/{resource}', 'addMedia')->name('add-media');
-            Route::get('admin-check', 'adminCheck')->name('admin-check');
-        });
+    Route::controller(ReviewController::class)->group(function () {
+        Route::delete('reviews/{review}', 'deleteReview')->name('reviews.destroy');
+        Route::put('reviews/{ review}/reply', 'deleteReply')->name('reviews.reply.destroy');
+        Route::put('reviews/{review}', 'replyReview')->name('reviews.reply');
+    });
 
-        Route::prefix("orders/")->controller(OrderController::class)->as("orders.")->group(function () {
-            Route::post("step1", 'storeStep1')->name('step1');
-            Route::post("step2", 'storeStep2')->name('step2');
-            Route::post("template-customizations", 'templateCustomizations')->name('template.customizations');
-            Route::post("apply-discount-code", 'applyDiscountCode')->name('apply-discount-code');
-            Route::post("step4", 'storeStep4')->name('step4');
-            Route::post("step5", 'storeStep5')->name('step5');
-            Route::post("step6", 'storeStep6')->name('step6');
-            Route::put('orders/{order}/edit-shipping-addresses', 'editShippingAddresses')->name('edit-shipping-addresses');
-            Route::delete('orders/{orderId}/designs/{designId}', 'deleteDesign')->name('designs.delete');
+    Route::controller(MainController::class)->group(function () {
+        Route::get('states', 'states')->name('states');
+        Route::get('sub-categories', 'subCategories')->name('sub-categories');
+        Route::get('template-types', 'templateTypes')->name('template-types');
+        Route::get('tags', 'tags')->name('tags');
+        Route::get('units', 'units')->name('units');
+        Route::delete('media/{media}', 'removeMedia')->name('remove-media');
+        Route::post('media/{resource}', 'addMedia')->name('add-media');
+        Route::get('admin-check', 'adminCheck')->name('admin-check');
+    });
 
-
-        });
-
-        Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);
-        Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
-        Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
-        Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
-
-        Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
-
-        Route::resource('shipping-addresses', ShippingAddressController::class)->only(['store', 'update', 'destroy']);
-
-        Route::post('product-specifications', ProductSpecificationController::class)->name('products.specifications.create');
-        Route::get('product-specifications/{product}', [ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
-
-        Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
-
-        Route::controller(MockupController::class)->group(function () {
-            Route::get('mockups','index');
-            Route::get('mockups/{mockup}','showAndUpdateRecent');
-            Route::get('recent-mockups','recentMockups');
-            Route::get('mockup-types','mockupTypes');
-            Route::delete('recent-mockups/{mockup}','destroyRecentMockup');
-        });
-
-        Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);
+    Route::prefix("orders/")->controller(OrderController::class)->as("orders.")->group(function () {
+        Route::post("step1", 'storeStep1')->name('step1');
+        Route::post("step2", 'storeStep2')->name('step2');
+        Route::post("template-customizations", 'templateCustomizations')->name('template.customizations');
+        Route::post("apply-discount-code", 'applyDiscountCode')->name('apply-discount-code');
+        Route::post("step4", 'storeStep4')->name('step4');
+        Route::post("step5", 'storeStep5')->name('step5');
+        Route::post("step6", 'storeStep6')->name('step6');
+        Route::put('orders/{order}/edit-shipping-addresses', 'editShippingAddresses')->name('edit-shipping-addresses');
+        Route::delete('orders/{orderId}/designs/{designId}', 'deleteDesign')->name('designs.delete');
 
 
     });
+
+    Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);
+    Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
+    Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
+    Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
+
+    Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
+
+    Route::resource('shipping-addresses', ShippingAddressController::class)->only(['store', 'update', 'destroy']);
+
+    Route::post('product-specifications', ProductSpecificationController::class)->name('products.specifications.create');
+    Route::get('product-specifications/{product}', [ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
+
+    Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
+
+    Route::controller(MockupController::class)->group(function () {
+        Route::get('mockups','index');
+        Route::get('mockups/{mockup}','showAndUpdateRecent');
+        Route::get('recent-mockups','recentMockups');
+        Route::get('mockup-types','mockupTypes');
+        Route::delete('recent-mockups/{mockup}','destroyRecentMockup');
+    });
+
+    Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);
+
 
 });
