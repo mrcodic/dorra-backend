@@ -68,6 +68,7 @@ class TemplateService extends BaseService
         $perPage = 16
     )
     {
+        request('with_design_data',true);
 
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
@@ -90,7 +91,9 @@ class TemplateService extends BaseService
                 : $query->paginate($pageSize)->withQueryString();
         }
         if (request()->expectsJson()) {
-            return $query->paginate($requested);
+            return $query
+                ->whereNotNull('design_data')
+                ->paginate($requested);
         }
 
         return $this->repository->all(

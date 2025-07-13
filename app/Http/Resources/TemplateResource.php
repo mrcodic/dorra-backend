@@ -21,7 +21,7 @@ class TemplateResource extends JsonResource
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
             'description' => $this->description,
-            'design_data' => $this->when(isset($this->design_data), $this->design_data),
+            'design_data' => $this->when($request->boolean('with_design_data'), $this->design_data),
             'width' => $this->when(isset($this->width_pixel), $this->width_pixel),
             'height' => $this->when(isset($this->height_pixel), $this->height_pixel),
             'original_width' => $this->when(isset($this->width), $this->width),

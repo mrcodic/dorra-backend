@@ -19,11 +19,9 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\ProfileController,
     Profile\UserNotificationTypeController,
     SavedItems\SaveController,
-    ShippingAddress\ShippingAddressController};
-use App\Http\Controllers\Dashboard\MockupController;
-use App\Http\Controllers\Dashboard\TemplateController;
+    ShippingAddress\ShippingAddressController,
+    Template\TemplateController};
 use App\Http\Controllers\Shared\CommentController;
-use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -132,6 +130,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('get-payment-link','getPaymentLink');
     });
 
+    Route::get('templates',[TemplateController::class, 'index']);
 
 });
 
