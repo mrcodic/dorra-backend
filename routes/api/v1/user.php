@@ -131,7 +131,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::controller(PaymentController::class)->group(function () {
         Route::get('payment-methods','paymentMethods');
         Route::post('get-payment-link','getPaymentLink');
-        Route::post('payment/webhook','handleWebhook');
+        Route::get('payment/callback','handleCallback');
+        Route::get('payment/webhook','handleWebhook');
     });
 
 

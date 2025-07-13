@@ -41,4 +41,8 @@ class PaymentController extends Controller
     {
         dd($request->all());
     }
+    public function handleCallback(Request $request)
+    {
+        dd($request->all());
+    }
 }

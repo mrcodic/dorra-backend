@@ -43,6 +43,7 @@ class TemplateResource extends JsonResource
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'base64_preview_image' => $this->when(isset($this->image), $this->image),
+            'product_type' => $this->product->getTranslation('name','en') == 'T-shirt' ? 'T-shirt' : 'other' ,
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
         ];
     }
