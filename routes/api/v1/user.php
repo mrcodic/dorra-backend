@@ -130,10 +130,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('get-payment-link','getPaymentLink');
     });
 
-    Route::get('templates',[TemplateController::class, 'index']);
 
 });
-
-
+Route::get('templates',[TemplateController::class, 'index']);
 
 
