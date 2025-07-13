@@ -53,7 +53,6 @@ Route::get('sub-categories', [MainController::class, 'subCategories']);
 
 Route::get('product-types', [ProductController::class, 'productTypes']);
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
-Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 
 Route::controller(DesignController::class)->prefix('designs/')->group(function () {
     Route::post('bulk-restore', 'bulkRestore');
@@ -131,12 +130,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::controller(PaymentController::class)->group(function () {
         Route::get('payment-methods','paymentMethods');
         Route::post('get-payment-link','getPaymentLink');
-        Route::get('payment/callback','handleCallback');
-        Route::get('payment/webhook','handleWebhook');
     });
 
 
 });
+
 
 
 

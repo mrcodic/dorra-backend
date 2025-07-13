@@ -89,6 +89,9 @@ class TemplateService extends BaseService
                 ? $query->get()
                 : $query->paginate($pageSize)->withQueryString();
         }
+        if (request()->expectsJson()) {
+            return $query->paginate($requested);
+        }
 
         return $this->repository->all(
             $paginate,

@@ -39,12 +39,10 @@ class TemplateController extends Controller
 
     }
 
-    public function getProductTemplates()
+    public function index()
     {
-        $productId = request()->input('productId');
-        $templates = $this->templateService->getProductTemplates($productId);
+        $templates = $this->templateService->getAll();
         return Response::api(data: TemplateResource::collection($templates));
-
     }
 
 
