@@ -55,11 +55,11 @@ class PaymentController extends Controller
         }
         $transaction = Transaction::where('transaction_id', $paymobOrderId)->firstOrFail();
         if ($isSuccess && !$isPending) {
-            $paymentStatus = StatusEnum::PAID->value;
+            $paymentStatus = StatusEnum::PAID;
         } elseif (!$isSuccess && $isPending) {
-            $paymentStatus = StatusEnum::PENDING->value;
+            $paymentStatus = StatusEnum::PENDING;
         } elseif (!$isSuccess && !$isPending) {
-            $paymentStatus = StatusEnum::UNPAID->value;
+            $paymentStatus = StatusEnum::UNPAID;
         }
 
         $transaction->update([
