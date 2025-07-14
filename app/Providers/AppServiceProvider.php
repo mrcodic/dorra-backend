@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Fortify::loginView(fn () => view('dashboard.auth.login'));
 
-        Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "Request completed successfully", $data = [], $errors = [],array $cookies = []) {
+        Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "Request completed successfully", $data = [], $errors = []) {
             $response = [
                 'status' => $statusCode->value,
                 'success' => $statusCode->value < HttpEnum::BAD_REQUEST->value,
@@ -61,12 +61,7 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $jsonResponse =  response()->json($response, $statusCode->value);
-            if (!empty($cookies))
-            {
-                foreach ($cookies as $cookie) {
-                    $jsonResponse->headers->setCookie($cookie);
-                }
-            }
+
             return $jsonResponse;
         });
 //         Model::preventLazyLoading(! app()->isProduction());

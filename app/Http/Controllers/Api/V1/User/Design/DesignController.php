@@ -54,7 +54,6 @@ class DesignController extends Controller
                 'design' => DesignResource::make($design),
                 'cookie_value' => $design->guest?->cookie_value ?? null,
             ],
-            cookies: $cookie ? [$cookie] : []
         );
     }
 
