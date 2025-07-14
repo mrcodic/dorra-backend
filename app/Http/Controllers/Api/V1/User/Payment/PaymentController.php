@@ -48,12 +48,13 @@ class PaymentController extends Controller
         $paymobOrderId = data_get($data, 'obj.order.id');
         $isSuccess = data_get($data, 'obj.success');
         $isPending = data_get($data, 'obj.pending');
-        Log::info($paymobOrderId,[$data,$isSuccess,$isPending]);
 
         if (!$paymobOrderId) {
             return response()->json(['error' => 'Missing order ID'], 400);
         }
         $transaction = Transaction::where('transaction_id', $paymobOrderId)->firstOrFail();
+        Log::info($transaction);
+
         if ($isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::PAID;
         } elseif (!$isSuccess && $isPending) {
