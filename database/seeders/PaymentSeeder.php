@@ -15,17 +15,6 @@ class PaymentSeeder extends Seeder
             ['code' => 'paymob'],
             [
                 'name' => 'Paymob',
-                'api_key' => $paymobConfig['api_key'] ?? null,
-                'config' => json_encode([
-                    'api_key' => $paymobConfig['api_key'] ?? null,
-                    'secret_key' => $paymobConfig['secret_key'] ?? null,
-                    'public_key' => $paymobConfig['public_key'] ?? null,
-                    'kiosk_integration_id' => $paymobConfig['kiosk_integration_id'] ?? null,
-                    'card_integration_id' => $paymobConfig['card_integration_id'] ?? null,
-                    'wallet_integration_id' => $paymobConfig['wallet_integration_id'] ?? null,
-                    'hmac' => $paymobConfig['hmac'] ?? null,
-                    'currency' => $paymobConfig['currency'] ?? 'EGP',
-                ]),
                 'active' => true,
                 'updated_at' => now(),
                 'created_at' => now(),
