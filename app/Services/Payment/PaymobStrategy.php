@@ -56,7 +56,6 @@ use Illuminate\Support\Facades\Log;
             integrationId: (int)$integrationIds[$paymentMethod] ?? throw new \Exception("Invalid payment method"),
             currency: $this->config['currency'] ?? 'EGP'
         );
-        dd($dto->toArray());
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->config['secret_key'],
             'Content-Type' => 'application/json',
