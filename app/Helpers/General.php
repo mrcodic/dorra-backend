@@ -19,10 +19,24 @@ function getActiveGuard(): string|null
 function getCookie($key): array
 {
     $cookieValue = request()->cookie($key);
+    $cookie = null;
+
     if (!$cookieValue) {
         $cookieValue = (string)Str::uuid();
-        $cookie = cookie()->queue(cookie($key, $cookieValue, 60 * 24 * 30));
+        $cookie = cookie(
+            name: $key,
+            value: $cookieValue,
+            minutes: 60 * 24 * 30,
+            path: '/',
+            domain: null,
+            secure: false,
+            httpOnly: false,
+            sameSite: 'Lax'
+        );
+
+        cookie()->queue($cookie);
     }
+
     return [
         'value' => $cookieValue,
         'cookie' => $cookie,
