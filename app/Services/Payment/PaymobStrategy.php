@@ -50,12 +50,13 @@ use Illuminate\Support\Facades\Log;
         $dto = PaymobIntentionData::fromArray(
             data: [
                 ...$payload,
-                'redirection_url' => $this->config['notification_url'] ?? '',
+                'redirection_url' => $this->config['redirection_url'] ?? '',
                 'notification_url' => $this->config['notification_url'] ?? '',
             ],
             integrationId: (int)$integrationIds[$paymentMethod] ?? throw new \Exception("Invalid payment method"),
             currency: $this->config['currency'] ?? 'EGP'
         );
+        dd($dto->toArray());
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->config['secret_key'],
             'Content-Type' => 'application/json',
