@@ -53,7 +53,7 @@ class PaymentController extends Controller
             return response()->json(['error' => 'Missing order ID'], 400);
         }
         $transaction = Transaction::where('transaction_id', $paymobOrderId)->firstOrFail();
-        Log::info('dsa',$paymobOrderId);
+
 
         if ($isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::PAID;
@@ -62,7 +62,10 @@ class PaymentController extends Controller
         } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
         }
-
+        Log::info('Failed to create payment intention', [
+            'paymobOrderId' => $paymobOrderId,
+          'status' => $paymentStatus,
+        ]);
         $transaction->update([
             'payment_status' => $paymentStatus,
             'payment_method' => $paymentMethod,
