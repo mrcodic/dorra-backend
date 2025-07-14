@@ -62,8 +62,6 @@ use Illuminate\Support\Facades\Log;
         ])->post($this->baseUrl . '/v1/intention/', $dto->toArray());
 
         $result = $response->json();
-        Log::info('Paymob Intention Response', ['response' => $result]);
-
         if ($response->failed() || empty($result['client_secret']) || empty($result['id'])) {
             Log::error('Failed to create payment intention', [
                 'response' => $result,
