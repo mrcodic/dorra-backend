@@ -12,6 +12,7 @@ use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
 use App\Services\Payment\PaymentGatewayFactory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
 class PaymentController extends Controller
@@ -42,6 +43,7 @@ class PaymentController extends Controller
 
     public function handleCallback(Request $request)
     {
+        Log::info('🚀 transaction:');
         $data = $request->json()->all();
         $paymentMethod = data_get($data, 'obj.source_data.sub_type');
         $paymobOrderId = data_get($data, 'obj.order.id');
