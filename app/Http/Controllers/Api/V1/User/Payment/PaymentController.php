@@ -51,7 +51,6 @@ class PaymentController extends Controller
         if (!$paymobOrderId) {
             return response()->json(['error' => 'Missing order ID'], 400);
         }
-
         $transaction = Transaction::where('transaction_id', $paymobOrderId)->firstOrFail();
         if ($isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::PAID->value;

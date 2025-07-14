@@ -61,10 +61,12 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $jsonResponse =  response()->json($response, $statusCode->value);
-            foreach ($cookies as $cookie) {
-                $jsonResponse->headers->setCookie($cookie);
+            if (!empty($cookies))
+            {
+                foreach ($cookies as $cookie) {
+                    $jsonResponse->headers->setCookie($cookie);
+                }
             }
-
             return $jsonResponse;
         });
 //         Model::preventLazyLoading(! app()->isProduction());
