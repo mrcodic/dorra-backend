@@ -47,7 +47,7 @@ class DesignController extends Controller
             'unit',
             'product_id'
         ]));
-        return Response::api(data: DesignResource::make($design));
+        return Response::api(data: DesignResource::make($design), cookies: [getCookie('cookie_id')['cookie'] ? [getCookie('cookie_id')['cookie']] : [] ]);
     }
 
     public function show($design)

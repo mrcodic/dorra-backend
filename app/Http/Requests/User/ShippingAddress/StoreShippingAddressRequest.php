@@ -17,7 +17,7 @@ class StoreShippingAddressRequest extends BaseRequest
     {
         $this->merge([
             'user_id' => $this->user('sanctum')?->id,
-            'cookie_id' => getCookieId('cookie_id')
+            'cookie_id' => getCookie('cookie_id')['value']
         ]);
     }
 

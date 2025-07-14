@@ -16,14 +16,17 @@ function getActiveGuard(): string|null
     return null;
 }
 
-function getCookieId($key): string
+function getCookie($key): array
 {
-    $cookie = request()->cookie($key);
-    if (!$cookie) {
-        $cookie = (string)Str::uuid();
-        cookie()->queue(cookie($key, $cookie, 60 * 24 * 30));
+    $cookieValue = request()->cookie($key);
+    if (!$cookieValue) {
+        $cookieValue = (string)Str::uuid();
+        $cookie = cookie()->queue(cookie($key, $cookieValue, 60 * 24 * 30));
     }
-    return $cookie;
+    return [
+        'value' => $cookieValue,
+        'cookie' => $cookie,
+    ];
 }
 
 function getOrderStepCacheKey(): string
