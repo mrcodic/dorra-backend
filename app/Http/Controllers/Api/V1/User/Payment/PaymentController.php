@@ -43,12 +43,12 @@ class PaymentController extends Controller
 
     public function handleCallback(Request $request)
     {
-        Log::info('🚀 transaction:');
         $data = $request->json()->all();
         $paymentMethod = data_get($data, 'obj.source_data.sub_type');
         $paymobOrderId = data_get($data, 'obj.order.id');
         $isSuccess = data_get($data, 'obj.success');
         $isPending = data_get($data, 'obj.pending');
+        Log::info($paymobOrderId,[$data,$isSuccess,$isPending]);
 
         if (!$paymobOrderId) {
             return response()->json(['error' => 'Missing order ID'], 400);
