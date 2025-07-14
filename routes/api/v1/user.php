@@ -136,5 +136,5 @@ Route::controller(PaymentController::class)->group(function () {
     Route::get('payment-methods','paymentMethods');
     Route::post('get-payment-link','getPaymentLink');
     Route::post('payment/callback','handleCallback');
-    Route::post('payment/redirect','handleRedirect');
+    Route::get('payment/redirect','handleRedirect');
 });

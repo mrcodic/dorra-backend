@@ -110,6 +110,7 @@ class StoreDesignRequest extends BaseRequest
             'height' => $height,
             'width' => $width,
             'unit' => $unit,
+            'cookie' => $cookieValue,
         ]);
     }
 }
