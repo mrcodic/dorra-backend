@@ -43,9 +43,9 @@ class DesignService extends BaseService
                     ->copy($design, 'designs');
 
                 return $design->load([
+                    'product.prices',
                     'media',
                     'directProduct.prices',
-                    'product.prices',
                     'template:id',
                     'template.specifications.options',
                 ]);
