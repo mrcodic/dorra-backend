@@ -95,7 +95,7 @@ use Illuminate\Support\Facades\Log;
             'amount' => $orderData['amount'],
             'payment_method' => $paymentMethod,
             'payment_status' => 'pending',
-            'transaction_id' => $orderData['order_id'] / 100,
+            'transaction_id' => $orderData['order_id'],
             'response_message' => json_encode($orderData),
             'success_url' => request()->success_url ?? $this->callback,
             'failure_url' => request()->failure_url ?? $this->callback,
