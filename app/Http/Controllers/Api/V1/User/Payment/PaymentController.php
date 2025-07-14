@@ -53,7 +53,7 @@ class PaymentController extends Controller
             return response()->json(['error' => 'Missing order ID'], 400);
         }
         $transaction = Transaction::where('transaction_id', $paymobOrderId)->firstOrFail();
-        Log::info($transaction->transaction_id);
+        Log::info('dsa',$paymobOrderId);
 
         if ($isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::PAID;
