@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     ShippingAddress\ShippingAddressController,
     Template\TemplateController};
 use App\Http\Controllers\Shared\CommentController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -125,13 +126,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('trash', [MainController::class, 'trash'])->name('trash');
 
-    Route::controller(PaymentController::class)->group(function () {
-        Route::get('payment-methods','paymentMethods');
-        Route::post('get-payment-link','getPaymentLink');
-    });
+
 
 
 });
 Route::get('templates',[TemplateController::class, 'index']);
 
-
+Route::controller(PaymentController::class)->group(function () {
+    Route::get('payment-methods','paymentMethods');
+    Route::post('get-payment-link','getPaymentLink');
+    Route::post('payment/callback','handleCallback');
+    Route::post('payment/redirect','handleRedirect');
+});

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\V1\User\Payment;
 
 use App\DTOs\Payment\PaymentRequestData;
+use App\Enums\Payment\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
+use App\Models\Transaction;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
 use App\Services\Payment\PaymentGatewayFactory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
@@ -37,12 +40,52 @@ class PaymentController extends Controller
         return Response::api(data: $paymentDetails);
     }
 
-    public function handleWebhook(Request $request)
-    {
-        dd($request->all());
-    }
     public function handleCallback(Request $request)
     {
-        dd($request->all());
+        $data = $request->json()->all();
+        $paymentMethod = data_get($data, 'obj.source_data.sub_type');
+        $paymobOrderId = data_get($data, 'obj.order.id');
+        $isSuccess = data_get($data, 'obj.success');
+        $isPending = data_get($data, 'obj.pending');
+
+        if (!$paymobOrderId) {
+            return response()->json(['error' => 'Missing order ID'], 400);
+        }
+
+        $transaction = Transaction::where('transaction_id', $paymobOrderId)->firstOrFail();
+        if ($isSuccess && !$isPending) {
+            $paymentStatus = StatusEnum::PAID->value;
+        } elseif (!$isSuccess && $isPending) {
+            $paymentStatus = StatusEnum::PENDING->value;
+        } elseif (!$isSuccess && !$isPending) {
+            $paymentStatus = StatusEnum::UNPAID->value;
+        }
+
+        $transaction->update([
+            'payment_status' => $paymentStatus,
+            'payment_method' => $paymentMethod,
+            'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
+        ]);
+        return Response::api();
+    }
+    public function handleRedirect(Request $request): RedirectResponse
+    {
+        $requestedData = $request->all();
+        $paymobOrderId = data_get($requestedData, 'order');
+        $success = data_get($requestedData, 'success') == 'true';
+        $pending = data_get($requestedData, 'pending') == 'true';
+        $transaction = Transaction::whereTransactionId($paymobOrderId)->first();
+        if (!$transaction) {
+            return redirect()->to(config('services.frontend_base_url'));
+        } else {
+            if ($success) {
+                return redirect()->to($transaction->success_url);
+            }
+            if ($pending) {
+                return redirect()->to($transaction->pending_url);
+            }
+            return redirect()->to($transaction->failure_url);
+        }
+
     }
 }

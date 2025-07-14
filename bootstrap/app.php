@@ -26,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->validateCsrfTokens(except: [
+            'api/v1/user/payment/callback',
+        ]);
         $middleware->redirectUsersTo('/');
         $middleware->api([EnsureFrontendRequestsAreStateful::class]);
     })

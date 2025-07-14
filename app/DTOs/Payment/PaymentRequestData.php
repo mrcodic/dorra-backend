@@ -31,7 +31,7 @@ class PaymentRequestData
         $baseItems = $this->order->orderItems->map(fn($item) => [
             'name' => Str::limit($item->design?->name ?? 'Item', 50, ''),
             'amount' => (int) round($item->total_price * 100),
-            'quantity' => $item->design?->quantity ?? 1,
+            'quantity' => 1,
         ])->toArray();
 
         $extraItems = [];
