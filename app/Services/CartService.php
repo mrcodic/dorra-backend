@@ -83,7 +83,9 @@ class CartService extends BaseService
         $cookieValue = request()->cookie('cookie_id');
 
         if (!$userId && !$cookieValue) {
-            return null;
+            throw ValidationException::withMessages([
+                'message' => 'You must be either user or guest.',
+            ]);
         }
 
         $guestId = null;
@@ -94,7 +96,6 @@ class CartService extends BaseService
                 ->first();
             $guestId = $guest?->id;
         }
-
         return $this->repository->query()
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
@@ -109,7 +110,11 @@ class CartService extends BaseService
     {
         $this->handleTransaction(function () use ($designId) {
             $cart = $this->resolveUserCart();
-
+            if (!$cart) {
+                throw ValidationException::withMessages([
+                    'cart' => ['Cart not found for this user.'],
+                ]);
+            }
             $cartItem = CartItem::where('design_id', $designId)
                 ->where('cart_id', $cart->id)
                 ->first();
@@ -171,7 +176,24 @@ class CartService extends BaseService
 
     public function cartInfo(): array
     {
-        $cart = $this->resolveUserCart();
+        $userId = auth('sanctum')->id();
+        $cookieValue = request()->cookie('cookie_id');
+        $guestId = null;
+
+        if ($cookieValue && !$userId) {
+            $guest = $this->guestRepository->query()
+                ->where('cookie_value', $cookieValue)
+                ->first();
+            $guestId = $guest?->id;
+        }
+
+        $cart = $this->repository->query()
+            ->where(function ($query) use ($guestId, $userId) {
+                $query->where('guest_id', $guestId)
+                    ->where('user_id', $userId);
+            })
+            ->with(['designs.product', 'cartItems.product'])
+            ->first();
 
         return [
             'price' => $cart?->price ?? 0,

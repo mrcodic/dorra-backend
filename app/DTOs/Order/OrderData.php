@@ -17,7 +17,7 @@ class OrderData
             'delivery_amount' => setting('delivery') ?? 30,
             'tax_amount' => setting('tax'),
             'total_price' => getTotalPrice($discountCode ?? 0, $subTotal),
-            'status' => StatusEnum::PLACED,
+            'status' => StatusEnum::PENDING,
         ];
     }
 }

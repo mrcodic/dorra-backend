@@ -8,18 +8,18 @@ enum StatusEnum : int
 {
     use EnumHelpers;
 
-    case PLACED = 1;
+    case PENDING = 1;
     case CONFIRMED = 2;
     case PREPARED = 3;
     case SHIPPED = 4;
     case DELIVERED = 5;
-    case PENDING = 6;
+
     case PAID = 7;
     case FAILED = 8;
     public function label()
     {
         return match ($this) {
-            self::PLACED => "Placed",
+            self::PENDING => "Pending",
             self::CONFIRMED => "Confirmed",
             self::PREPARED => "Prepared",
             self::SHIPPED => "Shipped",

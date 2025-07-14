@@ -35,8 +35,21 @@ class DesignService extends BaseService
     {
         if (!empty($validatedData['template_id'])) {
             $design = $this->handleTransaction(function () use ($validatedData) {
-                $design = $this->repository->query()->firstOrCreate(['template_id' => $validatedData['template_id'],
-                    'user_id' => $validatedData['user_id']], $validatedData);
+                if (!empty($validatedData['user_id']))
+                {
+                    $design = $this->repository->query()->firstOrCreate(
+                        ['template_id' => $validatedData['template_id'],
+                            'user_id' => $validatedData['user_id']]
+                        , $validatedData);
+                }
+                if (!empty($validatedData['guest_id']))
+                {
+                    $design = $this->repository->query()->firstOrCreate(
+                        ['template_id' => $validatedData['template_id'],
+                            'guest_id' => $validatedData['guest_id']]
+                        , $validatedData);
+                }
+
                 $this->templateRepository
                     ->find($validatedData['template_id'])
                     ->getFirstMedia('templates')

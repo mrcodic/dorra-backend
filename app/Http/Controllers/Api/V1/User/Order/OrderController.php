@@ -26,7 +26,7 @@ class OrderController extends Controller
         if (!$order) {
             return Response::api(statusCode: HttpEnum::BAD_REQUEST, message: 'Bad request', errors: ['message' => 'Cart is empty.']);
         }
-        return Response::api(data: ['id' => $order->id, 'number' => $order->order_number]);
+        return Response::api(data: $order);
     }
 
     public function searchLocations(Request $request)

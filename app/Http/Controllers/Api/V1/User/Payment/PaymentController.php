@@ -27,19 +27,19 @@ class PaymentController extends Controller
         return Response::api(data: PaymentResource::collection($this->paymentMethodRepository->all()));
     }
 
-    public function getPaymentLink(Request $request)
-    {
-        $request->validate([
-            'payment_method_id' => ['required', 'exists:payment_methods,id'],
-            'order_id' => ['required', 'exists:orders,id'],
-        ]);
-        $selectedOrder = $this->orderRepository->find($request->get('order_id'));
-        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
-        $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
-        $dto = PaymentRequestData::fromArray(['order' => $selectedOrder, 'user' => auth('sanctum')->user(), 'method' => $selectedPaymentMethod]);
-        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(),['order' => $selectedOrder, 'user' => auth('sanctum')->user()]);
-        return Response::api(data: $paymentDetails);
-    }
+//    public function getPaymentLink(Request $request)
+//    {
+//        $request->validate([
+//            'payment_method_id' => ['required', 'exists:payment_methods,id'],
+//            'order_id' => ['required', 'exists:orders,id'],
+//        ]);
+//        $selectedOrder = $this->orderRepository->find($request->get('order_id'));
+//        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
+//        $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
+//        $dto = PaymentRequestData::fromArray(['order' => $selectedOrder, 'user' => auth('sanctum')->user(), 'method' => $selectedPaymentMethod]);
+//        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(),['order' => $selectedOrder, 'user' => auth('sanctum')->user()]);
+//        return Response::api(data: $paymentDetails);
+//    }
 
     public function handleCallback(Request $request)
     {
