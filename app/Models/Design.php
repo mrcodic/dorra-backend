@@ -41,6 +41,11 @@ class Design extends Model implements HasMedia
         'quantity' => 1,
         'current_version' => 0
     ];
+
+    public function guest(): BelongsTo
+    {
+        return $this->belongsTo(Guest::class);
+    }
     public function users()
     {
         return $this->morphedByMany(User::class, 'designable', 'designables')->withTimestamps();

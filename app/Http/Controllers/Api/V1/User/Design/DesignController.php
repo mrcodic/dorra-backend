@@ -49,9 +49,11 @@ class DesignController extends Controller
         ]));
         $cookieData = getCookie('cookie_id');
         $cookie = $cookieData['cookie'];
-
         return Response::api(
-            data: DesignResource::make($design),
+            data: [
+                'design' => DesignResource::make($design),
+                'cookie_value' => $design->guest?->cookie_value ?? null,
+            ],
             cookies: $cookie ? [$cookie] : []
         );
     }
