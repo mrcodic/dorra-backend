@@ -38,7 +38,7 @@ class AddToCartRequest extends BaseRequest
         $userId = $activeGuard === 'sanctum' ? Auth::guard($activeGuard)->id() : null;
         $cookie = request()->cookie('cookie_id');
         $design = Design::query()->find($this->input('design_id'));
-        if ($design->product->prices->isNotEmpty()) {
+        if (!$design->product_price_id) {
             throw new HttpResponseException(
                 Response::api(
                     HttpEnum::UNPROCESSABLE_ENTITY,
