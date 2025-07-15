@@ -13,9 +13,7 @@ class OrderObserver
     {
         $now = now();
         $dateString = $now->format('d-m-Y');
-        $count = Order::whereDate('created_at', $now->toDateString())->count() + 1;
-        $increment = str_pad($count, 3, '0', STR_PAD_LEFT);
-        $order->order_number = "#ORD-{$dateString}-{$increment}";
+        $order->order_number = "#ORD-{$dateString}-".mt_rand(100, 999);
     }
 
     /**
@@ -34,7 +32,7 @@ class OrderObserver
     public function updated(Order $order): void
     {
          if (
-            $order->isDirty('status') && 
+            $order->isDirty('status') &&
             $order->status === StatusEnum::CONFIRMED &&
             !$order->invoice
         ) {
