@@ -568,7 +568,7 @@ class OrderService extends BaseService
             $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
             $dto = PaymentRequestData::fromArray(['order' => $order,
                 'user' => auth('sanctum')->user(),
-                'guest' => $order->orderAddress,
+                'guest' => $order->orderAddress ?? $order->pickupContact,
                 'method' => $selectedPaymentMethod]);
             $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), ['order' => $order, 'user' => auth('sanctum')->user()]);
             return [
