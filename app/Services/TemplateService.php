@@ -145,7 +145,6 @@ class TemplateService extends BaseService
             }
 
             if (isset($validatedData['base64_preview_image'])) {
-//                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
                 if (preg_match('/^data:image\/(\w+);base64,/', $validatedData['base64_preview_image'], $type)) {
                     $imageData = substr($validatedData['base64_preview_image'], strpos($validatedData['base64_preview_image'], ',') + 1);
                     $type = strtolower($type[1]);
@@ -161,6 +160,7 @@ class TemplateService extends BaseService
                 } else {
                     throw new \Exception('Invalid base64 format');
                 }
+
                 $tempDir = storage_path('app/tmp_uploads');
                 if (!file_exists($tempDir)) {
                     mkdir($tempDir, 0755, true);
@@ -175,7 +175,7 @@ class TemplateService extends BaseService
                 $model->addMedia($tempFilePath)
                     ->toMediaCollection('templates');
 
-                $model->addMedia($tempFilePath)->toMediaCollection('templates');
+                @unlink($tempFilePath); // Clean up after upload
             }
 
             return $model->refresh();
