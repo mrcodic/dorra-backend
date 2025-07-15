@@ -83,9 +83,7 @@ class CartService extends BaseService
         $cookieValue = request()->cookie('cookie_id');
 
         if (!$userId && !$cookieValue) {
-            throw ValidationException::withMessages([
-                'message' => 'You must be either user or guest.',
-            ]);
+          return null;
         }
 
         $guestId = null;
@@ -176,25 +174,8 @@ class CartService extends BaseService
 
     public function cartInfo(): array
     {
-        $userId = auth('sanctum')->id();
-        $cookieValue = request()->cookie('cookie_id');
-        $guestId = null;
 
-        if ($cookieValue && !$userId) {
-            $guest = $this->guestRepository->query()
-                ->where('cookie_value', $cookieValue)
-                ->first();
-            $guestId = $guest?->id;
-        }
-
-        $cart = $this->repository->query()
-            ->where(function ($query) use ($guestId, $userId) {
-                $query->where('guest_id', $guestId)
-                    ->where('user_id', $userId);
-            })
-            ->with(['designs.product', 'cartItems.product'])
-            ->first();
-
+        $cart = $this->resolveUserCart();
         return [
             'price' => $cart?->price ?? 0,
             'items_count' => $cart?->cartItems->count() ?? 0,
