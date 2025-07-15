@@ -63,9 +63,12 @@ use Illuminate\Support\Facades\Log;
         ])->post($this->baseUrl . '/v1/intention/', $dto->toArray());
 
         $result = $response->json();
-        dd($dto->toArray(),$result);
-
+        Log::error('Failed to create payment intention', [
+            'response' => $result,
+            'vzx' => $response,
+        ]);
         if ($response->failed() || empty($result['client_secret']) || empty($result['id'])) {
+
             Log::error('Failed to create payment intention', [
                 'response' => $result,
                 'status_code' => $response->status(),
