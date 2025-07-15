@@ -24,8 +24,8 @@ class DesignService extends BaseService
         DesignRepositoryInterface                   $repository,
         public TemplateRepositoryInterface          $templateRepository,
         public ProductSpecificationOptionRepository $optionRepository,
-        public UserRepositoryInterface $userRepository,
-        public GuestRepositoryInterface $guestRepository,
+        public UserRepositoryInterface              $userRepository,
+        public GuestRepositoryInterface             $guestRepository,
     )
     {
         parent::__construct($repository);
@@ -35,15 +35,13 @@ class DesignService extends BaseService
     {
         if (!empty($validatedData['template_id'])) {
             $design = $this->handleTransaction(function () use ($validatedData) {
-                if (!empty($validatedData['user_id']))
-                {
+                if (!empty($validatedData['user_id'])) {
                     $design = $this->repository->query()->firstOrCreate(
                         ['template_id' => $validatedData['template_id'],
                             'user_id' => $validatedData['user_id']]
                         , $validatedData);
                 }
-                if (!empty($validatedData['guest_id']))
-                {
+                if (!empty($validatedData['guest_id'])) {
                     $design = $this->repository->query()->firstOrCreate(
                         ['template_id' => $validatedData['template_id'],
                             'guest_id' => $validatedData['guest_id']]
@@ -68,7 +66,7 @@ class DesignService extends BaseService
             $design = $this->repository->query()->create($validatedData);
 //            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $design, 'designs');
         }
-        if ($validatedData['user_id']){
+        if ($validatedData['user_id']) {
             $design->users()->attach(
                 $this->userRepository->find($validatedData['user_id'])
             );
@@ -93,7 +91,6 @@ class DesignService extends BaseService
         }
         return $model->load($relationsToLoad);
     }
-
 
 
     public function getDesigns()
@@ -122,12 +119,9 @@ class DesignService extends BaseService
                 ])
                 ->when($userId, fn($q) => $q->where('user_id', $userId))
                 ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
-                ->when(request()->filled('owner_id'), fn($q) =>
-                $q->where('user_id', request('owner_id'))
+                ->when(request()->filled('owner_id'), fn($q) => $q->where('user_id', request('owner_id'))
                 )
-                ->when(request()->filled('category_id'), fn($q) =>
-                $q->whereHas('product.category', fn($query) =>
-                $query->where('id', request('category_id'))
+                ->when(request()->filled('category_id'), fn($q) => $q->whereHas('product.category', fn($query) => $query->where('id', request('category_id'))
                 )
                 )
                 ->orderBy('created_at', request('date', 'desc'))
@@ -156,24 +150,24 @@ class DesignService extends BaseService
         return $this->handleTransaction(function () use ($validatedData) {
             $this->repository->update($validatedData, $validatedData['design_id']);
             $design = $this->repository->query()->find($validatedData['design_id']);
+            if (!empty($validatedData['specs'])) {
+                $syncData = collect($validatedData['specs'])->mapWithKeys(function ($spec) {
+                    return [
+                        $spec['id'] => ['spec_option_id' => $spec['option']]
+                    ];
+                })->toArray();
 
-            $syncData = collect($validatedData['specs'])->mapWithKeys(function ($spec) {
-                return [
-                    $spec['id'] => ['spec_option_id' => $spec['option']]
-                ];
-            })->toArray();
+                $design->specifications()->sync($syncData);
 
-            $design->specifications()->sync($syncData);
-
-            $optionTotal = collect($validatedData['specs'])
-                ->map(function ($spec) {
-                    return $this->optionRepository->find($spec['option'])->price;
-                })
-                ->sum();
-
+                $optionTotal = collect($validatedData['specs'])
+                    ->map(function ($spec) {
+                        return $this->optionRepository->find($spec['option'])->price;
+                    })
+                    ->sum();
+            }
 
             $productPrice = optional($design->productPrice)->price;
-            $subTotal = $optionTotal + ($productPrice ?? ($design->product->base_price * $design->quantity));
+            $subTotal = $optionTotal ?? 0 + ($productPrice ?? ($design->product->base_price * $design->quantity));
 
             return [
                 'sub_total' => $subTotal,
@@ -238,15 +232,17 @@ class DesignService extends BaseService
             ->values();
 
     }
+
     public function bulkForceResources($ids)
     {
         return $this->repository->query()->withTrashed()->whereIn('id', $ids)->forceDelete();
     }
+
     public function trash()
     {
         return $this->repository->query()
             ->onlyTrashed()
-            ->with(['product.category','owner'])
+            ->with(['product.category', 'owner'])
             ->whereHas('users', function ($query) {
                 $query->where('user_id', auth('sanctum')->id());
             })
