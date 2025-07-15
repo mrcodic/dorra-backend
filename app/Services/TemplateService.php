@@ -256,7 +256,7 @@ class TemplateService extends BaseService
             if (file_put_contents($tempFilePath, $imageData) === false) {
                 throw new \Exception('Failed to write temp file');
             }
-
+            $model->clearMediaCollection('templates');
             $model->addMedia($tempFilePath)
                 ->toMediaCollection('templates');
 
