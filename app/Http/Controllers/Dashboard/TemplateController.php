@@ -93,15 +93,6 @@ class TemplateController extends DashboardController
 
     }
 
-    public function showTemplate($id)
-    {
-        $template = $this->templateRepository->find($id);
-        return Response::api(data:[
-            'source_design_svg' =>$template->image,
-            'base64_preview_image' => $template->image,
-            'product_type' => $template->product?->getTranslation('name','en') == 'T-shirt' ? 'T-shirt' : 'other' ,]);
-    }
-
     public function index()
     {
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination, perPage: request('per_page', 16));

@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);
-Route::get('show-template/{template}', [TemplateController::class,'showTemplate']);
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 Route::get('template-types', [MainController::class, 'templateTypes'])->name('template-types');
 Route::get('tags', [MainController::class, 'tags'])->name('tags');

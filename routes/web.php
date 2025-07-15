@@ -203,7 +203,6 @@ Route::prefix('api/v1/')->group(function () {
 
 
     });
-    Route::get('show-template/{template}', [TemplateController::class,'showTemplate']);
     Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);
     Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
     Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
