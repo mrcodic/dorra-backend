@@ -10,28 +10,13 @@ use App\Repositories\Interfaces\PaymentGatewayRepositoryInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-#[AllowDynamicProperties]
-class PaymobStrategy implements PaymentGatewayStrategy
+#[AllowDynamicProperties] class PaymobStrategy implements PaymentGatewayStrategy
 {
-    protected string $baseUrl;
-    protected string $callback;
-    protected array $config;
-    protected array $integrationIds;
 
-    public function __construct(
-        public PaymentGatewayRepositoryInterface $gatewayRepository,
-        public string $gatewayCode
-    ) {
-        $this->config = config('services.paymob');
-        $this->baseUrl = $this->config['base_url'];
-        $this->callback = $this->config['callback'];
-
-        $this->integrationIds = [
-            'paymob_card' => $this->config['card_integration_id'],
-            'paymob_wallet' => $this->config['wallet_integration_id'],
-            'paymob_kiosk' => $this->config['kiosk_integration_id'],
-        ];
-
+    public function __construct(public PaymentGatewayRepositoryInterface $gatewayRepository, public $gatewayCode)
+    {
+        $this->baseUrl = config('services.paymob.base_url');
+        $this->callback = config('services.paymob.callback');
         $gateway = $this->gatewayRepository->query()
             ->whereCode($this->gatewayCode)
             ->active()
@@ -40,11 +25,13 @@ class PaymobStrategy implements PaymentGatewayStrategy
         if (!$gateway) {
             throw new \Exception("Payment gateway [{$this->gatewayCode}] not found or inactive.");
         }
+
+        $this->config = config('services.paymob');
     }
 
     public function pay(array $payload, array $data): array
     {
-        $method = $payload['method'] ?? null;
+        $method = $payload['method'];
 
         if (!$method || !$method->active) {
             throw new \Exception("This payment method is not available");
@@ -53,13 +40,13 @@ class PaymobStrategy implements PaymentGatewayStrategy
         return $this->createPaymentIntention($payload, $data, $method->code);
     }
 
-    protected function createPaymentIntention(array $payload, array $data, string $paymentMethod): array
+    protected function createPaymentIntention(array $payload,array $data, string $paymentMethod): array
     {
-        if (!isset($this->integrationIds[$paymentMethod])) {
-            throw new \Exception("Invalid or unsupported payment method: $paymentMethod");
-        }
-
-        $integrationId = (int)$this->integrationIds[$paymentMethod];
+        $integrationIds = [
+            'paymob_card' => $this->config['card_integration_id'],
+            'paymob_wallet' => $this->config['wallet_integration_id'],
+            'paymob_kiosk' => $this->config['kiosk_integration_id'],
+        ];
 
         $dto = PaymobIntentionData::fromArray(
             data: [
@@ -67,33 +54,21 @@ class PaymobStrategy implements PaymentGatewayStrategy
                 'redirection_url' => $this->config['redirection_url'] ?? '',
                 'notification_url' => $this->config['notification_url'] ?? '',
             ],
-            integrationId: $integrationId,
+            integrationId: (int)$integrationIds[$paymentMethod] ?? throw new \Exception("Invalid payment method"),
             currency: $this->config['currency'] ?? 'EGP'
         );
-
-        Log::info('Creating Paymob intention', [
-            'integration_id' => $integrationId,
-            'payment_method' => $paymentMethod,
-            'request_payload' => $dto->toArray(),
-        ]);
-
+//        dd($dto->toArray());
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->config['secret_key'],
             'Content-Type' => 'application/json',
         ])->post($this->baseUrl . '/v1/intention/', $dto->toArray());
 
         $result = $response->json();
-        dd($result);
-
-        Log::info('Paymob intention response', [
-            'status_code' => $response->status(),
-            'response' => $result,
-        ]);
 
         if ($response->failed() || empty($result['client_secret']) || empty($result['id'])) {
-            Log::error('Failed to create Paymob intention', [
-                'status_code' => $response->status(),
+            Log::error('Failed to create payment intention', [
                 'response' => $result,
+                'status_code' => $response->status(),
             ]);
 
             throw new \Exception('Failed to create payment intention');
@@ -108,12 +83,15 @@ class PaymobStrategy implements PaymentGatewayStrategy
             'intention_id' => $result['id'],
             'client_secret' => $result['client_secret'],
         ];
-
         return $this->storeTransaction($orderData, $data, $paymentMethod);
     }
 
-    public function storeTransaction(array $orderData, array $data, string $paymentMethod): array
+    public function storeTransaction($orderData, $data, $paymentMethod): array
     {
+        if (!$orderData) {
+            return ['error' => 'Could not create payment intention'];
+        }
+
         $transaction = Transaction::create([
             'order_id' => $data['order']->id,
             'amount' => $orderData['amount'],
@@ -134,9 +112,9 @@ class PaymobStrategy implements PaymentGatewayStrategy
         ];
     }
 
+
     public function refund(string $transactionId): bool
     {
-        // You can implement refund logic here if needed
         return true;
     }
 }
