@@ -12,7 +12,7 @@ class OrderData
     {
         return [
             'user_id' => Auth::guard('sanctum')?->id(),
-            'guest_id' => request()->hasCookie('cookie_id') ? Guest::whereCookieValue(request()->cookie('cookie_id'))->first()->id : null,
+            'guest_id' => request()->hasCookie('cookie_id') ? Guest::whereCookieValue(request()->cookie('cookie_id'))->first()?->id : null,
             'payment_method_id' => request('payment_method_id'),
             'subtotal' => $subTotal,
             'discount_amount' => getDiscountAmount($discountCode ?? 0, $subTotal),
