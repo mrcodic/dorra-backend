@@ -129,37 +129,41 @@ class AuthService
         $cookieValue = request()->cookie('cookie_id');
 
         if ($cookieValue) {
-
             $guest = $this->guestRepository->query()
-                ->firstOrCreate(['cookie_value' => $cookieValue]);
+                ->where('cookie_value', $cookieValue)
+                ->first();
 
-            $guestId = $guest->id;
-            $userId = $user->id;
+            if ($guest) {
+                $guestId = $guest->id;
+                $userId = $user->id;
 
-            $this->designRepository->query()
-                ->where('user_id', $userId)
-                ->update([
-                    'guest_id' => $guestId,
-                    'user_id' => null
-                ]);
+                // On logout, keep guest_id and remove user_id (if you're reverting to guest state)
+                $this->designRepository->query()
+                    ->where('user_id', $userId)
+                    ->update([
+                        'guest_id' => $guestId,
+                        'user_id' => null,
+                    ]);
 
-            $this->cartRepository->query()
-                ->where('user_id', $userId)
-                ->update([
-                    'guest_id' => $guestId,
-                    'user_id' => null
-                ]);
+                $this->cartRepository->query()
+                    ->where('user_id', $userId)
+                    ->update([
+                        'guest_id' => $guestId,
+                        'user_id' => null,
+                    ]);
 
-            $this->shippingAddressRepository->query()
-                ->where('user_id', $userId)
-                ->update([
-                    'guest_id' => $guestId,
-                    'user_id' => null
-                ]);
+                $this->shippingAddressRepository->query()
+                    ->where('user_id', $userId)
+                    ->update([
+                        'guest_id' => $guestId,
+                        'user_id' => null,
+                    ]);
+            }
         }
 
         return $user->currentAccessToken()->delete();
     }
+
 
 
 }

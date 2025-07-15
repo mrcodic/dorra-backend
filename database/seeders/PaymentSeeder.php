@@ -28,9 +28,9 @@ class PaymentSeeder extends Seeder
         }
 
         $methods = [
-            ['name' => 'Card', 'code' => 'paymob_card'],
+            ['name' => 'Debit/Credit Card', 'code' => 'paymob_card'],
             ['name' => 'Wallet', 'code' => 'paymob_wallet'],
-            ['name' => 'Kiosk', 'code' => 'paymob_kiosk'],
+            ['name' => 'Aman', 'code' => 'paymob_kiosk'],
         ];
 
         foreach ($methods as $method) {

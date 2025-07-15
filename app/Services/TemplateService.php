@@ -161,10 +161,20 @@ class TemplateService extends BaseService
                 } else {
                     throw new \Exception('Invalid base64 format');
                 }
-                $tempFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid() . '.' . $type;
+                $tempDir = storage_path('app/tmp_uploads');
+                if (!file_exists($tempDir)) {
+                    mkdir($tempDir, 0755, true);
+                }
+
+                $tempFilePath = $tempDir . '/' . uniqid('preview_') . '.' . $type;
+
                 if (file_put_contents($tempFilePath, $imageData) === false) {
                     throw new \Exception('Failed to write temp file');
                 }
+
+                $model->addMedia($tempFilePath)
+                    ->toMediaCollection('templates');
+
                 $model->addMedia($tempFilePath)->toMediaCollection('templates');
             }
 
