@@ -23,7 +23,8 @@ use App\Repositories\Interfaces\{PaymentMethodRepositoryInterface,
     DiscountCodeRepositoryInterface,
     ProductPriceRepositoryInterface,
     ShippingAddressRepositoryInterface,
-    ProductSpecificationOptionRepositoryInterface};
+    ProductSpecificationOptionRepositoryInterface
+};
 
 
 class OrderService extends BaseService
@@ -43,8 +44,8 @@ class OrderService extends BaseService
         public DesignRepositoryInterface                     $designRepository,
         public LocationRepositoryInterface                   $locationRepository,
         public CartService                                   $cartService,
-        public PaymentMethodRepositoryInterface $paymentMethodRepository,
-        public PaymentGatewayFactory            $paymentFactory,
+        public PaymentMethodRepositoryInterface              $paymentMethodRepository,
+        public PaymentGatewayFactory                         $paymentFactory,
 
     )
 
@@ -546,7 +547,7 @@ class OrderService extends BaseService
     {
         $cart = $this->cartService->getCurrentUserOrGuestCart();
         if (!$cart || $cart->cartItems->isEmpty()) {
-           return  false;
+            return false;
         }
         $discountCode = $request->discount_code_id ? $this->discountCodeRepository->find($request->discount_code_id) : 0;
         $subTotal = $cart->cartItems()->sum('sub_total');
@@ -562,17 +563,23 @@ class OrderService extends BaseService
 
             return $order;
         });
-        if ($request->payment_method_id)
-        {
+        if ($request->payment_method_id) {
             $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
             $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
-            $dto = PaymentRequestData::fromArray(['order' => $order, 'user' => auth('sanctum')->user(), 'method' => $selectedPaymentMethod]);
-            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(),['order' => $order, 'user' => auth('sanctum')->user()]);
+            $dto = PaymentRequestData::fromArray(['order' => $order,
+                'user' => auth('sanctum')->user(),
+                'guest' => $order->orderAddress,
+                'method' => $selectedPaymentMethod]);
+            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), ['order' => $order, 'user' => auth('sanctum')->user()]);
             return [
                 'order' => ['id' => $order->id, 'number' => $order->order_number],
                 'paymentDetails' => $paymentDetails,
             ];
         }
+        return [
+            'order' => ['id' => $order->id, 'order_number' => $order->order_number],
+            'paymentDetails' => []
+        ];
 
     }
 

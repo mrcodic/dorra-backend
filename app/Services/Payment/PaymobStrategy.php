@@ -4,6 +4,7 @@ namespace App\Services\Payment;
 
 use AllowDynamicProperties;
 use App\DTOs\Payment\PaymobIntentionData;
+use App\Enums\Payment\StatusEnum;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\PaymentGatewayRepositoryInterface;
 use Illuminate\Support\Facades\Http;
@@ -90,11 +91,10 @@ use Illuminate\Support\Facades\Log;
         }
 
         $transaction = Transaction::create([
-            'user_id' => $data['user']->id,
             'order_id' => $data['order']->id,
             'amount' => $orderData['amount'],
             'payment_method' => $paymentMethod,
-            'payment_status' => 'pending',
+            'payment_status' => StatusEnum::PENDING,
             'transaction_id' => $orderData['order_id'],
             'response_message' => json_encode($orderData),
             'success_url' => request()->success_url ?? $this->callback,

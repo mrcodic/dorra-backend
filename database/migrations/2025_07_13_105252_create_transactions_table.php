@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
 
 
@@ -21,7 +20,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
 
             $table->string('payment_method');
-            $table->string('payment_status');
+            $table->tinyInteger('payment_status');
 
             $table->string('transaction_id')->unique();
             $table->string('wallet_reference')->nullable();

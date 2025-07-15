@@ -7,7 +7,7 @@ use App\Enums\Order\StatusEnum;
 use App\Observers\OrderObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany,   HasMany, HasOne};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOne};
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 #[ObservedBy(OrderObserver::class)]
@@ -16,6 +16,7 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'user_id',
+        'guest_id',
         'delivery_method',
         'payment_method_id',
         'payment_status',
@@ -31,6 +32,9 @@ class Order extends Model
         'status' => StatusEnum::class,
     ];
 
+    protected $attributes = [
+        'payment_status' => \App\Enums\Payment\StatusEnum::PENDING,
+    ];
 
     public function totalPrice(): Attribute
     {
@@ -53,9 +57,8 @@ class Order extends Model
 
     public function designs(): BelongsToMany
     {
-        return $this->belongsToMany(Design::class,'order_items');
+        return $this->belongsToMany(Design::class, 'order_items');
     }
-
 
 
     public function orderAddress(): HasOne
@@ -74,7 +77,6 @@ class Order extends Model
     {
         return $this->hasOne(Invoice::class);
     }
-
 
 
 }
