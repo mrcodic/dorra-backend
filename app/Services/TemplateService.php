@@ -145,37 +145,7 @@ class TemplateService extends BaseService
             }
 
             if (isset($validatedData['base64_preview_image'])) {
-                if (preg_match('/^data:image\/(\w+);base64,/', $validatedData['base64_preview_image'], $type)) {
-                    $imageData = substr($validatedData['base64_preview_image'], strpos($validatedData['base64_preview_image'], ',') + 1);
-                    $type = strtolower($type[1]);
-
-                    if (!in_array($type, ['jpg', 'jpeg', 'png', 'gif'])) {
-                        throw new \Exception('Invalid image type');
-                    }
-
-                    $imageData = base64_decode($imageData);
-                    if ($imageData === false) {
-                        throw new \Exception('base64_decode failed');
-                    }
-                } else {
-                    throw new \Exception('Invalid base64 format');
-                }
-
-                $tempDir = storage_path('app/tmp_uploads');
-                if (!file_exists($tempDir)) {
-                    mkdir($tempDir, 0755, true);
-                }
-
-                $tempFilePath = $tempDir . '/' . uniqid('preview_') . '.' . $type;
-
-                if (file_put_contents($tempFilePath, $imageData) === false) {
-                    throw new \Exception('Failed to write temp file');
-                }
-
-                $model->addMedia($tempFilePath)
-                    ->toMediaCollection('templates');
-
-                @unlink($tempFilePath); // Clean up after upload
+                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
             }
 
             return $model->refresh();
