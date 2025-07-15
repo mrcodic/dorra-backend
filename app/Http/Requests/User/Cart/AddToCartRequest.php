@@ -4,6 +4,7 @@ namespace App\Http\Requests\User\Cart;
 
 use App\Enums\HttpEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Design;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
@@ -36,7 +37,16 @@ class AddToCartRequest extends BaseRequest
         $activeGuard = getActiveGuard();
         $userId = $activeGuard === 'sanctum' ? Auth::guard($activeGuard)->id() : null;
         $cookie = request()->cookie('cookie_id');
-
+        $design = Design::query()->find($this->input('design_id'));
+        if ($design->product->prices->isNotEmpty()) {
+            throw new HttpResponseException(
+                Response::api(
+                    HttpEnum::UNPROCESSABLE_ENTITY,
+                    message: 'Validation error',
+                    errors: ["user_id" => 'You must select at least one price. '],
+                )
+            );
+        }
         if (empty($userId) && empty($cookie)) {
             throw new HttpResponseException(
                 Response::api(
