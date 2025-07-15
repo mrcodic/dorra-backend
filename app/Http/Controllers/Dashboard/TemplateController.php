@@ -121,7 +121,7 @@ class TemplateController extends DashboardController
     {
         $template = $this->templateService->storeResource($request->validated());
         return Response::api(data: [
-            "redirect_url" => config('services.editor_url') . 'templates/' . $template->id
+            "redirect_url" => config('services.editor_url') . 'templates/' . $template->id .'?product_type=' . ($template->product->getTranslation('name','en') == 'T-shirt' ? 'T-shirt' : 'other')
         ]);
     }
 
