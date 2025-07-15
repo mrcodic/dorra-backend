@@ -227,7 +227,7 @@ class TemplateService extends BaseService
      * @return string
      * @throws \Exception
      */
-    public function convertBase64ToImageLink($validatedData, $model): string
+    public function convertBase64ToImageLink($validatedData, $model)
     {
         if (isset($validatedData['base64_preview_image'])) {
             if (preg_match('/^data:image\/(\w+);base64,/', $validatedData['base64_preview_image'], $type)) {
@@ -263,7 +263,7 @@ class TemplateService extends BaseService
             @unlink($tempFilePath);
 //                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
         }
-        return $type;
+
     }
 
 
