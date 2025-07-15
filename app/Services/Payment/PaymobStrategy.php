@@ -68,7 +68,7 @@ use Illuminate\Support\Facades\Log;
             'vzx' => $response,
         ]);
         if ($response->failed() || empty($result['client_secret']) || empty($result['id'])) {
-
+            $data['order']->delete();
             Log::error('Failed to create payment intention', [
                 'response' => $result,
                 'status_code' => $response->status(),
@@ -76,6 +76,8 @@ use Illuminate\Support\Facades\Log;
 
             throw new \Exception('Failed to create payment intention');
         }
+        $data['cart']->cartItems()->detach();
+        $data['cart']->update(['price' => 0]);
 
         $orderData = [
             'checkout_url' => $this->baseUrl . '/unifiedcheckout/?publicKey='

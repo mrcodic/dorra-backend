@@ -558,9 +558,6 @@ class OrderService extends BaseService
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
                 $order->pickupContact()->create(PickupContactData::fromRequest($request));
             }
-            $cart->cartItems()->detach();
-            $cart->update(['price' => 0]);
-
             return $order;
         });
         if ($request->payment_method_id) {
@@ -570,7 +567,7 @@ class OrderService extends BaseService
                 'user' => auth('sanctum')->user(),
                 'guest' => $order->orderAddress ?? $order->pickupContact,
                 'method' => $selectedPaymentMethod]);
-            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), ['order' => $order, 'user' => auth('sanctum')->user()]);
+            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), ['order' => $order, 'user' => auth('sanctum')->user(),'cart' => $cart]);
             return [
                 'order' => ['id' => $order->id, 'number' => $order->order_number],
                 'paymentDetails' => $paymentDetails,

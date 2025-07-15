@@ -13,7 +13,7 @@ class PaymobIntentionData
         public array $items,
         public string $redirectionUrl,
         public string $notificationUrl,
-        public int $expiration = 172800, // Default 2 days
+        public int $expiration = 172800,
     ) {}
 
     public static function fromArray(array $data, $integrationId, string $currency = 'EGP'): self
