@@ -117,10 +117,10 @@ class AuthService
                     ];
                 })->toArray();
 
-                $user->cart->cartItems()->syncWithoutDetaching($syncData);
+                $user->cart?->cartItems()->syncWithoutDetaching($syncData);
 
-                $guest->cart->cartItems()->detach();
-                $guest->cart->delete();
+                $guest->cart?->cartItems()->detach();
+                $guest->cart?->delete();
 
                 $this->designRepository->query()
                     ->whereNull('user_id')
