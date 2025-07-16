@@ -14,12 +14,11 @@ class OrderItemResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        dd($this);
         return [
             'id' => $this->id,
            'product_name' => $this->design?->product->name,
-           'quantity' => $this->design->quantity,
-           'total_price' => $this->design->total_price,
+           'quantity' => $this->design?->quantity,
+           'total_price' => $this->design?->total_price,
             'design_image' => $this->getFirstMediaUrl('designs'),
         ];
     }
