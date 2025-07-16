@@ -49,6 +49,8 @@ class OrderResource extends JsonResource
                 'value' => $this->discount_amount,
             ],
             'placed_on' => $this->created_at->format('d/m/Y'),
+            'payment_method' => $this->paymentMethod?->name,
+            'payment_status' => $this->payment_status,
 
         ];
     }
