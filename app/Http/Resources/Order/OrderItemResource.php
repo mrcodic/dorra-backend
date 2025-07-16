@@ -21,7 +21,7 @@ class OrderItemResource extends JsonResource
            'quantity' => $this->design?->quantity,
             'total_price' => $this->design?->total_price,
             'design_image' => $this->design?->getFirstMediaUrl('designs'),
-            'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
+            'specs' => ProductSpecificationResource::collection($this->whenLoaded('design.specifications')),
 
         ];
     }
