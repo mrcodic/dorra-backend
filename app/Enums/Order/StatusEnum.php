@@ -13,7 +13,6 @@ enum StatusEnum : int
     case PREPARED = 3;
     case SHIPPED = 4;
     case DELIVERED = 5;
-
     public function label()
     {
         return match ($this) {
