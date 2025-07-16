@@ -99,6 +99,11 @@ class User extends Authenticatable implements HasMedia
         return $this->belongsTo(CountryCode::class);
     }
 
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
     public function socialAccounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);

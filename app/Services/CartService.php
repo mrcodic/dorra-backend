@@ -34,11 +34,16 @@ class CartService extends BaseService
         $guestId = null;
 
         if (!$userId && $cookieValue) {
-            $guest = $this->guestRepository->query()
-                ->firstOrCreate(['cookie_value' => $cookieValue]);
-            $guestId = $guest->id;
+            $guest = $this->guestRepository->query()->firstWhere(['cookie_value' => $cookieValue]);
+            $guestId = $guest?->id;
         }
 
+        if (!$guestId && !$userId )
+        {
+            throw ValidationException::withMessages([
+                ["user_id" => 'Either user ID or cookie ID must be present.']
+            ]);
+        }
         $cart = $this->repository->query()
             ->when($userId, fn($query) => $query->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))

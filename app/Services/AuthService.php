@@ -93,15 +93,47 @@ class AuthService
 
         $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
         $user->token = $plainTextToken;
-
         $cookieValue = request()->cookie('cookie_id');
 
-        if (!$cookieValue || $cookieValue === 'null') {
+        if ($cookieValue) {
             $guest = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
                 ->first();
+            if ($user->cart)
+            {
+                $guestCartItems = collect($guest->cart->cartItems ?? []);
 
-            if ($guest) {
+                $syncData = $guestCartItems->mapWithKeys(function ($design) {
+
+
+                    return [
+                        $design->id => [
+                            'status' => 1,
+                            'sub_total' => $design->total_price,
+                            'total_price' => $design->total_price,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ],
+                    ];
+                })->toArray();
+
+                $user->cart->cartItems()->syncWithoutDetaching($syncData);
+
+                $guest->cart->cartItems()->detach();
+                $guest->cart->delete();
+
+                $this->designRepository->query()
+                    ->whereNull('user_id')
+                    ->where('guest_id', $guest->id)
+                    ->update(['user_id' => $user->id]);
+
+                $this->shippingAddressRepository->query()
+                    ->whereNull('user_id')
+                    ->where('guest_id', $guest->id)
+                    ->update(['user_id' => $user->id]);
+
+            }
+            else{
                 $this->designRepository->query()
                     ->whereNull('user_id')
                     ->where('guest_id', $guest->id)
@@ -116,8 +148,8 @@ class AuthService
                     ->whereNull('user_id')
                     ->where('guest_id', $guest->id)
                     ->update(['user_id' => $user->id]);
-
             }
+
 
         }
 
@@ -130,6 +162,7 @@ class AuthService
     {
         $user = $request->user();
         $cookieValue = request()->cookie('cookie_id');
+
 
         if ($cookieValue) {
             $guest = $this->guestRepository->query()
