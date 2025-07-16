@@ -67,7 +67,20 @@ class OrderService extends BaseService
                 $query->where('status',request('status'));
             })
             ->with(['orderItems'])
+            ->latest()
             ->get();
+    }
+
+    public function showUserOrder($id)
+    {
+        return $this->repository->query()
+            ->whereBelongsTo(auth('sanctum')->user())
+            ->whereKey($id)
+            ->when(request('status'),function ($query){
+                $query->where('status',request('status'));
+            })
+            ->with(['orderItems'])
+            ->firstOrFail();
     }
 
     public function getData()
