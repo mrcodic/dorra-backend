@@ -68,7 +68,7 @@ class OrderService extends BaseService
             })
             ->with(['orderItems'])
             ->latest()
-            ->get();
+            ->paginate();
     }
 
     public function showUserOrder($id)

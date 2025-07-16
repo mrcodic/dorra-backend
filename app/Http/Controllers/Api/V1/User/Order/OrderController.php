@@ -24,7 +24,7 @@ class OrderController extends Controller
         $request->validate([
             'status' => ['nullable', 'in:' . StatusEnum::getValuesAsString()]
         ]);
-        return Response::api(data: OrderResource::collection($this->orderService->userOrders()));
+        return Response::api(data: OrderResource::collection($this->orderService->userOrders())->response()->getData(true));
 
     }
 
