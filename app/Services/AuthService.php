@@ -182,6 +182,7 @@ class AuthService
                     ->where('user_id', $user->id)
                     ->update(['guest_id' => null]);
             }
+            $guest->delete();
         }
 
         return $user->currentAccessToken()->delete();
