@@ -107,10 +107,28 @@ class AuthService
                     ->where('guest_id', $guest->id)
                     ->update(['user_id' => $user->id]);
 
-                $this->cartRepository->query()
+                $oldCart = $this->cartRepository->query()
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                $ids = $oldCart->cartItems()->pluck('cart_items.id')->toArray(); // fix ambiguous ID
+
+                $cart = $this->cartRepository->query()
                     ->whereNull('user_id')
                     ->where('guest_id', $guest->id)
-                    ->update(['user_id' => $user->id]);
+                    ->first();
+
+                if ($cart) {
+                    // Update user_id manually
+                    $cart->user_id = $user->id;
+                    $cart->save();
+
+                    // Sync cart items
+                    $cart->cartItems()->syncWithoutDetaching($ids);
+
+                    // Remove old cart
+                    $oldCart->delete();
+                }
 
                 $this->shippingAddressRepository->query()
                     ->whereNull('user_id')

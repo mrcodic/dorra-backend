@@ -3,6 +3,7 @@
 namespace App\Http\Requests\User\ShippingAddress;
 
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Guest;
 
 class StoreShippingAddressRequest extends BaseRequest
 {
@@ -15,9 +16,15 @@ class StoreShippingAddressRequest extends BaseRequest
     }
     public function prepareForValidation(): void
     {
+        $cookieValue = getCookie('cookie_id')['value'];
+        $guestId = null;
+        if ($cookieValue) {
+            $guest = Guest::firstOrCreate(['cookie_value' => $cookieValue]);
+            $guestId = $guest->id;
+        }
         $this->merge([
             'user_id' => $this->user('sanctum')?->id,
-            'cookie_id' => getCookie('cookie_id')['value']
+            'guest_id' => $guestId
         ]);
     }
 
@@ -33,6 +40,7 @@ class StoreShippingAddressRequest extends BaseRequest
             'line' => ['required', 'string', 'max:500'],
             'state_id' => ['required', 'exists:states,id'],
             'user_id' => ['nullable', 'exists:users,id'],
+            'guest_id' => ['nullable', 'exists:guests,id'],
             'cookie_id' => ['nullable'],
             ];
 
