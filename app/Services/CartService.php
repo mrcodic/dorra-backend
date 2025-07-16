@@ -81,24 +81,22 @@ class CartService extends BaseService
     {
         $userId = auth('sanctum')->id();
         $cookieValue = request()->cookie('cookie_id');
-
-        if (!$userId && !$cookieValue) {
-          return null;
-        }
-
         $guestId = null;
-
+        if (!$userId && !$guestId) {
+            return null;
+        }
         if ($cookieValue && !$userId) {
             $guest = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
                 ->first();
             $guestId = $guest?->id;
         }
+
         return $this->repository->query()
-            ->when($userId, fn($q) => $q->where('user_id', $userId))
+            ->when($userId, fn($q) =>$q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->with(['designs.product', 'cartItems.product'])
-            ->first();
+            ->first() ?? null;
     }
 
     /**
