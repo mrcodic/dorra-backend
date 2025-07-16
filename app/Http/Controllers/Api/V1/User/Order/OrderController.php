@@ -28,6 +28,11 @@ class OrderController extends Controller
 
     }
 
+    public function show($id)
+    {
+        return Response::api(data: OrderResource::make($this->orderService->showResource($id)));
+    }
+
     public function checkout(CheckoutRequest $request)
     {
         $order = $this->orderService->checkout($request);
