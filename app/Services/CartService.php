@@ -82,14 +82,14 @@ class CartService extends BaseService
         $userId = auth('sanctum')->id();
         $cookieValue = request()->cookie('cookie_id');
         $guestId = null;
-        if (!$userId && !$guestId) {
-            return null;
-        }
         if ($cookieValue && !$userId) {
             $guest = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
                 ->first();
             $guestId = $guest?->id;
+        }
+        if (!$userId && !$guestId) {
+            return null;
         }
 
         return $this->repository->query()
