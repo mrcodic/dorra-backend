@@ -96,7 +96,7 @@ class CartService extends BaseService
             ->when($userId, fn($q) =>$q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->with(['designs.product', 'cartItems.product'])
-            ->first() ?? null;
+            ->first();
     }
 
     /**

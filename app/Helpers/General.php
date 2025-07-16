@@ -20,8 +20,7 @@ function getCookie($key): array
 {
     $cookieValue = request()->cookie($key);
     $cookie = null;
-
-    if (!$cookieValue) {
+    if (empty($cookieValue) || $cookieValue === 'null') {
         $cookieValue = (string)Str::uuid();
         $cookie = cookie(
             name: $key,

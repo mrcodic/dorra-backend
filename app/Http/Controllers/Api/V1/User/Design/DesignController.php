@@ -47,12 +47,11 @@ class DesignController extends Controller
             'unit',
             'product_id'
         ]));
-        $cookieData = getCookie('cookie_id');
-        $cookie = $cookieData['cookie'];
+
         return Response::api(
             data: [
                 'design' => DesignResource::make($design),
-                'cookie_value' => $design->guest?->cookie_value ?? null,
+                'cookie_value' => $design->guest?->cookie_value,
             ],
         );
     }
