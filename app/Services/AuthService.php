@@ -94,7 +94,7 @@ class AuthService
         $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
         $user->token = $plainTextToken;
 
-        $cookieValue = request()->cookie('cookie_id');
+        $cookieValue = getCookie('cookie_id')['value'];
 
         if ($cookieValue) {
             $guest = $this->guestRepository->query()
@@ -132,31 +132,26 @@ class AuthService
             $guest = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
                 ->first();
-
             if ($guest) {
-                $guestId = $guest->id;
                 $userId = $user->id;
 
-                // On logout, keep guest_id and remove user_id (if you're reverting to guest state)
                 $this->designRepository->query()
                     ->where('user_id', $userId)
                     ->update([
-                        'guest_id' => $guestId,
-                        'user_id' => null,
+                        'guest_id' => null,
+
                     ]);
 
                 $this->cartRepository->query()
                     ->where('user_id', $userId)
                     ->update([
-                        'guest_id' => $guestId,
-                        'user_id' => null,
+                        'guest_id' => null,
                     ]);
 
                 $this->shippingAddressRepository->query()
                     ->where('user_id', $userId)
                     ->update([
-                        'guest_id' => $guestId,
-                        'user_id' => null,
+                        'guest_id' => null,
                     ]);
             }
         }

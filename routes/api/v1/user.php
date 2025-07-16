@@ -79,7 +79,8 @@ Route::controller(OrderController::class)->group(function () {
     Route::get('track-order/{order}', 'trackOrder');
     Route::get('order-statuses', 'orderStatuses');
 });
-
+Route::get('states', [MainController::class, 'states']);
+Route::get('countries', [MainController::class, 'countries']);
 Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
 
@@ -103,8 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('bulk-delete-saved', 'destroyBulk');
     });
 
-    Route::get('states', [MainController::class, 'states']);
-    Route::get('countries', [MainController::class, 'countries']);
+
 
     Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
