@@ -59,6 +59,16 @@ class OrderService extends BaseService
         parent::__construct($repository);
     }
 
+    public function userOrders()
+    {
+        return $this->repository->query()
+            ->whereBelongsTo(auth('sanctum')->user())
+            ->when(request('status'),function ($query,$request){
+                $query->where('status',request('status'));
+            })
+            ->with(['orderItems'])
+            ->get();
+    }
 
     public function getData()
     {

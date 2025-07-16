@@ -19,6 +19,7 @@ class OrderItemResource extends JsonResource
            'product_name' => $this->design->product->name,
            'quantity' => $this->design->quantity,
            'total_price' => $this->design->total_price,
+            'design_image' => $this->getFirstMediaUrl('designs'),
         ];
     }
 }

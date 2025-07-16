@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User\Order;
 
 
 use App\Enums\HttpEnum;
+use App\Enums\Order\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Checkout\CheckoutRequest;
 use App\Http\Resources\LocationResource;
@@ -16,8 +17,13 @@ use Illuminate\Support\Facades\Response;
 
 class OrderController extends Controller
 {
-    public function __construct(public OrderService $orderService, public LocationService $locationService)
+    public function __construct(public OrderService $orderService, public LocationService $locationService){}
+
+    public function index(Request $request)
     {
+        $request->validate(['status' => ['nullable','in:',StatusEnum::getValuesAsString()]]);
+        return Response::api(data: OrderResource::collection($this->orderService->userOrders()));
+
     }
 
     public function checkout(CheckoutRequest $request)

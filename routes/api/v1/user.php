@@ -126,7 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('trash', [MainController::class, 'trash'])->name('trash');
 
-
+    Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 
 
 });

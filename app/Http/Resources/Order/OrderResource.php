@@ -48,6 +48,7 @@ class OrderResource extends JsonResource
                 'ratio' => round($paidRatio * 100) . '%',
                 'value' => $this->discount_amount,
             ],
+            'placed_on' => $this->created_at->format('d/m/Y'),
 
         ];
     }
