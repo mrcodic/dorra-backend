@@ -94,9 +94,9 @@ class AuthService
         $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
         $user->token = $plainTextToken;
 
-        $cookieValue = getCookie('cookie_id')['value'];
+        $cookieValue = request()->cookie('cookie_id');
 
-        if ($cookieValue) {
+        if (!$cookieValue || $cookieValue === 'null') {
             $guest = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
                 ->first();
@@ -107,38 +107,23 @@ class AuthService
                     ->where('guest_id', $guest->id)
                     ->update(['user_id' => $user->id]);
 
-                $oldCart = $this->cartRepository->query()
-                    ->where('user_id', $user->id)
-                    ->first();
-
-                $ids = $oldCart->cartItems()->pluck('cart_items.id')->toArray(); // fix ambiguous ID
-
-                $cart = $this->cartRepository->query()
-                    ->whereNull('user_id')
-                    ->where('guest_id', $guest->id)
-                    ->first();
-
-                if ($cart) {
-                    // Update user_id manually
-                    $cart->user_id = $user->id;
-                    $cart->save();
-
-                    // Sync cart items
-                    $cart->cartItems()->syncWithoutDetaching($ids);
-
-                    // Remove old cart
-                    $oldCart->delete();
-                }
-
                 $this->shippingAddressRepository->query()
                     ->whereNull('user_id')
                     ->where('guest_id', $guest->id)
                     ->update(['user_id' => $user->id]);
+
+                $this->cartRepository->query()
+                    ->whereNull('user_id')
+                    ->where('guest_id', $guest->id)
+                    ->update(['user_id' => $user->id]);
+
             }
+
         }
 
         return $user;
     }
+
 
 
     public function logout($request)
@@ -150,32 +135,25 @@ class AuthService
             $guest = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
                 ->first();
+
             if ($guest) {
-                $userId = $user->id;
-
                 $this->designRepository->query()
-                    ->where('user_id', $userId)
-                    ->update([
-                        'guest_id' => null,
-
-                    ]);
-
-                $this->cartRepository->query()
-                    ->where('user_id', $userId)
-                    ->update([
-                        'guest_id' => null,
-                    ]);
+                    ->where('user_id', $user->id)
+                    ->update(['guest_id' => null]);
 
                 $this->shippingAddressRepository->query()
-                    ->where('user_id', $userId)
-                    ->update([
-                        'guest_id' => null,
-                    ]);
+                    ->where('user_id', $user->id)
+                    ->update(['guest_id' => null]);
+
+                $this->cartRepository->query()
+                    ->where('user_id', $user->id)
+                    ->update(['guest_id' => null]);
             }
         }
 
         return $user->currentAccessToken()->delete();
     }
+
 
 
 
