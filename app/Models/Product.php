@@ -10,7 +10,7 @@ use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough, MorphMany, MorphToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasManyThrough, MorphMany, MorphToMany};
 
 class Product extends Model implements HasMedia
 {
@@ -26,6 +26,7 @@ class Product extends Model implements HasMedia
         'is_free_shipping',
         'base_price',
         'status',
+        'has_mockup',
     ];
 
     public function price(): Attribute
@@ -73,9 +74,9 @@ class Product extends Model implements HasMedia
         return $this->hasMany(ProductSpecification::class);
     }
 
-    public function templates(): HasMany
+    public function templates(): BelongsToMany
     {
-        return $this->hasMany(Template::class);
+        return $this->belongsToMany(Template::class)->withTimestamps();
     }
 
     public function specificationOptions(): HasManyThrough
@@ -120,6 +121,8 @@ class Product extends Model implements HasMedia
         return $this->getMedia('product_extra_images')
             ->merge($this->getMedia('product_main_image'));
     }
+
+
 
     public function getMainImageUrl(): string
     {

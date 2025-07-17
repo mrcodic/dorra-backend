@@ -46,6 +46,8 @@ class StoreTemplateRequest extends BaseRequest
                 'prohibits:product_type:T-shirt',
                 'exists:products,id'
             ],
+            'product_ids' => ['required', 'array'],
+            'product_ids.*' => ['integer', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],

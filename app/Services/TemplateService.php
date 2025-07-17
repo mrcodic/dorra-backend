@@ -108,43 +108,9 @@ class TemplateService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
-            if (($validatedData['product_type'] ?? null) === 'T-shirt') {
-                $tShirtProduct = $this->productRepository
-                    ->query()
-                    ->where('name->en', $validatedData['product_type'])
-                    ->first();
-                if (!$tShirtProduct) {
-                    throw ValidationException::withMessages(['product_type' => 'You must create product called T-shirt to upload template for it.']);
-                }
-
-                $validatedData['product_id'] = $tShirtProduct->id;
-
-            } elseif (($validatedData['product_type'] ?? null) === 'other') {
-                foreach (['width', 'height', 'unit', 'product_id'] as $field) {
-                    if (empty($validatedData[$field])) {
-                        throw ValidationException::withMessages(['product_type' => "{$field} is required when product_type is 'other'."]);
-
-                    }
-                }
-            }
-
-            if (empty($validatedData['height'])) {
-                $validatedData['height'] = 650;
-            }
-            if (empty($validatedData['width'])) {
-                $validatedData['width'] = 650;
-            }
-            if (empty($validatedData['unit'])) {
-                $validatedData['unit'] = \App\Enums\Template\UnitEnum::PIXEL->value;
-            }
-
             $model = $this->repository->create($validatedData);
-
-            if (isset($validatedData['specifications'])) {
-                $model->specifications()->attach($validatedData['specifications']);
-            }
+            $model->products()->sync($validatedData['product_ids']);
             $this->convertBase64ToImageLink($validatedData, $model);
-
             return $model->refresh();
         });
 

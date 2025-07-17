@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Api\V1\User\{General\MainController,};
 use App\Http\Controllers\Dashboard\MockupController;
 use App\Http\Controllers\Dashboard\TemplateController;
@@ -25,4 +26,4 @@ Route::get('mockups', [MockupController::class, 'index']);
 Route::get('mockup-types', [MockupController::class, 'mockupTypes']);
 Route::delete('mockups/{mockup}', [MockupController::class, 'destroy']);
 Route::get('mockups/{mockup}', [MockupController::class, 'showAndUpdateRecent']);
-
+Route::get('/products', [ProductController::class,'index'])->name('products.index');

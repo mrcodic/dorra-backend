@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
+use App\Http\Resources\Product\ProductResource;
 use App\Models\Product;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\TagRepositoryInterface;
@@ -38,13 +39,16 @@ class ProductController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-        'show' => ['category', 'tags', 'reviews.user','media','specifications.options.media'],
-        'edit' => ['category', 'tags', 'reviews','media', 'specifications.options'],
-    ];
+            'index' => ['saves'],
+            'show' => ['category', 'tags', 'reviews.user', 'media', 'specifications.options.media'],
+            'edit' => ['category', 'tags', 'reviews', 'media', 'specifications.options'],
+        ];
 
         $this->usePagination = true;
         $this->resourceTable = 'products';
+        $this->resourceClass = ProductResource::class;
     }
+
     public function getData(): JsonResponse
     {
         return $this->productService->getData();
@@ -53,6 +57,6 @@ class ProductController extends DashboardController
     public function search(Request $request)
     {
         $products = $this->productService->search($request);
-        return  view("dashboard.partials.filtered-products", compact('products'));
+        return view("dashboard.partials.filtered-products", compact('products'));
     }
 }

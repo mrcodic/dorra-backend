@@ -47,6 +47,10 @@ class DashboardController extends Controller
     {
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination);
         $associatedData = $this->getAssociatedData('index');
+        if (request()->expectsJson())
+        {
+            return Response::api(data: $this->resourceClass ? $this->resourceClass::collection($data) : $data);
+        }
         return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());
     }
 

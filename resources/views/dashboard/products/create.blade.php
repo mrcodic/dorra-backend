@@ -158,6 +158,38 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <!-- Has Mockup -->
+
+                                    <div class="col-md-12">
+                                        <div class="mb-1">
+                                            <label class="form-label label-text">Has Mockup</label>
+                                            <div class="d-flex gap-3">
+                                                <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
+                                                    <input
+                                                        class="form-check-input me-2"
+                                                        type="radio"
+                                                        name="has_mockup"
+                                                        id="yes"
+                                                        value="1"
+                                                        required
+                                                    />
+                                                    <label class="form-check-label mb-0 flex-grow-1" for="yes">Yes</label>
+                                                </div>
+                                                <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
+                                                    <input
+                                                        class="form-check-input me-2"
+                                                        type="radio"
+                                                        name="has_mockup"
+                                                        id="no"
+                                                        value="0"
+                                                        required
+                                                    />
+                                                    <label class="form-check-label mb-0 flex-grow-1" for="no">No</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="d-flex justify-content-end">
                                         <button type="button" class="btn btn-primary next-tab">Next</button>
                                     </div>

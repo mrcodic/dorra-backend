@@ -79,19 +79,14 @@ class TemplateController extends DashboardController
 
     public function checkProductType(Request $request)
     {
-        $isProductFound = $this->templateService->checkProductType($request);
-        if (!$isProductFound) {
-            return view("dashboard.errors.product");
-        }
+
+//        $isProductFound = $this->templateService->checkProductType($request);
+//        if (!$isProductFound) {
+//            return view("dashboard.errors.product");
+//        }
         return view("dashboard.templates.create",['associatedData' => $this->assoiciatedData['create']]);
     }
 
-    public function checkProductTypeInEditor(Request $request)
-    {
-        $request->validate(['product_type'=>['required','string','in:T-shirt,other']]);
-        $isProductFound = $this->templateService->checkProductTypeInEditor($request);
-
-    }
 
     public function index()
     {

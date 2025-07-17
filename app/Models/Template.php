@@ -104,6 +104,9 @@ class Template extends Model implements HasMedia
     }
 
 
-
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class)->withTimestamps();
+    }
 
 }

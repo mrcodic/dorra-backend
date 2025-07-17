@@ -145,8 +145,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/store-templates', [TemplateController::class, 'storeAndRedirect'])->name('templates.redirect.store');
 
     Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status");
-    Route::post('product-templates/create', [TemplateController::class, 'checkProductType'])->name("check.product.type");
-    Route::resource('/product-templates', TemplateController::class)->except('create');
+    Route::resource('/product-templates', TemplateController::class);
 
 
     Route::resource('/profile', ProfileController::class)->only(['index', 'update']);

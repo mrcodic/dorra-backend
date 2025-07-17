@@ -18,32 +18,7 @@
                             @csrf
                             <div class="flex-grow-1">
                                 <div class="">
-                                    <div class="row @if(session('product_type') != "other")d-none @endif ">
-                                        <!-- Width -->
-                                        <div class="col-md-4 mb-2">
-                                            <label for="edit-width" class="label-text mb-1">Width</label>
-                                            <input type="number" id="edit-width" name="width" class="form-control"
-                                                   placeholder="Enter width">
-                                        </div>
 
-                                        <!-- Height -->
-                                        <div class="col-md-4 mb-2">
-                                            <label for="edit-height" class="label-text mb-1">Height</label>
-                                            <input type="number" id="edit-height" name="height" class="form-control"
-                                                   placeholder="Enter height">
-                                        </div>
-
-                                        <!-- Unit -->
-                                        <div class="col-md-4 mb-2">
-                                            <label for="unit" class="label-text mb-1">Unit</label>
-                                            <select id="unit" name="unit" class="form-select">
-                                                <option value="">Select Unit</option>
-                                                @foreach(\App\Enums\Template\UnitEnum::cases() as $unit)
-                                                    <option value="{{ $unit->value }}"> {{ $unit->label() }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
                                     <div class="form-group mb-2">
                                         <label class="label-text mb-1">Template Type</label>
                                         <div class="row">
@@ -111,45 +86,24 @@
                                     {{--                                    </div>--}}
                                     <div class="form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
-                                        <select id="productsSelect" class="form-select select2" name="product_id" @if(session('product_type') != "other") readonly @endif>
+                                        <select id="productsSelect" class="form-select select2" name="product_ids[]" @if(session('product_type') != "other") readonly @endif multiple>
                                             <option value="" disabled>Choose Product</option>
-                                            @if(session('product_type') == 'other')
-                                                @php
-                                                    $products = \App\Models\Product::query()->where('name->en','!=','T-shirt')->get();
-                                                @endphp
-                                            @else
-                                                @php
-                                                    $products = \App\Models\Product::query()->where('name->en','=','T-shirt')->get();
-                                                @endphp
-                                            @endif
-                                            @foreach($products as $product)
-
-                                                    <option
-                                                        value="{{ $product->id }}"
-                                                        {{ session('product_type') == $product->getTranslation('name', 'en') ? 'selected' : '' }}
-                                                    >
+                                            @foreach($associatedData['products'] as $product)
+                                                    <option value="{{ $product->id }}">
                                                         {{ $product->getTranslation('name', app()->getLocale()) }}
                                                     </option>
                                             @endforeach
+                                            <input type="hidden" name="product_id" value="1">
+
 
                                         </select>
                                     </div>
 
-                                    <div class="form-group mb-2 d-none">
-                                        <label class="label-text mb-1">Spec</label>
-                                        <div class="row" id="specsContainer">
 
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-end">
-                                <button type="button" class="btn btn-outline-secondary" id="addNewSpec">
-                                    Add New Specs
-                                </button>
 
-                            </div>
                             <div class="d-flex justify-content-between pt-2">
                                 <button type="button" class="btn btn-outline-secondary"  id="cancelButton">Cancel</button>
                                 <div class="d-flex gap-1">
@@ -210,26 +164,7 @@
             }
         });
 
-        $("#addNewSpec").on('click', function (e) {
-            const productId = $('#productsSelect').val();
 
-            if (!productId) {
-                e.preventDefault(); // block behavior
-
-                Toastify({
-                    text: "Select product first to add spec on it!",
-                    duration: 4000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#EA5455", // Red for warning
-                    close: true,
-                }).showToast();
-
-            } else {
-                $("#addSpecModal").modal("show");
-
-            }
-        });
         $('.saveChangesButton').on('click', function (e) {
             const $button = $(this);
             const action = $button.data('action');
@@ -264,101 +199,12 @@
         });
 
     </script>
-    <script !src="">
 
-        $('#productsSelect').on('change', function () {
-            const productId = $(this).val();
-            if (productId) {
-                $('#addNewSpec').attr('data-bs-toggle', 'modal').attr('data-bs-target', '#addSpecModal');
-                $('#product_id_input').val(productId);
-
-            } else {
-                $('#addNewSpec').removeAttr('data-bs-toggle').removeAttr('data-bs-target');
-            }
-
-            const $specsContainer = $('#specsContainer');
-            const $specSection = $specsContainer.closest('.form-group');
-
-            if (productId) {
-                $.ajax({
-                    url: "{{ url('api/v1/product-specifications') }}/" + productId,
-                    method: 'GET',
-                    success: function (res) {
-                        if (res.data && res.data.length > 0) {
-                            $specsContainer.empty();
-
-                            res.data.forEach(spec => {
-                                const specHtml = `
-                                <div class="col-12 mb-1">
-                                    <div class="border rounded p-1 d-flex align-items-center">
-                                        <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
-                                        <label class="form-check-label">${spec.name}</label>
-                                    </div>
-                                </div>
-                            `;
-                                $specsContainer.append(specHtml);
-                            });
-
-                            $specSection.removeClass('d-none');
-                        } else {
-                            $specsContainer.empty();
-                            $specSection.addClass('d-none');
-                        }
-                    },
-                    error: function () {
-                        Toastify({
-                            text: 'Failed to load specifications.',
-                            duration: 4000,
-                            gravity: 'top',
-                            position: 'right',
-                            backgroundColor: '#EA5455',
-                            close: true
-                        }).showToast();
-                        $specsContainer.empty();
-                        $specSection.addClass('d-none');
-                    }
-                });
-            } else {
-                $specsContainer.empty();
-                $specSection.addClass('d-none');
-            }
-        });
-    </script>
     <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
-    <script !src="">
-        handleAjaxFormSubmit("#addSpecForm", {
-            successMessage: "Specification created successfully!",
-            closeModal: '#addSpecModal',
-            onSuccess: function (response, $form) {
-                const spec = response.data;
-
-                const specHtml = `
-            <div class="col-12 mb-1">
-                <div class="border rounded p-1 d-flex align-items-center">
-                    <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
-                    <label class="form-check-label">${spec.name}</label>
-                </div>
-            </div>
-        `;
-
-                $('#specsContainer').append(specHtml);
-
-                // Clear uploaded images and previews
-                $form.find('.option-image-input').val(''); // Clear file input
-                $form.find('.option-upload-progress').addClass('d-none').find('.progress-bar').css('width', '0%'); // Reset progress bar
-                $form.find('.option-uploaded-image').addClass('d-none'); // Hide uploaded image preview container
-                $form.find('.option-image-preview').attr('src', ''); // Clear preview src
-                $form.find('.option-file-name').text(''); // Clear file name text
-                $form.find('.option-file-size').text(''); // Clear file size text
-            },
-            resetForm: true,
-        });
-
-    </script>
     <script>
         $(document).ready(function () {
             $('#productsSelect').select2();

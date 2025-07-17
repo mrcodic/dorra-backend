@@ -228,6 +228,7 @@ class DesignService extends BaseService
             ->with('owner:id,first_name,last_name')
             ->get()
             ->pluck('owner')
+            ->filter()
             ->unique('id')
             ->values();
 

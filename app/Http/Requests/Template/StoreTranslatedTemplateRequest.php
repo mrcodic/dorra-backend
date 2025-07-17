@@ -51,6 +51,8 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'height' => ['nullable', 'numeric', new DimensionWithinUnitRange()],
             'width'  => ['nullable', 'numeric', new DimensionWithinUnitRange()],
             'product_id' => ['required', 'exists:products,id'],
+            'product_ids' => ['required', 'array'],
+            'product_ids.*' => ['integer', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],
