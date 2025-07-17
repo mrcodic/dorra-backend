@@ -168,11 +168,12 @@ class CartService extends BaseService
         return [
             'discount' => [
                 'id' => $discountCode->id,
-                'ratio' => round($discountValue,2),
-                'value' => round($discountAmount,2),
+                'ratio' => number_format($discountValue, 2, '.', ''), 
+                'value' => number_format($discountAmount, 2, '.', ''),
             ],
-            'total_price' => round($totalPrice,2),
+            'total_price' => number_format($totalPrice, 2, '.', ''),
         ];
+
     }
 
     public function cartInfo(): array
