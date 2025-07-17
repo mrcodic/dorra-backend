@@ -593,7 +593,9 @@ class OrderService extends BaseService
                 'user' => auth('sanctum')->user(),
                 'guest' => $order->orderAddress ?? $order->pickupContact,
                 'method' => $selectedPaymentMethod]);
-            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), ['order' => $order, 'user' => auth('sanctum')->user(),'cart' => $cart]);
+            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), [
+                'order' => $order, 'user' => auth('sanctum')->user(),
+                'cart' => $cart ,'discountCode' => $discountCode]);
             return [
                 'order' => ['id' => $order->id, 'number' => $order->order_number],
                 'paymentDetails' => $paymentDetails,

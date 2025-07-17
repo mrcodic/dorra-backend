@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Log;
         $this->config = config('services.paymob');
     }
 
-    public function pay(array $payload, array $data): array
+    public function pay(array $payload, array $data): false|array
     {
         $method = $payload['method'];
 
@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Log;
         return $this->createPaymentIntention($payload, $data, $method->code);
     }
 
-    protected function createPaymentIntention(array $payload,array $data, string $paymentMethod): array
+    protected function createPaymentIntention(array $payload,array $data, string $paymentMethod): false|array
     {
         $integrationIds = [
             'paymob_card' => $this->config['card_integration_id'],
@@ -68,16 +68,18 @@ use Illuminate\Support\Facades\Log;
             'vzx' => $response,
         ]);
         if ($response->failed() || empty($result['client_secret']) || empty($result['id'])) {
-            $data['order']->delete();
             Log::error('Failed to create payment intention', [
                 'response' => $result,
                 'status_code' => $response->status(),
             ]);
-
-            throw new \Exception('Failed to create payment intention');
+            return false;
         }
         $data['cart']->cartItems()->detach();
         $data['cart']->update(['price' => 0]);
+        if ($data['discountCode'] !== 0)
+        {
+            $data['discountCode']->decrement('max_usage');
+        }
 
         $orderData = [
             'checkout_url' => $this->baseUrl . '/unifiedcheckout/?publicKey='
@@ -93,10 +95,6 @@ use Illuminate\Support\Facades\Log;
 
     public function storeTransaction($orderData, $data, $paymentMethod): array
     {
-        if (!$orderData) {
-            return ['error' => 'Could not create payment intention'];
-        }
-
         $transaction = Transaction::create([
             'order_id' => $data['order']->id,
             'amount' => $orderData['amount'],

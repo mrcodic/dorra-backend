@@ -13,9 +13,7 @@ class PaymentRequestData
         public $guest,
         public $method,
 
-    )
-    {
-    }
+    ){}
 
     public static function fromArray(array $data): self
     {

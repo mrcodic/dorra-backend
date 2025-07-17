@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\V1\User\Payment;
 
 use App\DTOs\Payment\PaymentRequestData;
+use App\Enums\HttpEnum;
 use App\Enums\Payment\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
+use App\Models\Guest;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
@@ -27,19 +29,29 @@ class PaymentController extends Controller
         return Response::api(data: PaymentResource::collection($this->paymentMethodRepository->all()));
     }
 
-//    public function getPaymentLink(Request $request)
-//    {
-//        $request->validate([
-//            'payment_method_id' => ['required', 'exists:payment_methods,id'],
-//            'order_id' => ['required', 'exists:orders,id'],
-//        ]);
-//        $selectedOrder = $this->orderRepository->find($request->get('order_id'));
-//        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
-//        $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
-//        $dto = PaymentRequestData::fromArray(['order' => $selectedOrder, 'user' => auth('sanctum')->user(), 'method' => $selectedPaymentMethod]);
-//        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(),['order' => $selectedOrder, 'user' => auth('sanctum')->user()]);
-//        return Response::api(data: $paymentDetails);
-//    }
+    public function getPaymentLink(Request $request)
+    {
+        $request->validate([
+            'payment_method_id' => ['required', 'exists:payment_methods,id'],
+            'order_id' => ['required', 'exists:orders,id'],
+        ]);
+        $selectedOrder = $this->orderRepository->find($request->get('order_id'));
+        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
+        $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
+        $dto = PaymentRequestData::fromArray(['order' => $selectedOrder, 'user' => auth('sanctum')->user(),
+            'guest'=>Guest::query()->whereCookieValue('cookie_value')->first(), 'method' => $selectedPaymentMethod]);
+        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(),['order' => $selectedOrder, 'user' => auth('sanctum')->user()]);
+        if (!$paymentDetails)
+        {
+            return Response::api(HttpEnum::BAD_REQUEST,
+                message: 'Something went wrong',
+                errors: [
+                    'error' =>[ 'Failed to payment transaction try again later.'],
+                ]
+            );
+        }
+        return Response::api(data: $paymentDetails);
+    }
 
     public function handleCallback(Request $request)
     {

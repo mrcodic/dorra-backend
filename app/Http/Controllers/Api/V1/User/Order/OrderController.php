@@ -36,6 +36,15 @@ class OrderController extends Controller
     public function checkout(CheckoutRequest $request)
     {
         $order = $this->orderService->checkout($request);
+        if ($order['paymentDetails'] === false)
+        {
+            return Response::api(HttpEnum::BAD_REQUEST,
+                message: 'Something went wrong',
+                errors: [
+                    'error' =>[ 'Failed to payment transaction try again later.'],
+                ]
+            );
+        }
         if (!$order) {
             return Response::api(statusCode: HttpEnum::BAD_REQUEST, message: 'Bad request', errors: ['message' => 'Cart is empty.']);
         }
