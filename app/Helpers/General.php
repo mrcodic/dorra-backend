@@ -87,7 +87,7 @@ function getTotalPrice($discount, $subtotal): float|int
 
 function getPriceAfterTax($tax, $subtotal): float|int
 {
-    return number_format($tax * $subtotal, 2, '.', '')
+    return number_format($tax * $subtotal, 2, '.', '');
 }
 
 function setting(string $key, $default = null)
