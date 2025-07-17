@@ -70,7 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/search', [ProductController::class, 'search'])->name('search');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     }));
-//    Route::resource('/products', ProductController::class);
+    Route::resource('/products', ProductController::class);
 
     Route::group(['prefix' => 'tags', 'as' => 'tags.', 'controller' => TagController::class,], (function () {
         Route::get('/data', [TagController::class, 'getData'])->name('data');
