@@ -67,8 +67,8 @@ class CartService extends BaseService
             ]
         ]);
 
-        $totalPrice = $cart->designs->sum(fn($design) => $design->total_price ?? 0);
-        $cart->update(['price' => getTotalPrice(0, $totalPrice)]);
+        $subTotal = $cart->designs->sum(fn($design) => $design->total_price ?? 0);
+        $cart->update(['price' => $subTotal]);
 
         return $cart->load(['designs.product']);
     }
@@ -160,7 +160,7 @@ class CartService extends BaseService
         $subTotal = $cart->price;
         $discountValue = $discountCode->type == TypeEnum::PERCENTAGE
             ? $discountCode->value
-            : round(($discountCode->value / $subTotal) * 100, 2);
+            : ($discountCode->value / $subTotal) * 100;
 
         $discountAmount = getDiscountAmount($discountCode, $subTotal);
         $totalPrice = $subTotal - $discountAmount;
