@@ -63,8 +63,11 @@ class OrderService extends BaseService
     {
         return $this->repository->query()
             ->whereBelongsTo(auth('sanctum')->user())
-            ->when(request('status'),function ($query,$request){
+            ->when(request('status'),function ($query){
                 $query->where('status',request('status'));
+            })
+            ->when(request('search'),function ($query){
+                $query->whereOrderNumber(request('search'));
             })
             ->with(['orderItems'])
             ->latest()
