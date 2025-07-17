@@ -69,7 +69,7 @@ class OrderService extends BaseService
             ->when(request('search'),function ($query){
                 $query->whereOrderNumber(request('search'));
             })
-            ->with(['orderItems'])
+            ->with(['orderItems.design.product','orderItems.design.productPrice','paymentMethod'])
             ->latest()
             ->paginate();
     }

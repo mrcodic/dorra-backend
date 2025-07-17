@@ -26,7 +26,6 @@ class OrderResource extends JsonResource
         $paidRatio = $this->subtotal > 0
             ? ($this->discount_amount) / $this->subtotal
             : 0;
-
         return [
             'id' => $this->id,
             'number' => $this->order_number,
@@ -37,6 +36,12 @@ class OrderResource extends JsonResource
             'statuses' => $statuses,
             'shipping_address' => OrderAddressResource::make($this->whenLoaded('orderAddress')),
             'items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
+            'items_images' => $this->orderItems->pluck('design')->map(function ($item) {
+                return $item->getFirstMediaUrl('designs');
+            }),
+            'items_names' => $this->orderItems->pluck('design')->map(function ($item) {
+                return $item->name;
+            }),
             'sub_total' => $this->subtotal,
             'total' => $this->total_price,
             'tax' => [
