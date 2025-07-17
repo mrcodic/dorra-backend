@@ -67,7 +67,13 @@ function getDiscountAmount($discount, $subtotal)
     if (!is_object($discount)) {
         return 0;
     }
-    return $subtotal * $discount->value;
+    if ($discount->type == \App\Enums\DiscountCode\TypeEnum::PERCENTAGE)
+    {
+        return $subtotal * $discount->value;
+
+    }
+    return  $discount->value;
+
 }
 
 

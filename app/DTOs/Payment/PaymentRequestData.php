@@ -29,7 +29,8 @@ class PaymentRequestData
 
     public function toArray(): array
     {
-        $amountCents = (int) $this->order->total_price * 100;
+
+        $amountCents = (int) ($this->order->total_price * 100);
         $baseItems = $this->order->orderItems->map(fn($item) => [
             'name' => Str::limit($item->design?->name ?? 'Item', 50, ''),
             'amount' => (int) round($item->total_price * 100),
@@ -53,11 +54,10 @@ class PaymentRequestData
                 'quantity' => 1,
             ];
         }
-
-        if ($this->order->discount_amount > 0) {
+        if ($this->order?->discount_amount > 0) {
             $extraItems[] = [
-                'name' => Str::limit( 'Discount', 50, ''),
-                'amount' => (int) round($this->order->discount_amount  * 100),
+                'name' => Str::limit('Discount', 50, ''),
+                'amount' => -(int) round($this->order->discount_amount * 100),
                 'quantity' => 1,
             ];
         }
