@@ -168,7 +168,7 @@ class CartService extends BaseService
         return [
             'discount' => [
                 'id' => $discountCode->id,
-                'ratio' => number_format($discountValue, 2, '.', ''), 
+                'ratio' => number_format($discountValue, 2, '.', ''),
                 'value' => number_format($discountAmount, 2, '.', ''),
             ],
             'total_price' => number_format($totalPrice, 2, '.', ''),
