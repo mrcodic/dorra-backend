@@ -58,7 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     return Response::api(\App\Enums\HttpEnum::NOT_FOUND,
                         message: 'Something went wrong',
                         errors: [
-                            ['message' =>[ 'Resource not found.']],
+                            'message' =>[ 'Resource not found.'],
                         ]
                    );
                 }
