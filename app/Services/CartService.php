@@ -163,7 +163,7 @@ class CartService extends BaseService
             : ($discountCode->value / $subTotal) * 100;
 
         $discountAmount = getDiscountAmount($discountCode, $subTotal);
-        $totalPrice = getTotalPrice($discountCode, $subTotal);
+        $totalPrice = $subTotal - $discountAmount;
 
         return [
             'discount' => [

@@ -82,7 +82,6 @@ function getTotalPrice($discount, $subtotal): float|int
     $discountAmount = getDiscountAmount($discount, $subtotal);
     $tax = setting('tax');
     $delivery = setting('delivery');
-    dd($discountAmount, $tax, $delivery, $subtotal);
     return $subtotal - $discountAmount + ($tax * $subtotal) + $delivery;
 }
 
