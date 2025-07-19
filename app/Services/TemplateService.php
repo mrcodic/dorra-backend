@@ -3,14 +3,12 @@
 namespace App\Services;
 
 
-use App\Enums\Template\UnitEnum;
+
 use App\Jobs\ProcessBase64Image;
-use App\Jobs\RenderFabricJsonToPngJob;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
-use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TemplateService extends BaseService
@@ -23,42 +21,6 @@ class TemplateService extends BaseService
     {
         parent::__construct($repository);
 
-    }
-
-    public function checkProductType($request): bool
-    {
-        session(['product_type' => $request->input('product_type')]);
-        $productType = session('product_type');
-        $product = $this->productRepository
-            ->query()
-            ->where('name->en', $productType)
-            ->first();
-        if ($productType == 'other') {
-            return true;
-        }
-        if (!$product) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @throws ValidationException
-     */
-    public function checkProductTypeInEditor($request)
-    {
-        $productType = $request->product_type;
-        $product = $this->productRepository
-            ->query()
-            ->where('name->en', $productType)
-            ->first();
-        if (!$product && $productType == 'T-shirt') {
-            throw ValidationException::withMessages([
-                'product_type' => 'You must create product called T-shirt to upload template for it'
-            ]);
-        } else {
-            return $productType;
-        }
     }
 
     public function getAll(
@@ -125,9 +87,7 @@ class TemplateService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
             $model = $this->repository->update($validatedData, $id);
-            if (isset($validatedData['specifications'])) {
-                $model->specifications()->sync($validatedData['specifications']);
-            }
+            $model->products()->sync($validatedData['product_ids']);
             return $model;
         });
        $this->convertBase64ToImageLink($validatedData, $model);

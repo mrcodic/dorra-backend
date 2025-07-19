@@ -86,9 +86,9 @@
                                     {{--                                    </div>--}}
                                     <div class="form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
-                                        <select id="productsSelect" class="form-select select2" name="product_ids[]" @if(session('product_type') != "other") readonly @endif multiple>
+                                        <select id="productsSelect" class="form-select select2" name="product_ids[]" multiple>
                                             <option value="" disabled>Choose Product</option>
-                                            @foreach($associatedData['products'] as $product)
+                                                @foreach($associatedData['products'] as $product)
                                                     <option value="{{ $product->id }}">
                                                         {{ $product->getTranslation('name', app()->getLocale()) }}
                                                     </option>
@@ -130,7 +130,7 @@
         </div>
 
     </section>
-    @include('modals.templates.add-spec')
+
 
 @endsection
 @section('vendor-script')

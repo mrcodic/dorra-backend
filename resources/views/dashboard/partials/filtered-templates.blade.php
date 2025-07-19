@@ -15,24 +15,25 @@
                                 data-feather="edit-3" class="me-1"></i>Edit</a></li>
                     <li>
                         <a class="dropdown-item"
-                            href="{{ config('services.editor_url') . 'templates/' . $template->id . '?product_type=' . ($template->product->getTranslation('name','en') == 'T-shirt' ? 'T-shirt' : 'other') }}"
-                            target="_blank">
+                           href="{{ config('services.editor_url') . 'templates/' . $template->id ."?has_mockup=" .
+                          ($template->products->contains('has_mockup', true) ? 'true' : 'false')}}"
+                           target="_blank">
                             <i data-feather="eye" class="me-1"></i>Show
                         </a>
                     </li>
-                        <form class="change-status-form"
-                              action="{{ route("product-templates.change-status",$template->id) }}" method="post">
-                            @csrf
-                            @method("PUT")
-                            <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}">
+                    <form class="change-status-form"
+                          action="{{ route("product-templates.change-status",$template->id) }}" method="post">
+                        @csrf
+                        @method("PUT")
+                        <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}">
 
-                            <button class="dropdown-item change-status-btn w-100
+                        <button class="dropdown-item change-status-btn w-100
                                 {{ (!empty($template->design_data) && $template->status !== \App\Enums\Template\StatusEnum::PUBLISHED) ? '' : 'disabled' }}   ">
-                                <i data-feather="send" class="me-1">
+                            <i data-feather="send" class="me-1">
 
-                                </i>Publish
-                            </button>
-                        </form>
+                            </i>Publish
+                        </button>
+                    </form>
                     </li>
 
 
@@ -82,18 +83,22 @@
                         {{ $template->getTranslation('name', app()->getLocale()) }}
                     </h6>
 
+                    <!-- Info Row -->
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div class="text-16">Dimensions: <span class="text-black">{{ round($template->height /2.54  , 2)  }} × {{ round($template->width /2.54  ,2) }} pixel</span>
-                        </div>
+                        <div>
+                            <p style="display:inline; margin-right: 10px">Type:</p>
 
-                        <span class="badge text-light p-75 px-2 template-status-label"
-                              style="background-color: #222245">
-                        {{ $template->type->label() }}
-                    </span>
+                            <span class="badge text-light p-75 px-2 template-status-label "
+                                  style="background-color: #222245">
+                          {{ $template->type->label() }}
+                            </span>
+                        </div>
                     </div>
-                    <p class="fs-4 mb-1"
-                       style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:29px"> {{ $template->product->getTranslation('name', app()->getLocale()) }} </p>
                 </div> <!-- Tags -->
+                <div>
+                    <p style="display: inline">Created at: {{ $template->created_at->format('d/m/Y') }}</p>
+                   <p style="display: inline">Last update: {{ $template->updated_at->format('d/m/Y') }}</p>
+                </div>
                 <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
                      style="min-height: 44px;"> @foreach($template->product->tags as $tag)
                         <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"

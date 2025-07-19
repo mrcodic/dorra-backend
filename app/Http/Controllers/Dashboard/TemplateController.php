@@ -5,19 +5,17 @@ namespace App\Http\Controllers\Dashboard;
 use App\Enums\HttpEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
-use App\Http\Resources\MediaResource;
-use App\Http\Resources\TemplateResource;
-use App\Repositories\Interfaces\ProductRepositoryInterface;
-use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
-use App\Repositories\Interfaces\TagRepositoryInterface;
-use App\Repositories\Interfaces\TemplateRepositoryInterface;
+use App\Http\Resources\{MediaResource, TemplateResource};
+use App\Repositories\Interfaces\{ProductSpecificationRepositoryInterface,
+    ProductRepositoryInterface,
+    TagRepositoryInterface,
+    TemplateRepositoryInterface
+};
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\{Cache, Response};
 use App\Http\Requests\Template\{StoreTemplateRequest,
     StoreTranslatedTemplateRequest,
-    UpdateTemplateRequest,
     UpdateTranslatedTemplateRequest
 };
 
@@ -46,47 +44,23 @@ class TemplateController extends DashboardController
         $this->resourceClass = TemplateResource::class;
         $this->assoiciatedData = [
             'create' => [
-                'products' => $this->productRepository->query()
-                    ->when(
-                        session('product_type') === 'other',
-                        fn($query) => $query->whereRaw(
-                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.en'))) NOT LIKE ?",
-                            ['t-shirt']
-                        ),
-                        fn($query) => $query->whereRaw(
-                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.en'))) LIKE ?",
-                            ['t-shirt']
-                        )
-                    )
-                    ->get(),
+                'products' => $this->productRepository->query()->get(['id', 'name']),
             ],
-
-
             'index' => [
-                'products' => $this->productRepository->all(),
-                'tags' => $this->tagRepository->all(),
+                'products' => $this->productRepository->query()->get(['id', 'name']),
+                'tags' => $this->tagRepository->query()->get(['id', 'name']),
             ],
             'edit' => [
-                'products' => $this->productRepository->all(),
+                'products' => $this->productRepository->query()->get(['id', 'name']),
 
             ],
         ];
         $this->methodRelations = [
-            'index' => ["product.tags", "media"],
+            'index' => ["product.tags", "media", "products"],
+            'edit' => ['products']
         ];
 
     }
-
-    public function checkProductType(Request $request)
-    {
-
-//        $isProductFound = $this->templateService->checkProductType($request);
-//        if (!$isProductFound) {
-//            return view("dashboard.errors.product");
-//        }
-        return view("dashboard.templates.create",['associatedData' => $this->assoiciatedData['create']]);
-    }
-
 
     public function index()
     {
@@ -116,7 +90,10 @@ class TemplateController extends DashboardController
     {
         $template = $this->templateService->storeResource($request->validated());
         return Response::api(data: [
-            "redirect_url" => config('services.editor_url') . 'templates/' . $template->id .'?product_type=' . ($template->product->getTranslation('name','en') == 'T-shirt' ? 'T-shirt' : 'other')
+            "redirect_url" =>
+                config('services.editor_url') .
+                'templates/' . $template->id . "?has_mockup=" .
+                ($template->products->contains('has_mockup', true) ? 'true' : 'false')
         ]);
     }
 

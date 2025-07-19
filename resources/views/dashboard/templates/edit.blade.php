@@ -19,35 +19,6 @@
                             @method("PUT")
                             <div class="flex-grow-1">
                                 <div class="">
-                                    <div class="row">
-                                        <!-- Width -->
-                                        <div class="col-md-4 mb-2">
-                                            <label for="width" class="label-text mb-1 width">Width</label>
-                                            <input type="number" step="0.01" id="width" name="width" value="{{ $model->width }}"
-                                                   class="form-control"
-                                                   placeholder="Enter width" disabled>
-                                        </div>
-
-                                        <!-- Height -->
-                                        <div class="col-md-4 mb-2">
-                                            <label for="height" class="label-text mb-1">Height</label>
-                                            <input type="number" step="0.01" id="height" name="height" value="{{ $model->height }}"
-                                                   class="form-control"
-                                                   placeholder="Enter height" disabled>
-                                        </div>
-
-                                        <!-- Unit -->
-                                        <div class="col-md-4 mb-2">
-                                            <label for="unit" class="label-text mb-1">Unit</label>
-                                            <select id="unit" name="unit" class="form-select" disabled>
-                                                <option value="">Select Unit</option>
-                                                @foreach(\App\Enums\Template\UnitEnum::cases() as $unit)
-                                                    <option
-                                                        value="{{ $unit->value }}" @selected($unit == $model->unit)> {{ $unit->label() }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
                                     <div class="form-group mb-2">
                                         <label class="label-text mb-1">Template Type</label>
                                         <div class="row">
@@ -130,48 +101,25 @@
 {{--                                    </div>--}}
                                     <div class="form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
-                                        <select id="productsSelect" class="form-select select2" name="product_id">
+                                        <select id="productsSelect" class="form-select select2" name="product_ids[]" multiple>
                                             <option value="" disabled>Choose Product</option>
                                             @foreach($associatedData['products'] as $product)
                                                 <option
                                                     value="{{ $product->id }}"
-                                                    @selected($product->id == $model->product->id)>
+                                                    @selected($product->id == $model->products->contains('id', $product->id))>
                                                     {{ $product->getTranslation('name', app()->getLocale()) }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    @if($model->product && $model->product->specifications->isNotEmpty())
-                                        <div class="form-group mb-2">
-                                            <label class="label-text mb-1">Spec</label>
-                                            <div class="row" id="specsContainer">
-                                                @foreach($model->product->specifications as $spec)
-                                                    <div class="col-12 mb-1">
-                                                        <div class="border rounded p-1 d-flex align-items-center">
-                                                            <input type="checkbox" name="specifications[]"
-                                                                   value="{{$spec->id}}" class="form-check-input me-1"
-                                                                @checked($model->specifications->pluck('id')->contains($spec->id))>
-                                                            <label class="form-check-label">{{ $spec->name}}</label>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-
-                                    @endif
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-end">
-                                <button type="button" class="btn btn-outline-secondary" id="addNewSpec"
-                                >
-                                    Add New Specs
-                                </button>
 
-                            </div>
                             <div class="d-flex justify-content-between pt-2">
                                 <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
                                 <div class="d-flex gap-1">
-                                    <a href="{{ config("services.editor_url")."templates/".$model->id }}"
+                                    <a href="{{ config("services.editor_url")."templates/".$model->id. "?has_mockup=".
+                                      ($model->products->contains('has_mockup', true) ? 'true' : 'false')}}"
                                        class="btn btn-outline-secondary fs-5 "
                                        target="_blank"
                                     >
@@ -192,9 +140,7 @@
                 </div>
             </div>
         </div>
-
     </section>
-    @include('modals.templates.add-spec')
 @endsection
 
 
@@ -221,26 +167,6 @@
             });
         });
 
-        $("#addNewSpec").on('click', function (e) {
-            const productId = $('#productsSelect').val();
-            $('#product_id_input').val(productId);
-            if (!productId) {
-                e.preventDefault(); // block behavior
-
-                Toastify({
-                    text: "Select product first to add spec on it!",
-                    duration: 4000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#EA5455", // Red for warning
-                    close: true,
-                }).showToast();
-
-            } else {
-                $("#addSpecModal").modal("show");
-
-            }
-        });
     </script>
     <script !src="">
         handleAjaxFormSubmit("#editTemplateForm", {
@@ -258,108 +184,14 @@
     </script>
     <script !src="">
         $(document).ready(function () {
-            $(document).on('click', '#specsContainer .border', function(e) {
-                if ($(e.target).is('input[type="checkbox"]')) {
-                    return;
-                }
-                const checkbox = $(this).find('input[type="checkbox"]');
-                checkbox.prop('checked', !checkbox.prop('checked'));
-            });
             const preselectedProductId = $('#productsSelect').val();
             if (preselectedProductId) {
                 $('#productsSelect').trigger('change');
             }
         });
-        $('#productsSelect').on('change', function () {
-            const productId = $(this).val();
-            if (productId) {
-                $('#addNewSpec').attr('data-bs-toggle', 'modal').attr('data-bs-target', '#addSpecModal');
-                $('#product_id_input').val(productId);
 
-            } else {
-                $('#addNewSpec').removeAttr('data-bs-toggle').removeAttr('data-bs-target');
-            }
-
-            const $specsContainer = $('#specsContainer');
-            const $specSection = $specsContainer.closest('.form-group');
-
-            if (productId) {
-                $.ajax({
-                    url: "{{ url('api/v1/product-specifications') }}/" + productId,
-                    method: 'GET',
-                    success: function (res) {
-                        if (res.data && res.data.length > 0) {
-                            const selectedSpecs = @json($model->specifications->pluck('id'));
-                            $specsContainer.empty();
-
-                            res.data.forEach(spec => {
-                                const isChecked = selectedSpecs.includes(spec.id);
-                                const specHtml = `
-                    <div class="col-12 mb-1">
-                        <div class="border rounded p-1 d-flex align-items-center">
-                            <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1" ${isChecked ? 'checked' : ''}>
-                            <label class="form-check-label">${spec.name}</label>
-                        </div>
-                    </div>
-                `;
-                                $specsContainer.append(specHtml);
-                            });
-
-
-                            $specSection.removeClass('d-none');
-                        } else {
-                            $specsContainer.empty();
-                            $specSection.addClass('d-none');
-                        }
-                    },
-                    error: function () {
-                        Toastify({
-                            text: 'Failed to load specifications.',
-                            duration: 4000,
-                            gravity: 'top',
-                            position: 'right',
-                            backgroundColor: '#EA5455',
-                            close: true
-                        }).showToast();
-                        $specsContainer.empty();
-                        $specSection.addClass('d-none');
-                    }
-                });
-            } else {
-                $specsContainer.empty();
-                $specSection.addClass('d-none');
-            }
-        });
     </script>
     <script !src="">
-
-        handleAjaxFormSubmit("#addSpecForm", {
-            successMessage: "Specification created successfully!",
-            closeModal: '#addSpecModal',
-            onSuccess: function (response, $form) {
-                const spec = response.data;
-
-                const specHtml = `
-            <div class="col-12 mb-1">
-                <div class="border rounded p-1 d-flex align-items-center">
-                    <input type="checkbox" name="specifications[]" value="${spec.id}" class="form-check-input me-1">
-                    <label class="form-check-label">${spec.name}</label>
-                </div>
-            </div>
-        `;
-
-                $('#specsContainer').append(specHtml);
-
-                // Clear uploaded images and previews
-                $form.find('.option-image-input').val(''); // Clear file input
-                $form.find('.option-upload-progress').addClass('d-none').find('.progress-bar').css('width', '0%'); // Reset progress bar
-                $form.find('.option-uploaded-image').addClass('d-none'); // Hide uploaded image preview container
-                $form.find('.option-image-preview').attr('src', ''); // Clear preview src
-                $form.find('.option-file-name').text(''); // Clear file name text
-                $form.find('.option-file-size').text(''); // Clear file size text
-            },
-            resetForm: true,
-        });
 
     </script>
     <script>

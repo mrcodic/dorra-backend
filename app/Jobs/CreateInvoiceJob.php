@@ -18,14 +18,16 @@ class CreateInvoiceJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Order $order) {}
+    public function __construct(public Order $order)
+    {
+    }
 
     /**
      * Execute the job.
      */
-public function handle(): void
-{
-   
+    public function handle(): void
+    {
+
 
         $invoice = Invoice::updateOrCreate([
             'order_id' => $this->order->id,
