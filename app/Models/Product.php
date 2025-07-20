@@ -69,6 +69,11 @@ class Product extends Model implements HasMedia
             ->withTimestamps();
     }
 
+    public function dimensions()
+    {
+        return $this->belongsToMany(Dimension::class)->withTimestamps();
+    }
+
     public function specifications(): HasMany
     {
         return $this->hasMany(ProductSpecification::class);

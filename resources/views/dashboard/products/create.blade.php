@@ -158,6 +158,33 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <!-- Dimensions -->
+
+                                    <div class="col-md-12">
+                                        <div class="mb-1">
+                                            <label class="form-label label-text">Product Size</label>
+                                            <div class="d-flex gap-3">
+                                                @foreach($associatedData['dimensions'] as $dimension)
+                                                    <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
+                                                        <input
+                                                            class="form-check-input me-2"
+                                                            type="checkbox"
+                                                            name="has_mockup"
+                                                            id="{{ $dimension->id }}"
+                                                            value="{{ $dimension->id }}"
+
+                                                        />
+                                                        <label class="form-check-label mb-0 flex-grow-1" for="{{ $dimension->id }}">{{ $dimension->name }}</label>
+
+                                                    </div>
+                                                @endforeach
+
+                                            </div>
+                                            <button class="upload-card w-100 mt-2" data-bs-toggle="modal" data-bs-target="#addSizeModal">Add Custom Size </button>
+
+                                        </div>
+                                    </div>
+
                                     <!-- Has Mockup -->
 
                                     <div class="col-md-12">
@@ -449,6 +476,7 @@
             </div>
         </div>
     </div>
+    @include("modals.products.add-size")
 </section>
 @endsection
 

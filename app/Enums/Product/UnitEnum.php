@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums\Template;
+namespace App\Enums\Product;
 
 use App\Helpers\EnumHelpers;
 

@@ -2,13 +2,11 @@
 
 namespace App\Http\Requests\Template;
 
+use App\Enums\Product\UnitEnum;
 use App\Enums\Template\TypeEnum;
-use App\Enums\Template\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Rules\DimensionWithinUnitRange;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
-use App\Models\Product;
 
 class StoreTemplateRequest extends BaseRequest
 {

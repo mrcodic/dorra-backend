@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Enums\Template\UnitEnum;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductSpecificationResource;
 use Illuminate\Http\Request;
@@ -45,6 +44,7 @@ class TemplateResource extends JsonResource
                 'label' => $this->type?->label(),
             ]),
             'product' => ProductResource::make($this->whenLoaded('product')),
+            'products' => ProductResource::collection($this->whenLoaded('products')),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'base64_preview_image' => $this->when(isset($this->image), $this->image),

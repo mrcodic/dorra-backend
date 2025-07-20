@@ -188,6 +188,7 @@ Route::prefix('api/v1/')->group(function () {
         Route::get('units', 'units')->name('units');
         Route::delete('media/{media}', 'removeMedia')->name('remove-media');
         Route::post('media/{resource}', 'addMedia')->name('add-media');
+            Route::post('dimensions', 'storeDimension')->name('dimensions.store');
         Route::get('admin-check', 'adminCheck')->name('admin-check');
     });
 

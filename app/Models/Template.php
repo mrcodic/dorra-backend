@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\Product\UnitEnum;
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
-use App\Enums\Template\UnitEnum;
 use App\Observers\TemplateObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;

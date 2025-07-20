@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->float('width')->nullable();
             $table->float('height')->nullable();
+            $table->tinyInteger("unit")->nullable();
             $table->boolean('is_custom')->default(false);
             $table->timestamps();
         });

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Design;
 
-use App\Enums\Template\UnitEnum;
+use App\Enums\Product\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\{Guest, Product, Template};
 use App\Rules\DimensionWithinUnitRange;

@@ -3,26 +3,26 @@
 namespace App\Http\Controllers\Api\V1\User\General;
 
 
-
+use App\Enums\Product\UnitEnum;
 use App\Enums\Template\TypeEnum;
-use App\Enums\Template\UnitEnum;
 use App\Http\Controllers\Controller;
-use App\Models\CountryCode;
-use App\Models\GlobalAsset;
-use App\Services\CategoryService;
-use App\Services\DesignService;
-use App\Services\FolderService;
-use App\Services\TagService;
+use App\Http\Requests\Dimension\StoreDimensionRequest;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
     CountryResource,
     Design\DesignResource,
     FolderResource,
     MediaResource,
-    PaymentResource,
     StateResource,
-    TagResource};
-use App\Repositories\Interfaces\{PaymentMethodRepositoryInterface, CountryRepositoryInterface, StateRepositoryInterface};
+    TagResource
+};
+use App\Models\CountryCode;
+use App\Models\GlobalAsset;
+use App\Repositories\Interfaces\{CountryRepositoryInterface, DimensionRepositoryInterface, StateRepositoryInterface};
+use App\Services\CategoryService;
+use App\Services\DesignService;
+use App\Services\FolderService;
+use App\Services\TagService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -32,12 +32,13 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class MainController extends Controller
 {
     public function __construct(
-        public CountryRepositoryInterface $countryRepository,
-        public StateRepositoryInterface   $stateRepository,
-        public CategoryService            $categoryService,
-        public TagService                 $tagService,
-        public DesignService $designService,
-        public FolderService $folderService,
+        public CountryRepositoryInterface   $countryRepository,
+        public StateRepositoryInterface     $stateRepository,
+        public CategoryService              $categoryService,
+        public TagService                   $tagService,
+        public DesignService                $designService,
+        public FolderService                $folderService,
+        public DimensionRepositoryInterface $dimensionRepository,
 
     )
     {
@@ -144,11 +145,17 @@ class MainController extends Controller
     public function trash()
     {
         return Response::api(data: [
-           'designs' => DesignResource::collection($this->designService->trash()),
+            'designs' => DesignResource::collection($this->designService->trash()),
             'folders' => FolderResource::collection($this->folderService->trash())
         ]);
 
     }
 
+    public function storeDimension(StoreDimensionRequest $request)
+    {
+        $dimension = $this->dimensionRepository->create($request->validated());
+        return Response::api(data: ['id' => $dimension->id]);
+
+    }
 
 }

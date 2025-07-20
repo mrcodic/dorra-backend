@@ -6,6 +6,7 @@ use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\Product\ProductResource;
 use App\Models\Product;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\TagRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,8 +21,8 @@ class ProductController extends DashboardController
     (
         public ProductService              $productService,
         public CategoryRepositoryInterface $categoryRepository,
-        public TagRepositoryInterface      $tagRepository
-
+        public TagRepositoryInterface      $tagRepository,
+        public DimensionRepositoryInterface $dimensionRepository,
     )
     {
 
@@ -37,6 +38,13 @@ class ProductController extends DashboardController
                 'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
                 'tags' => $this->tagRepository->all(columns: ['id', 'name']),
             ],
+            'edit' => [
+                'dimensions' => $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
+            ],
+            'create' => [
+                'dimensions' => $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
+
+            ]
         ];
         $this->methodRelations = [
             'index' => ['saves'],
