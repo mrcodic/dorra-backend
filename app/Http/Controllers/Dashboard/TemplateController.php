@@ -99,7 +99,7 @@ class TemplateController extends DashboardController
 
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices'])));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices','products'])));
     }
 
     public function getProductTemplates()

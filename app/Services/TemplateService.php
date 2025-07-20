@@ -92,7 +92,7 @@ class TemplateService extends BaseService
             if (!empty($validatedData['product_ids']))
             {
                 $model->products()->sync($validatedData['product_ids']);
-                
+
             }
             return $model;
         });
