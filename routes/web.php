@@ -168,6 +168,8 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/mockups', MockupController::class);
 
+    Route::apiResource('/products', ProductController::class)->only(['show','index']);
+
 
 });
 Route::prefix('api/v1/')->group(function () {

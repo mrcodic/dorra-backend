@@ -27,8 +27,7 @@
                                                     <label class="radio-box">
                                                         <input class="form-check-input" type="radio" name="type"
                                                                value="{{ $type->value }}"
-                                                            @checked($type->value == $model->type)
-                                                        >
+                                                            @checked($type == $model->type)>
                                                         <span>{{ $type->label() }}</span>
                                                     </label>
                                                 </div>
