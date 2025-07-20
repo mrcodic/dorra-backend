@@ -10,6 +10,7 @@ use App\Http\Requests\Template\StoreTemplateRequest;
 use App\Http\Requests\Template\UpdateTemplateRequest;
 use App\Http\Resources\TemplateResource;
 use App\Services\TemplateService;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
 
@@ -42,7 +43,11 @@ class TemplateController extends Controller
     public function index()
     {
         $templates = $this->templateService->getAll(paginate: request()->boolean('paginate'));
-        return Response::api(data: TemplateResource::collection($templates)->response()->getData(true));
+        $templateResourceCollection = $templates instanceof LengthAwarePaginator ?
+            TemplateResource::collection($templates)->response()->getData()
+            : TemplateResource::collection($templates);
+        return Response::api(data: $templateResourceCollection);
+
     }
 
 
