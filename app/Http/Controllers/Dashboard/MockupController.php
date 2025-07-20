@@ -34,7 +34,7 @@ class MockupController extends DashboardController
         $this->resourceTable = 'mockups';
         $this->assoiciatedData = [
             'index'=>[
-                'products' => $this->productRepository->all(),
+                'products' => $this->productRepository->query()->whereHasMockup(true)->get(['id','name']),
             ],
         ];
         $this->methodRelations = [
