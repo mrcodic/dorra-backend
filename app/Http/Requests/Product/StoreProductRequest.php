@@ -74,6 +74,10 @@ class StoreProductRequest extends BaseRequest
             'specifications.*.specification_options.*.value_ar' => 'sometimes|string',
             'specifications.*.specification_options.*.price' => ['nullable', 'numeric', 'min:0'],
             'specifications.*.specification_options.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png'],
+            'dimensions'=>['required_without:custom_dimensions', 'array'],
+            'dimensions.*' =>['sometimes', 'integer', 'exists:dimensions,id'],
+            'custom_dimensions'=>['required_without:dimensions', 'array'],
+            'custom_dimensions.*' =>['sometimes'],
             'is_free_shipping' => ['nullable', 'boolean'],
             'status' => ['nullable', 'in:', StatusEnum::values()],
         ];

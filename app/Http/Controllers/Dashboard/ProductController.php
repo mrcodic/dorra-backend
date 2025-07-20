@@ -33,6 +33,12 @@ class ProductController extends DashboardController
         $this->createView = 'products.create';
         $this->editView = 'products.edit';
         $this->showView = 'products.show';
+        $sessionDimensions = collect(session('custom_dimensions', []));
+        $dbDimensions = $this->dimensionRepository
+            ->query()
+            ->whereIsCustom(false)
+            ->get(['id', 'name']);
+        $allDimensions = $dbDimensions->concat($sessionDimensions);
         $this->assoiciatedData = [
             'shared' => [
                 'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
@@ -42,7 +48,7 @@ class ProductController extends DashboardController
                 'dimensions' => $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
             ],
             'create' => [
-                'dimensions' => $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
+                'dimensions' => $allDimensions,
 
             ]
         ];

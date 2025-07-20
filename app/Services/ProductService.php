@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Filters\SubCategoryFilter;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
 use Illuminate\Http\UploadedFile;
@@ -25,6 +26,7 @@ class ProductService extends BaseService
 
     public function __construct(ProductRepositoryInterface                     $repository,
                                 public ProductSpecificationRepositoryInterface $specificationRepository,
+                                public DimensionRepositoryInterface            $dimensionRepository,
     )
     {
         $this->relations = ['category', 'tags', 'reviews', 'saves' => function ($query) {
@@ -107,47 +109,62 @@ class ProductService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $product = $this->repository->create($validatedData);
-        $product->load($this->relations);
-        $product->tags()->sync($validatedData['tags'] ?? []);
-        $product->prices()->createMany($validatedData['prices'] ?? []);
-        if (isset($validatedData['specifications'])) {
-            collect($validatedData['specifications'])->map(function ($specification) use ($product) {
-                $productSpecification = $product->specifications()->create([
-                    'name' => [
-                        'en' => $specification['name_en'],
-                        'ar' => $specification['name_ar'],
-                    ],
-                ]);
+        return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
+            $product = $this->repository->create($validatedData);
+            $product->load($this->relations);
+            $product->tags()->sync($validatedData['tags'] ?? []);
+            if (!empty($validatedData['dimensions'])) {
+                $product->dimensions()->syncWithoutDetaching($validatedData['dimensions']);
+            }
 
+            if (!empty($validatedData['custom_dimensions'])) {
 
-                collect($specification['specification_options'])->each(function ($option, $index) use ($productSpecification) {
+                collect($validatedData['custom_dimensions'])->each(function ($dimension) use ($product) {
+                    $dimension = $this->dimensionRepository->create($dimension);
+                    $product->dimensions()->syncWithoutDetaching($dimension->id);
+                });
+            }
 
-                    $productOption = $productSpecification->options()->create([
-                        'value' => [
-                            'en' => $option['value_en'],
-                            'ar' => $option['value_ar'],
+            $product->prices()->createMany($validatedData['prices'] ?? []);
+            if (isset($validatedData['specifications'])) {
+                collect($validatedData['specifications'])->map(function ($specification) use ($product) {
+                    $productSpecification = $product->specifications()->create([
+                        'name' => [
+                            'en' => $specification['name_en'],
+                            'ar' => $specification['name_ar'],
                         ],
-                        'price' => $option['price'],
                     ]);
 
-                    if (isset($option['image'])) {
-                        if ($option['image'] instanceof UploadedFile) {
-                            handleMediaUploads([$option['image']], $productOption);
+
+                    collect($specification['specification_options'])->each(function ($option, $index) use ($productSpecification) {
+
+                        $productOption = $productSpecification->options()->create([
+                            'value' => [
+                                'en' => $option['value_en'],
+                                'ar' => $option['value_ar'],
+                            ],
+                            'price' => $option['price'],
+                        ]);
+
+                        if (isset($option['image'])) {
+                            if ($option['image'] instanceof UploadedFile) {
+                                handleMediaUploads([$option['image']], $productOption);
+                            }
                         }
-                    }
+                    });
+
+
                 });
+            }
+            handleMediaUploads($validatedData['image'], $product, 'product_main_image');
+            if (isset($validatedData['images'])) {
+                handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
+
+            }
+            return $product;
+        });
 
 
-            });
-        }
-        handleMediaUploads($validatedData['image'], $product, 'product_main_image');
-        if (isset($validatedData['images'])) {
-            handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
-
-        }
-
-        return $product;
     }
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
@@ -155,6 +172,7 @@ class ProductService extends BaseService
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
+        $product->dimensions()->sync($validatedData['dimensions'] ?? []);
         if (request()->has('deleted_old_images')) {
             collect(request()->deleted_old_images)->each(function ($id) {
                 Media::find($id)?->delete();

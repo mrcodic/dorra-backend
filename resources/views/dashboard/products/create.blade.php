@@ -163,24 +163,35 @@
                                     <div class="col-md-12">
                                         <div class="mb-1">
                                             <label class="form-label label-text">Product Size</label>
-                                            <div class="d-flex gap-3">
+                                            <!-- Standard Dimensions -->
+                                            <div class="d-flex gap-3" id="standard-dimensions-container">
                                                 @foreach($associatedData['dimensions'] as $dimension)
                                                     <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
                                                         <input
                                                             class="form-check-input me-2"
                                                             type="checkbox"
-                                                            name="has_mockup"
-                                                            id="{{ $dimension->id }}"
-                                                            value="{{ $dimension->id }}"
-
+                                                            name="dimensions[]"
+                                                            id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                            value="{{ $dimension['id'] }}"
                                                         />
-                                                        <label class="form-check-label mb-0 flex-grow-1" for="{{ $dimension->id }}">{{ $dimension->name }}</label>
-
+                                                        <label class="form-check-label mb-0 flex-grow-1" for="dimension-checkbox-{{ $dimension['id'] }}">
+                                                            {{ $dimension['name'] }}
+                                                        </label>
                                                     </div>
                                                 @endforeach
+                                            </div>
+
+                                            <!-- Custom Dimensions -->
+                                            <div class="d-flex gap-3 mt-2" id="custom-dimensions-container">
+                                                <!-- Custom dimensions from sessionStorage will be injected here -->
+                                            </div>
+
+
+
+
 
                                             </div>
-                                            <button class="upload-card w-100 mt-2" data-bs-toggle="modal" data-bs-target="#addSizeModal">Add Custom Size </button>
+                                            <button type="button" class="upload-card w-100 mt-2" data-bs-toggle="modal" data-bs-target="#addSizeModal">Add Custom Size </button>
 
                                         </div>
                                     </div>
@@ -488,6 +499,15 @@
 @section('page-script')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    $(document).ready(function () {
+        // Optional if you want to clear when user reloads
+        window.addEventListener("beforeunload", function () {
+            sessionStorage.removeItem("custom_dimensions");
+        });
+
+    });
+</script>
 
 <script>
     $(document).ready(function() {
@@ -915,6 +935,18 @@
             saveLoader.removeClass('d-none');
             saveButtonText.addClass('d-none');
             const formData = new FormData(this);
+            const customDimensions = sessionStorage.getItem('custom_dimensions');
+            if (customDimensions) {
+                const parsedDimensions = JSON.parse(customDimensions);
+                parsedDimensions.forEach((dim, index) => {
+                    formData.append(`custom_dimensions[${index}][width]`, dim.width);
+                    formData.append(`custom_dimensions[${index}][height]`, dim.height);
+                    formData.append(`custom_dimensions[${index}][unit]`, dim.unit);
+                    formData.append(`custom_dimensions[${index}][name]`, dim.name);
+                    formData.append(`custom_dimensions[${index}][is_custom]`, dim.is_custom);
+                });
+            }
+
             $.ajax({
                 url: this.action,
                 method: 'POST',

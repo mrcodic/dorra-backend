@@ -21,11 +21,5 @@ class Dimension extends Model
         return $this->belongsToMany(Product::class)->withTimestamps();
     }
 
-    public function name(): Attribute
-    {
-        return Attribute::set(function ($value, $attributes) {
-            return $attributes['width'] . '*' . $attributes['height'];
-        });
-    }
 
 }

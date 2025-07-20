@@ -20,11 +20,11 @@ class StoreDimensionRequest extends BaseRequest
         return [
             'height' => [
                 'numeric',
-//                new DimensionWithinUnitRange()
+                new DimensionWithinUnitRange()
             ],
             'width' => [
                 'numeric',
-//                new DimensionWithinUnitRange()
+                new DimensionWithinUnitRange()
             ],
             'unit' => [
                 'integer',
@@ -38,8 +38,8 @@ class StoreDimensionRequest extends BaseRequest
     public function passedValidation()
     {
         $this->merge([
-            'is_custom' => true,
-            'name' =>''
+            'is_custom' => 1,
+            'name' => $this->width . '*' . $this->height
         ]);
     }
 

@@ -153,9 +153,7 @@ class MainController extends Controller
 
     public function storeDimension(StoreDimensionRequest $request)
     {
-        $dimension = $this->dimensionRepository->create($request->validated());
-        return Response::api(data: ['id' => $dimension->id]);
-
+        return Response::api(data: ['id' => uniqid()]);
     }
 
 }
