@@ -57,7 +57,9 @@ class TemplateService extends BaseService
                 ->whereNotNull('design_data')
                 ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
                 ->paginate($requested)
-                : $query->get();
+                : $query->whereNotNull('design_data')
+                    ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
+                    ->get();
         }
 
         return $this->repository->all(
