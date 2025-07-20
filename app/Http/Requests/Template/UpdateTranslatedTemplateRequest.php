@@ -46,7 +46,7 @@ class UpdateTranslatedTemplateRequest extends BaseRequest
             'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
             'status' => ["required","integer","in:".StatusEnum::getValuesAsString()],
             'product_id' => ['sometimes', 'exists:products,id'],
-            'product_ids' => ['sometimes', 'array'],
+            'product_ids' => ['required', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],

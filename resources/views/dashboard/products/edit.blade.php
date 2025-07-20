@@ -1,5 +1,14 @@
 @extends('layouts/contentLayoutMaster')
+@php
+    $dimensions = \App\Models\Dimension::query()
+      ->where('is_custom', false)
+      ->orWhereHas('products', function ($q) use ($model) {
+          $q->where('product_id', $model->id);
+      })
+      ->get(['id', 'name']);
 
+
+@endphp
 @section('title', 'Edit Products')
 @section('main-page', 'Products')
 @section('sub-page', 'Edit Product')
@@ -256,6 +265,43 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                                <!-- Dimensions -->
+
+                                <div class="col-md-12">
+                                    <div class="mb-1">
+                                        <label class="form-label label-text">Product Size</label>
+                                        <!-- Standard Dimensions -->
+                                        <div class="d-flex gap-3" id="standard-dimensions-container">
+                                            @foreach($dimensions as $dimension)
+                                                <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
+                                                    <input
+                                                        class="form-check-input me-2"
+                                                        type="checkbox"
+                                                        name="dimensions[]"
+                                                        id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                        value="{{ $dimension['id'] }}"
+{{--                                                        @checked($dimension->id )--}}
+                                                    />
+                                                    <label class="form-check-label mb-0 flex-grow-1" for="dimension-checkbox-{{ $dimension['id'] }}">
+                                                        {{ $dimension['name'] }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+                                        <!-- Custom Dimensions -->
+                                        <div class="d-flex gap-3 mt-2" id="custom-dimensions-container">
+                                            <!-- Custom dimensions from sessionStorage will be injected here -->
+                                        </div>
+
+
+
+
+
+                                    </div>
+                                    <button type="button" class="upload-card w-100 mt-2" data-bs-toggle="modal" data-bs-target="#addSizeModal">Add Custom Size </button>
+
                                 </div>
                             </div>
                             <!-- first tab content end -->
