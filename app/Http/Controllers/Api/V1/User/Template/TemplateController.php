@@ -42,7 +42,7 @@ class TemplateController extends Controller
 
     public function index()
     {
-        $templates = $this->templateService->getAll(paginate: request()->boolean('paginate'));
+        $templates = $this->templateService->getAll(paginate: request()->boolean('paginate',true));
         $templateResourceCollection = $templates instanceof LengthAwarePaginator ?
             TemplateResource::collection($templates)->response()->getData()
             : TemplateResource::collection($templates);
