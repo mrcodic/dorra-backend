@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Api\V1\User\{General\MainController,};
 use App\Http\Controllers\Dashboard\MockupController;
@@ -17,7 +18,7 @@ Route::get('template-types', [MainController::class, 'templateTypes'])->name('te
 Route::get('tags', [MainController::class, 'tags'])->name('tags');
 Route::get('units', [MainController::class, 'units'])->name('units');
 Route::delete('/media/{media}', [MainController::class, 'removeMedia'])->name('remove-media');
-Route::post("orders/template-customizations", [\App\Http\Controllers\Dashboard\OrderController::class, 'templateCustomizations'])->name('template.customizations');
+Route::post("orders/template-customizations", [OrderController::class, 'templateCustomizations'])->name('template.customizations');
 Route::post("convert-fabric-json", [MainController::class, 'convertFabricJson']);
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");

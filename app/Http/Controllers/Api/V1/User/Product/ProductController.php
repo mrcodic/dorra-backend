@@ -19,7 +19,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = $this->productService->getAll(relations: ['reviews','category:name','media' => fn($q) => $q->where('collection_name','product_main_image')]);
+        $products = $this->productService->getAll(relations: ['reviews','category:name','media' => fn($q) => $q->where('collection_name','product_main_image')], paginate: request()->boolean('paginate'));
         $productResourceCollection = $products instanceof LengthAwarePaginator ?
             ProductResource::collection($products)->response()->getData()
             : ProductResource::collection($products);

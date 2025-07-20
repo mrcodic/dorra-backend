@@ -41,7 +41,7 @@ class TemplateController extends Controller
 
     public function index()
     {
-        $templates = $this->templateService->getAll();
+        $templates = $this->templateService->getAll(paginate: request()->boolean('paginate'));
         return Response::api(data: TemplateResource::collection($templates)->response()->getData(true));
     }
 
