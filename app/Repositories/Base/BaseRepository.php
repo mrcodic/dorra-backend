@@ -23,6 +23,7 @@ class BaseRepository implements BaseRepositoryInterface
     public function all(bool $paginate = false, $columns = ['*'], $relations = [], $orderBy = 'created_at', $direction = 'desc',$filters = [],$perPage = 10): Collection|LengthAwarePaginator
     {
         $query =  $this->query($columns)->with($relations)->orderBy($orderBy, $direction);
+        dd($paginate);
         return $paginate ? $query->paginate($perPage) : $query->get($columns);
     }
 

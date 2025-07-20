@@ -53,9 +53,10 @@ class TemplateService extends BaseService
                 : $query->paginate($pageSize)->withQueryString();
         }
         if (request()->expectsJson()) {
-            return $query
+            return $paginate ?$query
                 ->whereNotNull('design_data')
-                ->paginate($requested);
+                ->paginate($requested)
+                : $query->get();
         }
 
         return $this->repository->all(

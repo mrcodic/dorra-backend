@@ -27,9 +27,9 @@ class ProductService extends BaseService
                                 public ProductSpecificationRepositoryInterface $specificationRepository,
     )
     {
-    $this->relations = ['category','tags','reviews',  'saves' => function ($query) {
-        $query->where('user_id', auth('sanctum')->id());
-    },];
+        $this->relations = ['category', 'tags', 'reviews', 'saves' => function ($query) {
+            $query->where('user_id', auth('sanctum')->id());
+        },];
 
         parent::__construct($repository);
     }
@@ -85,11 +85,9 @@ class ProductService extends BaseService
             ->select($columns)
             ->with($relations)
             ->withCount('reviews')
-            ->when($productType === 'T-shirt', fn($q) =>
-            $q->where('name->en', 'T-shirt')
+            ->when($productType === 'T-shirt', fn($q) => $q->where('name->en', 'T-shirt')
             )
-            ->when($productType === 'other', fn($q) =>
-            $q->where('name->en', '!=', 'T-shirt')
+            ->when($productType === 'other', fn($q) => $q->where('name->en', '!=', 'T-shirt')
             )
             ->allowedFilters([
                 AllowedFilter::partial('category.id'),
@@ -99,12 +97,11 @@ class ProductService extends BaseService
             ->latest();
 
         if (request()->has('limit') && is_numeric(request('limit'))) {
-            return $query->take((int) request('limit'))->get();
+            return $query->take((int)request('limit'))->get();
         }
 
-        return $query->paginate($perPage);
+        return $paginate ? $query->paginate($perPage) : $query->get();
     }
-
 
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
@@ -195,27 +192,27 @@ class ProductService extends BaseService
                     ]
                 );
 
-        if (isset($specification['specification_options'])) {
-            collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
-                $productOption = $productSpecification->options()->updateOrCreate(
-                    [
-                        'value->en' => $option['value_en'],
-                        'value->ar' => $option['value_ar'],
-                    ],
-                    [
-                        'value' => [
-                            'en' => $option['value_en'],
-                            'ar' => $option['value_ar'],
-                        ],
-                        'price' => $option['price'] ?? 0,
-                    ]
-                );
+                if (isset($specification['specification_options'])) {
+                    collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
+                        $productOption = $productSpecification->options()->updateOrCreate(
+                            [
+                                'value->en' => $option['value_en'],
+                                'value->ar' => $option['value_ar'],
+                            ],
+                            [
+                                'value' => [
+                                    'en' => $option['value_en'],
+                                    'ar' => $option['value_ar'],
+                                ],
+                                'price' => $option['price'] ?? 0,
+                            ]
+                        );
 
-                if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
-                    handleMediaUploads([$option['image']], $productOption, clearExisting: true);
+                        if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
+                            handleMediaUploads([$option['image']], $productOption, clearExisting: true);
+                        }
+                    });
                 }
-            });
-        }
 
             });
 
