@@ -55,6 +55,7 @@ class TemplateService extends BaseService
         if (request()->expectsJson()) {
             return $paginate ? $query
                 ->whereNotNull('design_data')
+                ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
                 ->paginate($requested)
                 : $query->get();
         }
