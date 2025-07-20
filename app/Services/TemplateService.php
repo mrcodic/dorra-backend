@@ -89,7 +89,11 @@ class TemplateService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
             $model = $this->repository->update($validatedData, $id);
-            $model->products()->sync($validatedData['product_ids']);
+            if (!empty($validatedData['product_ids']))
+            {
+                $model->products()->sync($validatedData['product_ids']);
+                
+            }
             return $model;
         });
        $this->convertBase64ToImageLink($validatedData, $model);
@@ -107,7 +111,7 @@ class TemplateService extends BaseService
         $recent = request()->boolean('recent');
 
         return $this->repository->query()
-            ->with('media')
+            ->with(['media','products'])
             ->when($search, function ($query) use ($search) {
                 $locale = app()->getLocale();
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
@@ -127,7 +131,9 @@ class TemplateService extends BaseService
             }, function ($query) {
                 $query->oldest();
             })
-            ->whereProductId($productId)
+            ->when(!is_null($productId),function ($query) use ($productId) {
+                $query->whereProductId($productId);
+            })
             ->paginate(10);
     }
 
