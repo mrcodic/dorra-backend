@@ -79,16 +79,17 @@ class ProductService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 9)
     {
-        $productType = request('product_type');
+        $locale = App::getLocale();
 
         $query = QueryBuilder::for(Product::class)
             ->select($columns)
             ->with($relations)
             ->withCount('reviews')
-            ->when($productType === 'T-shirt', fn($q) => $q->where('name->en', 'T-shirt')
-            )
-            ->when($productType === 'other', fn($q) => $q->where('name->en', '!=', 'T-shirt')
-            )
+            ->when(request()->filled('search'), function ($query) use ($locale) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower(request()->search) . '%'
+                ]);
+            })
             ->allowedFilters([
                 AllowedFilter::partial('category.id'),
                 AllowedFilter::custom('sub_categories', new SubCategoryFilter()),
