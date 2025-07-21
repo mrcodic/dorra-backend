@@ -205,7 +205,9 @@ Route::prefix('api/v1/')->group(function () {
 
 
     });
-    Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'update', 'destroy']);
+    Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'destroy']);
+    Route::patch('templates/{template}', [TemplateController::class,'updateEditorData']);
+
     Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
     Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
     Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");

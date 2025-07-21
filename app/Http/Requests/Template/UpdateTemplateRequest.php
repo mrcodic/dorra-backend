@@ -3,11 +3,8 @@
 namespace App\Http\Requests\Template;
 
 use App\Enums\Template\StatusEnum;
+use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
-use App\Models\CountryCode;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
-use Propaganistas\LaravelPhone\Rules\Phone;
 
 class UpdateTemplateRequest extends BaseRequest
 {
@@ -37,10 +34,17 @@ class UpdateTemplateRequest extends BaseRequest
                 'sometimes',
                 'string',
                 'max:255',
-
             ],
-            'name' => ['sometimes', 'string', 'max:255'],
-            'status' => ["sometimes","integer","in:".StatusEnum::getValuesAsString()],
+            'description.en' => [
+                'nullable',
+                'string',
+            ],
+            'description.ar' => [
+                'nullable',
+                'string',
+            ],
+            'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
+            'status' => ["required","integer","in:".StatusEnum::getValuesAsString()],
             'product_id' => ['sometimes', 'exists:products,id'],
             'product_ids' => ['required', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],

@@ -16,7 +16,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Cache, Response};
 use App\Http\Requests\Template\{StoreTemplateRequest,
     StoreTranslatedTemplateRequest,
-    UpdateTranslatedTemplateRequest
+    UpdateTemplateEditorRequest,
+    UpdateTemplateRequest
 };
 
 
@@ -34,7 +35,7 @@ class TemplateController extends DashboardController
     {
         parent::__construct($templateService);
         $this->storeRequestClass = new StoreTemplateRequest();
-        $this->updateRequestClass = new UpdateTranslatedTemplateRequest();
+        $this->updateRequestClass = new UpdateTemplateRequest();
         $this->indexView = 'templates.index';
         $this->createView = 'templates.create';
         $this->editView = 'templates.edit';
@@ -100,9 +101,15 @@ class TemplateController extends DashboardController
         ]);
     }
 
+    public function updateEditorData(UpdateTemplateEditorRequest $request, $id)
+    {
+        $template = $this->templateService->updateResource($request->validated(), $id);
+        return Response::api(data: $this->resourceClass::make($template));
+    }
+
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices','products'])));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices', 'products'])));
     }
 
     public function getProductTemplates()
@@ -118,8 +125,8 @@ class TemplateController extends DashboardController
             if (!$productId) {
                 return Response::api(HttpEnum::BAD_REQUEST, errors: ['error' => 'Product not selected.']);
             }
-            $templates = $this->templateRepository->query()->with(['product','products'])
-                ->when($productId,function ($query) use ($productId) {
+            $templates = $this->templateRepository->query()->with(['product', 'products'])
+                ->when($productId, function ($query) use ($productId) {
                     $query->whereProductId($productId);
                 })->live()->get();
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
