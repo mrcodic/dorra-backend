@@ -188,13 +188,12 @@
             onSuccess: function (response, $form) {
                 // Re-enable buttons & hide all loaders
                 $('.saveChangesButton').prop('disabled', false).find('.saveLoader').addClass('d-none');
-                if (!response.data) {
+                if (response.data.redirect_url) {
+                    window.open(response.data.redirect_url, '_blank');
+                }else{
                     setTimeout(function () {
                         window.location.href = '/product-templates';
                     }, 1000);
-                }
-                if (response.data.redirect_url) {
-                    window.open(response.data.redirect_url, '_blank');
                 }
 
             },

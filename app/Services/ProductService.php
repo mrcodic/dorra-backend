@@ -9,7 +9,6 @@ use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -173,12 +172,12 @@ class ProductService extends BaseService
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
         if (!empty($validatedData['dimensions'])) {
-            $product->dimensions()->syncWithoutDetaching($validatedData['dimensions']);
+            $product->dimensions()->sync($validatedData['dimensions']);
         }
         if (!empty($validatedData['custom_dimensions'])) {
             collect($validatedData['custom_dimensions'])->each(function ($dimension) use ($product) {
                 $dimension = $this->dimensionRepository->create($dimension);
-                $product->dimensions()->syncWithoutDetaching($dimension->id);
+                $product->dimensions()->sync($dimension->id);
             });
         }
         if (request()->has('deleted_old_images')) {

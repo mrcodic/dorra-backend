@@ -3,7 +3,6 @@
 namespace App\Services;
 
 
-
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -30,7 +29,7 @@ class TemplateService extends BaseService
         $perPage = 16
     )
     {
-        request('with_design_data',true);
+        request('with_design_data', true);
 
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
@@ -53,13 +52,15 @@ class TemplateService extends BaseService
                 : $query->paginate($pageSize)->withQueryString();
         }
         if (request()->expectsJson()) {
-            return $paginate ? $query
-                ->whereNotNull('design_data')
+            $query = $query->whereNotNull('design_data')
                 ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
-                ->paginate($requested)
-                : $query->whereNotNull('design_data')
-                    ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
-                    ->get();
+                ->when(request('product_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereProductId(request('product_id'))))
+                ->when(request()->has('tags'), function ($q) {
+                    $tags = request('tags');
+                    $q->whereHas('tags', fn($q) => $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]));
+                });
+
+            return $paginate ? $query->paginate($requested) : $query->get();
         }
 
         return $this->repository->all(
@@ -76,8 +77,7 @@ class TemplateService extends BaseService
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $model = $this->repository->create($validatedData);
             $model->products()->sync($validatedData['product_ids']);
-            if (!empty($validatedData['tags']))
-            {
+            if (!empty($validatedData['tags'])) {
                 $model->tags()->sync($validatedData['tags']);
             }
             $this->convertBase64ToImageLink($validatedData, $model);
@@ -89,78 +89,6 @@ class TemplateService extends BaseService
         }
 
         return $model->load($relationsToLoad);
-    }
-
-    public function updateResource($validatedData, $id, $relationsToLoad = [])
-    {
-        $model = $this->handleTransaction(function () use ($validatedData, $id) {
-            $model = $this->repository->update($validatedData, $id);
-            if (!empty($validatedData['product_ids']))
-            {
-                $model->products()->sync($validatedData['product_ids']);
-            }
-            if (!empty($validatedData['tags']))
-            {
-                $model->tags()->sync($validatedData['tags']);
-            }
-            return $model;
-        });
-       $this->convertBase64ToImageLink($validatedData, $model);
-        if (request()->allFiles()) {
-            handleMediaUploads(request()->allFiles(), $model);
-        }
-        return $model->load($relationsToLoad);
-    }
-
-    public function getProductTemplates($productId)
-    {
-        $search = trim(request()->input('search'));
-        $type = request()->input('type');
-        $tags = array_filter((array)request()->input('tags'));
-        $recent = request()->boolean('recent');
-
-        return $this->repository->query()
-            ->with(['media','products'])
-            ->when($search, function ($query) use ($search) {
-                $locale = app()->getLocale();
-                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
-            })
-            ->when($type !== null && $type !== '', function ($query) use ($type) {
-                $query->whereType($type);
-            })
-            ->when(!empty($tags), function ($query) use ($tags) {
-                $query->whereHas('product.tags', function ($q) use ($tags) {
-                    $q->whereIn('tags.id', $tags);
-                });
-            })
-            ->when($recent == true, function ($query) use ($recent) {
-                $query->whereNotNull('updated_at')
-                    ->orderByDesc('updated_at')
-                    ->take(10);
-            }, function ($query) {
-                $query->oldest();
-            })
-            ->when(!is_null($productId),function ($query) use ($productId) {
-                $query->whereProductId($productId);
-            })
-            ->paginate(10);
-    }
-
-    public function templateAssets()
-    {
-        return Media::query()
-//            ->whereMorphedTo('model',auth($this->activeGuard)->user())
-            ->whereCollectionName("template_assets")
-            ->latest()
-            ->paginate();
-    }
-
-    public function storeTemplateAssets($request)
-    {
-        $validated = $request->validate(["file" => "required|file|mimes:svg"]);
-        return handleMediaUploads($validated['file'], Admin::find(1), "template_assets");
-//        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user(),"template_assets");
-
     }
 
     /**
@@ -206,6 +134,76 @@ class TemplateService extends BaseService
             @unlink($tempFilePath);
 //                ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
         }
+
+    }
+
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->handleTransaction(function () use ($validatedData, $id) {
+            $model = $this->repository->update($validatedData, $id);
+            if (!empty($validatedData['product_ids'])) {
+                $model->products()->sync($validatedData['product_ids']);
+            }
+            if (!empty($validatedData['tags'])) {
+                $model->tags()->sync($validatedData['tags']);
+            }
+            return $model;
+        });
+        $this->convertBase64ToImageLink($validatedData, $model);
+        if (request()->allFiles()) {
+            handleMediaUploads(request()->allFiles(), $model);
+        }
+        return $model->load($relationsToLoad);
+    }
+
+    public function getProductTemplates($productId)
+    {
+        $search = trim(request()->input('search'));
+        $type = request()->input('type');
+        $tags = array_filter((array)request()->input('tags'));
+        $recent = request()->boolean('recent');
+
+        return $this->repository->query()
+            ->with(['media', 'products'])
+            ->when($search, function ($query) use ($search) {
+                $locale = app()->getLocale();
+                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            })
+            ->when($type !== null && $type !== '', function ($query) use ($type) {
+                $query->whereType($type);
+            })
+            ->when(!empty($tags), function ($query) use ($tags) {
+                $query->whereHas('product.tags', function ($q) use ($tags) {
+                    $q->whereIn('tags.id', $tags);
+                });
+            })
+            ->when($recent == true, function ($query) use ($recent) {
+                $query->whereNotNull('updated_at')
+                    ->orderByDesc('updated_at')
+                    ->take(10);
+            }, function ($query) {
+                $query->oldest();
+            })
+            ->when(!is_null($productId), function ($query) use ($productId) {
+                $query->whereProductId($productId);
+            })
+            ->paginate(10);
+    }
+
+    public function templateAssets()
+    {
+        return Media::query()
+//            ->whereMorphedTo('model',auth($this->activeGuard)->user())
+            ->whereCollectionName("template_assets")
+            ->latest()
+            ->paginate();
+    }
+
+    public function storeTemplateAssets($request)
+    {
+        $validated = $request->validate(["file" => "required|file|mimes:svg"]);
+        return handleMediaUploads($validated['file'], Admin::find(1), "template_assets");
+//        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user(),"template_assets");
 
     }
 
