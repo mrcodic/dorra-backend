@@ -59,7 +59,7 @@ class TemplateService extends BaseService
                     $q->whereHas('tags', fn($q) => $q->whereIn('id', is_array($tags) ? $tags : [$tags]));
                 });
 
-            return $paginate ? $query->paginate($requested) : $query->get(); 
+            return $paginate ? $query->paginate($requested) : $query->get();
         }
 
         return $this->repository->all(
