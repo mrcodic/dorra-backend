@@ -13,9 +13,7 @@ return new class extends Migration
     {
         Schema::table('templates', function (Blueprint $table) {
             $table->json("description")->after("name")->nullable();
-            $table->integer("height")->nullable()->after("description");
-            $table->integer("width")->nullable()->after("height");
-            $table->tinyInteger("unit")->after("width")->nullable();
+
         });
     }
 
@@ -26,9 +24,6 @@ return new class extends Migration
     {
         Schema::table('templates', function (Blueprint $table) {
             $table->dropColumn("description");
-            $table->dropColumn("height");
-            $table->dropColumn("width");
-            $table->dropColumn("unit");
         });
     }
 };
