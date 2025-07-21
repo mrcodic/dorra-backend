@@ -18,9 +18,8 @@ class TagService extends BaseService
     {
         $tags = $this->repository
             ->query(['id', 'name','created_at'])
-//            ->withCount(['templates', 'products'])
-            ->withCount(['products'])
-            ->when(request()->filled('search_value'), function ($query) {
+            ->withCount(['templates', 'products'])
+                ->when(request()->filled('search_value'), function ($query) {
                 $locale = app()->getLocale();
                 $search = request('search_value');
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
@@ -50,9 +49,7 @@ class TagService extends BaseService
 
             })
             ->addColumn('no_of_templates', function ($tag) {
-                return 0;
-//                return $tag->templates_count;
-
+                return $tag->templates_count;
             })->make();
     }
 
