@@ -9,7 +9,6 @@ use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;

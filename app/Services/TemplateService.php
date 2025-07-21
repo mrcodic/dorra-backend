@@ -56,7 +56,7 @@ class TemplateService extends BaseService
                 ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
                 ->when(request()->has('tags'), function ($q) {
                     $tags = request('tags');
-                    $q->whereHas('tags', fn($q) => $q->whereIn('id', is_array($tags) ? $tags : [$tags]));
+                    $q->whereHas('tags', fn($q) => $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]));
                 });
 
             return $paginate ? $query->paginate($requested) : $query->get();
