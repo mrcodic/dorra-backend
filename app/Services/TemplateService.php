@@ -54,6 +54,7 @@ class TemplateService extends BaseService
         if (request()->expectsJson()) {
             $query = $query->whereNotNull('design_data')
                 ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
+                ->when(request('product_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereProductId(request('product_id'))))
                 ->when(request()->has('tags'), function ($q) {
                     $tags = request('tags');
                     $q->whereHas('tags', fn($q) => $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]));
