@@ -64,7 +64,7 @@ class TemplateResource extends JsonResource
             return false;
         }
         // Get the design IDs associated with this template
-        $designIds = $user->designs->pluck('id');
+        $designIds = $user->designs?->pluck('id');
         // Check if any of these designs exist in the user's cart
         return !$user->cart->cartItems()
             ->whereIn('design_id', $designIds)
