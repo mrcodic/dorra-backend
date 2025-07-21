@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Product;
 
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\DimensionResource;
 use App\Http\Resources\MediaResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -33,6 +34,7 @@ class ProductResource extends JsonResource
             'all_product_images' => $this->whenLoaded('media', function () {
                 return MediaResource::collection($this->getAllProductImages());
             }),
+            'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
             'is_saved' => $this->when(!$this->deleted_at,fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id()),),
             'has_mockup' => (boolean) $this->has_mockup,
         ];

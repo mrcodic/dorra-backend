@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Enums\HttpEnum;
 use App\Enums\Template\StatusEnum;
+use App\Enums\Template\TypeEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\{MediaResource, TemplateResource};
 use App\Repositories\Interfaces\{ProductSpecificationRepositoryInterface,
@@ -86,7 +87,6 @@ class TemplateController extends DashboardController
                 'total' => is_countable($data) ? count($data) : $data->total(),
             ]);
         }
-
         return view("dashboard.templates.index", get_defined_vars());
     }
 
@@ -109,7 +109,7 @@ class TemplateController extends DashboardController
 
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices', 'products'])));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices', 'products.dimensions'])));
     }
 
     public function getProductTemplates()

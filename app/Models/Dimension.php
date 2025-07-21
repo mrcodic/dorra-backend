@@ -20,6 +20,21 @@ class Dimension extends Model
     {
         return $this->belongsToMany(Product::class)->withTimestamps();
     }
+    public function getWidthPixelAttribute()
+    {
+        $value = $this->unit === UnitEnum::CM
+            ? round($this->width / 2.54, 2)
+            : $this->width;
+        return fmod($value, 1) == 0.0 ? (int)$value : $value;
+    }
 
+    public function getHeightPixelAttribute()
+    {
+        $value = $this->unit === UnitEnum::CM
+            ? round($this->height / 2.54, 2)
+            : $this->height;
+
+        return fmod($value, 1) == 0.0 ? (int)$value : $value;
+    }
 
 }

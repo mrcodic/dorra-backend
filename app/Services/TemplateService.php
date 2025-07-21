@@ -62,8 +62,7 @@ class TemplateService extends BaseService
 
             return $paginate ? $query->paginate($requested) : $query->get();
         }
-
-        return $this->repository->all(
+            return $this->repository->all(
             $paginate,
             $columns,
             $relations,
