@@ -51,24 +51,24 @@ class TemplateResource extends JsonResource
             'product_type' => $this->product?->getTranslation('name','en') == 'T-shirt' ? 'T-shirt' : 'other' ,
             'has_mockup' => (boolean) $this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
-            'add_to_cart' => $this->canBeAddedToCart(),
+//            'add_to_cart' => $this->canBeAddedToCart(),
 
         ];
     }
-    protected function canBeAddedToCart(): bool
-    {
-        $user = auth('sanctum')->user();
-
-
-        if (!$user) {
-            return false;
-        }
-        // Get the design IDs associated with this template
-        $designIds = $user->designs?->pluck('id');
-        // Check if any of these designs exist in the user's cart
-        return !$user->cart->cartItems()
-            ->whereIn('design_id', $designIds)
-            ->exists();
-    }
+//    protected function canBeAddedToCart(): bool
+//    {
+//        $user = auth('sanctum')->user();
+//
+//
+//        if (!$user) {
+//            return false;
+//        }
+//        // Get the design IDs associated with this template
+//        $designIds = $user->designs?->pluck('id');
+//        // Check if any of these designs exist in the user's cart
+//        return !$user->cart?->cartItems()
+//            ->whereIn('design_id', $designIds)
+//            ->exists();
+//    }
 
 }
