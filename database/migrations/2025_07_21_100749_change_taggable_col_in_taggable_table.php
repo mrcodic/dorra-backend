@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::table('taggables', function (Blueprint $table) {
             $table->string('taggable_id')->change();
-            $table->index(['taggable_type', 'taggable_id']);
+
         });
     }
 
@@ -23,7 +23,6 @@ return new class extends Migration {
     {
         Schema::table('taggables', function (Blueprint $table) {
             $table->unsignedBigInteger('taggable_id')->change();
-            $table->index(['taggable_type', 'taggable_id']);
 
         });
     }
