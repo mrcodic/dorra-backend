@@ -25,15 +25,19 @@
                                             @foreach(\App\Models\Type::all(['id','value']) as $type)
                                                 <div class="col">
                                                     <label class="radio-box">
-                                                        <input class="form-check-input" type="checkbox" name="types[]"
-                                                               value="{{ $type->value }}"
-                                                               @checked($model->types->contains($type->id))
+                                                        <input
+                                                            class="form-check-input type-checkbox"
+                                                            type="checkbox"
+                                                            name="types[]"
+                                                            value="{{ $type->value }}"
+                                                            data-type-name="{{ strtolower($type->value->name) }}"
+                                                            @checked($model->types->contains($type->id))
+
                                                         >
                                                         <span>{{ $type->value->label() }}</span>
                                                     </label>
                                                 </div>
                                             @endforeach
-
                                         </div>
 
                                     </div>
@@ -193,7 +197,7 @@
             toggleCheckboxes();
         });
     </script>
-    
+
     <script !src="">
         $('#cancelButton').on('click', function(e) {
             e.preventDefault();
