@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Template;
 
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductSpecificationResource;
@@ -39,10 +39,7 @@ class TemplateResource extends JsonResource
                 'value' => $this->status?->value,
                 'label' => $this->status?->label(),
             ]),
-            'type' => $this->when(isset($this->type), [
-                'value' => $this->type?->value,
-                'label' => $this->type?->label(),
-            ]),
+            'types' => TypeResource::collection($this->whenLoaded('types')),
             'product' => ProductResource::make($this->whenLoaded('product')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),

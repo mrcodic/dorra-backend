@@ -8,7 +8,7 @@ use App\DTOs\Template\TemplateData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Template\StoreTemplateRequest;
 use App\Http\Requests\Template\UpdateTemplateRequest;
-use App\Http\Resources\TemplateResource;
+use App\Http\Resources\Template\TemplateResource;
 use App\Services\TemplateService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;

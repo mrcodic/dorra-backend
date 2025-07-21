@@ -4,22 +4,19 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Enums\HttpEnum;
 use App\Enums\Template\StatusEnum;
-use App\Enums\Template\TypeEnum;
 use App\Http\Controllers\Base\DashboardController;
-use App\Http\Resources\{MediaResource, TemplateResource};
-use App\Repositories\Interfaces\{ProductSpecificationRepositoryInterface,
-    ProductRepositoryInterface,
-    TagRepositoryInterface,
-    TemplateRepositoryInterface
-};
-use App\Services\TemplateService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Cache, Response};
 use App\Http\Requests\Template\{StoreTemplateRequest,
     StoreTranslatedTemplateRequest,
     UpdateTemplateEditorRequest,
-    UpdateTemplateRequest
-};
+    UpdateTemplateRequest};
+use App\Http\Resources\{MediaResource, Template\TemplateResource};
+use App\Repositories\Interfaces\{ProductRepositoryInterface,
+    ProductSpecificationRepositoryInterface,
+    TagRepositoryInterface,
+    TemplateRepositoryInterface};
+use App\Services\TemplateService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\{Cache, Response};
 
 
 class TemplateController extends DashboardController
@@ -61,8 +58,8 @@ class TemplateController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'index' => ["tags", "media", "products"],
-            'edit' => ['products']
+            'index' => ["tags", "media", "products","types"],
+            'edit' => ['products','types']
         ];
 
     }
@@ -109,7 +106,7 @@ class TemplateController extends DashboardController
 
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices', 'products.dimensions'])));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices', 'products.dimensions','types'])));
     }
 
     public function getProductTemplates()

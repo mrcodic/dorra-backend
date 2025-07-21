@@ -22,16 +22,21 @@
                                     <div class="form-group mb-2">
                                         <label class="label-text mb-1">Template Type</label>
                                         <div class="row">
-                                            @foreach(\App\Enums\Template\TypeEnum::cases() as $type)
+                                            @foreach(\App\Models\Type::all(['id','value']) as $type)
                                                 <div class="col">
                                                     <label class="radio-box">
-                                                        <input class="form-check-input" type="radio" name="type"
-                                                               value="{{ $type->value }}"
+                                                        <input
+                                                            class="form-check-input type-checkbox"
+                                                            type="checkbox"
+                                                            name="types[]"
+                                                            value="{{ $type->value }}"
+                                                            data-type-name="{{ strtolower($type->value->name) }}"
                                                         >
-                                                        <span>{{ $type->label() }}</span>
+                                                        <span>{{ $type->value->label() }}</span>
                                                     </label>
                                                 </div>
                                             @endforeach
+
                                         </div>
 
                                     </div>
@@ -210,6 +215,44 @@
 @endsection
 
 @section('page-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('.type-checkbox');
+
+            function toggleCheckboxes() {
+                let frontChecked = false;
+                let backChecked = false;
+                let noneChecked = false;
+
+                checkboxes.forEach(checkbox => {
+                    const type = checkbox.dataset.typeName;
+                    if (type === 'front' && checkbox.checked) frontChecked = true;
+                    if (type === 'back' && checkbox.checked) backChecked = true;
+                    if (type === 'none' && checkbox.checked) noneChecked = true;
+                });
+
+                checkboxes.forEach(checkbox => {
+                    const type = checkbox.dataset.typeName;
+
+                    if (noneChecked && (type === 'front' || type === 'back')) {
+                        checkbox.disabled = true;
+                    } else if ((frontChecked || backChecked) && type === 'none') {
+                        checkbox.disabled = true;
+                    } else {
+                        checkbox.disabled = false;
+                    }
+                });
+            }
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', toggleCheckboxes);
+            });
+
+            // Initial state
+            toggleCheckboxes();
+        });
+    </script>
+
     <script>
         $(document).ready(function () {
             $('#productsSelect').select2();

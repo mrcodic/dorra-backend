@@ -22,13 +22,14 @@
                                     <div class="form-group mb-2">
                                         <label class="label-text mb-1">Template Type</label>
                                         <div class="row">
-                                            @foreach(\App\Enums\Template\TypeEnum::cases() as $type)
+                                            @foreach(\App\Models\Type::all(['id','value']) as $type)
                                                 <div class="col">
                                                     <label class="radio-box">
-                                                        <input class="form-check-input" type="radio" name="type"
+                                                        <input class="form-check-input" type="checkbox" name="types[]"
                                                                value="{{ $type->value }}"
-                                                            @checked($type == $model->type)>
-                                                        <span>{{ $type->label() }}</span>
+                                                               @checked($model->types->contains($type->id))
+                                                        >
+                                                        <span>{{ $type->value->label() }}</span>
                                                     </label>
                                                 </div>
                                             @endforeach

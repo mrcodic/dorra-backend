@@ -55,6 +55,8 @@ class UpdateTemplateRequest extends BaseRequest
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['integer', 'exists:tags,id'],
+            'types' => ['required', 'array'],
+            'types.*' => ['integer', 'exists:types,id'],
         ];
     }
 

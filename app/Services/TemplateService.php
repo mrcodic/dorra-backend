@@ -37,7 +37,7 @@ class TemplateService extends BaseService
 
         $query = $this->repository
             ->query()
-            ->with(['product:id,name', 'product.tags'])
+            ->with(['product:id,name', 'product.tags','types'])
             ->when(request()->filled('search_value'), function ($q) {
                 $locale = app()->getLocale();
                 $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
@@ -62,7 +62,7 @@ class TemplateService extends BaseService
 
             return $paginate ? $query->paginate($requested) : $query->get();
         }
-            return $this->repository->all(
+        return $this->repository->all(
             $paginate,
             $columns,
             $relations,
@@ -76,6 +76,7 @@ class TemplateService extends BaseService
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $model = $this->repository->create($validatedData);
             $model->products()->sync($validatedData['product_ids']);
+            $model->types()->sync($validatedData['types']);
             if (!empty($validatedData['tags'])) {
                 $model->tags()->sync($validatedData['tags']);
             }
@@ -140,6 +141,10 @@ class TemplateService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
             $model = $this->repository->update($validatedData, $id);
+            if (!empty($validatedData['types'])) {
+                $model->types()->sync($validatedData['types']);
+            }
+            $model->types()->sync($validatedData['types']);
             if (!empty($validatedData['product_ids'])) {
                 $model->products()->sync($validatedData['product_ids']);
             }
@@ -160,10 +165,11 @@ class TemplateService extends BaseService
         $search = trim(request()->input('search'));
         $type = request()->input('type');
         $tags = array_filter((array)request()->input('tags'));
+        $types = array_filter((array)request()->input('types'));
         $recent = request()->boolean('recent');
 
         return $this->repository->query()
-            ->with(['media', 'products'])
+            ->with(['media', 'products','types'])
             ->when($search, function ($query) use ($search) {
                 $locale = app()->getLocale();
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
@@ -174,6 +180,11 @@ class TemplateService extends BaseService
             ->when(!empty($tags), function ($query) use ($tags) {
                 $query->whereHas('product.tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', $tags);
+                });
+            })
+            ->when(!empty($types), function ($query) use ($types) {
+                $query->whereHas('types', function ($q) use ($types) {
+                    $q->whereIn('types.id', $types);
                 });
             })
             ->when($recent == true, function ($query) use ($recent) {

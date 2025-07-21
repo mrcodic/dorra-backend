@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Resources\Design;
+namespace App\Http\Resources\Template;
 
+use App\Http\Resources\CountryCodeResource;
+use App\Http\Resources\MediaResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DesignFinalizationResource extends JsonResource
+class TypeResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,9 +17,9 @@ class DesignFinalizationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "item" => $this->pivot->productSpecification->name,
-            "selection" => $this->pivot->specOption->value,
-            "price" => $this->pivot->specOption->price,
+            'id' => $this->id,
+            'value' => $this->value->value,
+            'label' => $this->value->label(),
         ];
     }
 }

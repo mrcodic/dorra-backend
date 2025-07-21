@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
            AdminSeeder::class,
            TemplateSeeder::class,
            PaymentSeeder::class,
+           DimensionSeeder::class,
+           TemplateTypeSeeder::class,
        ]);
     }
 }
