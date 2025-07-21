@@ -4,7 +4,6 @@ namespace App\Services;
 
 
 use App\Jobs\ProcessBase64Image;
-use App\Jobs\RenderFabricJsonToPngJob;
 use App\Models\CartItem;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
@@ -13,7 +12,6 @@ use App\Repositories\Interfaces\GuestRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Validation\ValidationException;
 
 
 class DesignService extends BaseService
