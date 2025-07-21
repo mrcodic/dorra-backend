@@ -227,81 +227,82 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-end">
-                                        <button type="button" class="btn btn-primary next-tab">Next</button>
-                                    </div>
-                                </div>
+                                    <!-- Has Mockup -->
 
-                                <!-- Has Mockup -->
-
-                                <div class="col-md-12">
-                                    <div class="mb-1">
-                                        <label class="form-label label-text">Has Mockup</label>
-                                        <div class="d-flex gap-3">
-                                            <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
-                                                <input
-                                                    class="form-check-input me-2"
-                                                    type="radio"
-                                                    name="has_mockup"
-                                                    id="yes"
-                                                    value="1"
-                                                    required
-                                                    @checked($model->has_mockup == 1)
-                                                />
-                                                <label class="form-check-label mb-0 flex-grow-1" for="yes">Yes</label>
-                                            </div>
-                                            <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
-                                                <input
-                                                    class="form-check-input me-2"
-                                                    type="radio"
-                                                    name="has_mockup"
-                                                    id="no"
-                                                    value="0"
-                                                    required
-                                                    @checked($model->has_mockup == 0)
-
-                                                />
-                                                <label class="form-check-label mb-0 flex-grow-1" for="no">No</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Dimensions -->
-
-                                <div class="col-md-12">
-                                    <div class="mb-1">
-                                        <label class="form-label label-text">Product Size</label>
-                                        <!-- Standard Dimensions -->
-                                        <div class="d-flex gap-3" id="standard-dimensions-container">
-                                            @foreach($dimensions as $dimension)
+                                    <div class="col-md-12">
+                                        <div class="mb-1">
+                                            <label class="form-label label-text">Has Mockup</label>
+                                            <div class="d-flex gap-3">
                                                 <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
                                                     <input
                                                         class="form-check-input me-2"
-                                                        type="checkbox"
-                                                        name="dimensions[]"
-                                                        id="dimension-checkbox-{{ $dimension['id'] }}"
-                                                        value="{{ $dimension['id'] }}"
-{{--                                                        @checked($dimension->id )--}}
+                                                        type="radio"
+                                                        name="has_mockup"
+                                                        id="yes"
+                                                        value="1"
+                                                        required
+                                                        @checked($model->has_mockup == 1)
                                                     />
-                                                    <label class="form-check-label mb-0 flex-grow-1" for="dimension-checkbox-{{ $dimension['id'] }}">
-                                                        {{ $dimension['name'] }}
-                                                    </label>
+                                                    <label class="form-check-label mb-0 flex-grow-1" for="yes">Yes</label>
                                                 </div>
-                                            @endforeach
+                                                <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
+                                                    <input
+                                                        class="form-check-input me-2"
+                                                        type="radio"
+                                                        name="has_mockup"
+                                                        id="no"
+                                                        value="0"
+                                                        required
+                                                        @checked($model->has_mockup == 0)
+
+                                                    />
+                                                    <label class="form-check-label mb-0 flex-grow-1" for="no">No</label>
+                                                </div>
+                                            </div>
                                         </div>
+                                    </div>
+                                    <!-- Dimensions -->
 
-                                        <!-- Custom Dimensions -->
-                                        <div class="d-flex gap-3 mt-2" id="custom-dimensions-container">
-                                            <!-- Custom dimensions from sessionStorage will be injected here -->
+                                    <div class="col-md-12">
+                                        <div class="mb-1">
+                                            <label class="form-label label-text">Product Size</label>
+                                            <!-- Standard Dimensions -->
+                                            <div class="d-flex gap-3" id="standard-dimensions-container">
+                                                @foreach($dimensions as $dimension)
+                                                    <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
+                                                        <input
+                                                            class="form-check-input me-2"
+                                                            type="checkbox"
+                                                            name="dimensions[]"
+                                                            id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                            value="{{ $dimension['id'] }}"
+                                                            @checked($model->dimensions->contains($dimension->id))
+                                                        />
+                                                        <label class="form-check-label mb-0 flex-grow-1" for="dimension-checkbox-{{ $dimension['id'] }}">
+                                                            {{ $dimension['name'] }}
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            <!-- Custom Dimensions -->
+                                            <div class="d-flex gap-3 mt-2 mb-2" id="custom-dimensions-container">
+                                                <!-- Custom dimensions from sessionStorage will be injected here -->
+                                            </div>
+
+
+
+
+
                                         </div>
-
-
-
-
+                                        <button type="button" class="upload-card w-100 mt-2" data-bs-toggle="modal" data-bs-target="#addSizeModal">Add Custom Size </button>
 
                                     </div>
-                                    <button type="button" class="upload-card w-100 mt-2" data-bs-toggle="modal" data-bs-target="#addSizeModal">Add Custom Size </button>
 
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-primary next-tab">Next</button>
                                 </div>
                             </div>
                             <!-- first tab content end -->
@@ -772,6 +773,8 @@
             </div>
         </div>
     </div>
+    @include("modals.products.add-size")
+
 </section>
 @endsection
 
@@ -783,7 +786,15 @@
 @section('page-script')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    $(document).ready(function () {
+        // Optional if you want to clear when user reloads
+        window.addEventListener("beforeunload", function () {
+            sessionStorage.removeItem("custom_dimensions");
+        });
 
+    });
+</script>
 <script>
 
 
@@ -1226,6 +1237,17 @@
             saveLoader.removeClass('d-none');
             saveButtonText.addClass('d-none');
             const formData = new FormData(this);
+            const customDimensions = sessionStorage.getItem('custom_dimensions');
+            if (customDimensions) {
+                const parsedDimensions = JSON.parse(customDimensions);
+                parsedDimensions.forEach((dim, index) => {
+                    formData.append(`custom_dimensions[${index}][width]`, dim.width);
+                    formData.append(`custom_dimensions[${index}][height]`, dim.height);
+                    formData.append(`custom_dimensions[${index}][unit]`, dim.unit);
+                    formData.append(`custom_dimensions[${index}][name]`, dim.name);
+                    formData.append(`custom_dimensions[${index}][is_custom]`, dim.is_custom);
+                });
+            }
             $.ajax({
                 url: this.action,
                 method: 'POST',

@@ -172,7 +172,15 @@ class ProductService extends BaseService
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
-        $product->dimensions()->sync($validatedData['dimensions'] ?? []);
+        if (!empty($validatedData['dimensions'])) {
+            $product->dimensions()->syncWithoutDetaching($validatedData['dimensions']);
+        }
+        if (!empty($validatedData['custom_dimensions'])) {
+            collect($validatedData['custom_dimensions'])->each(function ($dimension) use ($product) {
+                $dimension = $this->dimensionRepository->create($dimension);
+                $product->dimensions()->syncWithoutDetaching($dimension->id);
+            });
+        }
         if (request()->has('deleted_old_images')) {
             collect(request()->deleted_old_images)->each(function ($id) {
                 Media::find($id)?->delete();

@@ -82,6 +82,10 @@ class UpdateProductRequest extends BaseRequest
             'specifications.*.specification_options.*.price' => ['nullable', 'numeric', 'min:0'],
             'specifications.*.specification_options.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
 //            'is_free_shipping' => ['required', 'boolean'],
+            'dimensions'=>['required_without:custom_dimensions', 'array'],
+            'dimensions.*' =>['sometimes', 'integer', 'exists:dimensions,id'],
+            'custom_dimensions'=>['required_without:dimensions', 'array'],
+            'custom_dimensions.*' =>['sometimes'],
             'status' => ['nullable', 'in:', StatusEnum::values()],
         ];
 
