@@ -10,18 +10,14 @@ use App\Http\Resources\MockupResource;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\MockupService;
 use Illuminate\Support\Facades\Response;
-use App\Http\Requests\Mockup\{
-    StoreMockupRequest,
-    UpdateMockupRequest,
-
-};
+use App\Http\Requests\Mockup\{StoreMockupRequest, UpdateMockupEditorRequest, UpdateMockupRequest};
 
 
 class MockupController extends DashboardController
 {
     public function __construct(
-        public MockupService $mockupService,
-        public ProductRepositoryInterface              $productRepository,
+        public MockupService              $mockupService,
+        public ProductRepositoryInterface $productRepository,
 
 
     )
@@ -33,8 +29,8 @@ class MockupController extends DashboardController
         $this->usePagination = true;
         $this->resourceTable = 'mockups';
         $this->assoiciatedData = [
-            'index'=>[
-                'products' => $this->productRepository->query()->whereHasMockup(true)->get(['id','name']),
+            'index' => [
+                'products' => $this->productRepository->query()->whereHasMockup(true)->get(['id', 'name']),
             ],
         ];
         $this->methodRelations = [
@@ -42,9 +38,10 @@ class MockupController extends DashboardController
         ];
         $this->resourceClass = MockupResource::class;
     }
+
     public function index()
     {
-        $data = $this->service->getAll($this->getRelations('index'), $this->usePagination ,perPage: request('per_page',16));
+        $data = $this->service->getAll($this->getRelations('index'), $this->usePagination, perPage: request('per_page', 16));
         $associatedData = $this->getAssociatedData('index');
         if (request()->expectsJson()) {
             return Response::api(data: MockupResource::collection($data)->response()->getData(true));
@@ -60,9 +57,9 @@ class MockupController extends DashboardController
             }
 
             return Response::api(data: [
-                'cards'      => $cards,
+                'cards' => $cards,
                 'pagination' => $pagination,
-                'total'      => is_countable($data) ? count($data) : $data->total(),
+                'total' => is_countable($data) ? count($data) : $data->total(),
             ]);
         }
 
@@ -80,6 +77,7 @@ class MockupController extends DashboardController
         return Response::api(data: MockupResource::collection($recentMockups));
 
     }
+
     public function showAndUpdateRecent($id)
     {
         $mockup = $this->mockupService->showAndUpdateRecent($id);
@@ -93,5 +91,11 @@ class MockupController extends DashboardController
         return Response::api(data: MockupResource::make($mockup));
     }
 
+    public function updateEditorData(UpdateMockupEditorRequest $request, $id)
+    {
+        $mockup = $this->mockupService->updateResource($request->validated(), $id);
+        return Response::api(data: MockupResource::make($mockup));
+
+    }
 
 }

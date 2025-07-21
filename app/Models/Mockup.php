@@ -16,6 +16,10 @@ class Mockup extends Model implements HasMedia
         'type',
         'product_id',
         'colors',
+        'area_top',
+        'area_left',
+        'area_height',
+        'area_width',
     ];
 
     protected $casts = [
