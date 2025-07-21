@@ -1,6 +1,6 @@
 @forelse ($data as $template)
     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row" data-template-id="{{ $template->id }}">
-        <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;">
+        <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;border:1px solid #CED5D4;border-radius:12px">
             <!-- Checkbox -->
             <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
                    value="{{ $template->id }}" name="selected_templates[]">
@@ -72,9 +72,9 @@
                     </li>
                 </ul>
             </div>
-            <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
+            <div style="background-color: #F4F6F6;height:200px;border-radius:12px"> <!-- Top Image --> <img
                     src="{{  $template->getFirstMediaUrl('templates') ?: asset("images/default-photo.png") }}"
-                    class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
+                    class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%;border-top-left-radius:12px ;border-top-right-radius:12px" alt="Template Image">
             </div> <!-- Template Info -->
             <div class="card-body text-start p-2">
                 <div>
@@ -95,22 +95,25 @@
                         </div>
                     </div>
                 </div> <!-- Tags -->
-                <div>
+                <div class="mb-1">
                     <p style="display: inline">Created at: {{ $template->created_at->format('d/m/Y') }}</p>
                    <p style="display: inline">Last update: {{ $template->updated_at->format('d/m/Y') }}</p>
                 </div>
-                <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
+                <div class="d-flex flex-wrap justify-content-start gap-1 mb-1"
                      style="min-height: 44px;"> @foreach($template->tags as $tag)
-                        <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
-                              style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
+                       <span class="text-black"
+                     style="background-color: #FCF8FC; padding: 8px; border-radius: 8px; display: inline-block;">
+                         {{ $tag->getTranslation('name', app()->getLocale()) }}
+                       </span>
+
                     @endforeach
                 </div> <!-- Palette and Status -->
 
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <div class="d-flex" style="gap: 5px;">
-                        <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #FF5733;"></div>
-                        <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #33B5FF;"></div>
-                        <div class="rounded-circle" style="width: 15px; height: 15px; background-color: #9B59B6;"></div>
+                        <div class="rounded-circle" style="width: 24px; height: 24px; background-color: #FF5733;"></div>
+                        <div class="rounded-circle" style="width: 24px; height: 24px; background-color: #33B5FF;"></div>
+                        <div class="rounded-circle" style="width: 24px; height: 24px; background-color: #9B59B6;"></div>
                     </div>
                     <span class="badge text-dark p-75 px-2 template-status-label"
                           data-template-id="{{ $template->id }}"

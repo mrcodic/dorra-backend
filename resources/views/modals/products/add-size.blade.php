@@ -71,17 +71,17 @@
 
                 // Add to DOM
                 const checkboxHtml = `
-<div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
+<label class="form-check option-box rounded border py-1 px-3 d-flex align-items-center" for="dimension-${id}">
     <input
         class="form-check-input me-2"
         type="checkbox"
-
+        style="pointer-events: none"
         id="dimension-${id}"
         value="${id}"
         checked
     />
-    <label class="form-check-label mb-0 flex-grow-1" for="dimension-${id}">${name}</label>
-</div>`;
+    <span class="form-check-label mb-0 flex-grow-1" >${name}</span>
+</label>`;
 
 
                 $('#custom-dimensions-container').append(checkboxHtml);
