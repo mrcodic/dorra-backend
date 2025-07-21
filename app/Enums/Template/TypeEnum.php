@@ -10,7 +10,9 @@ enum TypeEnum : int
 
     case FRONT = 1;
     case BACK = 2;
-    case NONE = 3;
+    case FRONT_AND_BACK = 3;
+    case NONE = 4;
+
 
 
     public function label()
@@ -18,6 +20,8 @@ enum TypeEnum : int
         return match ($this) {
             self::FRONT => "Front",
             self::BACK => "Back",
+            self::FRONT_AND_BACK => "Front and Back",
+
             self::NONE => "None",
 
         };
