@@ -45,6 +45,8 @@ class TemplateController extends DashboardController
         $this->assoiciatedData = [
             'create' => [
                 'products' => $this->productRepository->query()->get(['id', 'name']),
+                'tags' => $this->tagRepository->query()->get(['id', 'name']),
+
             ],
             'index' => [
                 'products' => $this->productRepository->query()->get(['id', 'name']),
@@ -52,11 +54,12 @@ class TemplateController extends DashboardController
             ],
             'edit' => [
                 'products' => $this->productRepository->query()->get(['id', 'name']),
+                'tags' => $this->tagRepository->query()->get(['id', 'name']),
 
             ],
         ];
         $this->methodRelations = [
-            'index' => ["product.tags", "media", "products"],
+            'index' => ["tags", "media", "products"],
             'edit' => ['products']
         ];
 

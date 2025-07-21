@@ -76,6 +76,10 @@ class TemplateService extends BaseService
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $model = $this->repository->create($validatedData);
             $model->products()->sync($validatedData['product_ids']);
+            if (!empty($validatedData['tags']))
+            {
+                $model->tags()->sync($validatedData['tags']);
+            }
             $this->convertBase64ToImageLink($validatedData, $model);
             return $model->refresh();
         });
@@ -94,7 +98,10 @@ class TemplateService extends BaseService
             if (!empty($validatedData['product_ids']))
             {
                 $model->products()->sync($validatedData['product_ids']);
-
+            }
+            if (!empty($validatedData['tags']))
+            {
+                $model->tags()->sync($validatedData['tags']);
             }
             return $model;
         });

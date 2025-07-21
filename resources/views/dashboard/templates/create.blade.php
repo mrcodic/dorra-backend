@@ -70,12 +70,17 @@
                                         </div>
                                     </div>
 
-                                    {{--                                    <div class="form-group mb-2">--}}
-                                    {{--                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>--}}
-                                    {{--                                        <select id="tagsSelect" class="form-select select2" multiple>--}}
-                                    {{--                                            <option value="">Choose tag</option>--}}
-                                    {{--                                        </select>--}}
-                                    {{--                                    </div>--}}
+                                    <div class="form-group mb-2">
+                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>
+                                        <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
+                                            <option value="" readonly>Choose tag</option>
+                                            @foreach($associatedData['tags'] as $tag)
+                                                <option value="{{ $tag->id }}">
+                                                    {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     {{--                                    <!-- Colors -->--}}
                                     {{--                                    <div class="form-group mb-2">--}}
                                     {{--                                        <label for="colorsSelect" class="label-text mb-1">Colors</label>--}}
@@ -86,12 +91,13 @@
                                     {{--                                    </div>--}}
                                     <div class="form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Product</label>
-                                        <select id="productsSelect" class="form-select select2" name="product_ids[]" multiple>
+                                        <select id="productsSelect" class="form-select select2" name="product_ids[]"
+                                                multiple>
                                             <option value="" disabled>Choose Product</option>
-                                                @foreach($associatedData['products'] as $product)
-                                                    <option value="{{ $product->id }}">
-                                                        {{ $product->getTranslation('name', app()->getLocale()) }}
-                                                    </option>
+                                            @foreach($associatedData['products'] as $product)
+                                                <option value="{{ $product->id }}">
+                                                    {{ $product->getTranslation('name', app()->getLocale()) }}
+                                                </option>
                                             @endforeach
                                             <input type="hidden" name="product_id" value="1">
 
@@ -105,7 +111,8 @@
 
 
                             <div class="d-flex justify-content-between pt-2">
-                                <button type="button" class="btn btn-outline-secondary"  id="cancelButton">Cancel</button>
+                                <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel
+                                </button>
                                 <div class="d-flex gap-1">
                                     <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
                                             data-action="draft">
@@ -131,27 +138,26 @@
 
     </section>
 
-
 @endsection
 @section('vendor-script')
 
     <script !src="">
         $(document).ready(function () {
-            $('#cancelButton').on('click', function(e) {
+            $('#cancelButton').on('click', function (e) {
                 e.preventDefault();
 
                 // Reset the form inputs to initial values
                 $('#addTemplateForm')[0].reset();
 
                 // Reset all select2 fields inside the form to their original values
-                $('#addTemplateForm').find('.select2').each(function() {
+                $('#addTemplateForm').find('.select2').each(function () {
                     var $select = $(this);
                     // Get the option with selected attribute from original HTML
                     var originalVal = $select.find('option[selected]').val() || '';
                     $select.val(originalVal).trigger('change');
                 });
             });
-            $(document).on('click', '#specsContainer .border', function(e) {
+            $(document).on('click', '#specsContainer .border', function (e) {
                 if ($(e.target).is('input[type="checkbox"]')) {
                     return;
                 }

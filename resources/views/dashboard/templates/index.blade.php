@@ -107,17 +107,17 @@
                         </div>
 
                         {{-- Action Buttons --}}
-                        <div class="col-4 d-flex gap-1">
-                            <a class="btn btn-outline-secondary w-100 w-md-auto"
-                               href="{{  config("services.editor_url") }}">
-                                <i data-feather="upload"></i>
-                                Upload Template
-                            </a>
-                            <a class="btn btn-primary w-100 w-md-auto" href="{{ route("product-templates.create") }}">
+{{--                        <div class="col-4 ">--}}
+{{--                            <a class="btn btn-outline-secondary w-100 w-md-auto"--}}
+{{--                               href="{{  config("services.editor_url") }}">--}}
+{{--                                <i data-feather="upload"></i>--}}
+{{--                                Upload Template--}}
+{{--                            </a>--}}
+                            <a class="btn btn-primary w-md-auto" href="{{ route("product-templates.create") }}">
                                 <i data-feather="plus"></i>
                                 Create Template
                             </a>
-                        </div>
+{{--                        </div>--}}
                     </div>
                 </div>
 

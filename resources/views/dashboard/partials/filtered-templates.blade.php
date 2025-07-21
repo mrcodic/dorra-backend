@@ -100,7 +100,7 @@
                    <p style="display: inline">Last update: {{ $template->updated_at->format('d/m/Y') }}</p>
                 </div>
                 <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
-                     style="min-height: 44px;"> @foreach($template->product->tags as $tag)
+                     style="min-height: 44px;"> @foreach($template->tags as $tag)
                         <span class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
                               style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
                     @endforeach

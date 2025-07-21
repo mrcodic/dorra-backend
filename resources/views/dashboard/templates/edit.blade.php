@@ -84,12 +84,17 @@
                                     </div>
 
 
-{{--                                    <div class="form-group mb-2">--}}
-{{--                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>--}}
-{{--                                        <select id="tagsSelect" class="form-select select2" multiple>--}}
-{{--                                            <option value="">Choose tag</option>--}}
-{{--                                        </select>--}}
-{{--                                    </div>--}}
+                                    <div class="form-group mb-2">
+                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>
+                                        <select id="tagsSelect" class="form-select select2" name="tags[]"multiple>
+                                            <option value="" readonly>Choose tag</option>
+                                            @foreach($associatedData['tags'] as $tag)
+                                                <option value="{{ $tag->id }}" @selected($model->tags->contains($tag->id))>
+                                                    {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 {{--                                    <!-- Colors -->--}}
 {{--                                    <div class="form-group mb-2">--}}
 {{--                                        <label for="colorsSelect" class="label-text mb-1">Colors</label>--}}
