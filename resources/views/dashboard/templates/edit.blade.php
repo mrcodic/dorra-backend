@@ -156,6 +156,44 @@
 
 
 @section('page-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('.type-checkbox');
+
+            function toggleCheckboxes() {
+                let frontChecked = false;
+                let backChecked = false;
+                let noneChecked = false;
+
+                checkboxes.forEach(checkbox => {
+                    const type = checkbox.dataset.typeName;
+                    if (type === 'front' && checkbox.checked) frontChecked = true;
+                    if (type === 'back' && checkbox.checked) backChecked = true;
+                    if (type === 'none' && checkbox.checked) noneChecked = true;
+                });
+
+                checkboxes.forEach(checkbox => {
+                    const type = checkbox.dataset.typeName;
+
+                    if (noneChecked && (type === 'front' || type === 'back')) {
+                        checkbox.disabled = true;
+                    } else if ((frontChecked || backChecked) && type === 'none') {
+                        checkbox.disabled = true;
+                    } else {
+                        checkbox.disabled = false;
+                    }
+                });
+            }
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', toggleCheckboxes);
+            });
+
+            // Initial state
+            toggleCheckboxes();
+        });
+    </script>
+    
     <script !src="">
         $('#cancelButton').on('click', function(e) {
             e.preventDefault();
