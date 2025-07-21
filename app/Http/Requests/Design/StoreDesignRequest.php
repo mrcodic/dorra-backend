@@ -20,28 +20,24 @@ class StoreDesignRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'template_id' => ['required_without:product_id', 'prohibits:product_id', 'exists:templates,id'],
-            'product_id' => ['required_without:template_id', 'prohibits:template_id', 'exists:products,id'],
+            'template_id' => ['sometimes', 'exists:templates,id'],
+            'product_id' => ['required', 'exists:products,id'],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
             'design_data' => ['nullable', 'json'],
-            'product_type' => ['required_with:product_id', 'in:T-shirt,other'],
             'unit' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
                 'integer',
                 'in:' . UnitEnum::getValuesAsString(),
             ],
             'height' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
                 'numeric',
                 new DimensionWithinUnitRange()
             ],
             'width' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
                 'numeric',
                 new DimensionWithinUnitRange()
             ],
-            'name' => ['required_with:product_id', 'string', 'max:255'],
+            'name' => ['required_without:template_id', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
         ];
     }
