@@ -35,6 +35,7 @@ class ProductResource extends JsonResource
                 return MediaResource::collection($this->getAllProductImages());
             }),
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
+            'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
             'is_saved' => $this->when(!$this->deleted_at,fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id()),),
             'has_mockup' => (boolean) $this->has_mockup,
         ];

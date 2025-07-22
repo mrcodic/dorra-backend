@@ -25,7 +25,7 @@ class DesignResource extends JsonResource
             'design_data' => $this->when(request('design_data') == true, $this->design_data),
             'design_image' => $this->getFirstMediaUrl('designs'),
             'current_version' => $this->current_version,
-            'product' => ProductResource::make($this->whenLoaded('product') ?? $this->whenLoaded('directProduct')),
+            'product' => ProductResource::make($this->whenLoaded('product')),
             'owner' => UserResource::make($this->whenLoaded('owner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'template' => TemplateResource::make($this->whenLoaded('template')),

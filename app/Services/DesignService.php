@@ -54,9 +54,8 @@ class DesignService extends BaseService
                 return $design->load([
                     'product.prices',
                     'media',
-                    'directProduct.prices',
                     'template:id',
-                    'template.specifications.options',
+                    'product.specifications.options',
                 ]);
             });
 
@@ -73,10 +72,9 @@ class DesignService extends BaseService
 
         return $design->load([
             'media',
-            'directProduct.prices',
             'product.prices',
             'template:id',
-            'template.specifications.options',
+            'product.specifications.options',
         ]);
     }
 

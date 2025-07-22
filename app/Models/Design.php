@@ -79,20 +79,10 @@ class Design extends Model implements HasMedia
         return $this->belongsTo(Template::class);
     }
 
-    public function product(): HasOneThrough
+
+    public function product(): BelongsTo
     {
-        return $this->hasOneThrough(
-            Product::class,
-            Template::class,
-            'id',
-            'id',
-            'template_id',
-            'product_id'
-        );
-    }
-    public function directProduct(): BelongsTo
-    {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class)->withDefault(['name' => '']);
     }
 
 
