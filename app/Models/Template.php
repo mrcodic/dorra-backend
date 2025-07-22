@@ -45,12 +45,6 @@ class Template extends Model implements HasMedia
         'status' => StatusEnum::DRAFTED,
     ];
 
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
-
     public function specifications(): BelongsToMany
     {
         return $this->belongsToMany(ProductSpecification::class)->withTimestamps();

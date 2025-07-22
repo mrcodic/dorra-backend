@@ -162,7 +162,6 @@ class TemplateService extends BaseService
     public function getProductTemplates($productId)
     {
         $search = trim(request()->input('search'));
-        $type = request()->input('type');
         $tags = array_filter((array)request()->input('tags'));
         $types = array_filter((array)request()->input('types'));
         $recent = request()->boolean('recent');
@@ -191,7 +190,8 @@ class TemplateService extends BaseService
                 $query->oldest();
             })
             ->when(!is_null($productId), function ($query) use ($productId) {
-                $query->whereProductId($productId);
+                $query->whereHas('products',function ($q) use ($productId) {
+                    $q->where('products.id', $productId);
             })
             ->paginate(10);
     }
