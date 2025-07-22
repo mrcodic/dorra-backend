@@ -43,7 +43,7 @@ class TemplateService extends BaseService
                 $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
             })
             ->when(request()->filled('product_id'), fn($query) => $query->whereHas('products', function ($q) use ($productId) {
-                    $q->where('products.id', $productId);
+                    $q->where('id', $productId);
                 }))
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
             ->latest();
@@ -57,7 +57,7 @@ class TemplateService extends BaseService
             $query = $query->whereNotNull('design_data')
                 ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
                 ->when(request('product_id'), fn($q) => $q->whereHas('products', fn($query) =>  $query->whereHas('products', function ($q) use ($productId) {
-                    $q->where('products.id', $productId);
+                    $q->where('.id', $productId);
                 })))
                 ->when(request()->has('tags'), function ($q) {
                     $tags = request('tags');
