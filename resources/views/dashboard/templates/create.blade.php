@@ -95,7 +95,7 @@
                                     {{--                                        </select>--}}
                                     {{--                                    </div>--}}
                                     <div class="form-group mb-2">
-                                        <label for="productsSelect" class="label-text mb-1">Product</label>
+                                        <label for="productsSelect" class="label-text mb-1">Products</label>
                                         <select id="productsSelect" class="form-select select2" name="product_ids[]"
                                                 multiple>
                                             <option value="" disabled>Choose Product</option>

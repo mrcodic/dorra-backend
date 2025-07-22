@@ -173,9 +173,6 @@ class TemplateService extends BaseService
                 $locale = app()->getLocale();
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
             })
-            ->when($type !== null && $type !== '', function ($query) use ($type) {
-                $query->whereType($type);
-            })
             ->when(!empty($tags), function ($query) use ($tags) {
                 $query->whereHas('product.tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', $tags);
