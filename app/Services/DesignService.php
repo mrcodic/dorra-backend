@@ -149,7 +149,7 @@ class DesignService extends BaseService
             if (!empty($validatedData['specs'])) {
                 $syncData = collect($validatedData['specs'])->mapWithKeys(function ($spec) {
                     return [
-                        $spec['id'] => ['spec_option_id' => $spec['option']]
+                        $spec['id'] => ['spec_option_i  d' => $spec['option']]
                     ];
                 })->toArray();
 

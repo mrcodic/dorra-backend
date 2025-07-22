@@ -40,12 +40,12 @@ class StoreDesignFinalizationRequest extends BaseRequest
             }],
             "specs" => ["sometimes", "array"],
             "specs.*.id" => ["sometimes", "exists:product_specification_template,product_specification_id",function ($attribute, $value, $fail) use ($design) {
-            if (!$design->template->specifications->contains($value)) {
+            if (!$design->product->specifications->contains($value)) {
                 $fail("The selected specification is not valid for the chosen template.");
             }
             }],
             "specs.*.option" => ["sometimes", "exists:product_specification_options,id",function ($attribute, $value, $fail) use ($design) {
-            if (!$design->template->specifications->each(function ($spec) use ($value) {
+            if (!$design->product->specifications->each(function ($spec) use ($value) {
                 $spec->load('options');
                 $spec->options->contains($value);
             })) {
