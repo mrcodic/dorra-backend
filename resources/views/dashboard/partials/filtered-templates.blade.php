@@ -139,7 +139,7 @@
         <p class="mb-2 text-secondary">Nothing to show yet.</p>
 
         <!-- Create Button -->
-        <a class="btn btn-primary" data-bs-target="#templateModal" data-bs-toggle="modal">
+        <a class="btn btn-primary" href="{{ route("product-templates.create") }}">
             <i data-feather="plus"></i>
             Create Template
         </a>
