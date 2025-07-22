@@ -23,27 +23,6 @@ class StoreTemplateRequest extends BaseRequest
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
             'type' => ['sometimes', 'in:' . TypeEnum::getValuesAsString()],
-            'unit' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
-                'integer',
-                'in:' . UnitEnum::getValuesAsString(),
-            ],
-            'height' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
-                'numeric',
-                new DimensionWithinUnitRange()
-            ],
-            'width' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
-                'numeric',
-                new DimensionWithinUnitRange()
-            ],
-
-            'product_id' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
-                'prohibits:product_type:T-shirt',
-                'exists:products,id'
-            ],
             'product_ids' => ['required', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
             'tags' => ['sometimes', 'array'],

@@ -27,7 +27,6 @@ class Template extends Model implements HasMedia
     protected $fillable = [
         'name',
         'status',
-        'product_id',
         'design_data',
         'type',
         'description',
