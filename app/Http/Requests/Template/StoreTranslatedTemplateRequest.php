@@ -51,6 +51,8 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'product_ids.*' => ['integer', 'exists:products,id'],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['integer', 'exists:tags,id'],
+            'types' => ['required', 'array'],
+            'types.*' => ['integer', 'exists:types,id'],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],
