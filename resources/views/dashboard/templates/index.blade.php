@@ -162,8 +162,6 @@
         'title' => 'Delete Templates',
         'confirmText' => 'Are you sure you want to delete this items?',
         ])
-       @include('modals.templates.template-modal')
-       @include('modals.templates.template-editor-modal')
         <!-- list and filter end -->
     </section>
     <!-- users list ends -->
