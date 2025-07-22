@@ -34,15 +34,17 @@ class TemplateService extends BaseService
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
-
+        $productId = request('product_id');
         $query = $this->repository
             ->query()
-            ->with(['product:id,name', 'product.tags','types'])
+            ->with(['products:id,name', 'products.tags','types'])
             ->when(request()->filled('search_value'), function ($q) {
                 $locale = app()->getLocale();
                 $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
             })
-            ->when(request()->filled('product_id'), fn($q) => $q->whereProductId(request('product_id')))
+            ->when(request()->filled('product_id'), fn($query) => $query->whereHas('products', function ($q) use ($productId) {
+                    $q->where('products.id', $productId);
+                }))
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
             ->latest();
 
@@ -54,7 +56,9 @@ class TemplateService extends BaseService
         if (request()->expectsJson()) {
             $query = $query->whereNotNull('design_data')
                 ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
-                ->when(request('product_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereProductId(request('product_id'))))
+                ->when(request('product_id'), fn($q) => $q->whereHas('products', fn($query) =>  $query->whereHas('products', function ($q) use ($productId) {
+                    $q->where('products.id', $productId);
+                })))
                 ->when(request()->has('tags'), function ($q) {
                     $tags = request('tags');
                     $q->whereHas('tags', fn($q) => $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]));
