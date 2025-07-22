@@ -3,7 +3,6 @@
 namespace App\Http\Resources\Template;
 
 use App\Http\Resources\Product\ProductResource;
-use App\Http\Resources\Product\ProductSpecificationResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,15 +25,6 @@ class TemplateResource extends JsonResource
                 request()->boolean('with_design_data', true),
                 $this->design_data
             ),
-            'width' => $this->when(isset($this->width_pixel), $this->width_pixel),
-            'height' => $this->when(isset($this->height_pixel), $this->height_pixel),
-            'original_width' => $this->when(isset($this->width), $this->width),
-            'original_height' => $this->when(isset($this->height), $this->height),
-            'unit' => $this->when(isset($this->unit), [
-                'value' => $this->unit?->value,
-                'label' => $this->unit?->label(),
-            ]),
-            'dpi' => $this->when(isset($this->dpi), $this->dpi ?? 300),
             'status' => $this->when(isset($this->status), [
                 'value' => $this->status?->value,
                 'label' => $this->status?->label(),
@@ -43,7 +33,6 @@ class TemplateResource extends JsonResource
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'base64_preview_image' => $this->when(isset($this->image), $this->image),
-            'product_type' => $this->product?->getTranslation('name','en') == 'T-shirt' ? 'T-shirt' : 'other' ,
             'has_mockup' => (boolean) $this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
 //            'add_to_cart' => $this->canBeAddedToCart(),
