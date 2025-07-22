@@ -122,9 +122,11 @@ class TemplateController extends DashboardController
             if (!$productId) {
                 return Response::api(HttpEnum::BAD_REQUEST, errors: ['error' => 'Product not selected.']);
             }
-            $templates = $this->templateRepository->query()->with(['product', 'products'])
+            $templates = $this->templateRepository->query()->with(['products'])
                 ->when($productId, function ($query) use ($productId) {
-                    $query->whereProductId($productId);
+                    $query->whereHas('products', function ($q) use ($productId) {
+                        $q->where('products.id', $productId);
+                    });
                 })->live()->get();
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
         }
