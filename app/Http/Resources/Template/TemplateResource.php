@@ -52,13 +52,14 @@ class TemplateResource extends JsonResource
             });
         }
         if ($guest) {
+
             return $guest->cartItems->contains(function ($cartItem) {
                 return optional($cartItem->design->template)->id === $this->id;
             });
 
 
         }
-        return false;
+
     }
 
 
