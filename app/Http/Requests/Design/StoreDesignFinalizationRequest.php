@@ -39,7 +39,7 @@ class StoreDesignFinalizationRequest extends BaseRequest
             }
             }],
             "specs" => ["sometimes", "array"],
-            "specs.*.id" => ["sometimes", "exists:product_specification_template,product_specification_id",function ($attribute, $value, $fail) use ($design) {
+            "specs.*.id" => ["sometimes", "exists:product_specifications,id",function ($attribute, $value, $fail) use ($design) {
             if (!$design->product->specifications->contains($value)) {
                 $fail("The selected specification is not valid for the chosen template.");
             }

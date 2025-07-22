@@ -149,7 +149,7 @@ class DesignService extends BaseService
             if (!empty($validatedData['specs'])) {
                 $syncData = collect($validatedData['specs'])->mapWithKeys(function ($spec) {
                     return [
-                        $spec['id'] => ['spec_option_i  d' => $spec['option']]
+                        $spec['id'] => ['spec_option_id' => $spec['option']]
                     ];
                 })->toArray();
 
@@ -164,7 +164,6 @@ class DesignService extends BaseService
 
             $productPrice = optional($design->productPrice)->price;
             $subTotal = $optionTotal ?? 0 + ($productPrice ?? ($design->product->base_price * $design->quantity));
-
             return [
                 'sub_total' => $subTotal,
                 'quantity' => $design->productPrice?->quantity ?? $design->quantity,
