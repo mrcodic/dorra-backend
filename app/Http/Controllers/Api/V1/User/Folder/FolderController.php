@@ -22,7 +22,7 @@ class FolderController extends Controller
     public function index()
     {
         $folders = $this->folderService->getUserFolders();
-        return Response::api(data: FolderResource::collection($folders->load(['designs.owner','designs.directProduct','designs.product'])));
+        return Response::api(data: FolderResource::collection($folders->load(['designs.owner', 'designs.product'])));
     }
 
     public function store(StoreFolderRequest $request)
@@ -39,7 +39,7 @@ class FolderController extends Controller
 
     public function show($id)
     {
-        $folder = $this->folderService->showResource($id, ['designs','designs.product.category', 'designs.directProduct.category','designs.owner']);
+        $folder = $this->folderService->showResource($id, ['designs','designs.product.category','designs.owner']);
         return Response::api(data: FolderResource::make($folder));
     }
 

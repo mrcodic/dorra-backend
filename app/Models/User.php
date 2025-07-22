@@ -12,7 +12,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, MorphMany, MorphToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasManyThrough, MorphMany, MorphToMany};
 
 class User extends Authenticatable implements HasMedia
 {
@@ -102,6 +102,11 @@ class User extends Authenticatable implements HasMedia
     public function cart()
     {
         return $this->hasOne(Cart::class);
+    }
+
+    public function cartItems(): HasManyThrough
+    {
+        return $this->hasManyThrough(CartItem::class, Cart::class);
     }
 
     public function socialAccounts(): HasMany
