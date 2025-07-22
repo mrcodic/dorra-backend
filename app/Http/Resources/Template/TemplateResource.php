@@ -47,13 +47,13 @@ class TemplateResource extends JsonResource
         $user = auth('sanctum')->user();
         $guest = Guest::find(request()->cookie('cookie_id'));
         if ($user) {
-            return $user->cartItems->contains(function ($cartItem) {
+            return $user->cartItems?->contains(function ($cartItem) {
                 return optional($cartItem->design->template)->id === $this->id;
             });
         }
         if ($guest) {
 
-            return $guest->cartItems->contains(function ($cartItem) {
+            return $guest->cartItems?->contains(function ($cartItem) {
                 return optional($cartItem->design->template)->id === $this->id;
             });
 

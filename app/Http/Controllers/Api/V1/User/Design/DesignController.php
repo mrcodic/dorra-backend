@@ -77,7 +77,6 @@ class DesignController extends Controller
     public function designFinalization(StoreDesignFinalizationRequest $request)
     {
         $designData = $this->designService->designFinalization($request);
-
         return Response::api(data: DesignFinalizationResource::collection($designData['syncData'])
             ->additional([
                 'sub_total' => $designData['sub_total'],
