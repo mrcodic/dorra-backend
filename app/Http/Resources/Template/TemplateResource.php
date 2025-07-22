@@ -3,7 +3,6 @@
 namespace App\Http\Resources\Template;
 
 use App\Http\Resources\Product\ProductResource;
-use App\Models\CartItem;
 use App\Models\Guest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;

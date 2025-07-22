@@ -26,6 +26,12 @@ class Mockup extends Model implements HasMedia
         'colors' => 'array',
         'type' => TypeEnum::class,
     ];
+    protected $attributes = [
+        'area_width' => 200,
+        'area_left' => 233,
+        'area_top' => 233,
+        'area_height' => 370,
+    ];
 
     public function product()
     {

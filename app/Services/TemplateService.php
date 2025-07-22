@@ -174,7 +174,7 @@ class TemplateService extends BaseService
         });
         $this->convertBase64ToImageLink($validatedData, $model);
         if (request()->allFiles()) {
-            handleMediaUploads(request()->allFiles(), $model);
+            handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
         }
         return $model->load($relationsToLoad);
     }
