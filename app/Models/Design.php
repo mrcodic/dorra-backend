@@ -24,7 +24,6 @@ class Design extends Model implements HasMedia
         'cookie_id',
         'user_id',
         'guest_id',
-        'order_id',
         'template_id',
         'design_data',
         'current_version',
@@ -32,9 +31,6 @@ class Design extends Model implements HasMedia
         'quantity',
         'name',
         'description',
-        'height',
-        'width',
-        'unit',
         'product_id'
     ];
     protected $attributes = [

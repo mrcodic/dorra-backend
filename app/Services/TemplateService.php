@@ -29,7 +29,8 @@ class TemplateService extends BaseService
         $perPage = 16
     )
     {
-        request()->merge(['with_design_data' => true]);
+        request('with_design_data', true);
+
 
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
@@ -38,7 +39,7 @@ class TemplateService extends BaseService
 
         $query = $this->repository
             ->query()
-            ->with(['products:id,name', 'products.tags', 'types'])
+            ->with(['products:id,name', 'tags', 'types'])
             ->when(request()->filled('search_value'), function ($q) {
                 $locale = app()->getLocale();
                 $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
@@ -80,7 +81,7 @@ class TemplateService extends BaseService
                 ? $query->paginate($requested)
                 : $query->get();
         }
-        
+
         return $this->repository->all(
             $paginate,
             $columns,
@@ -89,7 +90,6 @@ class TemplateService extends BaseService
             perPage: $pageSize ?? $perPage
         );
     }
-
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
@@ -193,7 +193,7 @@ class TemplateService extends BaseService
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
             })
             ->when(!empty($tags), function ($query) use ($tags) {
-                $query->whereHas('product.tags', function ($q) use ($tags) {
+                $query->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', $tags);
                 });
             })

@@ -45,52 +45,12 @@ class Template extends Model implements HasMedia
         'status' => StatusEnum::DRAFTED,
     ];
 
-    public function specifications(): BelongsToMany
-    {
-        return $this->belongsToMany(ProductSpecification::class)->withTimestamps();
-    }
-
 
     public function getImageAttribute(): string
     {
         return $this->getFirstMediaUrl('templates') ?: "";
 
     }
-
-    public function height(): Attribute
-    {
-        return Attribute::get(function ($value) {
-            return fmod($value, 1) == 0.0 ? (int)$value : $value;
-
-        });
-    }
-
-    public function width(): Attribute
-    {
-        return Attribute::get(function ($value) {
-            return fmod($value, 1) == 0.0 ? (int)$value : $value;
-
-        });
-    }
-
-    public function getWidthPixelAttribute()
-    {
-        $value = $this->unit === UnitEnum::CM
-            ? round($this->width / 2.54, 2)
-            : $this->width;
-        return fmod($value, 1) == 0.0 ? (int)$value : $value;
-    }
-
-    public function getHeightPixelAttribute()
-    {
-        $value = $this->unit === UnitEnum::CM
-            ? round($this->height / 2.54, 2)
-            : $this->height;
-
-        return fmod($value, 1) == 0.0 ? (int)$value : $value;
-    }
-
-
     public function scopeLive(Builder $builder): Builder
     {
         return $builder->where('status', StatusEnum::LIVE);
