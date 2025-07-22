@@ -85,6 +85,7 @@
                         <th>
                             <input type="checkbox" id="select-all-checkbox">
                         </th>
+                        <th>Image</th>
                         <th>Name</th>
                         <th>Category</th>
                         <th>Tags</th>

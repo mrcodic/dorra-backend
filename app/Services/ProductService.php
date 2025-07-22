@@ -73,6 +73,9 @@ class ProductService extends BaseService
             ->addColumn('rating', function ($product) {
                 return $product->reviews?->pluck('rating')->avg() ?? 0;
             })
+            ->addColumn('image', function ($product) {
+                return $product->getMainImageUrl();
+            })
             ->addColumn('no_of_purchas', function ($product) {
                 return 0;
             })->make();

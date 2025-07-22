@@ -27,6 +27,16 @@ var dt_user_table = $(".product-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
+
+        {
+            data: "image",
+            render: function (data, type, row) {
+                return `
+            <img src="${data}" alt="Product Image"
+                style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #ccc;" />
+        `;
+            }
+        },
         { data: "name" },
         { data: "category" },
         {
@@ -187,7 +197,7 @@ $(document).ready(function () {
                     duration: 2000,
                     gravity: "top",
                     position: "right",
-                    backgroundColor: "#EA5455", 
+                    backgroundColor: "#EA5455",
                     close: true,
                 }).showToast();
                 $(".product-list-table").DataTable().ajax.reload(null, false);
