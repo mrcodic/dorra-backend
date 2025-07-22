@@ -167,7 +167,7 @@ class TemplateService extends BaseService
         $recent = request()->boolean('recent');
 
         return $this->repository->query()
-            ->with(['media', 'products','types'])
+            ->with(['media', 'products', 'types'])
             ->when($search, function ($query) use ($search) {
                 $locale = app()->getLocale();
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
@@ -182,7 +182,7 @@ class TemplateService extends BaseService
                     $q->whereIn('types.id', $types);
                 });
             })
-            ->when($recent == true, function ($query) use ($recent) {
+            ->when($recent === true, function ($query) {
                 $query->whereNotNull('updated_at')
                     ->orderByDesc('updated_at')
                     ->take(10);
@@ -190,11 +190,13 @@ class TemplateService extends BaseService
                 $query->oldest();
             })
             ->when(!is_null($productId), function ($query) use ($productId) {
-                $query->whereHas('products',function ($q) use ($productId) {
+                $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
-            })
+                });
+            }) 
             ->paginate(10);
     }
+
 
     public function templateAssets()
     {
