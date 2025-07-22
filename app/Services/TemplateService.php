@@ -29,22 +29,25 @@ class TemplateService extends BaseService
         $perPage = 16
     )
     {
-        request('with_design_data', true);
+        request()->merge(['with_design_data' => true]);
 
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
         $productId = request('product_id');
+
         $query = $this->repository
             ->query()
-            ->with(['products:id,name', 'products.tags','types'])
+            ->with(['products:id,name', 'products.tags', 'types'])
             ->when(request()->filled('search_value'), function ($q) {
                 $locale = app()->getLocale();
                 $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
             })
-            ->when(request()->filled('product_id'), fn($query) => $query->whereHas('products', function ($q) use ($productId) {
-                    $q->where('id', $productId);
-                }))
+            ->when(request()->filled('product_id'), function ($query) use ($productId) {
+                $query->whereHas('products', function ($q) use ($productId) {
+                    $q->where('products.id', $productId);
+                });
+            })
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
             ->latest();
 
@@ -53,19 +56,31 @@ class TemplateService extends BaseService
                 ? $query->get()
                 : $query->paginate($pageSize)->withQueryString();
         }
+
         if (request()->expectsJson()) {
             $query = $query->whereNotNull('design_data')
-                ->when(request('category_id'), fn($q) => $q->whereHas('products', fn($q) => $q->whereCategoryId(request('category_id'))))
-                ->when(request('product_id'), fn($q) => $q->whereHas('products', fn($query) =>  $query->whereHas('products', function ($q) use ($productId) {
-                    $q->where('.id', $productId);
-                })))
+                ->when(request('category_id'), function ($q) {
+                    $q->whereHas('products', function ($q) {
+                        $q->whereCategoryId(request('category_id'));
+                    });
+                })
+                ->when(request('product_id'), function ($q) use ($productId) {
+                    $q->whereHas('products', function ($q) use ($productId) {
+                        $q->where('products.id', $productId);
+                    });
+                })
                 ->when(request()->has('tags'), function ($q) {
                     $tags = request('tags');
-                    $q->whereHas('tags', fn($q) => $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]));
+                    $q->whereHas('tags', function ($q) use ($tags) {
+                        $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
+                    });
                 });
 
-            return $paginate ? $query->paginate($requested) : $query->get();
+            return $paginate
+                ? $query->paginate($requested)
+                : $query->get();
         }
+        
         return $this->repository->all(
             $paginate,
             $columns,
@@ -74,6 +89,7 @@ class TemplateService extends BaseService
             perPage: $pageSize ?? $perPage
         );
     }
+
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
