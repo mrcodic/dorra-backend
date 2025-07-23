@@ -15,9 +15,10 @@ class CartItem extends Pivot
         'itemable_type',
         'cart_id',
         'product_id',
-        'status',
+        'specs_price',
         'sub_total',
-        'total_price'
+        'product_price',
+        'quantity'
     ];
     protected $table = 'cart_items';
 

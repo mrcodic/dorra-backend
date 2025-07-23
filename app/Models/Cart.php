@@ -23,15 +23,16 @@ class Cart extends Model
     {
         return $this->hasMany(CartItem::class)->with('itemable');
     }
-    public function addItem(Model $itemable, ?Product $product = null,$subTotal): CartItem
+    public function addItem(Model $itemable, ?Product $product = null,$quantity,$specsSum,$productPrice,$subTotal): CartItem
     {
         return $this->items()->create([
             'itemable_id' => $itemable->id,
             'itemable_type' => get_class($itemable),
             'product_id' => $product?->id,
-            'status' => 1,
             'sub_total' => $subTotal,
-            'total_price' => $subTotal,
+            'specs_price' => $specsSum,
+            'product_price' => $productPrice,
+            'quantity' => $quantity,
         ]);
     }
     public function removeItem(CartItem $item)

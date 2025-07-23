@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::table('cart_items', function (Blueprint $table) {
             $table->after('cart_id', function ($table) {
+                $table->decimal('specs_price', 8, 2)->default(0.00);
+                $table->decimal('product_price', 8, 2)->default(0.00);
                 $table->decimal('sub_total', 8, 2)->default(0.00);
-                $table->decimal('total_price', 8, 2)->default(0.00);
             });
         });
     }

@@ -4,7 +4,7 @@ namespace App\Services;
 
 
 use App\Jobs\ProcessBase64Image;
-use App\Models\CartItem;
+
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
@@ -24,6 +24,7 @@ class DesignService extends BaseService
         public ProductSpecificationOptionRepository $optionRepository,
         public UserRepositoryInterface              $userRepository,
         public GuestRepositoryInterface             $guestRepository,
+
     )
     {
         parent::__construct($repository);
@@ -63,7 +64,6 @@ class DesignService extends BaseService
 
         } else {
             $design = $this->repository->query()->create($validatedData);
-//            RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $design, 'designs');
         }
         if ($validatedData['user_id']) {
             $design->users()->attach(
@@ -83,7 +83,6 @@ class DesignService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
-//        RenderFabricJsonToPngJob::dispatch($validatedData['design_data'], $model, 'designs');
         if (isset($validatedData['base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
         }
@@ -174,33 +173,6 @@ class DesignService extends BaseService
         });
     }
 
-
-    public function addQuantity($request, $id)
-    {
-        $design = $this->repository->find($id);
-
-        if ($design->product->has_custom_prices) {
-            $updated = $design->update($request->only(['product_price_id']));
-        } else {
-            $updated = $design->update($request->only(['quantity']));
-        }
-
-        if ($design->cartItems->isNotEmpty()) {
-            collect($design->cartItems)->each(function ($cart) use ($design) {
-                $cartItem = CartItem::where('cart_id', $cart->id)
-                    ->where('design_id', $design->id)
-                    ->first();
-
-                if ($cartItem) {
-                    $cartItem->update([
-                        'sub_total' => $design->total_price
-                    ]);
-                }
-            });
-        }
-
-        return $updated;
-    }
 
     public function priceDetails($designId): array
     {

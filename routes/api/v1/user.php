@@ -59,7 +59,6 @@ Route::controller(DesignController::class)->prefix('designs/')->group(function (
     Route::post('bulk-force-delete', 'bulkForceDelete');
     Route::get('owners', 'owners');
     Route::get('{design}/price-details', 'priceDetails');
-    Route::post('{design}/add-quantity', 'addQuantity');
     Route::get('{design}/quantities', 'getQuantities');
     Route::post('design-finalization', 'designFinalization');
 });
@@ -70,6 +69,8 @@ Route::controller(CartController::class)->group(function () {
     Route::get('/cart-info', 'cartInfo');
     Route::post('/carts/apply-discount', 'applyDiscount');
     Route::delete('/carts', 'destroy');
+    Route::post('carts/{item}/add-quantity', 'addQuantity');
+
 });
 Route::apiResource('/carts', CartController::class)->only(['store', 'index']);
 

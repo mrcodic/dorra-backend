@@ -12,7 +12,12 @@ class CartItemObserver
      */
     public function created(CartItem $cartItem): void
     {
-        //
+        $cart = $cartItem->cart;
+        $total = $cart->items()->sum('sub_total');
+
+        $cart->update([
+            'price' => $total
+        ]);
     }
 
     /**
@@ -20,14 +25,27 @@ class CartItemObserver
      */
     public function updated(CartItem $cartItem): void
     {
-        if ($cartItem->wasChanged('sub_total'))
-        {
-            $cart = $cartItem->cart;
-            $total = $cart->cartItems()->sum('sub_total');
+        $cart = $cartItem->cart;
+
+        if ($cartItem->wasChanged('sub_total')) {
+            $total = $cart->items()->sum('sub_total');
 
             $cart->update([
                 'price' => $total
             ]);
+
+        }
+        if ($cartItem->wasChanged('quantity')) {
+            if ($cartItem->product->has_custom_price) {
+
+                $subTotal = $cartItem->productPrice + $cart->specs_price;
+                $cartItem->sub_total = $subTotal;
+                $cartItem->saveQuietly();
+            } else {
+                $subTotal = ($cartItem->productPrice * $cartItem->quantity) + $cart->specs_price;
+                $cartItem->sub_total = $subTotal;
+                $cartItem->saveQuietly();
+            }
 
         }
 

@@ -18,7 +18,7 @@ return new class extends Migration
                 $table->string('itemable_type');
                 $table->string('itemable_id');
                 $table->index(['itemable_type', 'itemable_id'], 'itemable_index');
-
+                $table->unsignedBigInteger('quantity')->nullable();
                 $table->foreignIdFor(\App\Models\Product::class)->nullable()->constrained()->nullOnDelete();
             });
         });

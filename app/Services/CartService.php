@@ -5,7 +5,8 @@ namespace App\Services;
 use App\Enums\DiscountCode\TypeEnum;
 use App\Enums\HttpEnum;
 use App\Models\{CartItem, Guest, Product, Template, User};
-use App\Repositories\Interfaces\{DiscountCodeRepositoryInterface,
+use App\Repositories\Interfaces\{CartItemRepositoryInterface,
+    DiscountCodeRepositoryInterface,
     CartRepositoryInterface,
     DesignRepositoryInterface,
     GuestRepositoryInterface,
@@ -29,6 +30,7 @@ class CartService extends BaseService
         public GuestRepositoryInterface        $guestRepository,
         public ProductPriceRepositoryInterface $productPriceRepository,
         public ProductSpecificationOptionRepositoryInterface $optionRepository,
+        public CartItemRepositoryInterface $cartItemRepository,
     )
     {
         parent::__construct($repository);
@@ -60,10 +62,10 @@ class CartService extends BaseService
                 return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
             })
             ->sum();
-        $subTotal = $product->base_price ?? $productPrice + $specsSum;
-        $cart->addItem($design ?? $template, $product, $subTotal);
-        $cart->update(['price' => $cart->items->sum('sub_total') ]);
-
+        $quantity = $productPrice->quantity ?? 1;
+        $productPrice = $product->base_price ?? $productPrice;
+        $subTotal = ($product->base_price ?? $productPrice )+ $specsSum;
+        $cart->addItem($design ?? $template, $product, $quantity, $specsSum, $productPrice,$subTotal);
         return $cart;
     }
 
@@ -171,5 +173,17 @@ class CartService extends BaseService
             'price' => $cart?->price ?? 0,
             'items_count' => $cart?->cartItems->count() ?? 0,
         ];
+    }
+
+    public function addQuantity($request, $id)
+    {
+        $cartItem = $this->cartItemRepository->find($id);
+        if ($cartItem->product->has_custom_prices) {
+            $productPrice = $this->productPriceRepository->query()->find($request->only(['product_price_id']))?->price;
+            $updated = $cartItem->update($productPrice);
+        } else {
+            $updated = $cartItem->update($request->only(['quantity']));
+        }
+        return $updated;
     }
 }
