@@ -14,7 +14,6 @@ return new class extends Migration
     {
         Schema::create('templates', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->tinyInteger('status')->default(1);
             $table->json('design_data');

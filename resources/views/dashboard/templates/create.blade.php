@@ -104,7 +104,7 @@
                                                     {{ $product->getTranslation('name', app()->getLocale()) }}
                                                 </option>
                                             @endforeach
-                                            <input type="hidden" name="product_id" value="1">
+
 
 
                                         </select>

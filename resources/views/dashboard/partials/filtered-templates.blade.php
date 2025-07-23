@@ -17,7 +17,7 @@
                     <li>
                         <a class="dropdown-item"
                            href="{{ config('services.editor_url') . 'templates/' . $template->id ."?has_mockup=" .
-                          ($template->products->contains('has_mockup', true) ? 'true' : 'false')}}"
+                          ($template->products->pluck('has_mockup')->contains(true) ? 'true' : 'false')}}"
                            target="_blank">
                             <i data-feather="eye" class="me-1"></i>Show
                         </a>
