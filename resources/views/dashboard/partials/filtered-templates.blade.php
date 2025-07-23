@@ -16,8 +16,7 @@
                                 data-feather="edit-3" class="me-1"></i>Edit</a></li>
                     <li>
                         <a class="dropdown-item"
-                           href="{{ config('services.editor_url') . 'templates/' . $template->id ."?has_mockup=" .
-                          ($template->products->contains('has_mockup', true) ? 'true' : 'false')}}"
+                           href="{{ config('services.editor_url') . 'templates/' . $template->id }}"
                            target="_blank">
                             <i data-feather="eye" class="me-1"></i>Show
                         </a>

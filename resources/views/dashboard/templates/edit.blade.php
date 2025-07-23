@@ -127,8 +127,7 @@
                             <div class="d-flex justify-content-between pt-2">
                                 <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
                                 <div class="d-flex gap-1">
-                                    <a href="{{ config("services.editor_url")."templates/".$model->id. "?has_mockup=".
-                                      ($template->products->pluck('has_mockup')->contains(true) ? 'true' : 'false')}}"
+                                    <a href="{{ config("services.editor_url")."templates/".$model->id}}"
                                        class="btn btn-outline-secondary fs-5 "
                                        target="_blank"
                                     >
