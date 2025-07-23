@@ -127,12 +127,12 @@
                             <div class="d-flex justify-content-between pt-2">
                                 <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
                                 <div class="d-flex gap-1">
-                                    <a href="{{ config("services.editor_url") . "templates/" . $model->id . "?has_mockup=" .
-    (\App\Models\Product::where('template_id', $template->id)->where('has_mockup', true)->exists() ? 'true' : 'false') }}"
-                                       class="btn btn-outline-secondary fs-5"
-                                       target="_blank">
-
-                                    <i data-feather="edit-3"></i>
+                                    <a href="{{ config("services.editor_url")."templates/".$model->id. "?has_mockup=".
+                                      ($template->products->pluck('has_mockup')->contains(true) ? 'true' : 'false')}}"
+                                       class="btn btn-outline-secondary fs-5 "
+                                       target="_blank"
+                                    >
+                                        <i data-feather="edit-3"></i>
                                         <span>Edit Design</span>
 
                                     </a>
