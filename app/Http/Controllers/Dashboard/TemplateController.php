@@ -94,7 +94,7 @@ class TemplateController extends DashboardController
             "redirect_url" =>
                 config('services.editor_url') .
                 'templates/' . $template->id . "?has_mockup=" .
-                ($template->products->pluck('has_mockup')->contains(true) ? 'true' : 'false')
+                (\App\Models\Product::where('template_id', $template->id)->where('has_mockup', true)->exists())
         ]);
     }
 
