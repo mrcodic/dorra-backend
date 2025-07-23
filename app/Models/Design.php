@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough, MorphMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough, MorphMany, MorphToMany};
 use Spatie\Translatable\HasTranslations;
 
 #[ObservedBy(DesignObserver::class)]
@@ -105,11 +105,9 @@ class Design extends Model implements HasMedia
         return $this->belongsTo(ProductPrice::class);
     }
 
-    public function specifications(): BelongsToMany
+    public function specifications(): MorphMany
     {
-        return $this->belongsToMany(ProductSpecification::class)
-            ->using(DesignProductSpecification::class)
-            ->withPivot('spec_option_id')->withTimestamps();
+        return $this->morphMany(CustomizableProductSpecification::class, 'customizable');
     }
 
     public function cartItems(): BelongsToMany
@@ -122,21 +120,28 @@ class Design extends Model implements HasMedia
 
     public function getTotalPriceAttribute(): float
     {
-        $this->load('productPrice');
-        $specOptions = $this->options()->select('price')->get();
-        $specTotalPrice = $specOptions->sum('price');
-        $productPrice = $this->productPrice->price ?? $this->product?->base_price * $this->quantity;
+        $this->loadMissing('productPrice', 'options');
+
+        $specTotalPrice = $this->options->sum('price');
+
+        $productPrice = $this->productPrice->price
+            ?? ($this->product?->base_price ?? 0) * ($this->quantity ?? 1);
+
         return $specTotalPrice + $productPrice;
     }
 
-    public function options(): BelongsToMany
+
+    public function options(): MorphToMany
     {
-        return $this->belongsToMany(ProductSpecificationOption::class, 'design_product_specification',
-            'design_id',
-            'spec_option_id')
-            ->using(DesignProductSpecification::class)
-            ->withTimestamps();
+        return $this->morphToMany(
+            ProductSpecificationOption::class,
+            'customizable',
+            'customizable',
+            'customizable_id',
+            'spec_option_id'
+        )->withTimestamps();
     }
+
 
     public function invoices()
     {

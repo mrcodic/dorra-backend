@@ -3,16 +3,21 @@
 namespace App\Services;
 
 use App\Enums\DiscountCode\TypeEnum;
-use App\Models\{CartItem, Product};
-use App\Repositories\Interfaces\{
-    DiscountCodeRepositoryInterface,
+use App\Enums\HttpEnum;
+use App\Models\{CartItem, Guest, Product, Template, User};
+use App\Repositories\Interfaces\{DiscountCodeRepositoryInterface,
     CartRepositoryInterface,
     DesignRepositoryInterface,
-    GuestRepositoryInterface
-};
+    GuestRepositoryInterface,
+    ProductPriceRepositoryInterface,
+    ProductRepositoryInterface,
+    ProductSpecificationOptionRepositoryInterface,
+    TemplateRepositoryInterface};
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
+use phpDocumentor\Reflection\Types\Array_;
 
 class CartService extends BaseService
 {
@@ -22,28 +27,18 @@ class CartService extends BaseService
         public CartRepositoryInterface         $cartRepository,
         public DiscountCodeRepositoryInterface $discountCodeRepository,
         public GuestRepositoryInterface        $guestRepository,
+        public ProductPriceRepositoryInterface $productPriceRepository,
+        public ProductSpecificationOptionRepositoryInterface $optionRepository,
     )
     {
         parent::__construct($repository);
     }
 
-    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    public function storeResource($request, $relationsToStore = [], $relationsToLoad = [])
     {
-        $userId = auth('sanctum')->id();
-        $cookieValue = Arr::get($validatedData, 'cookie_id');
-        $guestId = null;
-
-        if (!$userId && $cookieValue) {
-            $guest = $this->guestRepository->query()->firstWhere(['cookie_value' => $cookieValue]);
-            $guestId = $guest?->id;
-        }
-
-        if (!$guestId && !$userId )
-        {
-            throw ValidationException::withMessages([
-                ["user_id" => 'Either user ID or cookie ID must be present.']
-            ]);
-        }
+        $validatedData = $request->validated();
+        $userId = getAuthOrGuest() instanceof User ? getAuthOrGuest()->id : null;
+        $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
         $cart = $this->repository->query()
             ->when($userId, fn($query) => $query->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
@@ -56,23 +51,21 @@ class CartService extends BaseService
                 ...Arr::except($validatedData, ['design_id', 'cookie_id']),
             ]);
         }
+        $product = $request->getProduct();
+        $template = $request->getTemplate();
+        $design = $request->getDesign();
+        $productPrice = $this->productPriceRepository->query()->find(Arr::get($validatedData,'product_price_id'))?->price;
+        $specsSum = collect(Arr::get($validatedData, 'specs'))
+            ->map(function ($spec) {
+                return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
+            })
+            ->sum();
+        $subTotal = $product->base_price ?? $productPrice + $specsSum;
+        $cart->addItem($design ?? $template, $product, $subTotal);
+        $cart->update(['price' => $cart->items->sum('sub_total') ]);
 
-        $design = $this->designRepository->find($validatedData['design_id']);
-
-        $cart->designs()->syncWithoutDetaching([
-            $design->id => [
-                'status' => 1,
-                'sub_total' => $design->total_price,
-                'total_price' => $design->total_price,
-            ]
-        ]);
-
-        $subTotal = $cart->designs->sum(fn($design) => $design->total_price ?? 0);
-        $cart->update(['price' => $subTotal]);
-
-        return $cart->load(['designs.product']);
+        return $cart;
     }
-
 
     /**
      * @throws ValidationException
@@ -98,43 +91,37 @@ class CartService extends BaseService
         }
 
         return $this->repository->query()
-            ->when($userId, fn($q) =>$q->where('user_id', $userId))
+            ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
-            ->with(['designs.product', 'cartItems.product','designs' => fn($q) => $q->latest(),])
+//            ->with(['designs.product', 'cartItems.product', 'designs' => fn($q) => $q->latest(),])
+                ->with(['items.product'])
             ->first();
     }
 
-    /**
-     * @throws ValidationException
-     */
-    public function deleteItemFromCart($designId)
+    public function deleteItemFromCart($itemId)
     {
-        $this->handleTransaction(function () use ($designId) {
-            $cart = $this->resolveUserCart();
-            if (!$cart) {
-                throw ValidationException::withMessages([
-                    'cart' => ['Cart not found for this user.'],
-                ]);
-            }
-            $cartItem = CartItem::where('design_id', $designId)
-                ->where('cart_id', $cart->id)
-                ->first();
-
-            if (!$cartItem) {
-                throw ValidationException::withMessages([
-                    'cart' => ['Design item not found in cart.'],
-                ]);
-            }
-
-            $itemPrice = $cartItem->design->total_price ?? $cartItem->total_price ?? 0;
-
-            $cartItem->delete();
-
-            $cart->update([
-                'price' => max(0, $cart->price - $itemPrice),
+        $cart = $this->resolveUserCart();
+        if (!$cart) {
+            throw ValidationException::withMessages([
+                'cart' => ['Cart not found for this user.'],
             ]);
-        });
+        }
+        $item = $cart->items()->whereKey($itemId)->first();
+
+        if (!$item) {
+            throw ValidationException::withMessages([
+                'cart' => ['Item not found in cart.'],
+            ]);
+        }
+        $item->delete();
+        $cart->update([
+            'price' => $cart->items()->sum('sub_total'),
+        ]);
+
+        return Response::api(message:"Item removed from cart successfully.");
+
     }
+
 
     public function applyDiscount($request)
     {

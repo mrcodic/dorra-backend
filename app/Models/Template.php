@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -26,11 +28,7 @@ class Template extends Model implements HasMedia
         'name',
         'status',
         'design_data',
-        'type',
         'description',
-        'unit',
-        'height',
-        'width',
     ];
     protected $casts = [
         'status' => StatusEnum::class,
@@ -67,6 +65,11 @@ class Template extends Model implements HasMedia
     public function types()
     {
         return $this->belongsToMany(Type::class)->withTimestamps();
-
     }
+
+    public function specifications(): MorphMany
+    {
+        return $this->morphMany(CustomizableProductSpecification::class, 'customizable');
+    }
+
 }

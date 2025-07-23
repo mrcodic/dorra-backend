@@ -5,19 +5,34 @@ namespace App\Models;
 use App\Observers\CartItemObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 #[ObservedBy(CartItemObserver::class)]
 class CartItem extends Pivot
 {
+    protected $fillable = [
+        'itemable_id',
+        'itemable_type',
+        'cart_id',
+        'product_id',
+        'status',
+        'sub_total',
+        'total_price'
+    ];
     protected $table = 'cart_items';
 
-    public function design(): BelongsTo
+    public function itemable(): MorphTo
     {
-        return $this->belongsTo(Design::class);
+        return $this->morphTo();
     }
 
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 }

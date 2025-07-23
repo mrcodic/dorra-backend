@@ -36,30 +36,30 @@ class TemplateResource extends JsonResource
             'base64_preview_image' => $this->when(isset($this->image), $this->image),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
-            'is_add_to_cart' => $this->canBeAddedToCart(),
+//            'is_add_to_cart' => $this->canBeAddedToCart(),
 
         ];
     }
 
-    protected function canBeAddedToCart()
-    {
-        $user = auth('sanctum')->user();
-        $guest = Guest::find(request()->cookie('cookie_id'));
-        if ($user) {
-            return $user->cartItems?->contains(function ($cartItem) {
-                return optional($cartItem->design->template)->id === $this->id;
-            });
-        }
-        if ($guest) {
-
-            return $guest->cartItems?->contains(function ($cartItem) {
-                return optional($cartItem->design->template)->id === $this->id;
-            });
-
-
-        }
-
-    }
+//    protected function canBeAddedToCart()
+//    {
+//        $user = auth('sanctum')->user();
+//        $guest = Guest::find(request()->cookie('cookie_id'));
+//        if ($user) {
+//            return $user->cartItems?->contains(function ($cartItem) {
+//                return optional($cartItem->design->template)->id === $this->id;
+//            });
+//        }
+//        if ($guest) {
+//
+//            return $guest->cartItems?->contains(function ($cartItem) {
+//                return optional($cartItem->design->template)->id === $this->id;
+//            });
+//
+//
+//        }
+//
+//    }
 
 
 }

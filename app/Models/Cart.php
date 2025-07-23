@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Cart extends Model
 {
@@ -20,17 +19,36 @@ class Cart extends Model
            return fmod($value, 1) == 0.0 ? (int)$value : $value;
         });
     }
-
-    public function designs()
+    public function items()
     {
-        return $this->belongsToMany(Design::class,'cart_items')
-            ->withTimestamps();
+        return $this->hasMany(CartItem::class)->with('itemable');
     }
-    public function cartItems()
+    public function addItem(Model $itemable, ?Product $product = null,$subTotal): CartItem
     {
-        return $this->belongsToMany(Design::class, 'cart_items')
-            ->using(CartItem::class)
-            ->withPivot(['sub_total', 'total_price'])
-            ->withTimestamps();
+        return $this->items()->create([
+            'itemable_id' => $itemable->id,
+            'itemable_type' => get_class($itemable),
+            'product_id' => $product?->id,
+            'status' => 1,
+            'sub_total' => $subTotal,
+            'total_price' => $subTotal,
+        ]);
+    }
+    public function removeItem(CartItem $item)
+    {
+        return $item->delete();
+    }
+    public function clear()
+    {
+        return $this->items()->delete();
+    }
+    public function totalItems()
+    {
+        return $this->items()->count();
+    }
+
+    public function itemsByType(string $class)
+    {
+        return $this->items()->where('itemable_type', $class)->get();
     }
 }

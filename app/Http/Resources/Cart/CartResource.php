@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Cart;
 
-use App\Http\Resources\Design\DesignResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,12 +16,12 @@ class CartResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "designs" => DesignResource::collection($this->whenLoaded('designs')),
-            'sub_total' => $this->designs->pluck('total_price')->sum(),
+            "items" =>  CartItemResource::collection($this->whenLoaded('items')) ,
+            'sub_total' => $this->price,
             'total' => getTotalPrice(0,  $this->price),
             'tax' => [
                 'ratio' => setting('tax') * 100 . "%",
-                'value' => getPriceAfterTax(setting('tax'), $this->designs->pluck('total_price')->sum()),
+                'value' => getPriceAfterTax(setting('tax'), $this->price),
             ],
             'delivery' => setting('delivery'),
             'discount' => [

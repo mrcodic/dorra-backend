@@ -6,6 +6,24 @@ use App\Repositories\Implementations\SettingRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
+function getAuthOrGuest()
+{
+    $user = auth('sanctum')->user();
+
+    if ($user) {
+        return $user;
+    }
+
+    $cookieData = getCookie('cookie_id');
+    $cookieValue = $cookieData['value'];
+
+    $guest = \App\Models\Guest::query()->firstwhere('cookie_value', $cookieValue);
+    if ($guest) {
+        return $guest;
+
+    }
+}
+
 function getActiveGuard(): string|null
 {
     foreach (array_keys(config('auth.guards')) as $guard) {
@@ -67,12 +85,11 @@ function getDiscountAmount($discount, $subtotal)
     if (!is_object($discount)) {
         return 0;
     }
-    if ($discount->type == \App\Enums\DiscountCode\TypeEnum::PERCENTAGE)
-    {
+    if ($discount->type == \App\Enums\DiscountCode\TypeEnum::PERCENTAGE) {
         return $subtotal * $discount->value;
 
     }
-    return  $discount->value;
+    return $discount->value;
 
 }
 
@@ -82,7 +99,7 @@ function getTotalPrice($discount, $subtotal): float|int
     $discountAmount = getDiscountAmount($discount, $subtotal);
     $tax = setting('tax');
     $delivery = setting('delivery');
-    return  $subtotal - $discountAmount + ($tax * $subtotal) + $delivery;
+    return $subtotal - $discountAmount + ($tax * $subtotal) + $delivery;
 }
 
 function getPriceAfterTax($tax, $subtotal): float|int

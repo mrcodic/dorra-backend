@@ -1,26 +1,27 @@
 <?php
 
-use App\Models\{Design,
-    ProductSpecification,
-    ProductSpecificationOption
-};
+use App\Models\ProductSpecification;
+use App\Models\ProductSpecificationOption;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration
+{
+
     public function up(): void
     {
-        Schema::create('design_product_specification', function (Blueprint $table) {
+        Schema::create('customizable', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Design::class)->constrained()->cascadeOnDelete();
+            $table->string('customizable_type');
+            $table->string('customizable_id');
+            $table->index(['customizable_type', 'customizable_id'], 'customizable_index');
+            $table->nullableMorphs('owner');
             $table->foreignIdFor(ProductSpecification::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(ProductSpecificationOption::class, 'spec_option_id')
                 ->constrained('product_specification_options')
                 ->cascadeOnDelete();
+            $table->decimal('price');
             $table->timestamps();
         });
     }
@@ -30,6 +31,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('design_product_specification');
+        Schema::dropIfExists('customizable');
     }
 };
+

@@ -94,6 +94,12 @@ class ProductService extends BaseService
                     '%' . strtolower(request()->search) . '%'
                 ]);
             })
+            ->when(request()->filled('templates'), function ($q) {
+                $templates = request('templates');
+                $q->whereHas('templates', function ($q) use ($templates) {
+                    $q->whereIn('templates.id', is_array($templates) ? $templates : [$templates]);
+                });
+            })
             ->allowedFilters([
                 AllowedFilter::partial('category.id'),
                 AllowedFilter::custom('sub_categories', new SubCategoryFilter()),
