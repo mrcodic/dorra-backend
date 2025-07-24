@@ -111,13 +111,7 @@ class TemplateService extends BaseService
         return $model->load($relationsToLoad);
     }
 
-    /**
-     * @param $validatedData
-     * @param $type
-     * @param $model
-     * @return string
-     * @throws \Exception
-     */
+
     public function convertBase64ToImageLink($validatedData, $model)
     {
         if (isset($validatedData['base64_preview_image'])) {

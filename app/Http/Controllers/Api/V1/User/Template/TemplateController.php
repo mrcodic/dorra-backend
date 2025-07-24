@@ -35,7 +35,11 @@ class TemplateController extends Controller
 
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id)));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id,[
+            'products' => fn($q) => $q->whereKey(request()->integer('product_id')),
+            'products.specifications',
+            'products.prices',
+            ])));
 
 
     }

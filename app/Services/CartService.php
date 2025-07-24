@@ -3,22 +3,19 @@
 namespace App\Services;
 
 use App\Enums\DiscountCode\TypeEnum;
-use App\Enums\HttpEnum;
-use App\Models\{CartItem, Guest, Product, Template, User};
+use App\Models\{Guest, Product, User};
 use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     DiscountCodeRepositoryInterface,
     CartRepositoryInterface,
     DesignRepositoryInterface,
     GuestRepositoryInterface,
     ProductPriceRepositoryInterface,
-    ProductRepositoryInterface,
-    ProductSpecificationOptionRepositoryInterface,
-    TemplateRepositoryInterface};
+    ProductSpecificationOptionRepositoryInterface,};
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
-use phpDocumentor\Reflection\Types\Array_;
+
 
 class CartService extends BaseService
 {
