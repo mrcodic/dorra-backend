@@ -22,7 +22,7 @@ class Cart extends Model
     }
     public function items()
     {
-        return $this->hasMany(CartItem::class)->with('itemable');
+        return $this->hasMany(CartItem::class);
     }
     public function addItem(Model $itemable, ?Product $product = null,$quantity,$specsSum,$productPrice,$subTotal): CartItem
     {
