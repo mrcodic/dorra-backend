@@ -10,6 +10,7 @@ use App\Models\Design;
 use App\Services\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
 {
@@ -28,10 +29,13 @@ class CartController extends Controller
         return Response::api(data: $data);
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function destroy(Request $request)
     {
-        $request->validate(['design_id' => 'required', 'exists:designs,id']);
-        $this->cartService->deleteItemFromCart($request->design_id);
+        $request->validate(['item_id' => 'required', 'exists:items,id']);
+        $this->cartService->deleteItemFromCart($request->item_id);
         return Response::api();
     }
 

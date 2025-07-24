@@ -572,14 +572,14 @@ class OrderService extends BaseService
     public function checkout($request)
     {
         $cart = $this->cartService->getCurrentUserOrGuestCart();
-        if (!$cart || $cart->cartItems->isEmpty()) {
+        if (!$cart || $cart->items->isEmpty()) {
             return false;
         }
         $discountCode = $request->discount_code_id ? $this->discountCodeRepository->find($request->discount_code_id) : 0;
-        $subTotal = $cart->cartItems()->sum('sub_total');
+        $subTotal = $cart->items()->sum('sub_total');
         $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
-            $order->orderItems()->createMany(OrderItemData::fromCartItems($cart->cartItems->load(['productPrice', 'product'])));
+            $order->orderItems()->createMany(OrderItemData::fromCartItems($cart->items));
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
                 $order->pickupContact()->create(PickupContactData::fromRequest($request));

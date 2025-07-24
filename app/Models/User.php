@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Interfaces\Auth\MustVerifyEmail;
-use App\Models\ShippingAddress;
+
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Permission\Traits\HasRoles;

@@ -22,7 +22,6 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     ShippingAddress\ShippingAddressController,
     Template\TemplateController};
 use App\Http\Controllers\Shared\CommentController;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
