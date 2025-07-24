@@ -15,14 +15,12 @@ use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
 {
-    public function __construct(public CartService $cartService)
-    {
-    }
+    public function __construct(public CartService $cartService){}
 
     public function store(AddToCartRequest $request)
     {
-        $cart = $this->cartService->storeResource($request);
-        return Response::api(message: "Item added to cart successfully", data: ['cookie_value' => $cart->guest?->cookie_value,]);
+       $cart =  $this->cartService->storeResource($request);
+        return Response::api(message: "Item added to cart successfully",data: ['cookie_value' => $cart->guest?->cookie_value,]);
     }
 
     public function index()
@@ -71,26 +69,10 @@ class CartController extends Controller
         return Response::api();
     }
 
-    public function priceDetails()
+    public function priceDetails($itemId)
     {
-        $cartItems = $this->cartService->priceDetails();
-        return Response::api(data: [
-            'items' => $cartItems->map(function ($item) {
-                return   [
-                    'specs' => $item->specs->flatMap(function ($spec) {
-                    return [
-                        "item" => $spec->spec_name,
-                        "selection" => $spec->option_name,
-                        "price" => $spec->option_price,
-                    ];
-                }), "product" => $item->product->name,
-                    "quantity" => $item->quantity,
-                    "total_price" => $item->sub_total,];
-
-
-            }),
-
-        ]);
+        $itemSpecs = $this->cartService->priceDetails($itemId);
+        return Response::api(data: new CartItemResource($itemSpecs));
 
 
     }

@@ -70,7 +70,7 @@ Route::controller(CartController::class)->group(function () {
     Route::get('/cart-info', 'cartInfo');
     Route::post('/carts/apply-discount', 'applyDiscount');
     Route::delete('/carts', 'destroy');
-    Route::get('carts/price-details', 'priceDetails');
+    Route::get('carts/{item}/price-details', 'priceDetails');
 
     Route::post('carts/{item}/add-quantity', 'addQuantity');
 

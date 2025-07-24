@@ -14,9 +14,9 @@ class CartItemSpecsResource extends JsonResource
     {
 
         return [
-            'spec_name' => $this->spec_name,
-            'option_name' => $this->option_name,
-            'option_price' => $this->option_price,
+            'item' => $this->spec_name,
+            'selection' => $this->option_name,
+            'price' => $this->option_price,
 
         ];
     }
