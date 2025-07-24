@@ -1,7 +1,7 @@
 <?php
 
 
-use App\Models\{Design, Template};
+use App\Models\{Design, Guest, Template};
 use App\Repositories\Implementations\SettingRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -17,10 +17,9 @@ function getAuthOrGuest()
     $cookieData = getCookie('cookie_id');
     $cookieValue = $cookieData['value'];
 
-    $guest = \App\Models\Guest::query()->firstwhere('cookie_value', $cookieValue);
+    $guest = Guest::query()->firstOrCreate(['cookie_value'=> $cookieValue]);
     if ($guest) {
         return $guest;
-
     }
 }
 

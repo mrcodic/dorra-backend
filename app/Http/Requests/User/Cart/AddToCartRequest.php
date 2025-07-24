@@ -95,22 +95,6 @@ class AddToCartRequest extends BaseRequest
             }
         }
 
-        $activeGuard = getActiveGuard();
-        $userId = $activeGuard === 'sanctum' ? Auth::guard($activeGuard)->id() : null;
-        $cookie = request()->cookie('cookie_id');
-
-        if (empty($userId) && empty($cookie)) {
-            throw new HttpResponseException(
-                Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
-                    'user_id' => 'Either user ID or cookie ID must be present.',
-                ])
-            );
-        }
-
-        $this->merge([
-            'user_id' => $userId,
-            'cookie_id' => $cookie,
-        ]);
     }
 
     public function getTemplate(): ?Template
