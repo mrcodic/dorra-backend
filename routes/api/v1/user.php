@@ -48,10 +48,14 @@ Route::prefix('login')->controller(LoginController::class)->group(function () {
 });
 
 Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
-Route::get('sub-categories', [MainController::class, 'subCategories']);
 
-Route::get('product-types', [ProductController::class, 'productTypes']);
+Route::get('sub-categories', [MainController::class, 'subCategories']);
+Route::controller(ProductController::class)->group(function () {
+    Route::get('product-types', 'productTypes');
+    Route::get('products/{product}/quantities', 'getQuantities');
+});
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+
 
 Route::controller(DesignController::class)->prefix('designs/')->group(function () {
     Route::post('bulk-restore', 'bulkRestore');
@@ -59,7 +63,6 @@ Route::controller(DesignController::class)->prefix('designs/')->group(function (
     Route::post('bulk-force-delete', 'bulkForceDelete');
     Route::get('owners', 'owners');
     Route::get('{design}/price-details', 'priceDetails');
-    Route::get('{design}/quantities', 'getQuantities');
     Route::post('design-finalization', 'designFinalization');
 });
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);

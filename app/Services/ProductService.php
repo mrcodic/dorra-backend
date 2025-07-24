@@ -330,6 +330,10 @@ class ProductService extends BaseService
 
 
     }
-
+    public function getQuantities($productId)
+    {
+        $product = $this->repository->find($productId);
+        return $product->prices->pluck('quantity', 'id')->toArray();
+    }
 
 }

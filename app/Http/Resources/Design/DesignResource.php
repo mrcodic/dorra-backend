@@ -36,7 +36,7 @@ class DesignResource extends JsonResource
             'type' => 'design',
             'delete_since' => $this->deleted_at?->diffForHumans(),
             'is_saved' => $this->when(!$this->deleted_at,fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id()),),
-            'is_added_to_cart' => $this->isAddedToCart(),
+//            'is_added_to_cart' => $this->isAddedToCart(),
 
         ];
     }

@@ -183,12 +183,6 @@ class DesignService extends BaseService
         ];
     }
 
-    public function getQuantities($designId)
-    {
-        $design = $this->repository->find($designId);
-        return $design->product->prices->pluck('quantity', 'id')->toArray();
-    }
-
     public function owners()
     {
 

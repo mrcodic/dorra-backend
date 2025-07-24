@@ -94,14 +94,6 @@ class DesignController extends Controller
 
     }
 
-    public function getQuantities($designId)
-    {
-        $quantities = $this->designService->getQuantities($designId);
-        $quantities = $quantities ?: (object)[];
-        return Response::api(data: $quantities);
-
-    }
-
     public function bulkDelete(Request $request)
     {
         $request->validate([
