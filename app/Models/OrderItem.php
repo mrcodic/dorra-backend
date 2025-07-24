@@ -5,12 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class OrderItem extends Model
 {
 
-    protected $guarded = [];
-
+    protected $fillable = [
+        'itemable_id',
+        'itemable_type',
+        'order_id',
+        'product_id',
+        'specs_price',
+        'sub_total',
+        'product_price',
+        'quantity'
+    ];
     public function totalPrice(): Attribute
     {
         return Attribute::get(function ($value) {
@@ -24,8 +33,8 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function design(): BelongsTo
+    public function itemable(): MorphTo
     {
-        return $this->belongsTo(Design::class);
+        return $this->morphTo();
     }
 }

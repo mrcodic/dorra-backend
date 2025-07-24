@@ -579,7 +579,7 @@ class OrderService extends BaseService
         $subTotal = $cart->items()->sum('sub_total');
         $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
-            $order->orderItems()->createMany(OrderItemData::fromCartItems($cart->items));
+            $order->orderItems()->createMany($cart->items->toArray());
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
                 $order->pickupContact()->create(PickupContactData::fromRequest($request));

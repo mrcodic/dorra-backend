@@ -21,6 +21,7 @@ class CartItemResource extends JsonResource
                 : new TemplateResource($item),
             'product' => ProductResource::make($this->whenLoaded('product')),
             'price' => $this->sub_total,
+            'quantity' => $this->quantity,
         ];
     }
 }

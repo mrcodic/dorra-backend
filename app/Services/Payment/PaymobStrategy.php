@@ -63,6 +63,7 @@ use Illuminate\Support\Facades\Log;
         ])->post($this->baseUrl . '/v1/intention/', $dto->toArray());
 
         $result = $response->json();
+        dd($result);
         Log::error('Failed to create payment intention', [
             'response' => $result,
             'vzx' => $response,
@@ -74,7 +75,7 @@ use Illuminate\Support\Facades\Log;
             ]);
             return false;
         }
-        $data['cart']->cartItems()->detach();
+        $data['cart']->items()->delete();
         $data['cart']->update(['price' => 0]);
         if ($data['discountCode'] !== 0)
         {
