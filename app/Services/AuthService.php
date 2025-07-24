@@ -11,6 +11,7 @@ use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -100,52 +101,39 @@ class AuthService
                     ->where('cookie_value', $cookieValue)
                     ->first();
 
-//                if ($guest) {
-//                    if ($user->cart) {
-//                        $guestCartItems = collect($guest->cart->cartItems ?? []);
-//
-//                        $syncData = $guestCartItems->mapWithKeys(function ($design) {
-//                            return [
-//                                $design->id => [
-//                                    'status' => 1,
-//                                    'sub_total' => $design->total_price,
-//                                    'total_price' => $design->total_price,
-//                                    'created_at' => now(),
-//                                    'updated_at' => now(),
-//                                ],
-//                            ];
-//                        })->toArray();
-//
-//                        $user->cart?->cartItems()->syncWithoutDetaching($syncData);
-//                        $guest->cart?->cartItems()->detach();
-//                        $guest->cart?->delete();
-//
-//                        $this->designRepository->query()
-//                            ->whereNull('user_id')
-//                            ->where('guest_id', $guest->id)
-//                            ->update(['user_id' => $user->id]);
-//
-//                        $this->shippingAddressRepository->query()
-//                            ->whereNull('user_id')
-//                            ->where('guest_id', $guest->id)
-//                            ->update(['user_id' => $user->id]);
-//                    } else {
-//                        $this->designRepository->query()
-//                            ->whereNull('user_id')
-//                            ->where('guest_id', $guest->id)
-//                            ->update(['user_id' => $user->id]);
-//
-//                        $this->shippingAddressRepository->query()
-//                            ->whereNull('user_id')
-//                            ->where('guest_id', $guest->id)
-//                            ->update(['user_id' => $user->id]);
-//
-//                        $this->cartRepository->query()
-//                            ->whereNull('user_id')
-//                            ->where('guest_id', $guest->id)
-//                            ->update(['user_id' => $user->id]);
-//                    }
-//                }
+                if ($guest) {
+                    if ($user->cart) {
+                        $guestCartItems = $guest->cart->items->toArray() ?? [];
+                        $user->cart?->items()->createMany($guestCartItems);
+                        $guest->cart?->items()->delete();
+                        $guest->cart?->delete();
+
+                        $this->designRepository->query()
+                            ->whereNull('user_id')
+                            ->where('guest_id', $guest->id)
+                            ->update(['user_id' => $user->id]);
+
+                        $this->shippingAddressRepository->query()
+                            ->whereNull('user_id')
+                            ->where('guest_id', $guest->id)
+                            ->update(['user_id' => $user->id]);
+                    } else {
+                        $this->designRepository->query()
+                            ->whereNull('user_id')
+                            ->where('guest_id', $guest->id)
+                            ->update(['user_id' => $user->id]);
+
+                        $this->shippingAddressRepository->query()
+                            ->whereNull('user_id')
+                            ->where('guest_id', $guest->id)
+                            ->update(['user_id' => $user->id]);
+
+                        $this->cartRepository->query()
+                            ->whereNull('user_id')
+                            ->where('guest_id', $guest->id)
+                            ->update(['user_id' => $user->id]);
+                    }
+                }
             }
 
 

@@ -164,11 +164,10 @@ class CartService extends BaseService
 
     public function cartInfo(): array
     {
-
         $cart = $this->resolveUserCart();
         return [
             'price' => $cart?->price ?? 0,
-            'items_count' => $cart?->cartItems->count() ?? 0,
+            'items_count' => $cart?->totalItems() ?? 0,
         ];
     }
 
