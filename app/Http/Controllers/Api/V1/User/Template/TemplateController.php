@@ -37,7 +37,7 @@ class TemplateController extends Controller
     {
         return Response::api(data: TemplateResource::make($this->templateService->showResource($id,[
             'products' => fn($q) => $q->whereKey(request()->integer('product_id')),
-            'products.specifications',
+            'products.specifications.options',
             'products.prices',
             ])));
 
