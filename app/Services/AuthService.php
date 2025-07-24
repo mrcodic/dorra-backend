@@ -103,7 +103,7 @@ class AuthService
 
                 if ($guest) {
                     if ($user->cart) {
-                        $guestCartItems = $guest->cart->items->toArray() ?? [];
+                        $guestCartItems = $guest->cart->items?->toArray() ?? [];
                         $user->cart?->items()->createMany($guestCartItems);
                         $guest->cart?->items()->delete();
                         $guest->cart?->delete();
