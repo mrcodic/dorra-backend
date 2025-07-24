@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Observers\CartItemObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 #[ObservedBy(CartItemObserver::class)]
-class CartItem extends Pivot
+class CartItem extends Model
 {
     protected $fillable = [
         'itemable_id',

@@ -10,7 +10,8 @@ use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     DesignRepositoryInterface,
     GuestRepositoryInterface,
     ProductPriceRepositoryInterface,
-    ProductSpecificationOptionRepositoryInterface,};
+    ProductSpecificationOptionRepositoryInterface,
+    ProductSpecificationRepositoryInterface};
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response;
@@ -27,6 +28,7 @@ class CartService extends BaseService
         public GuestRepositoryInterface        $guestRepository,
         public ProductPriceRepositoryInterface $productPriceRepository,
         public ProductSpecificationOptionRepositoryInterface $optionRepository,
+        public ProductSpecificationRepositoryInterface $specificationRepository,
         public CartItemRepositoryInterface $cartItemRepository,
     )
     {
@@ -66,12 +68,13 @@ class CartService extends BaseService
             $cartItem = $cart->addItem($design ?? $template,$quantity, $specsSum, $productPrice,$subTotal,$product);
             collect(Arr::get($validatedData, 'specs'))->each(function ($spec) use ($cartItem) {
               $option = $this->optionRepository->query()->find($spec['option']);
-              $specification = $this->optionRepository->query()->find($spec['id']);
+              $specification = $this->specificationRepository->query()->find($spec['id']);
               if ($option && $specification) {
                   $cartItem->specs()->create([
                       'spec_name' => $specification->name,
                       'option_name' => $option->value,
                       'option_price' => $option->price,
+                      'cart_item_id' => $cartItem->id,
                   ]);
               }
           });
