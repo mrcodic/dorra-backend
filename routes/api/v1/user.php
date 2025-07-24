@@ -133,6 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 Route::get('templates',[TemplateController::class, 'index']);
+Route::get('templates/{template}',[TemplateController::class, 'show']);
 
 Route::controller(PaymentController::class)->group(function () {
     Route::get('payment-methods','paymentMethods');
