@@ -30,7 +30,7 @@ class PaymentRequestData
         $amountCents = (int) ((int)$this->order->total_price * 100);
         $baseItems = $this->order->orderItems->map(fn($item) => [
             'name' => Str::limit($item?->itemable->name ?? 'Item', 50, ''),
-            'amount' => (int) round($item->total_price * 100),
+            'amount' => (int) round($item->sub_total * 100),
             'quantity' => 1,
         ])->toArray();
 
@@ -59,7 +59,6 @@ class PaymentRequestData
             ];
         }
         $allItems = array_merge($baseItems, $extraItems);
-
         return [
             'amount' => $amountCents,
             'method' => $this->method,
