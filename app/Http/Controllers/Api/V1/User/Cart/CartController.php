@@ -17,8 +17,9 @@ class CartController extends Controller
 
     public function store(AddToCartRequest $request)
     {
-        $this->cartService->storeResource($request);
-        return Response::api(message: "Item added to cart successfully");
+       $cart =  $this->cartService->storeResource($request);
+
+        return Response::api(message: "Item added to cart successfully",data: ['cookie_value' => $cart->guest?->cookie_value,]);
     }
 
     public function index()
