@@ -16,6 +16,7 @@ use App\Rules\ValidDiscountCode;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
+use function Pest\Laravel\get;
 
 
 class CartService extends BaseService
@@ -111,7 +112,6 @@ class CartService extends BaseService
         return $this->repository->query()
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
-//            ->with(['designs.product', 'cartItems.product', 'designs' => fn($q) => $q->latest(),])
                 ->with(['items.product'])
             ->first();
     }
@@ -200,5 +200,13 @@ class CartService extends BaseService
             $updated = $cartItem->update($request->only(['quantity']));
         }
         return $updated;
+    }
+
+    public function priceDetails()
+    {
+        return $this->cartItemRepository->query()->select(['id','product_id','quantity','sub_total','cart_id'])
+            ->where('cart_id', $this->resolveUserCart()->id)
+            ->get()
+            ->load(['specs']);
     }
 }

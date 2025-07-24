@@ -85,15 +85,6 @@ class DesignController extends Controller
         );
     }
 
-
-    public function priceDetails($designId)
-    {
-        $designData = $this->designService->priceDetails($designId);
-        return Response::api(data: new DesignFinalizationCollectionResource(collect($designData)));
-
-
-    }
-
     public function bulkDelete(Request $request)
     {
         $request->validate([

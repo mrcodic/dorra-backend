@@ -174,14 +174,7 @@ class DesignService extends BaseService
     }
 
 
-    public function priceDetails($designId): array
-    {
-        $design = $this->repository->find($designId);
-        return [
-            'design' => $design,
-            'specs' => $design->specifications->load(['options'])
-        ];
-    }
+
 
     public function owners()
     {
