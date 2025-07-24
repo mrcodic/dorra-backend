@@ -35,35 +35,51 @@ class CartService extends BaseService
 
     public function storeResource($request, $relationsToStore = [], $relationsToLoad = [])
     {
-        $validatedData = $request->validated();
-        $userId = getAuthOrGuest() instanceof User ? getAuthOrGuest()->id : null;
-        $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
-        $cart = $this->repository->query()
-            ->when($userId, fn($query) => $query->where('user_id', $userId))
-            ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
-            ->first();
+      return  $this->handleTransaction(function () use ($request, $relationsToStore, $relationsToLoad) {
+            $validatedData = $request->validated();
+            $userId = getAuthOrGuest() instanceof User ? getAuthOrGuest()->id : null;
+            $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
+            $cart = $this->repository->query()
+                ->when($userId, fn($query) => $query->where('user_id', $userId))
+                ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
+                ->first();
 
-        if (!$cart) {
-            $cart = $this->repository->query()->create([
-                'user_id' => $userId,
-                'guest_id' => $guestId,
-                ...Arr::except($validatedData, ['design_id', 'cookie_id']),
-            ]);
-        }
-        $product = $request->getProduct();
-        $template = $request->getTemplate();
-        $design = $request->getDesign();
-        $productPrice = $this->productPriceRepository->query()->find(Arr::get($validatedData,'product_price_id'))?->price;
-        $specsSum = collect(Arr::get($validatedData, 'specs'))
-            ->map(function ($spec) {
-                return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
-            })
-            ->sum();
-        $quantity = $productPrice->quantity ?? 1;
-        $productPrice = $product->base_price ?? $productPrice;
-        $subTotal = ($product->base_price ?? $productPrice )+ $specsSum;
-        $cart->addItem($design ?? $template, $product, $quantity, $specsSum, $productPrice,$subTotal);
-        return $cart;
+            if (!$cart) {
+                $cart = $this->repository->query()->create([
+                    'user_id' => $userId,
+                    'guest_id' => $guestId,
+                    ...Arr::except($validatedData, ['design_id', 'cookie_id']),
+                ]);
+            }
+            $product = $request->getProduct();
+            $template = $request->getTemplate();
+            $design = $request->getDesign();
+            $productPrice = $this->productPriceRepository->query()->find(Arr::get($validatedData,'product_price_id'))?->price;
+            $specsSum = collect(Arr::get($validatedData, 'specs'))
+                ->map(function ($spec) {
+                    return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
+                })
+                ->sum();
+            $quantity = $productPrice->quantity ?? 1;
+            $productPrice = $product->base_price ?? $productPrice;
+            $subTotal = ($product->base_price ?? $productPrice )+ $specsSum;
+            $cartItem = $cart->addItem($design ?? $template,$quantity, $specsSum, $productPrice,$subTotal,$product);
+            collect(Arr::get($validatedData, 'specs'))->each(function ($spec) use ($cartItem) {
+              $option = $this->optionRepository->query()->find($spec['option']);
+              $specification = $this->optionRepository->query()->find($spec['id']);
+              if ($option && $specification) {
+                  $cartItem->specs()->create([
+                      'spec_name' => $specification->name,
+                      'option_name' => $option->value,
+                      'option_price' => $option->price,
+                  ]);
+              }
+          });
+
+
+          return $cart;
+        });
+
     }
 
     /**
@@ -175,7 +191,8 @@ class CartService extends BaseService
     {
         $cartItem = $this->cartItemRepository->find($id);
         if ($cartItem->product->has_custom_prices) {
-            $productPrice = $this->productPriceRepository->query()->find($request->only(['product_price_id']))?->price;
+            dd($request->only(['product_price_id']));
+            $productPrice = $this->productPriceRepository->query()->find([$request->only(['product_price_id']]))?->price;
             $updated = $cartItem->update($productPrice);
         } else {
             $updated = $cartItem->update($request->only(['quantity']));

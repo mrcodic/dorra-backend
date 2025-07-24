@@ -24,7 +24,7 @@ class Cart extends Model
     {
         return $this->hasMany(CartItem::class);
     }
-    public function addItem(Model $itemable, ?Product $product = null,$quantity,$specsSum,$productPrice,$subTotal): CartItem
+    public function addItem(Model $itemable,$quantity,$specsSum,$productPrice,$subTotal, ?Product $product = null,): CartItem
     {
         return $this->items()->create([
             'itemable_id' => $itemable->id,
