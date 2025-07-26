@@ -8,11 +8,9 @@ use App\Models\Design;
 use App\Models\Product;
 use App\Models\Template;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Validation\Rule;
 
-class AddToCartRequest extends BaseRequest
+class StoreCartItemRequest extends BaseRequest
 {
     private Template|null $template = null;
     private Design|null $design = null;

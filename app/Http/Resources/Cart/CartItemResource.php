@@ -16,10 +16,12 @@ class CartItemResource extends JsonResource
         $item = $this->itemable;
         return [
             'id' => $this->id,
-            'type' => class_basename($item),
-            'item' => $item instanceof Design
-                ? new DesignResource($item)
-                : new TemplateResource($item),
+            'type' => $this->when($item ,class_basename($item)),
+            'item' => $this->when($item,function () use($item){
+               return $item instanceof Design
+                    ? new DesignResource($item)
+                    : new TemplateResource($item);
+            }),
             'specs' => CartItemSpecsResource::collection($this->whenLoaded('specs')),
             'product' => ProductResource::make($this->whenLoaded('product')),
             'price' => $this->sub_total,

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Cart extends Model
 {
@@ -12,6 +13,9 @@ class Cart extends Model
         "user_id",
         "guest_id",
         "price",
+        "discount_amount",
+        "discount_code_id"
+
     ];
 
     public function price(): Attribute
@@ -20,7 +24,7 @@ class Cart extends Model
            return fmod($value, 1) == 0.0 ? (int)$value : $value;
         });
     }
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(CartItem::class);
     }
@@ -33,25 +37,19 @@ class Cart extends Model
             'sub_total' => $subTotal,
             'specs_price' => $specsSum,
             'product_price' => $productPrice,
-            'quantity' => $quantity,
+            'quantity' => $quantity ?? 1,
         ]);
     }
-    public function removeItem(CartItem $item)
-    {
-        return $item->delete();
-    }
-    public function clear()
-    {
-        return $this->items()->delete();
-    }
+   
     public function totalItems()
     {
         return $this->items()->count();
     }
 
-    public function itemsByType(string $class)
+
+    public function discountCode(): BelongsTo
     {
-        return $this->items()->where('itemable_type', $class)->get();
+        return $this->belongsTo(DiscountCode::class);
     }
 
     public function guest(): BelongsTo

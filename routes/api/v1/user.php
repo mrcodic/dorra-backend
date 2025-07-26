@@ -71,7 +71,7 @@ Route::controller(CartController::class)->group(function () {
     Route::post('/carts/apply-discount', 'applyDiscount');
     Route::delete('/carts', 'destroy');
     Route::get('carts/{item}/price-details', 'priceDetails');
-
+    Route::put('carts/{item}/price-details', 'updatePriceDetails');
     Route::post('carts/{item}/add-quantity', 'addQuantity');
 
 });

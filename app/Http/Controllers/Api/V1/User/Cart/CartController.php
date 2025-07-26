@@ -3,24 +3,24 @@
 namespace App\Http\Controllers\Api\V1\User\Cart;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\Cart\AddToCartRequest;
-use App\Http\Resources\Cart\CartItemResource;
-use App\Http\Resources\Cart\CartResource;
-use App\Models\CartItem;
-use App\Models\Design;
+use App\Http\Requests\User\Cart\{StoreCartItemRequest, UpdateCartItemRequest};
+use App\Http\Resources\Cart\{CartItemResource, CartResource};
+use App\Models\{CartItem, Design};
 use App\Services\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\{Rules\RequiredIf, Rule, ValidationException};
 
 class CartController extends Controller
 {
     public function __construct(public CartService $cartService){}
 
-    public function store(AddToCartRequest $request)
+    public function store(StoreCartItemRequest $request)
     {
-       $cart =  $this->cartService->storeResource($request);
-        return Response::api(message: "Item added to cart successfully",data: ['cookie_value' => $cart->guest?->cookie_value,]);
+        $cart = $this->cartService->storeResource($request);
+        return Response::api(message: "Item added to cart successfully", data: [
+            'cookie_value' => $cart->guest?->cookie_value,
+        ]);
     }
 
     public function index()
@@ -54,16 +54,23 @@ class CartController extends Controller
 
     public function addQuantity(Request $request, $itemId)
     {
+        $cartItem = CartItem::find($itemId);
+
         $request->validate([
             'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
-            'product_price_id' => ['required_without:quantity', 'integer', 'exists:product_prices,id',
-                function ($attribute, $value, $fail) use ($itemId) {
-                    $cartItem = CartItem::find($itemId);
-                    if (!$cartItem || !$cartItem->product->prices->pluck('id')->contains($value)) {
-                        $fail('The selected product price is not valid for the current Item.');
+            'product_price_id' => [
+                Rule::requiredIf(function () use ($cartItem) {
+                    return $cartItem && $cartItem->product->has_custom_prices;
+                }),
+                'integer',
+                'exists:product_prices,id',
+                function ($attribute, $value, $fail) use ($cartItem) {
+                    if ($cartItem && !$cartItem->product->prices->pluck('id')->contains($value)) {
+                        $fail('The selected product price is not valid for the current item.');
                     }
-                }
+                },
             ],
+
         ]);
         $this->cartService->addQuantity($request, $itemId);
         return Response::api();
@@ -73,8 +80,12 @@ class CartController extends Controller
     {
         $itemSpecs = $this->cartService->priceDetails($itemId);
         return Response::api(data: new CartItemResource($itemSpecs));
+    }
 
-
+    public function updatePriceDetails(UpdateCartItemRequest $request, $itemId)
+    {
+        $itemSpecs = $this->cartService->updatePriceDetails($request->validated(), $itemId);
+        return Response::api(data: new CartItemResource($itemSpecs));
     }
 
 }

@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\CartItem;
-use Illuminate\Support\Facades\Log;
 
 class CartItemObserver
 {
@@ -25,8 +24,7 @@ class CartItemObserver
     public function updated(CartItem $cartItem): void
     {
         if ($cartItem->wasChanged('quantity')) {
-            if ($cartItem->product->has_custom_price) {
-
+            if ($cartItem->product->has_custom_prices) {
                 $subTotal = $cartItem->product_price + $cartItem->specs_price;
                 $cartItem->sub_total = $subTotal;
                 $cartItem->saveQuietly();

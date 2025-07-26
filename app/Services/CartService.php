@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Enums\DiscountCode\TypeEnum;
-use App\Models\{Guest, Product, User};
+use App\Models\{Category, Guest, Product, User};
 use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     DiscountCodeRepositoryInterface,
     CartRepositoryInterface,
@@ -11,25 +11,25 @@ use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     GuestRepositoryInterface,
     ProductPriceRepositoryInterface,
     ProductSpecificationOptionRepositoryInterface,
-    ProductSpecificationRepositoryInterface};
+    ProductSpecificationRepositoryInterface
+};
 use App\Rules\ValidDiscountCode;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Support\{Facades\Response, Arr};
 use Illuminate\Validation\ValidationException;
 
 
 class CartService extends BaseService
 {
     public function __construct(
-        CartRepositoryInterface                $repository,
-        public DesignRepositoryInterface       $designRepository,
-        public CartRepositoryInterface         $cartRepository,
-        public DiscountCodeRepositoryInterface $discountCodeRepository,
-        public GuestRepositoryInterface        $guestRepository,
-        public ProductPriceRepositoryInterface $productPriceRepository,
+        CartRepositoryInterface                              $repository,
+        public DesignRepositoryInterface                     $designRepository,
+        public CartRepositoryInterface                       $cartRepository,
+        public DiscountCodeRepositoryInterface               $discountCodeRepository,
+        public GuestRepositoryInterface                      $guestRepository,
+        public ProductPriceRepositoryInterface               $productPriceRepository,
         public ProductSpecificationOptionRepositoryInterface $optionRepository,
-        public ProductSpecificationRepositoryInterface $specificationRepository,
-        public CartItemRepositoryInterface $cartItemRepository,
+        public ProductSpecificationRepositoryInterface       $specificationRepository,
+        public CartItemRepositoryInterface                   $cartItemRepository,
     )
     {
         parent::__construct($repository);
@@ -37,10 +37,11 @@ class CartService extends BaseService
 
     public function storeResource($request, $relationsToStore = [], $relationsToLoad = [])
     {
-      return  $this->handleTransaction(function () use ($request, $relationsToStore, $relationsToLoad) {
+        return $this->handleTransaction(function () use ($request, $relationsToStore, $relationsToLoad) {
             $validatedData = $request->validated();
             $userId = getAuthOrGuest() instanceof User ? getAuthOrGuest()->id : null;
             $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
+
             $cart = $this->repository->query()
                 ->when($userId, fn($query) => $query->where('user_id', $userId))
                 ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
@@ -53,36 +54,26 @@ class CartService extends BaseService
                     ...Arr::except($validatedData, ['design_id', 'cookie_id']),
                 ]);
             }
+
             $product = $request->getProduct();
             $template = $request->getTemplate();
             $design = $request->getDesign();
-            $productPrice = $this->productPriceRepository->query()->find(Arr::get($validatedData,'product_price_id'))?->price;
-            $specsSum = collect(Arr::get($validatedData, 'specs'))
-                ->map(function ($spec) {
-                    return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
-                })
-                ->sum();
-            $quantity = $productPrice->quantity ?? 1;
-            $productPrice = $product->base_price ?? $productPrice;
-            $subTotal = ($product->base_price ?? $productPrice )+ $specsSum;
-            $cartItem = $cart->addItem($design ?? $template,$quantity, $specsSum, $productPrice,$subTotal,$product);
-            collect(Arr::get($validatedData, 'specs'))->each(function ($spec) use ($cartItem) {
-              $option = $this->optionRepository->query()->find($spec['option']);
-              $specification = $this->specificationRepository->query()->find($spec['id']);
-              if ($option && $specification) {
-                  $cartItem->specs()->create([
-                      'spec_name' => $specification->name,
-                      'option_name' => $option->value,
-                      'option_price' => $option->price,
-                      'cart_item_id' => $cartItem->id,
-                  ]);
-              }
-          });
 
+            $priceDetails = $this->calculatePriceDetails($validatedData, $product);
 
-          return $cart;
+            $cartItem = $cart->addItem(
+                $design ?? $template,
+                Arr::get($priceDetails, 'quantity'),
+                $priceDetails['specs_sum'],
+                $priceDetails['product_price'],
+                $priceDetails['sub_total'],
+                $product
+            );
+
+            $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
+
+            return $cart;
         });
-
     }
 
     /**
@@ -111,8 +102,7 @@ class CartService extends BaseService
         return $this->repository->query()
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
-//            ->with(['designs.product', 'cartItems.product', 'designs' => fn($q) => $q->latest(),])
-                ->with(['items.product'])
+            ->with(['items.product'])
             ->first();
     }
 
@@ -136,7 +126,7 @@ class CartService extends BaseService
             'price' => $cart->items()->sum('sub_total'),
         ]);
 
-        return Response::api(message:"Item removed from cart successfully.");
+        return Response::api(message: "Item removed from cart successfully.");
 
     }
 
@@ -144,41 +134,26 @@ class CartService extends BaseService
     public function applyDiscount($request)
     {
         $cart = $this->resolveUserCart();
-        $cart->load('cartItems.product');
-        $items = $cart->cartItems;
-
+        $items = $cart->load('items.product.category')->items;
+        $products = $items->pluck('product.id')->filter()->unique();
+        $categories = $items->pluck('product.category.id')->filter()->unique();
+        $allSameProduct = $products->count() === 1;
+        $allSameCategory = $categories->count() === 1;
+        $product = $allSameProduct ? $items->first()->product : null;
+        $category = $allSameCategory ? $items->first()->product->category : null;
+        $request->validate([
+            'code' => ['required', new ValidDiscountCode($product, $category)],
+        ]);
         $discountCode = $this->discountCodeRepository->query()
             ->whereCode($request->code)
             ->firstOrFail();
 
-        $products = $items->pluck('product.id')->filter()->unique();
-        $allSameProduct = $products->count() === 1;
-
-        if ($allSameProduct) {
-            $product = Product::find($products->first());
-        }
-
-        $request->validate([
-            'code' => ['required', new ValidDiscountCode($product ?? null)],
+        $cart->update([
+            'discount_code_id' => $discountCode->id,
+            'discount_amount' => getDiscountAmount($discountCode, $cart->price)
         ]);
 
-        $subTotal = $cart->price;
-        $discountValue = $discountCode->type == TypeEnum::PERCENTAGE
-            ? $discountCode->value
-            : ($discountCode->value / $subTotal) * 100;
-
-        $discountAmount = getDiscountAmount($discountCode, $subTotal);
-        $totalPrice = $subTotal - $discountAmount;
-
-        return [
-            'discount' => [
-                'id' => $discountCode->id,
-                'ratio' => number_format($discountValue, 2, '.', ''),
-                'value' => number_format($discountAmount, 2, '.', ''),
-            ],
-            'total_price' => number_format($totalPrice, 2, '.', ''),
-        ];
-
+        return $cart;
     }
 
     public function cartInfo(): array
@@ -195,7 +170,7 @@ class CartService extends BaseService
         $cartItem = $this->cartItemRepository->find($id);
         if ($cartItem->product->has_custom_prices) {
             $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
-            $updated = $cartItem->update(['product_price' => $productPrice->price , 'quantity' => $productPrice->quantity]);
+            $updated = $cartItem->update(['product_price' => $productPrice->price, 'quantity' => $productPrice->quantity]);
         } else {
             $updated = $cartItem->update($request->only(['quantity']));
         }
@@ -204,6 +179,74 @@ class CartService extends BaseService
 
     public function priceDetails($itemId)
     {
-        return $this->cartItemRepository->query()->select(['id','product_id','quantity','sub_total'])->find($itemId)->load(['product:id,name','specs']);
+        return $this->cartItemRepository->query()
+            ->select(['id', 'product_id', 'quantity', 'sub_total'])
+            ->find($itemId)->load(['product:id,name', 'specs']);
     }
+
+    public function updatePriceDetails($validatedData, $itemId)
+    {
+        $cartItem = $this->cartItemRepository->query()
+            ->select(['id', 'product_id', 'quantity', 'sub_total', 'product_price', 'cart_id'])
+            ->find($itemId);
+
+        $product = $cartItem->product;
+        $priceDetails = $this->calculatePriceDetails($validatedData, $product, $cartItem->product_price);
+
+        $cartItem->update([
+            'sub_total' => $priceDetails['sub_total'],
+            'specs_price' => $priceDetails['specs_sum'],
+            'product_price' => $priceDetails['product_price'],
+            'quantity' => Arr::get($priceDetails, 'quantity'),
+        ]);
+
+        $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
+        return $cartItem;
+    }
+
+    private function calculatePriceDetails(array $validatedData, $product, $price = null): array
+    {
+        $productPrice = $this->productPriceRepository->query()
+            ->find(Arr::get($validatedData, 'product_price_id'));
+
+        $productPriceValue = $productPrice?->price ?? $price;
+        $specsSum = collect(Arr::get($validatedData, 'specs'))
+            ->map(function ($spec) {
+                return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
+            })->sum();
+        $basePrice = $product->base_price ?? $productPriceValue;
+
+        $subTotal = ($product->base_price ?? $productPriceValue) + $specsSum;
+        $calculatePrices = [
+            'product_price' => $basePrice,
+            'specs_sum' => $specsSum,
+            'sub_total' => $subTotal,
+        ];
+        $quantity = $productPrice?->quantity;
+        if ($quantity) {
+            $calculatePrices['quantity'] = $quantity;
+        }
+
+        return $calculatePrices;
+    }
+
+    private function handleSpecs(array $specs, $cartItem): void
+    {
+        collect($specs)->each(function ($spec) use ($cartItem) {
+            $option = $this->optionRepository->query()->find($spec['option']);
+            $specification = $this->specificationRepository->query()->find($spec['id']);
+
+            if ($option && $specification) {
+                $cartItem->specs()->delete();
+                $cartItem->specs()->updateOrCreate(
+                    ['cart_item_id' => $cartItem->id, 'spec_name' => $specification->name],
+                    [
+                        'option_name' => $option->value,
+                        'option_price' => $option->price,
+                    ]
+                );
+            }
+        });
+    }
+
 }
