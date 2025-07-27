@@ -20,6 +20,6 @@ class CartItemSpecsResource extends JsonResource
             'price' => $this->productSpecificationOption->price,
 
 
-        ];
+        ];  
     }
 }
