@@ -85,10 +85,11 @@ function getDiscountAmount($discount, $subtotal)
         return 0;
     }
     if ($discount->type == \App\Enums\DiscountCode\TypeEnum::PERCENTAGE) {
-        return $subtotal * $discount->value;
+        return number_format($subtotal * $discount->value, 2, '.', '');
 
     }
-    return $discount->value;
+    return number_format($discount->value, 2, '.', '');
+
 
 }
 
