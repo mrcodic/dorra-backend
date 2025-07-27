@@ -10,7 +10,7 @@ class OrderData
 {
     public static function fromCart($subTotal, $discountCode): array
     {
-        
+
         return [
             'user_id' => Auth::guard('sanctum')?->id(),
             'guest_id' => request()->hasCookie('cookie_id') ? Guest::whereCookieValue(request()->cookie('cookie_id'))->first()?->id : null,

@@ -54,7 +54,7 @@ class DiscountCode extends Model
     {
         return $query->where(function ($q) {
             $q->where('expired_at', '<=', now())
-                ->orWhere('max_usage', '=', 0);
+                ->orWhereColumn('used', 'max_usage');
         });
     }
 
