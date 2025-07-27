@@ -17,10 +17,7 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->string('invoice_number');
-            $table->string('itemable_type');
-            $table->string('itemable_id');
-            $table->index(['itemable_type', 'itemable_id'], 'itemable_index');
-            $table->foreignIdFor(Order::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
             $table->integer('quantity')->nullable();
             $table->decimal('subtotal', 8, 2)->nullable();
             $table->decimal('discount_amount', 8, 2)->nullable();

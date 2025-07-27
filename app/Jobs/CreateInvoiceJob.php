@@ -29,7 +29,7 @@ class CreateInvoiceJob implements ShouldQueue
     {
 
 
-        $invoice = Invoice::updateOrCreate([
+       Invoice::updateOrCreate([
             'order_id' => $this->order->id,
         ], [
             'invoice_number' => $this->order->order_number,
@@ -42,10 +42,6 @@ class CreateInvoiceJob implements ShouldQueue
             'issued_date' => now(),
         ]);
 
-        $designIds = $this->order->orderItems->pluck('design_id')->filter()->unique();
 
-        if ($designIds->isNotEmpty()) {
-            $invoice->designs()->sync($designIds);
-        }
     }
 }
