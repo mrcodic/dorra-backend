@@ -38,8 +38,8 @@ class OrderResource extends JsonResource
             'shipping_address' => OrderAddressResource::make($this->whenLoaded('orderAddress')),
 
             'items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
-            'items_images' => $this->orderItems->load('itemable')->map(function ($orderItem) {
-                return $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($this->itemable))));
+            'items_images' => $this->orderItems->load('itemable.media')->map(function ($orderItem) {
+                return $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))));
             }),
 
             'items_names' => $this->orderItems->map(function ($orderItem) {
