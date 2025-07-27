@@ -5,6 +5,7 @@ namespace App\Http\Resources\Order;
 use App\Enums\Order\StatusEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 
 class OrderResource extends JsonResource
 {
@@ -38,7 +39,7 @@ class OrderResource extends JsonResource
 
             'items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
             'items_images' => $this->orderItems->load('itemable')->map(function ($orderItem) {
-                return $orderItem->itemable?->getFirstMediaUrl('templates');
+                return $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($this->itemable))));
             }),
 
             'items_names' => $this->orderItems->map(function ($orderItem) {
