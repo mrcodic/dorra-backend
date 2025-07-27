@@ -17,10 +17,6 @@ class Invoice extends Model
     {
         return $this->belongsTo(Order::class);
     }
-    public function itemable(): MorphTo
-    {
-        return $this->morphTo();
-    }
 
 
 }

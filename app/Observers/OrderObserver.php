@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Admin;
+use App\Models\Invoice;
 use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
@@ -32,8 +33,20 @@ class OrderObserver
     public function updated(Order $order): void
     {
          if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
-            CreateInvoiceJob::dispatch($order);
-        }
+             Invoice::updateOrCreate([
+                 'order_id' => $order->id,
+             ], [
+                 'invoice_number' => $order->order_number,
+                 'subtotal' => $order->subtotal,
+                 'discount_amount' => $order->discount_amount,
+                 'delivery_amount' => $order->delivery_amount,
+                 'tax_amount' => $order->tax_amount,
+                 'total_price' => $order->total_price,
+                 'status' => $order->status,
+                 'issued_date' => now(),
+             ]);
+
+         }
     }
 
     /**
