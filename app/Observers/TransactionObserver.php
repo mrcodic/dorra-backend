@@ -11,11 +11,15 @@ class TransactionObserver
     {
         if ($transaction->payment_status == StatusEnum::PAID) {
 
-            $transaction->order()->update([
-                'status' => \App\Enums\Order\StatusEnum::CONFIRMED,
-                'payment_status' => StatusEnum::PAID,
-            ]);
-    }
+            $order = $transaction->order;
+            if ($order) {
+                $order->update([
+                    'status' => \App\Enums\Order\StatusEnum::CONFIRMED,
+                    'payment_status' => StatusEnum::PAID,
+                ]);
+            }
+
+        }
         if ($transaction->payment_status == StatusEnum::UNPAID) {
 
             $transaction->order()->update([
