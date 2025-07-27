@@ -33,7 +33,6 @@ class CreateInvoiceJob implements ShouldQueue
             'order_id' => $this->order->id,
         ], [
             'invoice_number' => $this->order->order_number,
-            'user_id' => $this->order->user_id,
             'subtotal' => $this->order->subtotal,
             'discount_amount' => $this->order->discount_amount,
             'delivery_amount' => $this->order->delivery_amount,

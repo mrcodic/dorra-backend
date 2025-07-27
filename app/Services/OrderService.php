@@ -110,7 +110,7 @@ class OrderService extends BaseService
                     : 'No User';
             })
             ->addColumn('items', function ($order) {
-                return $order->orderItems_count ?? 0;
+                return $order->order_items_count ?? 0;
             })
             ->addColumn('total_price', function ($order) {
                 return $order->total_price ?? 0;

@@ -6,30 +6,21 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Design;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Invoice extends Model
 {
     protected $guarded = [];
 
-
-    public function order()
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
-
-
-    public function user()
+    public function itemable(): MorphTo
     {
-        return $this->belongsTo(User::class);
+        return $this->morphTo();
     }
 
-    public function design()
-    {
-        return $this->belongsTo(Design::class);
-    }
 
-        public function designs()
-    {
-        return $this->morphToMany(Design::class, 'designable', 'designables')->withTimestamps();
-    }
 }
