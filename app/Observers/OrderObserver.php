@@ -32,7 +32,7 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
+         if ($order->wasChanged('status') && $order->status == StatusEnum::CONFIRMED) {
              Invoice::updateOrCreate([
                  'order_id' => $order->id,
              ], [
