@@ -159,7 +159,18 @@ class CartService extends BaseService
             'discount_amount' => getDiscountAmount($discountCode, $cart->price)
         ]);
 
-        return $cart;
+        return [
+            'code' => $discountCode?->code,
+            'ratio' => $cart->price
+                ? (
+                    ($discountCode?->type === TypeEnum::PERCENTAGE
+                        ? $discountCode?->value
+                        : ($discountCode?->value / $cart->price) * 100
+                    ) . '%'
+                )
+                : '0%',
+            'value' => $this->discountCode?->value ?? 0,
+        ];
     }
 
     public function cartInfo(): array
