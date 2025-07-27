@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class OrderItem extends Model
@@ -40,5 +41,10 @@ class OrderItem extends Model
     public function itemable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function specs(): HasMany
+    {
+        return $this->hasMany(OrderItemSpec::class,'order_item_id');
     }
 }

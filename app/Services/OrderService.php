@@ -64,13 +64,13 @@ class OrderService extends BaseService
     {
         return $this->repository->query()
             ->whereBelongsTo(auth('sanctum')->user())
-            ->when(request('status'),function ($query){
-                $query->where('status',request('status'));
+            ->when(request('status'), function ($query) {
+                $query->where('status', request('status'));
             })
-            ->when(request('search'),function ($query){
+            ->when(request('search'), function ($query) {
                 $query->whereOrderNumber(request('search'));
             })
-            ->with(['orderItems.product','paymentMethod'])
+            ->with(['orderItems.product', 'paymentMethod'])
             ->latest()
             ->paginate();
     }
@@ -80,10 +80,10 @@ class OrderService extends BaseService
         return $this->repository->query()
             ->whereBelongsTo(auth('sanctum')->user())
             ->whereKey($id)
-            ->when(request('status'),function ($query){
-                $query->where('status',request('status'));
+            ->when(request('status'), function ($query) {
+                $query->where('status', request('status'));
             })
-            ->with(['orderItems','orderItems.product.specifications'])
+            ->with(['orderItems', 'orderItems.specs'])
             ->firstOrFail();
     }
 
@@ -578,15 +578,28 @@ class OrderService extends BaseService
         }
         $discountCode = $cart->discountCode;
         if ($cart->discountCode()->isNotValid()->exists()) {
-           throw ValidationException::withMessages([
-               'discountCode' => ['This discount code is not valid.'],
-           ]);
+            throw ValidationException::withMessages([
+                'discountCode' => ['This discount code is not valid.'],
+            ]);
         }
 
         $subTotal = $cart->items()->sum('sub_total');
-        $order = $this->handleTransaction(function () use ($cart,$discountCode, $subTotal, $request) {
+        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
-            $order->orderItems()->createMany($cart->items->toArray());
+            $orderItems = $order->orderItems()->createMany($cart->items->toArray());
+            $orderItems->each(function ($item) use ($cart) {
+                $cart->items->each(function ($cartItem) use ($item) {
+                    $cartItem->specs->each(function ($spec) use ($item) {
+                        $item->specs()->create([
+                            'spec_name' => $spec->productSpecification?->name,
+                            'option_name' => $spec->productSpecificationOption?->value,
+                            'option_price' => $spec->productSpecificationOption?->price,
+                        ]);
+                    });
+
+                });
+
+            });
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
                 $order->pickupContact()->create(PickupContactData::fromRequest($request));
@@ -602,7 +615,7 @@ class OrderService extends BaseService
                 'method' => $selectedPaymentMethod]);
             $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), [
                 'order' => $order, 'user' => auth('sanctum')->user(),
-                'cart' => $cart ,'discountCode' => $discountCode]);
+                'cart' => $cart, 'discountCode' => $discountCode]);
             return [
                 'order' => ['id' => $order->id, 'number' => $order->order_number],
                 'paymentDetails' => $paymentDetails,
