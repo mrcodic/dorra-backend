@@ -5,6 +5,7 @@ namespace App\Http\Resources\Order;
 use App\Http\Resources\Product\ProductSpecificationResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 
 class OrderItemResource extends JsonResource
 {
@@ -15,14 +16,13 @@ class OrderItemResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         return [
             'id' => $this->id,
-           'product_name' => $this->design?->product->name,
-           'quantity' => $this->design?->quantity,
-            'total_price' => $this->design?->total_price,
-            'design_image' => $this->design?->getFirstMediaUrl('designs'),
-            'specs' => ProductSpecificationResource::collection($this->whenLoaded('design.specifications')),
-
+           'product_name' => $this->product?->name,
+           'quantity' => $this->quantity,
+            'total_price' => $this->total_price,
+            'design_image' => $this->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($this->itemable)))),
         ];
     }
 }
