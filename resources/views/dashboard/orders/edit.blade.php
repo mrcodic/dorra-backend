@@ -136,7 +136,7 @@
                             </div>
                             <div class="text-end">
                                 <div class="fw-bold text-black">
-                                    ${{ number_format($product->base_price ?? 0, 2) }}
+                                    ${{ number_format($orderItem->sub_total ?? 0, 2) }}
                                 </div>
                                 @if ($model->orderItems->count() > 1 )
                                     <form class="delete-design-form d-inline" method="POST" action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $orderItem->id]) }}">
