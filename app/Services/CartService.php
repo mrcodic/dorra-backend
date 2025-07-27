@@ -134,7 +134,10 @@ class CartService extends BaseService
     public function applyDiscount($request)
     {
         $cart = $this->resolveUserCart();
-        if($cart)
+        if(!$cart)
+        {
+            throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
+        }
         $items = $cart->load('items.product.category')->items;
         $products = $items->pluck('product.id')->filter()->unique();
         $categories = $items->pluck('product.category.id')->filter()->unique();
@@ -182,7 +185,7 @@ class CartService extends BaseService
     {
         return $this->cartItemRepository->query()
             ->select(['id', 'product_id', 'quantity', 'sub_total'])
-            ->find($itemId)->load(['product:id,name', 'specs']);
+            ->findOrFail($itemId)?->load(['product:id,name', 'specs']);
     }
 
     public function updatePriceDetails($validatedData, $itemId)

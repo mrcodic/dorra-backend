@@ -7,6 +7,7 @@ use App\DTOs\Payment\PaymobIntentionData;
 use App\Enums\Payment\StatusEnum;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\PaymentGatewayRepositoryInterface;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -75,8 +76,8 @@ use Illuminate\Support\Facades\Log;
             return false;
         }
         $data['cart']->items()->delete();
-        $data['cart']->update(['price' => 0]);
-        if ($data['discountCode'] !== 0)
+        $data['cart']->update(['price' => 0,'discount_amount' => 0,'discount_code_id' => null]);
+        if (Arr::get($data['cart'] ,'discountCode') !== 0)
         {
             $data['discountCode']->decrement('max_usage');
         }

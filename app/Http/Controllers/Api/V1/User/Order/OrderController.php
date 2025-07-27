@@ -12,6 +12,7 @@ use App\Http\Resources\Order\OrderResource;
 use App\Services\LocationService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response;
 
 
@@ -36,7 +37,7 @@ class OrderController extends Controller
     public function checkout(CheckoutRequest $request)
     {
         $order = $this->orderService->checkout($request);
-        if ($order['paymentDetails'] === false)
+        if (Arr::get($order,'paymentDetails') === false)
         {
             return Response::api(HttpEnum::BAD_REQUEST,
                 message: 'Something went wrong',
@@ -46,7 +47,7 @@ class OrderController extends Controller
             );
         }
         if (!$order) {
-            return Response::api(statusCode: HttpEnum::BAD_REQUEST, message: 'Bad request', errors: ['message' => 'Cart is empty.']);
+            return Response::api(statusCode: HttpEnum::BAD_REQUEST, message: 'Bad request', errors: ['message' => ['Cart is empty.']]);
         }
         return Response::api(data: $order);
     }

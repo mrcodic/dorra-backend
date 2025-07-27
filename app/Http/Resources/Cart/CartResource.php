@@ -19,13 +19,14 @@ class CartResource extends JsonResource
             "id" => $this->id,
             "items" => CartItemResource::collection($this->whenLoaded('items')),
             'sub_total' => $this->price,
-            'total' => getTotalPrice(0, $this->price),
+            'total' => getTotalPrice($this->discountCode ?? 0, $this->price),
             'tax' => [
                 'ratio' => setting('tax') * 100 . "%",
                 'value' => getPriceAfterTax(setting('tax'), $this->price),
             ],
             'delivery' => setting('delivery'),
             'discount' => [
+                'code' => $this->discountCode?->code,
                 'ratio' => $this->price
                     ? (
                         ($this->discountCode?->type === TypeEnum::PERCENTAGE

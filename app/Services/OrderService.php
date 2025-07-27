@@ -9,6 +9,7 @@ use Exception;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Rules\ValidDiscountCode;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 use App\Enums\Order\{OrderTypeEnum, StatusEnum};
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\{DB, Auth, Cache};
@@ -575,10 +576,16 @@ class OrderService extends BaseService
         if (!$cart || $cart->items->isEmpty()) {
             return false;
         }
-        $discountCode = $request->discount_code_id ? $this->discountCodeRepository->find($request->discount_code_id) : 0;
+        $discountCode = $cart->discountCode;
+        if ($cart->discountCode()->isNotValid()->exists()) {
+           throw ValidationException::withMessages([
+               'discountCode' => ['This discount code is not valid.'],
+           ]);
+        }
+
         $subTotal = $cart->items()->sum('sub_total');
-        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
-            $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
+        $order = $this->handleTransaction(function () use ($cart,$discountCode, $subTotal, $request) {
+            $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode?->value));
             $order->orderItems()->createMany($cart->items->toArray());
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
