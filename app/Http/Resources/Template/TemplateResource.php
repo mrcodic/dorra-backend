@@ -41,25 +41,20 @@ class TemplateResource extends JsonResource
         ];
     }
 
-    protected function canBeAddedToCart()
+    protected function canBeAddedToCart(): bool
     {
         $user = auth('sanctum')->user();
         $guest = Guest::find(request()->cookie('cookie_id'));
 
         if ($user) {
-            return $user->cartItems?->contains(function ($cartItem) {
-                return $cartItem->itemable_id == $this->id;
-            });
+            return $user->cartItems?->contains(fn($cartItem) => $cartItem->itemable_id == $this->id) ?? false;
         }
+
         if ($guest) {
-
-            return $guest->cartItems?->contains(function ($cartItem) {
-                return $cartItem->itemable_id == $this->id;
-            });
-
-
+            return $guest->cartItems?->contains(fn($cartItem) => $cartItem->itemable_id == $this->id) ?? false;
         }
 
+        return false;
     }
 
 

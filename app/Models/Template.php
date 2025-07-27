@@ -28,6 +28,7 @@ class Template extends Model implements HasMedia
         'name',
         'status',
         'design_data',
+        'design_data_back',
         'description',
     ];
     protected $casts = [
