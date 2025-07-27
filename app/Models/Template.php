@@ -67,9 +67,6 @@ class Template extends Model implements HasMedia
         return $this->belongsToMany(Type::class)->withTimestamps();
     }
 
-    public function specifications(): MorphMany
-    {
-        return $this->morphMany(CustomizableProductSpecification::class, 'customizable');
-    }
+
 
 }
