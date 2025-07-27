@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Api\V1\User\Cart;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Cart\{StoreCartItemRequest, UpdateCartItemRequest};
 use App\Http\Resources\Cart\{CartItemResource, CartResource};
-use App\Models\{CartItem, Design};
+use App\Models\{CartItem};
 use App\Services\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Validation\{Rules\RequiredIf, Rule, ValidationException};
+use Illuminate\Validation\{Rule, ValidationException};
 
 class CartController extends Controller
 {
@@ -42,8 +42,8 @@ class CartController extends Controller
 
     public function applyDiscount(Request $request)
     {
-        $data = $this->cartService->applyDiscount($request);
-        return Response::api(data: $data);
+        $this->cartService->applyDiscount($request);
+        return Response::api();
     }
 
     public function cartInfo()

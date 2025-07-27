@@ -134,6 +134,7 @@ class CartService extends BaseService
     public function applyDiscount($request)
     {
         $cart = $this->resolveUserCart();
+        if($cart)
         $items = $cart->load('items.product.category')->items;
         $products = $items->pluck('product.id')->filter()->unique();
         $categories = $items->pluck('product.category.id')->filter()->unique();
