@@ -18,8 +18,7 @@ class CartItemSpecsResource extends JsonResource
             'item' => $this->productSpecification->name,
             'selection' => $this->productSpecificationOption->value,
             'price' => $this->productSpecificationOption->price,
-
-
-        ];  
+            0
+        ];
     }
 }
