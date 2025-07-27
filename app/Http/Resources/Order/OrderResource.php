@@ -33,6 +33,7 @@ class OrderResource extends JsonResource
             'current_status' => [
                 'value' => $this->status->value,
                 'label' => $this->status->label(),
+                'icon' => $this->status->icon(),
             ],
             'statuses' => $statuses,
             'shipping_address' => OrderAddressResource::make($this->whenLoaded('orderAddress')),

@@ -92,9 +92,9 @@
                 <p >Completed</p>
 
 
-                @foreach($model->designs as $design)
+                @foreach($model->orderItems as $orderItem)
                     @php
-                        $product = optional(optional($design->template)->product);
+                        $product = $orderItem->product;
                     @endphp
 
                 <!-- Items List -->
