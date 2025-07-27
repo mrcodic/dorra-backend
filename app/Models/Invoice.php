@@ -2,12 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\User;
-use App\Models\Order;
-use App\Models\Design;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+
 
 class Invoice extends Model
 {
@@ -17,6 +14,4 @@ class Invoice extends Model
     {
         return $this->belongsTo(Order::class);
     }
-
-
 }
