@@ -60,7 +60,7 @@
 
                     <div id="shipSection">
                         <div class="d-flex gap-2 flex-wrap">
-                            @foreach ($model->user->addresses as $address)
+                            @foreach (collect(optional($model->user)->addresses ?? optional($model->guest)->addresses) as $address)
                                 <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
                                     <input class="form-check-input" type="radio" name="shipping_address_id"
                                            id="address{{ $address->id }}" value="{{ $address->id }}"
