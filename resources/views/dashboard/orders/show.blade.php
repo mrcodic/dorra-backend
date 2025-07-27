@@ -115,7 +115,6 @@
                         <div class="fw-bold text-black">
                             ${{ number_format($orderItem->sub_total ?? 0, 2) }}
                         </div>
-                        <button class="btn btn-sm btn-outline-danger mt-1">Delete</button>
                     </div>
                 </div>
             </div>

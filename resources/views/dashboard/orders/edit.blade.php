@@ -123,7 +123,8 @@
                     <div class="mb-1">
                         <div class="d-flex align-items-start justify-content-between">
                             <div class="d-flex">
-                                <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+                                <img src="{{ $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable)))) }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+
                                 <div>
                                     <div class="fw-bold text-black fs-16">
                                         {{ $product->name ?? 'No Product Found' }}
