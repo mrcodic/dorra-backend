@@ -42,8 +42,7 @@ class CartController extends Controller
 
     public function applyDiscount(Request $request)
     {
-        $this->cartService->applyDiscount($request);
-        return Response::api();
+        return Response::api(data:$this->cartService->applyDiscount($request));
     }
 
     public function cartInfo()
