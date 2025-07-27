@@ -32,11 +32,10 @@ class OrderObserver
     public function updated(Order $order): void
     {
          if (
-            $order->isDirty('status') &&
-            $order->status === StatusEnum::CONFIRMED &&
-            !$order->invoice
+            $order->wasChanged('status') &&
+            $order->status === StatusEnum::CONFIRMED
         ) {
-            CreateInvoiceJob::dispatch($order->load('orderItems'));
+            CreateInvoiceJob::dispatch($order);
         }
     }
 
