@@ -26,7 +26,7 @@ class CartResource extends JsonResource
             ],
             'delivery' => setting('delivery'),
             'discount' => [
-                'ratio' => $this->when($this->price, function () {
+                  'ratio' => $this->when($this->price, function () {
                         return $this->discountCode?->type === TypeEnum::PERCENTAGE
                             ? $this->discountCode?->value
                             : ($this->discountCode?->value / $this->price) * 100;
