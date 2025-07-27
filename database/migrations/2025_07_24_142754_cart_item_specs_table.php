@@ -2,6 +2,7 @@
 
 use App\Models\CartItem;
 
+use App\Models\{ProductSpecification, ProductSpecificationOption};
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,9 +15,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('cart_item_specs', function (Blueprint $table) {
-                $table->string('spec_name');
-                $table->string('option_name');
-                $table->string('option_price');
+            $table->id();
+            $table->foreignIdFor(ProductSpecification::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(ProductSpecificationOption::class, 'spec_option_id')
+                ->constrained('product_specification_options')
+                ->cascadeOnDelete();
             $table->foreignIdFor(CartItem::class, 'cart_item_id')->constrained()->cascadeOnDelete();
 
         });

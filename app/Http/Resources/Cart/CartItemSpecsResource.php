@@ -12,11 +12,13 @@ class CartItemSpecsResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-
         return [
-            'item' => $this->spec_name,
-            'selection' => $this->option_name,
-            'price' => $this->option_price,
+            'spec_id' => $this->productSpecification->id,
+            'option_id' =>$this->productSpecificationOption->id,
+            'item' => $this->productSpecification->name,
+            'selection' => $this->productSpecificationOption->value,
+            'price' => $this->productSpecificationOption->price,
+
 
         ];
     }
