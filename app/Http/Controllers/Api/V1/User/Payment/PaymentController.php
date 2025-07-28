@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
 use App\Services\Payment\PaymentGatewayFactory;
+use App\Traits\HandlesTryCatch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -19,10 +20,14 @@ use Illuminate\Support\Facades\Response;
 
 class PaymentController extends Controller
 {
+    use HandlesTryCatch;
+
     public function __construct(public PaymentMethodRepositoryInterface $paymentMethodRepository,
                                 public PaymentGatewayFactory            $paymentFactory,
                                 public OrderRepositoryInterface         $orderRepository,
-    ){}
+    )
+    {
+    }
 
     public function paymentMethods()
     {
@@ -35,18 +40,24 @@ class PaymentController extends Controller
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'order_id' => ['required', 'exists:orders,id'],
         ]);
-        $selectedOrder = $this->orderRepository->find($request->get('order_id'));
+        $selectedOrder = $this->orderRepository->query()->with(['orderItems.specs', 'orderAddress', 'pickupContact']);
+        $newOrder = $selectedOrder->replicate();
+        $newOrder->isReplication = true;
+        $newOrder->originalOrder = $selectedOrder;
+        $dateString = now()->format('d-m-Y');
+        $newOrder->order_number = "#ORD-{$dateString}-" . mt_rand(100, 999);
+        $newOrder->save();
+
         $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
         $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
-        $dto = PaymentRequestData::fromArray(['order' => $selectedOrder, 'user' => auth('sanctum')->user(),
-            'guest'=>Guest::query()->whereCookieValue('cookie_value')->first(), 'method' => $selectedPaymentMethod]);
-        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(),['order' => $selectedOrder, 'user' => auth('sanctum')->user()]);
-        if (!$paymentDetails)
-        {
+        $dto = PaymentRequestData::fromArray(['order' => $newOrder, 'user' => auth('sanctum')->user(),
+            'guest' => Guest::query()->whereCookieValue('cookie_value')->first(), 'method' => $selectedPaymentMethod]);
+        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), ['order' => $selectedOrder, 'user' => auth('sanctum')->user()]);
+        if (!$paymentDetails) {
             return Response::api(HttpEnum::BAD_REQUEST,
                 message: 'Something went wrong',
                 errors: [
-                    'error' =>[ 'Failed to payment transaction try again later.'],
+                    'error' => ['Failed to payment transaction try again later.'],
                 ]
             );
         }
@@ -75,7 +86,7 @@ class PaymentController extends Controller
         }
         Log::info('Failed to create payment intention', [
             'paymobOrderId' => $paymobOrderId,
-             'status' => $paymentStatus,
+            'status' => $paymentStatus,
         ]);
         $transaction->update([
             'payment_status' => $paymentStatus,
@@ -84,6 +95,7 @@ class PaymentController extends Controller
         ]);
         return Response::api();
     }
+
     public function handleRedirect(Request $request): RedirectResponse
     {
         $requestedData = $request->all();
