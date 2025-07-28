@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('templates', function (Blueprint $table) {
             $table->after('design_data', function ($table) {
-                $table->string('design_back_data')->nullable();
+                $table->json('design_back_data')->nullable();
             });
         });
     }
