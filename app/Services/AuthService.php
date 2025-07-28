@@ -73,9 +73,9 @@ class AuthService
             $this->socialAccountRepository->updateOrCreate(['user_id' => $user->id, 'provider' => 'google',], [
                 'provider_id' => $googleUser->getId(),
             ]);
-            Auth::login($user);
-//            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
-//            $user->token = $plainTextToken;
+
+            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
+            $user->token = $plainTextToken;
 
             return $user;
 
