@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/v1/user/payment/callback',
         ]);
+        $middleware->encryptCookies(['token']);
         $middleware->redirectUsersTo('/');
         $middleware->api([EnsureFrontendRequestsAreStateful::class]);
     })
