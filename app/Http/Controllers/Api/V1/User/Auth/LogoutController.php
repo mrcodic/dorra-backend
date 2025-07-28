@@ -23,7 +23,7 @@ class LogoutController extends Controller
         return Response::api(
             statusCode: HttpEnum::OK,
             message: 'You are successfully logged out',
-        )->withCookie(cookie()->forget('cookie_id'));
+        )->withCookie(cookie()->forget('token'));
 
     }
 
