@@ -20,7 +20,9 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\UserNotificationTypeController,
     SavedItems\SaveController,
     ShippingAddress\ShippingAddressController,
-    Template\TemplateController};
+    Team\TeamController,
+    Template\TemplateController
+};
 use App\Http\Controllers\Shared\CommentController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -110,7 +112,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 
-
     Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
     Route::post('designs/assign-to-folder', [FolderController::class, 'assignDesignsToFolder']);
@@ -128,6 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('invitation.accept')
             ->middleware('signed');
     });
+    Route::apiResource('teams', TeamController::class)->except(['update']);
 
     Route::get('trash', [MainController::class, 'trash'])->name('trash');
 
@@ -136,12 +138,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 });
-Route::get('templates',[TemplateController::class, 'index']);
-Route::get('templates/{template}',[TemplateController::class, 'show']);
+Route::get('templates', [TemplateController::class, 'index']);
+Route::get('templates/{template}', [TemplateController::class, 'show']);
 
 Route::controller(PaymentController::class)->group(function () {
-    Route::get('payment-methods','paymentMethods');
-    Route::post('get-payment-link','getPaymentLink');
-    Route::post('payment/callback','handleCallback');
-    Route::get('payment/redirect','handleRedirect');
+    Route::get('payment-methods', 'paymentMethods');
+    Route::post('get-payment-link', 'getPaymentLink');
+    Route::post('payment/callback', 'handleCallback');
+    Route::get('payment/redirect', 'handleRedirect');
 });
