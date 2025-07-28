@@ -77,7 +77,7 @@ use Illuminate\Support\Facades\Log;
         }
         Arr::get($data, 'cart')?->items()->delete();
         Arr::get($data, 'cart')?->update(['price' => 0, 'discount_amount' => 0, 'discount_code_id' => null]);
-        if (Arr::get($data['cart'], 'discountCode') !== 0) {
+        if (Arr::get(Arr::get($data, 'cart'), 'discountCode') !== 0) {
             $data['discountCode']?->increment('used');
         }
 
