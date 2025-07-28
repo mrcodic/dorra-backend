@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Log;
         return $this->createPaymentIntention($payload, $data, $method->code);
     }
 
-    protected function createPaymentIntention(array $payload,array $data, string $paymentMethod): false|array
+    protected function createPaymentIntention(array $payload, array $data, string $paymentMethod): false|array
     {
         $integrationIds = [
             'paymob_card' => $this->config['card_integration_id'],
@@ -75,10 +75,9 @@ use Illuminate\Support\Facades\Log;
             ]);
             return false;
         }
-        $data['cart']->items()->delete();
-        $data['cart']->update(['price' => 0,'discount_amount' => 0,'discount_code_id' => null]);
-        if (Arr::get($data['cart'] ,'discountCode') !== 0)
-        {
+        Arr::get($data, 'cart')?->items()->delete();
+        Arr::get($data, 'cart')?->update(['price' => 0, 'discount_amount' => 0, 'discount_code_id' => null]);
+        if (Arr::get($data['cart'], 'discountCode') !== 0) {
             $data['discountCode']?->increment('used');
         }
 
