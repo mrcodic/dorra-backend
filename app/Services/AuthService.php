@@ -118,8 +118,6 @@ class AuthService
                             ->where('guest_id', $guest->id)
                             ->update(['user_id' => $user->id]);
                     } else {
-                        $guest->cart?->items()->delete();
-                        $guest->cart?->delete();
                         $this->designRepository->query()
                             ->whereNull('user_id')
                             ->where('guest_id', $guest->id)

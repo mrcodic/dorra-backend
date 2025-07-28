@@ -16,6 +16,8 @@ class Guest extends Model
     {
         return $this->hasOne(Cart::class);
     }
+
+
     public function cartItems(): HasManyThrough
     {
         return $this->hasManyThrough(CartItem::class, Cart::class);
