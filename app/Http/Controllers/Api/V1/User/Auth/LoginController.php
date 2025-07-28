@@ -36,7 +36,7 @@ class LoginController extends Controller
 
         }
         return  redirect()->away('https://dorraprint.com/Home')->withCookie(cookie(
-            name: 'token',
+            name: 'dorra_auth_token',
             value: $user->token,
             path: '/',
             domain: '.dorraprint.com',
