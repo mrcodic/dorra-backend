@@ -69,6 +69,7 @@ Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 Route::controller(CartController::class)->group(function () {
     Route::get('/cart-info', 'cartInfo');
     Route::post('/carts/apply-discount', 'applyDiscount');
+    Route::get('/carts/remove-discount', 'removeDiscount');
     Route::delete('/carts', 'destroy');
     Route::get('carts/{item}/price-details', 'priceDetails');
     Route::put('carts/{item}/price-details', 'updatePriceDetails');

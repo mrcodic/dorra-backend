@@ -169,8 +169,20 @@ class CartService extends BaseService
                     ) . '%'
                 )
                 : '0%',
-            'value' => $this->discountCode?->value ?? 0,
+            'value' => $discountCode?->value ?? 0,
         ];
+    }
+   public function removeDiscount(): void
+   {
+        $cart = $this->resolveUserCart();
+        if(!$cart)
+        {
+            throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
+        }
+        $cart->update([
+            'discount_code_id' => null,
+            'discount_amount' => 0,
+        ]);
     }
 
     public function cartInfo(): array
