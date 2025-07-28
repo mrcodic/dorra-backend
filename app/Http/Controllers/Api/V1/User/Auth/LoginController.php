@@ -41,7 +41,7 @@ class LoginController extends Controller
             minutes: 60 * 5,
             path: '/',
             domain: '.dorraprint.com',
-            secure: false,
+            secure: true,
             httpOnly: false,
             sameSite: 'None'
         ));
