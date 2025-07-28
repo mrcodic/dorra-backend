@@ -45,7 +45,7 @@ class TemplateResource extends JsonResource
         ];
     }
 
-    protected function canBeAddedToCart(): bool
+    protected function canBeAddedToCart()
     {
         $user = auth('sanctum')->user();
         $guest = Guest::find(request()->cookie('cookie_id'));
