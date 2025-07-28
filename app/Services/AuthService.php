@@ -165,8 +165,9 @@ class AuthService
                 $this->cartRepository->query()
                     ->where('user_id', $user->id)
                     ->update(['guest_id' => null]);
+                $guest->delete();
             }
-            $guest->delete();
+
         }
 
         return $user->currentAccessToken()->delete();
