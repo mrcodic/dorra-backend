@@ -38,11 +38,12 @@ class LoginController extends Controller
         return  redirect()->away('https://dorraprint.com/Home')->withCookie(cookie(
             name: 'dorra_auth_token',
             value: $user->token,
+            minutes: 60 * 5,
             path: '/',
             domain: '.dorraprint.com',
-            secure: false,
-            httpOnly: false,
-            sameSite: 'Lax'
+            secure: true,
+            httpOnly: true,
+            sameSite: 'None'
         ));
 //        return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode', 'socialAccounts', 'notificationTypes')));
 
