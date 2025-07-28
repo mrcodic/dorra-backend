@@ -75,11 +75,13 @@ use Illuminate\Support\Facades\Log;
             ]);
             return false;
         }
-        Arr::get($data, 'cart')?->items()->delete();
-        Arr::get($data, 'cart')?->update(['price' => 0, 'discount_amount' => 0, 'discount_code_id' => null]);
-        if (Arr::get(Arr::get($data, 'cart'), 'discountCode') !== 0) {
-            $data['discountCode']?->increment('used');
+        $cart = Arr::get($data, 'cart');
+        $cart?->items()->delete();
+        $cart?->update(['price' => 0, 'discount_amount' => 0, 'discount_code_id' => null]);
+        if ($cart && $cart->discountCode) {
+            $cart->discountCode->increment('used');
         }
+
 
         $orderData = [
             'checkout_url' => $this->baseUrl . '/unifiedcheckout/?publicKey='
