@@ -35,6 +35,7 @@ class LoginController extends Controller
             return Response::api(HttpEnum::BAD_REQUEST, message: "Bad Request", errors: ['message' => 'something went wrong, please try again.']);
 
         }
+        dd($user->token);
         return  redirect()->away('https://dorraprint.com/Home')->withCookie(cookie(
             name: 'token',
             value: $user->token,
