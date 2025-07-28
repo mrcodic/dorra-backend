@@ -41,9 +41,9 @@ class LoginController extends Controller
             minutes: 60 * 5,
             path: '/',
             domain: '.dorraprint.com',
-            secure: true,
+            secure: false,
             httpOnly: false,
-            sameSite: 'None'
+            sameSite: 'Lax'
         ));
 //        return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode', 'socialAccounts', 'notificationTypes')));
 
