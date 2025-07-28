@@ -22,7 +22,6 @@ class LogoutController extends Controller
         $this->authService->logout($request);
         return Response::api(
             message: 'You are successfully logged out',
-            forgetToken: true
         );
 
 
