@@ -107,7 +107,10 @@ class TemplateService extends BaseService
             handleMediaUploads(request()->allFiles(), $model);
         }
         if (isset($validatedData['base64_preview_image'])) {
-            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'templates');
+        }
+        if (isset($validatedData['back_base64_preview_image'])) {
+            ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
         }
         return $model->load($relationsToLoad);
     }
@@ -129,7 +132,10 @@ class TemplateService extends BaseService
             return $model;
         });
         if (isset($validatedData['base64_preview_image'])) {
-            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'templates');
+        }
+        if (isset($validatedData['back_base64_preview_image'])) {
+            ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
         }
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model, clearExisting: true);

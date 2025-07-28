@@ -14,7 +14,7 @@ class ProcessBase64Image implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public string $base64Image, public Template $template)
+    public function __construct(public string $base64Image, public Template $template, public $collection)
     {
 
     }
@@ -50,9 +50,9 @@ class ProcessBase64Image implements ShouldQueue
         if (file_put_contents($tempFilePath, $imageData) === false) {
             throw new \Exception('Failed to write temp file');
         }
-        $this->template->clearMediaCollection('templates');
+        $this->template->clearMediaCollection($this->collection);
         $this->template->addMedia($tempFilePath)
-            ->toMediaCollection('templates');
+            ->toMediaCollection($this->collection);
 
         @unlink($tempFilePath);
 

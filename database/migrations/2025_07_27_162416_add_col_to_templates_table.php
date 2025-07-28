@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('templates', function (Blueprint $table) {
             $table->after('design_data', function ($table) {
-                $table->string('design_data_back')->nullable();
+                $table->string('design_back_data')->nullable();
             });
         });
     }
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('templates', function (Blueprint $table) {
-            $table->dropColumn('design_data_back');
+            $table->dropColumn('design_back_data');
         });
     }
 };

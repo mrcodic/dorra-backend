@@ -26,6 +26,10 @@ class TemplateResource extends JsonResource
                 request()->boolean('with_design_data', true),
                 $this->design_data
             ),
+            'design_back_data' => $this->when(
+                request()->boolean('with_design_data', true),
+                $this->design_back_data
+            ),
             'status' => $this->when(isset($this->status), [
                 'value' => $this->status?->value,
                 'label' => $this->status?->label(),
@@ -33,7 +37,7 @@ class TemplateResource extends JsonResource
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
-            'base64_preview_image' => $this->when(isset($this->image), $this->image),
+            'back_base64_preview_image' => $this->getFirstMediaUrl('back_base64_preview_image'),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
             'is_add_to_cart' => $this->canBeAddedToCart(),
@@ -47,14 +51,13 @@ class TemplateResource extends JsonResource
         $guest = Guest::find(request()->cookie('cookie_id'));
 
         if ($user) {
-            return $user->cartItems?->contains(fn($cartItem) => $cartItem->itemable_id == $this->id) ?? false;
+            return $user->cartItems?->contains(fn($cartItem) => $cartItem->itemable_id == $this->id) ;
         }
 
         if ($guest) {
-            return $guest->cartItems?->contains(fn($cartItem) => $cartItem->itemable_id == $this->id) ?? false;
+            return $guest->cartItems?->contains(fn($cartItem) => $cartItem->itemable_id == $this->id) ;
         }
 
-        return false;
     }
 
 
