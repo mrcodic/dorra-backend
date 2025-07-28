@@ -9,18 +9,17 @@ use App\Enums\Order\StatusEnum;
 
 class OrderObserver
 {
-    public function creating(Order $order)
-    {
-        $now = now();
-        $dateString = $now->format('d-m-Y');
-        $order->order_number = "#ORD-{$dateString}-".mt_rand(100, 999);
-    }
 
     /**
      * Handle the Order "created" event.
      */
     public function created(Order $order): void
     {
+        $now = now();
+        $dateString = $now->format('d-m-Y');
+
+        $order->order_number = "#ORD-{$dateString}-{$order->id}";
+        $order->save();
         if (request()->user() instanceof Admin)
         {
             $order->update(["status"=> StatusEnum::CONFIRMED]);
