@@ -40,9 +40,9 @@ class LoginController extends Controller
             value: $user->token,
             path: '/',
             domain: '.dorraprint.com',
-            secure: false,
+            secure: true,
             httpOnly: false,
-            sameSite: 'None'
+            sameSite: 'Lax'
         ));
 //        return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode', 'socialAccounts', 'notificationTypes')));
 
