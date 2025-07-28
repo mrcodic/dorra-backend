@@ -6,8 +6,7 @@ namespace App\Services;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
-use App\Repositories\Interfaces\ProductRepositoryInterface;
-use App\Repositories\Interfaces\TemplateRepositoryInterface;
+use App\Repositories\Interfaces\{ProductRepositoryInterface, TemplateRepositoryInterface};
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TemplateService extends BaseService
