@@ -39,7 +39,7 @@ class LoginController extends Controller
             name: 'dorra_auth_token',
             value: $user->token,
             path: '/',
-            domain: '.dorraprint.com',
+            domain: 'dorraprint.com',
             secure: false,
             httpOnly: false,
             sameSite: 'Lax'
