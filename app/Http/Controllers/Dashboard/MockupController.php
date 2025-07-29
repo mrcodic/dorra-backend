@@ -34,17 +34,19 @@ class MockupController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'index' => ['product'],
+            'index' => ['product.saves','types'],
         ];
         $this->resourceClass = MockupResource::class;
     }
 
     public function index()
     {
+
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination, perPage: request('per_page', 16));
+
         $associatedData = $this->getAssociatedData('index');
         if (request()->expectsJson()) {
-            return Response::api(data: MockupResource::collection($data)->response()->getData(true));
+            return Response::api(data: MockupResource::collection($data->load('types'))->response()->getData(true));
         }
         if (request()->ajax()) {
             $cards = view('dashboard.partials.filtered-mockups', compact('data'))->render();

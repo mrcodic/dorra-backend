@@ -7,7 +7,8 @@
 
             <div style="background-color: #F4F6F6;height:200px"> <!-- Top Image --> <img
                     src="{{  $mockup->getFirstMediaUrl('mockups') ?: asset("images/default-photo.png") }}"
-                    class="mx-auto d-block rounded-top" style="height:100%; width:auto;max-width: 100%; " alt="Template Image">
+                    class="mx-auto d-block rounded-top" style="height:100%; width:auto;max-width: 100%; "
+                    alt="Template Image">
             </div> <!-- Template Info -->
             <div class="card-body text-start p-2">
                 <div>
@@ -21,39 +22,43 @@
                             style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:29px">{{ $mockup->product->name }}
                         </div>
 
-                        <span class="badge text-light p-75 px-2 template-status-label"
-                              style="background-color: #222245">
-                        {{ $mockup->type?->label() }}
+                     <div>
+                         @foreach( $mockup->types as $type)
+                             <span class="badge text-light p-75  template-status-label"
+                                   style="background-color: #222245">
+                        {{ $type->value->label() }}
                     </span>
+                         @endforeach
+                     </div>
                     </div>
 
                 </div>
-               <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
-    <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"
-        data-image="{{ $mockup->getFirstMediaUrl('mockups') }}"
-        data-colors="{{ json_encode($mockup->colors) }}"
-        data-bs-toggle="modal"
-        data-bs-target="#showMockupModal">Show
-    </button>
+                <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
+                    <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"
+                            data-image="{{ $mockup->getFirstMediaUrl('mockups') }}"
+                            data-colors="{{ json_encode($mockup->colors) }}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#showMockupModal">Show
+                    </button>
 
-    <button type="button" class="btn btn-outline-secondary flex-fill edit-mockup-btn"
-        data-bs-toggle="modal"
-        data-bs-target="#editMockupModal"
-        data-id="{{ $mockup->id }}"
-        data-name="{{ $mockup->name }}"
-        data-type="{{ $mockup->type }}"
-        data-product-id="{{ $mockup->product->id }}"
-        data-colors="{{ json_encode($mockup->colors) }}"
-        data-image="{{ $mockup->getFirstMediaUrl('mockups') }}">Edit
-    </button>
+                    <button type="button" class="btn btn-outline-secondary flex-fill edit-mockup-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editMockupModal"
+                            data-id="{{ $mockup->id }}"
+                            data-name="{{ $mockup->name }}"
+                            data-type="{{ $mockup->type }}"
+                            data-product-id="{{ $mockup->product->id }}"
+                            data-colors="{{ json_encode($mockup->colors) }}"
+                            data-image="{{ $mockup->getFirstMediaUrl('mockups') }}">Edit
+                    </button>
 
-    <button class="btn btn-outline-danger flex-fill open-delete-mockup-modal"
-        data-id="{{ $mockup->id }}"
-        data-bs-toggle="modal"
-        data-bs-target="#deleteMockupModal">
-        <i data-feather="trash-2"></i> Delete
-    </button>
-</div>
+                    <button class="btn btn-outline-danger flex-fill open-delete-mockup-modal"
+                            data-id="{{ $mockup->id }}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteMockupModal">
+                        <i data-feather="trash-2"></i> Delete
+                    </button>
+                </div>
 
 
             </div>
@@ -153,6 +158,7 @@
             resetForm: false,
         });
     }
+
     document.addEventListener("DOMContentLoaded", function () {
         if (window.feather) {
             feather.replace();

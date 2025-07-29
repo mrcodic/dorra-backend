@@ -23,22 +23,56 @@ class StoreMockupRequest extends BaseRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+
+
+    public function rules()
     {
+        $types = $this->input('types', []);
+
         return [
             'name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-            'type' => ['required', Rule::in(TypeEnum::values())],
+            'types.*' => ['required', Rule::in(TypeEnum::values())],
             'product_id' => ['required','integer', Rule::exists(Product::class, 'id')],
             'colors' => ['required','array'],
-            'colors.*' => ['required','string'],
-            'image' => ['required', 'image', 'mimes:png'],
-        ];
+            'front_base_image' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'image',
+                'mimes:jpg',
+            ],
+            'front_mask_image' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'image',
+                'mimes:png',
+            ],
 
+            'back_base_image' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'image',
+                'mimes:jpg',
+            ],
+            'back_mask_image' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'image',
+                'mimes:png',
+            ],
+
+            'none_base_image' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'image',
+                'mimes:jpg',
+            ],
+            'none_mask_image' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'image',
+                'mimes:png',
+            ],
+        ];
     }
+
     public function messages()
     {
         return [

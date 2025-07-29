@@ -36,7 +36,10 @@ class ProductResource extends JsonResource
             }),
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
-            'is_saved' => $this->when(!$this->deleted_at,fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id()),),
+            'is_saved' => $this->when(
+                $this->relationLoaded('saves') && is_null($this->deleted_at),
+                fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id())
+            ),
             'has_mockup' => (boolean) $this->has_mockup,
         ];
     }

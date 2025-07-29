@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\Template\TypeResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,10 +32,31 @@ class MockupResource extends JsonResource
             'default_color' => '#000000',
             'warp_mode'     => 'none',
         ];
+        $images = collect($this->types)
+            ->mapWithKeys(function ($type)  {
+                $sideName = strtolower($type->value->name); // e.g., FRONT, BACK, NONE
+
+                $baseMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
+                    return $media->getCustomProperty('side') === $sideName &&
+                        $media->getCustomProperty('role') === 'base';
+                });
+
+                $maskMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
+                    return $media->getCustomProperty('side') === $sideName &&
+                        $media->getCustomProperty('role') === 'mask';
+                });
+
+                return [
+                    $sideName => [
+                        'base_url' => $baseMedia?->getFullUrl() ,
+                        'mask_url' => $maskMedia?->getFullUrl(),
+                    ]
+                ];
+            });
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
-            'type' => $this->when(isset($this->type), $this->type->label()),
+            'types' => TypeResource::collection($this->whenLoaded('types')),
             'colors' => $this->when(isset($this->colors), $this->colors),
             'area_top' => $this->area_top,
             'area_left' => $this->area_left,
@@ -46,6 +68,7 @@ class MockupResource extends JsonResource
             'shadow_url'    => $img('1678793789014.darkBlend1.png'),
             'mask_url'      => $img('mask.png'),
             'disp_url'      => $img('1678793789014.darkBlend1.png'),
+            'images' => $images,
         ];
     }
 }

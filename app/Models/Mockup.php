@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Mockup\TypeEnum;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -33,8 +34,12 @@ class Mockup extends Model implements HasMedia
         'area_height' => 370,
     ];
 
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+    public function types()
+    {
+        return $this->morphToMany(Type::class, 'typeable')->withTimestamps();
     }
 }
