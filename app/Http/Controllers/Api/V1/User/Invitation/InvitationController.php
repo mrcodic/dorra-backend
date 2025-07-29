@@ -59,10 +59,27 @@ class InvitationController extends Controller
         }
         if ($invitation->design_id)
         {
-            auth('sanctum')->user()->userDesigns()->attach($invitation->design_id);
+            auth('sanctum')->user()->userDesigns()->syncWitoutDetaching($invitation->design_id);
+            $invitation->team->designs()->syncWitoutDetaching($invitation->design_id);
+        }
+        if ($invitation->team_id)
+        {
+            $teamDesigns = $invitation->team->designs;
+            if ($teamDesigns->isNotEmpty())
+            {
+                auth('sanctum')->user()->userDesigns()->syncWitoutDetaching($teamDesigns);
+            }
         }
         $invitation->status = StatusEnum::ACCEPTED;
         $invitation->save();
-        return redirect()->away('https://www.google.com/');
+        return redirect()->away(config('services.site_url').'Home')->withCookie(cookie(
+            name: 'dorra_auth_token',
+            value: auth('sanctum')->user()->currentAccessToken(),
+            path: '/',
+            domain: 'dorraprint.com',
+            secure: false,
+            httpOnly: false,
+            sameSite: 'Lax'
+        ));
     }
 }
