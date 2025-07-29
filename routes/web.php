@@ -159,6 +159,7 @@ Route::middleware('auth')->group(function () {
     Route::controller(SettingController::class)->group(function () {
         Route::get('settings/details', 'details')->name('settings.details');
         Route::get('settings/payments', 'payments')->name('settings.payments');
+        Route::get('settings/website', 'website')->name('settings.website');
         Route::get('settings/notifications', 'notifications')->name('settings.notifications');
     });
 
