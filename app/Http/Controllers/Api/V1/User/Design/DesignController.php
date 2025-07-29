@@ -68,6 +68,12 @@ class DesignController extends Controller
         return Response::api(data: DesignResource::make($design->refresh()));
     }
 
+    public function assignToTeam($designId, $teamId)
+    {
+        $this->designService->assignToTeam($designId, $teamId);
+        return Response::api();
+    }
+
     public function getDesignVersions($designId)
     {
         $designVersions = $this->designService->getDesignVersions($designId);
@@ -99,6 +105,7 @@ class DesignController extends Controller
         $this->designService->bulkDeleteResources($request->designs);
         return Response::api();
     }
+
     public function bulkForceDelete(Request $request)
     {
         $request->validate([
@@ -113,6 +120,7 @@ class DesignController extends Controller
         $this->designService->bulkForceResources($request->designs);
         return Response::api();
     }
+
     public function bulkRestore(Request $request)
     {
         $request->validate([

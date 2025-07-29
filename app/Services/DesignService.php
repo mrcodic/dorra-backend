@@ -9,6 +9,7 @@ use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\GuestRepositoryInterface;
+use App\Repositories\Interfaces\TeamRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -24,6 +25,7 @@ class DesignService extends BaseService
         public ProductSpecificationOptionRepository $optionRepository,
         public UserRepositoryInterface              $userRepository,
         public GuestRepositoryInterface             $guestRepository,
+        public TeamRepositoryInterface                 $teamRepository,
 
     )
     {
@@ -113,6 +115,7 @@ class DesignService extends BaseService
                     },
                     'owner' => fn($q) => $q->select('id', 'first_name', 'last_name'),
                     'template' => fn($q) => $q->select('id', 'name', 'description'),
+                    'template.products.saves',
                 ])
                 ->when($userId, fn($q) => $q->where('user_id', $userId))
                 ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
@@ -134,6 +137,12 @@ class DesignService extends BaseService
         );
     }
 
+    public function assignToTeam($designId, $teamId)
+    {
+        $design = $this->repository->find($designId);
+        $team = $this->teamRepository->find($teamId);
+        $design->teams()->attach($team);
+    }
     public function getDesignVersions($designId)
     {
         return $this->repository->find($designId)->versions()->paginate();
@@ -172,9 +181,6 @@ class DesignService extends BaseService
             ];
         });
     }
-
-
-
 
     public function owners()
     {

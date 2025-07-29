@@ -15,13 +15,26 @@ class TeamController extends Controller
 
     public function store(StoreTeamRequest $request)
     {
-        $this->teamService->storeResource($request->validated());
-        return Response::api();
+        $team = $this->teamService->storeResource($request->validated());
+        return Response::api(data: TeamResource::make($team));
     }
 
     public function index()
     {
         return Response::api(data: TeamResource::collection($this->teamService->userTeams()));
+
+    }
+
+    public function destroy($id)
+    {
+        $this->teamService->deleteResource($id);
+        return Response::api();
+
+    }
+
+    public function show($id)
+    {
+        return Response::api(data: TeamResource::make( $this->teamService->showResource($id)));
 
     }
 }

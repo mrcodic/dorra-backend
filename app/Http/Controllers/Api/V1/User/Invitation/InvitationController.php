@@ -10,6 +10,8 @@ use App\Mail\Invitation;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\InvitationRepositoryInterface;
 use App\Repositories\Interfaces\TeamRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Traits\HandlesTryCatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -19,23 +21,33 @@ use Illuminate\Support\Facades\URL;
 
 class InvitationController extends Controller
 {
+    use HandlesTryCatch;
     public function __construct(public InvitationRepositoryInterface $invitationRepository,
                                 public DesignRepositoryInterface     $designRepository,
-                                public TeamRepositoryInterface       $teamRepository,)
-    {}
+                                public TeamRepositoryInterface       $teamRepository,
+                                public UserRepositoryInterface       $userRepository,
+    )
+    {
+    }
 
     public function send(SendInvitationRequest $request)
     {
         $design = $request->design_id ? $this->designRepository->find($request->design_id) : null;
         $team = $request->team_id ? $this->teamRepository->find($request->team_id) : null;
-
-        $invitation = $this->invitationRepository->create($request->validated());
+        $invitation =  $this->handleTransaction(function () use ($request, $design, $team) {
+           $this->invitationRepository->query()->where('email', $request->email)
+               ->where('status', StatusEnum::PENDING)
+               ->when($request->design_id, fn($q) => $q->where('design_id', $request->design_id))
+               ->when($request->team_id, fn($q) => $q->where('team_id', $request->team_id))->delete();
+          return $this->invitationRepository->create($request->validated());
+       });
         $url = URL::temporarySignedRoute('invitation.accept', now()->addDays(2), [
             'invitation' => $invitation->id,
             'email' => $request->email,
         ]);
         $invitedResource = $design ?? $team;
         Mail::to($request->email)->send(new Invitation($url, $invitedResource));
+
         return Response::api();
 
     }
@@ -57,26 +69,26 @@ class InvitationController extends Controller
                 ]
             );
         }
-        if ($invitation->design_id)
-        {
-            auth('sanctum')->user()->userDesigns()->syncWitoutDetaching($invitation->design_id);
-            $invitation->team->designs()->syncWitoutDetaching($invitation->design_id);
+        $invitationUser = $this->userRepository->query()->whereEmail($email)->first();
+        if ($invitation->design_id) {
+            $invitationUser?->designs()->syncWithoutDetaching($invitation->design_id);
         }
-        if ($invitation->team_id)
-        {
+
+        if ($invitation->team_id) {
             $teamDesigns = $invitation->team->designs;
-            if ($teamDesigns->isNotEmpty())
-            {
-                auth('sanctum')->user()->userDesigns()->syncWitoutDetaching($teamDesigns);
+            if ($teamDesigns->isNotEmpty()) {
+                $invitationUser->designs()->syncWithoutDetaching($teamDesigns);
+                $invitationUser->teams()->syncWithoutDetaching($invitation->team->id);
             }
         }
+
         $invitation->status = StatusEnum::ACCEPTED;
         $invitation->save();
-        return redirect()->away(config('services.site_url').'Home')->withCookie(cookie(
-            name: 'dorra_auth_token',
-            value: auth('sanctum')->user()->currentAccessToken(),
+        return redirect()->away(config('services.site_url') . 'Home')->withCookie(cookie(
+            name: 'token',
+            value: auth('sanctum')->user()?->currentAccessToken(),
             path: '/',
-            domain: 'dorraprint.com',
+            domain: '.dorraprint.com',
             secure: false,
             httpOnly: false,
             sameSite: 'Lax'

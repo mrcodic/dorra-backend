@@ -142,9 +142,9 @@ class User extends Authenticatable implements HasMedia
         return $this->morphedByMany(Design::class, 'savable','saves')->withTimestamps();
     }
 
-    public function teams(): BelongsToMany
+    public function teams(): MorphToMany
     {
-        return $this->belongsToMany(Team::class)->withTimestamps();
+        return $this->morphToMany(Team::class,'teamable')->withTimestamps();
     }
 
     public function reviews(): HasMany

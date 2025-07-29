@@ -56,6 +56,10 @@ class Design extends Model implements HasMedia
     {
         return $this->morphedByMany(Folder::class, 'designable', 'designables')->withTimestamps();
     }
+    public function teams(): MorphToMany
+    {
+        return $this->morphToMany(Team::class,'teamable')->withTimestamps();
+    }
 
     public function quantity(): Attribute
     {
