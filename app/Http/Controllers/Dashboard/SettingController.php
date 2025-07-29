@@ -20,5 +20,11 @@ class SettingController extends Controller
      {
          return view("dashboard.settings.payments");
      }
+     
+     public function website()
+     {
+         return view("dashboard.settings.website");
+     }
 }
+
 
