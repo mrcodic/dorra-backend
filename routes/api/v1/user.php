@@ -20,9 +20,10 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\UserNotificationTypeController,
     SavedItems\SaveController,
     ShippingAddress\ShippingAddressController,
-    Template\TemplateController};
+    Team\TeamController,
+    Template\TemplateController
+};
 use App\Http\Controllers\Shared\CommentController;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -48,19 +49,20 @@ Route::prefix('login')->controller(LoginController::class)->group(function () {
 });
 
 Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
-Route::get('sub-categories', [MainController::class, 'subCategories']);
 
-Route::get('product-types', [ProductController::class, 'productTypes']);
+Route::get('sub-categories', [MainController::class, 'subCategories']);
+Route::controller(ProductController::class)->group(function () {
+    Route::get('product-types', 'productTypes');
+    Route::get('products/{product}/quantities', 'getQuantities');
+});
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+
 
 Route::controller(DesignController::class)->prefix('designs/')->group(function () {
     Route::post('bulk-restore', 'bulkRestore');
     Route::post('bulk-delete', 'bulkDelete');
     Route::post('bulk-force-delete', 'bulkForceDelete');
     Route::get('owners', 'owners');
-    Route::get('{design}/price-details', 'priceDetails');
-    Route::post('{design}/add-quantity', 'addQuantity');
-    Route::get('{design}/quantities', 'getQuantities');
     Route::post('design-finalization', 'designFinalization');
 });
 Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
@@ -69,7 +71,12 @@ Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 Route::controller(CartController::class)->group(function () {
     Route::get('/cart-info', 'cartInfo');
     Route::post('/carts/apply-discount', 'applyDiscount');
+    Route::get('/carts/remove-discount', 'removeDiscount');
     Route::delete('/carts', 'destroy');
+    Route::get('carts/{item}/price-details', 'priceDetails');
+    Route::put('carts/{item}/price-details', 'updatePriceDetails');
+    Route::post('carts/{item}/add-quantity', 'addQuantity');
+
 });
 Route::apiResource('/carts', CartController::class)->only(['store', 'index']);
 
@@ -105,7 +112,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 
-
     Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
     Route::post('designs/assign-to-folder', [FolderController::class, 'assignDesignsToFolder']);
@@ -123,6 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('invitation.accept')
             ->middleware('signed');
     });
+    Route::apiResource('teams', TeamController::class)->except(['update']);
 
     Route::get('trash', [MainController::class, 'trash'])->name('trash');
 
@@ -131,11 +138,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 });
-Route::get('templates',[TemplateController::class, 'index']);
+Route::get('templates', [TemplateController::class, 'index']);
+Route::get('templates/{template}', [TemplateController::class, 'show']);
 
 Route::controller(PaymentController::class)->group(function () {
-    Route::get('payment-methods','paymentMethods');
-    Route::post('get-payment-link','getPaymentLink');
-    Route::post('payment/callback','handleCallback');
-    Route::get('payment/redirect','handleRedirect');
+    Route::get('payment-methods', 'paymentMethods');
+    Route::post('get-payment-link', 'getPaymentLink');
+    Route::post('payment/callback', 'handleCallback');
+    Route::get('payment/redirect', 'handleRedirect');
 });

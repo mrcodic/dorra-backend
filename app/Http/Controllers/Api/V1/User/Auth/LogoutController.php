@@ -21,9 +21,9 @@ class LogoutController extends Controller
     {
         $this->authService->logout($request);
         return Response::api(
-            statusCode: HttpEnum::OK,
             message: 'You are successfully logged out',
-        )->withCookie(cookie()->forget('cookie_id'));
+        );
+
 
     }
 

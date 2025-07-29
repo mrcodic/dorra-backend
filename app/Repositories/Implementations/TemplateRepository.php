@@ -2,9 +2,11 @@
 
 namespace App\Repositories\Implementations;
 
+
 use App\Models\Template;
 use App\Repositories\Base\BaseRepository;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
+
 
 class TemplateRepository extends BaseRepository implements TemplateRepositoryInterface
 {
@@ -12,5 +14,4 @@ class TemplateRepository extends BaseRepository implements TemplateRepositoryInt
     {
         parent::__construct($template);
     }
-
 }

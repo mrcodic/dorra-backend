@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Interfaces\Auth\MustVerifyEmail;
-use App\Models\ShippingAddress;
+
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Permission\Traits\HasRoles;
@@ -12,7 +12,13 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, MorphMany, MorphToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo,
+    BelongsToMany,
+    HasMany,
+    HasManyThrough,
+    HasOne,
+    MorphMany,
+    MorphToMany};
 
 class User extends Authenticatable implements HasMedia
 {
@@ -99,9 +105,14 @@ class User extends Authenticatable implements HasMedia
         return $this->belongsTo(CountryCode::class);
     }
 
-    public function cart()
+    public function cart(): HasOne
     {
         return $this->hasOne(Cart::class);
+    }
+
+    public function cartItems(): HasManyThrough
+    {
+        return $this->hasManyThrough(CartItem::class, Cart::class);
     }
 
     public function socialAccounts(): HasMany
@@ -145,6 +156,7 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->morphToMany(Design::class, 'designable', 'designables')->withTimestamps();
     }
+
 
 
 

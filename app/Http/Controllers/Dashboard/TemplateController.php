@@ -5,20 +5,18 @@ namespace App\Http\Controllers\Dashboard;
 use App\Enums\HttpEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
-use App\Http\Resources\{MediaResource, TemplateResource};
-use App\Repositories\Interfaces\{ProductSpecificationRepositoryInterface,
-    ProductRepositoryInterface,
-    TagRepositoryInterface,
-    TemplateRepositoryInterface
-};
-use App\Services\TemplateService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Cache, Response};
 use App\Http\Requests\Template\{StoreTemplateRequest,
     StoreTranslatedTemplateRequest,
     UpdateTemplateEditorRequest,
-    UpdateTemplateRequest
-};
+    UpdateTemplateRequest};
+use App\Http\Resources\{MediaResource, Template\TemplateResource};
+use App\Repositories\Interfaces\{ProductRepositoryInterface,
+    ProductSpecificationRepositoryInterface,
+    TagRepositoryInterface,
+    TemplateRepositoryInterface};
+use App\Services\TemplateService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\{Cache, Response};
 
 
 class TemplateController extends DashboardController
@@ -60,8 +58,8 @@ class TemplateController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'index' => ["tags", "media", "products"],
-            'edit' => ['products']
+            'index' => ["tags", "media", "products","types"],
+            'edit' => ['products','types']
         ];
 
     }
@@ -86,7 +84,6 @@ class TemplateController extends DashboardController
                 'total' => is_countable($data) ? count($data) : $data->total(),
             ]);
         }
-
         return view("dashboard.templates.index", get_defined_vars());
     }
 
@@ -95,9 +92,7 @@ class TemplateController extends DashboardController
         $template = $this->templateService->storeResource($request->validated());
         return Response::api(data: [
             "redirect_url" =>
-                config('services.editor_url') .
-                'templates/' . $template->id . "?has_mockup=" .
-                ($template->products->contains('has_mockup', true) ? 'true' : 'false')
+                config('services.editor_url') . 'templates/' . $template->id
         ]);
     }
 
@@ -109,7 +104,7 @@ class TemplateController extends DashboardController
 
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['specifications.options', 'product.prices', 'products'])));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['products.dimensions','types'])));
     }
 
     public function getProductTemplates()
@@ -125,9 +120,11 @@ class TemplateController extends DashboardController
             if (!$productId) {
                 return Response::api(HttpEnum::BAD_REQUEST, errors: ['error' => 'Product not selected.']);
             }
-            $templates = $this->templateRepository->query()->with(['product', 'products'])
+            $templates = $this->templateRepository->query()->with(['products'])
                 ->when($productId, function ($query) use ($productId) {
-                    $query->whereProductId($productId);
+                    $query->whereHas('products', function ($q) use ($productId) {
+                        $q->where('products.id', $productId);
+                    });
                 })->live()->get();
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
         }

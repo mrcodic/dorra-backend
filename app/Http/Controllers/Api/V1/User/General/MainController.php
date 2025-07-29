@@ -7,6 +7,7 @@ use App\Enums\Product\UnitEnum;
 use App\Enums\Template\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dimension\StoreDimensionRequest;
+use App\Models\Type;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
     CountryResource,
@@ -14,8 +15,8 @@ use App\Http\Resources\{CategoryResource,
     FolderResource,
     MediaResource,
     StateResource,
-    TagResource
-};
+    TagResource,
+    Template\TypeResource};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Repositories\Interfaces\{CountryRepositoryInterface, DimensionRepositoryInterface, StateRepositoryInterface};
@@ -91,7 +92,7 @@ class MainController extends Controller
 
     public function templateTypes()
     {
-        return Response::api(data: TypeEnum::toArray());
+        return Response::api(data: TypeResource::collection(Type::all(['id', 'value'])));
 
     }
 

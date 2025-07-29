@@ -73,6 +73,9 @@ class ProductService extends BaseService
             ->addColumn('rating', function ($product) {
                 return $product->reviews?->pluck('rating')->avg() ?? 0;
             })
+            ->addColumn('image', function ($product) {
+                return $product->getMainImageUrl();
+            })
             ->addColumn('no_of_purchas', function ($product) {
                 return 0;
             })->make();
@@ -90,6 +93,12 @@ class ProductService extends BaseService
                 $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                     '%' . strtolower(request()->search) . '%'
                 ]);
+            })
+            ->when(request()->filled('templates'), function ($q) {
+                $templates = request('templates');
+                $q->whereHas('templates', function ($q) use ($templates) {
+                    $q->whereIn('templates.id', is_array($templates) ? $templates : [$templates]);
+                });
             })
             ->allowedFilters([
                 AllowedFilter::partial('category.id'),
@@ -321,6 +330,10 @@ class ProductService extends BaseService
 
 
     }
-
+    public function getQuantities($productId)
+    {
+        $product = $this->repository->find($productId);
+        return $product->prices->pluck('quantity', 'id')->toArray();
+    }
 
 }

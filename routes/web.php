@@ -227,6 +227,7 @@ Route::prefix('api/v1/')->group(function () {
         Route::get('mockups/{mockup}', 'showAndUpdateRecent');
         Route::get('recent-mockups', 'recentMockups');
         Route::get('mockup-types', 'mockupTypes');
+        Route::patch('mockups/{mockup}', 'updateEditorData');
         Route::delete('recent-mockups/{mockup}', 'destroyRecentMockup');
     });
 

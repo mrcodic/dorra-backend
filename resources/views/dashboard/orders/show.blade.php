@@ -92,30 +92,29 @@
                 <p >Completed</p>
 
 
-                @foreach($model->designs as $design)
+                @foreach($model->orderItems as $orderItem)
                     @php
-                        $product = optional(optional($design->template)->product);
+                        $product = $orderItem->product;
                     @endphp
 
                 <!-- Items List -->
                  <div class="mb-1">
                 <div class="d-flex align-items-start justify-content-between">
                     <div class="d-flex">
-                        <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+                        <img src="{{ $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable)))) }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
                         <div>
                             <div class="fw-bold text-black fs-16">
                                 {{ $product->name ?? 'No Product Found' }}
                             </div>
                             <div class="text-dark fs-5">
-                                Qty: {{ $design->pivot->quantity }}
+                                Qty: {{$orderItem->quantity }}
                             </div>
                         </div>
                     </div>
                     <div class="text-end">
                         <div class="fw-bold text-black">
-                            ${{ number_format($product->base_price ?? 0, 2) }}
+                            ${{ number_format($orderItem->sub_total ?? 0, 2) }}
                         </div>
-                        <button class="btn btn-sm btn-outline-danger mt-1">Delete</button>
                     </div>
                 </div>
             </div>
@@ -178,7 +177,7 @@
                 </div>
 
                 <div class="d-flex gap-2 justify-content-end ">
-                        <a class="btn btn-primary" href="/orders/1/edit" >Edit Order</a>
+                        <a class="btn btn-primary" href="{{ route("orders.edit",$model->id) }}" >Edit Order</a>
                 </div>
             </div>
         </div>

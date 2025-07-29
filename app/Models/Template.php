@@ -8,11 +8,11 @@ use App\Enums\Template\TypeEnum;
 use App\Observers\TemplateObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -27,13 +27,9 @@ class Template extends Model implements HasMedia
     protected $fillable = [
         'name',
         'status',
-        'product_id',
         'design_data',
-        'type',
+        'design_back_data',
         'description',
-        'unit',
-        'height',
-        'width',
     ];
     protected $casts = [
         'status' => StatusEnum::class,
@@ -46,57 +42,11 @@ class Template extends Model implements HasMedia
     ];
 
 
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
-
-    public function specifications(): BelongsToMany
-    {
-        return $this->belongsToMany(ProductSpecification::class)->withTimestamps();
-    }
-
-
     public function getImageAttribute(): string
     {
         return $this->getFirstMediaUrl('templates') ?: "";
 
     }
-
-    public function height(): Attribute
-    {
-        return Attribute::get(function ($value) {
-            return fmod($value, 1) == 0.0 ? (int)$value : $value;
-
-        });
-    }
-
-    public function width(): Attribute
-    {
-        return Attribute::get(function ($value) {
-            return fmod($value, 1) == 0.0 ? (int)$value : $value;
-
-        });
-    }
-
-    public function getWidthPixelAttribute()
-    {
-        $value = $this->unit === UnitEnum::CM
-            ? round($this->width / 2.54, 2)
-            : $this->width;
-        return fmod($value, 1) == 0.0 ? (int)$value : $value;
-    }
-
-    public function getHeightPixelAttribute()
-    {
-        $value = $this->unit === UnitEnum::CM
-            ? round($this->height / 2.54, 2)
-            : $this->height;
-
-        return fmod($value, 1) == 0.0 ? (int)$value : $value;
-    }
-
-
     public function scopeLive(Builder $builder): Builder
     {
         return $builder->where('status', StatusEnum::LIVE);
@@ -112,5 +62,12 @@ class Template extends Model implements HasMedia
     {
         return $this->morphToMany(Tag::class, 'taggable')->withTimestamps();
     }
+
+    public function types()
+    {
+        return $this->belongsToMany(Type::class)->withTimestamps();
+    }
+
+
 
 }

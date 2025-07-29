@@ -16,7 +16,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Design::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Cart::class)->constrained()->cascadeOnDelete();
-            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }

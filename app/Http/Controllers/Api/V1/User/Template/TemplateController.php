@@ -8,7 +8,7 @@ use App\DTOs\Template\TemplateData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Template\StoreTemplateRequest;
 use App\Http\Requests\Template\UpdateTemplateRequest;
-use App\Http\Resources\TemplateResource;
+use App\Http\Resources\Template\TemplateResource;
 use App\Services\TemplateService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
@@ -35,7 +35,11 @@ class TemplateController extends Controller
 
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id)));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id,[
+            'products' => fn($q) => $q->whereKey(request()->integer('product_id')),
+            'products.specifications.options',
+            'products.prices',
+            ])));
 
 
     }

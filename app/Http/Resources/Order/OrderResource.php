@@ -5,6 +5,7 @@ namespace App\Http\Resources\Order;
 use App\Enums\Order\StatusEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 
 class OrderResource extends JsonResource
 {
@@ -32,16 +33,20 @@ class OrderResource extends JsonResource
             'current_status' => [
                 'value' => $this->status->value,
                 'label' => $this->status->label(),
+                'icon' => $this->status->icon(),
             ],
             'statuses' => $statuses,
             'shipping_address' => OrderAddressResource::make($this->whenLoaded('orderAddress')),
+
             'items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
-            'items_images' => $this->orderItems->pluck('design')->map(function ($item) {
-                return $item->getFirstMediaUrl('designs');
+            'items_images' => $this->orderItems->load('itemable.media')->map(function ($orderItem) {
+                return $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))));
             }),
-            'items_names' => $this->orderItems->pluck('design')->map(function ($item) {
-                return $item->name;
+
+            'items_names' => $this->orderItems->map(function ($orderItem) {
+                return $orderItem->itemable?->name;
             }),
+
             'sub_total' => $this->subtotal,
             'total' => $this->total_price,
             'tax' => [

@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('templates', function (Blueprint $table) {
-            $table->tinyInteger('type')->after('description')->default(3);
+        Schema::create('types', function (Blueprint $table) {
+            $table->id();
+            $table->tinyInteger('value');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('templates', function (Blueprint $table) {
-            $table->dropColumn('type');
-        });
+        Schema::dropIfExists('types');
     }
 };

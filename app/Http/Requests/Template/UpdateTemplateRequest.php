@@ -45,7 +45,6 @@ class UpdateTemplateRequest extends BaseRequest
             ],
             'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
             'status' => ["required","integer","in:".StatusEnum::getValuesAsString()],
-            'product_id' => ['sometimes', 'exists:products,id'],
             'product_ids' => ['required', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
             'design_data' => ['sometimes', 'json'],
@@ -55,6 +54,8 @@ class UpdateTemplateRequest extends BaseRequest
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['integer', 'exists:tags,id'],
+            'types' => ['required', 'array'],
+            'types.*' => ['integer', 'exists:types,id'],
         ];
     }
 

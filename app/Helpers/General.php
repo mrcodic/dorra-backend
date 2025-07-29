@@ -1,10 +1,27 @@
 <?php
 
 
-use App\Models\{Design, Template};
+use App\Models\{Design, Guest, Template};
 use App\Repositories\Implementations\SettingRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+
+function getAuthOrGuest()
+{
+    $user = auth('sanctum')->user();
+
+    if ($user) {
+        return $user;
+    }
+
+    $cookieData = getCookie('cookie_id');
+    $cookieValue = $cookieData['value'];
+
+    $guest = Guest::query()->firstOrCreate(['cookie_value'=> $cookieValue]);
+    if ($guest) {
+        return $guest;
+    }
+}
 
 function getActiveGuard(): string|null
 {
@@ -67,12 +84,12 @@ function getDiscountAmount($discount, $subtotal)
     if (!is_object($discount)) {
         return 0;
     }
-    if ($discount->type == \App\Enums\DiscountCode\TypeEnum::PERCENTAGE)
-    {
-        return $subtotal * $discount->value;
+    if ($discount->type == \App\Enums\DiscountCode\TypeEnum::PERCENTAGE) {
+        return number_format($subtotal * $discount->value, 2, '.', '');
 
     }
-    return  $discount->value;
+    return number_format($discount->value, 2, '.', '');
+
 
 }
 
@@ -82,7 +99,7 @@ function getTotalPrice($discount, $subtotal): float|int
     $discountAmount = getDiscountAmount($discount, $subtotal);
     $tax = setting('tax');
     $delivery = setting('delivery');
-    return  $subtotal - $discountAmount + ($tax * $subtotal) + $delivery;
+    return $subtotal - $discountAmount + ($tax * $subtotal) + $delivery;
 }
 
 function getPriceAfterTax($tax, $subtotal): float|int

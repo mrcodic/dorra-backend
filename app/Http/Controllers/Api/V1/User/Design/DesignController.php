@@ -58,7 +58,7 @@ class DesignController extends Controller
 
     public function show($design)
     {
-        $design = $this->designService->showResource($design, ['media', 'product','directProduct']);
+        $design = $this->designService->showResource($design, ['media', 'product']);
         return Response::api(data: DesignResource::make($design->refresh()));
     }
 
@@ -77,46 +77,12 @@ class DesignController extends Controller
     public function designFinalization(StoreDesignFinalizationRequest $request)
     {
         $designData = $this->designService->designFinalization($request);
-
         return Response::api(data: DesignFinalizationResource::collection($designData['syncData'])
             ->additional([
                 'sub_total' => $designData['sub_total'],
                 'quantity' => $designData['quantity'],
             ])->response()->getData(true)
         );
-    }
-
-    public function addQuantity(Request $request, $designId)
-    {
-        $request->validate([
-            'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
-            'product_price_id' => ['required_without:quantity', 'integer', 'exists:product_prices,id',
-                function ($attribute, $value, $fail) use ($designId) {
-                    $design = Design::find($designId);
-                    if (!$design || !$design->product->prices->pluck('id')->contains($value)) {
-                        $fail('The selected product price is not valid for the current design.');
-                    }
-                }
-            ],
-        ]);
-        $this->designService->addQuantity($request, $designId);
-        return Response::api();
-    }
-
-    public function priceDetails($designId)
-    {
-        $designData = $this->designService->priceDetails($designId);
-        return Response::api(data: new DesignFinalizationCollectionResource(collect($designData)));
-
-
-    }
-
-    public function getQuantities($designId)
-    {
-        $quantities = $this->designService->getQuantities($designId);
-        $quantities = $quantities ?: (object)[];
-        return Response::api(data: $quantities);
-
     }
 
     public function bulkDelete(Request $request)

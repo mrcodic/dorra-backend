@@ -20,28 +20,20 @@ class StoreDesignRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'template_id' => ['required_without:product_id', 'prohibits:product_id', 'exists:templates,id'],
-            'product_id' => ['required_without:template_id', 'prohibits:template_id', 'exists:products,id'],
+            'template_id' => ['bail', 'sometimes', 'exists:templates,id'],
+            'product_id' => ['required', 'exists:products,id',function ($attribute, $value, $fail) {
+                $template = Template::find($this->template_id);
+                if (!$template) {
+                    return;
+                }
+                if (!$template?->products->contains($value)) {
+                    return $fail("The selected product is not associated with the selected template.");
+                }
+            }],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
             'design_data' => ['nullable', 'json'],
-            'product_type' => ['required_with:product_id', 'in:T-shirt,other'],
-            'unit' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
-                'integer',
-                'in:' . UnitEnum::getValuesAsString(),
-            ],
-            'height' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
-                'numeric',
-                new DimensionWithinUnitRange()
-            ],
-            'width' => [
-                Rule::requiredIf($this->input('product_type') === 'other'),
-                'numeric',
-                new DimensionWithinUnitRange()
-            ],
-            'name' => ['required_with:product_id', 'string', 'max:255'],
+            'name' => ['required_without:template_id', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
         ];
     }
@@ -89,27 +81,12 @@ class StoreDesignRequest extends BaseRequest
             $guestId = $guest->id;
         }
 
-
-        $width = $template?->width ?? $this->input('width');
-        $height = $template?->height ?? $this->input('height');
-        $unit = $template?->unit->value ?? $this->input('unit');
-
-
-        if ($this->input('product_type') === 'T-shirt') {
-            $width = 650;
-            $height = 650;
-            $unit = UnitEnum::PIXEL->value;
-        }
-
         $this->merge([
             'user_id' => $userId,
             'guest_id' => $guestId,
             'design_data' => $template?->design_data ?? $this->input('design_data'),
             'name' => $template?->name ?? $this->input('name'),
             'description' => $template?->description ?? $this->input('description'),
-            'height' => $height,
-            'width' => $width,
-            'unit' => $unit,
             'cookie' => $cookieValue,
         ]);
     }

@@ -13,6 +13,7 @@ enum TypeEnum : int
     case NONE = 3;
 
 
+
     public function label()
     {
         return match ($this) {

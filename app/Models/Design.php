@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough, MorphMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough, MorphMany, MorphToMany};
 use Spatie\Translatable\HasTranslations;
 
 #[ObservedBy(DesignObserver::class)]
@@ -24,7 +24,6 @@ class Design extends Model implements HasMedia
         'cookie_id',
         'user_id',
         'guest_id',
-        'order_id',
         'template_id',
         'design_data',
         'current_version',
@@ -32,9 +31,6 @@ class Design extends Model implements HasMedia
         'quantity',
         'name',
         'description',
-        'height',
-        'width',
-        'unit',
         'product_id'
     ];
     protected $attributes = [
@@ -79,20 +75,10 @@ class Design extends Model implements HasMedia
         return $this->belongsTo(Template::class);
     }
 
-    public function product(): HasOneThrough
+
+    public function product(): BelongsTo
     {
-        return $this->hasOneThrough(
-            Product::class,
-            Template::class,
-            'id',
-            'id',
-            'template_id',
-            'product_id'
-        );
-    }
-    public function directProduct(): BelongsTo
-    {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class)->withDefault(['name' => '']);
     }
 
 
@@ -119,11 +105,9 @@ class Design extends Model implements HasMedia
         return $this->belongsTo(ProductPrice::class);
     }
 
-    public function specifications(): BelongsToMany
+    public function specifications(): MorphMany
     {
-        return $this->belongsToMany(ProductSpecification::class)
-            ->using(DesignProductSpecification::class)
-            ->withPivot('spec_option_id')->withTimestamps();
+        return $this->morphMany(CustomizableProductSpecification::class, 'customizable');
     }
 
     public function cartItems(): BelongsToMany
@@ -136,21 +120,28 @@ class Design extends Model implements HasMedia
 
     public function getTotalPriceAttribute(): float
     {
-        $this->load('productPrice');
-        $specOptions = $this->options()->select('price')->get();
-        $specTotalPrice = $specOptions->sum('price');
-        $productPrice = $this->productPrice->price ?? $this->product?->base_price * $this->quantity;
+        $this->loadMissing('productPrice', 'options');
+
+        $specTotalPrice = $this->options->sum('price');
+
+        $productPrice = $this->productPrice->price
+            ?? ($this->product?->base_price ?? 0) * ($this->quantity ?? 1);
+
         return $specTotalPrice + $productPrice;
     }
 
-    public function options(): BelongsToMany
+
+    public function options(): MorphToMany
     {
-        return $this->belongsToMany(ProductSpecificationOption::class, 'design_product_specification',
-            'design_id',
-            'spec_option_id')
-            ->using(DesignProductSpecification::class)
-            ->withTimestamps();
+        return $this->morphToMany(
+            ProductSpecificationOption::class,
+            'customizable',
+            'customizable',
+            'customizable_id',
+            'spec_option_id'
+        )->withTimestamps();
     }
+
 
     public function invoices()
     {

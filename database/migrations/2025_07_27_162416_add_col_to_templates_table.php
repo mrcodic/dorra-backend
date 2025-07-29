@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('templates', function (Blueprint $table) {
-            $table->integer("dpi")->nullable()->after("unit")->default(300);
-            $table->decimal('width')->nullable()->change();
-            $table->decimal('height')->nullable()->change();
+            $table->after('design_data', function ($table) {
+                $table->json('design_back_data')->nullable();
+            });
         });
     }
 
@@ -24,9 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('templates', function (Blueprint $table) {
-            $table->dropColumn("dpi");
-            $table->integer('width')->change();
-            $table->integer('height')->change();
+            $table->dropColumn('design_back_data');
         });
     }
 };

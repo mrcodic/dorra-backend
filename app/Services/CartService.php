@@ -3,76 +3,78 @@
 namespace App\Services;
 
 use App\Enums\DiscountCode\TypeEnum;
-use App\Models\{CartItem, Product};
-use App\Repositories\Interfaces\{
+use App\Models\{Category, Guest, Product, User};
+use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     DiscountCodeRepositoryInterface,
     CartRepositoryInterface,
     DesignRepositoryInterface,
-    GuestRepositoryInterface
+    GuestRepositoryInterface,
+    ProductPriceRepositoryInterface,
+    ProductSpecificationOptionRepositoryInterface,
+    ProductSpecificationRepositoryInterface
 };
 use App\Rules\ValidDiscountCode;
-use Illuminate\Support\Arr;
+use Illuminate\Support\{Facades\Response, Arr};
 use Illuminate\Validation\ValidationException;
+
 
 class CartService extends BaseService
 {
     public function __construct(
-        CartRepositoryInterface                $repository,
-        public DesignRepositoryInterface       $designRepository,
-        public CartRepositoryInterface         $cartRepository,
-        public DiscountCodeRepositoryInterface $discountCodeRepository,
-        public GuestRepositoryInterface        $guestRepository,
+        CartRepositoryInterface                              $repository,
+        public DesignRepositoryInterface                     $designRepository,
+        public CartRepositoryInterface                       $cartRepository,
+        public DiscountCodeRepositoryInterface               $discountCodeRepository,
+        public GuestRepositoryInterface                      $guestRepository,
+        public ProductPriceRepositoryInterface               $productPriceRepository,
+        public ProductSpecificationOptionRepositoryInterface $optionRepository,
+        public ProductSpecificationRepositoryInterface       $specificationRepository,
+        public CartItemRepositoryInterface                   $cartItemRepository,
     )
     {
         parent::__construct($repository);
     }
 
-    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    public function storeResource($request, $relationsToStore = [], $relationsToLoad = [])
     {
-        $userId = auth('sanctum')->id();
-        $cookieValue = Arr::get($validatedData, 'cookie_id');
-        $guestId = null;
+        return $this->handleTransaction(function () use ($request, $relationsToStore, $relationsToLoad) {
+            $validatedData = $request->validated();
+            $userId = getAuthOrGuest() instanceof User ? getAuthOrGuest()->id : null;
+            $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
 
-        if (!$userId && $cookieValue) {
-            $guest = $this->guestRepository->query()->firstWhere(['cookie_value' => $cookieValue]);
-            $guestId = $guest?->id;
-        }
+            $cart = $this->repository->query()
+                ->when($userId, fn($query) => $query->where('user_id', $userId))
+                ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
+                ->first();
 
-        if (!$guestId && !$userId )
-        {
-            throw ValidationException::withMessages([
-                ["user_id" => 'Either user ID or cookie ID must be present.']
-            ]);
-        }
-        $cart = $this->repository->query()
-            ->when($userId, fn($query) => $query->where('user_id', $userId))
-            ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
-            ->first();
+            if (!$cart) {
+                $cart = $this->repository->query()->create([
+                    'user_id' => $userId,
+                    'guest_id' => $guestId,
+                    ...Arr::except($validatedData, ['design_id', 'cookie_id']),
+                ]);
+            }
 
-        if (!$cart) {
-            $cart = $this->repository->query()->create([
-                'user_id' => $userId,
-                'guest_id' => $guestId,
-                ...Arr::except($validatedData, ['design_id', 'cookie_id']),
-            ]);
-        }
+            $product = $request->getProduct();
+            $template = $request->getTemplate();
+            $design = $request->getDesign();
 
-        $design = $this->designRepository->find($validatedData['design_id']);
+            $priceDetails = $this->calculatePriceDetails($validatedData, $product);
 
-        $cart->designs()->syncWithoutDetaching([
-            $design->id => [
-                'status' => 1,
-                'sub_total' => $design->total_price,
-                'total_price' => $design->total_price,
-            ]
-        ]);
+            $cartItem = $cart->addItem(
+                $design ?? $template,
+                Arr::get($priceDetails, 'quantity'),
+                $priceDetails['specs_sum'],
+                $priceDetails['product_price'],
+                $priceDetails['sub_total'],
+                $product
+            );
 
-        $subTotal = $cart->designs->sum(fn($design) => $design->total_price ?? 0);
-        $cart->update(['price' => $subTotal]);
+            $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
 
-        return $cart->load(['designs.product']);
+            return $cart;
+        });
     }
-
 
     /**
      * @throws ValidationException
@@ -98,91 +100,185 @@ class CartService extends BaseService
         }
 
         return $this->repository->query()
-            ->when($userId, fn($q) =>$q->where('user_id', $userId))
+            ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
-            ->with(['designs.product', 'cartItems.product','designs' => fn($q) => $q->latest(),])
+            ->with(['items.product','items.itemable' => function ($query) {
+                $query->select(['id','name']);
+            }])
             ->first();
     }
 
-    /**
-     * @throws ValidationException
-     */
-    public function deleteItemFromCart($designId)
+    public function deleteItemFromCart($itemId)
     {
-        $this->handleTransaction(function () use ($designId) {
-            $cart = $this->resolveUserCart();
-            if (!$cart) {
-                throw ValidationException::withMessages([
-                    'cart' => ['Cart not found for this user.'],
-                ]);
-            }
-            $cartItem = CartItem::where('design_id', $designId)
-                ->where('cart_id', $cart->id)
-                ->first();
-
-            if (!$cartItem) {
-                throw ValidationException::withMessages([
-                    'cart' => ['Design item not found in cart.'],
-                ]);
-            }
-
-            $itemPrice = $cartItem->design->total_price ?? $cartItem->total_price ?? 0;
-
-            $cartItem->delete();
-
-            $cart->update([
-                'price' => max(0, $cart->price - $itemPrice),
+        $cart = $this->resolveUserCart();
+        if (!$cart) {
+            throw ValidationException::withMessages([
+                'cart' => ['Cart not found for this user.'],
             ]);
-        });
+        }
+        $item = $cart->items()->whereKey($itemId)->first();
+
+        if (!$item) {
+            throw ValidationException::withMessages([
+                'cart' => ['Item not found in cart.'],
+            ]);
+        }
+        $item->delete();
+        $cart->update([
+            'price' => $cart->items()->sum('sub_total'),
+        ]);
+
+        return Response::api(message: "Item removed from cart successfully.");
+
     }
+
 
     public function applyDiscount($request)
     {
         $cart = $this->resolveUserCart();
-        $cart->load('cartItems.product');
-        $items = $cart->cartItems;
-
+        if(!$cart)
+        {
+            throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
+        }
+        $items = $cart->load('items.product.category')->items;
+        $products = $items->pluck('product.id')->filter()->unique();
+        $categories = $items->pluck('product.category.id')->filter()->unique();
+        $allSameProduct = $products->count() === 1;
+        $allSameCategory = $categories->count() === 1;
+        $product = $allSameProduct ? $items->first()->product : null;
+        $category = $allSameCategory ? $items->first()->product->category : null;
+        $request->validate([
+            'code' => ['required', new ValidDiscountCode($product, $category)],
+        ]);
         $discountCode = $this->discountCodeRepository->query()
             ->whereCode($request->code)
             ->firstOrFail();
 
-        $products = $items->pluck('product.id')->filter()->unique();
-        $allSameProduct = $products->count() === 1;
-
-        if ($allSameProduct) {
-            $product = Product::find($products->first());
-        }
-
-        $request->validate([
-            'code' => ['required', new ValidDiscountCode($product ?? null)],
+        $cart->update([
+            'discount_code_id' => $discountCode->id,
+            'discount_amount' => getDiscountAmount($discountCode, $cart->price)
         ]);
 
-        $subTotal = $cart->price;
-        $discountValue = $discountCode->type == TypeEnum::PERCENTAGE
-            ? $discountCode->value
-            : ($discountCode->value / $subTotal) * 100;
-
-        $discountAmount = getDiscountAmount($discountCode, $subTotal);
-        $totalPrice = $subTotal - $discountAmount;
-
         return [
-            'discount' => [
-                'id' => $discountCode->id,
-                'ratio' => number_format($discountValue, 2, '.', ''),
-                'value' => number_format($discountAmount, 2, '.', ''),
-            ],
-            'total_price' => number_format($totalPrice, 2, '.', ''),
+            'code' => $discountCode?->code,
+            'ratio' => $cart->price
+                ? (
+                    ($discountCode?->type === TypeEnum::PERCENTAGE
+                        ? $discountCode?->value
+                        : ($discountCode?->value / $cart->price) * 100
+                    ) . '%'
+                )
+                : '0%',
+            'value' => $discountCode?->value ?? 0,
         ];
-
+    }
+   public function removeDiscount(): void
+   {
+        $cart = $this->resolveUserCart();
+        if(!$cart)
+        {
+            throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
+        }
+        $cart->update([
+            'discount_code_id' => null,
+            'discount_amount' => 0,
+        ]);
     }
 
     public function cartInfo(): array
     {
-
         $cart = $this->resolveUserCart();
         return [
             'price' => $cart?->price ?? 0,
-            'items_count' => $cart?->cartItems->count() ?? 0,
+            'items_count' => $cart?->totalItems() ?? 0,
         ];
     }
+
+    public function addQuantity($request, $id)
+    {
+        $cartItem = $this->cartItemRepository->find($id);
+        if ($cartItem->product->has_custom_prices) {
+            $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
+            $updated = $cartItem->update(['product_price' => $productPrice->price, 'quantity' => $productPrice->quantity]);
+        } else {
+            $updated = $cartItem->update($request->only(['quantity']));
+        }
+        return $updated;
+    }
+
+    public function priceDetails($itemId)
+    {
+        return $this->cartItemRepository->query()
+            ->select(['id', 'product_id', 'quantity', 'sub_total','itemable_id', 'itemable_type'])
+            ->findOrFail($itemId)?->load([
+                'itemable:id','itemable.media','product',
+                'product.specifications.options', 'specs',
+                'itemable','specs.productSpecificationOption',
+                'specs.productSpecification']);
+    }
+
+    public function updatePriceDetails($validatedData, $itemId)
+    {
+        $cartItem = $this->cartItemRepository->query()
+            ->select(['id', 'product_id', 'quantity', 'sub_total', 'product_price', 'cart_id'])
+            ->find($itemId);
+
+        $product = $cartItem->product;
+        $priceDetails = $this->calculatePriceDetails($validatedData, $product, $cartItem->product_price);
+
+        $cartItem->update([
+            'sub_total' => $priceDetails['sub_total'],
+            'specs_price' => $priceDetails['specs_sum'],
+            'product_price' => $priceDetails['product_price'],
+            'quantity' => Arr::get($priceDetails, 'quantity'),
+        ]);
+
+        $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
+        return $cartItem;
+    }
+
+    private function calculatePriceDetails(array $validatedData, $product, $price = null): array
+    {
+        $productPrice = $this->productPriceRepository->query()
+            ->find(Arr::get($validatedData, 'product_price_id'));
+
+        $productPriceValue = $productPrice?->price ?? $price;
+        $specsSum = collect(Arr::get($validatedData, 'specs'))
+            ->map(function ($spec) {
+                return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
+            })->sum();
+        $basePrice = $product->base_price ?? $productPriceValue;
+
+        $subTotal = ($product->base_price ?? $productPriceValue) + $specsSum;
+        $calculatePrices = [
+            'product_price' => $basePrice,
+            'specs_sum' => $specsSum,
+            'sub_total' => $subTotal,
+        ];
+        $quantity = $productPrice?->quantity;
+        if ($quantity) {
+            $calculatePrices['quantity'] = $quantity;
+        }
+
+        return $calculatePrices;
+    }
+
+    private function handleSpecs(array $specs, $cartItem): void
+    {
+        collect($specs)->each(function ($spec) use ($cartItem) {
+            $option = $this->optionRepository->query()->find($spec['option']);
+            $specification = $this->specificationRepository->query()->find($spec['id']);
+
+            if ($option && $specification) {
+                $cartItem->specs()->delete();
+                $cartItem->specs()->updateOrCreate(
+                    ['cart_item_id' => $cartItem->id, 'product_specification_id' => $specification->id],
+                    [
+                        'spec_option_id' => $option->id,
+                    ]
+                );
+            }
+        });
+    }
+
 }

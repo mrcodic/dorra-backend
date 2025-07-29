@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\DiscountCode\ScopeEnum;
 use App\Enums\DiscountCode\TypeEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -49,6 +50,15 @@ class DiscountCode extends Model
         });
     }
 
+    public function scopeIsNotValid(Builder $query): Builder
+    {
+        return $query->where(function ($q) {
+            $q->where('expired_at', '<=', now())
+                ->orWhereColumn('used', 'max_usage');
+        });
+    }
+
+
     protected function casts(): array
     {
         return [
@@ -56,4 +66,5 @@ class DiscountCode extends Model
             'scope' => ScopeEnum::class,
         ];
     }
+
 }

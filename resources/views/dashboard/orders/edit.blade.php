@@ -1,5 +1,6 @@
+
 @extends('layouts/contentLayoutMaster')
-@section('title', 'Edit orderss')
+@section('title', 'Edit Order')
 @section('main-page', 'Orders')
 @section('sub-page', 'Edit Orders')
 
@@ -115,33 +116,33 @@
                     </select>
 
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
-
-                @foreach ($model->orderItems as $design)
+                @foreach ($model->orderItems as $orderItem)
                     @php
-                        $product = $design->product;
+                        $product = $orderItem->product;
                     @endphp
                     <div class="mb-1">
                         <div class="d-flex align-items-start justify-content-between">
                             <div class="d-flex">
-                                <img src="{{ asset('images/banner/banner-1.jpg') }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+                                <img src="{{ $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable)))) }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+
                                 <div>
                                     <div class="fw-bold text-black fs-16">
                                         {{ $product->name ?? 'No Product Found' }}
                                     </div>
                                     <div class="text-dark fs-5">
-                                        Qty: {{ $design->pivot?->quantity }}
+                                        Qty: {{ $orderItem->quantity }}
                                     </div>
                                 </div>
                             </div>
                             <div class="text-end">
                                 <div class="fw-bold text-black">
-                                    ${{ number_format($product->base_price ?? 0, 2) }}
+                                    ${{ number_format($orderItem->sub_total ?? 0, 2) }}
                                 </div>
                                 @if ($model->orderItems->count() > 1 )
-                                    <form class="delete-design-form d-inline" method="POST" action="{{ route('orders.orderItems.delete', ['orderId' => $model->id, 'designId' => $design->id]) }}">
+                                    <form class="delete-design-form d-inline" method="POST" action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $orderItem->id]) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn" data-design-id="{{ $design->id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn" data-design-id="{{ $orderItem->id }}">
                                             Delete
                                         </button>
                                     </form>

@@ -18,8 +18,11 @@ class DatabaseSeeder extends Seeder
            CountryStateSeeder::class,
           NotificationTypeSeeder::class,
            AdminSeeder::class,
-           TemplateSeeder::class,
+           SettingSeeder::class,
            PaymentSeeder::class,
+           DimensionSeeder::class,
+           TemplateTypeSeeder::class,
+           SettingSeeder::class,
        ]);
     }
 }

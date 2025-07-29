@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\CartItem;
-use Illuminate\Support\Facades\Log;
 
 class CartItemObserver
 {
@@ -12,7 +11,11 @@ class CartItemObserver
      */
     public function created(CartItem $cartItem): void
     {
-        //
+        $cart = $cartItem->cart;
+        $total = $cart->items()->sum('sub_total');
+        $cart->update([
+            'price' => $total
+        ]);
     }
 
     /**
@@ -20,14 +23,27 @@ class CartItemObserver
      */
     public function updated(CartItem $cartItem): void
     {
-        if ($cartItem->wasChanged('sub_total'))
-        {
-            $cart = $cartItem->cart;
-            $total = $cart->cartItems()->sum('sub_total');
+        if ($cartItem->wasChanged('quantity')) {
+            if ($cartItem->product->has_custom_prices) {
+                $subTotal = $cartItem->product_price + $cartItem->specs_price;
+                $cartItem->sub_total = $subTotal;
+                $cartItem->saveQuietly();
+            } else {
+                $subTotal = ($cartItem->product_price * $cartItem->quantity) + $cartItem->specs_price;
+                $cartItem->sub_total = $subTotal;
+                $cartItem->saveQuietly();
+            }
 
-            $cart->update([
-                'price' => $total
-            ]);
+        }
+
+        $cart = $cartItem->cart;
+
+        if ($cartItem->wasChanged('sub_total')) {
+
+            $total = $cart->items()->sum('sub_total');
+
+            $cart->price = $total;
+            $cart->saveQuietly();
 
         }
 

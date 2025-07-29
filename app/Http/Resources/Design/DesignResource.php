@@ -4,7 +4,7 @@ namespace App\Http\Resources\Design;
 
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\Product\ProductResource;
-use App\Http\Resources\TemplateResource;
+use App\Http\Resources\Template\TemplateResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -25,7 +25,7 @@ class DesignResource extends JsonResource
             'design_data' => $this->when(request('design_data') == true, $this->design_data),
             'design_image' => $this->getFirstMediaUrl('designs'),
             'current_version' => $this->current_version,
-            'product' => ProductResource::make($this->whenLoaded('product') ?? $this->whenLoaded('directProduct')),
+            'product' => ProductResource::make($this->whenLoaded('product')),
             'owner' => UserResource::make($this->whenLoaded('owner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
@@ -36,7 +36,7 @@ class DesignResource extends JsonResource
             'type' => 'design',
             'delete_since' => $this->deleted_at?->diffForHumans(),
             'is_saved' => $this->when(!$this->deleted_at,fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id()),),
-            'is_added_to_cart' => $this->isAddedToCart(),
+//            'is_added_to_cart' => $this->isAddedToCart(),
 
         ];
     }

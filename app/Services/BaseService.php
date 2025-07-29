@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Traits\HandlesTryCatch;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class BaseService

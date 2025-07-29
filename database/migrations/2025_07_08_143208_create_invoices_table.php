@@ -17,9 +17,7 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->string('invoice_number');
-            $table->foreignIdFor(User::class)->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Design::class)->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Order::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
             $table->integer('quantity')->nullable();
             $table->decimal('subtotal', 8, 2)->nullable();
             $table->decimal('discount_amount', 8, 2)->nullable();

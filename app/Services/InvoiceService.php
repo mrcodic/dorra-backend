@@ -18,10 +18,8 @@ class InvoiceService extends BaseService
     public function getData(): JsonResponse
     {
         $invoices = $this->repository
-        ->query(['id', 'invoice_number', 'created_at', 'user_id', 'order_id', 'design_id' , 
-        'quantity', 'subtotal', 'discount_amount', 'delivery_amount', 'tax_amount', 
-        'total_price', 'status', 'issued_date'])
-            ->with(['order', 'user', 'designs'])
+        ->query()
+            ->with(['order'])
             ->when(request()->filled('search_value'), function ($query) {
                 $locale = app()->getLocale();
                 $search = request('search_value');
@@ -33,10 +31,17 @@ class InvoiceService extends BaseService
         ->addColumn('invoice_number', function ($invoice) {
             return $invoice->invoice_number;
         })
-        ->addColumn('user_name', function ($invoice) {
-            return optional($invoice->user)->first_name . ' ' . optional($invoice->user)->last_name;
-        })
-        ->addColumn('total_price', function ($invoice) {
+             ->addColumn('user_name', function ($invoice) {
+                 if ($invoice->order && $invoice->order->user) {
+                     return trim($invoice->order->user->first_name . ' ' . $invoice->order->user->last_name);
+                 }
+                 if ($invoice->order && $invoice->order->guest) {
+                     return trim($invoice->order->guest->first_name . ' ' . $invoice->order->guest->last_name);
+                 }
+                 return 'Unknown';
+             })
+
+             ->addColumn('total_price', function ($invoice) {
             return $invoice->total_price;
         })
         ->addColumn('issued_date', function ($invoice) {

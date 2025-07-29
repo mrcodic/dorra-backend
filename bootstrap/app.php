@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/v1/user/payment/callback',
         ]);
+        $middleware->encryptCookies(['dorra_auth_token']);
         $middleware->redirectUsersTo('/');
         $middleware->api([EnsureFrontendRequestsAreStateful::class]);
     })
@@ -54,16 +55,16 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (Throwable $e, $request) {
 
-//            if ($e instanceof NotFoundHttpException) {
-//                if ($request->expectsJson()) {
-//                    return Response::api(\App\Enums\HttpEnum::NOT_FOUND,
-//                        message: 'Something went wrong',
-//                        errors: [
-//                            ['message' => 'Route not found.']
-//                        ]
-//                    );
-//                }
-//            }
+            if ($e instanceof NotFoundHttpException || $e instanceof ModelNotFoundException) {
+                if ($request->expectsJson()) {
+                    return Response::api(\App\Enums\HttpEnum::NOT_FOUND,
+                        message: 'Something went wrong',
+                        errors: [
+                            ['message' => 'Resource not found.']
+                        ]
+                    );
+                }
+            }
             if ($e instanceof InvalidArgumentException) {
                 if ($request->expectsJson()) {
                     return Response::api(\App\Enums\HttpEnum::BAD_REQUEST,

@@ -1,6 +1,7 @@
 @forelse ($data as $template)
     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row" data-template-id="{{ $template->id }}">
-        <div class="position-relative" style="box-shadow: 0px 4px 6px 0px #4247460F;border:1px solid #CED5D4;border-radius:12px">
+        <div class="position-relative"
+             style="box-shadow: 0px 4px 6px 0px #4247460F;border:1px solid #CED5D4;border-radius:12px">
             <!-- Checkbox -->
             <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
                    value="{{ $template->id }}" name="selected_templates[]">
@@ -15,8 +16,7 @@
                                 data-feather="edit-3" class="me-1"></i>Edit</a></li>
                     <li>
                         <a class="dropdown-item"
-                           href="{{ config('services.editor_url') . 'templates/' . $template->id ."?has_mockup=" .
-                          ($template->products->contains('has_mockup', true) ? 'true' : 'false')}}"
+                           href="{{ config('services.editor_url') . 'templates/' . $template->id }}"
                            target="_blank">
                             <i data-feather="eye" class="me-1"></i>Show
                         </a>
@@ -74,7 +74,9 @@
             </div>
             <div style="background-color: #F4F6F6;height:200px;border-radius:12px"> <!-- Top Image --> <img
                     src="{{  $template->getFirstMediaUrl('templates') ?: asset("images/default-photo.png") }}"
-                    class="mx-auto d-block " style="height:100%; width:auto;max-width: 100%;border-top-left-radius:12px ;border-top-right-radius:12px" alt="Template Image">
+                    class="mx-auto d-block "
+                    style="height:100%; width:auto;max-width: 100%;border-top-left-radius:12px ;border-top-right-radius:12px"
+                    alt="Template Image">
             </div> <!-- Template Info -->
             <div class="card-body text-start p-2">
                 <div>
@@ -87,22 +89,23 @@
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div>
                             <p style="display:inline; margin-right: 10px">Type:</p>
-
-                            <span class="badge text-light p-75 px-2 template-status-label "
-                                  style="background-color: #222245">
-                          {{ $template->type->label() }}
+                            @foreach( $template->types as $type)
+                                <span class="badge text-light p-75 px-2 template-status-label "
+                                      style="background-color: #222245">
+                             {{ $type->value->label()}}
                             </span>
+                            @endforeach
                         </div>
                     </div>
                 </div> <!-- Tags -->
                 <div class="mb-1">
                     <p style="display: inline">Created at: {{ $template->created_at->format('d/m/Y') }}</p>
-                   <p style="display: inline">Last update: {{ $template->updated_at->format('d/m/Y') }}</p>
+                    <p style="display: inline">Last update: {{ $template->updated_at->format('d/m/Y') }}</p>
                 </div>
                 <div class="d-flex flex-wrap justify-content-start gap-1 mb-1"
                      style="min-height: 44px;"> @foreach($template->tags as $tag)
-                       <span class="text-black"
-                     style="background-color: #FCF8FC; padding: 8px; border-radius: 8px; display: inline-block;">
+                        <span class="text-black"
+                              style="background-color: #FCF8FC; padding: 8px; border-radius: 8px; display: inline-block;">
                          {{ $tag->getTranslation('name', app()->getLocale()) }}
                        </span>
 
@@ -135,7 +138,7 @@
         <p class="mb-2 text-secondary">Nothing to show yet.</p>
 
         <!-- Create Button -->
-        <a class="btn btn-primary" data-bs-target="#templateModal" data-bs-toggle="modal">
+        <a class="btn btn-primary" href="{{ route("product-templates.create") }}">
             <i data-feather="plus"></i>
             Create Template
         </a>

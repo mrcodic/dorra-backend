@@ -50,6 +50,7 @@ return [
     ],
 
     'editor_url' => env('FRONT_END_EDITOR_URL'),
+    'site_url' => env('FRONT_END_URL'),
     'paymob' => [
         'base_url' => env('PAYMOB_BASE_URL'),
         'redirection_url' => env('PAYMOB_REDIRECTION_URL'),

@@ -40,7 +40,9 @@ class UpdateTemplateEditorRequest extends BaseRequest
 
             ],
             'design_data' => ['sometimes', 'json'],
+            'design_back_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
+            'back_base64_preview_image' => ['sometimes', 'string'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
 
         ];

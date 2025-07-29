@@ -22,17 +22,22 @@
                                     <div class="form-group mb-2">
                                         <label class="label-text mb-1">Template Type</label>
                                         <div class="row">
-                                            @foreach(\App\Enums\Template\TypeEnum::cases() as $type)
+                                            @foreach(\App\Models\Type::all(['id','value']) as $type)
                                                 <div class="col">
                                                     <label class="radio-box">
-                                                        <input class="form-check-input" type="radio" name="type"
-                                                               value="{{ $type->value }}"
-                                                            @checked($type == $model->type)>
-                                                        <span>{{ $type->label() }}</span>
+                                                        <input
+                                                            class="form-check-input type-checkbox"
+                                                            type="checkbox"
+                                                            name="types[]"
+                                                            value="{{ $type->value }}"
+                                                            data-type-name="{{ strtolower($type->value->name) }}"
+                                                            @checked($model->types->contains($type->id))
+
+                                                        >
+                                                        <span>{{ $type->value->label() }}</span>
                                                     </label>
                                                 </div>
                                             @endforeach
-
                                         </div>
 
                                     </div>
@@ -104,7 +109,7 @@
 {{--                                        </select>--}}
 {{--                                    </div>--}}
                                     <div class="form-group mb-2">
-                                        <label for="productsSelect" class="label-text mb-1">Product</label>
+                                        <label for="productsSelect" class="label-text mb-1">Products</label>
                                         <select id="productsSelect" class="form-select select2" name="product_ids[]" multiple>
                                             <option value="" disabled>Choose Product</option>
                                             @foreach($associatedData['products'] as $product)
@@ -122,8 +127,7 @@
                             <div class="d-flex justify-content-between pt-2">
                                 <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
                                 <div class="d-flex gap-1">
-                                    <a href="{{ config("services.editor_url")."templates/".$model->id. "?has_mockup=".
-                                      ($model->products->contains('has_mockup', true) ? 'true' : 'false')}}"
+                                    <a href="{{ config("services.editor_url")."templates/".$model->id}}"
                                        class="btn btn-outline-secondary fs-5 "
                                        target="_blank"
                                     >
@@ -155,6 +159,44 @@
 
 
 @section('page-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('.type-checkbox');
+
+            function toggleCheckboxes() {
+                let frontChecked = false;
+                let backChecked = false;
+                let noneChecked = false;
+
+                checkboxes.forEach(checkbox => {
+                    const type = checkbox.dataset.typeName;
+                    if (type === 'front' && checkbox.checked) frontChecked = true;
+                    if (type === 'back' && checkbox.checked) backChecked = true;
+                    if (type === 'none' && checkbox.checked) noneChecked = true;
+                });
+
+                checkboxes.forEach(checkbox => {
+                    const type = checkbox.dataset.typeName;
+
+                    if (noneChecked && (type === 'front' || type === 'back')) {
+                        checkbox.disabled = true;
+                    } else if ((frontChecked || backChecked) && type === 'none') {
+                        checkbox.disabled = true;
+                    } else {
+                        checkbox.disabled = false;
+                    }
+                });
+            }
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', toggleCheckboxes);
+            });
+
+            // Initial state
+            toggleCheckboxes();
+        });
+    </script>
+
     <script !src="">
         $('#cancelButton').on('click', function(e) {
             e.preventDefault();
