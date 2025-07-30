@@ -125,6 +125,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('folders', FolderController::class)->except(['destroy']);
 
     Route::apiResource('teams', TeamController::class)->except(['update']);
+    Route::prefix('teams/')->controller(TeamController::class)->group(function () {
+        Route::post('bulk-delete', 'bulkDelete');
+        Route::post('bulk-force-delete', 'bulkForceDelete');
+        Route::post('bulk-restore', 'bulkRestore');
+    });
 
     Route::get('trash', [MainController::class, 'trash'])->name('trash');
 

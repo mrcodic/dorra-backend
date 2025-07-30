@@ -39,4 +39,21 @@ use App\Repositories\Interfaces\TeamRepositoryInterface;
         return $this->query->with(['owner', 'members'])->findOrFail($id);
     }
 
+    public function bulkForceResources($ids)
+    {
+        return $this->repository->query()->withTrashed()->whereIn('id', $ids)->forceDelete();
+    }
+
+    public function trash()
+    {
+        return $this->repository->query()
+            ->onlyTrashed()
+            ->withCount('designs')
+            ->with(['owner', 'members.media' => function ($query) {
+                $query->where('collection_name', 'users');
+            },])
+            ->whereOwnerId(auth('sanctum')->id())
+            ->get();
+    }
+
 }

@@ -8,6 +8,7 @@ use App\Enums\Template\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dimension\StoreDimensionRequest;
 use App\Models\Type;
+use App\Services\TeamService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
     CountryResource,
@@ -16,6 +17,7 @@ use App\Http\Resources\{CategoryResource,
     MediaResource,
     StateResource,
     TagResource,
+    TeamResource,
     Template\TypeResource};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
@@ -40,6 +42,7 @@ class MainController extends Controller
         public DesignService                $designService,
         public FolderService                $folderService,
         public DimensionRepositoryInterface $dimensionRepository,
+        public TeamService                   $teamService,
 
     )
     {
@@ -147,7 +150,8 @@ class MainController extends Controller
     {
         return Response::api(data: [
             'designs' => DesignResource::collection($this->designService->trash()),
-            'folders' => FolderResource::collection($this->folderService->trash())
+            'folders' => FolderResource::collection($this->folderService->trash()),
+            'teams' => TeamResource::collection($this->teamService->trash())
         ]);
 
     }
