@@ -35,9 +35,11 @@ class Invitation extends Mailable
      */
     public function content(): Content
     {
-        return new Content(
+        return (new Content(
             view: 'emails.invitation',
-        );
+        ))->with([
+            'inviterEmail' =>  auth('sanctum')->user()?->email,
+        ]);
     }
 
     /**

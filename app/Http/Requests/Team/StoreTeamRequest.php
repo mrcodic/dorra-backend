@@ -32,6 +32,8 @@ class StoreTeamRequest extends BaseRequest
         return [
             'name' => ['required', 'string', 'max:255',],
             'owner_id' => ['nullable', 'integer', 'exists:users,id'],
+            'emails' => ['nullable', 'array'],
+            'emails.*' => ['nullable', 'email','exists:users,email'],
 
         ];
     }

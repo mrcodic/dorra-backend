@@ -4,7 +4,9 @@ namespace App\Services;
 
 
 use AllowDynamicProperties;
+use App\Jobs\SendInvitationsJob;
 use App\Repositories\Interfaces\TeamRepositoryInterface;
+use Illuminate\Support\Arr;
 
 
 #[AllowDynamicProperties] class TeamService extends BaseService
@@ -17,6 +19,14 @@ use App\Repositories\Interfaces\TeamRepositoryInterface;
 
     }
 
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    {
+        $model = $this->repository->create($validatedData);
+        if (Arr::get($validatedData, 'emails')) {
+            SendInvitationsJob::dispatch($model, $validatedData['emails']);
+        }
+        return $model->load($relationsToLoad);
+}
     public function userTeams()
     {
         return $this->query

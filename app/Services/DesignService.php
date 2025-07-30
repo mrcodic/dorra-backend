@@ -99,43 +99,47 @@ class DesignService extends BaseService
         $guestId = null;
 
         if (!$userId && $cookieValue) {
-            $guest = $this->guestRepository->query()
+            $guestId = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
-                ->first();
-            $guestId = $guest?->id;
+                ->value('id');
         }
 
-        if ($userId || $guestId) {
-            $designs = $this->repository->query()
-                ->with([
-                    'product.category' => fn($q) => $q->select('id', 'name'),
-                    'product.saves' => fn($q) => $q->select('id'),
-                    'saves' => function ($query) {
-                        $query->where('user_id', auth('sanctum')->id());
-                    },
-                    'owner' => fn($q) => $q->select('id', 'first_name', 'last_name'),
-                    'template' => fn($q) => $q->select('id', 'name', 'description'),
-                    'template.products.saves',
-                ])
-                ->when($userId, fn($q) => $q->where('user_id', $userId))
-                ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
-                ->when(request()->filled('owner_id'), fn($q) => $q->where('user_id', request('owner_id'))
-                )
-                ->when(request()->filled('category_id'), fn($q) => $q->whereHas('product.category', fn($query) => $query->where('id', request('category_id'))
-                )
-                )
-                ->orderBy('created_at', request('date', 'desc'))
-                ->paginate();
+        if (!$userId && !$guestId) {
+            return new LengthAwarePaginator(
+                collect([]),
+                0,
+                10,
+                LengthAwarePaginator::resolveCurrentPage(),
+                ['path' => LengthAwarePaginator::resolveCurrentPath()]
+            );
         }
 
-        return $designs ?? new LengthAwarePaginator(
-            collect([]),
-            0,
-            10,
-            LengthAwarePaginator::resolveCurrentPage(),
-            ['path' => LengthAwarePaginator::resolveCurrentPath()]
-        );
+        $query = $this->repository->query()
+            ->with([
+                'product.category:id,name',
+                'product.saves:id',
+                'saves' => fn($q) => $q->where('user_id', $userId),
+                'owner:id,first_name,last_name',
+                'template:id,name,description',
+                'template.products.saves',
+            ])
+            ->when($userId, fn($q) => $q->where('user_id', $userId))
+            ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
+            ->when(request()->filled('owner_id'), fn($q) => $q->where('user_id', request('owner_id')))
+            ->when(request()->filled('category_id'), fn($q) =>
+            $q->whereHas('product.category', fn($cat) =>
+            $cat->where('id', request('category_id'))
+            )
+            )
+            ->orderBy('created_at', request('date', 'desc'));
+
+        $shouldPaginate = filter_var(request('paginate', true), FILTER_VALIDATE_BOOLEAN);
+
+        return $shouldPaginate
+            ? $query->paginate()
+            : $query->get();
     }
+
 
     public function assignToTeam($designId, $teamId)
     {
