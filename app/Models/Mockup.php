@@ -11,7 +11,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Mockup extends Model implements HasMedia
 {
     use InteractsWithMedia;
-
+    protected $keyType = 'int';
     protected $fillable = [
         'name',
         'type',

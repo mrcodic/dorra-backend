@@ -156,6 +156,12 @@ return [
         ],
         'designs.*' => [
             'exists' => 'The selected design does not exist in your account or is invalid.',
+
+        ],
+        'emails.*' => [
+            'exists' => 'The selected emails is invalid.',
+            'required' => 'The selected email is required.',
+            'email' => 'The selected email is invalid format.',
         ],
         'addresses.*.label' => [
             'required' => 'Each address must have a label (e.g., Home, Work).',

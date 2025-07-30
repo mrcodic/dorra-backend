@@ -81,9 +81,9 @@ class MockupService extends BaseService
         if (request()->allFiles()) {
             $types = collect(request()->input('types', []));
             $mediaTypes = collect(['base_image', 'mask_image']);
-            $types->each(function ($type) use ($mediaTypes, $model,$clearExisting) {
+            $types->each(function ($type) use ($mediaTypes, $model, $clearExisting) {
                 $sideName = strtolower(TypeEnum::from($type)->name);
-                $mediaTypes->each(function ($mediaType) use ($sideName, $type, $model,$clearExisting) {
+                $mediaTypes->each(function ($mediaType) use ($sideName, $type, $model, $clearExisting) {
                     $inputName = "{$sideName}_{$mediaType}";
 
                     if (request()->hasFile($inputName)) {
@@ -112,7 +112,7 @@ class MockupService extends BaseService
             return $model;
         });
 
-        return $this->handleFiles($model,true);
+        return $this->handleFiles($model, true);
     }
 
     public function deleteResource($id)
@@ -121,9 +121,36 @@ class MockupService extends BaseService
         if ($model->hasMedia()) {
             clearMediaCollections($model);
         }
-        $model->types()->detach($model->types->pluck('id')->toArray());
+        $model->types()->newPivotStatement()
+            ->where('typeable_id', (string)$model->id)
+            ->where('typeable_type', get_class($model))
+            ->delete();
+
         return $model->delete();
     }
+
+    public function bulkDeleteResources($ids)
+    {
+        return $this->handleTransaction(function () use ($ids) {
+            $models = $this->repository->query()->whereIn('id', $ids)->get();
+
+            $models->each(function ($model) {
+
+                $model->types()->newPivotStatement()
+                    ->where('typeable_id', (string)$model->id)
+                    ->where('typeable_type', get_class($model))
+                    ->delete();
+
+                if ($model->hasMedia()) {
+                    clearMediaCollections($model);
+                }
+            });
+            return $this->repository->query()->whereIn('id', $ids)->delete();
+        });
+
+
+    }
+
 
     public function showAndUpdateRecent($id)
     {

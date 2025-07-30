@@ -18,14 +18,23 @@
 
                         <!-- Mockup Type -->
                         <div class="form-group mb-2">
-                            <label for="edit-mockup-type" class="label-text mb-1">Mockup Type</label>
-                            <select id="edit-mockup-type" name="type" class="form-select">
-                                <option value="" disabled>select mockup type</option>
-                                @foreach(\App\Enums\Mockup\TypeEnum::cases() as $type)
-                                    <option value="{{ $type->value }}">{{ $type->label() }}</option>
-                                @endforeach
-                            </select>
+                            <label for="mockup-type" class="label-text mb-1 d-block">Mockup Type</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                <label class="radio-box d-flex align-items-center gap-1">
+                                    <input
+                                        class="form-check-input type-checkbox"
+                                        type="checkbox"
+                                        name="types[]"
+                                        value="{{ $type->value }}"
+                                        data-type-name="{{ strtolower($type->value->name) }}"
+                                    >
+                                    <span>{{ $type->value->label() }}</span>
+                                </label>
+                            @endforeach
                         </div>
+                        </div>
+
 
                         <!-- Product -->
                         <div class="form-group mb-2">
@@ -52,31 +61,7 @@
 
                         <!-- File Upload -->
                         <div class="col-md-12">
-                            <div class="mb-1">
-                                <label class="form-label label-text" for="edit-product-image-main">Mockup File</label>
-                                <input type="file" name="image" id="edit-product-image-main" class="form-control d-none" accept="image/*">
-
-                                <!-- Custom Upload Card -->
-                                <div id="edit-upload-area" class="upload-card">
-                                    <div id="upload-content">
-                                        <i data-feather="upload" class="mb-2"></i>
-                                        <p>Drag file here to upload</p>
-                                    </div>
-                                </div>
-
-                                <!-- Progress Bar -->
-                                <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
-                                    <div id="edit-upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                                </div>
-
-                                <!-- Uploaded Image Preview -->
-                                <div id="edit-uploaded-image" class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                    <img src="" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
-                                    <div id="edit-file-details" class="file-details">
-                                        <div class="file-name fw-bold"></div>
-                                        <div class="file-size text-muted small"></div>
-                                    </div>
-                                </div>
+                            <div id="fileInputsContainer" class="dynamic-upload-container mb-1">
                             </div>
                         </div>
                     </div>

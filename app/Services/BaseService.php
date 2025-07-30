@@ -70,7 +70,17 @@ class BaseService
 
     public function bulkDeleteResources($ids)
     {
-        return $this->repository->query()->whereIn('id', $ids)->delete();
+        return $this->handleTransaction(function () use ($ids) {
+            $models = $this->repository->query()->whereIn('id', $ids)->get();
+
+            $models->each(function ($model) {
+                if ($model->hasMedia()) {
+                    clearMediaCollections($model);
+                }
+            });
+            return $this->repository->query()->whereIn('id', $ids)->delete();
+        });
+
 
     }
     public function bulkRestore($ids)
