@@ -198,7 +198,7 @@
         </div>
 
 
-        @include('modals.mockups.add-mockup')
+
         @include('modals.mockups.show-mockup')
         @include('modals.delete',[
         'id' => 'deleteMockupModal',
@@ -211,7 +211,7 @@
         'title' => 'Delete Mockups',
         'confirmText' => 'Are you sure you want to delete this items?',
         ])
-
+        @include('modals.mockups.add-mockup')
         <!-- list and filter end -->
     </section>
     <!-- users list ends -->

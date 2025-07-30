@@ -43,7 +43,7 @@ class TeamController extends Controller
     {
         $request->validate([
             'teams' => ['required', 'array'],
-            'teams.*' => ['nullable', 'string', 'exists:teams,id', function ($attribute, $value, $fail) {
+            'teams.*' => ['nullable', 'integer', 'exists:teams,id', function ($attribute, $value, $fail) {
                 $team = Team::find($value);
                 if ($team && $team->owner_id != auth('sanctum')->id()) {
                     $fail("The selected team does not belong to you");
@@ -58,7 +58,7 @@ class TeamController extends Controller
     {
         $request->validate([
             'teams' => ['required', 'array'],
-            'teams.*' => ['nullable', 'string', 'exists:teams,id', function ($attribute, $value, $fail) {
+            'teams.*' => ['nullable', 'integer', 'exists:teams,id', function ($attribute, $value, $fail) {
                 $team = Team::find($value);
                 if ($team && $team->owner_id != auth('sanctum')->id()) {
                     $fail("The selected team does not belong to you");
@@ -73,7 +73,7 @@ class TeamController extends Controller
     {
         $request->validate([
             'teams' => ['required', 'array'],
-            'teams.*' => ['nullable', 'string', 'exists:teams,id', function ($attribute, $value, $fail) {
+            'teams.*' => ['nullable', 'integer', 'exists:teams,id', function ($attribute, $value, $fail) {
                 $team = Team::find($value);
                 if ($team && $team->owner_id != auth('sanctum')->id()) {
                     $fail("The selected team does not belong to you");

@@ -59,7 +59,7 @@ Route::apiResource('products', ProductController::class)->only(['index', 'show']
 
 
 Route::controller(DesignController::class)->prefix('designs/')->group(function () {
-    Route::post('{design}/teams/{team}', 'assignToTeam');
+    Route::post('{design}/teams', 'assignToTeam');
     Route::post('bulk-restore', 'bulkRestore');
     Route::post('bulk-delete', 'bulkDelete');
     Route::post('bulk-force-delete', 'bulkForceDelete');
@@ -126,6 +126,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('teams', TeamController::class)->except(['update']);
     Route::prefix('teams/')->controller(TeamController::class)->group(function () {
+        Route::post('{team}/designs', 'assignToDesign');
+
         Route::post('bulk-delete', 'bulkDelete');
         Route::post('bulk-force-delete', 'bulkForceDelete');
         Route::post('bulk-restore', 'bulkRestore');

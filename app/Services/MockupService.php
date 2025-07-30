@@ -115,6 +115,17 @@ class MockupService extends BaseService
         return $this->handleFiles($model,true);
     }
 
+    public function deleteResource($id)
+    {
+        $model = $this->repository->find($id);
+        if ($model->hasMedia()) {
+            clearMediaCollections($model);
+        }
+        if ($model->types)
+        {$model->types()->detach();}
+        return $model->delete();
+    }
+
     public function showAndUpdateRecent($id)
     {
         $mockup = $this->repository->find($id);

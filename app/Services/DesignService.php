@@ -144,8 +144,7 @@ class DesignService extends BaseService
     public function assignToTeam($designId, $teamId)
     {
         $design = $this->repository->find($designId);
-        $team = $this->teamRepository->find($teamId);
-        $design->teams()->attach($team);
+        $design->teams()->syncWithoutDetaching(request()->teams);
     }
     public function getDesignVersions($designId)
     {

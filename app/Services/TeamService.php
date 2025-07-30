@@ -39,10 +39,7 @@ use Illuminate\Support\Arr;
             ->paginate();
     }
 
-    public function deleteResource($id): void
-    {
-        $this->query->findOrFail($id)->delete();
-    }
+
 
     public function showResource($id, $relations = [])
     {

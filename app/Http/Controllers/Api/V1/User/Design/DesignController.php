@@ -5,12 +5,8 @@ namespace App\Http\Controllers\Api\V1\User\Design;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Design\StoreDesignFinalizationRequest;
-use App\Http\Requests\Design\StoreDesignRequest;
-use App\Http\Requests\Design\UpdateDesignRequest;
-use App\Http\Resources\Design\DesignFinalizationCollectionResource;
-use App\Http\Resources\Design\DesignFinalizationResource;
-use App\Http\Resources\Design\DesignResource;
-use App\Http\Resources\Design\DesignVersionResource;
+use App\Http\Requests\Design\{StoreDesignRequest, UpdateDesignRequest};
+use App\Http\Resources\Design\{DesignResource, DesignFinalizationResource, DesignVersionResource};
 use App\Http\Resources\UserResource;
 use App\Models\Design;
 use App\Services\DesignService;
