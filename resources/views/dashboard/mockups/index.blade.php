@@ -199,7 +199,6 @@
 
 
 
-        @include('modals.mockups.show-mockup')
         @include('modals.delete',[
         'id' => 'deleteMockupModal',
         'formId' => 'deleteMockupForm',
