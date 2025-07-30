@@ -43,7 +43,7 @@ use Illuminate\Support\Arr;
 
     public function showResource($id, $relations = [])
     {
-        return $this->query->with(['owner', 'members'])->findOrFail($id);
+        return $this->query->with(['owner', 'members', 'designs'])->findOrFail($id);
     }
     public function assignToDesign($teamId): void
     {

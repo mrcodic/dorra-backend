@@ -121,8 +121,7 @@ class MockupService extends BaseService
         if ($model->hasMedia()) {
             clearMediaCollections($model);
         }
-        if ($model->types)
-        {$model->types()->detach();}
+        $model->types()->detach($model->types->pluck('id')->toArray());
         return $model->delete();
     }
 

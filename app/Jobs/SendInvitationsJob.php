@@ -4,8 +4,10 @@ namespace App\Jobs;
 
 use App\Enums\Invitation\StatusEnum;
 use App\Mail\Invitation;
+use App\Models\Design;
 use App\Models\Team;
 use App\Repositories\Interfaces\InvitationRepositoryInterface;
+use App\Traits\HandlesTryCatch;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
@@ -13,14 +15,15 @@ use Illuminate\Support\Facades\URL;
 
 class SendInvitationsJob implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, HandlesTryCatch;
 
     /**
      * Create a new job instance.
      */
 
     protected $emails;
-    public function __construct(public Team $team, array $emails)
+
+    public function __construct(public ?Team $team, public ?Design $design, array $emails)
     {
 
         $this->emails = $emails;
@@ -32,20 +35,27 @@ class SendInvitationsJob implements ShouldQueue
     public function handle(InvitationRepositoryInterface $repository): void
     {
         $team = $this->team;
+        $design = $this->design;
 
         foreach ($this->emails as $email) {
-            $repository->query()
-                ->where('email', $email)
-                ->where('team_id', $team->id)
-                ->where('status', StatusEnum::PENDING)
-                ->delete();
+
+            $invitation = $this->handleTransaction(function () use ($team, $design, $email, $repository) {
+                $repository->query()
+                    ->where('email', $email)
+                    ->where('team_id', $team?->id)
+                    ->where('design_id', $design?->id)
+                    ->where('status', StatusEnum::PENDING)
+                    ->delete();
 
 
-            $invitation = $repository->create([
-                'email' => $email,
-                'team_id' => $team->id,
-                'status' => StatusEnum::PENDING,
-            ]);
+                return $repository->create([
+                    'email' => $email,
+                    'team_id' => $team?->id,
+                    'design_id' => $design?->id,
+                    'status' => StatusEnum::PENDING,
+                ]);
+
+            });
 
 
             $url = URL::temporarySignedRoute('invitation.accept', now()->addDays(2), [
@@ -53,9 +63,8 @@ class SendInvitationsJob implements ShouldQueue
                 'email' => $email,
             ]);
 
-
             Mail::to($email)->send(new Invitation($url, $team));
+        }
     }
-}
 
 }

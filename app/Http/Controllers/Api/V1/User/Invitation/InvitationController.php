@@ -6,6 +6,7 @@ use App\Enums\HttpEnum;
 use App\Enums\Invitation\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invitation\SendInvitationRequest;
+use App\Jobs\SendInvitationsJob;
 use App\Mail\Invitation;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\InvitationRepositoryInterface;
@@ -34,19 +35,8 @@ class InvitationController extends Controller
     {
         $design = $request->design_id ? $this->designRepository->find($request->design_id) : null;
         $team = $request->team_id ? $this->teamRepository->find($request->team_id) : null;
-        $invitation =  $this->handleTransaction(function () use ($request, $design, $team) {
-           $this->invitationRepository->query()->where('email', $request->email)
-               ->where('status', StatusEnum::PENDING)
-               ->when($request->design_id, fn($q) => $q->where('design_id', $request->design_id))
-               ->when($request->team_id, fn($q) => $q->where('team_id', $request->team_id))->delete();
-          return $this->invitationRepository->create($request->validated());
-       });
-        $url = URL::temporarySignedRoute('invitation.accept', now()->addDays(2), [
-            'invitation' => $invitation->id,
-            'email' => $request->email,
-        ]);
-        $invitedResource = $design ?? $team;
-        Mail::to($request->email)->send(new Invitation($url, $invitedResource));
+        SendInvitationsJob::dispatch($team, $design, $request->emails);
+
 
         return Response::api();
 

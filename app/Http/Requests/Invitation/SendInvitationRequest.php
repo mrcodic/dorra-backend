@@ -16,7 +16,8 @@ class SendInvitationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email', 'exists:users,email'],
+            'emails' => ['required', 'array'],
+            'emails.' => ['required', 'email', 'exists:users,email'],
             'design_id' => ['required_without:team_id', 'nullable', 'exists:designs,id'],
             'team_id' => ['required_without:design_id', 'nullable', 'exists:teams,id'],
         ];

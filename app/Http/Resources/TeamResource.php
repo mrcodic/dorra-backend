@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Design\DesignResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,6 +33,7 @@ class TeamResource extends JsonResource
 
             'ownered_by_me' => $this->owner?->id == auth('sanctum')->user()?->id,
             'designs_count' => $this->designs_count,
+            'designs' => DesignResource::collection($this->whenLoaded('designs')),
 
         ];
     }
