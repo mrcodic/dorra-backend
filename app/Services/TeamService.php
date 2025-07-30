@@ -45,7 +45,11 @@ use Illuminate\Support\Arr;
     {
         return $this->query->with(['owner', 'members'])->findOrFail($id);
     }
-
+    public function assignToDesign($teamId): void
+    {
+        $team = $this->repository->find($teamId);
+        $team->designs()->syncWithoutDetaching(request()->designs);
+    }
     public function bulkForceResources($ids)
     {
         return $this->repository->query()->withTrashed()->whereIn('id', $ids)->forceDelete();

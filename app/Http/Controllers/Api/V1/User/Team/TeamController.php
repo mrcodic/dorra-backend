@@ -7,6 +7,7 @@ use App\Http\Resources\TeamResource;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Validation\Rule;
 use App\Http\Requests\Team\{StoreTeamRequest};
 
 use App\Services\TeamService;
@@ -81,6 +82,14 @@ class TeamController extends Controller
             }]
         ]);
         $this->teamService->bulkRestore($request->teams);
+        return Response::api();
+    }
+    public function assignToDesign(Request $request,$teamId)
+    {
+        $request->validate(['designs' => ['required', 'array'],
+            'designs.*' => ['required', 'string', 'exists:designs,id',
+                Rule::exists('designs', 'id')->whereNull('deleted_at')]]);
+        $this->teamService->assignToDesign($teamId);
         return Response::api();
     }
 

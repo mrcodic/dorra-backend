@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\User\Design;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Design\StoreDesignFinalizationRequest;
+use Illuminate\Validation\Rule;
 use App\Http\Requests\Design\{StoreDesignRequest, UpdateDesignRequest};
 use App\Http\Resources\Design\{DesignResource, DesignFinalizationResource, DesignVersionResource};
 use App\Http\Resources\UserResource;
@@ -66,9 +67,14 @@ class DesignController extends Controller
         return Response::api(data: DesignResource::make($design->refresh()));
     }
 
-    public function assignToTeam($designId, $teamId)
+    public function assignToTeam(Request $request, $designId)
     {
-        $this->designService->assignToTeam($designId, $teamId);
+        $request->validate(['teams' => ['required', 'array'],
+            'teams.*' => ['required', 'integer',
+            'exists:teams,id',
+            Rule::exists('teams', 'id')->whereNull('deleted_at')]
+        ]);
+        $this->designService->assignToTeam($designId);
         return Response::api();
     }
 
