@@ -15,6 +15,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Design;
 use App\Services\DesignService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
 
@@ -27,7 +28,8 @@ class DesignController extends Controller
     public function index()
     {
         $designs = $this->designService->getDesigns();
-        return Response::api(data: DesignResource::collection($designs)->response()->getData(true));
+        $resource = $designs instanceof LengthAwarePaginator ?DesignResource::collection($designs)->response()->getData(true) :DesignResource::collection($designs);
+        return Response::api(data: $resource);
 
     }
 
