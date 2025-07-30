@@ -1,4 +1,17 @@
 @forelse ($data as $mockup)
+    @php
+        $images = collect($mockup->getMedia('mockups'))
+            ->groupBy(fn($media) => $media->getCustomProperty('side'))
+            ->mapWithKeys(function ($group, $side) {
+                $side = strtolower($side);
+                $base = $group->first(fn($m) => $m->getCustomProperty('role') === 'base');
+                return [
+                    $side => [
+                        'base_url' => $base?->getFullUrl(),
+                    ]
+                ];
+            });
+    @endphp
     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row" data-template-id="{{ $mockup->id }}">
         <div class="position-relative border rounded-3" style="box-shadow: 0px 4px 6px 0px #4247460F;">
             <!-- Checkbox -->
@@ -35,7 +48,7 @@
                 </div>
                 <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
                     <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"
-                            data-image="{{ $mockup->getFirstMediaUrl('mockups') }}"
+                            data-images="{{ json_encode($images) }}"
                             data-colors="{{ json_encode($mockup->colors) }}"
                             data-bs-toggle="modal"
                             data-bs-target="#showMockupModal">Show
@@ -46,10 +59,11 @@
                             data-bs-target="#editMockupModal"
                             data-id="{{ $mockup->id }}"
                             data-name="{{ $mockup->name }}"
-                            data-type="{{ $mockup->type }}"
+                            data-types="{{ $mockup->types->pluck("id") }}"
                             data-product-id="{{ $mockup->product->id }}"
                             data-colors="{{ json_encode($mockup->colors) }}"
-                            data-image="{{ $mockup->getFirstMediaUrl('mockups') }}">Edit
+                            data-images="{{ json_encode($mockup->getMedia('mockups')) }}"
+                    >Edit
                     </button>
 
                     <button class="btn btn-outline-danger flex-fill open-delete-mockup-modal"
@@ -175,27 +189,28 @@
 
 
         $(document).on("click", ".show-mockup-btn", function () {
-            let imageUrl = $(this).data("image");
             let colorsJson = $(this).attr("data-colors");
-
+            let imagesJson = $(this).attr("data-images");
             let colors = [];
             try {
                 colors = JSON.parse(colorsJson);
-
-
                 if (colors.length === 1 && colors[0].includes(',')) {
                     colors = colors[0].split(',');
                 }
-
             } catch (e) {
                 colors = [];
             }
 
-            $("#showMockupModal img").attr("src", imageUrl);
+            let images = {};
+            try {
+                images = JSON.parse(imagesJson);
+            } catch (e) {
+                images = {};
+            }
 
+            // Render Colors
             const colorsContainer = $("#showMockupModal .colors-container");
             colorsContainer.empty();
-
             colors.forEach(color => {
                 colorsContainer.append(`
             <div style="
@@ -207,41 +222,103 @@
             "></div>
         `);
             });
+
+            // Render Images
+            const imageContainer = $("#showMockupModal .mockup-images-container");
+            imageContainer.empty();
+
+            // Group front/back in same row
+            const sidesInRow = ['front', 'back'];
+            let row = $('<div class="d-flex justify-content-center gap-3 mb-3"></div>');
+
+            sidesInRow.forEach(side => {
+                if (images[side]) {
+                    const sideLabel = side.charAt(0).toUpperCase() + side.slice(1);
+                    const baseUrl = images[side].base_url;
+
+                    row.append(`
+                <div class="text-center">
+                    ${baseUrl ? `<img src="${baseUrl}" alt="${sideLabel} Base" style="height: auto; width: 300px;">` : `<p>No base image</p>`}
+                </div>
+            `);
+                }
+            });
+
+            // Append row if it has content
+            if (row.children().length) {
+                imageContainer.append(row);
+            }
+
+            // Handle any remaining sides (e.g., "none", etc.)
+            for (const side in images) {
+                if (!sidesInRow.includes(side)) {
+                    const sideLabel = side.charAt(0).toUpperCase() + side.slice(1);
+                    const baseUrl = images[side].base_url;
+
+                    imageContainer.append(`
+                <div class="text-center mb-3">
+                    <h6 class="text-uppercase mb-2">${sideLabel} Side</h6>
+                    ${baseUrl ? `<img src="${baseUrl}" alt="${sideLabel} Base" style="max-height: 300px; max-width: 100%;">` : `<p>No base image</p>`}
+                </div>
+            `);
+                }
+            }
         });
 
-        $(".edit-mockup-btn").on("click", function () {
-            var id = $(this).data("id");
-            var name = $(this).data("name");
-            var type = $(this).data("type");
-            var productId = $(this).data("product-id");
-            var colors = $(this).attr("data-colors"); // get as raw string
-            var imgUrl = $(this).data("image");
 
+        $(".edit-mockup-btn").on("click", function () {
+            const id = $(this).data("id");
+            const name = $(this).data("name");
+            const types = $(this).data("types"); // array of type IDs
+            const productId = $(this).data("product-id");
+            const rawColors = $(this).attr("data-colors");
+            const images = $(this).data("images");
+
+            // Handle colors
+            let colors = [];
             try {
-                colors = JSON.parse(colors);
-                if (colors.length === 1 && colors[0].includes(',')) {
-                    colors = colors[0].split(',');
+                colors = JSON.parse(rawColors);
+                if (colors.length === 1 && colors[0].includes(",")) {
+                    colors = colors[0].split(",").map(c => c.trim());
                 }
             } catch (e) {
                 colors = [];
             }
 
-            $("#editMockupModal #editMockupForm").attr('action', "{{ route("mockups.update",':id') }}".replace(':id', id));
-            $("#editMockupModal #edit-mockup-name").val(name);
-            $("#editMockupModal #edit-mockup-type").val(type);
-            $("#editMockupModal #edit-products-select").val(productId).trigger("change");
-            // $("#editMockupModal #edit-colorsInput").val(colors.join(", "));
+            // Set form action
+            const actionUrl = "{{ route('mockups.update', ':id') }}".replace(":id", id);
+            $("#editMockupForm").attr("action", actionUrl);
+
+            // Set name and product
+            $("#edit-mockup-name").val(name);
+            $("#edit-products-select").val(productId).trigger("change");
+
+            // Reset checkboxes
+            const checkboxes = $("#editMockupModal .type-checkbox");
+            checkboxes.prop("checked", false).prop("disabled", false);
+
+            // Check appropriate types
+            types.forEach(function (typeId) {
+                checkboxes.each(function () {
+                    if (parseInt($(this).data("type-id")) === parseInt(typeId)) {
+                        $(this).prop("checked", true);
+                    }
+                });
+            });
+
+            // Set colors globally
             editPreviousColors = colors;
-
-            // rerender the colors
             renderAllColors();
-            $("#editMockupModal #edit-uploaded-image img").attr("src", imgUrl);
-            $("#editMockupModal #edit-uploaded-image").removeClass("d-none");
-            $("#editMockupModal #file-details .file-name").text(imgUrl.split('/').pop());
-            $("#editMockupModal #file-details .file-size").text('');
 
-            $("#editMockupModal #edit-upload-progress").addClass("d-none");
-            $("#editMockupModal #edit-upload-progress .progress-bar").css("width", "0%");
+            // Trigger change to refresh file inputs & enforce checkbox logic
+            checkboxes.trigger("change");
+
+            // Optional: reset upload preview UI
+            $("#edit-uploaded-image").addClass("d-none").find("img").attr("src", "");
+            $("#file-details .file-name").text("");
+            $("#file-details .file-size").text("");
+            $("#edit-upload-progress").addClass("d-none");
+            $("#edit-upload-progress .progress-bar").css("width", "0%");
         });
 
     });

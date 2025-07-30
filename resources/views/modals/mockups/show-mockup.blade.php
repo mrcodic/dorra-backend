@@ -8,13 +8,11 @@
             </div>
             <div class="modal-body flex-grow-1">
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <div class="form-group mb-2 p-2 " style="background: #F4F6F6;height: 480px;">
-                        <img
-                            class="mx-auto"
-                            src=""
-                            alt="Mockup"
-                            style="width: auto;height:100%;max-width:100%;background: #F4F6F6; display: block;">
+                    <!-- Mockup Images Section -->
+                    <div class="mockup-images-container d-flex flex-column gap-3">
+                        <!-- Images will be inserted here dynamically -->
                     </div>
+
                     <!-- Color circles -->
                     <h4> Colors</h4>
                     <div
