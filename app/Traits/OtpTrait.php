@@ -18,7 +18,7 @@ trait OtpTrait
             ->where('type', $type)
             ->delete();
         $otp = rand(100000, 999999);
-//        Mail::to($identifier)->send(new OtpMail($otp));
+        Mail::to($identifier)->send(new OtpMail($otp));
         return Otp::create([
             'identifier' => $identifier,
             'otp' => $otp,
