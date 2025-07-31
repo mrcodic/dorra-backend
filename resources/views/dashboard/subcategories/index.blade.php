@@ -57,7 +57,7 @@
                     {{-- Filter Select - 10% on md+, half width on sm --}}
                     <div class="col-6 col-md-2">
                         <select name="created_at" class="form-select filter-date">
-                            <option value="" readonly>Date</option>
+                            <option value="" disabled>Date</option>
                             <option value="asc">Oldest</option>
                             <option value="desc">Newest</option>
                         </select>
