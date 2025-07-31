@@ -44,7 +44,7 @@ class AuthService
         }
         $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
         $user->token = $plainTextToken;
-        return $user->refresh();
+        return $user;
     }
 
     public function redirectToGoogle()
