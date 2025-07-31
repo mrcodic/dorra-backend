@@ -5,6 +5,8 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Yajra\DataTables\DataTables;
 
 class CategoryService extends BaseService
@@ -112,4 +114,16 @@ class CategoryService extends BaseService
                 return $category->products_count;
             })->make();
     }
+
+    public function search($request)
+    {
+        $locale = App::getLocale();
+        return $this->repository->query()
+            ->when($request->filled('search'), function ($query) use ($request, $locale) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($request->search) . '%'
+                ]);
+            })->get();
+    }
+
 }

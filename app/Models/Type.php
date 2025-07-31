@@ -16,6 +16,11 @@ class Type extends Model
 
     public function templates()
     {
-        return $this->belongsToMany(Template::class)->withTimestamps();
+        return $this->morphedByMany(Template::class,'typeable')->withTimestamps();
+    }
+
+    public function mockups()
+    {
+        return $this->morphedByMany(Mockup::class,'typeable')->withTimestamps();
     }
 }

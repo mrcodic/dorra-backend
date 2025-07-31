@@ -136,10 +136,7 @@ class MockupService extends BaseService
 
             $models->each(function ($model) {
 
-                $model->types()->newPivotStatement()
-                    ->where('typeable_id', (string)$model->id)
-                    ->where('typeable_type', get_class($model))
-                    ->delete();
+                $model->types()->detach();
 
                 if ($model->hasMedia()) {
                     clearMediaCollections($model);

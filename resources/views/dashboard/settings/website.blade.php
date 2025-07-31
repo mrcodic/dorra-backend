@@ -30,7 +30,7 @@
     <div class="card-body">
         <ul class="nav nav-tabs nav-fill border-bottom-0">
             <li class="nav-item">
-                <a class="nav-link active custom-tab" data-bs-toggle="tab" href="#tab1">1. Hero</a>
+                <a class="nav-link active custom-tab" data-bs-toggle="tab" href="#tab1">1. Navbar</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab2">2. Best Sellers</a>
@@ -60,10 +60,152 @@
         {{-- Right Side: Tab Content --}}
         <div class="tab-content flex-grow-1 p-3" id="v-pills-tabContent">
             <!-- tab1 Section -->
-            <div class="tab-pane fade show active" id="tab1">
+
+            <div class="tab-pane fade show  active" id="tab1">
+                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                    <span class="fw-semibold text-black fs-4">Show categories in navbar</span>
+
+                    <!-- Toggle Switch -->
+                    <div class="form-check form-switch">
+                        <input class="form-check-input toggle-switch" type="checkbox" id="bestSellersToggle">
+                    </div>
+                </div>
+
+                <div class=" d-flex flex-row align-items-center p-1 mb-2"
+                     style="background-color: #F4F6F6; border-radius: 10px; border: none;">
+                    <span class="fw-semibold text-black fs-4">You can add up to </span><span class="fw-semibold fs-4 ms-1" style="color: #24B094;">7 Categories</span>
+                </div>
+
+                <!-- Input and Add Button Row -->
+                <p class="fw-semibold text-black fs-4">Category</p>
+                <div class="row g-2 mb-2">
+                    <div class="col-9">
+                        <input type="text" class="form-control" id="category-search" placeholder="Enter category name">
+                        <div id="search-suggestions" class="list-group position-absolute" style="z-index: 999;"></div>
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-primary w-100">Add Category</button>
+                    </div>
+                </div>
+                <p class="fw-semibold text-black fs-4">Added Categories</p>
+                <!-- Products Grid -->
+                <div class="row">
+                    <!-- Product Card -->
+                    <div class="col-md-6 mb-3">
+                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                            <!-- Image -->
+                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+
+                            <!-- Details -->
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-black fs-5">Product Name</div>
+                                <div class="">Category: <span class="fw-semibold text-black">Category Value</span></div>
+                            </div>
+
+                            <!-- Remove Button -->
+                            <button class="btn btn-outline-secondary btn-sm ms-2">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Duplicate the above .col-md-6 for each product added -->
+                    <div class="col-md-6 mb-3">
+                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-black fs-5">Another Product</div>
+                                <div class="">Category: <span class="fw-semibold text-black">Another Category</span></div>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm ms-2">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- tab2 -->
+            <div class="tab-pane fade" id="tab2">
+                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                    style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                    <span class="fw-semibold text-black fs-4">Show Best Sellers Section</span>
+
+                    <!-- Toggle Switch -->
+                    <div class="form-check form-switch">
+                        <input class="form-check-input toggle-switch" type="checkbox" id="bestSellersToggle">
+                    </div>
+                </div>
+
+                <div class=" d-flex flex-row align-items-center p-1 mb-2"
+                    style="background-color: #F4F6F6; border-radius: 10px; border: none;">
+                    <span class="fw-semibold text-black fs-4">You can add up to </span><span class="fw-semibold fs-4 ms-1" style="color: #24B094;">8 Products</span>
+                </div>
+
+                <!-- Input and Add Button Row -->
+                <p class="fw-semibold text-black fs-4">Product Name</p>
+                <div class="row g-2 mb-2">
+                    <div class="col-9">
+                        <input type="text" class="form-control" placeholder="Enter product name">
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-primary w-100">Add Product</button>
+                    </div>
+                </div>
+                <p class="fw-semibold text-black fs-4">Added Products</p>
+                <!-- Products Grid -->
+                <div class="row">
+                    <!-- Product Card -->
+                    <div class="col-md-6 mb-3">
+                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                            <!-- Image -->
+                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+
+                            <!-- Details -->
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-black fs-5">Product Name</div>
+                                <div class="">Category: <span class="fw-semibold text-black">Category Value</span></div>
+                            </div>
+
+                            <!-- Remove Button -->
+                            <button class="btn btn-outline-secondary btn-sm ms-2">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Duplicate the above .col-md-6 for each product added -->
+                    <div class="col-md-6 mb-3">
+                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-black fs-5">Another Product</div>
+                                <div class="">Category: <span class="fw-semibold text-black">Another Category</span></div>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm ms-2">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- tab3 -->
+            <div class="tab-pane fade" id="tab3">
+
+
+            </div>
+
+            <!-- tab4 -->
+            <div class="tab-pane fade" id="tab4">
+
+            </div>
+            <!-- tab4 -->
+            <div class="tab-pane fade show " id="tab5">
                 <!-- Card -->
                 <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                    style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
                     <span class="fw-semibold text-black fs-4">Show Hero Section</span>
 
                     <!-- Toggle Switch -->
@@ -208,86 +350,6 @@
 
             </div>
 
-            <!-- tab2 -->
-            <div class="tab-pane fade" id="tab2">
-                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
-                    style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                    <span class="fw-semibold text-black fs-4">Show Best Sellers Section</span>
-
-                    <!-- Toggle Switch -->
-                    <div class="form-check form-switch">
-                        <input class="form-check-input toggle-switch" type="checkbox" id="bestSellersToggle">
-                    </div>
-                </div>
-
-                <div class=" d-flex flex-row align-items-center p-1 mb-2"
-                    style="background-color: #F4F6F6; border-radius: 10px; border: none;">
-                    <span class="fw-semibold text-black fs-4">You can add up to </span><span class="fw-semibold fs-4 ms-1" style="color: #24B094;">8 Products</span>
-                </div>
-
-                <!-- Input and Add Button Row -->
-                <p class="fw-semibold text-black fs-4">Product Name</p>
-                <div class="row g-2 mb-2">
-                    <div class="col-9">
-                        <input type="text" class="form-control" placeholder="Enter product name">
-                    </div>
-                    <div class="col-3">
-                        <button class="btn btn-primary w-100">Add Product</button>
-                    </div>
-                </div>
-                <p class="fw-semibold text-black fs-4">Added Products</p>
-                <!-- Products Grid -->
-                <div class="row">
-                    <!-- Product Card -->
-                    <div class="col-md-6 mb-3">
-                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                            <!-- Image -->
-                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
-
-                            <!-- Details -->
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold text-black fs-5">Product Name</div>
-                                <div class="">Category: <span class="fw-semibold text-black">Category Value</span></div>
-                            </div>
-
-                            <!-- Remove Button -->
-                            <button class="btn btn-outline-secondary btn-sm ms-2">
-                                Remove
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Duplicate the above .col-md-6 for each product added -->
-                    <div class="col-md-6 mb-3">
-                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold text-black fs-5">Another Product</div>
-                                <div class="">Category: <span class="fw-semibold text-black">Another Category</span></div>
-                            </div>
-                            <button class="btn btn-outline-secondary btn-sm ms-2">
-                                Remove
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- tab3 -->
-            <div class="tab-pane fade" id="tab3">
-
-
-            </div>
-
-            <!-- tab4 -->
-            <div class="tab-pane fade" id="tab4">
-
-            </div>
-            <!-- tab4 -->
-            <div class="tab-pane fade" id="tab5">
-
-            </div>
             <!-- tab4 -->
             <div class="tab-pane fade" id="tab6">
 
@@ -323,6 +385,51 @@
 @section('page-script')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    $(document).ready(function () {
+        $('#category-search').on('keyup', function () {
+            const query = $(this).val();
+
+            if (query.length < 2) {
+                $('#search-suggestions').empty();
+                return;
+            }
+
+            $.ajax({
+                url: '{{route("categories.search")}}',
+                method: 'GET',
+                data: { search: query },
+                success: function (data) {
+                    let suggestions = '';
+                    data.forEach(function (item) {
+                        suggestions += `<a href="#" class="list-group-item list-group-item-action category-option" data-name="${item.name.en}">${item.name.en}</a>`;
+                    });
+
+                    $('#search-suggestions').html(suggestions).show();
+                },
+                error: function () {
+                    $('#search-suggestions').empty().hide();
+                }
+            });
+        });
+
+        // Handle click on suggestion
+        $(document).on('click', '.category-option', function (e) {
+            e.preventDefault();
+            const name = $(this).data('name');
+            $('#category-search').val(name);
+            $('#search-suggestions').empty().hide();
+        });
+
+        // Hide suggestions when clicking outside
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#category-search, #search-suggestions').length) {
+                $('#search-suggestions').empty().hide();
+            }
+        });
+    });
+</script>
+
 <script>
     $(document).ready(function() {
         const hash = window.location.hash;

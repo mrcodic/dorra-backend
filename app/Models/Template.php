@@ -65,7 +65,9 @@ class Template extends Model implements HasMedia
 
     public function types()
     {
-        return $this->morphToMany(Type::class, 'typeable')->withTimestamps();
+        return $this->morphToMany(Type::class, 'typeable')
+            ->using(Typeable::class)
+            ->withTimestamps();
     }
 
 

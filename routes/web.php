@@ -54,6 +54,8 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'categories', 'as' => 'categories.', 'controller' => CategoryController::class,], function () {
         Route::get('/data', 'getData')->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::get('/search',  'search')->name('search');
+
     });
     Route::delete('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
 

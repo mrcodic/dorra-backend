@@ -190,6 +190,12 @@
                     "name": "Notifications",
                     "icon": "circle",
                     "slug": ""
+                } ,
+                {
+                    "url": "/settings/website",
+                    "name": "Website",
+                    "icon": "circle",
+                    "slug": ""
                 }
             ],
             "modalTarget": ""
