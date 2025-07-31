@@ -1,6 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Tags List')
+@section('main-page', 'Tags')
 
 @section('vendor-style')
 {{-- Page Css files --}}

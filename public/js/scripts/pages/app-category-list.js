@@ -25,10 +25,10 @@ const dt_user_table = $(".category-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
-        {data: "name"},
-        {data: "sub_categories"},
-        {data: "no_of_products"},
-        {data: "added_date"},
+        {data: "name", orderable: false},
+        {data: "sub_categories", orderable: false},
+        {data: "no_of_products", orderable: false},
+        {data: "added_date", orderable: false},
         {
             data: "id",
             orderable: false,
