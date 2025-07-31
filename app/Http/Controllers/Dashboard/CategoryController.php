@@ -33,4 +33,19 @@ class CategoryController extends DashboardController
         return $this->resourceClass::collection($categories);
     }
 
+    public function addToLanding(Request $request)
+    {
+        $request->validate(['category_id' => 'required','exists:categories,id']);
+        $category = $this->categoryService->addToLanding($request->get('category_id'));
+        return $this->resourceClass::make($category);
+
+    }
+    public function removeFromLanding(Request $request)
+    {
+        $request->validate(['category_id' => 'required','exists:categories,id']);
+        $category = $this->categoryService->removeFromLanding($request->get('category_id'));
+        return $this->resourceClass::make($category);
+
+    }
+
 }

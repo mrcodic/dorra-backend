@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('teams', function (Blueprint $table) {
-            $table->softDeletes();
+        Schema::table('categories', function (Blueprint $table) {
+            $table->boolean('is_landing')->after('parent_id')->default(false);
         });
+
     }
 
     /**
@@ -21,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('teams', function (Blueprint $table) {
-            $table->dropSoftDeletes();
+        Schema::table('categories', function (Blueprint $table) {
+            $table->dropColumn('is_landing');
         });
     }
 };

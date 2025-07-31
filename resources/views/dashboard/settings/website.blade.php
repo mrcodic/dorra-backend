@@ -33,7 +33,7 @@
                 <a class="nav-link active custom-tab" data-bs-toggle="tab" href="#tab1">1. Navbar</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab2">2. Best Sellers</a>
+                <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab2">2. Hero</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab3">
@@ -79,56 +79,162 @@
 
                 <!-- Input and Add Button Row -->
                 <p class="fw-semibold text-black fs-4">Category</p>
-                <div class="row g-2 mb-2">
-                    <div class="col-9">
-                        <input type="text" class="form-control" id="category-search" placeholder="Enter category name">
-                        <div id="search-suggestions" class="list-group position-absolute" style="z-index: 999;"></div>
-                    </div>
-                    <div class="col-3">
-                        <button class="btn btn-primary w-100">Add Category</button>
-                    </div>
+                <div class="row g-2 mb-2" >
+                    <form action="{{ route('categories.landing') }}" method="POST">
+                        @csrf
+                        <div class="row g-2 align-items-center">
+                            {{-- Hidden input to store the selected category ID --}}
+                            <input type="hidden" name="category_id" id="selected-category-id">
+
+                            <div class="col-9 position-relative">
+                                <input type="text" class="form-control" id="category-search" placeholder="Enter category name">
+                                <div id="search-suggestions" class="list-group position-absolute w-100" style="z-index: 999;"></div>
+                            </div>
+
+                            <div class="col-3">
+                                <button type="submit" class="btn btn-primary w-100">Add Category</button>
+                            </div>
+                        </div>
+                    </form>
+
                 </div>
+
                 <p class="fw-semibold text-black fs-4">Added Categories</p>
                 <!-- Products Grid -->
                 <div class="row">
                     <!-- Product Card -->
-                    <div class="col-md-6 mb-3">
-                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                            <!-- Image -->
-                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                    @forelse($categories as $category)
+                        <!-- Product Card -->
+                        <div class="col-md-6 mb-3">
+                            <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                <!-- Image -->
+                                <img src="{{ $category->getFirstMediaUrl('categories')  }}" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
 
-                            <!-- Details -->
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold text-black fs-5">Product Name</div>
-                                <div class="">Category: <span class="fw-semibold text-black">Category Value</span></div>
+                                <!-- Details -->
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold text-black fs-5">{{ $category->name }}</div>
+                                </div>
+
+                                <!-- Remove Button -->
+                                <button class="btn btn-outline-secondary btn-sm ms-2 remove-category"  data-id="{{ $category->id }}">
+                                    Remove
+                                </button>
                             </div>
-
-                            <!-- Remove Button -->
-                            <button class="btn btn-outline-secondary btn-sm ms-2">
-                                Remove
-                            </button>
                         </div>
-                    </div>
+                    @empty
+                        <div class="col-12 text-center my-5">
+                            <div class="mt-3 text-muted fs-5">No categories added yet.</div>
+                    @endforelse
 
-                    <!-- Duplicate the above .col-md-6 for each product added -->
-                    <div class="col-md-6 mb-3">
-                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold text-black fs-5">Another Product</div>
-                                <div class="">Category: <span class="fw-semibold text-black">Another Category</span></div>
-                            </div>
-                            <button class="btn btn-outline-secondary btn-sm ms-2">
-                                Remove
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
+
+
+
+        </div>
             <!-- tab2 -->
-            <div class="tab-pane fade" id="tab2">
+            <div class="tab-pane fade show " id="tab2">
+                <!-- Card -->
+                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                    <span class="fw-semibold text-black fs-4">Show Hero Section</span>
+
+                    <!-- Toggle Switch -->
+                    <div class="form-check form-switch">
+                        <input class="form-check-input toggle-switch" type="checkbox" id="heroToggle">
+                    </div>
+                </div>
+
+                @foreach($carousels as $carousel)
+                    @php
+                        $labels = ['First', 'Second', 'Third'];
+                    @endphp
+                <div class="col-md-12 mb-2">
+                    <!-- Progress & Preview -->
+                    <div class="card p-4 mb-4 border rounded shadow-sm">
+                        <h5 class="mb-3 fw-semibold">{{$loop->iteration}}.
+                            {{ $labels[$loop->index] }} Carousel
+                        </h5>
+                        <!-- Upload Box -->
+
+                        <!-- Hidden file input -->
+                        <input type="file" name="image" id="add-category-image" class="form-control d-none" accept="image/*">
+
+                        <!-- Custom Upload Area -->
+                        <div id="add-upload-area" class="upload-card">
+                            <div id="add-upload-content">
+                                <i data-feather="upload" class="mb-2"></i>
+                                <p>Drag image here to upload</p>
+                            </div>
+                        </div>
+
+                        <!-- Upload Progress -->
+                        <div id="add-upload-progress" class="progress mt-2 d-none w-50">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                        </div>
+
+                        <!-- Uploaded Image Preview -->
+                        <div id="add-uploaded-image" class="uploaded-image  position-relative mt-1 d-flex align-items-center gap-2">
+                            <img src="{{ $carousel->getFirstMediaUrl('carousels') }}" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                            <div id="add-file-details" class="file-details">
+                                <div class="file-name fw-bold"></div>
+                                <div class="file-size text-muted small"></div>
+                            </div>
+
+                        </div>
+
+                        <!-- Title Fields -->
+                        <div class="row mb-3 mt-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Title in English</label>
+                                <input type="text" class="form-control" placeholder="Enter title in English" value="{{ $carousel->getTranslation('title','en') }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Title in Arabic</label>
+                                <input type="text" class="form-control" placeholder="Enter title in Arabic" value="{{ $carousel->getTranslation('title','ar') }}">
+                            </div>
+                        </div>
+
+                        <!-- Subtitle Fields -->
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Subtitle in English</label>
+                                <input type="text" class="form-control" placeholder="Enter subtitle in English" value="{{ $carousel->getTranslation('subtitle','en') }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Subtitle in Arabic</label>
+                                <input type="text" class="form-control" placeholder="Enter subtitle in Arabic" value="{{ $carousel->getTranslation('subtitle','ar') }}">
+                            </div>
+                        </div>
+
+                        <!-- Product Select -->
+                        <div class="mb-2">
+                            <label class="form-label">Select Product</label>
+                            <select class="form-select">
+                                <option selected disabled>Select a product</option>
+                                @foreach($products as $product)
+                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                @endforeach
+
+                            </select>
+                        </div>
+
+                        <div class="text-start">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+
+
+                </div>
+                @endforeach
+
+
+
+
+            </div>
+            <div class="tab-pane fade" id="tab5">
                 <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
-                    style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
                     <span class="fw-semibold text-black fs-4">Show Best Sellers Section</span>
 
                     <!-- Toggle Switch -->
@@ -138,7 +244,7 @@
                 </div>
 
                 <div class=" d-flex flex-row align-items-center p-1 mb-2"
-                    style="background-color: #F4F6F6; border-radius: 10px; border: none;">
+                     style="background-color: #F4F6F6; border-radius: 10px; border: none;">
                     <span class="fw-semibold text-black fs-4">You can add up to </span><span class="fw-semibold fs-4 ms-1" style="color: #24B094;">8 Products</span>
                 </div>
 
@@ -155,38 +261,28 @@
                 <p class="fw-semibold text-black fs-4">Added Products</p>
                 <!-- Products Grid -->
                 <div class="row">
-                    <!-- Product Card -->
-                    <div class="col-md-6 mb-3">
-                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                            <!-- Image -->
-                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                    @forelse($categories as $category)
+                        <!-- Product Card -->
+                        <div class="col-md-6 mb-3">
+                            <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                <!-- Image -->
+                                <img src="{{ $category->getFirstMediaUrl('categories')  }}" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
 
-                            <!-- Details -->
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold text-black fs-5">Product Name</div>
-                                <div class="">Category: <span class="fw-semibold text-black">Category Value</span></div>
+                                <!-- Details -->
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold text-black fs-5">{{ $category->name }}</div>
+                                    <div class="">Category: <span class="fw-semibold text-black">Category Value</span></div>
+                                </div>
+
+                                <!-- Remove Button -->
+                                <button class="btn btn-outline-secondary btn-sm ms-2">
+                                    Remove
+                                </button>
                             </div>
-
-                            <!-- Remove Button -->
-                            <button class="btn btn-outline-secondary btn-sm ms-2">
-                                Remove
-                            </button>
                         </div>
-                    </div>
+                    @empty
 
-                    <!-- Duplicate the above .col-md-6 for each product added -->
-                    <div class="col-md-6 mb-3">
-                        <div class=" p-2 d-flex flex-row align-items-center" style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                            <img src="https://via.placeholder.com/80" alt="Product" class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold text-black fs-5">Another Product</div>
-                                <div class="">Category: <span class="fw-semibold text-black">Another Category</span></div>
-                            </div>
-                            <button class="btn btn-outline-secondary btn-sm ms-2">
-                                Remove
-                            </button>
-                        </div>
-                    </div>
+                    @endforelse
                 </div>
 
             </div>
@@ -202,160 +298,12 @@
 
             </div>
             <!-- tab4 -->
-            <div class="tab-pane fade show " id="tab5">
-                <!-- Card -->
-                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                    <span class="fw-semibold text-black fs-4">Show Hero Section</span>
 
-                    <!-- Toggle Switch -->
-                    <div class="form-check form-switch">
-                        <input class="form-check-input toggle-switch" type="checkbox" id="heroToggle">
-                    </div>
-                </div>
-
-                <!-- first image -->
-                <div class="col-md-12 mb-2">
-                    <label class="form-label label-text" for="product-image-first">First photo (3:4, 323×432 px)</label>
-
-                    <!-- Hidden File Input -->
-                    <input type="file" name="image_first" id="product-image-first" class="form-control d-none" accept="image/*">
-
-                    <!-- Upload Card -->
-                    <div id="upload-area-first" class="upload-card">
-                        <div id="upload-content-first" class="d-flex gap-1 justify-content-center align-items-center" class="d-flex gap-1 justify-content-center align-items-center">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>Drag image here to upload</p>
-                        </div>
-                    </div>
-
-                    <!-- Progress & Preview -->
-                    <div>
-                        <div id="upload-progress-first" class="progress mt-2 d-none w-50">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                        </div>
-
-                        <div id="uploaded-image-first" class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                            <img src="" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
-                            <div id="file-details-first" class="file-details">
-                                <div class="file-name fw-bold"></div>
-                                <div class="file-size text-muted small"></div>
-                            </div>
-                            <button type="button" id="remove-image-first" class="btn btn-sm position-absolute text-danger" style="top: 5px; right: 5px; background-color: #FFEEED">
-                                <i data-feather="trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <!-- second image -->
-                <div class="col-md-12 mb-2">
-                    <label class="form-label label-text" for="product-image-second">Second photo (3:4, 213*285 px)</label>
-
-                    <!-- Hidden File Input -->
-                    <input type="file" name="image_second" id="product-image-second" class="form-control d-none" accept="image/*">
-
-                    <!-- Upload Card -->
-                    <div id="upload-area-second" class="upload-card">
-                        <div id="upload-content-second" class="d-flex gap-1 justify-content-center align-items-center">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>Drag image here to upload</p>
-                        </div>
-                    </div>
-
-                    <!-- Progress & Preview -->
-                    <div>
-                        <div id="upload-progress-second" class="progress mt-2 d-none w-50">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                        </div>
-
-                        <div id="uploaded-image-second" class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                            <img src="" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
-                            <div id="file-details-second" class="file-details">
-                                <div class="file-name fw-bold"></div>
-                                <div class="file-size text-muted small"></div>
-                            </div>
-                            <button type="button" id="remove-image-second" class="btn btn-sm position-absolute text-danger" style="top: 5px; right: 5px; background-color: #FFEEED">
-                                <i data-feather="trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <!-- third image -->
-                <div class="col-md-12 mb-2">
-                    <label class="form-label label-text" for="product-image-third">Third photo (3:4, 232*310 px)</label>
-
-                    <!-- Hidden File Input -->
-                    <input type="file" name="image_third" id="product-image-third" class="form-control d-none" accept="image/*">
-
-                    <!-- Upload Card -->
-                    <div id="upload-area-third" class="upload-card">
-                        <div id="upload-content-third" class="d-flex gap-1 justify-content-center align-items-center">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>Drag image here to upload</p>
-                        </div>
-                    </div>
-
-                    <!-- Progress & Preview -->
-                    <div>
-                        <div id="upload-progress-third" class="progress mt-2 d-none w-50">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                        </div>
-
-                        <div id="uploaded-image-third" class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                            <img src="" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
-                            <div id="file-details-third" class="file-details">
-                                <div class="file-name fw-bold"></div>
-                                <div class="file-size text-muted small"></div>
-                            </div>
-                            <button type="button" id="remove-image-third" class="btn btn-sm position-absolute text-danger" style="top: 5px; right: 5px; background-color: #FFEEED">
-                                <i data-feather="trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <!-- fourth image -->
-                <div class="col-md-12 mb-2">
-                    <label class="form-label label-text" for="product-image-fourth">Fourth photo (3:4, 295*395 px)</label>
-
-                    <!-- Hidden File Input -->
-                    <input type="file" name="image_fourth" id="product-image-fourth" class="form-control d-none" accept="image/*">
-
-                    <!-- Upload Card -->
-                    <div id="upload-area-fourth" class="upload-card">
-                        <div id="upload-content-fourth" class="d-flex gap-1 justify-content-center align-items-center">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>Drag image here to upload</p>
-                        </div>
-                    </div>
-
-                    <!-- Progress & Preview -->
-                    <div>
-                        <div id="upload-progress-fourth" class="progress mt-2 d-none w-50">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                        </div>
-
-                        <div id="uploaded-image-fourth" class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                            <img src="" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
-                            <div id="file-details-fourth" class="file-details">
-                                <div class="file-name fw-bold"></div>
-                                <div class="file-size text-muted small"></div>
-                            </div>
-                            <button type="button" id="remove-image-fourth" class="btn btn-sm position-absolute text-danger" style="top: 5px; right: 5px; background-color: #FFEEED">
-                                <i data-feather="trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
 
             <!-- tab4 -->
             <div class="tab-pane fade" id="tab6">
 
             </div>
-
-        </div>
     </div>
 
 </div>
@@ -387,22 +335,104 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
     $(document).ready(function () {
+        const input = $('#add-category-image');
+        const uploadArea = $('#add-upload-area');
+        const progress = $('#add-upload-progress');
+        const progressBar = progress.find('.progress-bar');
+        const uploadedImage = $('#add-uploaded-image');
+
+        uploadArea.on('click', () => input.click());
+
+        input.on('change', (e) => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+
+                progress.removeClass('d-none');
+                progressBar.css('width', '0%');
+
+                let fakeProgress = 0;
+                let interval = setInterval(() => {
+                    fakeProgress += 10;
+                    progressBar.css('width', `${fakeProgress}%`);
+
+                    if (fakeProgress >= 100) {
+                        clearInterval(interval);
+
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            uploadedImage.find('img').attr('src', e.target.result);
+                            uploadedImage.removeClass('d-none');
+                            progress.addClass('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }, 100);
+            }
+        }
+    });
+
+    $(document).on('click', '.remove-category', function (e) {
+        e.preventDefault();
+
+        const categoryId = $(this).data('id');
+
+        $.ajax({
+            url: '{{ route("categories.landing.remove") }}',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                category_id: categoryId
+            },
+            success: function (response) {
+                Toastify({
+                    text: "Category removed successfully.",
+                    backgroundColor: "#24B094"
+                }).showToast();
+
+                // Optionally remove the element from DOM
+                location.reload();
+            },
+            error: function (xhr) {
+                let message = "Something went wrong.";
+
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    message = Object.values(errors).flat().join('\n');
+                }
+
+                Toastify({
+                    text: message,
+                    backgroundColor: "#FF6B6B"
+                }).showToast();
+            }
+        });
+    });
+</script>
+
+    <script>
+        let selectedCategoryId = null;
+
+        $(document).ready(function () {
+        // Handle live search
         $('#category-search').on('keyup', function () {
             const query = $(this).val();
 
             if (query.length < 2) {
                 $('#search-suggestions').empty();
+                selectedCategoryId = null;
                 return;
             }
 
             $.ajax({
-                url: '{{route("categories.search")}}',
+                url: '{{ route("categories.search") }}',
                 method: 'GET',
                 data: { search: query },
                 success: function (data) {
                     let suggestions = '';
-                    data.forEach(function (item) {
-                        suggestions += `<a href="#" class="list-group-item list-group-item-action category-option" data-name="${item.name.en}">${item.name.en}</a>`;
+                    data.data.forEach(function (item) {
+                        suggestions += `<a href="#" class="list-group-item list-group-item-action category-option" data-id="${item.id}" data-name="${item.name}">${item.name}</a>`;
                     });
 
                     $('#search-suggestions').html(suggestions).show();
@@ -413,22 +443,78 @@
             });
         });
 
-        // Handle click on suggestion
+        // When suggestion clicked
         $(document).on('click', '.category-option', function (e) {
-            e.preventDefault();
-            const name = $(this).data('name');
-            $('#category-search').val(name);
-            $('#search-suggestions').empty().hide();
-        });
+        e.preventDefault();
+        const name = $(this).data('name');
+        selectedCategoryId = $(this).data('id');
 
-        // Hide suggestions when clicking outside
+        $('#category-search').val(name);
+        $('#search-suggestions').empty().hide();
+    });
+
+        // Hide on click outside
         $(document).on('click', function (e) {
-            if (!$(e.target).closest('#category-search, #search-suggestions').length) {
-                $('#search-suggestions').empty().hide();
+        if (!$(e.target).closest('#category-search, #search-suggestions').length) {
+        $('#search-suggestions').empty().hide();
+    }
+    });
+
+        // Submit on Add Category
+        $('.btn-primary:contains("Add Category")').on('click', function (e) {
+        e.preventDefault();
+
+        if (!selectedCategoryId) {
+        Toastify({
+        text: "Please select a category from suggestions.",
+        backgroundColor: "#FF6B6B"
+    }).showToast();
+        return;
+    }
+
+        $.ajax({
+        url: '{{ route("categories.landing") }}',
+        method: 'POST',
+        data: {
+        _token: '{{ csrf_token() }}',
+        category_id: selectedCategoryId
+    },
+        success: function (response) {
+        Toastify({
+        text: "Category added successfully!",
+        backgroundColor: "#24B094"
+    }).showToast();
+        location.reload();
+        // Optional: refresh added categories or clear input
+        $('#category-search').val('');
+        selectedCategoryId = null;
+    },
+            error: function (xhr) {
+                let errorMessage = "Error adding category.";
+
+                // Check for Laravel validation errors
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+
+                    // Combine all validation error messages
+                    if (errors) {
+                        errorMessage = Object.values(errors).flat().join('\n');
+                    }
+                }
+
+                Toastify({
+                    text: errorMessage,
+                    backgroundColor: "#FF6B6B",
+                    duration: 5000
+                }).showToast();
             }
-        });
+
+
+    });
+    });
     });
 </script>
+
 
 <script>
     $(document).ready(function() {

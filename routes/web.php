@@ -55,6 +55,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', 'getData')->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::get('/search',  'search')->name('search');
+        Route::post('/landing',  'addToLanding')->name('landing');
+        Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
 
     });
     Route::delete('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
@@ -163,6 +165,7 @@ Route::middleware('auth')->group(function () {
         Route::get('settings/payments', 'payments')->name('settings.payments');
         Route::get('settings/website', 'website')->name('settings.website');
         Route::get('settings/notifications', 'notifications')->name('settings.notifications');
+        Route::put('carousels/{carousel}','carouselUpdate')->name('carousels.update');
     });
 
     Route::group(['prefix' => 'mockups', 'as' => 'mockups.', 'controller' => MockupController::class,], function () {
