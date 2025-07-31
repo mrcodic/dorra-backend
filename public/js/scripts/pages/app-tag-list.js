@@ -7,6 +7,7 @@ var dt_user_table = $('.tag-list-table').DataTable({
     processing: true,
     serverSide: true,
     searching: false,
+    orderable:false,
     ajax: {
         url: tagsDataUrl,
         type: 'GET',
@@ -21,10 +22,10 @@ var dt_user_table = $('.tag-list-table').DataTable({
         { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             } },
-        {data: 'name'},
-        {data: 'no_of_products'},
-        {data: 'no_of_templates'},
-        {data: 'added_date'},
+        {data: 'name', orderable: false},
+        {data: 'no_of_products', orderable: false},
+        {data: 'no_of_templates', orderable: false},
+        {data: 'added_date', orderable: false},
 
         {
             data: 'id',

@@ -19,9 +19,9 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
         { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             } },
-        { data: "name" },
-        { data: "sub_category_products_count" },
-        { data: "added_date" },
+        { data: "name", orderable: false },
+        { data: "sub_category_products_count" , orderable: false},
+        { data: "added_date" , orderable: false},
 
         {
             data: "id",
