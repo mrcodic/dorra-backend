@@ -14,10 +14,18 @@ use Illuminate\Support\Arr;
     public function __construct(TeamRepositoryInterface $repository)
     {
         parent::__construct($repository);
-        $this->query = $this->repository->query()
-            ->whereBelongsTo(auth('sanctum')->user(), 'owner');
 
+        $user = auth('sanctum')->user();
+
+        $this->query = $this->repository->query();
+        if ($user) {
+            $this->query = $this->query->whereBelongsTo($user, 'owner');
+        } else {
+            $this->query = $this->query->whereRaw('1 = 0');
+
+        }
     }
+
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
