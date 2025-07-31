@@ -25,14 +25,15 @@ class CategoryService extends BaseService
 
     public function getData(): JsonResponse
     {
+        $locale = app()->getLocale();
         $categories = $this->repository
             ->query(['id', 'name', 'description', 'created_at'])
             ->with(['products', 'children'])
             ->withCount(['children', 'products'])
-            ->when(request()->filled('search_value'), function ($query) {
-                $locale = app()->getLocale();
-                $search = request('search_value');
-                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            ->when(request()->filled('search_value'), function ($query) use ( $locale) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower(request('search_value')) . '%'
+                ]);
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
             })
@@ -79,15 +80,16 @@ class CategoryService extends BaseService
 
     public function getSubCategoryData(): JsonResponse
     {
+        $locale = app()->getLocale();
         $categories = $this->repository
             ->query(['id', 'name', 'parent_id', 'created_at'])
             ->with(['parent'])
             ->withCount(['subCategoryProducts'])
             ->whereNotNull('parent_id')
-            ->when(request()->filled('search_value'), function ($query) {
-                $locale = app()->getLocale();
-                $search = request('search_value');
-                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            ->when(request()->filled('search_value'), function ($query) use ( $locale) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower(request('search_value')) . '%'
+                ]);
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
             })

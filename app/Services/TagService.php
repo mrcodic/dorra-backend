@@ -16,13 +16,14 @@ class TagService extends BaseService
 
     public function getData(): JsonResponse
     {
+        $locale = app()->getLocale();
         $tags = $this->repository
             ->query(['id', 'name','created_at'])
             ->withCount(['templates', 'products'])
-                ->when(request()->filled('search_value'), function ($query) {
-                $locale = app()->getLocale();
-                $search = request('search_value');
-                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+            ->when(request()->filled('search_value'), function ($query) use ( $locale) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower(request('search_value')) . '%'
+                ]);
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
             })
