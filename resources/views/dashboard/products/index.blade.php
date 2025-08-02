@@ -63,12 +63,21 @@
 
 
                     <div class="col-6 col-md-2 col-lg-2">
-                        <select name="tag_id" class="form-select tag-select">
-                            <option value=""  selected disabled>Tag</option>
-                            @foreach($associatedData['tags'] as $tag)
-                                <option value="{{ $tag->id }}">{{ $tag->name}}</option>
-                            @endforeach
-                        </select>
+                        <div style="position: relative;">
+                            <select name="tag_id" class="form-select pe-5" id="tagSelect">
+                                <option value="" selected disabled>Tag</option>
+                                @foreach($associatedData['tags'] as $tag)
+                                    <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                @endforeach
+                            </select>
+                            <button type="button" id="clearTagFilter"
+                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                       background: transparent; border: none; font-weight: bold;
+                       color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                                    title="Clear filter">
+                                &times;
+                            </button>
+                        </div>
                     </div>
 
                     <div class="col-12 col-md-2 text-md-end">
@@ -163,6 +172,14 @@
         const productsDataUrl = "{{ route('products.data') }}";
         const productsCreateUrl = "{{ route('products.create') }}";
     </script>
+    <script>
+        document.getElementById('clearTagFilter').addEventListener('click', function () {
+            const select = document.getElementById('tagSelect');
+            select.selectedIndex = 0; // Select the first option (placeholder)
+            select.dispatchEvent(new Event('change')); // If you have JS that listens to this
+        });
+    </script>
+
     <script>
         $(document).ready(function () {
             // Select all toggle

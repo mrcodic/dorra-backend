@@ -38,17 +38,13 @@ class ProductController extends DashboardController
             'shared' => [
                 'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
                 'tags' => $this->tagRepository->all(columns: ['id', 'name']),
-            ],
-            'edit' => [
-                'dimensions' => $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
-            ],
-            'create' => [
                 'dimensions' =>  $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
 
-            ]
+            ],
+
         ];
         $this->methodRelations = [
-            'index' => ['saves'],
+            'index' => ['saves','orders'],
             'show' => ['category', 'tags', 'reviews.user', 'media', 'specifications.options.media'],
             'edit' => ['category', 'tags', 'reviews', 'media', 'specifications.options'],
         ];

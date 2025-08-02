@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
-@section('title', 'Show orderss')
+@section('title', 'Show Order')
 @section('main-page', 'Orders')
-@section('sub-page', 'Show Orders')
+@section('sub-page', 'Show Order')
 
 @section('vendor-style')
 <!-- Vendor CSS Files -->
@@ -142,7 +142,7 @@
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">Discount</span>
-                    <span class="fs-16 text-black">-$ {{$model->discount_amount}}</span>
+                    <span class="fs-16 text-black">-$ {{ $model->discount_amount }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
@@ -156,7 +156,7 @@
                         Tax
                         <i data-feather="info" data-bs-toggle="tooltip" title="Tax is calculated as per applicable laws."></i>
                     </span>
-                    <span class="fs-16 text-black">$ {{$model->tax_amount}}</span>
+                    <span class="fs-16 text-black">$ {{ $model->tax_amount }}</span>
                 </div>
 
                 <hr class="border-dashed my-1">

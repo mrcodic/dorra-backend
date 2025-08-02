@@ -49,8 +49,10 @@ $configData = Helper::applClasses();
     function handleAjaxFormSubmit(formSelector, options = {}) {
         $(document).on('submit', formSelector, function (e) {
             e.preventDefault();
-
             const $form = $(this);
+
+            if (!$form.valid()) return;
+
             const $submitBtn = $form.find('button[type="submit"]');
             const $loader = $form.find('.spinner-border');
 
@@ -58,6 +60,9 @@ $configData = Helper::applClasses();
             $loader.removeClass('d-none');
 
             const formData = new FormData(this);
+
+            // Debug log (optional)
+            // for (let pair of formData.entries()) console.log(pair[0]+ ':', pair[1]);
 
             $.ajax({
                 url: $form.attr('action'),
@@ -77,7 +82,6 @@ $configData = Helper::applClasses();
                     }).showToast();
 
                     if (options.onSuccess) options.onSuccess(response, $form);
-
                     if (options.resetForm !== false) $form.trigger('reset');
                     if (options.closeModal) $(options.closeModal).modal('hide');
                 },
@@ -107,4 +111,6 @@ $configData = Helper::applClasses();
     }
 
 </script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+
 @stack('scripts')

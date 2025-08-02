@@ -157,9 +157,8 @@ class User extends Authenticatable implements HasMedia
         return $this->morphToMany(Design::class, 'designable', 'designables')->withTimestamps();
     }
 
-
-
-
-
-
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
 }
