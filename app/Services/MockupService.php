@@ -38,7 +38,7 @@ class MockupService extends BaseService
             })
             ->when(request()->filled('product_id'), fn($q) => $q->whereProductId(request('product_id')))
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('product_id', request()->array('product_ids')))
-            ->when(request()->filled('type'), fn($q) => $q->whereType(request('type')))
+            ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.id',request('type'))))
             ->when(request()->filled('search'), function ($q) {
                 $q->where('name', 'like', '%' . request('search') . '%');
             })

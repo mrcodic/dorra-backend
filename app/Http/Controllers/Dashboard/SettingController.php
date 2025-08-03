@@ -8,6 +8,7 @@ use App\Http\Requests\Template\UpdateTemplateRequest;
 use App\Repositories\Interfaces\CarouselRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
 use Illuminate\Support\Facades\Response;
 
 class SettingController extends Controller
@@ -35,7 +36,8 @@ class SettingController extends Controller
 
     public function website(CategoryRepositoryInterface $repository,
                             CarouselRepositoryInterface $carouselRepository,
-                            ProductRepositoryInterface  $productRepository,)
+                            ProductRepositoryInterface  $productRepository,
+                            SettingRepositoryInterface  $settingRepository,)
     {
         $categories = $repository->query()->isLanding()->get();
         $carousels = $carouselRepository->all();
@@ -43,9 +45,9 @@ class SettingController extends Controller
         return view("dashboard.settings.website", get_defined_vars());
     }
 
-    public function carouselUpdate($id, UpdateCarouselRequest $request,CarouselRepositoryInterface $carouselRepository)
+    public function carouselUpdate($id, UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository)
     {
-        $model =  $carouselRepository->update($id, $request->validated());
+        $model = $carouselRepository->update($id, $request->validated());
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
         }

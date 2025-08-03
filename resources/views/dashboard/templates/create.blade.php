@@ -177,22 +177,18 @@
 
 
         $('.saveChangesButton').on('click', function (e) {
-            e.preventDefault(); // Prevent default button behavior
-
             const $button = $(this);
             const action = $button.data('action');
             const $form = $('#addTemplateForm');
 
             // Set form action based on the button clicked
             if (action === 'draft') {
-                $form.attr('action', "{{ route('templates.store') }}");
+                $('#addTemplateForm').attr('action', "{{ route('templates.store') }}");
             } else if (action === 'editor') {
-                $form.attr('action', "{{ route('templates.redirect.store') }}");
+                $('#addTemplateForm').attr('action', "{{ route('templates.redirect.store') }}");
             }
 
-            // Show loader and disable all save buttons
-            $('.saveChangesButton').prop('disabled', true);
-            $button.find('.saveLoader').removeClass('d-none');
+ 
 
             // Let `handleAjaxFormSubmit()` take care of the actual submission
         });
