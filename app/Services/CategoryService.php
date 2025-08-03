@@ -5,7 +5,6 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
@@ -16,7 +15,13 @@ class CategoryService extends BaseService
     {
         parent::__construct($repository);
     }
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10)
+    {
 
+        return $this->repository->query()->when(request()->filled('is_landing'), function ($query) {
+            $query->where('is_landing', true);
+        })->paginate($perPage);
+    }
 
     public function getSubCategories()
     {
