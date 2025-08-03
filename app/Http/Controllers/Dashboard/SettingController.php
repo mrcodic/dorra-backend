@@ -9,6 +9,7 @@ use App\Repositories\Interfaces\CarouselRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
+use Dflydev\DotAccessData\Data;
 use Illuminate\Support\Facades\Response;
 
 class SettingController extends Controller
@@ -45,14 +46,25 @@ class SettingController extends Controller
         return view("dashboard.settings.website", get_defined_vars());
     }
 
-    public function carouselUpdate($id, UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository)
+    public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository, $id)
     {
-        $model = $carouselRepository->update($id, $request->validated());
+        $validatedData = $request->validated();
+        $model = $carouselRepository->query()->
+        updateOrCreate(['id' => $id], [
+            'title' => [
+                'en' => $validatedData['carousels'][0]['title_en'],
+                'ar' => $validatedData['carousels'][0]['title_ar'],
+            ], 'subtitle' => [
+                'en' => $validatedData['carousels'][0]['subtitle_en'],
+                'ar' => $validatedData['carousels'][0]['subtitle_ar'],
+            ],
+            'product_id' => $validatedData['carousels'][0]['product_id'],
+
+        ]);
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
         }
         return Response::api();
-
     }
 }
 

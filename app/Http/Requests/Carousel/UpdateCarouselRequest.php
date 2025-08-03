@@ -21,33 +21,19 @@ class UpdateCarouselRequest extends BaseRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules($id): array
+    public function rules(): array
     {
         return [
-            'title.en' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'title.ar' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'subtitle.en' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'subtitle.ar' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'product_id' =>['required', 'integer', 'exists:products,id'],
-            'image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'carousels' => 'required|array',
+            'carousels.*.title_en' => ['required', 'string', 'max:255'],
+            'carousels.*.title_ar' => ['required', 'string', 'max:255'],
+            'carousels.*.subtitle_en' => ['required', 'string', 'max:255'],
+            'carousels.*.subtitle_ar' => ['required', 'string', 'max:255'],
+            'carousels.*.product_id' => ['required', 'integer', 'exists:products,id'],
+            'carousels.*.image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],
         ];
     }
+
 
 
 }

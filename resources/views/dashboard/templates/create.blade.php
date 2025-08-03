@@ -188,7 +188,7 @@
                 $('#addTemplateForm').attr('action', "{{ route('templates.redirect.store') }}");
             }
 
- 
+
 
             // Let `handleAjaxFormSubmit()` take care of the actual submission
         });
