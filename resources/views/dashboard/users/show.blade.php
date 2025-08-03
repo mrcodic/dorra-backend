@@ -172,57 +172,56 @@
 
                                     <!-- Order Card -->
                                     <div class="card border rounded-3 p-1 mb-2">
+                                        @forelse($model->orders as $order)
+
                                         <!-- Order Header -->
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="mb-0 fs-16"><span class="fs-5">Order Number:</span> #12345</h6>
+                                            <h6 class="mb-0 fs-16"><span class="fs-5">Order Number:</span> {{ $order->order_number }}</h6>
                                             <span class=" fs-16 rounded-pill px-1 py-50"
-                                                  style="background-color: #FCF8FC;color:#4E2775">Cancelled</span>
+                                                  style="background-color: #FCF8FC;color:#4E2775">{{ $order->status->label() }}</span>
                                         </div>
 
                                         <!-- Total Price -->
-                                        <p class="mb-2 fw-bold fs-16"><span class="fs-5">Total Price:</span> $150.00</p>
+                                        <p class="mb-2 fw-bold fs-16"><span class="fs-5">Total Price:</span> {{ $order->total_price }}</p>
 
                                         <!-- Order Items -->
                                         <div class="mb-2">
                                             <h3 class="fs-16 text-black">Items</h3>
                                             <!-- Item 1 -->
+                                            @foreach($order->orderItems as $item)
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <div class="d-flex align-items-start gap-2">
                                                     <img
-                                                        src="{{$model->image?->getUrl() ?? asset('images/portrait/small/avatar-s-2.jpg')}}"
+                                                        src="{{$item->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($item->itemable)))) }}"
                                                         class="rounded" alt="Item" style="max-width: 55px;" />
                                                     <div>
-                                                        <div class="text-black fss-16">Car Wash</div>
-                                                        <small class="fs-5">Qty: 2</small>
+                                                        <div class="text-black fss-16">{{ $item->itemable->name }}</div>
+                                                        <small class="fs-5">Qty: {{ $item->quantity }}</small>
                                                     </div>
                                                 </div>
-                                                <div class="fw-bold text-black">$50.00</div>
+                                                <div class="fw-bold text-black">{{ $item->sub_total }}</div>
                                             </div>
+                                            @endforeach
 
-                                            <!-- Item 2 -->
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <div class="d-flex align-items-start gap-2">
-                                                    <img
-                                                        src="{{$model->image?->getUrl() ?? asset('images/portrait/small/avatar-s-2.jpg')}}"
-                                                        class="rounded" alt="Item" style="max-width: 55px;" />
-                                                    <div>
-                                                        <div class="text-black fss-16">Car Wash</div>
-                                                        <small class="fs-5">Qty: 2</small>
-                                                    </div>
-                                                </div>
-                                                <div class="fw-bold text-black">$50.00</div>
-                                            </div>
                                         </div>
 
                                         <!-- Show Order Button -->
                                         <div class="d-flex justify-content-end">
-                                            <button class="btn btn-primary mb-1">Show Order</button>
+                                            <a href="{{ route("orders.show",$order->id) }}" class="btn btn-primary mb-1">Show Order</a>
                                         </div>
 
 
                                         <!-- Divider -->
                                         <hr />
+                                        @empty
+                                            <div class="text-center flex-grow-1">
+                                                <p>No orders
+                                                    yet.</p>
+                                            </div>
+
+                                        @endforelse
                                     </div>
+
                                 </div>
                                 <!-- tab 2 content -->
                                 <div class="tab-pane fade" id="tab2">

@@ -53,9 +53,9 @@
 
                     <div class="col-3">
                         <select name="created_at" class="form-select filter-date">
-                            <option value="">Date</option>
-                            <option value="asc">asc</option>
-                            <option value="desc">desc</option>
+                            <option value="" disabled>Date</option>
+                            <option value="desc">Newest</option>
+                            <option value="asc">Oldest</option>
                         </select>
                     </div>
 

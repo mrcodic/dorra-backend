@@ -11,10 +11,7 @@ use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthService
@@ -84,62 +81,60 @@ class AuthService
         }
     }
 
-        public function login($validatedData): ?User
-        {
-            $user = $this->userRepository->findByEmail($validatedData['email']);
+    public function login($validatedData): ?User
+    {
+        $user = $this->userRepository->findByEmail($validatedData['email']);
+        $expiresAt = ($validatedData['remember'] ?? false)
+            ? now()->addDays(30)
+            : now()->addHours(10);
 
-            $expiresAt = ($validatedData['remember'] ?? false)
-                ? now()->addDays(30)
-                : now()->addHours(10);
+        $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
+        $user->token = $plainTextToken;
+        $cookieValue = request()->cookie('cookie_id');
 
-            $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
-            $user->token = $plainTextToken;
-            $cookieValue = request()->cookie('cookie_id');
+        if ($cookieValue) {
+            $guest = $this->guestRepository->query()
+                ->where('cookie_value', $cookieValue)
+                ->first();
 
-            if ($cookieValue) {
-                $guest = $this->guestRepository->query()
-                    ->where('cookie_value', $cookieValue)
-                    ->first();
+            if ($guest) {
+                if ($user->cart) {
+                    $guestCartItems = $guest->cart?->items?->toArray() ?? [];
+                    $user->cart?->items()->createMany($guestCartItems);
+                    $guest->cart?->items()->delete();
+                    $guest->cart?->delete();
 
-                if ($guest) {
-                    if ($user->cart) {
-                        $guestCartItems = $guest->cart?->items?->toArray() ?? [];
-                        $user->cart?->items()->createMany($guestCartItems);
-                        $guest->cart?->items()->delete();
-                        $guest->cart?->delete();
+                    $this->designRepository->query()
+                        ->whereNull('user_id')
+                        ->where('guest_id', $guest->id)
+                        ->update(['user_id' => $user->id]);
 
-                        $this->designRepository->query()
-                            ->whereNull('user_id')
-                            ->where('guest_id', $guest->id)
-                            ->update(['user_id' => $user->id]);
+                    $this->shippingAddressRepository->query()
+                        ->whereNull('user_id')
+                        ->where('guest_id', $guest->id)
+                        ->update(['user_id' => $user->id]);
+                } else {
+                    $this->designRepository->query()
+                        ->whereNull('user_id')
+                        ->where('guest_id', $guest->id)
+                        ->update(['user_id' => $user->id]);
 
-                        $this->shippingAddressRepository->query()
-                            ->whereNull('user_id')
-                            ->where('guest_id', $guest->id)
-                            ->update(['user_id' => $user->id]);
-                    } else {
-                        $this->designRepository->query()
-                            ->whereNull('user_id')
-                            ->where('guest_id', $guest->id)
-                            ->update(['user_id' => $user->id]);
+                    $this->shippingAddressRepository->query()
+                        ->whereNull('user_id')
+                        ->where('guest_id', $guest->id)
+                        ->update(['user_id' => $user->id]);
 
-                        $this->shippingAddressRepository->query()
-                            ->whereNull('user_id')
-                            ->where('guest_id', $guest->id)
-                            ->update(['user_id' => $user->id]);
-
-                        $this->cartRepository->query()
-                            ->whereNull('user_id')
-                            ->where('guest_id', $guest->id)
-                            ->update(['user_id' => $user->id]);
-                    }
+                    $this->cartRepository->query()
+                        ->whereNull('user_id')
+                        ->where('guest_id', $guest->id)
+                        ->update(['user_id' => $user->id]);
                 }
             }
-
-
-            return $user;
         }
 
+
+        return $user;
+    }
 
 
     public function logout($request)
@@ -172,8 +167,6 @@ class AuthService
 
         return $user->currentAccessToken()->delete();
     }
-
-
 
 
 }

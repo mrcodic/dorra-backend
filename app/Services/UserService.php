@@ -23,6 +23,7 @@ class UserService extends BaseService
     {
         $users = $this->repository
             ->query(['id', 'first_name', 'last_name', 'email', 'status', 'created_at'])
+            ->withCount('orders')
             ->when(request()->filled('search_value'), function ($query) {
                 $search = request('search_value');
                 $words = preg_split('/\s+/', $search);
@@ -43,9 +44,6 @@ class UserService extends BaseService
             })
             ->addColumn('joined_date', function ($user) {
                 return $user->created_at?->format('j/n/Y');
-            })
-            ->addColumn('orders_count', function ($user) {
-                return 0;
             })->make();
     }
 

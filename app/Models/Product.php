@@ -69,10 +69,21 @@ class Product extends Model implements HasMedia
             ->withTimestamps();
     }
 
-    public function dimensions()
+    public function dimensions(): BelongsToMany
     {
         return $this->belongsToMany(Dimension::class)->withTimestamps();
     }
+
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'order_items');
+    }
+    public function confirmedOrders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class,'order_items')
+            ->where('status', \App\Enums\Order\StatusEnum::CONFIRMED);
+    }
+
 
     public function specifications(): HasMany
     {
@@ -126,7 +137,6 @@ class Product extends Model implements HasMedia
         return $this->getMedia('product_extra_images')
             ->merge($this->getMedia('product_main_image'));
     }
-
 
 
     public function getMainImageUrl(): string

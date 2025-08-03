@@ -13,7 +13,7 @@
                 <div class="modal-body pt-0">
                     <!-- Avatar + Upload -->
                     <div class="d-flex align-items-end mb-3">
-                        <img id="avatarPreview" src="{{asset('images/avatar.png')}}" alt="Avatar"
+                        <img id="avatarPreview" src="{{ asset('images/avatar.png') }}" alt="Avatar"
                              class="rounded-circle border" style="width: 48px; height: 48px;">
                         <div>
                             <label for="avatarInput" class="lined-btn mx-1">Add Photo</label>
@@ -64,7 +64,7 @@
                         <select class="form-select" name="role_id" id="role">
                             <option selected disabled>Select Role</option>
                             @foreach($associatedData['roles'] as $role)
-                                <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale()) }}</option>
+                                <option value="{{ $role->id }}">{{ $role->getTranslation('name', app()->getLocale()) }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -92,20 +92,81 @@
 </div>
 
 <script>
-    document.getElementById('avatarInput').addEventListener('change', function (event) {
-        const [file] = event.target.files;
-        if (file) {
-            document.getElementById('avatarPreview').src = URL.createObjectURL(file);
-        }
-    });
     $(document).ready(function () {
+        // Show avatar preview
+        $('#avatarInput').on('change', function (e) {
+            const [file] = e.target.files;
+            if (file) {
+                $('#avatarPreview').attr('src', URL.createObjectURL(file));
+            }
+        });
+
+        // jQuery validation
+        $('#addAdminForm').validate({
+            rules: {
+                first_name: { required: true, maxlength: 255 },
+                last_name: { required: true, maxlength: 255 },
+                email: { required: true, email: true },
+                phone_number: { required: true, minlength: 11, maxlength: 11 },
+                password: { required: true, minlength: 8 },
+                password_confirmation: { required: true, equalTo: "#password" },
+                status: { required: true },
+                role_id: { required: false },
+                image: { extension: "jpg|jpeg|png|svg" }
+            },
+            messages: {
+                first_name: "Please enter the first name.",
+                last_name: "Please enter the last name.",
+                email: {
+                    required: "Please enter an email.",
+                    email: "Please enter a valid email."
+                },
+                phone_number: {
+                    required: "Please enter a phone number.",
+                    minlength: "Phone number must be 11 digits.",
+                    maxlength: "Phone number must be 11 digits."
+                },
+                password: {
+                    required: "Please enter a password.",
+                    minlength: "Password must be at least 8 characters."
+                },
+                password_confirmation: {
+                    required: "Please confirm the password.",
+                    equalTo: "Passwords do not match."
+                },
+                image: {
+                    extension: "Only JPG, JPEG, PNG, SVG allowed."
+                }
+            },
+            errorElement: 'div',
+            errorClass: 'invalid-feedback',
+            highlight: function (element) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element) {
+                $(element).removeClass('is-invalid').addClass('is-valid');
+            },
+            errorPlacement: function (error, element) {
+                if (element.parent('.input-group').length || element.is('select')) {
+                    error.insertAfter(element.parent());
+                } else {
+                    error.insertAfter(element);
+                }
+            }
+        });
+
+        // ✅ Call handleAjaxFormSubmit once
         handleAjaxFormSubmit('#addAdminForm', {
             successMessage: "✅ Admin created successfully!",
             closeModal: '#addAdminModal',
             onSuccess: function (response, $form) {
-                $(".admin-list-table").DataTable().ajax.reload(null, false); // false = stay on current page
+                $form[0].reset();
+                $form.find('.is-invalid, .is-valid').removeClass('is-invalid is-valid');
+                $form.find('.invalid-feedback').remove();
+                $('#avatarPreview').attr('src', '{{ asset("images/avatar.png") }}');
+                $(".admin-list-table").DataTable().ajax.reload(null, false);
             }
         });
     });
-</script>
 
+</script>

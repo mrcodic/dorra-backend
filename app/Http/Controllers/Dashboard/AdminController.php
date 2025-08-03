@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
+use App\Http\Resources\AdminResource;
 use App\Repositories\Interfaces\RoleRepositoryInterface;
 use App\Services\AdminService;
 use App\Http\Requests\Admin\{StoreAdminRequest, UpdateAdminRequest};
@@ -24,6 +25,7 @@ class AdminController extends DashboardController
            ]
        ];
        $this->resourceTable = 'admins';
+       $this->resourceClass = AdminResource::class;
    }
 
     public function getData()

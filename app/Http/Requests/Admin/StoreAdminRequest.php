@@ -25,12 +25,11 @@ class StoreAdminRequest extends BaseRequest
      */
     public function rules(): array
     {
-        $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:admins,email'],
-            'phone_number' => ['required', 'string', 'min:10', 'max:15',],
+            'phone_number' => ['required', 'string','digits:11',],
             'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'status' => ['required', 'boolean'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],

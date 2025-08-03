@@ -85,7 +85,7 @@
                 </div>
                 <div class="d-flex flex-column  justify-content-between">
                     <span class="mb-1 fw-bold  label-text">Purchase Times:</span>
-                    <span class="fw-semibold disabled-field">243</span>
+                    <span class="fw-semibold disabled-field">{{ $model->confirmedOrders->count()  }}</span>
                 </div>
             </div>
 

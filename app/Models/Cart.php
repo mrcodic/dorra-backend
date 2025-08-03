@@ -40,7 +40,7 @@ class Cart extends Model
             'quantity' => $quantity ?? 1,
         ]);
     }
-   
+
     public function totalItems()
     {
         return $this->items()->count();

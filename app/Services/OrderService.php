@@ -654,7 +654,7 @@ class OrderService extends BaseService
             if ($design->product_price_id && $design->productPrice) {
                 $customProductPrice = $design->productPrice->price;
                 $basePrice = 0;
-                $totalPrice = $customProductPrice * $quantity;
+                   $totalPrice = $customProductPrice * $quantity;
             } else {
                 $customProductPrice = 0;
                 $basePrice = $design->product ? $design->product->base_price : 0;
