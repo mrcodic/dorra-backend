@@ -17,7 +17,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories = $this->categoryService->getAll(relations: ['media'],paginate: request('paginate',false),perPage: request('per_page',8));
+        $categories = $this->categoryService->getAll(relations: ['media','children.products'],paginate: request('paginate',false),perPage: request('per_page',8));
         $categoryResourceCollection = $categories instanceof LengthAwarePaginator ?
             CategoryResource::collection($categories)->response()->getData()
             : CategoryResource::collection($categories);
