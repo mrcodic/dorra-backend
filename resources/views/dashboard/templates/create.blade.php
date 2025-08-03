@@ -1,4 +1,4 @@
-@extends('layouts/contentLayoutMaster')
+ @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Templates')
 
@@ -177,16 +177,25 @@
 
 
         $('.saveChangesButton').on('click', function (e) {
+            e.preventDefault(); // Prevent default button behavior
+
             const $button = $(this);
             const action = $button.data('action');
-            // Set form action
-            if (action === 'draft') {
-                $('#addTemplateForm').attr('action', "{{ route('templates.store') }}");
-            } else if (action === 'editor') {
-                $('#addTemplateForm').attr('action', "{{ route('templates.redirect.store') }}");
-            }
-        });
+            const $form = $('#addTemplateForm');
 
+            // Set form action based on the button clicked
+            if (action === 'draft') {
+                $form.attr('action', "{{ route('templates.store') }}");
+            } else if (action === 'editor') {
+                $form.attr('action', "{{ route('templates.redirect.store') }}");
+            }
+
+            // Show loader and disable all save buttons
+            $('.saveChangesButton').prop('disabled', true);
+            $button.find('.saveLoader').removeClass('d-none');
+
+            // Let `handleAjaxFormSubmit()` take care of the actual submission
+        });
 
         handleAjaxFormSubmit("#addTemplateForm", {
             successMessage: "Template created successfully",

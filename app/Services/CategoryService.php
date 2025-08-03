@@ -17,10 +17,11 @@ class CategoryService extends BaseService
     }
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10)
     {
-
-        return $this->repository->query()->when(request()->filled('is_landing'), function ($query) {
+        $query = $this->repository->query()->when(request()->filled('is_landing'), function ($query) {
             $query->where('is_landing', true);
-        })->paginate($perPage);
+        });
+
+        return $paginate ? $query->paginate($perPage) : $query->get();
     }
 
     public function getSubCategories()

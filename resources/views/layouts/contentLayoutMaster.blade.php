@@ -51,7 +51,6 @@ $configData = Helper::applClasses();
             e.preventDefault();
             const $form = $(this);
 
-            if (!$form.valid()) return;
 
             const $submitBtn = $form.find('button[type="submit"]');
             const $loader = $form.find('.spinner-border');
@@ -60,7 +59,6 @@ $configData = Helper::applClasses();
             $loader.removeClass('d-none');
 
             const formData = new FormData(this);
-
             // Debug log (optional)
             // for (let pair of formData.entries()) console.log(pair[0]+ ':', pair[1]);
 
