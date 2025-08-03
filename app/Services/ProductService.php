@@ -89,7 +89,7 @@ class ProductService extends BaseService
             ->select($columns)
             ->with($relations)
             ->withCount('reviews')
-            ->when(request()->filled('search'), function ($query) use ($locale) {
+            ->when(request()->filled('search_value'), function ($query) use ($locale) {
                 $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                     '%' . strtolower(request()->search) . '%'
                 ]);
@@ -330,6 +330,7 @@ class ProductService extends BaseService
 
 
     }
+
     public function getQuantities($productId)
     {
         $product = $this->repository->find($productId);

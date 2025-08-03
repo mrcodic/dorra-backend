@@ -9,6 +9,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class BaseService
 {
     use HandlesTryCatch;
+
     protected array $filters = [];
 
     public function __construct(public BaseRepositoryInterface $repository)
@@ -21,14 +22,14 @@ class BaseService
         return $this->repository->all($paginate, $columns, $relations, filters: $this->filters, perPage: $perPage);
     }
 
-    public function showResource($id,$relations=[])
+    public function showResource($id, $relations = [])
     {
         $model = $this->repository->find($id, $relations);
         return $model->load($relations);
 
     }
 
-    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad =[])
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->repository->create($validatedData);
         collect($relationsToStore)->map(function ($relation) use ($validatedData, $model) {
@@ -43,7 +44,7 @@ class BaseService
         return $model->load($relationsToLoad);
     }
 
-    public function updateResource($validatedData, $id, $relationsToLoad =[])
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
         $files = request()->allFiles();
@@ -74,8 +75,10 @@ class BaseService
             $models = $this->repository->query()->whereIn('id', $ids)->get();
 
             $models->each(function ($model) {
-                if ($model->hasMedia()) {
-                    clearMediaCollections($model);
+                if (method_exists($model, 'hasMedia') && $model->hasMedia()) {
+                    if ($model->hasMedia()) {
+                        clearMediaCollections($model);
+                    }
                 }
             });
             return $this->repository->query()->whereIn('id', $ids)->delete();
@@ -83,6 +86,7 @@ class BaseService
 
 
     }
+
     public function bulkRestore($ids)
     {
         return $this->repository->query()->onlyTrashed()->whereIn('id', $ids)->restore();
