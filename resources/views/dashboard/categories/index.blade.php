@@ -84,6 +84,7 @@
                         </th>
                         <th>Name</th>
                         <th>SubCategories</th>
+                        <th>Products</th>
                         <th>NO.of Products</th>
                         <th>Added Date</th>
                         <th>Actions</th>

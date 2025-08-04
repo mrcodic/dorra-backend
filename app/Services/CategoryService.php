@@ -38,6 +38,7 @@ class CategoryService extends BaseService
             ->query(['id', 'name', 'description', 'created_at'])
             ->with(['products', 'children'])
             ->withCount(['children', 'products'])
+
             ->when(request()->filled('search_value'), function ($query) use ( $locale) {
                 $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                     '%' . strtolower(request('search_value')) . '%'
@@ -66,6 +67,9 @@ class CategoryService extends BaseService
             })
             ->addColumn('image', function ($category) {
                 return $category->getFirstMediaUrl('categories');
+            })
+            ->addColumn('products', function ($product) {
+                return $product->products?->pluck('name');
             })
             ->addColumn('imageId', function ($category) {
                 return $category->getFirstMedia('categories')?->id;

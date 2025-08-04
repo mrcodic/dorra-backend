@@ -38,7 +38,7 @@ var dt_user_table = $(".product-list-table").DataTable({
             }
         },
         { data: "name" },
-        { data: "category" },
+        // { data: "category" },
         {
             data: "tags",
             render: function (data, type, row) {

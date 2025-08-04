@@ -96,7 +96,7 @@
                         </th>
                         <th>Image</th>
                         <th>Name</th>
-                        <th>Category</th>
+{{--                        <th>Category</th>--}}
                         <th>Tags</th>
                         <th>NO.of Purchas</th>
                         <th>Added Date</th>

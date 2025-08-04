@@ -27,6 +27,20 @@ const dt_user_table = $(".category-list-table").DataTable({
         },
         {data: "name", orderable: false},
         {data: "sub_categories", orderable: false},
+        {
+            data: "products",
+            render: function (data, type, row) {
+                if (!Array.isArray(JSON.parse(data))) return '';
+                return `
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        ${JSON.parse(data).map(product => `
+                            <span style="background-color: #FCF8FC; color: #000; padding: 6px 12px; border-radius: 12px; font-size: 14px;">
+                                ${product}
+                            </span>`).join("")}
+                    </div>
+                `;
+            }
+        },
         {data: "no_of_products", orderable: false},
         {data: "added_date", orderable: false},
         {

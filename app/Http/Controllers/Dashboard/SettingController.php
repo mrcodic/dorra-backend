@@ -62,7 +62,15 @@ class SettingController extends Controller
 
         ]);
         if (request()->allFiles()) {
-            handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
+            if (request()->hasFile('carousels.0.mobile_image')) {
+                handleMediaUploads(request()->file('carousels.0.mobile_image'), $model, collectionName: "mobile_carousels", clearExisting: true);
+
+            }
+            if (request()->hasFile('carousels.0.image')) {
+                handleMediaUploads(request()->file('carousels.0.image'), $model, clearExisting: true);
+
+            }
+
         }
         return Response::api();
     }

@@ -39,7 +39,7 @@
     @foreach ($paymentRows as $index => $row)
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="d-flex align-items-center gap-3">
-          
+
             @foreach ($row['icons'] as $icon)
             <img src="{{ asset('images/' . $icon) }}" alt="Payment Icon" style="height: 40px; width: auto;">
             @endforeach

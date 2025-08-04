@@ -64,9 +64,9 @@ class ProductService extends BaseService
             ->addColumn('added_date', function ($product) {
                 return $product->created_at?->format('j/n/Y');
             })
-            ->addColumn('category', function ($product) {
-                return $product->category?->name ?? 'uncategorized';
-            })
+//            ->addColumn('category', function ($product) {
+//                return $product->category?->name ?? 'uncategorized';
+//            })
             ->addColumn('tags', function ($product) {
                 return $product->tags?->pluck('name');
             })

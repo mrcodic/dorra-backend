@@ -90,7 +90,7 @@ Route::controller(OrderController::class)->group(function () {
 Route::get('states', [MainController::class, 'states']);
 Route::get('countries', [MainController::class, 'countries']);
 Route::apiResource('shipping-addresses', ShippingAddressController::class);
-
+Route::get('landing/carousels' ,[MainController::class, 'carousels']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
