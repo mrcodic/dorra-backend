@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\ResetPasswordController,
     Cart\CartController,
     Category\CategoryController,
+    CMS\LandingController,
     Design\DesignController,
     Folder\FolderController,
     General\MainController,
@@ -21,8 +22,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     SavedItems\SaveController,
     ShippingAddress\ShippingAddressController,
     Team\TeamController,
-    Template\TemplateController
-};
+    Template\TemplateController};
 use App\Http\Controllers\Shared\CommentController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -90,7 +90,7 @@ Route::controller(OrderController::class)->group(function () {
 Route::get('states', [MainController::class, 'states']);
 Route::get('countries', [MainController::class, 'countries']);
 Route::apiResource('shipping-addresses', ShippingAddressController::class);
-Route::get('landing/carousels' ,[MainController::class, 'carousels']);
+Route::get('landing/carousels' ,[LandingController::class, 'carousels']);
 
 Route::middleware('auth:sanctum')->group(function () {
 

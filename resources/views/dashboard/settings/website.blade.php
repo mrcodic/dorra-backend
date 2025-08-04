@@ -170,7 +170,7 @@
                                                                 </div>
                                                             </div>
                                                             <input type="file" name="image" class="form-control d-none image-input" accept="image/*">
-                                                            <div class="uploaded-image d-none mt-2">
+                                                            <div class="uploaded-image{{ $carousel->getFirstMediaUrl('carousels') ? '':'d-none' }}  mt-2">
                                                                 <img src="{{ $carousel->getFirstMediaUrl('carousels') }}"
                                                                      class="img-fluid rounded"
                                                                      style="width: 50px; height: 50px; object-fit: cover;">
@@ -190,7 +190,7 @@
                                                                 </div>
                                                             </div>
                                                             <input type="file" name="mobile_image" class="form-control d-none image-input" accept="image/*">
-                                                            <div class="uploaded-image d-none mt-2">
+                                                            <div class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels') ? '':'d-none' }} mt-2">
                                                                 <img src="{{ $carousel->getFirstMediaUrl('mobile_carousels') }}"
                                                                      class="img-fluid rounded"
                                                                      style="width: 50px; height: 50px; object-fit: cover;">

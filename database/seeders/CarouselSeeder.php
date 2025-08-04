@@ -23,6 +23,7 @@ class CarouselSeeder extends Seeder
                     'ar' => 'أنماط جديدة لأيام الصيف الحارة',
                 ],
                 'image' => public_path('images/carousel1.jpg'),
+                'mobile_image' => public_path('images/carousel1.jpg'),
             ],
             [
                 'title' => [
@@ -34,6 +35,7 @@ class CarouselSeeder extends Seeder
                     'ar' => 'أدفئ خزانة ملابسك',
                 ],
                 'image' => public_path('images/carousel2.jpg'),
+                'mobile_image' => public_path('images/carousel2.jpg'),
             ],
             [
                 'title' => [
@@ -45,6 +47,7 @@ class CarouselSeeder extends Seeder
                     'ar' => 'احتفل مع التخفيضات',
                 ],
                 'image' => public_path('images/carousel3.jpg'),
+                'mobile_image' => public_path('images/carousel3.jpg'),
             ],
         ];
 
@@ -58,6 +61,9 @@ class CarouselSeeder extends Seeder
 // Attach image (if exists)
             if (file_exists($carouselData[$i]['image'])) {
                 $carousel->addMedia($carouselData[$i]['image'])->toMediaCollection('carousels');
+            }
+            if (file_exists($carouselData[$i]['mobile_image'])) {
+                $carousel->addMedia($carouselData[$i]['mobile_image'])->toMediaCollection('mobile_carousels');
             }
         }
     }
