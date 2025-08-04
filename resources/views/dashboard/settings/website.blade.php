@@ -401,46 +401,6 @@
         $(document).ready(function () {
             $('.carousel').each(function () {
                 const form = $(this);
-                const input = form.find('.carousel-image-input');
-                const uploadArea = form.find('.upload-card');
-                const uploadedImage = form.find('.uploaded-image');
-                const progress = form.find('.upload-progress'); // Add this if needed
-                const progressBar = progress.find('.progress-bar');
-
-                uploadArea.on('click', () => input.click());
-
-                input.on('change', function (e) {
-                    const files = e.target.files;
-                    if (files.length > 0) {
-                        const file = files[0];
-
-                        progress.removeClass('d-none');
-                        progressBar.css('width', '0%');
-
-                        let fakeProgress = 0;
-                        let interval = setInterval(() => {
-                            fakeProgress += 10;
-                            progressBar.css('width', `${fakeProgress}%`);
-
-                            if (fakeProgress >= 100) {
-                                clearInterval(interval);
-
-                                const reader = new FileReader();
-                                reader.onload = function (e) {
-                                    uploadedImage.find('img').attr('src', e.target.result);
-                                    uploadedImage.removeClass('d-none');
-                                    progress.addClass('d-none');
-                                };
-                                reader.readAsDataURL(file);
-                            }
-                        }, 100);
-                    }
-                });
-            });
-        });
-        $(document).ready(function () {
-            $('.carousel').each(function () {
-                const form = $(this);
                 const input = form.find('.mobile-carousel-image-input');
                 const uploadArea = form.find('.upload-card');
                 const uploadedImage = form.find('.mobile-uploaded-image');
@@ -513,21 +473,34 @@
                     $(this).slideDown();
                     feather && feather.replace();
 
-                    var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                    const items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
                     items.each(function (index) {
-                        $(this).find('[data-repeater-delete]').toggle(index !== 0);
+                        // Hide delete button if it's the only one
+                        $(this).find('[data-repeater-delete]').toggle(items.length > 1);
                     });
                 },
                 hide: function (deleteElement) {
+                    const repeater = $(this).closest('.invoice-repeater');
+                    const items = repeater.find('[data-repeater-item]');
+
+                    // Prevent deleting if it's the only one
+                    if (items.length === 1) {
+                        alert("At least one item is required.");
+                        return;
+                    }
+
                     $(this).slideUp(deleteElement, function () {
-                        var items = $('.invoice-repeater').find('[data-repeater-item]');
-                        items.each(function (index) {
-                            $(this).find('[data-repeater-delete]').toggle(index !== 0);
+                        $(this).remove();
+
+                        const remainingItems = repeater.find('[data-repeater-item]');
+                        remainingItems.each(function (index) {
+                            $(this).find('[data-repeater-delete]').toggle(remainingItems.length > 1);
                         });
                     });
                 }
             });
         });
+
 
 
     </script>
