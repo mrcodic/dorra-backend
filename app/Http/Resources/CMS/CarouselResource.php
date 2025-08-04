@@ -20,7 +20,8 @@ class CarouselResource extends JsonResource
             'title' => $this->when(isset($this->title), $this->title),
             'subtitle' => $this->when(isset($this->subtitle), $this->subtitle),
             'site_image' =>  $this->getFirstMediaUrl("carousels"),
-            'mobile_image' =>  $this->getFirstMediaUrl("mobile_carousels"),
+            'mobile_image' =>  $this->getFirstMediaUrl("carousels"),
+//            'mobile_image' =>  $this->getFirstMediaUrl("mobile_carousels"),
             'product' => ProductResource::make($this->whenLoaded('product')),
 
         ];
