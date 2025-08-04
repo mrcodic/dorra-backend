@@ -78,27 +78,7 @@
 
                     <!-- Input and Add Button Row -->
                     <p class="fw-semibold text-black fs-4">Category</p>
-                    <div class="row g-2 mb-2">
-                        <form action="{{ route('categories.landing') }}" method="POST">
-                            @csrf
-                            <div class="row g-2 align-items-center">
-                                {{-- Hidden input to store the selected category ID --}}
-                                <input type="hidden" name="category_id" id="selected-category-id">
 
-                                <div class="col-9 position-relative">
-                                    <input type="text" class="form-control" id="category-search"
-                                           placeholder="Enter category name">
-                                    <div id="search-suggestions" class="list-group position-absolute w-100"
-                                         style="z-index: 999;"></div>
-                                </div>
-
-                                <div class="col-3">
-                                    <button type="submit" class="btn btn-primary w-100">Add Category</button>
-                                </div>
-                            </div>
-                        </form>
-
-                    </div>
                     <p class="fw-semibold text-black fs-4">Added Categories</p>
                     <div class="row">
                         <!-- Product Card -->
@@ -127,6 +107,9 @@
                             <div class="col-12 text-center my-5">
                                 <div class="mt-3 text-muted fs-5">No categories added yet.</div>
                                 @endforelse
+                                <div class="col-3 ms-auto">
+                                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addLandingCategoryModal">Add Category</button>
+                                </div>
 
                             </div>
 
@@ -371,7 +354,7 @@
 
             </div>
         </div>
-
+    @include("modals.landing.add-category")
     </div>
     </div>
 
@@ -394,9 +377,12 @@
     <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+
 @endsection
 
 @section('page-script')
+
     <script>
         $(document).ready(function () {
             $('.carousel').each(function () {
@@ -631,57 +617,57 @@
             });
 
             // Submit on Add Category
-            $('.btn-primary:contains("Add Category")').on('click', function (e) {
-                e.preventDefault();
+            {{--$('.btn-primary:contains("Add Category")').on('click', function (e) {--}}
+            {{--    e.preventDefault();--}}
 
-                if (!selectedCategoryId) {
-                    Toastify({
-                        text: "Please select a category from suggestions.",
-                        backgroundColor: "#FF6B6B"
-                    }).showToast();
-                    return;
-                }
+            {{--    if (!selectedCategoryId) {--}}
+            {{--        Toastify({--}}
+            {{--            text: "Please select a category from suggestions.",--}}
+            {{--            backgroundColor: "#FF6B6B"--}}
+            {{--        }).showToast();--}}
+            {{--        return;--}}
+            {{--    }--}}
 
-                $.ajax({
-                    url: '{{ route("categories.landing") }}',
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        category_id: selectedCategoryId
-                    },
-                    success: function (response) {
-                        Toastify({
-                            text: "Category added successfully!",
-                            backgroundColor: "#24B094"
-                        }).showToast();
-                        location.reload();
-                        // Optional: refresh added categories or clear input
-                        $('#category-search').val('');
-                        selectedCategoryId = null;
-                    },
-                    error: function (xhr) {
-                        let errorMessage = "Error adding category.";
+            {{--    $.ajax({--}}
+            {{--        url: '{{ route("categories.landing") }}',--}}
+            {{--        method: 'POST',--}}
+            {{--        data: {--}}
+            {{--            _token: '{{ csrf_token() }}',--}}
+            {{--            category_id: selectedCategoryId--}}
+            {{--        },--}}
+            {{--        success: function (response) {--}}
+            {{--            Toastify({--}}
+            {{--                text: "Category added successfully!",--}}
+            {{--                backgroundColor: "#24B094"--}}
+            {{--            }).showToast();--}}
+            {{--            location.reload();--}}
+            {{--            // Optional: refresh added categories or clear input--}}
+            {{--            $('#category-search').val('');--}}
+            {{--            selectedCategoryId = null;--}}
+            {{--        },--}}
+            {{--        error: function (xhr) {--}}
+            {{--            let errorMessage = "Error adding category.";--}}
 
-                        // Check for Laravel validation errors
-                        if (xhr.status === 422) {
-                            const errors = xhr.responseJSON.errors;
+            {{--            // Check for Laravel validation errors--}}
+            {{--            if (xhr.status === 422) {--}}
+            {{--                const errors = xhr.responseJSON.errors;--}}
 
-                            // Combine all validation error messages
-                            if (errors) {
-                                errorMessage = Object.values(errors).flat().join('\n');
-                            }
-                        }
+            {{--                // Combine all validation error messages--}}
+            {{--                if (errors) {--}}
+            {{--                    errorMessage = Object.values(errors).flat().join('\n');--}}
+            {{--                }--}}
+            {{--            }--}}
 
-                        Toastify({
-                            text: errorMessage,
-                            backgroundColor: "#FF6B6B",
-                            duration: 5000
-                        }).showToast();
-                    }
+            {{--            Toastify({--}}
+            {{--                text: errorMessage,--}}
+            {{--                backgroundColor: "#FF6B6B",--}}
+            {{--                duration: 5000--}}
+            {{--            }).showToast();--}}
+            {{--        }--}}
 
 
-                });
-            });
+            {{--    });--}}
+            {{--});--}}
         });
     </script>
 
@@ -788,6 +774,4 @@
     </script>
 
 
-    {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-product-list.js') }}?v={{ time() }}"></script>
 @endsection

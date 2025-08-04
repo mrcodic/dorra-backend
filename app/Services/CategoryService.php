@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
@@ -141,7 +142,7 @@ class CategoryService extends BaseService
             })->get();
     }
 
-    public function addToLanding($categoryId)
+    public function addToLanding($validatedData,$categoryId)
     {
         if ($this->repository->query()->isLanding()->count() == 7) {
             throw ValidationException::withMessages([
@@ -149,16 +150,28 @@ class CategoryService extends BaseService
             ]);
         }
         $category = $this->repository->find($categoryId);
-        return tap($category, function ($category) {
-            $category->update(['is_landing' => true]);
+        return $this->handleTransaction(function () use ($category, $validatedData) {
+            $category =tap($category, function ($category) {
+                $category->update(['is_landing' => true]);
+            });
+            $category->landingProducts()->syncWithoutDetaching(Arr::get($validatedData,'products') ?? []);
+            $category->landingSubCategories()->syncWithoutDetaching(Arr::get($validatedData,'sub_categories')  ?? []);
+
+         return  $category;
         });
     }
 
     public function removeFromLanding($categoryId)
     {
         $category = $this->repository->find($categoryId);
-        return tap($category, function ($category) {
-            $category->update(['is_landing' => false]);
+        return $this->handleTransaction(function () use ($category) {
+            $category =tap($category, function ($category) {
+                $category->update(['is_landing' => false]);
+            });
+            $category->landingProducts()->detach();
+            $category->landingSubCategories()->detach();
+
+            return  $category;
         });
     }
 

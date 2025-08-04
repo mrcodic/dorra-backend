@@ -35,7 +35,13 @@ class CategoryController extends DashboardController
 
     public function addToLanding(Request $request)
     {
-        $request->validate(['category_id' => 'required','exists:categories,id']);
+        $request->validate([
+            'category_id' => 'required','exists:categories,id',
+            'sub_categories' => 'required','array',
+            'sub_categories.*' => ['required','exists:categories,id'],
+            'products' => ['required','array'],
+            'products.*' => ['required','exists:products,id'],
+        ]);
         $category = $this->categoryService->addToLanding($request->get('category_id'));
         return $this->resourceClass::make($category);
 

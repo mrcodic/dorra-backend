@@ -43,6 +43,8 @@ class SettingController extends Controller
         $categories = $repository->query()->isLanding()->get();
         $carousels = $carouselRepository->all();
         $products = $productRepository->all(columns: ['id', 'name']);
+        $allCategories = $repository->query()->get();
+
         return view("dashboard.settings.website", get_defined_vars());
     }
 

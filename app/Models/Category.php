@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -48,4 +49,12 @@ class Category extends Model implements HasMedia
         return $this->hasMany(Product::class, 'category_id')->whereNull('sub_category_id');
     }
 
+    public function landingProducts(): MorphToMany
+    {
+        return $this->morphedByMany(Product::class, 'categorable');
+    }
+    public function landingSubCategories(): MorphToMany
+    {
+        return $this->morphedByMany(Category::class, 'categorable');
+    }
 }
