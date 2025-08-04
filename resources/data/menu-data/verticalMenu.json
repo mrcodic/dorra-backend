@@ -23,34 +23,18 @@
             "modalTarget": ""
 
         },
+
         {
             "name": "Products",
             "icon": "Projects.svg",
             "slug": "",
-            "url": "/products",
-            "modalTarget": ""
-
-        },
-        {
-            "name": "Templates",
-            "icon": "Templates.svg",
-            "slug": "",
-            "url": "/product-templates",
-            "modalTarget": ""
-        },
-        {
-            "name": "Mockups",
-            "icon": "mockup1.svg",
-            "slug": "",
-            "url": "/mockups",
-            "modalTarget": ""
-
-        },
-        {
-            "name": "Categories",
-            "icon": "Category.svg",
-            "slug": "",
             "submenu": [
+                {
+                    "url": "/products",
+                    "name": "All",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
                 {
                     "url": "/categories",
                     "name": "Categories",
@@ -70,6 +54,21 @@
                     "slug": "app-user-list"
                 }
             ],
+            "modalTarget": ""
+
+        },
+        {
+            "name": "Templates",
+            "icon": "Templates.svg",
+            "slug": "",
+            "url": "/product-templates",
+            "modalTarget": ""
+        },
+        {
+            "name": "Mockups",
+            "icon": "mockup1.svg",
+            "slug": "",
+            "url": "/mockups",
             "modalTarget": ""
 
         },
