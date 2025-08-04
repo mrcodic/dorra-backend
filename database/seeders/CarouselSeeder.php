@@ -59,12 +59,8 @@ class CarouselSeeder extends Seeder
             ]);
 
 // Attach image (if exists)
-            if (file_exists($carouselData[$i]['image'])) {
                 $carousel->addMedia($carouselData[$i]['image'])->toMediaCollection('carousels');
-            }
-            if (file_exists($carouselData[$i]['mobile_image'])) {
                 $carousel->addMedia($carouselData[$i]['mobile_image'])->toMediaCollection('mobile_carousels');
-            }
         }
     }
 }
