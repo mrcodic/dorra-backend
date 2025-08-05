@@ -53,12 +53,19 @@
                     </div>
 
                     <div class="col-6 col-md-2 col-lg-2">
-                        <select name="category_id" class="form-select category-select">
+                        <select id="categorySelect" name="category_id" class="form-select category-select">
                             <option value=""  selected disabled>Product</option>
                             @foreach($associatedData['categories'] as $category)
                                 <option value="{{ $category->id }}">{{ $category->name}}</option>
                             @endforeach
                         </select>
+                        <button type="button" id="clearProductFilter"
+                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                       background: transparent; border: none; font-weight: bold;
+                       color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                                title="Clear filter">
+                            &times;
+                        </button>
                     </div>
 
 
@@ -175,6 +182,13 @@
     <script>
         document.getElementById('clearTagFilter').addEventListener('click', function () {
             const select = document.getElementById('tagSelect');
+            select.selectedIndex = 0; // Select the first option (placeholder)
+            select.dispatchEvent(new Event('change')); // If you have JS that listens to this
+        });
+    </script>
+    <script>
+        document.getElementById('clearProductFilter').addEventListener('click', function () {
+            const select = document.getElementById('categorySelect');
             select.selectedIndex = 0; // Select the first option (placeholder)
             select.dispatchEvent(new Event('change')); // If you have JS that listens to this
         });
