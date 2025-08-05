@@ -3,7 +3,8 @@
 @section('title', 'Show Category')
 @section('main-page', 'Categories')
 @section('sub-page', 'Show Category')
-
+@section('main-page-url', route("categories.index"))
+@section('sub-page-url',  route("categories.show",$model->id))
 @section('vendor-style')
     {{-- Page Css files --}}
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
@@ -50,7 +51,7 @@
                     <div class="d-flex overflow-hidden" style="width: 260px; margin: 0 auto;">
                         <div id="sliderTrack" class="d-flex transition" style="gap: 0.5rem;">
 
-                            @foreach ($model->getAllCategoryImages() as $media)
+                            @foreach ($model->getAllProductImages() as $media)
                                 <img src="{{ $media->getUrl() }}" class="img-thumbnail thumb"
                                      style="width: 60px; height: 60px; flex: 0 0 auto; cursor: pointer;"
                                      onclick="updatePreview(this)">

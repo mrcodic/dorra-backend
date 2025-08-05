@@ -3,6 +3,9 @@
 @section('title', 'Add Categories')
 @section('main-page', 'Categories')
 @section('sub-page', 'Add New Category')
+@section('main-page-url', route("categories.index"))
+@section('sub-page-url',  route("categories.create"))
+
 
 @section('vendor-style')
 <!-- Vendor CSS Files -->
