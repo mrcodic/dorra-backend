@@ -21,7 +21,7 @@ class LibraryAssetController extends Controller
 
     public function index()
    {
-       $media = Media::query()->whereMorphedTo('model',Admin::find(1))
+       $media = Media::query()->whereMorphedTo('model',Admin::find(1) ?? Admin::find(7))
            ->whereCollectionName("web_assets")
            ->latest()
            ->paginate();
