@@ -51,6 +51,7 @@ class ProductService extends BaseService
                 $query->whereCategoryId(request()->get('category_id'));
             })
             ->when(request()->filled('tag_id'), function ($query) {
+
                 $query->whereHas('tags', function ($query) {
                     $query->whereKey(request('tag_id'));
                 });
