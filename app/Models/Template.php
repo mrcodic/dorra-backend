@@ -40,7 +40,10 @@ class Template extends Model implements HasMedia
     protected $attributes = [
         'status' => StatusEnum::DRAFTED,
     ];
-
+    public function scopeIsLanding(Builder $builder): Builder
+    {
+        return $builder->where('is_landing', true);
+    }
 
     public function getImageAttribute(): string
     {

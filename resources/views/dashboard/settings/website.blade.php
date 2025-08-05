@@ -37,12 +37,12 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab3">
-                        3. Popular Products
+                        3. Products
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab4">
-                        4. Logo
+                        4. Designs
                     </a>
                 </li>
                 <li class="nav-item">
@@ -63,13 +63,14 @@
                 <div class="tab-pane fade show active" id="tab1">
                     <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
                          style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                        <span class="fw-semibold text-black fs-4">Show categories in navbar</span>
+                        <span class="fw-semibold text-black fs-4">Show products in navbar</span>
                         <!-- Toggle Switch -->
                         <form id="navbarSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="key" value="navbar_section">
-                            <input type="hidden" name="value" value="{{ setting('navbar_section') ? 1 : 0 }}" id="navbarSectionValue">
+                            <input type="hidden" name="value" value="{{ setting('navbar_section') ? 1 : 0 }}"
+                                   id="navbarSectionValue">
 
                             <div class="form-check form-switch">
                                 <input
@@ -85,13 +86,12 @@
                     <div class=" d-flex flex-row align-items-center p-1 mb-2"
                          style="background-color: #F4F6F6; border-radius: 10px; border: none;">
                         <span class="fw-semibold text-black fs-4">You can add up to </span><span
-                            class="fw-semibold fs-4 ms-1" style="color: #24B094;">7 Categories</span>
+                            class="fw-semibold fs-4 ms-1" style="color: #24B094;">7 Products</span>
                     </div>
 
-                    <!-- Input and Add Button Row -->
-                    <p class="fw-semibold text-black fs-4">Category</p>
 
-                    <p class="fw-semibold text-black fs-4">Added Categories</p>
+
+                    <p class="fw-semibold text-black fs-4">Added Products</p>
                     <div class="row">
                         <!-- Product Card -->
                         @forelse($categories as $category)
@@ -120,14 +120,16 @@
                                 <div class="mt-3 text-muted fs-5">No categories added yet.</div>
                                 @endforelse
                                 <div class="col-3 ms-auto">
-                                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addLandingCategoryModal">Add Category</button>
+                                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                                            data-bs-target="#addLandingCategoryModal">Add Product
+                                    </button>
                                 </div>
 
                             </div>
 
-                </div>
+                    </div>
 
-                <!-- tab2 -->
+                    <!-- tab2 -->
                     <div class="tab-pane fade" id="tab2">
                         <!-- Card -->
                         <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
@@ -139,7 +141,8 @@
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="key" value="hero_section">
-                                <input type="hidden" name="value" value="{{ setting('hero_section') ? 1 : 0 }}" id="heroSectionValue">
+                                <input type="hidden" name="value" value="{{ setting('hero_section') ? 1 : 0 }}"
+                                       id="heroSectionValue">
 
                                 <div class="form-check form-switch">
                                     <input
@@ -171,17 +174,22 @@
                                                         <!-- Website Image Upload -->
                                                         <label class="form-label">Website Image</label>
                                                         <div class="upload-wrapper">
-                                                            <div class="upload-card border p-3 cursor-pointer text-center bg-light">
+                                                            <div
+                                                                class="upload-card border p-3 cursor-pointer text-center bg-light">
                                                                 <div class="upload-content">
                                                                     <i data-feather="upload" class="mb-2"></i>
                                                                     <p>Click to upload website image</p>
                                                                 </div>
                                                             </div>
-                                                            <input type="file" name="image" class="form-control d-none image-input" accept="image/*">
-                                                            <div class="uploaded-image{{ $carousel->getFirstMediaUrl('carousels') ? '':'d-none' }}  mt-2">
-                                                                <img src="{{ $carousel->getFirstMediaUrl('carousels') }}"
-                                                                     class="img-fluid rounded"
-                                                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                                            <input type="file" name="image"
+                                                                   class="form-control d-none image-input"
+                                                                   accept="image/*">
+                                                            <div
+                                                                class="uploaded-image{{ $carousel->getFirstMediaUrl('carousels') ? '':'d-none' }}  mt-2">
+                                                                <img
+                                                                    src="{{ $carousel->getFirstMediaUrl('carousels') }}"
+                                                                    class="img-fluid rounded"
+                                                                    style="width: 50px; height: 50px; object-fit: cover;">
                                                             </div>
                                                             <div class="progress upload-progress d-none">
                                                                 <div class="progress-bar" style="width: 0%"></div>
@@ -191,17 +199,22 @@
                                                         <!-- Mobile Image Upload -->
                                                         <label class="form-label mt-3">Mobile Image</label>
                                                         <div class="upload-wrapper">
-                                                            <div class="upload-card border p-3 cursor-pointer text-center bg-light">
+                                                            <div
+                                                                class="upload-card border p-3 cursor-pointer text-center bg-light">
                                                                 <div class="upload-content">
                                                                     <i data-feather="upload" class="mb-2"></i>
                                                                     <p>Click to upload mobile image</p>
                                                                 </div>
                                                             </div>
-                                                            <input type="file" name="mobile_image" class="form-control d-none image-input" accept="image/*">
-                                                            <div class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels') ? '':'d-none' }} mt-2">
-                                                                <img src="{{ $carousel->getFirstMediaUrl('mobile_carousels') }}"
-                                                                     class="img-fluid rounded"
-                                                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                                            <input type="file" name="mobile_image"
+                                                                   class="form-control d-none image-input"
+                                                                   accept="image/*">
+                                                            <div
+                                                                class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels') ? '':'d-none' }} mt-2">
+                                                                <img
+                                                                    src="{{ $carousel->getFirstMediaUrl('mobile_carousels') }}"
+                                                                    class="img-fluid rounded"
+                                                                    style="width: 50px; height: 50px; object-fit: cover;">
                                                             </div>
                                                             <div class="progress upload-progress d-none">
                                                                 <div class="progress-bar" style="width: 0%"></div>
@@ -226,12 +239,14 @@
                                                         <div class="row mb-3">
                                                             <div class="col-md-6">
                                                                 <label class="form-label">Subtitle in English</label>
-                                                                <input type="text" name="subtitle_en" class="form-control"
+                                                                <input type="text" name="subtitle_en"
+                                                                       class="form-control"
                                                                        value="{{ $carousel->getTranslation('subtitle', 'en') }}">
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label">Subtitle in Arabic</label>
-                                                                <input type="text" name="subtitle_ar" class="form-control"
+                                                                <input type="text" name="subtitle_ar"
+                                                                       class="form-control"
                                                                        value="{{ $carousel->getTranslation('subtitle', 'ar') }}">
                                                             </div>
                                                         </div>
@@ -252,7 +267,8 @@
 
                                                         <!-- Action Buttons -->
                                                         <div class="d-flex justify-content-between mt-3">
-                                                            <button type="button" data-repeater-delete class="btn btn-outline-danger">
+                                                            <button type="button" data-repeater-delete
+                                                                    class="btn btn-outline-danger">
                                                                 <i data-feather="x" class="me-1"></i> Delete
                                                             </button>
                                                             <button type="submit" class="btn btn-primary">
@@ -271,9 +287,12 @@
                                 <div data-repeater-item style="display: none;">
                                     <div class="col-md-12 mb-2">
                                         <div class="card p-4 mb-4 border rounded shadow-sm">
-                                            <form method="POST" action="{{ route('carousels.update') }}" enctype="multipart/form-data" class="carousel">
+                                            <form method="POST" action="{{ route('carousels.update') }}"
+                                                  enctype="multipart/form-data" class="carousel">
                                                 @csrf
-                                                <input type="file" name="image" class="carousel-image-input form-control d-none" accept="image/*">
+                                                <input type="file" name="image"
+                                                       class="carousel-image-input form-control d-none"
+                                                       accept="image/*">
 
                                                 <div class="upload-card">
                                                     <div class="upload-content">
@@ -282,8 +301,10 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="uploaded-image position-relative mt-1 d-flex align-items-center gap-2 d-none">
-                                                    <img src="" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                                <div
+                                                    class="uploaded-image position-relative mt-1 d-flex align-items-center gap-2 d-none">
+                                                    <img src="" alt="Uploaded" class="img-fluid rounded"
+                                                         style="width: 50px; height: 50px; object-fit: cover;">
                                                     <div class="file-details">
                                                         <div class="file-name fw-bold"></div>
                                                         <div class="file-size text-muted small"></div>
@@ -321,13 +342,15 @@
                                                     <select name="product_id" class="form-select">
                                                         <option disabled selected>Select a product</option>
                                                         @foreach($products as $product)
-                                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                                            <option
+                                                                value="{{ $product->id }}">{{ $product->name }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
 
                                                 <div class="d-flex justify-content-between mt-2">
-                                                    <button type="button" data-repeater-delete class="btn btn-outline-danger">
+                                                    <button type="button" data-repeater-delete
+                                                            class="btn btn-outline-danger">
                                                         <i data-feather="x" class="me-25"></i> Delete
                                                     </button>
                                                     <button type="submit" class="btn btn-primary save-carousel-btn">
@@ -350,37 +373,126 @@
                         </div>
 
 
-                            </div>
+                    </div>
 
+                    <!-- tab3 -->
+                    <div class="tab-pane fade" id="tab3">
+                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                            <span class="fw-semibold text-black fs-4">Show products</span>
+                            <!-- Toggle Switch -->
+                            <form id="categorySectionForm" action="{{ route('landing-sections.update') }}"
+                                  method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="key" value="categories_section">
+                                <input type="hidden" name="value" value="{{ setting('categories_section') ? 1 : 0 }}"
+                                       id="categorySectionValue">
 
+                                <div class="form-check form-switch">
+                                    <input
+                                        class="form-check-input toggle-switch"
+                                        type="checkbox"
+                                        id="categorySectionToggle"
+                                        {{ setting('categories_section') ? 'checked' : '' }}
+                                    >
+                                </div>
+                            </form>
 
                         </div>
 
                     </div>
 
-                    <!-- tab3 -->
-                <div class="tab-pane fade" id="tab3">
+                    <!-- tab4 -->
+                    <div class="tab-pane fade" id="tab4">
+                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                            <span class="fw-semibold text-black fs-4">Show designs</span>
+                            <!-- Toggle Switch -->
+                            <form id="productSectionForm" action="{{ route('landing-sections.update') }}"
+                                  method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="key" value="designs_section">
+                                <input type="hidden" name="value" value="{{ setting('designs_section') ? 1 : 0 }}"
+                                       id="productSectionValue">
+
+                                <div class="form-check form-switch">
+                                    <input
+                                        class="form-check-input toggle-switch"
+                                        type="checkbox"
+                                        id="productSectionToggle"
+                                        {{ setting('designs_section') ? 'checked' : '' }}
+                                    >
+                                </div>
+                            </form>
+
+                        </div>
+                        <div class=" d-flex flex-row align-items-center p-1 mb-2"
+                             style="background-color: #F4F6F6; border-radius: 10px; border: none;">
+                            <span class="fw-semibold text-black fs-4">You can add up to </span><span
+                                class="fw-semibold fs-4 ms-1" style="color: #24B094;">8 designs</span>
+                        </div>
+                        <p class="fw-semibold text-black fs-4">Design Name</p>
+                        <div class="row g-2 mb-2">
+                            <div class="col-9">
+                                <input type="text" class="form-control" placeholder="Enter design name">
+                            </div>
+                            <div class="col-3">
+                                <button class="btn btn-primary w-100">Add Design</button>
+                            </div>
+                        </div>
+                        <p class="fw-semibold text-black fs-4">Added Designs</p>
+                        <div class="row">
+                            <!-- Product Card -->
+                            @forelse($templates as $template)
+                                <!-- Product Card -->
+                                <div class="col-md-6 mb-3">
+                                    <div class=" p-2 d-flex flex-row align-items-center"
+                                         style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                        <!-- Image -->
+                                        <img src="{{ $template->getFirstMediaUrl('templates')  }}" alt="Product"
+                                             class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+
+                                        <!-- Details -->
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold text-black fs-5">{{ $template->name }}</div>
+                                        </div>
+
+                                        <!-- Remove Button -->
+                                        <button class="btn btn-outline-secondary btn-sm ms-2 remove-template"
+                                                data-id="{{ $template->id }}">
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-12 text-center my-5">
+                                    <div class="mt-3 text-muted fs-5">No designs added yet.</div>
+                                    @endforelse
 
 
+                                </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- tab5 -->
+                    <div class="tab-pane fade" id="tab5">
+
+                    </div>
+                    <!-- tab6 -->
+                    <div class="tab-pane fade" id="tab6">
+
+                    </div>
                 </div>
-
-                <!-- tab4 -->
-                <div class="tab-pane fade" id="tab4">
-
-                </div>
-                <!-- tab4 -->
-                <div class="tab-pane fade" id="tab5">
-
-                </div>
-                <!-- tab4 -->
-                <div class="tab-pane fade" id="tab6">
-
-                </div>
-
             </div>
-        </div>
-    @include("modals.landing.add-category")
 
+
+        </div>
+    </div>
+    @include("modals.landing.add-category")
 
 @endsection
 
@@ -406,6 +518,24 @@
 @endsection
 
 @section('page-script')
+    <script>
+        $(function () {
+            handleAjaxFormSubmit("#productSectionForm", {
+                successMessage: "Request completed Successfully",
+                resetForm: false,
+            });
+
+            document.getElementById('productSectionToggle').addEventListener('change', function () {
+                const isChecked = this.checked;
+                const valueInput = document.getElementById('productSectionValue');
+                const form = document.getElementById('productSectionForm');
+
+                valueInput.value = isChecked ? 1 : 0;
+
+                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+            });
+        });
+    </script>
     <script>
         $(function () {
             handleAjaxFormSubmit("#navbarSectionForm", {
@@ -435,6 +565,24 @@
                 const isChecked = this.checked;
                 const valueInput = document.getElementById('heroSectionValue');
                 const form = document.getElementById('heroSectionForm');
+
+                valueInput.value = isChecked ? 1 : 0;
+
+                form.requestSubmit();
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            handleAjaxFormSubmit("#categorySectionForm", {
+                successMessage: "Request completed Successfully",
+                resetForm: false,
+            });
+
+            document.getElementById('categorySectionToggle').addEventListener('change', function () {
+                const isChecked = this.checked;
+                const valueInput = document.getElementById('categorySectionValue');
+                const form = document.getElementById('categorySectionForm');
 
                 valueInput.value = isChecked ? 1 : 0;
 
@@ -547,10 +695,9 @@
         });
 
 
-
     </script>
-        <script>
-            $(document).ready(function () {
+    <script>
+        $(document).ready(function () {
             $('.upload-wrapper').each(function () {
                 const wrapper = $(this);
                 const input = wrapper.find('.image-input');
@@ -788,6 +935,5 @@
             initUploadHandlers('fourth');
         });
     </script>
-
 
 @endsection

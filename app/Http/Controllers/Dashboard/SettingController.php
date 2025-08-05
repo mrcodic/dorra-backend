@@ -9,6 +9,7 @@ use App\Repositories\Interfaces\CarouselRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
+use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -39,11 +40,12 @@ class SettingController extends Controller
     public function website(CategoryRepositoryInterface $repository,
                             CarouselRepositoryInterface $carouselRepository,
                             ProductRepositoryInterface  $productRepository,
-                            SettingRepositoryInterface  $settingRepository,)
+                            TemplateRepositoryInterface  $templateRepository)
     {
         $categories = $repository->query()->isLanding()->get();
         $carousels = $carouselRepository->all();
         $products = $productRepository->all(columns: ['id', 'name']);
+        $templates = $templateRepository->query()->isLanding()->get(['id','name']);
         $allCategories = $repository->query()->get();
 
         return view("dashboard.settings.website", get_defined_vars());

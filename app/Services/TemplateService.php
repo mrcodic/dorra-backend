@@ -49,6 +49,9 @@ class TemplateService extends BaseService
                 });
             })
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
+            ->when(request()->filled('is_landing'), function ($query) {
+                $query->where('is_landing', true);
+            })
             ->latest();
 
         if (request()->ajax()) {

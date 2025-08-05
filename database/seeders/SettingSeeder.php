@@ -15,7 +15,7 @@ class SettingSeeder extends Seeder
             ['key' => 'navbar_section', 'value' => true],
             ['key' => 'hero_section', 'value' => true],
             ['key' => 'categories_section', 'value' => true],
-            ['key' => 'popular_products_section', 'value' => true],
+            ['key' => 'designs_section', 'value' => true],
             ['key' => 'statistics_section', 'value' => true],
             ['key' => 'logo_section', 'value' => true],
             ['key' => 'testimonials_section', 'value' => true],
