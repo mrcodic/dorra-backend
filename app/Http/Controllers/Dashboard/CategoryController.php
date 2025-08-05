@@ -27,6 +27,7 @@ class CategoryController extends DashboardController
     {
         return $this->categoryService->getData();
     }
+
     public function search(Request $request)
     {
         $categories = $this->categoryService->search($request);
@@ -35,20 +36,21 @@ class CategoryController extends DashboardController
 
     public function addToLanding(Request $request)
     {
-        $request->validate([
-            'category_id' => 'required','exists:categories,id',
-            'sub_categories' => 'required','array',
-            'sub_categories.*' => ['required','exists:categories,id'],
-            'products' => ['required','array'],
-            'products.*' => ['required','exists:products,id'],
+        $validatedData = $request->validate([
+            'category_id' => 'required', 'exists:categories,id',
+            'sub_categories' => 'sometimes', 'array',
+            'sub_categories.*' => ['sometimes', 'exists:categories,id'],
+            'products' => ['sometimes', 'array'],
+            'products.*' => ['sometimes', 'exists:products,id'],
         ]);
-        $category = $this->categoryService->addToLanding($request->get('category_id'));
+        $category = $this->categoryService->addToLanding($validatedData, $request->get('category_id'));
         return $this->resourceClass::make($category);
 
     }
+
     public function removeFromLanding(Request $request)
     {
-        $request->validate(['category_id' => 'required','exists:categories,id']);
+        $request->validate(['category_id' => 'required', 'exists:categories,id']);
         $category = $this->categoryService->removeFromLanding($request->get('category_id'));
         return $this->resourceClass::make($category);
 

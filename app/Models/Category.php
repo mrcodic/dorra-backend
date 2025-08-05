@@ -51,10 +51,10 @@ class Category extends Model implements HasMedia
 
     public function landingProducts(): MorphToMany
     {
-        return $this->morphedByMany(Product::class, 'categorable');
+        return $this->morphedByMany(Product::class, 'categorable')->withTimestamps();
     }
     public function landingSubCategories(): MorphToMany
     {
-        return $this->morphedByMany(Category::class, 'categorable');
+        return $this->morphedByMany(Category::class, 'categorable')->withTimestamps();
     }
 }

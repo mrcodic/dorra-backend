@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categorable', function (Blueprint $table) {
+        Schema::create('categorables', function (Blueprint $table) {
             $table->id();
             $table->morphs('categorable');
             $table->foreignIdFor(Category::class)->constrained()->cascadeOnDelete();
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categorable');
+        Schema::dropIfExists('categorables');
     }
 };

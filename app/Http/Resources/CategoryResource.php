@@ -22,8 +22,8 @@ class CategoryResource extends JsonResource
             'image' => $this->whenLoaded('media', fn() => $this->getFirstMediaUrl("categories")),
             'sub_categories' => CategoryResource::collection($this->whenLoaded('children')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
-            'category_products' => ProductResource::collection($this->whenLoaded('categoryProducts')),
-            'sub_category_products' => ProductResource::collection($this->whenLoaded('subCategoryProducts')),
+            'category_products' => ProductResource::collection($this->whenLoaded('landingProducts')),
+            'sub_category_products' => ProductResource::collection($this->whenLoaded('landingSubCategories')),
         ];
     }
 }

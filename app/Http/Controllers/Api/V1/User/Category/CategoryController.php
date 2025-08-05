@@ -18,8 +18,8 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = $this->categoryService->getAll(relations: ['media',
-            'children.subCategoryProducts',
-            'categoryProducts'],
+            'children.landingSubCategories',
+            'landingProducts'],
             paginate: request('paginate',false),
             perPage: request('per_page',8));
         $categoryResourceCollection = $categories instanceof LengthAwarePaginator ?
