@@ -263,7 +263,7 @@
                                                         <div class="col-md-4">
                                                             <div class="mb-2">
                                                                 <label class="form-label label-text">Quantity</label>
-                                                                <input type="number" name="prices[][quantity]" class="form-control" placeholder="Add Quantity" />
+                                                                <input type="number"  step="1" name="prices[][quantity]" class="form-control" placeholder="Add Quantity" />
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
