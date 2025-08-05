@@ -23,4 +23,13 @@ class LandingController extends Controller
         return Response::api(data: CarouselResource::collection($carousels));
     }
 
+    public function visibilitySections()
+    {
+        return Response::api(data: collect(setting())
+            ->filter(fn($value, $key) => str_ends_with($key, '_section'))
+            ->toArray()
+        );
+
+    }
+
 }

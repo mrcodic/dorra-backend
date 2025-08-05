@@ -107,10 +107,17 @@ function getPriceAfterTax($tax, $subtotal): float|int
     return number_format($tax * $subtotal, 2, '.', '');
 }
 
-function setting(string $key, $default = null)
+function setting(string $key = null, $default = null)
 {
-    return app(SettingRepository::class)->get($key, $default);
+    $repository = app(SettingRepository::class);
+
+    if (is_null($key)) {
+        return $repository->query()->pluck('value', 'key')->toArray();
+    }
+
+    return $repository->get($key, $default);
 }
+
 
 function commentableModelClass(string $type): ?string
 {

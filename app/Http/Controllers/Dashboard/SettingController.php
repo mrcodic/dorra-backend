@@ -10,6 +10,7 @@ use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
 use Dflydev\DotAccessData\Data;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 class SettingController extends Controller
@@ -75,6 +76,11 @@ class SettingController extends Controller
 
         }
         return Response::api();
+    }
+
+    public function landingSections(Request $request)
+    {
+        
     }
 }
 

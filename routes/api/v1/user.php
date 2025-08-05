@@ -91,6 +91,7 @@ Route::get('states', [MainController::class, 'states']);
 Route::get('countries', [MainController::class, 'countries']);
 Route::apiResource('shipping-addresses', ShippingAddressController::class);
 Route::get('landing/carousels' ,[LandingController::class, 'carousels']);
+    Route::get('landing/settings/visibility-sections' ,[LandingController::class, 'visibilitySections']);
 
 Route::middleware('auth:sanctum')->group(function () {
 

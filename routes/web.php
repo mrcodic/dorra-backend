@@ -165,7 +165,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/website', 'website')->name('settings.website');
         Route::get('/notifications', 'notifications')->name('settings.notifications');
         Route::post('/carousels/{carousel?}','createOrUpdateCarousel')->name('carousels.update');
-        Route::post('');
+        Route::post('landing-sections', 'landingSections')->name('landing-sections.update');
     });
 
     Route::group(['prefix' => 'mockups', 'as' => 'mockups.', 'controller' => MockupController::class,], function () {

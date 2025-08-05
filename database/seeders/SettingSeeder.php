@@ -9,14 +9,20 @@ class SettingSeeder extends Seeder
 {
     public function run()
     {
-        Setting::updateOrCreate(
-            ['key' => 'delivery'],
-            ['value' => 30]
-        );
+        $settings = [
+            ['key' => 'delivery', 'value' => 30],
+            ['key' => 'tax', 'value' => 0.1],
+            ['key' => 'navbar_section', 'value' => true],
+            ['key' => 'hero_section', 'value' => true],
+            ['key' => 'categories_section', 'value' => true],
+            ['key' => 'popular_products_section', 'value' => true],
+            ['key' => 'statistics_section', 'value' => true],
+            ['key' => 'logo_section', 'value' => true],
+            ['key' => 'testimonials_section', 'value' => true],
+            ['key' => 'partners_section', 'value' => true],
+            ['key' => 'faq_section', 'value' => true],
+        ];
 
-        Setting::updateOrCreate(
-            ['key' => 'tax'],
-            ['value' => 0.1]
-        );
+        Setting::upsert($settings, ['key'], ['value']);
     }
 }
