@@ -169,6 +169,7 @@ class CategoryService extends BaseService
                 $category->update(['is_landing' => false]);
             });
             $category->landingProducts()->detach();
+
             $category->landingSubCategories()->detach();
 
             return  $category;

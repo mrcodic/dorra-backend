@@ -57,7 +57,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/search',  'search')->name('search');
         Route::post('/landing',  'addToLanding')->name('landing');
         Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
-
     });
     Route::delete('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
 
@@ -160,12 +159,13 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    Route::controller(SettingController::class)->group(function () {
-        Route::get('settings/details', 'details')->name('settings.details');
-        Route::get('settings/payments', 'payments')->name('settings.payments');
-        Route::get('settings/website', 'website')->name('settings.website');
-        Route::get('settings/notifications', 'notifications')->name('settings.notifications');
-        Route::post('carousels/{carousel?}','createOrUpdateCarousel')->name('carousels.update');
+    Route::controller(SettingController::class)->prefix('settings')->group(function () {
+        Route::get('/details', 'details')->name('settings.details');
+        Route::get('/payments', 'payments')->name('settings.payments');
+        Route::get('/website', 'website')->name('settings.website');
+        Route::get('/notifications', 'notifications')->name('settings.notifications');
+        Route::post('/carousels/{carousel?}','createOrUpdateCarousel')->name('carousels.update');
+        Route::post('');
     });
 
     Route::group(['prefix' => 'mockups', 'as' => 'mockups.', 'controller' => MockupController::class,], function () {
