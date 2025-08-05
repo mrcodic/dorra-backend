@@ -131,9 +131,9 @@
                                     <!-- Category & Subcategory -->
                                     <div class="col-md-6">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="category">Category</label>
+                                            <label class="form-label label-text" for="category">Product</label>
                                             <select name="category_id" id="category" class="form-control category-select">
-                                                <option value="">Select category</option>
+                                                <option value="">Select product</option>
                                                 @foreach($associatedData['categories'] as $category)
                                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                                                 @endforeach
