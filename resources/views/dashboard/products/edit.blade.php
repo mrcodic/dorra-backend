@@ -27,13 +27,13 @@
                 <div class="card-body">
                     <ul class="nav nav-tabs mb-4 w-100 d-flex justify-content-center px-5" id="formTabs">
                         <li class="nav-item" style="width: 30%;">
-                            <a class="nav-link active" data-step="0" href="#">Product Details</a>
+                            <a class="nav-link active" data-step="0" href="#">Category Details</a>
                         </li>
                         <li class="nav-item" style="width: 30%;">
                             <a class="nav-link" data-step="1" href="#">Quantity & Price</a>
                         </li>
                         <li class="nav-item" style="width: 30%;">
-                            <a class="nav-link" data-step="2" href="#">Product Specs</a>
+                            <a class="nav-link" data-step="2" href="#">Category Specs</a>
                         </li>
                     </ul>
 
@@ -46,48 +46,48 @@
                             <!-- first tab content -->
                             <div class="tab-pane active" id="step1">
                                 <div class="row">
-                                    <!-- Product Name EN/AR -->
+                                    <!-- Category Name EN/AR -->
                                     <div class="col-md-6">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="product-name-en">Product Name
+                                            <label class="form-label label-text" for="product-name-en">Category Name
                                                 (EN)</label>
                                             <input type="text" id="product-name-en"
                                                 value="{{ $model->getTranslation('name','en') }}" class="form-control"
-                                                name="name[en]" placeholder="Product Name (EN)" />
+                                                name="name[en]" placeholder="Category Name (EN)" />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="product-name-ar">Product Name
+                                            <label class="form-label label-text" for="product-name-ar">Category Name
                                                 (AR)</label>
                                             <input type="text" id="product-name-ar"
                                                 value="{{ $model->getTranslation('name','ar') }}" class="form-control"
-                                                name="name[ar]" placeholder="Product Name (AR)" />
+                                                name="name[ar]" placeholder="Category Name (AR)" />
                                         </div>
                                     </div>
 
                                     <!-- Description EN/AR -->
                                     <div class="col-md-6">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="description-en">Product Description
+                                            <label class="form-label label-text" for="description-en">Category Description
                                                 (EN)</label>
                                             <textarea name="description[en]" id="description-en" class="form-control"
-                                                placeholder="Product Description (EN)">{{ $model->getTranslation('description','en') }}</textarea>
+                                                placeholder="Category Description (EN)">{{ $model->getTranslation('description','en') }}</textarea>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="description-ar">Product Description
+                                            <label class="form-label label-text" for="description-ar">Category Description
                                                 (AR)</label>
                                             <textarea name="description[ar]" id="description-ar" class="form-control"
-                                                placeholder="Product Description (AR)">{{ $model->getTranslation('description','ar') }}</textarea>
+                                                placeholder="Category Description (AR)">{{ $model->getTranslation('description','ar') }}</textarea>
                                         </div>
                                     </div>
 
                                     <!-- Main Image Upload -->
                                     <div class="col-md-12">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="product-image-main">Product Image
+                                            <label class="form-label label-text" for="product-image-main">Category Image
                                                 (main)*</label>
 
                                             <!-- Hidden real input -->
@@ -140,7 +140,7 @@
                                     <!-- Multiple Images Upload -->
                                     <div class="col-md-12">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="product-images">Product Images</label>
+                                            <label class="form-label label-text" for="product-images">Category Images</label>
 
                                             <!-- Hidden real input -->
                                             <input type="file" name="images[]" id="product-images"
@@ -227,45 +227,32 @@
                                             </select>
                                         </div>
                                     </div>
+
                                     <!-- Has Mockup -->
-
                                     <div class="col-md-12">
-                                        <div class="mb-1">
-                                            <label class="form-label label-text">Has Mockup</label>
-                                            <div class="d-flex gap-3">
-                                                <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
-                                                    <input
-                                                        class="form-check-input me-2"
-                                                        type="radio"
-                                                        name="has_mockup"
-                                                        id="yes"
-                                                        value="1"
-                                                        required
-                                                        @checked($model->has_mockup == 1)
-                                                    />
-                                                    <label class="form-check-label mb-0 flex-grow-1" for="yes">Yes</label>
-                                                </div>
-                                                <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
-                                                    <input
-                                                        class="form-check-input me-2"
-                                                        type="radio"
-                                                        name="has_mockup"
-                                                        id="no"
-                                                        value="0"
-                                                        required
-                                                        @checked($model->has_mockup == 0)
+                                        <div class="mb-2 d-flex align-items-center gap-2">
+                                            <label class="form-label label-text ">Is this category has Mockup?</label>
+                                            <div class="form-check form-switch">
+                                                <input type="hidden" name="has_mockup" value="0" />
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="has_mockup"
+                                                    name="has_mockup"
+                                                    value="1"
+                                                    @checked($model->has_mockup == 1)
 
-                                                    />
-                                                    <label class="form-check-label mb-0 flex-grow-1" for="no">No</label>
-                                                </div>
+                                                />
+
                                             </div>
                                         </div>
                                     </div>
+
                                     <!-- Dimensions -->
 
                                     <div class="col-md-12">
                                         <div class="mb-1">
-                                            <label class="form-label label-text">Product Size</label>
+                                            <label class="form-label label-text">Category Size</label>
                                             <!-- Standard Dimensions -->
                                             <div class="d-flex gap-3" id="standard-dimensions-container">
                                                 @foreach($dimensions as $dimension)
@@ -301,8 +288,8 @@
 
                                 </div>
 
-                                <div class="d-flex justify-content-end">
-                                    <button type="button" class="btn btn-primary next-tab">Next</button>
+                                <div class="d-flex justify-content-end ">
+                                    <button type="button" class="btn btn-primary next-tab mt-2">Next</button>
                                 </div>
                             </div>
                             <!-- first tab content end -->
@@ -465,7 +452,7 @@
                                 <!-- Specifications -->
                                 <div class="col-12">
                                     <div class="mb-1">
-                                        <label class="form-label label-text">Product Specs</label>
+                                        <label class="form-label label-text">Category Specs</label>
                                         <div class="">
                                             <div>
                                                 <!-- Outer Repeater for Specifications -->
@@ -749,7 +736,7 @@
                                     {{-- <div class="form-check form-switch">--}}
                                     {{-- <input type="hidden" name="is_free_shipping" value="0">--}}
                                     {{-- <input type="checkbox" class="form-check-input" id="free-shipping" name="is_free_shipping" value="1">--}}
-                                    {{-- <label class="form-check-label" for="free-shipping">Product available for free shipping</label>--}}
+                                    {{-- <label class="form-check-label" for="free-shipping">Category available for free shipping</label>--}}
                                     {{-- </div>--}}
                                     {{-- </div>--}}
                                     {{-- </div>--}}
@@ -758,7 +745,7 @@
                                     <div class="col-12 d-flex justify-content-end gap-1">
                                         <button type="button" class="btn btn-secondary prev-tab">Back</button>
                                         <button type="submit" class="btn btn-primary me-1 saveChangesButton" id="SaveChangesButton">
-                                            <span class="btn-text">Edit Product</span>
+                                            <span class="btn-text">Edit Category</span>
                                             <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
                                         </button>
                                     </div>

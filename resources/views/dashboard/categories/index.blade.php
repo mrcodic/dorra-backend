@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Categories')
-@section('main-page', 'Categories')
+@section('title', 'Products')
+@section('main-page', 'Products')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -50,7 +50,7 @@
                                 class="form-control ps-5 border rounded-3"
                                 name="search_value"
                                 id="search-category-form"
-                                placeholder="Search category..."
+                                placeholder="Search product..."
                                 style="height: 38px;">
                         </form>
                     </div>
@@ -69,7 +69,7 @@
                         <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
                            data-bs-target="#addCategoryModal">
                             <i data-feather="plus"></i>
-                            Add New Category
+                            Add New Product
                         </a>
                     </div>
 
@@ -84,8 +84,8 @@
                         </th>
                         <th>Name</th>
                         <th>SubCategories</th>
-                        <th>Products</th>
-                        <th>NO.of Products</th>
+                        <th>Categories</th>
+                        <th>NO.of Categories</th>
                         <th>Added Date</th>
                         <th>Actions</th>
                     </tr>

@@ -1,8 +1,8 @@
 
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Products')
-@section('main-page', 'Products')
+@section('title', 'Categories')
+@section('main-page', 'Categories')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -47,14 +47,14 @@
                                 class="form-control ps-5 border rounded-3"
                                 name="search_value"
                                 id="search-product-form"
-                                placeholder="Search product..."
+                                placeholder="Search category..."
                                 style="height: 38px;">
                         </form>
                     </div>
 
                     <div class="col-6 col-md-2 col-lg-2">
                         <select name="category_id" class="form-select category-select">
-                            <option value=""  selected disabled>Category</option>
+                            <option value=""  selected disabled>Product</option>
                             @foreach($associatedData['categories'] as $category)
                                 <option value="{{ $category->id }}">{{ $category->name}}</option>
                             @endforeach
@@ -82,7 +82,7 @@
 
                     <div class="col-12 col-md-2 text-md-end">
                         <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route('products.create') }}">
-                            Add New Product
+                            Add New Category
                         </a>
                     </div>
                 </div>

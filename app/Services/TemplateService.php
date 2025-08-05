@@ -6,6 +6,9 @@ namespace App\Services;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
+use Illuminate\Validation\ValidationException;
 use App\Repositories\Interfaces\{ProductRepositoryInterface, TemplateRepositoryInterface};
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -200,6 +203,36 @@ class TemplateService extends BaseService
 //        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user(),"template_assets");
 
     }
+    public function search($request)
+    {
+        $locale = App::getLocale();
+        return $this->repository->query()
+            ->when($request->filled('search'), function ($query) use ($request, $locale) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($request->search) . '%'
+                ]);
+            })->get();
+    }
 
+    public function addToLanding($templateId)
+    {
+        if ($this->repository->query()->isLanding()->count() == 8) {
+            throw ValidationException::withMessages([
+                'design_id' => ['you can\'t add more than 8 items.']
+            ]);
+        }
+        $template = $this->repository->find($templateId);
+        return tap($template, function ($template) {
+            $template->update(['is_landing' => true]);
+        });
+    }
+
+    public function removeFromLanding($templateId)
+    {
+        $template = $this->repository->find($templateId);
+          return tap($template, function ($template) {
+            $template->update(['is_landing' => false]);
+        });
+    }
 
 }

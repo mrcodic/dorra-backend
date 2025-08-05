@@ -143,7 +143,10 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
         Route::get('/data', [TemplateController::class, 'getData'])->name('data');
+        Route::get('/search',  'search')->name('search');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::post('/landing',  'addToLanding')->name('landing');
+        Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
     });
     Route::post('/store-templates', [TemplateController::class, 'storeAndRedirect'])->name('templates.redirect.store');
 

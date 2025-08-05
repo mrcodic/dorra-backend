@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Enums\HttpEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
+use App\Models\Template;
 use App\Http\Requests\Template\{StoreTemplateRequest,
     StoreTranslatedTemplateRequest,
     UpdateTemplateEditorRequest,
@@ -162,6 +163,40 @@ class TemplateController extends DashboardController
     {
         $media = $this->templateService->storeTemplateAssets($request);
         return Response::api(data: MediaResource::make($media));
+
+    }
+    public function search(Request $request)
+    {
+        $templates = $this->templateService->search($request);
+        return $this->resourceClass::collection($templates);
+    }
+
+    public function addToLanding(Request $request)
+    {
+        $request->validate([
+            'design_id' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $exists = Template::whereKey($value)
+                        ->where('status', StatusEnum::LIVE)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail('The selected design is invalid or not live.');
+                    }
+                }
+            ],
+        ]);
+
+        $template = $this->templateService->addToLanding($request->get('design_id'));
+        return $this->resourceClass::make($template);
+    }
+
+    public function removeFromLanding(Request $request)
+    {
+        $request->validate(['design_id' => 'required', 'exists:templates,id']);
+        $template = $this->templateService->removeFromLanding($request->get('design_id'));
+        return $this->resourceClass::make($template);
 
     }
 }

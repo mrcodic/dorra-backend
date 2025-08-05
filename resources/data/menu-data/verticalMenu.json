@@ -30,13 +30,13 @@
             "slug": "",
             "submenu": [
                 {
-                    "url": "/products",
+                    "url": "/categories",
                     "name": "All",
                     "icon": "circle",
                     "slug": "app-user-list"
                 },
                 {
-                    "url": "/categories",
+                    "url": "/products",
                     "name": "Categories",
                     "icon": "circle",
                     "slug": "app-user-list"

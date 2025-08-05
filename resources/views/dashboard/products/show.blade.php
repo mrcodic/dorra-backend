@@ -1,8 +1,8 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Show Product')
-@section('main-page', 'Products')
-@section('sub-page', 'Show Product')
+@section('title', 'Show Category')
+@section('main-page', 'Categories')
+@section('sub-page', 'Show Category')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -25,16 +25,16 @@
 @section('content')
     <div class="row">
         <div class="col-md-4 bg-white p-3 rounded">
-            <p class="fs-2 fw-bold text-black">Product Name</p>
+            <p class="fs-2 fw-bold text-black">Category Name</p>
 
             <!-- Main Preview Image -->
-            <p class="label-text">Product Image (main)</p>
+            <p class="label-text">Category Image (main)</p>
             <div class="w-100 d-flex justify-content-center">
                 <img id="mainPreview" src="{{$model->getMainImageUrl() }}" alt="Preview" class="img-fluid mb-2"
                      style="height: 256px;width: 256px"/>
             </div>
             @if($model->getMedia('product_extra_images')->isNotEmpty())
-                <p class="label-text">Product Images</p>
+                <p class="label-text">Category Images</p>
 
                 <!-- Custom Slider -->
                 <div class="position-relative mb-3">
@@ -50,7 +50,7 @@
                     <div class="d-flex overflow-hidden" style="width: 260px; margin: 0 auto;">
                         <div id="sliderTrack" class="d-flex transition" style="gap: 0.5rem;">
 
-                            @foreach ($model->getAllProductImages() as $media)
+                            @foreach ($model->getAllCategoryImages() as $media)
                                 <img src="{{ $media->getUrl() }}" class="img-thumbnail thumb"
                                      style="width: 60px; height: 60px; flex: 0 0 auto; cursor: pointer;"
                                      onclick="updatePreview(this)">
@@ -103,7 +103,7 @@
                     <!-- Tabs -->
                     <ul class="nav nav-tabs mb-3" id="tabContent">
                         <li class="nav-item">
-                            <a class="tab-button active " id="tab1-tab" data-bs-toggle="tab" href="#tab1">Product
+                            <a class="tab-button active " id="tab1-tab" data-bs-toggle="tab" href="#tab1">Category
                                 Information</a>
                         </li>
                         <li class="nav-item">
@@ -116,24 +116,24 @@
                         <div class="tab-pane fade show active" id="tab1">
                             <div class="my-3 d-flex justify-content-between gap-2">
                                 <div class="d-flex flex-column w-50">
-                                    <span class="mb-1 fw-bold label-text">Product Name In English</span>
+                                    <span class="mb-1 fw-bold label-text">Category Name In English</span>
                                     <span
                                         class="fw-semibold disabled-field">{{ $model->getTranslation('name','en') }}</span>
                                 </div>
                                 <div class="d-flex flex-column  justify-content-between w-50">
-                                    <span class="mb-1 fw-bold label-text">Product Name In Arabic</span>
+                                    <span class="mb-1 fw-bold label-text">Category Name In Arabic</span>
                                     <span
                                         class="fw-semibold disabled-field">{{ $model->getTranslation('name','ar') }}</span>
                                 </div>
                             </div>
                             <div class="my-3 d-flex justify-content-between gap-2">
                                 <div class="d-flex flex-column w-50">
-                                    <span class="mb-1 fw-bold label-text">Product Description In English</span>
+                                    <span class="mb-1 fw-bold label-text">Category Description In English</span>
                                     <span
                                         class="fw-semibold disabled-field">{{ $model->getTranslation('description','en') }}</span>
                                 </div>
                                 <div class="d-flex flex-column  justify-content-between w-50">
-                                    <span class="mb-1 fw-bold label-text">Product Description In Arabic</span>
+                                    <span class="mb-1 fw-bold label-text">Category Description In Arabic</span>
                                     <span
                                         class="fw-semibold disabled-field">{{ $model->getTranslation('description','ar') }}</span>
                                 </div>
@@ -196,7 +196,7 @@
                             </div>
 
 
-                            <p class="label-text">Product Specs</p>
+                            <p class="label-text">Category Specs</p>
                             @foreach($model->specifications as $specification)
                                 <div class="border rounded p-1 mb-2">
                                     <div class="d-flex flex-column w-100">

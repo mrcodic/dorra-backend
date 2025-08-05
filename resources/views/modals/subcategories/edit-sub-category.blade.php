@@ -25,9 +25,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="edit-sub-category-parent-id" class="form-label label-text">Main Category</label>
+                        <label for="edit-sub-category-parent-id" class="form-label label-text">Main Product</label>
                         <select name="parent_id"  class="form-select">
-                            <option value="">Choose Main Category</option>
+                            <option value="">Choose Main Product</option>
                             @foreach($associatedData['categories'] as $category)
                                 <option value="{{ $category->id }}">{{ $category->getTranslation('name', app()->getLocale()) }}</option>
                             @endforeach

@@ -47,7 +47,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab5">
-                        5. Category
+                        5. Statistics
                     </a>
                 </li>
                 <li class="nav-item">
@@ -434,14 +434,18 @@
                                 class="fw-semibold fs-4 ms-1" style="color: #24B094;">8 designs</span>
                         </div>
                         <p class="fw-semibold text-black fs-4">Design Name</p>
-                        <div class="row g-2 mb-2">
-                            <div class="col-9">
-                                <input type="text" class="form-control" placeholder="Enter design name">
+                        <div class="position-relative">
+                            <div class="row g-2 mb-2">
+                                <div class="col-9">
+                                    <input type="text" id="design-search" class="form-control" placeholder="Enter design name">
+                                </div>
+                                <div class="col-3">
+                                    <button class="btn btn-primary w-100">Add Design</button>
+                                </div>
                             </div>
-                            <div class="col-3">
-                                <button class="btn btn-primary w-100">Add Design</button>
-                            </div>
+                            <div id="search-suggestions" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                         </div>
+
                         <p class="fw-semibold text-black fs-4">Added Designs</p>
                         <div class="row">
                             <!-- Product Card -->
@@ -480,7 +484,29 @@
 
                     <!-- tab5 -->
                     <div class="tab-pane fade" id="tab5">
+                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                            <span class="fw-semibold text-black fs-4">Show designs</span>
+                            <!-- Toggle Switch -->
+                            <form id="productSectionForm" action="{{ route('landing-sections.update') }}"
+                                  method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="key" value="designs_section">
+                                <input type="hidden" name="value" value="{{ setting('designs_section') ? 1 : 0 }}"
+                                       id="productSectionValue">
 
+                                <div class="form-check form-switch">
+                                    <input
+                                        class="form-check-input toggle-switch"
+                                        type="checkbox"
+                                        id="productSectionToggle"
+                                        {{ setting('designs_section') ? 'checked' : '' }}
+                                    >
+                                </div>
+                            </form>
+
+                        </div>
                     </div>
                     <!-- tab6 -->
                     <div class="tab-pane fade" id="tab6">
@@ -518,6 +544,140 @@
 @endsection
 
 @section('page-script')
+    <script>
+        let selectedDesignId = null;
+
+        $(document).ready(function () {
+            // Handle live search
+            $('#design-search').on('keyup', function () {
+                const query = $(this).val();
+
+                if (query.length < 2) {
+                    $('#search-suggestions').empty();
+                    selectedDesignId = null;
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route("templates.search") }}',
+                    method: 'GET',
+                    data: { search: query },
+                    success: function (data) {
+                        let suggestions = '';
+                        data.data.forEach(function (item) {
+                            suggestions += `<a href="#" class="list-group-item list-group-item-action design-option" data-id="${item.id}" data-name="${item.name}">${item.name}</a>`;
+                        });
+
+                        $('#search-suggestions').html(suggestions).show();
+                    },
+                    error: function () {
+                        $('#search-suggestions').empty().hide();
+                    }
+                });
+            });
+
+            // When suggestion clicked
+            $(document).on('click', '.design-option', function (e) {
+                e.preventDefault();
+                const name = $(this).data('name');
+                selectedDesignId = $(this).data('id');
+
+                $('#design-search').val(name);
+                $('#search-suggestions').empty().hide();
+            });
+
+            // Hide suggestions on click outside
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('#design-search, #search-suggestions').length) {
+                    $('#search-suggestions').empty().hide();
+                }
+            });
+
+            // Submit on Add Design
+            $('.btn-primary:contains("Add Design")').on('click', function (e) {
+                e.preventDefault();
+
+                if (!selectedDesignId) {
+                    Toastify({
+                        text: "Please select a design from suggestions.",
+                        backgroundColor: "#FF6B6B"
+                    }).showToast();
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route("templates.landing") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        design_id: selectedDesignId
+                    },
+                    success: function (response) {
+                        Toastify({
+                            text: "Design added successfully!",
+                            backgroundColor: "#24B094"
+                        }).showToast();
+                        location.reload();
+                        $('#design-search').val('');
+                        selectedDesignId = null;
+                    },
+                    error: function (xhr) {
+                        let errorMessage = "Error adding design.";
+
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            if (errors) {
+                                errorMessage = Object.values(errors).flat().join('\n');
+                            }
+                        }
+
+                        Toastify({
+                            text: errorMessage,
+                            backgroundColor: "#FF6B6B",
+                            duration: 5000
+                        }).showToast();
+                    }
+                });
+            });
+        });
+        $(document).on('click', '.remove-template', function (e) {
+            e.preventDefault();
+
+            const designId = $(this).data('id');
+
+            $.ajax({
+                url: '{{ route("templates.landing.remove") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    design_id: designId
+                },
+                success: function (response) {
+                    Toastify({
+                        text: "Design removed successfully.",
+                        backgroundColor: "#24B094"
+                    }).showToast();
+
+                    // Optionally remove the element from DOM
+                    location.reload();
+                },
+                error: function (xhr) {
+                    let message = "Something went wrong.";
+
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON.errors;
+                        message = Object.values(errors).flat().join('\n');
+                    }
+
+                    Toastify({
+                        text: message,
+                        backgroundColor: "#FF6B6B"
+                    }).showToast();
+                }
+            });
+        });
+
+    </script>
     <script>
         $(function () {
             handleAjaxFormSubmit("#productSectionForm", {
@@ -782,78 +942,32 @@
                 location.reload();
             }
         });
-
-        let selectedCategoryId = null;
-
-        $(document).ready(function () {
-            // Handle live search
-            $('#category-search').on('keyup', function () {
-                const query = $(this).val();
-
-                if (query.length < 2) {
-                    $('#search-suggestions').empty();
-                    selectedCategoryId = null;
-                    return;
-                }
-
-                $.ajax({
-                    url: '{{ route("categories.search") }}',
-                    method: 'GET',
-                    data: {search: query},
-                    success: function (data) {
-                        let suggestions = '';
-                        data.data.forEach(function (item) {
-                            suggestions += `<a href="#" class="list-group-item list-group-item-action category-option" data-id="${item.id}" data-name="${item.name}">${item.name}</a>`;
-                        });
-
-                        $('#search-suggestions').html(suggestions).show();
-                    },
-                    error: function () {
-                        $('#search-suggestions').empty().hide();
-                    }
-                });
-            });
-
-            // When suggestion clicked
-            $(document).on('click', '.category-option', function (e) {
-                e.preventDefault();
-                const name = $(this).data('name');
-                selectedCategoryId = $(this).data('id');
-
-                $('#category-search').val(name);
-                $('#search-suggestions').empty().hide();
-            });
-
-            // Hide on click outside
-            $(document).on('click', function (e) {
-                if (!$(e.target).closest('#category-search, #search-suggestions').length) {
-                    $('#search-suggestions').empty().hide();
-                }
-            });
-
-        });
     </script>
-
 
     <script>
-        $(document).ready(function () {
-            const savedTab = localStorage.getItem('activeTab');
-            if (savedTab) {
-                const tabTrigger = $('.nav-link[href="' + savedTab + '"]');
-                if (tabTrigger.length) {
-                    tabTrigger.tab('show');
-                    localStorage.removeItem('activeTab');
+        // Immediately activate the saved tab before Bootstrap initializes
+        const savedTab = localStorage.getItem('activeTab');
+        if (savedTab) {
+            document.addEventListener('DOMContentLoaded', function () {
+                const trigger = document.querySelector('.nav-link[href="' + savedTab + '"]');
+                if (trigger) {
+                    new bootstrap.Tab(trigger).show();
                 }
-            } else {
-                const hash = window.location.hash;
-                const tabTrigger = $('.nav-link[href="' + hash + '"]');
-                if (tabTrigger.length) {
-                    tabTrigger.tab('show');
-                }
-            }
-        });
+            });
+        }
 
+        // Save active tab on change
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.nav-link').forEach(function (tab) {
+                tab.addEventListener('shown.bs.tab', function (e) {
+                    const href = e.target.getAttribute('href');
+                    localStorage.setItem('activeTab', href);
+                });
+            });
+        });
     </script>
+
+
     <script>
         function initUploadHandlers(prefix) {
             let input = $(`#product-image-${prefix}`);

@@ -23,13 +23,13 @@
 
                 <!-- Subcategories -->
                 <div class="mb-3">
-                    <label class="form-label label-text" for="parent-name">Main Category</label>
+                    <label class="form-label label-text" for="parent-name">Main Product</label>
                     <input type="text" class="form-control" id="parent-name" disabled />
                 </div>
 
                 <!-- Number of Products -->
                 <div class="mb-3">
-                    <label class="form-label label-text">Number of Products</label>
+                    <label class="form-label label-text">Number of Categories</label>
                     <input type="number" id="sub-category-products" class="form-control" disabled />
                 </div>
 

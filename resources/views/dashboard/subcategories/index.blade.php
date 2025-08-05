@@ -83,7 +83,7 @@
                             <input type="checkbox" id="select-all-checkbox">
                         </th>
                         <th>Name</th>
-                        <th>NO.of Products</th>
+                        <th>NO.of Categories</th>
                         <th>Added Date</th>
                         <th>Actions</th>
                     </tr>

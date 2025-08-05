@@ -1,8 +1,8 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Add Products')
-@section('main-page', 'Products')
-@section('sub-page', 'Add New Product')
+@section('title', 'Add Categories')
+@section('main-page', 'Categories')
+@section('sub-page', 'Add New Category')
 
 @section('vendor-style')
 <!-- Vendor CSS Files -->
@@ -18,13 +18,13 @@
                 <div class="card-body ">
                     <ul class="nav nav-tabs mb-4 w-100 d-flex justify-content-center px-5" id="formTabs">
                         <li class="nav-item" style="width: 30%;">
-                            <a class="nav-link active" data-step="0" href="#">Product Details</a>
+                            <a class="nav-link active" data-step="0" href="#">Category Details</a>
                         </li>
                         <li class="nav-item" style="width: 30%;">
                             <a class="nav-link" data-step="1" href="#">Quantity & Price</a>
                         </li>
                         <li class="nav-item" style="width: 30%;">
-                            <a class="nav-link" data-step="2" href="#">Product Specs</a>
+                            <a class="nav-link" data-step="2" href="#">Category Specs</a>
                         </li>
                     </ul>
 
@@ -35,38 +35,38 @@
                             <!-- first tab content -->
                             <div class="tab-pane active" id="step1">
                                 <div class="row">
-                                    <!-- Product Name EN/AR -->
+                                    <!-- Category Name EN/AR -->
                                     <div class="col-md-6">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="product-name-en">Product Name (EN)</label>
-                                            <input type="text" id="product-name-en" class="form-control" name="name[en]" placeholder="Product Name (EN)" />
+                                            <label class="form-label label-text" for="product-name-en">Category Name (EN)</label>
+                                            <input type="text" id="product-name-en" class="form-control" name="name[en]" placeholder="Category Name (EN)" />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="product-name-ar">Product Name (AR)</label>
-                                            <input type="text" id="product-name-ar" class="form-control" name="name[ar]" placeholder="Product Name (AR)" />
+                                            <label class="form-label label-text" for="product-name-ar">Category Name (AR)</label>
+                                            <input type="text" id="product-name-ar" class="form-control" name="name[ar]" placeholder="Category Name (AR)" />
                                         </div>
                                     </div>
 
                                     <!-- Description EN/AR -->
                                     <div class="col-md-6">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="description-en">Product Description (EN)</label>
-                                            <textarea name="description[en]" id="description-en" class="form-control" placeholder="Product Description (EN)"></textarea>
+                                            <label class="form-label label-text" for="description-en">Category Description (EN)</label>
+                                            <textarea name="description[en]" id="description-en" class="form-control" placeholder="Category Description (EN)"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="description-ar">Product Description (AR)</label>
-                                            <textarea name="description[ar]" id="description-ar" class="form-control" placeholder="Product Description (AR)"></textarea>
+                                            <label class="form-label label-text" for="description-ar">Category Description (AR)</label>
+                                            <textarea name="description[ar]" id="description-ar" class="form-control" placeholder="Category Description (AR)"></textarea>
                                         </div>
                                     </div>
 
                                     <!-- Main Image Upload -->
                                     <div class="col-md-12">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="product-image-main">Product Image (main)*</label>
+                                            <label class="form-label label-text" for="product-image-main">Category Image (main)*</label>
 
                                             <!-- Hidden real input -->
                                             <input type="file" name="image" id="product-image-main" class="form-control d-none" accept="image/*">
@@ -106,7 +106,7 @@
                                     <!-- Multiple Images Upload -->
                                     <div class="col-md-12">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="product-images">Product Images</label>
+                                            <label class="form-label label-text" for="product-images">Category Images</label>
 
                                             <!-- Hidden real input -->
                                             <input type="file" name="images[]" id="product-images" class="form-control d-none" multiple accept="image/*">
@@ -162,7 +162,7 @@
 
                                     <div class="col-md-12 mb-2">
                                         <div class="">
-                                            <label class="form-label label-text">Product Size</label>
+                                            <label class="form-label label-text">Category Size</label>
                                             <!-- Standard Dimensions -->
                                             <div class="d-flex gap-3" id="standard-dimensions-container">
                                                 @foreach($associatedData['dimensions'] as $dimension)
@@ -196,7 +196,7 @@
                                 <!-- Has Mockup -->
                                 <div class="col-md-12">
                                     <div class="mb-2 d-flex align-items-center gap-2">
-                                        <label class="form-label label-text ">Is this product has Mockup?</label>
+                                        <label class="form-label label-text ">Is this category has Mockup?</label>
                                         <div class="form-check form-switch">
                                             <input type="hidden" name="has_mockup" value="0" />
                                             <input
@@ -311,7 +311,7 @@
                             <!-- Specifications -->
                             <div class="col-12">
                                 <div class="mb-2">
-                                    <label class="form-label label-text">Product Specs</label>
+                                    <label class="form-label label-text">Category Specs</label>
                                     <div class="">
                                         <div>
                                             <!-- Outer Repeater for Specifications -->
@@ -441,7 +441,7 @@
                                 {{-- <div class="form-check form-switch">--}}
                                 {{-- <input type="hidden" name="is_free_shipping" value="0">--}}
                                 {{-- <input type="checkbox" class="form-check-input" id="free-shipping" name="is_free_shipping" value="1">--}}
-                                {{-- <label class="form-check-label" for="free-shipping">Product available for free shipping</label>--}}
+                                {{-- <label class="form-check-label" for="free-shipping">Category available for free shipping</label>--}}
                                 {{-- </div>--}}
                                 {{-- </div>--}}
                                 {{-- </div>--}}
@@ -450,7 +450,7 @@
                                 <div class="col-12 d-flex justify-content-end gap-1">
                                     <button type="button" class="btn btn-secondary prev-tab">Previous</button>
                                     <button type="submit" class="btn btn-primary me-1 saveChangesButton" id="SaveChangesButton">
-                                        <span class="btn-text">Add Product</span>
+                                        <span class="btn-text">Add Category</span>
                                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
                                     </button>
 

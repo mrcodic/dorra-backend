@@ -7,7 +7,7 @@
                 <input type="hidden" id="edit-category-id">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
-                    <h5 class="modal-title fs-3">Edit Category</h5>
+                    <h5 class="modal-title fs-3">Edit Product</h5>
                 </div>
                 <div class="modal-body flex-grow-1">
 

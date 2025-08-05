@@ -6,7 +6,7 @@
 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
-                    <h5 class="modal-title fs-3" id="exampleModalLabel">Add New Category</h5>
+                    <h5 class="modal-title fs-3" id="exampleModalLabel">Add New Product</h5>
                 </div>
                 <div class="modal-body flex-grow-1">
                     <div class="mb-1">

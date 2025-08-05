@@ -3,7 +3,7 @@
         <div class="add-new-user modal-content pt-0">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
             <div class="modal-header mb-1">
-                <h5 class="modal-title fs-3" id="exampleModalLabel">Show Category</h5>
+                <h5 class="modal-title fs-3" id="exampleModalLabel">Show Product</h5>
             </div>
             <div class="modal-body flex-grow-1">
                 <input type="hidden" id="image-id">
@@ -47,7 +47,7 @@
 
                 <!-- Number of Products -->
                 <div class="mb-3">
-                    <label class="form-label label-text">Number of Products</label>
+                    <label class="form-label label-text">Number of Categories</label>
                     <input type="number" id="category-products" class="form-control" disabled />
                 </div>
 
