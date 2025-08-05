@@ -3,8 +3,8 @@
 @section('title', 'Show Category')
 @section('main-page', 'Categories')
 @section('sub-page', 'Show Category')
-@section('main-page-url', route("categories.index"))
-@section('sub-page-url',  route("categories.show",$model->id))
+@section('main-page-url', route("products.index"))
+@section('sub-page-url',  route("products.show",$model->id))
 @section('vendor-style')
     {{-- Page Css files --}}
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">

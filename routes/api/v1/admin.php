@@ -29,5 +29,10 @@ Route::get('mockup-types', [MockupController::class, 'mockupTypes']);
 Route::delete('mockups/{mockup}', [MockupController::class, 'destroy']);
 Route::patch('mockups/{mockup}', [MockupController::class, 'updateEditorData']);
 Route::get('mockups/{mockup}', [MockupController::class, 'showAndUpdateRecent']);
-Route::apiResource('/products', ProductController::class)->only(['show','index']);
+Route::apiResource('/products', ProductController::class)
+    ->only(['index', 'show'])
+    ->names([
+        'index' => 'admin.products.index',
+        'show' => 'admin.products.show',
+    ]);
 

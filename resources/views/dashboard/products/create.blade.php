@@ -3,7 +3,7 @@
 @section('title', 'Add Categories')
 @section('main-page', 'Categories')
 @section('sub-page', 'Add New Category')
-@section('main-page-url', '/products')
+@section('main-page-url', route("products.index"))
 @section('sub-page-url',  route("products.create"))
 
 
