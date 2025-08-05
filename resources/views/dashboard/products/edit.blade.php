@@ -351,15 +351,14 @@
                                                                     <input type="number" name="quantity"
                                                                         value="{{ $price->quantity }}"
                                                                         class="form-control"
-                                                                        placeholder="Add Quantity"
-                                                                           step="1"/>
+                                                                        placeholder="Add Quantity" />
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <div class="mb-1">
                                                                     <label class="form-label label-text">Price
                                                                         (EGP)</label>
-                                                                    <input type="number" name="price"
+                                                                    <input type="text" name="price"
                                                                         value="{{ $price->price }}"
                                                                         class="form-control"
                                                                         placeholder="Add Price" />
@@ -395,7 +394,7 @@
                                                                 <div class="mb-1">
                                                                     <label class="form-label label-text">Price
                                                                         (EGP)</label>
-                                                                    <input type="number" name="price"
+                                                                    <input type="text" name="price"
                                                                         class="form-control"
                                                                         placeholder="Add Price" />
                                                                 </div>
@@ -437,7 +436,7 @@
                                     <div class="mb-1">
                                         <label class="form-label label-text" for="base_price">Original Price (EGP) (Per
                                             Item)</label>
-                                        <input type="number" id="base_price" name="base_price"
+                                        <input type="text" id="base_price" name="base_price"
                                             value="{{ $model->base_price }}" class="form-control"
                                             placeholder="Original Price" />
                                     </div>
@@ -520,7 +519,7 @@
                                                                                     <label
                                                                                         class="form-label label-text">Price
                                                                                         (EGP) (Optional)</label>
-                                                                                    <input type="number"
+                                                                                    <input type="text"
                                                                                         value="{{ $option->price }}"
                                                                                         name="price"
                                                                                         class="form-control"
@@ -663,7 +662,7 @@
 
                                                                                 <div class="col">
                                                                                     <label class="form-label label-text">Price (EGP) (Optional)</label>
-                                                                                    <input type="number" name="price" class="form-control" placeholder="Price" />
+                                                                                    <input type="text" name="price" class="form-control" placeholder="Price" />
                                                                                 </div>
                                                                             </div>
 

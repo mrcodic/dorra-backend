@@ -145,7 +145,7 @@
                                         <div class="mb-2">
                                             <label class="form-label label-text" for="sub-category">Subcategory</label>
                                             <select name="sub_category_id" id="sub-category" class="form-control sub-category-select" data-sub-category-url="{{ route('sub-categories') }}">
-                                                <option value="" disabled>Select subcategory</option>
+                                                <option value="">Select subcategory</option>
                                             </select>
                                         </div>
                                     </div>
@@ -263,13 +263,13 @@
                                                         <div class="col-md-4">
                                                             <div class="mb-2">
                                                                 <label class="form-label label-text">Quantity</label>
-                                                                <input type="number"  step="1" name="prices[][quantity]" class="form-control" placeholder="Add Quantity" />
+                                                                <input type="number" name="prices[][quantity]" class="form-control" placeholder="Add Quantity" />
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="mb-2">
                                                                 <label class="form-label label-text">Price (EGP)</label>
-                                                                <input type="number" name="prices[][price]" class="form-control" placeholder="Add Price" />
+                                                                <input type="text" name="prices[][price]" class="form-control" placeholder="Add Price" />
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
@@ -299,7 +299,7 @@
                             <div class="col-md-12" id="default-price-section" style="display: none;">
                                 <div class="mb-2">
                                     <label class="form-label label-text" for="base_price">Original Price</label>
-                                    <input type="number" id="base_price" name="base_price" class="form-control" placeholder="Original Price" />
+                                    <input type="text" id="base_price" name="base_price" class="form-control" placeholder="Original Price" />
                                 </div>
                             </div>
 
@@ -357,7 +357,7 @@
                                                                             <!-- Option Price -->
                                                                             <div class="col">
                                                                                 <label class="form-label label-text">Price (EGP) (Optional)</label>
-                                                                                <input type="number" name="price" class="form-control" placeholder="Price" />
+                                                                                <input type="text" name="price" class="form-control" placeholder="Price" />
                                                                             </div>
                                                                         </div>
                                                                         <div class="row d-flex align-items-end mt-2">
