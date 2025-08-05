@@ -110,11 +110,6 @@ function getPriceAfterTax($tax, $subtotal): float|int
 function setting(string $key = null, $default = null)
 {
     $repository = app(SettingRepository::class);
-
-    if (is_null($key)) {
-        return $repository->query()->pluck('value', 'key')->toArray();
-    }
-
     return $repository->get($key, $default);
 }
 

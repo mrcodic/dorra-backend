@@ -64,11 +64,23 @@
                     <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
                          style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
                         <span class="fw-semibold text-black fs-4">Show categories in navbar</span>
-
                         <!-- Toggle Switch -->
-                        <div class="form-check form-switch">
-                            <input class="form-check-input toggle-switch" type="checkbox" id="bestSellersToggle">
-                        </div>
+                        <form id="navbarSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="navbar_section">
+                            <input type="hidden" name="value" value="{{ setting('navbar_section') ? 1 : 0 }}" id="navbarSectionValue">
+
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input toggle-switch"
+                                    type="checkbox"
+                                    id="navbarSectionToggle"
+                                    {{ setting('navbar_section') ? 'checked' : '' }}
+                                >
+                            </div>
+                        </form>
+
                     </div>
                     <div class=" d-flex flex-row align-items-center p-1 mb-2"
                          style="background-color: #F4F6F6; border-radius: 10px; border: none;">
@@ -123,9 +135,22 @@
                             <span class="fw-semibold text-black fs-4">Show Hero Section</span>
 
                             <!-- Toggle Switch -->
-                            <div class="form-check form-switch">
-                                <input class="form-check-input toggle-switch" type="checkbox" id="heroToggle">
-                            </div>
+                            <form id="heroSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="key" value="hero_section">
+                                <input type="hidden" name="value" value="{{ setting('hero_section') ? 1 : 0 }}" id="heroSectionValue">
+
+                                <div class="form-check form-switch">
+                                    <input
+                                        class="form-check-input toggle-switch"
+                                        type="checkbox"
+                                        id="heroSectionToggle"
+                                        {{ setting('hero_section') ? 'checked' : '' }}
+                                    >
+                                </div>
+                            </form>
+
                         </div>
 
                         <div class="invoice-repeater">
@@ -381,7 +406,42 @@
 @endsection
 
 @section('page-script')
+    <script>
+        $(function () {
+            handleAjaxFormSubmit("#navbarSectionForm", {
+                successMessage: "Request completed Successfully",
+                resetForm: false,
+            });
 
+            document.getElementById('navbarSectionToggle').addEventListener('change', function () {
+                const isChecked = this.checked;
+                const valueInput = document.getElementById('navbarSectionValue');
+                const form = document.getElementById('navbarSectionForm');
+
+                valueInput.value = isChecked ? 1 : 0;
+
+                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            handleAjaxFormSubmit("#heroSectionForm", {
+                successMessage: "Request completed Successfully",
+                resetForm: false,
+            });
+
+            document.getElementById('heroSectionToggle').addEventListener('change', function () {
+                const isChecked = this.checked;
+                const valueInput = document.getElementById('heroSectionValue');
+                const form = document.getElementById('heroSectionForm');
+
+                valueInput.value = isChecked ? 1 : 0;
+
+                form.requestSubmit();
+            });
+        });
+    </script>
     <script>
         $(document).ready(function () {
             $('.carousel').each(function () {

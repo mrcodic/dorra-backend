@@ -78,9 +78,15 @@ class SettingController extends Controller
         return Response::api();
     }
 
-    public function landingSections(Request $request)
+    public function landingSections(Request $request, SettingRepositoryInterface $settingRepository)
     {
-        
+        $setting = $settingRepository->query()->where('key',$request->input('key'))->firstOrFail();
+        $newValue = $setting->value ? 0 : 1;
+        $settingRepository->update([
+            'key' => $request->input('key'),
+            'value' => $newValue
+        ], $setting->id);
+        return Response::api();
     }
 }
 
