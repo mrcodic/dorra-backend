@@ -193,7 +193,7 @@ class TemplateService extends BaseService
     public function storeTemplateAssets($request)
     {
         $validated = $request->validate(["file" => "required|file|mimes:svg"]);
-        return handleMediaUploads($validated['file'], Admin::find(1), "template_assets");
+        return handleMediaUploads($validated['file'], Admin::find(1) ?? Admin::find(7), "template_assets");
 //        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user(),"template_assets");
 
     }
