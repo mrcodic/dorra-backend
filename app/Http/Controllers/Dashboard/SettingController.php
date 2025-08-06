@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Carousel\UpdateCarouselRequest;
 use App\Http\Requests\Template\UpdateTemplateRequest;
 use App\Models\GlobalAsset;
+use App\Models\Review;
 use App\Repositories\Interfaces\CarouselRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\LandingReviewRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
@@ -43,7 +45,9 @@ class SettingController extends Controller
     public function website(CategoryRepositoryInterface $repository,
                             CarouselRepositoryInterface $carouselRepository,
                             ProductRepositoryInterface  $productRepository,
-                            TemplateRepositoryInterface  $templateRepository)
+                            TemplateRepositoryInterface  $templateRepository,
+    LandingReviewRepositoryInterface $landingReviewRepository,
+    )
     {
         $categories = $repository->query()->isLanding()->get();
         $carousels = $carouselRepository->all();
@@ -51,6 +55,8 @@ class SettingController extends Controller
         $templates = $templateRepository->query()->isLanding()->get(['id','name']);
         $allCategories = $repository->query()->get();
         $partners = Media::query()->whereCollectionName('partners')->get();
+        $reviewsWithImages = $landingReviewRepository->query()->whereType('with_image')->get();
+        $reviewsWithoutImages = $landingReviewRepository->query()->whereType('without_image')->get();
 
         return view("dashboard.settings.website", get_defined_vars());
     }
@@ -122,6 +128,19 @@ class SettingController extends Controller
         handleMediaUploads($request->image, $asset, collectionName: "partners");
         return Response::api();
 
+    }
+
+    public function storeReviewsWithImages(Request $request, LandingReviewRepositoryInterface $reviewRepository)
+    {
+      $review =   $reviewRepository->create($request->all());
+      handleMediaUploads($request->image, $review, collectionName: "reviews_landing_images");
+        return Response::api();
+
+    }
+    public function storeReviews(Request $request, LandingReviewRepositoryInterface $reviewRepository)
+    {
+         $reviewRepository->create($request->all());
+         return Response::api();
     }
 
 }

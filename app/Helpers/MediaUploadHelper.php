@@ -20,6 +20,7 @@ if (!function_exists('handleMediaUploads')) {
     function handleMediaUploads($files, $modelData, string $collectionName = null, array $customProperties = [], bool $clearExisting = false)
     {
         if (empty($files)) {return null;}
+
         $collectionName = $collectionName ? getMediaCollectionName($collectionName) : getMediaCollectionName($modelData);
 
         if ($clearExisting) {

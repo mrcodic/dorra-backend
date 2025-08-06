@@ -22,6 +22,8 @@ class SettingSeeder extends Seeder
             ['key' => 'statistics_section', 'value' => true, 'group' => 'visibility_sections_landing'],
             ['key' => 'logo_section', 'value' => true, 'group' => 'visibility_sections_landing'],
             ['key' => 'testimonials_section', 'value' => true, 'group' => 'visibility_sections_landing'],
+            ['key' => 'reviews_with_images_section', 'value' => true, 'group' => 'visibility_sections_landing'],
+            ['key' => 'reviews_without_images_section', 'value' => true, 'group' => 'visibility_sections_landing'],
             ['key' => 'partners_section', 'value' => true, 'group' => 'visibility_sections_landing'],
             ['key' => 'faq_section', 'value' => true, 'group' => 'visibility_sections_landing'],
 

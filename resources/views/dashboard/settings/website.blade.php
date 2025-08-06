@@ -600,62 +600,152 @@
                     <!-- Header with toggle -->
                     <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
                          style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                        <span class="fw-semibold text-black fs-4">Show statistics section</span>
+                        <span class="fw-semibold text-black fs-4">Show Testimonials Section</span>
 
-                        <form id="statisticsSectionForm" action="{{ route('landing-sections.update') }}"
+                        <form id="testimonialSectionForm" action="{{ route('landing-sections.update') }}"
                               method="POST">
                             @csrf
                             @method('PUT')
-                            <input type="hidden" name="key" value="statistics_section">
-                            <input type="hidden" name="value" value="{{ setting('statistics_section') ? 1 : 0 }}"
-                                   id="statisticsSectionValue">
+                            <input type="hidden" name="key" value="testimonials_section">
+                            <input type="hidden" name="value" value="{{ setting('testimonials_section') ? 1 : 0 }}"
+                                   id="testimonialSectionValue">
 
                             <div class="form-check form-switch">
                                 <input
                                     class="form-check-input toggle-switch"
                                     type="checkbox"
-                                    id="statisticsSectionToggle"
-                                    {{ setting('statistics_section') ? 'checked' : '' }}
+                                    id="testimonialSectionToggle"
+                                    {{ setting('testimonials_section') ? 'checked' : '' }}
                                 >
                             </div>
                         </form>
                     </div>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <!-- Header with toggle -->
+                            <div class="d-flex justify-content-between align-items-center mb-4"
+                                 style="background-color: #F4F6F6; padding: 10px; border-radius: 10px; border: 1px solid #CED5D4;">
+                                <span class="fw-semibold text-black fs-5">Show Reviews With Images Section</span>
+                                <form action="{{ route('landing-sections.update') }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="key" value="reviews_with_images">
+                                    <input type="hidden" name="value" value="{{ setting('reviews_with_images') ? 1 : 0 }}" id="reviewsWithImagesToggleValue">
+                                    <div class="form-check form-switch">
+                                        <input
+                                            class="form-check-input toggle-switch"
+                                            type="checkbox"
+                                            id="reviewsWithImagesToggle"
+                                            {{ setting('reviews_with_images') ? 'checked' : '' }}>
+                                    </div>
+                                </form>
+                            </div>
 
-                    <!-- Form Inputs & Save Button -->
-                    <form id="updateStatisticsForm" action="{{ route("statistics-section.update") }}" method="POST">
-                        @csrf
-                        @method('PUT')
+                            <!-- Review Form -->
+                            <form action="{{ route("reviews-images.create") }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label>Customer</label>
+                                        <input type="text" class="form-control" name="customer" placeholder="Enter name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Rate</label>
+                                        <select name="rate" class="form-select">
+                                            <option value="">Select rate</option>
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <option value="{{ $i }}">{{ $i }} ★</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Date</label>
+                                        <input type="date" name="date" class="form-control">
+                                    </div>
+                                </div>
 
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                            <div class="flex-grow-1">
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Customers</label>
-                                    <input type="number" class="form-control" name="customers"
-                                           placeholder="Enter customers number"
-                                           value="{{ setting('customers') }}">
+                                    <label>Review</label>
+                                    <textarea name="review" class="form-control" placeholder="Add review"></textarea>
                                 </div>
+
+                                <!-- Upload Photo (Drag and Drop Area) -->
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Orders</label>
-                                    <input type="number" class="form-control" name="orders"
-                                           placeholder="Enter orders number"
-                                           value="{{ setting('orders') }}">
+                                    <label>Photo</label>
+                                    <input type="file" name="image" id="product-image-main" class="form-control d-none"
+                                           accept="image/*">
+
+                                    <!-- Custom Upload Card -->
+                                    <div id="upload-area" class="upload-card">
+                                        <div id="upload-content">
+                                            <i data-feather="upload" class="mb-2"></i>
+                                            <p>Drag image here to upload</p>
+                                        </div>
+
+
+                                    </div>
+                                    <div>
+                                        <!-- Progress Bar -->
+                                        <div id="upload-progress" class="progress mt-2 d-none w-50">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                 style="width: 0%"></div>
+                                        </div>
+
+
+                                        <!-- Uploaded Image Preview -->
+                                        <div id="uploaded-image"
+                                             class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                            <img src="" alt="Uploaded" class="img-fluid rounded"
+                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                            <div id="file-details" class="file-details">
+                                                <div class="file-name fw-bold"></div>
+                                                <div class="file-size text-muted small"></div>
+                                            </div>
+                                            <button type="button" id="remove-image"
+                                                    class="btn btn-sm position-absolute text-danger"
+                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                <i data-feather="trash"></i>
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="type" value="with_image">
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-success">Add Review</button>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Rate</label>
-                                    <input type="number" step="0.1" class="form-control" name="rate"
-                                           placeholder="Enter rate"
-                                           value="{{ setting('rate') }}">
+                            </form>
+
+                            <!-- Added Products List -->
+                            <div class="mt-4">
+                                <h5>Added Reviews</h5>
+                                <div class="row row-cols-1 row-cols-md-2 g-3 mt-2">
+                                    @foreach($reviewsWithImages as $review)
+                                        <div class="col">
+                                            <div class="card h-100 shadow-sm border-0">
+                                                <div class="card-body d-flex">
+                                                    <img src="{{ asset($review->image_url) }}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                                    <div>
+                                                        <strong>{{ $review->customer_name }}</strong>
+                                                        <div class="text-warning">
+                                                            @for($i = 1; $i <= 5; $i++)
+                                                                <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
+                                                            @endfor
+                                                        </div>
+                                                        <small class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                        <p class="mb-1">{{ $review->review }}</p>
+                                                        <form action="" method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button class="btn btn-sm btn-outline-danger">Remove</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
 
-
                         </div>
-                        <div class="text-end ">
-                            <button type="submit" class=" btn btn-primary">
-                                <i data-feather="save" class="me-1"></i> Save Changes
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
 
                 <!-- tab8 -->
@@ -725,8 +815,7 @@
                                                 <i data-feather="trash"></i>
                                             </button>
                                         </div>
-                                        <div id="search-suggestions" class="list-group position-absolute w-100"
-                                             style="z-index: 1000;"></div>
+
                                     </div>
                                     <div class="col-3">
                                         <button type="submit" class="btn btn-primary w-100 mt-3 mb-3">Add Partner
@@ -761,15 +850,16 @@
                                 </div>
 
                             </div>
-
+                        </div>
 
                         </div>
                         <!-- tab9 -->
                         <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
-
+knjjklhjkh
                         </div>
                     </div>
                 </div>
+
 
                 @include("modals.landing.add-category")
 
@@ -1040,6 +1130,24 @@
                                 const isChecked = this.checked;
                                 const valueInput = document.getElementById('productSectionValue');
                                 const form = document.getElementById('productSectionForm');
+
+                                valueInput.value = isChecked ? 1 : 0;
+
+                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                            });
+                        });
+                    </script>
+                <script>
+                        $(function () {
+                            handleAjaxFormSubmit("#testimonialSectionForm", {
+                                successMessage: "Request completed Successfully",
+                                resetForm: false,
+                            });
+
+                            document.getElementById('testimonialSectionToggle').addEventListener('change', function () {
+                                const isChecked = this.checked;
+                                const valueInput = document.getElementById('testimonialSectionValue');
+                                const form = document.getElementById('testimonialSectionForm');
 
                                 valueInput.value = isChecked ? 1 : 0;
 

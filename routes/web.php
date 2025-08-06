@@ -171,6 +171,8 @@ Route::middleware('auth')->group(function () {
         Route::put('landing-sections', 'landingSections')->name('landing-sections.update');
         Route::put('statistics', 'updateStatisticsSection')->name('statistics-section.update');
         Route::post('partners', 'uploadPartners')->name('partners.create');
+        Route::post('reviews-with-images', 'storeReviewsWithImages')->name('reviews-images.create');
+        Route::post('reviews', 'storeReviews')->name('reviews.create');
     });
 
     Route::group(['prefix' => 'mockups', 'as' => 'mockups.', 'controller' => MockupController::class,], function () {

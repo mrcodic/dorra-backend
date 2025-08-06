@@ -160,5 +160,7 @@ Route::prefix("landing/")->controller(LandingController::class)->group(function 
     Route::get('settings/visibility-sections' , 'visibilitySections');
     Route::get('settings/statistics' , 'statistics');
     Route::get('partners' , 'partners');
+    Route::get('reviews-with-images' , 'reviewsWithImages');
+    Route::get('reviews-without-images' , 'reviewsWithoutImages');
 });
 
