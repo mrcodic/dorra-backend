@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\V1\User\CMS;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CMS\CarouselResource;
+use App\Http\Resources\MediaResource;
 use App\Models\Carousel;
 use App\Services\CategoryService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 
 class LandingController extends Controller
@@ -32,6 +34,13 @@ class LandingController extends Controller
     public function statistics()
     {
         return Response::api(data: setting(group: "statistics_landing"));
+
+    }
+
+    public function partners()
+    {
+        $partners = Media::query()->whereCollectionName('partners')->get();
+        return Response::api(data: MediaResource::collection($partners));
 
     }
 

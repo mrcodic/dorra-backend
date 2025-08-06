@@ -75,22 +75,31 @@
             {{-- Right Side: Tab Content --}}
             <div class="tab-content flex-grow-1 p-3" id="v-pills-tabContent">
                 <!-- tab1 Section -->
-                <!-- tab1 Section -->
                 <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
                     <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
                          style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
                         <span class="fw-semibold text-black fs-4">Show products in navbar</span>
-                        <!-- Toggle Switch Form -->
-                        <form id="navbarSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
+                        <!-- Toggle Switch -->
+                        <form id="navbarSectionForm" action="{{ route('landing-sections.update') }}"
+                              method="POST">
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="key" value="navbar_section">
-                            <!-- Toggle Switch Placeholder -->
+                            <input type="hidden" name="value" value="{{ setting('navbar_section') ? 1 : 0 }}"
+                                   id="navbarSectionValue">
+
                             <div class="form-check form-switch">
-                                <!-- Switch code goes here -->
+                                <input
+                                    class="form-check-input toggle-switch"
+                                    type="checkbox"
+                                    id="navbarSectionToggle"
+                                    {{ setting('navbar_section') ? 'checked' : '' }}
+                                >
                             </div>
                         </form>
+
                     </div>
+
                     <div class="d-flex flex-row align-items-center p-1 mb-2"
                          style="background-color: #F4F6F6; border-radius: 10px; border: none;">
                         <span class="fw-semibold text-black fs-4">You can add up to</span>
@@ -132,10 +141,6 @@
 
                     </div>
                 </div>
-
-
-
-
 
                 <!-- tab2 -->
                 <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
@@ -673,43 +678,68 @@
                     <div class="position-relative">
                         <div class="row g-2 mb-2">
                             <div class="col-9">
-                                <input type="file" name="image"
-                                       class="carousel-image-input form-control d-none"
-                                       accept="image/*">
+                                <form id="createPartner" action="{{ route("partners.create") }}" method="post" enctype="multipart/form-data">
+                                    @csrf
+                                <input type="file" name="image" id="product-image-main" class="form-control d-none" accept="image/*">
 
-                                <div class="upload-card">
-                                    <div class="upload-content">
+                                <!-- Custom Upload Card -->
+                                <div id="upload-area" class="upload-card">
+                                    <div id="upload-content">
                                         <i data-feather="upload" class="mb-2"></i>
                                         <p>Drag image here to upload</p>
                                     </div>
-                                </div>
 
-                                <div
-                                    class="uploaded-image position-relative mt-1 d-flex align-items-center gap-2 d-none">
-                                    <img src="" alt="Uploaded" class="img-fluid rounded"
-                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                    <div class="file-details">
-                                        <div class="file-name fw-bold"></div>
-                                        <div class="file-size text-muted small"></div>
+
+                                </div>
+                                <div>
+                                    <!-- Progress Bar -->
+                                    <div id="upload-progress" class="progress mt-2 d-none w-50">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                                     </div>
-                                </div>
 
-                                <div class="progress upload-progress d-none">
-                                    <div class="progress-bar" style="width: 0%"></div>
-                                </div>
-                            </div>
-                            <div class="col-3">
-                                <button class="btn btn-primary w-100">Add Partner</button>
-                            </div>
-                        </div>
+
+                                    <!-- Uploaded Image Preview -->
+                                    <div id="uploaded-image" class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                        <img src="" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                        <div id="file-details" class="file-details">
+                                            <div class="file-name fw-bold"></div>
+                                            <div class="file-size text-muted small"></div>
+                                        </div>
+                                        <button type="button" id="remove-image" class="btn btn-sm position-absolute text-danger" style="top: 5px; right: 5px; background-color: #FFEEED">
+                                            <i data-feather="trash"></i>
+                                        </button>
+                                    </div>
                         <div id="search-suggestions" class="list-group position-absolute w-100"
                              style="z-index: 1000;"></div>
                     </div>
-
+                                <div class="col-3">
+                                    <button type="submit" class="btn btn-primary w-100 mt-3 mb-3">Add Partner</button>
+                                </div>
+                                </form>
                     <p class="fw-semibold text-black fs-4">Added Partners</p>
                     <div class="row">
                         <!-- Product Card -->
+                        @forelse($partners as $partner)
+                            <!-- Product Card -->
+                            <div class="col-md-6 mb-3">
+                                <div class="p-2 d-flex flex-row align-items-center"
+                                     style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                    <!-- Image -->
+                                    <img src="{{ $partner->getUrl() }}" alt="Product"
+                                         class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
 
+                                    <!-- Remove Button -->
+                                    <button class="btn btn-outline-secondary btn-sm ms-2 remove-category"
+                                            data-id="{{ $partner->id }}">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-12 text-center my-5">
+                                <div class="mt-3 text-muted fs-5">No partners added yet.</div>
+                            </div>
+                        @endforelse
                     </div>
 
                 </div>
@@ -718,34 +748,10 @@
             </div>
                 <!-- tab9 -->
                 <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
-                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                        <span class="fw-semibold text-black fs-4">Show logo section</span>
-
-                        <form id="logoSectionForm" action="{{ route('landing-sections.update') }}"
-                              method="POST">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="key" value="logo_section">
-                            <input type="hidden" name="value" value="{{ setting('logo_section') ? 1 : 0 }}"
-                                   id="logoSectionValue">
-
-                            <div class="form-check form-switch">
-                                <input
-                                    class="form-check-input toggle-switch"
-                                    type="checkbox"
-                                    id="logoSectionToggle"
-                                    {{ setting('logo_section') ? 'checked' : '' }}
-                                >
-                            </div>
-                        </form>
-                    </div>
 
                 </div>
             </div>
         </div>
-
-
 
     @include("modals.landing.add-category")
 
@@ -773,6 +779,97 @@
 @endsection
 
 @section('page-script')
+    <script !src="">
+        handleAjaxFormSubmit("#createPartner",{
+            successMessage:"Asset Uploaded Successfully",
+            onSuccess:function (){
+                location.reoad()
+            }
+        })
+        $(document).ready(function() {
+            let input = $('#product-image-main');
+            let uploadArea = $('#upload-area');
+            let progress = $('#upload-progress');
+            let progressBar = $('.progress-bar');
+            let uploadedImage = $('#uploaded-image');
+            let removeButton = $('#remove-image');
+
+            // Click on the upload area triggers the hidden input
+            uploadArea.on('click', function() {
+                input.click();
+            });
+
+            // Handle file selection
+            input.on('change', function(e) {
+                handleFiles(e.target.files);
+            });
+
+            // Handle Drag & Drop
+            uploadArea.on('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.addClass('dragover');
+            });
+
+            uploadArea.on('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.removeClass('dragover');
+            });
+
+            uploadArea.on('drop', function(e) {
+                e.preventDefault();
+                uploadArea.removeClass('dragover');
+                handleFiles(e.originalEvent.dataTransfer.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    let file = files[0];
+
+                    // 🔽 This is the fix: assign the dropped file to the input element
+                    let dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    input[0].files = dataTransfer.files;
+
+                    console.log('Input files:', input[0].files); // Make sure this logs a FileList with 1 file
+
+                    // Show loader
+                    progress.removeClass('d-none');
+                    progressBar.css('width', '0%');
+
+                    // Fake loading effect
+                    let fakeProgress = 0;
+                    let interval = setInterval(function() {
+                        fakeProgress += 10;
+                        progressBar.css('width', fakeProgress + '%');
+
+                        if (fakeProgress >= 100) {
+                            clearInterval(interval);
+
+                            // Preview image
+                            let reader = new FileReader();
+                            reader.onload = function(e) {
+                                uploadedImage.find('img').attr('src', e.target.result);
+                                uploadedImage.removeClass('d-none');
+                                progress.addClass('d-none');
+
+                                // Show file name and size
+                                $('#file-details .file-name').text(file.name);
+                                $('#file-details .file-size').text((file.size / 1024).toFixed(2) + ' KB');
+                            }
+                            reader.readAsDataURL(file);
+                        }
+                    }, 100);
+                }
+            }
+
+            // Remove image
+            removeButton.on('click', function() {
+                uploadedImage.addClass('d-none');
+                input.val(''); // Clear the input
+            });
+        });
+
+    </script>
     <script>
         handleAjaxFormSubmit("#updateStatisticsForm", {
                 successMessage: "Statistics updated successfully",

@@ -155,7 +155,10 @@ Route::prefix('invitations/')->controller(InvitationController::class)->group(fu
         ->name('invitation.accept')
         ->middleware('signed');
 });
+Route::prefix("landing/")->controller(LandingController::class)->group(function () {
+    Route::get('carousels' , 'carousels');
+    Route::get('settings/visibility-sections' , 'visibilitySections');
+    Route::get('settings/statistics' , 'statistics');
+    Route::get('partners' , 'partners');
+});
 
-Route::get('landing/carousels' ,[LandingController::class, 'carousels']);
-Route::get('landing/settings/visibility-sections' ,[LandingController::class, 'visibilitySections']);
-Route::get('landing/settings/statistics' ,[LandingController::class, 'statistics']);

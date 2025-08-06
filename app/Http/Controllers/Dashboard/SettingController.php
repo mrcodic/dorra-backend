@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Carousel\UpdateCarouselRequest;
 use App\Http\Requests\Template\UpdateTemplateRequest;
+use App\Models\GlobalAsset;
 use App\Repositories\Interfaces\CarouselRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
@@ -14,6 +15,7 @@ use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class SettingController extends Controller
 {
@@ -48,6 +50,7 @@ class SettingController extends Controller
         $products = $productRepository->all(columns: ['id', 'name']);
         $templates = $templateRepository->query()->isLanding()->get(['id','name']);
         $allCategories = $repository->query()->get();
+        $partners = Media::query()->whereCollectionName('partners')->get();
 
         return view("dashboard.settings.website", get_defined_vars());
     }
@@ -106,8 +109,18 @@ class SettingController extends Controller
             );
         });
 
-
         return Response::api();
+    }
+
+    public function uploadPartners(Request $request)
+    {
+        $asset = GlobalAsset::create([
+            'title' => 'Partner Upload',
+            'type' => 'partner_upload'
+        ]);
+        handleMediaUploads($request->image, $asset, collectionName: "partners");
+        return Response::api();
+
     }
 
 }
