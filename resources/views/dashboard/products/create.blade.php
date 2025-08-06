@@ -614,20 +614,26 @@
         });
 
         function handleFiles(files) {
-            files.forEach(file => {
-                if (!file.type.startsWith('image/')) return;
+            // First filter out non-images and duplicates
+            const newFiles = files.filter(file => {
+                if (!file.type.startsWith('image/')) return false;
+                return !selectedFiles.some(f => f.name === file.name && f.size === file.size);
+            });
 
-                const alreadyExists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
-                if (alreadyExists) return;
+            selectedFiles = [...selectedFiles, ...newFiles];
 
-                selectedFiles.push(file);
+            // Create previews for all new files
+            newFiles.forEach(file => {
                 previewImage(file);
             });
+
+            // Now simulate upload for all files at once
+            simulateUpload();
         }
 
         function previewImage(file) {
             const wrapper = $(`
-            <div class="image-wrapper position-relative mb-3 d-flex align-items-center gap-2">
+            <div class="image-wrapper position-relative mb-3 d-flex align-items-center gap-2" data-filename="${file.name}">
                 <img src="" alt="Preview" style="width: 50px; height: 50px; object-fit: cover; display: none;">
                 <div class="file-info">
                     <div class="file-name fw-bold">${file.name}</div>
@@ -643,25 +649,6 @@
         `);
 
             uploadedImages.append(wrapper);
-            const progressBar = wrapper.find('.progress-bar');
-            const imgTag = wrapper.find('img');
-
-            // Simulate upload progress
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                progressBar.css('width', `${progress}%`);
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        imgTag.attr('src', e.target.result).fadeIn();
-                        wrapper.find('.progress').remove();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }, 100);
 
             // Remove button
             wrapper.find('.remove-btn').on('click', function () {
@@ -671,8 +658,35 @@
 
             feather.replace();
         }
-    });
 
+        function simulateUpload() {
+            // Reset all progress bars to 0
+            $('.progress-bar').css('width', '0%');
+
+            // Simulate upload progress for all files at once
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                $('.progress-bar').css('width', `${progress}%`);
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    // Process all images when upload is complete
+                    selectedFiles.forEach(file => {
+                        const wrapper = $(`.image-wrapper[data-filename="${file.name}"]`);
+                        const imgTag = wrapper.find('img');
+
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            imgTag.attr('src', e.target.result).fadeIn();
+                            wrapper.find('.progress').remove();
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }, 100);
+        }
+    });
 </script>
 
 <script>
