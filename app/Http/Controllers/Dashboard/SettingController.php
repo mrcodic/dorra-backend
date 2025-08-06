@@ -12,6 +12,7 @@ use App\Repositories\Interfaces\SettingRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
 
 class SettingController extends Controller
@@ -90,6 +91,25 @@ class SettingController extends Controller
         ], $setting->id);
         return Response::api();
     }
+
+    public function updateStatisticsSection(Request $request, SettingRepositoryInterface $settingRepository)
+    {
+        $validated = $request->validate([
+            'customers' => 'required|integer|min:0',
+            'orders' => 'required|integer|min:0',
+            'rate' => 'required|numeric|min:0|max:5',
+        ]);
+
+        collect($validated)->each(function ($value, $key) use ($settingRepository) {
+            $settingRepository->query()->where(['key'=> $key,'group'=>"statistics_landing"])->update(
+                ['value' => $value]
+            );
+        });
+
+
+        return Response::api();
+    }
+
 }
 
 

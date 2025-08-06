@@ -4,6 +4,7 @@
 use App\Models\{Design, Guest, Template};
 use App\Repositories\Implementations\SettingRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 function getAuthOrGuest()
@@ -109,6 +110,7 @@ function getPriceAfterTax($tax, $subtotal): float|int
 
 function setting(string $key = null, $group = null ,$default = null)
 {
+    Cache::forget("app_settings");
     $repository = app(SettingRepository::class);
     return $repository->get($key, $default, $group);
 }

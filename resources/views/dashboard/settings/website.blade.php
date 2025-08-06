@@ -90,7 +90,6 @@
                     </div>
 
 
-
                     <p class="fw-semibold text-black fs-4">Added Products</p>
                     <div class="row">
                         <!-- Product Card -->
@@ -437,13 +436,15 @@
                         <div class="position-relative">
                             <div class="row g-2 mb-2">
                                 <div class="col-9">
-                                    <input type="text" id="design-search" class="form-control" placeholder="Enter design name">
+                                    <input type="text" id="design-search" class="form-control"
+                                           placeholder="Enter design name">
                                 </div>
                                 <div class="col-3">
                                     <button class="btn btn-primary w-100">Add Design</button>
                                 </div>
                             </div>
-                            <div id="search-suggestions" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                            <div id="search-suggestions" class="list-group position-absolute w-100"
+                                 style="z-index: 1000;"></div>
                         </div>
 
                         <p class="fw-semibold text-black fs-4">Added Designs</p>
@@ -483,13 +484,74 @@
                     </div>
 
                     <!-- tab5 -->
+
                     <div class="tab-pane fade" id="tab5">
+                        <!-- Header with toggle -->
+                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                            <span class="fw-semibold text-black fs-4">Show statistics section</span>
+
+                            <form id="statisticsSectionForm" action="{{ route('landing-sections.update') }}"
+                                  method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="key" value="statistics_section">
+                                <input type="hidden" name="value" value="{{ setting('statistics_section') ? 1 : 0 }}"
+                                       id="statisticsSectionValue">
+
+                                <div class="form-check form-switch">
+                                    <input
+                                        class="form-check-input toggle-switch"
+                                        type="checkbox"
+                                        id="statisticsSectionToggle"
+                                        {{ setting('statistics_section') ? 'checked' : '' }}
+                                    >
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Form Inputs & Save Button -->
+                        <form id="updateStatisticsForm" action="{{ route("statistics-section.update") }}" method="POST">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                                <div class="flex-grow-1">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Customers</label>
+                                        <input type="number" class="form-control" name="customers"
+                                               placeholder="Enter customers number"
+                                               value="{{ setting('customers') }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Orders</label>
+                                        <input type="number" class="form-control" name="orders"
+                                               placeholder="Enter orders number"
+                                               value="{{ setting('orders') }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Rate</label>
+                                        <input type="number" step="0.1" class="form-control" name="rate"
+                                               placeholder="Enter rate"
+                                               value="{{ setting('rate') }}">
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="text-end ">
+                                <button type="submit" class=" btn btn-primary">
+                                    <i data-feather="save" class="me-1"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
                     </div>
+
                     <!-- tab6 -->
                     <div class="tab-pane fade" id="tab6">
                     </div>
 
-                    </div>
+                </div>
 
             </div>
 
@@ -523,6 +585,13 @@
 
 @section('page-script')
     <script>
+        handleAjaxFormSubmit("#updateStatisticsForm", {
+                successMessage: "Statistics updated successfully",
+                resetForm: false,
+            }
+        )
+    </script>
+    <script>
         let selectedDesignId = null;
 
         $(document).ready(function () {
@@ -539,7 +608,7 @@
                 $.ajax({
                     url: '{{ route("templates.search") }}',
                     method: 'GET',
-                    data: { search: query },
+                    data: {search: query},
                     success: function (data) {
                         let suggestions = '';
                         data.data.forEach(function (item) {
@@ -667,6 +736,24 @@
                 const isChecked = this.checked;
                 const valueInput = document.getElementById('productSectionValue');
                 const form = document.getElementById('productSectionForm');
+
+                valueInput.value = isChecked ? 1 : 0;
+
+                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            handleAjaxFormSubmit("#statisticsSectionForm", {
+                successMessage: "Request completed Successfully",
+                resetForm: false,
+            });
+
+            document.getElementById('statisticsSectionToggle').addEventListener('change', function () {
+                const isChecked = this.checked;
+                const valueInput = document.getElementById('statisticsSectionValue');
+                const form = document.getElementById('statisticsSectionForm');
 
                 valueInput.value = isChecked ? 1 : 0;
 
