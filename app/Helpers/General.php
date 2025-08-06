@@ -107,10 +107,10 @@ function getPriceAfterTax($tax, $subtotal): float|int
     return number_format($tax * $subtotal, 2, '.', '');
 }
 
-function setting(string $key = null, $default = null)
+function setting(string $key = null, $group = null ,$default = null)
 {
     $repository = app(SettingRepository::class);
-    return $repository->get($key, $default);
+    return $repository->get($key, $default, $group);
 }
 
 

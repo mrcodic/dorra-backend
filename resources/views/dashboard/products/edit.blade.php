@@ -456,9 +456,12 @@
                                         <label class="form-label label-text">Category Specs</label>
                                         <div class="">
                                             <div>
+                                                @php
+                                                    $hasSpecs = $model->specifications->isNotEmpty();
+                                                @endphp
                                                 <!-- Outer Repeater for Specifications -->
                                                 <div class="outer-repeater">
-                                                    <div data-repeater-list="specifications">
+                                                    <div class="{{ $hasSpecs ? '' :'d-none' }}" data-repeater-list="specifications">
                                                         @forelse($model->specifications as $specification)
                                                         <div data-repeater-item>
                                                             <!-- Specification Fields -->
@@ -1045,6 +1048,7 @@
 </script>
 <script>
     $(document).ready(function() {
+
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1130,6 +1134,8 @@
         $(document).ready(function () {
             initializeImageUploaders($('.outer-repeater')); // This ensures the first one is bound properly
         });
+        const $specList = $('.outer-repeater').find('[data-repeater-list="specifications"]');
+
         $('.outer-repeater').repeater({
             repeaters: [{
                 selector: '.inner-repeater',
@@ -1156,6 +1162,9 @@
                 nestedInputName: 'specification_options'
             }],
             show: function() {
+                if ($specList.hasClass('d-none')) {
+                    $specList.removeClass('d-none');
+                }
                 $(this).slideDown();
                 updateDeleteButtons($('.outer-repeater'));
                 initializeImageUploaders(this);
@@ -1185,6 +1194,8 @@
                 updateDeleteButtons($('.outer-repeater'));
             }
         });
+
+
 
 
 

@@ -25,10 +25,13 @@ class LandingController extends Controller
 
     public function visibilitySections()
     {
-        return Response::api(data: collect(setting())
-            ->filter(fn($value, $key) => str_ends_with($key, '_section'))
-            ->toArray()
-        );
+        return Response::api(data: setting(group: "visibility_sections_landing"));
+
+    }
+
+    public function statistics()
+    {
+        return Response::api(data: setting(group: "statistics_landing"));
 
     }
 

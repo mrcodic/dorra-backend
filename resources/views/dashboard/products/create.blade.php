@@ -111,19 +111,16 @@
                                         <div class="mb-2">
                                             <label class="form-label label-text" for="product-images">Category Images</label>
 
-                                            <!-- Hidden real input -->
-                                            <input type="file" name="images[]" id="product-images" class="form-control d-none" multiple accept="image/*">
-
-                                            <!-- Custom Upload Card -->
+                                            <!-- HTML (no changes needed, just make sure it's like this) -->
+                                            <input type="file" id="product-images" class="form-control d-none"  accept="image/*">
                                             <div id="multi-upload-area" class="upload-card">
                                                 <div id="multi-upload-content">
                                                     <i data-feather="upload" class="mb-2"></i>
                                                     <p>Drag images here to upload</p>
                                                 </div>
                                             </div>
+                                            <div id="multi-uploaded-images" class="mt-3"></div>
 
-                                            <!-- Uploaded Images Preview Area -->
-                                            <div id="multi-uploaded-images" class=" mt-3"></div>
                                         </div>
                                     </div>
 
@@ -263,13 +260,15 @@
                                                         <div class="col-md-4">
                                                             <div class="mb-2">
                                                                 <label class="form-label label-text">Quantity</label>
-                                                                <input type="number" name="prices[][quantity]" class="form-control" placeholder="Add Quantity" />
+                                                                <input type="number" name="prices[][quantity]" class="form-control" placeholder="Add Quantity"
+
+                                                                />
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="mb-2">
                                                                 <label class="form-label label-text">Price (EGP)</label>
-                                                                <input type="text" name="prices[][price]" class="form-control" placeholder="Add Price" />
+                                                                <input type="number" name="prices[][price]" class="form-control" placeholder="Add Price" />
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
@@ -580,56 +579,59 @@
     });
 </script>
 <script>
-    $(document).ready(function() {
-        let input = $('#product-images');
-        let uploadArea = $('#multi-upload-area');
-        let uploadedImages = $('#multi-uploaded-images');
+    // JavaScript (FULLY WORKING)
+    $(document).ready(function () {
+        const input = $('#product-images');
+        const uploadArea = $('#multi-upload-area');
+        const uploadedImages = $('#multi-uploaded-images');
+        let selectedFiles = [];
 
-        // Click to open file input
-        uploadArea.on('click', function() {
+        uploadArea.on('click', function () {
             input.click();
         });
 
-        // Handle input change
-        input.on('change', function(e) {
-            handleFiles(e.target.files);
+        input.on('change', function (e) {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+            input.val(''); // allow re-uploading same file
         });
 
-        // Drag and Drop
-        uploadArea.on('dragover', function(e) {
+        uploadArea.on('dragover', function (e) {
             e.preventDefault();
             uploadArea.addClass('dragover');
         });
 
-        uploadArea.on('dragleave', function(e) {
+        uploadArea.on('dragleave', function (e) {
             e.preventDefault();
             uploadArea.removeClass('dragover');
         });
 
-        uploadArea.on('drop', function(e) {
+        uploadArea.on('drop', function (e) {
             e.preventDefault();
             uploadArea.removeClass('dragover');
-            handleFiles(e.originalEvent.dataTransfer.files);
+            const files = Array.from(e.originalEvent.dataTransfer.files);
+            handleFiles(files);
         });
 
         function handleFiles(files) {
-            for (let i = 0; i < files.length; i++) {
-                uploadFile(files[i]);
-            }
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const alreadyExists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+                if (alreadyExists) return;
+
+                selectedFiles.push(file);
+                previewImage(file);
+            });
         }
 
-        function uploadFile(file) {
-            if (!file.type.startsWith('image/')) return;
-
-            const fileSizeKB = (file.size / 1024).toFixed(2) + ' KB';
-
-            // Create wrapper with image hidden initially
-            let wrapper = $(`
+        function previewImage(file) {
+            const wrapper = $(`
             <div class="image-wrapper position-relative mb-3 d-flex align-items-center gap-2">
-                <img src="" alt="Uploading..." style="width: 50px; height: 50px; object-fit: cover; display: none;">
+                <img src="" alt="Preview" style="width: 50px; height: 50px; object-fit: cover; display: none;">
                 <div class="file-info">
                     <div class="file-name fw-bold">${file.name}</div>
-                    <div class="file-size text-muted small">${fileSizeKB}</div>
+                    <div class="file-size text-muted small">${(file.size / 1024).toFixed(2)} KB</div>
                     <div class="progress mt-2 w-50" style="height: 6px;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                     </div>
@@ -641,38 +643,36 @@
         `);
 
             uploadedImages.append(wrapper);
+            const progressBar = wrapper.find('.progress-bar');
+            const imgTag = wrapper.find('img');
 
-            let progressBar = wrapper.find('.progress-bar');
-            let imgTag = wrapper.find('img');
-
-            // Fake upload progress
+            // Simulate upload progress
             let progress = 0;
-            let interval = setInterval(function() {
+            const interval = setInterval(() => {
                 progress += 10;
-                progressBar.css('width', progress + '%');
+                progressBar.css('width', `${progress}%`);
 
                 if (progress >= 100) {
                     clearInterval(interval);
-
-                    // Display the image after "upload" finishes
-                    let reader = new FileReader();
-                    reader.onload = function(e) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
                         imgTag.attr('src', e.target.result).fadeIn();
                         wrapper.find('.progress').remove();
-                    }
+                    };
                     reader.readAsDataURL(file);
                 }
             }, 100);
 
             // Remove button
-            wrapper.find('.remove-btn').on('click', function() {
+            wrapper.find('.remove-btn').on('click', function () {
+                selectedFiles = selectedFiles.filter(f => !(f.name === file.name && f.size === file.size));
                 wrapper.remove();
             });
 
-            // Re-render feather icons
             feather.replace();
         }
     });
+
 </script>
 
 <script>

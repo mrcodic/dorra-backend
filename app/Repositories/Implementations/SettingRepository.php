@@ -12,13 +12,20 @@ class SettingRepository extends BaseRepository implements SettingRepositoryInter
     {
         parent::__construct($setting);
     }
-    public function get(?string $key, $default = null)
+    public function get(?string $key = null, $default = null, ?string $group = null)
     {
         $settings = Cache::rememberForever('app_settings', function () {
-            return Setting::pluck('value', 'key')->toArray();
+            return Setting::all();
         });
-        return $key ? $settings[$key] : $settings;
+
+        if ($group) {
+            $settings = $settings->where('group', $group)->pluck('value', 'key')->toArray();
+        } else {
+            $settings = $settings->pluck('value', 'key')->toArray();
+        }
+        return $key ? ($settings[$key] ?? $default) : $settings;
     }
+
 
     public function update(array $data, $id)
     {

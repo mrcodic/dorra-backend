@@ -25,7 +25,7 @@
 @endsection
 
 @section('content')
-    <div class="card  ">
+    <div class="card">
         {{-- Left Side: Vertical Tabs --}}
         <div class="card-body">
             <ul class="nav nav-tabs nav-fill border-bottom-0">
@@ -484,35 +484,13 @@
 
                     <!-- tab5 -->
                     <div class="tab-pane fade" id="tab5">
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show designs</span>
-                            <!-- Toggle Switch -->
-                            <form id="productSectionForm" action="{{ route('landing-sections.update') }}"
-                                  method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="designs_section">
-                                <input type="hidden" name="value" value="{{ setting('designs_section') ? 1 : 0 }}"
-                                       id="productSectionValue">
-
-                                <div class="form-check form-switch">
-                                    <input
-                                        class="form-check-input toggle-switch"
-                                        type="checkbox"
-                                        id="productSectionToggle"
-                                        {{ setting('designs_section') ? 'checked' : '' }}
-                                    >
-                                </div>
-                            </form>
-
-                        </div>
                     </div>
                     <!-- tab6 -->
                     <div class="tab-pane fade" id="tab6">
+                    </div>
 
                     </div>
-                </div>
+
             </div>
 
 
