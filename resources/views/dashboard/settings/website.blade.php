@@ -52,7 +52,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab6">
-                        6. Testimonials
+                        6. Logo
                     </a>
                 </li>
             </ul>
@@ -549,6 +549,29 @@
 
                     <!-- tab6 -->
                     <div class="tab-pane fade" id="tab6">
+                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                            <span class="fw-semibold text-black fs-4">Show logo section</span>
+
+                            <form id="logoSectionForm" action="{{ route('landing-sections.update') }}"
+                                  method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="key" value="logo_section">
+                                <input type="hidden" name="value" value="{{ setting('logo_section') ? 1 : 0 }}"
+                                       id="logoSectionValue">
+
+                                <div class="form-check form-switch">
+                                    <input
+                                        class="form-check-input toggle-switch"
+                                        type="checkbox"
+                                        id="logoSectionToggle"
+                                        {{ setting('logo_section') ? 'checked' : '' }}
+                                    >
+                                </div>
+                            </form>
+                        </div>
+
                     </div>
 
                 </div>
@@ -736,6 +759,24 @@
                 const isChecked = this.checked;
                 const valueInput = document.getElementById('productSectionValue');
                 const form = document.getElementById('productSectionForm');
+
+                valueInput.value = isChecked ? 1 : 0;
+
+                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            handleAjaxFormSubmit("#logoSectionForm", {
+                successMessage: "Request completed Successfully",
+                resetForm: false,
+            });
+
+            document.getElementById('logoSectionToggle').addEventListener('change', function () {
+                const isChecked = this.checked;
+                const valueInput = document.getElementById('logoSectionValue');
+                const form = document.getElementById('logoSectionForm');
 
                 valueInput.value = isChecked ? 1 : 0;
 
