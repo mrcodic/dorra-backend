@@ -114,6 +114,7 @@ class SettingController extends Controller
 
     public function uploadPartners(Request $request)
     {
+        $request->validate(['image' => ['required', 'file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048']]);
         $asset = GlobalAsset::create([
             'title' => 'Partner Upload',
             'type' => 'partner_upload'
