@@ -97,6 +97,12 @@
                         <span class="fw-semibold fs-4 ms-1" style="color: #24B094;">7 Products</span>
                     </div>
                     <p class="fw-semibold text-black fs-4">Added Products</p>
+                    <div class="col-3 ms-auto mb-3">
+                        <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                                data-bs-target="#addLandingCategoryModal">
+                            Add Product
+                        </button>
+                    </div>
                     <div class="row">
                         @forelse($categories as $category)
                             <!-- Product Card -->
@@ -123,12 +129,7 @@
                             </div>
                         @endforelse
 
-                        <div class="col-3 ms-auto">
-                            <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
-                                    data-bs-target="#addLandingCategoryModal">
-                                Add Product
-                            </button>
-                        </div>
+
                     </div>
                 </div>
 
@@ -744,7 +745,7 @@
             </div>
         </div>
 
-  
+
 
     @include("modals.landing.add-category")
 
