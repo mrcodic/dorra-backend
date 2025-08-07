@@ -183,7 +183,7 @@
                         <div class="invoice-repeater">
 
                             <div data-repeater-list="carousels">
-                                @foreach($carousels as $carousel)
+                                @forelse($carousels as $carousel)
                                     @include('modals.delete',[
                         'id' => 'deleteCarouselModal',
                         'formId' => 'deleteCarouselForm',
@@ -297,6 +297,7 @@
                                                     <!-- Action Buttons -->
                                                     <div class="d-flex justify-content-between mt-3">
                                                         <button type="button"
+                                                                data-repeater-delete
                                                                 class="btn btn-outline-danger open-delete-carousel-modal"
                                                                 data-bs-toggle="modal"
                                                                 data-bs-target="#deleteCarouselModal"
@@ -311,7 +312,128 @@
                                             </div>
                                         </div>
                                     </div>
-                                @endforeach
+                                @empty
+                                    <div data-repeater-item>
+                                        <div class="col-md-12 mb-2">
+                                            <div class="card p-4 mb-4 border rounded shadow-sm">
+                                                <form action="{{ route("carousels.update") }}"
+                                                      method="POST"
+                                                      enctype="multipart/form-data"
+                                                      class="carousel">
+                                                    @csrf
+                                                    @method("PUT")
+
+                                                    <!-- Website Image Upload -->
+                                                    <label class="form-label">Website Image</label>
+                                                    <div class="upload-wrapper">
+                                                        <div
+                                                            class="upload-card border p-3 cursor-pointer text-center bg-light">
+                                                            <div class="upload-content">
+                                                                <i data-feather="upload" class="mb-2"></i>
+                                                                <p>Click to upload website image</p>
+                                                            </div>
+                                                        </div>
+                                                        <input type="file" name="image"
+                                                               class="form-control d-none image-input"
+                                                               accept="image/*">
+                                                        <div
+                                                            class="uploaded-image  mt-2">
+                                                            <img
+                                                                src=""
+                                                                class="img-fluid rounded"
+                                                                style="width: 50px; height: 50px; object-fit: cover;">
+                                                        </div>
+                                                        <div class="progress upload-progress d-none">
+                                                            <div class="progress-bar" style="width: 0%"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Mobile Image Upload -->
+                                                    <label class="form-label mt-3">Mobile Image</label>
+                                                    <div class="upload-wrapper">
+                                                        <div
+                                                            class="upload-card border p-3 cursor-pointer text-center bg-light">
+                                                            <div class="upload-content">
+                                                                <i data-feather="upload" class="mb-2"></i>
+                                                                <p>Click to upload mobile image</p>
+                                                            </div>
+                                                        </div>
+                                                        <input type="file" name="mobile_image"
+                                                               class="form-control d-none image-input"
+                                                               accept="image/*">
+                                                        <div
+                                                            class="uploaded-image mt-2">
+                                                            <img
+                                                                src=""
+                                                                class="img-fluid rounded"
+                                                                style="width: 50px; height: 50px; object-fit: cover;">
+                                                        </div>
+                                                        <div class="progress upload-progress d-none">
+                                                            <div class="progress-bar" style="width: 0%"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Titles -->
+                                                    <div class="row mb-3 mt-4">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Title in English</label>
+                                                            <input type="text" name="title_en" class="form-control"
+                                                                   value="">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Title in Arabic</label>
+                                                            <input type="text" name="title_ar" class="form-control"
+                                                                   value="">
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Subtitles -->
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Subtitle in English</label>
+                                                            <input type="text" name="subtitle_en"
+                                                                   class="form-control"
+                                                                   value="">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Subtitle in Arabic</label>
+                                                            <input type="text" name="subtitle_ar"
+                                                                   class="form-control"
+                                                                   value="">
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Product Selection -->
+                                                    <div class="mb-2">
+                                                        <label class="form-label">Select Product</label>
+                                                        <select name="product_id" class="form-select">
+                                                            <option disabled selected>Select a product</option>
+                                                            @foreach($products as $product)
+                                                                <option value="{{ $product->id }}"
+                                                                   >
+                                                                    {{ $product->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Action Buttons -->
+                                                    <div class="d-flex justify-content-between mt-3">
+                                                        <button type="button" data-repeater-delete
+                                                                class="btn btn-outline-danger"
+
+                                                        >
+                                                            <i data-feather="x" class="me-1"></i> Delete
+                                                        </button>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i data-feather="save" class="me-1"></i> Save Changes
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforelse
                             </div>
 
                             {{-- Hidden template for new carousel --}}
@@ -1055,7 +1177,13 @@
 
             @section('page-script')
                 <script !src="">
-                    handleAjaxFormSubmit("#deleteCarouselForm")
+                    handleAjaxFormSubmit("#deleteCarouselForm",{
+                        successMessage: "Carousel removed Successfully",
+                        onSuccess: function (){
+                            $('#deleteCarouselModal').modal('hide');
+                            location.reload();
+                        }
+                    })
                     $(document).on("click", ".open-delete-carousel-modal", function () {
 
                         const carouselId = $(this).data("id");

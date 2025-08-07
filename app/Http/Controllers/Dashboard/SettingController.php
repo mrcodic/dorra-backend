@@ -63,32 +63,47 @@ class SettingController extends Controller
         return view("dashboard.settings.website", get_defined_vars());
     }
 
-    public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository, $id)
+    public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository)
     {
         $validatedData = $request->validated();
-        $model = $carouselRepository->query()->
-        updateOrCreate(['id' => $id], [
-            'title' => [
-                'en' => $validatedData['carousels'][0]['title_en'],
-                'ar' => $validatedData['carousels'][0]['title_ar'],
-            ], 'subtitle' => [
-                'en' => $validatedData['carousels'][0]['subtitle_en'],
-                'ar' => $validatedData['carousels'][0]['subtitle_ar'],
-            ],
-            'product_id' => $validatedData['carousels'][0]['product_id'],
 
-        ]);
-        if (request()->allFiles()) {
-            if (request()->hasFile('carousels.0.mobile_image')) {
-                handleMediaUploads(request()->file('carousels.0.mobile_image'), $model, collectionName: "mobile_carousels", clearExisting: true);
+        collect($validatedData['carousels'])->each(function ($carouselData, $index) use ($carouselRepository) {
+            // Create or update the carousel
+            $model = $carouselRepository->query()->updateOrCreate(
+                ['id' => $carouselData['id'] ?? null],
+                [
+                    'title' => [
+                        'en' => $carouselData['title_en'],
+                        'ar' => $carouselData['title_ar'],
+                    ],
+                    'subtitle' => [
+                        'en' => $carouselData['subtitle_en'],
+                        'ar' => $carouselData['subtitle_ar'],
+                    ],
+                    'product_id' => $carouselData['product_id'],
+                ]
+            );
 
+
+            if (request()->hasFile("carousels.$index.mobile_image")) {
+                handleMediaUploads(
+                    request()->file("carousels.$index.mobile_image"),
+                    $model,
+                    collectionName: "mobile_carousels",
+                    clearExisting: true
+                );
             }
-            if (request()->hasFile('carousels.0.image')) {
-                handleMediaUploads(request()->file('carousels.0.image'), $model, clearExisting: true);
 
+            if (request()->hasFile("carousels.$index.image")) {
+                handleMediaUploads(
+                    request()->file("carousels.$index.image"),
+                    $model,
+                    collectionName: "carousels",
+                    clearExisting: true
+                );
             }
+        });
 
-        }
         return Response::api();
     }
     public function removeCarousel($id, CarouselRepositoryInterface $carouselRepository)
