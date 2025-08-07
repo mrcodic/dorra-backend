@@ -132,14 +132,30 @@ class SettingController extends Controller
 
     public function storeReviewsWithImages(Request $request, LandingReviewRepositoryInterface $reviewRepository)
     {
-      $review =   $reviewRepository->create($request->all());
+        $validatedData = $request->validate([
+            'customer' => 'required|string|max:255',
+            'rate'     => 'required|integer|min:1|max:5',
+            'date'     => 'required|date',
+            'review'   => 'required|string|max:1000',
+            'type'     => 'required|in:with_image,without_image,other',
+            'image'   => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $review =   $reviewRepository->create($validatedData);
       handleMediaUploads($request->image, $review, collectionName: "reviews_landing_images");
         return Response::api();
 
     }
     public function storeReviews(Request $request, LandingReviewRepositoryInterface $reviewRepository)
     {
-         $reviewRepository->create($request->all());
+        $validatedData = $request->validate([
+            'customer' => 'required|string|max:255',
+            'rate'     => 'required|integer|min:1|max:5',
+            'date'     => 'required|date',
+            'review'   => 'required|string|max:1000',
+            'type'     => 'required|in:with_image,without_image,other',
+        ]);
+         $reviewRepository->create($validatedData);
          return Response::api();
     }
 
