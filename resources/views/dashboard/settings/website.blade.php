@@ -722,7 +722,9 @@
                                         <div class="text-end">
                                             <button type="submit" class="btn btn-primary mt-2">Add Review</button>
                                         </div>
-
+                                    </div>
+                                </div>
+                            </form>
 
                                         <!-- Added Products List -->
                                         <div class="mt-4">
@@ -746,10 +748,10 @@
                                                                     <small
                                                                         class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                                     <p class="mb-1">{{ $review->review }}</p>
-                                                                    <form action="" method="POST">
-                                                                        {{--                                                            @csrf--}}
-                                                                        {{--                                                            @method('DELETE')--}}
-                                                                        <button class="btn btn-sm btn-outline-danger">
+                                                                    <form class="remove-review" action="{{ route("reviews.remove", $review->id) }}" method="POST" >
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
                                                                             Remove
                                                                         </button>
                                                                     </form>
@@ -761,9 +763,9 @@
                                             </div>
                                         </div>
 
-                                    </div>
+
                                 </div>
-                            </form>
+
                             <div class="card mb-4">
                                 <div class="card-body">
                                     <!-- Header with toggle -->
@@ -795,7 +797,7 @@
                                     </div>
 
                                     <!-- Review Form -->
-                                    <form id="reviews" action="{{ route("reviews-images.create") }}" method="POST"
+                                    <form id="reviews" action="{{ route("reviews.create") }}" method="POST"
                                           enctype="multipart/form-data">
                                         @csrf
                                         <div class="row mb-3">
@@ -848,10 +850,10 @@
                                                                 <small
                                                                     class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                                 <p class="mb-1">{{ $review->review }}</p>
-                                                                <form action="" method="POST">
-                                                                    {{--                                                            @csrf--}}
-                                                                    {{--                                                            @method('DELETE')--}}
-                                                                    <button class="btn btn-sm btn-outline-danger">
+                                                                <form class="remove-review" action="{{ route("reviews.remove", $review->id) }}" method="POST">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
                                                                         Remove
                                                                     </button>
                                                                 </form>
@@ -959,7 +961,9 @@
                                                      style="width: 80px; height: 80px; object-fit: cover;">
 
                                                 <!-- Remove Button -->
-                                                <form id="remove-partner" action="{{ route("partners.remove",$partner->id) }}" method="POST">
+                                                <form id="remove-partner"
+                                                      action="{{ route("partners.remove",$partner->id) }}"
+                                                      method="POST">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button
@@ -1037,6 +1041,11 @@
 
                 @section('page-script')
                     <script !src="">
+                        handleAjaxFormSubmit(".remove-review", {
+                            successMessage: "Review removed Successfully", onSuccess: function () {
+                                location.reload();
+                            }
+                        })
                         handleAjaxFormSubmit("#remove-partner", {
                             successMessage: "partner removed Successfully", onSuccess: function () {
                                 location.reload();

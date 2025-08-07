@@ -158,6 +158,16 @@ class SettingController extends Controller
         return Response::api();
 
     }
+    public function removeReview($id, LandingReviewRepositoryInterface $reviewRepository)
+    {
+        $review = $reviewRepository->find($id);
+        if ($review && $review->hasMedia()) {
+            $review->clearMediaCollection();
+        }
+        $review->delete();
+
+        return Response::api();
+    }
 
     public function storeReviews(Request $request, LandingReviewRepositoryInterface $reviewRepository)
     {
