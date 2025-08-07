@@ -63,14 +63,13 @@ class SettingController extends Controller
         return view("dashboard.settings.website", get_defined_vars());
     }
 
-    public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository)
+    public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository,$id)
     {
         $validatedData = $request->validated();
+        collect($validatedData['carousels'])->each(function ($carouselData, $index) use ($carouselRepository,$id) {
 
-        collect($validatedData['carousels'])->each(function ($carouselData, $index) use ($carouselRepository) {
-            // Create or update the carousel
             $model = $carouselRepository->query()->updateOrCreate(
-                ['id' => $carouselData['id'] ?? null],
+                ['id' =>$id?? null],
                 [
                     'title' => [
                         'en' => $carouselData['title_en'],
@@ -83,7 +82,6 @@ class SettingController extends Controller
                     'product_id' => $carouselData['product_id'],
                 ]
             );
-
 
             if (request()->hasFile("carousels.$index.mobile_image")) {
                 handleMediaUploads(

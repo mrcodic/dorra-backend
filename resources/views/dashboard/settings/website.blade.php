@@ -1832,43 +1832,7 @@
                     });
                 </script>
                 <script>
-                    $(document).ready(function () {
-                        $('.upload-wrapper').each(function () {
-                            const wrapper = $(this);
-                            const input = wrapper.find('.image-input');
-                            const uploadCard = wrapper.find('.upload-card');
-                            const preview = wrapper.find('.uploaded-image');
-                            const progress = wrapper.find('.upload-progress');
-                            const progressBar = progress.find('.progress-bar');
 
-                            uploadCard.on('click', () => input.click());
-
-                            input.on('change', function (e) {
-                                const file = e.target.files[0];
-                                if (!file) return;
-
-                                preview.removeClass('d-none');
-                                progress.removeClass('d-none');
-                                progressBar.css('width', '0%');
-
-                                let percent = 0;
-                                const interval = setInterval(() => {
-                                    percent += 20;
-                                    progressBar.css('width', percent + '%');
-
-                                    if (percent >= 100) {
-                                        clearInterval(interval);
-                                        const reader = new FileReader();
-                                        reader.onload = function (e) {
-                                            preview.find('img').attr('src', e.target.result);
-                                            progress.addClass('d-none');
-                                        };
-                                        reader.readAsDataURL(file);
-                                    }
-                                }, 100);
-                            });
-                        });
-                    });
 
                     $(document).on('click', '.remove-category', function (e) {
                         e.preventDefault();
