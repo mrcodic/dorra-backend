@@ -31,7 +31,7 @@
                         </li>
                     </ul>
 
-                    <form id="product-form" class="form px-5 " action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+                    <form id="product-form" class="form px-5 " action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                         @csrf
 
                         <div class="tab-content">
@@ -41,13 +41,13 @@
                                     <!-- Category Name EN/AR -->
                                     <div class="col-md-6">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="product-name-en">Category Name (EN)</label>
+                                            <label class="form-label label-text" for="product-name-en">Category Name (EN)*</label>
                                             <input type="text" id="product-name-en" class="form-control" name="name[en]" placeholder="Category Name (EN)" />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="product-name-ar">Category Name (AR)</label>
+                                            <label class="form-label label-text" for="product-name-ar">Category Name (AR)*</label>
                                             <input type="text" id="product-name-ar" class="form-control" name="name[ar]" placeholder="Category Name (AR)" />
                                         </div>
                                     </div>
@@ -128,7 +128,7 @@
                                     <!-- Category & Subcategory -->
                                     <div class="col-md-6">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="category">Product</label>
+                                            <label class="form-label label-text" for="category">Product*</label>
                                             <select name="category_id" id="category" class="form-control category-select">
                                                 <option value="" disabled>Select product</option>
                                                 @foreach($associatedData['categories'] as $category)
@@ -162,7 +162,7 @@
 
                                     <div class="col-md-12 mb-2">
                                         <div class="">
-                                            <label class="form-label label-text">Category Size</label>
+                                            <label class="form-label label-text">Category Size*</label>
                                             <!-- Standard Dimensions -->
                                             <div class="d-flex gap-3" id="standard-dimensions-container">
                                                 @foreach($associatedData['dimensions'] as $dimension)
@@ -196,7 +196,7 @@
                                 <!-- Has Mockup -->
                                 <div class="col-md-12">
                                     <div class="mb-2 d-flex align-items-center gap-2">
-                                        <label class="form-label label-text ">Is this category has Mockup?</label>
+                                        <label class="form-label label-text ">Is this category has Mockup?*</label>
                                         <div class="form-check form-switch">
                                             <input type="hidden" name="has_mockup" value="0" />
                                             <input
@@ -224,7 +224,7 @@
                             <div class="col-md-12">
                                 <div class="mb-2">
                                     <label class="form-label label-text d-block">Quantity & Price Options</label>
-                                    <label class="form-label label-text mt-2">Quantity Type</label>
+                                    <label class="form-label label-text mt-2">Quantity Type*</label>
                                     <div class="row gap-2 " style="margin: 2px;">
                                         <div class="col border rounded-3 p-1">
                                             <div class="form-check form-check-inline">
@@ -260,8 +260,14 @@
                                                         <div class="col-md-4">
                                                             <div class="mb-2">
                                                                 <label class="form-label label-text">Quantity</label>
-                                                                <input type="number"  name="prices[][quantity]" class="form-control" placeholder="Add Quantity"
-
+                                                                <input
+                                                                    type="number"
+                                                                    name="prices[][quantity]"
+                                                                    class="form-control"
+                                                                    placeholder="Add Quantity"
+                                                                    step="1"
+                                                                    inputmode="numeric"
+                                                                    min="1"
                                                                 />
                                                             </div>
                                                         </div>

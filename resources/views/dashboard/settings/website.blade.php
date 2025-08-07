@@ -73,6 +73,12 @@
                         8. Partners
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link custom-tab" id="tab8-tab" data-bs-toggle="tab" href="#tab9" role="tab"
+                       aria-controls="tab8">
+                        9. FAQ
+                    </a>
+                </li>
 
             </ul>
 
@@ -713,7 +719,9 @@
                                 <div class="text-end">
                                     <button type="submit" class="btn btn-primary mt-2">Add Review</button>
                                 </div>
-                            </form>
+
+
+
 
                             <!-- Added Products List -->
                             <div class="mt-4">
@@ -748,7 +756,7 @@
 
                         </div>
                     </div>
-
+                            </form>
                     <div class="card mb-4">
                         <div class="card-body">
                             <!-- Header with toggle -->
@@ -843,6 +851,10 @@
                     </div>
                 </div>
 
+
+                </div>
+
+                </div>
                 <!-- tab8 -->
                 <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
                     <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
@@ -947,12 +959,36 @@
                             </div>
                         </div>
 
-                        </div>
-
                     </div>
+
                 </div>
 
+                <!-- tab9 -->
+                <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show faq section</span>
 
+                        <form id="faqSectionForm" action="{{ route('landing-sections.update') }}"
+                              method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="faq_section">
+                            <input type="hidden" name="value" value="{{ setting('faq_section') ? 1 : 0 }}"
+                                   id="faqSectionValue">
+
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input toggle-switch"
+                                    type="checkbox"
+                                    id="faqSectionToggle"
+                                    {{ setting('faq_section') ? 'checked' : '' }}
+                                >
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
                 @include("modals.landing.add-category")
 
                 @endsection
@@ -1276,6 +1312,25 @@
                                 const isChecked = this.checked;
                                 const valueInput = document.getElementById('partnerSectionValue');
                                 const form = document.getElementById('partnerSectionForm');
+
+                                valueInput.value = isChecked ? 1 : 0;
+
+                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                            });
+                        });
+                    </script>
+
+                    <script>
+                        $(function () {
+                            handleAjaxFormSubmit("#faqSectionForm", {
+                                successMessage: "Request completed Successfully",
+                                resetForm: false,
+                            });
+
+                            document.getElementById('faqSectionToggle').addEventListener('change', function () {
+                                const isChecked = this.checked;
+                                const valueInput = document.getElementById('faqSectionValue');
+                                const form = document.getElementById('faqSectionForm');
 
                                 valueInput.value = isChecked ? 1 : 0;
 
