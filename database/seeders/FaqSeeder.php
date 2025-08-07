@@ -32,6 +32,24 @@ class FaqSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
+            [
+                'question' => 'How do I reset my password?',
+                'answer' => 'Click on "Forgot Password" at the login page and follow the instructions to reset your password.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'question' => 'Where can I view my purchase history?',
+                'answer' => 'You can view your purchase history under the "My Orders" section in your account dashboard.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'question' => 'How can I contact customer support?',
+                'answer' => 'You can reach our customer support team via the "Contact Us" form or by calling our hotline.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
         ]);
     }
 }
