@@ -737,7 +737,7 @@
                                                                     class="rounded me-3"
                                                                     style="width: 50px; height: 50px; object-fit: cover;">
                                                                 <div>
-                                                                    <strong>{{ $review->customer_name }}</strong>
+                                                                    <strong>{{ $review->customer }}</strong>
                                                                     <div class="text-warning">
                                                                         @for($i = 1; $i <= 5; $i++)
                                                                             <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
@@ -959,10 +959,15 @@
                                                      style="width: 80px; height: 80px; object-fit: cover;">
 
                                                 <!-- Remove Button -->
-                                                <button class="btn btn-outline-secondary btn-sm ms-2 remove-category"
+                                                <form id="remove-partner" action="{{ route("partners.remove",$partner->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button
+                                                        class="btn btn-outline-secondary btn-sm ms-2"
                                                         data-id="{{ $partner->id }}">
-                                                    Remove
-                                                </button>
+                                                        Remove
+                                                    </button>
+                                                </form>
                                             </div>
                                         </div>
                                     @empty
@@ -1032,6 +1037,11 @@
 
                 @section('page-script')
                     <script !src="">
+                        handleAjaxFormSubmit("#remove-partner", {
+                            successMessage: "partner removed Successfully", onSuccess: function () {
+                                location.reload();
+                            }
+                        })
                         handleAjaxFormSubmit("#reviews-images", {
                             successMessage: "Review Added Successfully", onSuccess: function () {
                                 location.reload();
