@@ -122,30 +122,6 @@ class Design extends Model implements HasMedia
     }
 
 
-    public function getTotalPriceAttribute(): float
-    {
-        $this->loadMissing('productPrice', 'options');
-
-        $specTotalPrice = $this->options->sum('price');
-
-        $productPrice = $this->productPrice->price
-            ?? ($this->product?->base_price ?? 0) * ($this->quantity ?? 1);
-
-        return $specTotalPrice + $productPrice;
-    }
-
-
-    public function options(): MorphToMany
-    {
-        return $this->morphToMany(
-            ProductSpecificationOption::class,
-            'customizable',
-            'customizable',
-            'customizable_id',
-            'spec_option_id'
-        )->withTimestamps();
-    }
-
 
     public function invoices()
     {

@@ -91,7 +91,15 @@ class SettingController extends Controller
         }
         return Response::api();
     }
-
+    public function removeCarousel($id, CarouselRepositoryInterface $carouselRepository)
+    {
+        $carousel = $carouselRepository->find($id);
+        if ($carousel && $carousel->hasMedia()) {
+            $carousel->clearMediaCollection();
+        }
+        $carousel->delete();
+        return Response::api();
+    }
     public function landingSections(Request $request, SettingRepositoryInterface $settingRepository)
     {
         $setting = $settingRepository->query()->where('key', $request->input('key'))->firstOrFail();

@@ -19,7 +19,7 @@ class DesignObserver
             $design->current_version += 1;
         }
     }
-    public function saved(Design $design): void
+    public function created(Design $design): void
     {
         $design->refresh();
         if ($design->tempalte_id)

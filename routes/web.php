@@ -167,11 +167,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/payments', 'payments')->name('settings.payments');
         Route::get('/website', 'website')->name('settings.website');
         Route::get('/notifications', 'notifications')->name('settings.notifications');
+
         Route::post('/carousels/{carousel?}','createOrUpdateCarousel')->name('carousels.update');
+        Route::delete('carousels/{carousel}', 'removeCarousel')->name('carousels.remove');
+
         Route::put('landing-sections', 'landingSections')->name('landing-sections.update');
+
         Route::put('statistics', 'updateStatisticsSection')->name('statistics-section.update');
+
         Route::post('partners', 'uploadPartners')->name('partners.create');
         Route::delete('partners/{partner}', 'removePartner')->name('partners.remove');
+
         Route::delete('reviews/{review}', 'removeReview')->name('reviews.remove');
         Route::post('reviews-with-images', 'storeReviewsWithImages')->name('reviews-images.create');
         Route::post('reviews', 'storeReviews')->name('reviews.create');

@@ -184,6 +184,12 @@
 
                             <div data-repeater-list="carousels">
                                 @foreach($carousels as $carousel)
+                                    @include('modals.delete',[
+                        'id' => 'deleteCarouselModal',
+                        'formId' => 'deleteCarouselForm',
+                        'title' => 'Delete Carousel',
+                        'action' => route("carousels.remove",$carousel->id),
+                        ])
                                     <div data-repeater-item>
                                         <div class="col-md-12 mb-2">
                                             <div class="card p-4 mb-4 border rounded shadow-sm">
@@ -290,8 +296,11 @@
 
                                                     <!-- Action Buttons -->
                                                     <div class="d-flex justify-content-between mt-3">
-                                                        <button type="button" data-repeater-delete
-                                                                class="btn btn-outline-danger">
+                                                        <button type="button"
+                                                                class="btn btn-outline-danger open-delete-carousel-modal"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#deleteCarouselModal"
+                                                        >
                                                             <i data-feather="x" class="me-1"></i> Delete
                                                         </button>
                                                         <button type="submit" class="btn btn-primary">
@@ -726,1108 +735,863 @@
                                 </div>
                             </form>
 
-                                        <!-- Added Products List -->
-                                        <div class="mt-4">
-                                            <h5>Added Reviews</h5>
-                                            <div class="row row-cols-1 row-cols-md-2 g-3 mt-2">
-                                                @foreach($reviewsWithImages as $review)
-                                                    <div class="col">
-                                                        <div class="card h-100 shadow-sm border-0">
-                                                            <div class="card-body d-flex">
-                                                                <img
-                                                                    src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
-                                                                    class="rounded me-3"
-                                                                    style="width: 50px; height: 50px; object-fit: cover;">
-                                                                <div>
-                                                                    <strong>{{ $review->customer }}</strong>
-                                                                    <div class="text-warning">
-                                                                        @for($i = 1; $i <= 5; $i++)
-                                                                            <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
-                                                                        @endfor
-                                                                    </div>
-                                                                    <small
-                                                                        class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
-                                                                    <p class="mb-1">{{ $review->review }}</p>
-                                                                    <form class="remove-review" action="{{ route("reviews.remove", $review->id) }}" method="POST" >
-                                                                        @csrf
-                                                                        @method('DELETE')
-                                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                                            Remove
-                                                                        </button>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
+                            <!-- Added Products List -->
+                            <div class="mt-4">
+                                <h5>Added Reviews</h5>
+                                <div class="row row-cols-1 row-cols-md-2 g-3 mt-2">
+                                    @foreach($reviewsWithImages as $review)
+                                        <div class="col">
+                                            <div class="card h-100 shadow-sm border-0">
+                                                <div class="card-body d-flex">
+                                                    <img
+                                                        src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
+                                                        class="rounded me-3"
+                                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                                    <div>
+                                                        <strong>{{ $review->customer }}</strong>
+                                                        <div class="text-warning">
+                                                            @for($i = 1; $i <= 5; $i++)
+                                                                <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
+                                                            @endfor
                                                         </div>
+                                                        <small
+                                                            class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                        <p class="mb-1">{{ $review->review }}</p>
+                                                        <form class="remove-review"
+                                                              action="{{ route("reviews.remove", $review->id) }}"
+                                                              method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                Remove
+                                                            </button>
+                                                        </form>
                                                     </div>
-                                                @endforeach
+                                                </div>
                                             </div>
                                         </div>
+                                    @endforeach
+                                </div>
+                            </div>
 
+
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <!-- Header with toggle -->
+                                <div
+                                    class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                                    style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                                    <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>
+                                    <!-- Toggle Switch -->
+                                    <form id="reviewsWithoutImagesSectionForm"
+                                          action="{{ route('landing-sections.update') }}"
+                                          method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="key" value="reviews_with_images_section">
+                                        <input type="hidden" name="value"
+                                               value="{{ setting('reviews_with_images_section') ? 1 : 0 }}"
+                                               id="reviewsWithoutImagesSectionValue">
+
+                                        <div class="form-check form-switch">
+                                            <input
+                                                class="form-check-input toggle-switch"
+                                                type="checkbox"
+                                                id="reviewsWithoutImagesSectionToggle"
+                                                {{ setting('reviews_with_images_section') ? 'checked' : '' }}
+                                            >
+                                        </div>
+                                    </form>
 
                                 </div>
 
-                            <div class="card mb-4">
-                                <div class="card-body">
-                                    <!-- Header with toggle -->
-                                    <div
-                                        class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
-                                        style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                                        <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>
-                                        <!-- Toggle Switch -->
-                                        <form id="reviewsWithoutImagesSectionForm"
-                                              action="{{ route('landing-sections.update') }}"
-                                              method="POST">
-                                            @csrf
-                                            @method('PUT')
-                                            <input type="hidden" name="key" value="reviews_with_images_section">
-                                            <input type="hidden" name="value"
-                                                   value="{{ setting('reviews_with_images_section') ? 1 : 0 }}"
-                                                   id="reviewsWithoutImagesSectionValue">
-
-                                            <div class="form-check form-switch">
-                                                <input
-                                                    class="form-check-input toggle-switch"
-                                                    type="checkbox"
-                                                    id="reviewsWithoutImagesSectionToggle"
-                                                    {{ setting('reviews_with_images_section') ? 'checked' : '' }}
-                                                >
-                                            </div>
-                                        </form>
-
+                                <!-- Review Form -->
+                                <form id="reviews" action="{{ route("reviews.create") }}" method="POST"
+                                      enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label>Customer</label>
+                                            <input type="text" class="form-control" name="customer"
+                                                   placeholder="Enter name">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>Rate</label>
+                                            <select name="rate" class="form-select">
+                                                <option value="">Select rate</option>
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <option value="{{ $i }}">{{ $i }} ★</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>Date</label>
+                                            <input type="date" name="date" class="form-control">
+                                        </div>
                                     </div>
 
-                                    <!-- Review Form -->
-                                    <form id="reviews" action="{{ route("reviews.create") }}" method="POST"
-                                          enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="row mb-3">
-                                            <div class="col-md-4">
-                                                <label>Customer</label>
-                                                <input type="text" class="form-control" name="customer"
-                                                       placeholder="Enter name">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>Rate</label>
-                                                <select name="rate" class="form-select">
-                                                    <option value="">Select rate</option>
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        <option value="{{ $i }}">{{ $i }} ★</option>
-                                                    @endfor
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>Date</label>
-                                                <input type="date" name="date" class="form-control">
-                                            </div>
-                                        </div>
+                                    <div class="mb-3">
+                                        <label>Review</label>
+                                        <textarea name="review" class="form-control"
+                                                  placeholder="Add review"></textarea>
+                                    </div>
+                                    <input type="hidden" name="type" value="without_image">
 
-                                        <div class="mb-3">
-                                            <label>Review</label>
-                                            <textarea name="review" class="form-control"
-                                                      placeholder="Add review"></textarea>
-                                        </div>
-                                        <input type="hidden" name="type" value="without_image">
-
-                                        <div class="text-end">
-                                            <button type="submit" class="btn btn-primary mt-2">Add Review</button>
-                                        </div>
-                                    </form>
-                                    <!-- Added Products List -->
-                                    <div class="mt-4">
-                                        <h5>Added Reviews</h5>
-                                        <div class="row row-cols-1 row-cols-md-2 g-3 mt-2">
-                                            @foreach($reviewsWithoutImages as $review)
-                                                <div class="col">
-                                                    <div class="card h-100 shadow-sm border-0">
-                                                        <div class="card-body d-flex">
-                                                            <div>
-                                                                <strong>{{ $review->customer }}</strong>
-                                                                <div class="text-warning">
-                                                                    @for($i = 1; $i <= 5; $i++)
-                                                                        <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
-                                                                    @endfor
-                                                                </div>
-                                                                <small
-                                                                    class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
-                                                                <p class="mb-1">{{ $review->review }}</p>
-                                                                <form class="remove-review" action="{{ route("reviews.remove", $review->id) }}" method="POST">
-                                                                    @csrf
-                                                                    @method('DELETE')
-                                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                                        Remove
-                                                                    </button>
-                                                                </form>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary mt-2">Add Review</button>
+                                    </div>
+                                </form>
+                                <!-- Added Products List -->
+                                <div class="mt-4">
+                                    <h5>Added Reviews</h5>
+                                    <div class="row row-cols-1 row-cols-md-2 g-3 mt-2">
+                                        @foreach($reviewsWithoutImages as $review)
+                                            <div class="col">
+                                                <div class="card h-100 shadow-sm border-0">
+                                                    <div class="card-body d-flex">
+                                                        <div>
+                                                            <strong>{{ $review->customer }}</strong>
+                                                            <div class="text-warning">
+                                                                @for($i = 1; $i <= 5; $i++)
+                                                                    <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
+                                                                @endfor
                                                             </div>
+                                                            <small
+                                                                class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                            <p class="mb-1">{{ $review->review }}</p>
+                                                            <form class="remove-review"
+                                                                  action="{{ route("reviews.remove", $review->id) }}"
+                                                                  method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                        class="btn btn-sm btn-outline-danger">
+                                                                    Remove
+                                                                </button>
+                                                            </form>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @endforeach
-                                        </div>
+                                            </div>
+                                        @endforeach
                                     </div>
-
                                 </div>
+
                             </div>
                         </div>
-
-
                     </div>
+
 
                 </div>
-                <!-- tab8 -->
-                <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
-                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                        <span class="fw-semibold text-black fs-4">Show partners section</span>
 
-                        <form id="partnerSectionForm" action="{{ route('landing-sections.update') }}"
-                              method="POST">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="key" value="partners_section">
-                            <input type="hidden" name="value" value="{{ setting('partners_section') ? 1 : 0 }}"
-                                   id="partnerSectionValue">
+            </div>
+            <!-- tab8 -->
+            <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
+                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                    <span class="fw-semibold text-black fs-4">Show partners section</span>
 
-                            <div class="form-check form-switch">
-                                <input
-                                    class="form-check-input toggle-switch"
-                                    type="checkbox"
-                                    id="partnerSectionToggle"
-                                    {{ setting('partners_section') ? 'checked' : '' }}
-                                >
-                            </div>
-                        </form>
-                    </div>
+                    <form id="partnerSectionForm" action="{{ route('landing-sections.update') }}"
+                          method="POST">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="key" value="partners_section">
+                        <input type="hidden" name="value" value="{{ setting('partners_section') ? 1 : 0 }}"
+                               id="partnerSectionValue">
 
-                    <p class="fw-semibold text-black fs-4">Photo</p>
-                    <div class="position-relative">
-                        <div class="row g-2 mb-2">
-                            <div class="col-9">
-                                <form id="createPartner" action="{{ route("partners.create") }}" method="post"
-                                      enctype="multipart/form-data">
-                                    @csrf
-                                    <input type="file" name="image" id="partner-image-main" class="form-control d-none"
-                                           accept="image/*">
+                        <div class="form-check form-switch">
+                            <input
+                                class="form-check-input toggle-switch"
+                                type="checkbox"
+                                id="partnerSectionToggle"
+                                {{ setting('partners_section') ? 'checked' : '' }}
+                            >
+                        </div>
+                    </form>
+                </div>
 
-                                    <!-- Custom Upload Card -->
-                                    <div id="partner-upload-area" class="upload-card">
-                                        <div id="partner-upload-content">
-                                            <i data-feather="upload" class="mb-2"></i>
-                                            <p>Drag image here to upload</p>
-                                        </div>
+                <p class="fw-semibold text-black fs-4">Photo</p>
+                <div class="position-relative">
+                    <div class="row g-2 mb-2">
+                        <div class="col-9">
+                            <form id="createPartner" action="{{ route("partners.create") }}" method="post"
+                                  enctype="multipart/form-data">
+                                @csrf
+                                <input type="file" name="image" id="partner-image-main" class="form-control d-none"
+                                       accept="image/*">
 
-
+                                <!-- Custom Upload Card -->
+                                <div id="partner-upload-area" class="upload-card">
+                                    <div id="partner-upload-content">
+                                        <i data-feather="upload" class="mb-2"></i>
+                                        <p>Drag image here to upload</p>
                                     </div>
-                                    <div>
-                                        <!-- Progress Bar -->
-                                        <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
-                                            <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
-                                                 style="width: 0%"></div>
-                                        </div>
 
 
-                                        <!-- Uploaded Image Preview -->
-                                        <div id="partner-uploaded-image"
-                                             class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                            <img src="" alt="Uploaded" class="img-fluid rounded"
-                                                 style="width: 50px; height: 50px; object-fit: cover;">
-                                            <div id="file-details" class="file-details">
-                                                <div class="file-name fw-bold"></div>
-                                                <div class="file-size text-muted small"></div>
-                                            </div>
-                                            <button type="button" id="partner-remove-image"
-                                                    class="btn btn-sm position-absolute text-danger"
-                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                <i data-feather="trash"></i>
-                                            </button>
-                                        </div>
-
+                                </div>
+                                <div>
+                                    <!-- Progress Bar -->
+                                    <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
+                                        <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
+                                             style="width: 0%"></div>
                                     </div>
-                                    <div class="col-3">
-                                        <button type="submit" class="btn btn-primary w-100 mt-3 mb-3">Add Partner
+
+
+                                    <!-- Uploaded Image Preview -->
+                                    <div id="partner-uploaded-image"
+                                         class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                        <img src="" alt="Uploaded" class="img-fluid rounded"
+                                             style="width: 50px; height: 50px; object-fit: cover;">
+                                        <div id="file-details" class="file-details">
+                                            <div class="file-name fw-bold"></div>
+                                            <div class="file-size text-muted small"></div>
+                                        </div>
+                                        <button type="button" id="partner-remove-image"
+                                                class="btn btn-sm position-absolute text-danger"
+                                                style="top: 5px; right: 5px; background-color: #FFEEED">
+                                            <i data-feather="trash"></i>
                                         </button>
                                     </div>
-                                </form>
-                                <p class="fw-semibold text-black fs-4">Added Partners</p>
-                                <div class="row">
-                                    <!-- Product Card -->
-                                    @forelse($partners as $partner)
-                                        <!-- Product Card -->
-                                        <div class="col-md-6 mb-3">
-                                            <div class="p-2 d-flex flex-row align-items-center"
-                                                 style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                                                <!-- Image -->
-                                                <img src="{{ $partner->getUrl() }}" alt="Product"
-                                                     class="me-3 rounded"
-                                                     style="width: 80px; height: 80px; object-fit: cover;">
 
-                                                <!-- Remove Button -->
-                                                <form id="remove-partner"
-                                                      action="{{ route("partners.remove",$partner->id) }}"
-                                                      method="POST">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button
-                                                        class="btn btn-outline-secondary btn-sm ms-2"
-                                                        data-id="{{ $partner->id }}">
-                                                        Remove
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    @empty
-                                        <div class="col-12 text-center my-5">
-                                            <div class="mt-3 text-muted fs-5">No partners added yet.</div>
-                                        </div>
-                                    @endforelse
                                 </div>
+                                <div class="col-3">
+                                    <button type="submit" class="btn btn-primary w-100 mt-3 mb-3">Add Partner
+                                    </button>
+                                </div>
+                            </form>
+                            <p class="fw-semibold text-black fs-4">Added Partners</p>
+                            <div class="row">
+                                <!-- Product Card -->
+                                @forelse($partners as $partner)
+                                    <!-- Product Card -->
+                                    <div class="col-md-6 mb-3">
+                                        <div class="p-2 d-flex flex-row align-items-center"
+                                             style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                            <!-- Image -->
+                                            <img src="{{ $partner->getUrl() }}" alt="Product"
+                                                 class="me-3 rounded"
+                                                 style="width: 80px; height: 80px; object-fit: cover;">
 
+                                            <!-- Remove Button -->
+                                            <form id="remove-partner"
+                                                  action="{{ route("partners.remove",$partner->id) }}"
+                                                  method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    class="btn btn-outline-secondary btn-sm ms-2"
+                                                    data-id="{{ $partner->id }}">
+                                                    Remove
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="col-12 text-center my-5">
+                                        <div class="mt-3 text-muted fs-5">No partners added yet.</div>
+                                    </div>
+                                @endforelse
                             </div>
+
                         </div>
-
                     </div>
 
                 </div>
 
-                <!-- tab9 -->
-                <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
-                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                        <span class="fw-semibold text-black fs-4">Show faq section</span>
+            </div>
 
-                        <form id="faqSectionForm" action="{{ route('landing-sections.update') }}"
-                              method="POST">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="key" value="faq_section">
-                            <input type="hidden" name="value" value="{{ setting('faq_section') ? 1 : 0 }}"
-                                   id="faqSectionValue">
+            <!-- tab9 -->
+            <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
+                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                    <span class="fw-semibold text-black fs-4">Show faq section</span>
 
-                            <div class="form-check form-switch">
-                                <input
-                                    class="form-check-input toggle-switch"
-                                    type="checkbox"
-                                    id="faqSectionToggle"
-                                    {{ setting('faq_section') ? 'checked' : '' }}
-                                >
-                            </div>
-                        </form>
-                    </div>
+                    <form id="faqSectionForm" action="{{ route('landing-sections.update') }}"
+                          method="POST">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="key" value="faq_section">
+                        <input type="hidden" name="value" value="{{ setting('faq_section') ? 1 : 0 }}"
+                               id="faqSectionValue">
 
+                        <div class="form-check form-switch">
+                            <input
+                                class="form-check-input toggle-switch"
+                                type="checkbox"
+                                id="faqSectionToggle"
+                                {{ setting('faq_section') ? 'checked' : '' }}
+                            >
+                        </div>
+                    </form>
                 </div>
-                @include("modals.landing.add-category")
 
-                @endsection
+            </div>
+            @include("modals.landing.add-category")
 
-                @section('vendor-script')
-                    {{-- Vendor js files --}}
-                    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+            @endsection
 
-                @endsection
+            @section('vendor-script')
+                {{-- Vendor js files --}}
+                <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+                <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 
-                @section('page-script')
-                    <script !src="">
-                        handleAjaxFormSubmit(".remove-review", {
-                            successMessage: "Review removed Successfully", onSuccess: function () {
-                                location.reload();
-                            }
-                        })
-                        handleAjaxFormSubmit("#remove-partner", {
-                            successMessage: "partner removed Successfully", onSuccess: function () {
-                                location.reload();
-                            }
-                        })
-                        handleAjaxFormSubmit("#reviews-images", {
-                            successMessage: "Review Added Successfully", onSuccess: function () {
-                                location.reload();
-                            }
-                        })
-                        handleAjaxFormSubmit("#reviews", {
-                            successMessage: "Review Added Successfully", onSuccess: function () {
-                                location.reload();
-                            }
-                        })
-                        handleAjaxFormSubmit("#createPartner", {
-                            successMessage: "Asset Uploaded Successfully",
-                            onSuccess: function () {
-                                location.reload();
-                            }
-                        })
-                        $(document).ready(function () {
-                            let input = $('#partner-image-main');
-                            let uploadArea = $('#partner-upload-area');
-                            let progress = $('#partner-upload-progress');
-                            let progressBar = $('.partner-progress-bar');
-                            let uploadedImage = $('#partner-uploaded-image');
-                            let removeButton = $('#partner-remove-image');
+            @endsection
 
-                            // Click on the upload area triggers the hidden input
-                            uploadArea.on('click', function () {
-                                input.click();
-                            });
+            @section('page-script')
+                <script !src="">
+                    handleAjaxFormSubmit("#deleteCarouselForm")
+                    $(document).on("click", ".open-delete-carousel-modal", function () {
 
-                            // Handle file selection
-                            input.on('change', function (e) {
-                                handleFiles(e.target.files);
-                            });
+                        const carouselId = $(this).data("id");
+                        $("#deleteCarouselForm").data("id", carouselId);
+                    });
+                    handleAjaxFormSubmit(".remove-review", {
+                        successMessage: "Review removed Successfully", onSuccess: function () {
+                            location.reload();
+                        }
+                    })
+                    handleAjaxFormSubmit("#remove-partner", {
+                        successMessage: "partner removed Successfully", onSuccess: function () {
+                            location.reload();
+                        }
+                    })
+                    handleAjaxFormSubmit("#reviews-images", {
+                        successMessage: "Review Added Successfully", onSuccess: function () {
+                            location.reload();
+                        }
+                    })
+                    handleAjaxFormSubmit("#reviews", {
+                        successMessage: "Review Added Successfully", onSuccess: function () {
+                            location.reload();
+                        }
+                    })
+                    handleAjaxFormSubmit("#createPartner", {
+                        successMessage: "Asset Uploaded Successfully",
+                        onSuccess: function () {
+                            location.reload();
+                        }
+                    })
+                    $(document).ready(function () {
+                        let input = $('#partner-image-main');
+                        let uploadArea = $('#partner-upload-area');
+                        let progress = $('#partner-upload-progress');
+                        let progressBar = $('.partner-progress-bar');
+                        let uploadedImage = $('#partner-uploaded-image');
+                        let removeButton = $('#partner-remove-image');
 
-                            // Handle Drag & Drop
-                            uploadArea.on('dragover', function (e) {
-                                e.preventDefault();
-                                uploadArea.addClass('dragover');
-                            });
-
-                            uploadArea.on('dragleave', function (e) {
-                                e.preventDefault();
-                                uploadArea.removeClass('dragover');
-                            });
-
-                            uploadArea.on('drop', function (e) {
-                                e.preventDefault();
-                                uploadArea.removeClass('dragover');
-                                handleFiles(e.originalEvent.dataTransfer.files);
-                            });
-
-                            function handleFiles(files) {
-                                if (files.length > 0) {
-                                    let file = files[0];
-
-                                    // 🔽 This is the fix: assign the dropped file to the input element
-                                    let dataTransfer = new DataTransfer();
-                                    dataTransfer.items.add(file);
-                                    input[0].files = dataTransfer.files;
-
-                                    console.log('Input files:', input[0].files); // Make sure this logs a FileList with 1 file
-
-                                    // Show loader
-                                    progress.removeClass('d-none');
-                                    progressBar.css('width', '0%');
-
-                                    // Fake loading effect
-                                    let fakeProgress = 0;
-                                    let interval = setInterval(function () {
-                                        fakeProgress += 10;
-                                        progressBar.css('width', fakeProgress + '%');
-
-                                        if (fakeProgress >= 100) {
-                                            clearInterval(interval);
-
-                                            // Preview image
-                                            let reader = new FileReader();
-                                            reader.onload = function (e) {
-                                                uploadedImage.find('img').attr('src', e.target.result);
-                                                uploadedImage.removeClass('d-none');
-                                                progress.addClass('d-none');
-
-                                                // Show file name and size
-                                                $('#file-details .file-name').text(file.name);
-                                                $('#file-details .file-size').text((file.size / 1024).toFixed(2) + ' KB');
-                                            }
-                                            reader.readAsDataURL(file);
-                                        }
-                                    }, 100);
-                                }
-                            }
-
-                            // Remove image
-                            removeButton.on('click', function () {
-                                uploadedImage.addClass('d-none');
-                                input.val(''); // Clear the input
-                            });
+                        // Click on the upload area triggers the hidden input
+                        uploadArea.on('click', function () {
+                            input.click();
                         });
 
-                        $(document).ready(function () {
-                            let input = $('#product-image-main');
-                            let uploadArea = $('#upload-area');
-                            let progress = $('#upload-progress');
-                            let progressBar = $('.progress-bar');
-                            let uploadedImage = $('#uploaded-image');
-                            let removeButton = $('#remove-image');
-
-                            // Click on the upload area triggers the hidden input
-                            uploadArea.on('click', function () {
-                                input.click();
-                            });
-
-                            // Handle file selection
-                            input.on('change', function (e) {
-                                handleFiles(e.target.files);
-                            });
-
-                            // Handle Drag & Drop
-                            uploadArea.on('dragover', function (e) {
-                                e.preventDefault();
-                                uploadArea.addClass('dragover');
-                            });
-
-                            uploadArea.on('dragleave', function (e) {
-                                e.preventDefault();
-                                uploadArea.removeClass('dragover');
-                            });
-
-                            uploadArea.on('drop', function (e) {
-                                e.preventDefault();
-                                uploadArea.removeClass('dragover');
-                                handleFiles(e.originalEvent.dataTransfer.files);
-                            });
-
-                            function handleFiles(files) {
-                                if (files.length > 0) {
-                                    let file = files[0];
-
-                                    // 🔽 This is the fix: assign the dropped file to the input element
-                                    let dataTransfer = new DataTransfer();
-                                    dataTransfer.items.add(file);
-                                    input[0].files = dataTransfer.files;
-
-                                    console.log('Input files:', input[0].files); // Make sure this logs a FileList with 1 file
-
-                                    // Show loader
-                                    progress.removeClass('d-none');
-                                    progressBar.css('width', '0%');
-
-                                    // Fake loading effect
-                                    let fakeProgress = 0;
-                                    let interval = setInterval(function () {
-                                        fakeProgress += 10;
-                                        progressBar.css('width', fakeProgress + '%');
-
-                                        if (fakeProgress >= 100) {
-                                            clearInterval(interval);
-
-                                            // Preview image
-                                            let reader = new FileReader();
-                                            reader.onload = function (e) {
-                                                uploadedImage.find('img').attr('src', e.target.result);
-                                                uploadedImage.removeClass('d-none');
-                                                progress.addClass('d-none');
-
-                                                // Show file name and size
-                                                $('#file-details .file-name').text(file.name);
-                                                $('#file-details .file-size').text((file.size / 1024).toFixed(2) + ' KB');
-                                            }
-                                            reader.readAsDataURL(file);
-                                        }
-                                    }, 100);
-                                }
-                            }
-
-                            // Remove image
-                            removeButton.on('click', function () {
-                                uploadedImage.addClass('d-none');
-                                input.val(''); // Clear the input
-                            });
+                        // Handle file selection
+                        input.on('change', function (e) {
+                            handleFiles(e.target.files);
                         });
 
-                    </script>
-                    <script>
-                        handleAjaxFormSubmit("#updateStatisticsForm", {
-                                successMessage: "Statistics updated successfully",
-                                resetForm: false,
-                            }
-                        )
-                    </script>
-                    <script>
-                        let selectedDesignId = null;
+                        // Handle Drag & Drop
+                        uploadArea.on('dragover', function (e) {
+                            e.preventDefault();
+                            uploadArea.addClass('dragover');
+                        });
 
-                        $(document).ready(function () {
-                            // Handle live search
-                            $('#design-search').on('keyup', function () {
-                                const query = $(this).val();
+                        uploadArea.on('dragleave', function (e) {
+                            e.preventDefault();
+                            uploadArea.removeClass('dragover');
+                        });
 
-                                if (query.length < 2) {
-                                    $('#search-suggestions').empty();
-                                    selectedDesignId = null;
-                                    return;
-                                }
+                        uploadArea.on('drop', function (e) {
+                            e.preventDefault();
+                            uploadArea.removeClass('dragover');
+                            handleFiles(e.originalEvent.dataTransfer.files);
+                        });
 
-                                $.ajax({
-                                    url: '{{ route("templates.search") }}',
-                                    method: 'GET',
-                                    data: {search: query},
-                                    success: function (data) {
-                                        let suggestions = '';
-                                        data.data.forEach(function (item) {
-                                            suggestions += `<a href="#" class="list-group-item list-group-item-action design-option" data-id="${item.id}" data-name="${item.name}">${item.name}</a>`;
-                                        });
+                        function handleFiles(files) {
+                            if (files.length > 0) {
+                                let file = files[0];
 
-                                        $('#search-suggestions').html(suggestions).show();
-                                    },
-                                    error: function () {
-                                        $('#search-suggestions').empty().hide();
+                                // 🔽 This is the fix: assign the dropped file to the input element
+                                let dataTransfer = new DataTransfer();
+                                dataTransfer.items.add(file);
+                                input[0].files = dataTransfer.files;
+
+                                console.log('Input files:', input[0].files); // Make sure this logs a FileList with 1 file
+
+                                // Show loader
+                                progress.removeClass('d-none');
+                                progressBar.css('width', '0%');
+
+                                // Fake loading effect
+                                let fakeProgress = 0;
+                                let interval = setInterval(function () {
+                                    fakeProgress += 10;
+                                    progressBar.css('width', fakeProgress + '%');
+
+                                    if (fakeProgress >= 100) {
+                                        clearInterval(interval);
+
+                                        // Preview image
+                                        let reader = new FileReader();
+                                        reader.onload = function (e) {
+                                            uploadedImage.find('img').attr('src', e.target.result);
+                                            uploadedImage.removeClass('d-none');
+                                            progress.addClass('d-none');
+
+                                            // Show file name and size
+                                            $('#file-details .file-name').text(file.name);
+                                            $('#file-details .file-size').text((file.size / 1024).toFixed(2) + ' KB');
+                                        }
+                                        reader.readAsDataURL(file);
                                     }
-                                });
-                            });
+                                }, 100);
+                            }
+                        }
 
-                            // When suggestion clicked
-                            $(document).on('click', '.design-option', function (e) {
-                                e.preventDefault();
-                                const name = $(this).data('name');
-                                selectedDesignId = $(this).data('id');
+                        // Remove image
+                        removeButton.on('click', function () {
+                            uploadedImage.addClass('d-none');
+                            input.val(''); // Clear the input
+                        });
+                    });
 
-                                $('#design-search').val(name);
-                                $('#search-suggestions').empty().hide();
-                            });
+                    $(document).ready(function () {
+                        let input = $('#product-image-main');
+                        let uploadArea = $('#upload-area');
+                        let progress = $('#upload-progress');
+                        let progressBar = $('.progress-bar');
+                        let uploadedImage = $('#uploaded-image');
+                        let removeButton = $('#remove-image');
 
-                            // Hide suggestions on click outside
-                            $(document).on('click', function (e) {
-                                if (!$(e.target).closest('#design-search, #search-suggestions').length) {
+                        // Click on the upload area triggers the hidden input
+                        uploadArea.on('click', function () {
+                            input.click();
+                        });
+
+                        // Handle file selection
+                        input.on('change', function (e) {
+                            handleFiles(e.target.files);
+                        });
+
+                        // Handle Drag & Drop
+                        uploadArea.on('dragover', function (e) {
+                            e.preventDefault();
+                            uploadArea.addClass('dragover');
+                        });
+
+                        uploadArea.on('dragleave', function (e) {
+                            e.preventDefault();
+                            uploadArea.removeClass('dragover');
+                        });
+
+                        uploadArea.on('drop', function (e) {
+                            e.preventDefault();
+                            uploadArea.removeClass('dragover');
+                            handleFiles(e.originalEvent.dataTransfer.files);
+                        });
+
+                        function handleFiles(files) {
+                            if (files.length > 0) {
+                                let file = files[0];
+
+                                // 🔽 This is the fix: assign the dropped file to the input element
+                                let dataTransfer = new DataTransfer();
+                                dataTransfer.items.add(file);
+                                input[0].files = dataTransfer.files;
+
+                                console.log('Input files:', input[0].files); // Make sure this logs a FileList with 1 file
+
+                                // Show loader
+                                progress.removeClass('d-none');
+                                progressBar.css('width', '0%');
+
+                                // Fake loading effect
+                                let fakeProgress = 0;
+                                let interval = setInterval(function () {
+                                    fakeProgress += 10;
+                                    progressBar.css('width', fakeProgress + '%');
+
+                                    if (fakeProgress >= 100) {
+                                        clearInterval(interval);
+
+                                        // Preview image
+                                        let reader = new FileReader();
+                                        reader.onload = function (e) {
+                                            uploadedImage.find('img').attr('src', e.target.result);
+                                            uploadedImage.removeClass('d-none');
+                                            progress.addClass('d-none');
+
+                                            // Show file name and size
+                                            $('#file-details .file-name').text(file.name);
+                                            $('#file-details .file-size').text((file.size / 1024).toFixed(2) + ' KB');
+                                        }
+                                        reader.readAsDataURL(file);
+                                    }
+                                }, 100);
+                            }
+                        }
+
+                        // Remove image
+                        removeButton.on('click', function () {
+                            uploadedImage.addClass('d-none');
+                            input.val(''); // Clear the input
+                        });
+                    });
+
+                </script>
+                <script>
+                    handleAjaxFormSubmit("#updateStatisticsForm", {
+                            successMessage: "Statistics updated successfully",
+                            resetForm: false,
+                        }
+                    )
+                </script>
+                <script>
+                    let selectedDesignId = null;
+
+                    $(document).ready(function () {
+                        // Handle live search
+                        $('#design-search').on('keyup', function () {
+                            const query = $(this).val();
+
+                            if (query.length < 2) {
+                                $('#search-suggestions').empty();
+                                selectedDesignId = null;
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '{{ route("templates.search") }}',
+                                method: 'GET',
+                                data: {search: query},
+                                success: function (data) {
+                                    let suggestions = '';
+                                    data.data.forEach(function (item) {
+                                        suggestions += `<a href="#" class="list-group-item list-group-item-action design-option" data-id="${item.id}" data-name="${item.name}">${item.name}</a>`;
+                                    });
+
+                                    $('#search-suggestions').html(suggestions).show();
+                                },
+                                error: function () {
                                     $('#search-suggestions').empty().hide();
                                 }
                             });
-
-                            // Submit on Add Design
-                            $('.btn-primary:contains("Add Design")').on('click', function (e) {
-                                e.preventDefault();
-
-                                if (!selectedDesignId) {
-                                    Toastify({
-                                        text: "Please select a design from suggestions.",
-                                        backgroundColor: "#FF6B6B"
-                                    }).showToast();
-                                    return;
-                                }
-
-                                $.ajax({
-                                    url: '{{ route("templates.landing") }}',
-                                    method: 'POST',
-                                    data: {
-                                        _token: '{{ csrf_token() }}',
-                                        design_id: selectedDesignId
-                                    },
-                                    success: function (response) {
-                                        Toastify({
-                                            text: "Design added successfully!",
-                                            backgroundColor: "#24B094"
-                                        }).showToast();
-                                        location.reload();
-                                        $('#design-search').val('');
-                                        selectedDesignId = null;
-                                    },
-                                    error: function (xhr) {
-                                        let errorMessage = "Error adding design.";
-
-                                        if (xhr.status === 422) {
-                                            const errors = xhr.responseJSON.errors;
-                                            if (errors) {
-                                                errorMessage = Object.values(errors).flat().join('\n');
-                                            }
-                                        }
-
-                                        Toastify({
-                                            text: errorMessage,
-                                            backgroundColor: "#FF6B6B",
-                                            duration: 5000
-                                        }).showToast();
-                                    }
-                                });
-                            });
                         });
-                        $(document).on('click', '.remove-template', function (e) {
+
+                        // When suggestion clicked
+                        $(document).on('click', '.design-option', function (e) {
+                            e.preventDefault();
+                            const name = $(this).data('name');
+                            selectedDesignId = $(this).data('id');
+
+                            $('#design-search').val(name);
+                            $('#search-suggestions').empty().hide();
+                        });
+
+                        // Hide suggestions on click outside
+                        $(document).on('click', function (e) {
+                            if (!$(e.target).closest('#design-search, #search-suggestions').length) {
+                                $('#search-suggestions').empty().hide();
+                            }
+                        });
+
+                        // Submit on Add Design
+                        $('.btn-primary:contains("Add Design")').on('click', function (e) {
                             e.preventDefault();
 
-                            const designId = $(this).data('id');
+                            if (!selectedDesignId) {
+                                Toastify({
+                                    text: "Please select a design from suggestions.",
+                                    backgroundColor: "#FF6B6B"
+                                }).showToast();
+                                return;
+                            }
 
                             $.ajax({
-                                url: '{{ route("templates.landing.remove") }}',
-                                type: 'POST',
+                                url: '{{ route("templates.landing") }}',
+                                method: 'POST',
                                 data: {
                                     _token: '{{ csrf_token() }}',
-                                    design_id: designId
+                                    design_id: selectedDesignId
                                 },
                                 success: function (response) {
                                     Toastify({
-                                        text: "Design removed successfully.",
+                                        text: "Design added successfully!",
                                         backgroundColor: "#24B094"
                                     }).showToast();
-
-                                    // Optionally remove the element from DOM
                                     location.reload();
+                                    $('#design-search').val('');
+                                    selectedDesignId = null;
                                 },
                                 error: function (xhr) {
-                                    let message = "Something went wrong.";
+                                    let errorMessage = "Error adding design.";
 
                                     if (xhr.status === 422) {
                                         const errors = xhr.responseJSON.errors;
-                                        message = Object.values(errors).flat().join('\n');
-                                    }
-
-                                    Toastify({
-                                        text: message,
-                                        backgroundColor: "#FF6B6B"
-                                    }).showToast();
-                                }
-                            });
-                        });
-
-                    </script>
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#productSectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('productSectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('productSectionValue');
-                                const form = document.getElementById('productSectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
-                            });
-                        });
-                    </script>
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#reviewsWithoutImagesSectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('reviewsWithoutImagesSectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('reviewsWithoutImagesSectionValue');
-                                const form = document.getElementById('reviewsWithoutImagesSectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
-                            });
-                        });
-                    </script>
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#testimonialSectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('testimonialSectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('testimonialSectionValue');
-                                const form = document.getElementById('testimonialSectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
-                            });
-                        });
-                    </script>
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#partnerSectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('partnerSectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('partnerSectionValue');
-                                const form = document.getElementById('partnerSectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
-                            });
-                        });
-                    </script>
-
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#faqSectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('faqSectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('faqSectionValue');
-                                const form = document.getElementById('faqSectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
-                            });
-                        });
-                    </script>
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#logoSectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('logoSectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('logoSectionValue');
-                                const form = document.getElementById('logoSectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
-                            });
-                        });
-                    </script>
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#statisticsSectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('statisticsSectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('statisticsSectionValue');
-                                const form = document.getElementById('statisticsSectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
-                            });
-                        });
-                    </script>
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#navbarSectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('navbarSectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('navbarSectionValue');
-                                const form = document.getElementById('navbarSectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
-                            });
-                        });
-                    </script>
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#heroSectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('heroSectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('heroSectionValue');
-                                const form = document.getElementById('heroSectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit();
-                            });
-                        });
-                    </script>
-                    <script>
-                        $(function () {
-                            handleAjaxFormSubmit("#categorySectionForm", {
-                                successMessage: "Request completed Successfully",
-                                resetForm: false,
-                            });
-
-                            document.getElementById('categorySectionToggle').addEventListener('change', function () {
-                                const isChecked = this.checked;
-                                const valueInput = document.getElementById('categorySectionValue');
-                                const form = document.getElementById('categorySectionForm');
-
-                                valueInput.value = isChecked ? 1 : 0;
-
-                                form.requestSubmit();
-                            });
-                        });
-                    </script>
-                    <script>
-                        $(document).ready(function () {
-                            $('.carousel').each(function () {
-                                const form = $(this);
-                                const input = form.find('.mobile-carousel-image-input');
-                                const uploadArea = form.find('.upload-card');
-                                const uploadedImage = form.find('.mobile-uploaded-image');
-                                const progress = form.find('.mobile-upload-progress'); // Add this if needed
-                                const progressBar = progress.find('.mobile-progress-bar');
-
-                                uploadArea.on('click', () => input.click());
-
-                                input.on('change', function (e) {
-                                    const files = e.target.files;
-                                    if (files.length > 0) {
-                                        const file = files[0];
-
-                                        progress.removeClass('d-none');
-                                        progressBar.css('width', '0%');
-
-                                        let fakeProgress = 0;
-                                        let interval = setInterval(() => {
-                                            fakeProgress += 10;
-                                            progressBar.css('width', `${fakeProgress}%`);
-
-                                            if (fakeProgress >= 100) {
-                                                clearInterval(interval);
-
-                                                const reader = new FileReader();
-                                                reader.onload = function (e) {
-                                                    uploadedImage.find('img').attr('src', e.target.result);
-                                                    uploadedImage.removeClass('d-none');
-                                                    progress.addClass('d-none');
-                                                };
-                                                reader.readAsDataURL(file);
-                                            }
-                                        }, 100);
-                                    }
-                                });
-                            });
-                        });
-
-                        $(document).on('change', 'input[type="file"][name="image"]', function (e) {
-                            const input = e.target;
-                            const file = input.files[0];
-
-                            if (file) {
-                                const reader = new FileReader();
-                                reader.onload = function (e) {
-                                    const previewContainer = $(input).closest('form').find('.uploaded-image');
-                                    previewContainer.find('img').attr('src', e.target.result);
-                                    previewContainer.removeClass('d-none');
-                                };
-                                reader.readAsDataURL(file);
-                            }
-                        });
-
-                        handleAjaxFormSubmit('.carousel', {
-                            onSuccess: function () {
-                                const currentTab = $('.nav-tabs .nav-link.active').attr('href');
-                                localStorage.setItem('activeTab', currentTab);
-                                location.reload();
-                            }
-                        });
-
-                    </script>
-
-                    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-
-                    <script>
-                        $(document).ready(function () {
-                            $('.invoice-repeater').repeater({
-                                show: function () {
-                                    $(this).slideDown();
-                                    feather && feather.replace();
-
-                                    const items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                                    items.each(function (index) {
-                                        // Hide delete button if it's the only one
-                                        $(this).find('[data-repeater-delete]').toggle(items.length > 1);
-                                    });
-                                },
-                                hide: function (deleteElement) {
-                                    const repeater = $(this).closest('.invoice-repeater');
-                                    const items = repeater.find('[data-repeater-item]');
-
-                                    // Prevent deleting if it's the only one
-                                    if (items.length === 1) {
-                                        alert("At least one item is required.");
-                                        return;
-                                    }
-
-                                    $(this).slideUp(deleteElement, function () {
-                                        $(this).remove();
-
-                                        const remainingItems = repeater.find('[data-repeater-item]');
-                                        remainingItems.each(function (index) {
-                                            $(this).find('[data-repeater-delete]').toggle(remainingItems.length > 1);
-                                        });
-                                    });
-                                }
-                            });
-                        });
-
-
-                    </script>
-                    <script>
-                        $(document).ready(function () {
-                            $('.upload-wrapper').each(function () {
-                                const wrapper = $(this);
-                                const input = wrapper.find('.image-input');
-                                const uploadCard = wrapper.find('.upload-card');
-                                const preview = wrapper.find('.uploaded-image');
-                                const progress = wrapper.find('.upload-progress');
-                                const progressBar = progress.find('.progress-bar');
-
-                                uploadCard.on('click', () => input.click());
-
-                                input.on('change', function (e) {
-                                    const file = e.target.files[0];
-                                    if (!file) return;
-
-                                    preview.removeClass('d-none');
-                                    progress.removeClass('d-none');
-                                    progressBar.css('width', '0%');
-
-                                    let percent = 0;
-                                    const interval = setInterval(() => {
-                                        percent += 20;
-                                        progressBar.css('width', percent + '%');
-
-                                        if (percent >= 100) {
-                                            clearInterval(interval);
-                                            const reader = new FileReader();
-                                            reader.onload = function (e) {
-                                                preview.find('img').attr('src', e.target.result);
-                                                progress.addClass('d-none');
-                                            };
-                                            reader.readAsDataURL(file);
+                                        if (errors) {
+                                            errorMessage = Object.values(errors).flat().join('\n');
                                         }
-                                    }, 100);
-                                });
-                            });
-                        });
-
-                        $(document).on('click', '.remove-category', function (e) {
-                            e.preventDefault();
-
-                            const categoryId = $(this).data('id');
-
-                            $.ajax({
-                                url: '{{ route("categories.landing.remove") }}',
-                                type: 'POST',
-                                data: {
-                                    _token: '{{ csrf_token() }}',
-                                    category_id: categoryId
-                                },
-                                success: function (response) {
-                                    Toastify({
-                                        text: "Category removed successfully.",
-                                        backgroundColor: "#24B094"
-                                    }).showToast();
-
-                                    // Optionally remove the element from DOM
-                                    location.reload();
-                                },
-                                error: function (xhr) {
-                                    let message = "Something went wrong.";
-
-                                    if (xhr.status === 422) {
-                                        const errors = xhr.responseJSON.errors;
-                                        message = Object.values(errors).flat().join('\n');
                                     }
 
                                     Toastify({
-                                        text: message,
-                                        backgroundColor: "#FF6B6B"
+                                        text: errorMessage,
+                                        backgroundColor: "#FF6B6B",
+                                        duration: 5000
                                     }).showToast();
                                 }
                             });
                         });
-                    </script>
+                    });
+                    $(document).on('click', '.remove-template', function (e) {
+                        e.preventDefault();
 
-                    <script>
-                        // Submit on Add Category
-                        handleAjaxFormSubmit(".landing-category-form", {
-                            successMessage: "Product added To Landing",
-                            onSuccess: function () {
-                                $('#addLandingCategoryModal').modal('hide');
+                        const designId = $(this).data('id');
+
+                        $.ajax({
+                            url: '{{ route("templates.landing.remove") }}',
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                design_id: designId
+                            },
+                            success: function (response) {
+                                Toastify({
+                                    text: "Design removed successfully.",
+                                    backgroundColor: "#24B094"
+                                }).showToast();
+
+                                // Optionally remove the element from DOM
                                 location.reload();
+                            },
+                            error: function (xhr) {
+                                let message = "Something went wrong.";
+
+                                if (xhr.status === 422) {
+                                    const errors = xhr.responseJSON.errors;
+                                    message = Object.values(errors).flat().join('\n');
+                                }
+
+                                Toastify({
+                                    text: message,
+                                    backgroundColor: "#FF6B6B"
+                                }).showToast();
                             }
                         });
-                    </script>
+                    });
 
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const savedTab = localStorage.getItem('activeTab');
-                            const defaultTab = document.querySelector('.nav-link[href="#tab1"]');
-
-                            // Remove 'active' and 'show' from tab1 and its pane
-                            if (!savedTab && defaultTab) {
-                                defaultTab.classList.remove('active');
-                                const tab1Pane = document.querySelector('#tab1');
-                                if (tab1Pane) {
-                                    tab1Pane.classList.remove('active', 'show');
-                                }
-                            }
-
-                            // Restore the saved tab
-                            if (savedTab) {
-                                const trigger = document.querySelector('.nav-link[href="' + savedTab + '"]');
-                                if (trigger) {
-                                    new bootstrap.Tab(trigger).show();
-                                }
-                            }
-
-                            // Save active tab on change
-                            document.querySelectorAll('.nav-link').forEach(function (tab) {
-                                tab.addEventListener('shown.bs.tab', function (e) {
-                                    const href = e.target.getAttribute('href');
-                                    localStorage.setItem('activeTab', href);
-                                });
-                            });
+                </script>
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#productSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
                         });
-                    </script>
 
+                        document.getElementById('productSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('productSectionValue');
+                            const form = document.getElementById('productSectionForm');
 
+                            valueInput.value = isChecked ? 1 : 0;
 
-                    <script>
-                        function initUploadHandlers(prefix) {
-                            let input = $(`#product-image-${prefix}`);
-                            let uploadArea = $(`#upload-area-${prefix}`);
-                            let progress = $(`#upload-progress-${prefix}`);
-                            let progressBar = progress.find('.progress-bar');
-                            let uploadedImage = $(`#uploaded-image-${prefix}`);
-                            let removeButton = $(`#remove-image-${prefix}`);
+                            form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                        });
+                    });
+                </script>
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#reviewsWithoutImagesSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
 
-                            // Trigger hidden input on click
+                        document.getElementById('reviewsWithoutImagesSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('reviewsWithoutImagesSectionValue');
+                            const form = document.getElementById('reviewsWithoutImagesSectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                        });
+                    });
+                </script>
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#testimonialSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
+
+                        document.getElementById('testimonialSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('testimonialSectionValue');
+                            const form = document.getElementById('testimonialSectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                        });
+                    });
+                </script>
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#partnerSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
+
+                        document.getElementById('partnerSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('partnerSectionValue');
+                            const form = document.getElementById('partnerSectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                        });
+                    });
+                </script>
+
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#faqSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
+
+                        document.getElementById('faqSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('faqSectionValue');
+                            const form = document.getElementById('faqSectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                        });
+                    });
+                </script>
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#logoSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
+
+                        document.getElementById('logoSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('logoSectionValue');
+                            const form = document.getElementById('logoSectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                        });
+                    });
+                </script>
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#statisticsSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
+
+                        document.getElementById('statisticsSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('statisticsSectionValue');
+                            const form = document.getElementById('statisticsSectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                        });
+                    });
+                </script>
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#navbarSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
+
+                        document.getElementById('navbarSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('navbarSectionValue');
+                            const form = document.getElementById('navbarSectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                        });
+                    });
+                </script>
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#heroSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
+
+                        document.getElementById('heroSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('heroSectionValue');
+                            const form = document.getElementById('heroSectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit();
+                        });
+                    });
+                </script>
+                <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#categorySectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
+
+                        document.getElementById('categorySectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('categorySectionValue');
+                            const form = document.getElementById('categorySectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit();
+                        });
+                    });
+                </script>
+                <script>
+                    $(document).ready(function () {
+                        $('.carousel').each(function () {
+                            const form = $(this);
+                            const input = form.find('.mobile-carousel-image-input');
+                            const uploadArea = form.find('.upload-card');
+                            const uploadedImage = form.find('.mobile-uploaded-image');
+                            const progress = form.find('.mobile-upload-progress'); // Add this if needed
+                            const progressBar = progress.find('.mobile-progress-bar');
+
                             uploadArea.on('click', () => input.click());
 
-                            // File selected via input
-                            input.on('change', (e) => handleFiles(e.target.files));
-
-                            // Drag & drop events
-                            uploadArea.on('dragover', (e) => {
-                                e.preventDefault();
-                                uploadArea.addClass('dragover');
-                            });
-                            uploadArea.on('dragleave', (e) => {
-                                e.preventDefault();
-                                uploadArea.removeClass('dragover');
-                            });
-                            uploadArea.on('drop', (e) => {
-                                e.preventDefault();
-                                uploadArea.removeClass('dragover');
-                                handleFiles(e.originalEvent.dataTransfer.files);
-                            });
-
-                            // Remove image
-                            removeButton.on('click', () => {
-                                uploadedImage.addClass('d-none');
-                                input.val('');
-                            });
-
-                            function handleFiles(files) {
+                            input.on('change', function (e) {
+                                const files = e.target.files;
                                 if (files.length > 0) {
-                                    let file = files[0];
-
-                                    // Attach file to input
-                                    let dataTransfer = new DataTransfer();
-                                    dataTransfer.items.add(file);
-                                    input[0].files = dataTransfer.files;
+                                    const file = files[0];
 
                                     progress.removeClass('d-none');
                                     progressBar.css('width', '0%');
@@ -1840,30 +1604,286 @@
                                         if (fakeProgress >= 100) {
                                             clearInterval(interval);
 
-                                            // Show preview
-                                            let reader = new FileReader();
+                                            const reader = new FileReader();
                                             reader.onload = function (e) {
                                                 uploadedImage.find('img').attr('src', e.target.result);
                                                 uploadedImage.removeClass('d-none');
                                                 progress.addClass('d-none');
-
-                                                $(`#file-details-${prefix} .file-name`).text(file.name);
-                                                $(`#file-details-${prefix} .file-size`).text((file.size / 1024).toFixed(2) + ' KB');
                                             };
                                             reader.readAsDataURL(file);
                                         }
                                     }, 100);
                                 }
+                            });
+                        });
+                    });
+
+                    $(document).on('change', 'input[type="file"][name="image"]', function (e) {
+                        const input = e.target;
+                        const file = input.files[0];
+
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                const previewContainer = $(input).closest('form').find('.uploaded-image');
+                                previewContainer.find('img').attr('src', e.target.result);
+                                previewContainer.removeClass('d-none');
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    handleAjaxFormSubmit('.carousel', {
+                        onSuccess: function () {
+                            const currentTab = $('.nav-tabs .nav-link.active').attr('href');
+                            localStorage.setItem('activeTab', currentTab);
+                            location.reload();
+                        }
+                    });
+
+                </script>
+
+                <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+
+                <script>
+                    $(document).ready(function () {
+                        $('.invoice-repeater').repeater({
+                            show: function () {
+                                $(this).slideDown();
+                                feather && feather.replace();
+
+                                const items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                                items.each(function (index) {
+                                    // Hide delete button if it's the only one
+                                    $(this).find('[data-repeater-delete]').toggle(items.length > 1);
+                                });
+                            },
+                            hide: function (deleteElement) {
+                                const repeater = $(this).closest('.invoice-repeater');
+                                const items = repeater.find('[data-repeater-item]');
+
+                                // Prevent deleting if it's the only one
+                                if (items.length === 1) {
+                                    alert("At least one item is required.");
+                                    return;
+                                }
+
+                                $(this).slideUp(deleteElement, function () {
+                                    $(this).remove();
+
+                                    const remainingItems = repeater.find('[data-repeater-item]');
+                                    remainingItems.each(function (index) {
+                                        $(this).find('[data-repeater-delete]').toggle(remainingItems.length > 1);
+                                    });
+                                });
+                            }
+                        });
+                    });
+
+
+                </script>
+                <script>
+                    $(document).ready(function () {
+                        $('.upload-wrapper').each(function () {
+                            const wrapper = $(this);
+                            const input = wrapper.find('.image-input');
+                            const uploadCard = wrapper.find('.upload-card');
+                            const preview = wrapper.find('.uploaded-image');
+                            const progress = wrapper.find('.upload-progress');
+                            const progressBar = progress.find('.progress-bar');
+
+                            uploadCard.on('click', () => input.click());
+
+                            input.on('change', function (e) {
+                                const file = e.target.files[0];
+                                if (!file) return;
+
+                                preview.removeClass('d-none');
+                                progress.removeClass('d-none');
+                                progressBar.css('width', '0%');
+
+                                let percent = 0;
+                                const interval = setInterval(() => {
+                                    percent += 20;
+                                    progressBar.css('width', percent + '%');
+
+                                    if (percent >= 100) {
+                                        clearInterval(interval);
+                                        const reader = new FileReader();
+                                        reader.onload = function (e) {
+                                            preview.find('img').attr('src', e.target.result);
+                                            progress.addClass('d-none');
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }, 100);
+                            });
+                        });
+                    });
+
+                    $(document).on('click', '.remove-category', function (e) {
+                        e.preventDefault();
+
+                        const categoryId = $(this).data('id');
+
+                        $.ajax({
+                            url: '{{ route("categories.landing.remove") }}',
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                category_id: categoryId
+                            },
+                            success: function (response) {
+                                Toastify({
+                                    text: "Category removed successfully.",
+                                    backgroundColor: "#24B094"
+                                }).showToast();
+
+                                // Optionally remove the element from DOM
+                                location.reload();
+                            },
+                            error: function (xhr) {
+                                let message = "Something went wrong.";
+
+                                if (xhr.status === 422) {
+                                    const errors = xhr.responseJSON.errors;
+                                    message = Object.values(errors).flat().join('\n');
+                                }
+
+                                Toastify({
+                                    text: message,
+                                    backgroundColor: "#FF6B6B"
+                                }).showToast();
+                            }
+                        });
+                    });
+                </script>
+
+                <script>
+                    // Submit on Add Category
+                    handleAjaxFormSubmit(".landing-category-form", {
+                        successMessage: "Product added To Landing",
+                        onSuccess: function () {
+                            $('#addLandingCategoryModal').modal('hide');
+                            location.reload();
+                        }
+                    });
+                </script>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const savedTab = localStorage.getItem('activeTab');
+                        const defaultTab = document.querySelector('.nav-link[href="#tab1"]');
+
+                        // Remove 'active' and 'show' from tab1 and its pane
+                        if (!savedTab && defaultTab) {
+                            defaultTab.classList.remove('active');
+                            const tab1Pane = document.querySelector('#tab1');
+                            if (tab1Pane) {
+                                tab1Pane.classList.remove('active', 'show');
                             }
                         }
 
-                        // Init all uploaders
-                        $(document).ready(() => {
-                            initUploadHandlers('first');
-                            initUploadHandlers('second');
-                            initUploadHandlers('third');
-                            initUploadHandlers('fourth');
+                        // Restore the saved tab
+                        if (savedTab) {
+                            const trigger = document.querySelector('.nav-link[href="' + savedTab + '"]');
+                            if (trigger) {
+                                new bootstrap.Tab(trigger).show();
+                            }
+                        }
+
+                        // Save active tab on change
+                        document.querySelectorAll('.nav-link').forEach(function (tab) {
+                            tab.addEventListener('shown.bs.tab', function (e) {
+                                const href = e.target.getAttribute('href');
+                                localStorage.setItem('activeTab', href);
+                            });
                         });
-                    </script>
+                    });
+                </script>
+
+
+
+                <script>
+                    function initUploadHandlers(prefix) {
+                        let input = $(`#product-image-${prefix}`);
+                        let uploadArea = $(`#upload-area-${prefix}`);
+                        let progress = $(`#upload-progress-${prefix}`);
+                        let progressBar = progress.find('.progress-bar');
+                        let uploadedImage = $(`#uploaded-image-${prefix}`);
+                        let removeButton = $(`#remove-image-${prefix}`);
+
+                        // Trigger hidden input on click
+                        uploadArea.on('click', () => input.click());
+
+                        // File selected via input
+                        input.on('change', (e) => handleFiles(e.target.files));
+
+                        // Drag & drop events
+                        uploadArea.on('dragover', (e) => {
+                            e.preventDefault();
+                            uploadArea.addClass('dragover');
+                        });
+                        uploadArea.on('dragleave', (e) => {
+                            e.preventDefault();
+                            uploadArea.removeClass('dragover');
+                        });
+                        uploadArea.on('drop', (e) => {
+                            e.preventDefault();
+                            uploadArea.removeClass('dragover');
+                            handleFiles(e.originalEvent.dataTransfer.files);
+                        });
+
+                        // Remove image
+                        removeButton.on('click', () => {
+                            uploadedImage.addClass('d-none');
+                            input.val('');
+                        });
+
+                        function handleFiles(files) {
+                            if (files.length > 0) {
+                                let file = files[0];
+
+                                // Attach file to input
+                                let dataTransfer = new DataTransfer();
+                                dataTransfer.items.add(file);
+                                input[0].files = dataTransfer.files;
+
+                                progress.removeClass('d-none');
+                                progressBar.css('width', '0%');
+
+                                let fakeProgress = 0;
+                                let interval = setInterval(() => {
+                                    fakeProgress += 10;
+                                    progressBar.css('width', `${fakeProgress}%`);
+
+                                    if (fakeProgress >= 100) {
+                                        clearInterval(interval);
+
+                                        // Show preview
+                                        let reader = new FileReader();
+                                        reader.onload = function (e) {
+                                            uploadedImage.find('img').attr('src', e.target.result);
+                                            uploadedImage.removeClass('d-none');
+                                            progress.addClass('d-none');
+
+                                            $(`#file-details-${prefix} .file-name`).text(file.name);
+                                            $(`#file-details-${prefix} .file-size`).text((file.size / 1024).toFixed(2) + ' KB');
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }, 100);
+                            }
+                        }
+                    }
+
+                    // Init all uploaders
+                    $(document).ready(() => {
+                        initUploadHandlers('first');
+                        initUploadHandlers('second');
+                        initUploadHandlers('third');
+                        initUploadHandlers('fourth');
+                    });
+                </script>
 
 @endsection
