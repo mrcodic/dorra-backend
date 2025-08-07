@@ -34,7 +34,7 @@ class FaqSeeder extends Seeder
             ],
             [
                 'question' => 'How do I reset my password?',
-                'answer' => 'Click on "Forgot Password" at the login page and follow the instructions to reset your password.',
+                'answer' => 'Click on Forgot Password at the login page and follow the instructions to reset your password.',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
