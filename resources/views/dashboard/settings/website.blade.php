@@ -903,12 +903,12 @@
                                 <form id="createPartner" action="{{ route("partners.create") }}" method="post"
                                       enctype="multipart/form-data">
                                     @csrf
-                                    <input type="file" name="image" id="product-image-main" class="form-control d-none"
+                                    <input type="file" name="image" id="partner-image-main" class="form-control d-none"
                                            accept="image/*">
 
                                     <!-- Custom Upload Card -->
-                                    <div id="upload-area" class="upload-card">
-                                        <div id="upload-content">
+                                    <div id="partner-upload-area" class="upload-card">
+                                        <div id="partner-upload-content">
                                             <i data-feather="upload" class="mb-2"></i>
                                             <p>Drag image here to upload</p>
                                         </div>
@@ -917,22 +917,22 @@
                                     </div>
                                     <div>
                                         <!-- Progress Bar -->
-                                        <div id="upload-progress" class="progress mt-2 d-none w-50">
-                                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                        <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
+                                            <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
                                                  style="width: 0%"></div>
                                         </div>
 
 
                                         <!-- Uploaded Image Preview -->
-                                        <div id="uploaded-image"
-                                             class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                        <div id="partner-uploaded-image"
+                                             class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
                                             <img src="" alt="Uploaded" class="img-fluid rounded"
                                                  style="width: 50px; height: 50px; object-fit: cover;">
                                             <div id="file-details" class="file-details">
                                                 <div class="file-name fw-bold"></div>
                                                 <div class="file-size text-muted small"></div>
                                             </div>
-                                            <button type="button" id="remove-image"
+                                            <button type="button" id="partner-remove-image"
                                                     class="btn btn-sm position-absolute text-danger"
                                                     style="top: 5px; right: 5px; background-color: #FFEEED">
                                                 <i data-feather="trash"></i>
@@ -1048,6 +1048,89 @@
                                 location.reload();
                             }
                         })
+                        $(document).ready(function () {
+                            let input = $('#partner-image-main');
+                            let uploadArea = $('#partner-upload-area');
+                            let progress = $('#partner-upload-progress');
+                            let progressBar = $('.partner-progress-bar');
+                            let uploadedImage = $('#partner-uploaded-image');
+                            let removeButton = $('#partner-remove-image');
+
+                            // Click on the upload area triggers the hidden input
+                            uploadArea.on('click', function () {
+                                input.click();
+                            });
+
+                            // Handle file selection
+                            input.on('change', function (e) {
+                                handleFiles(e.target.files);
+                            });
+
+                            // Handle Drag & Drop
+                            uploadArea.on('dragover', function (e) {
+                                e.preventDefault();
+                                uploadArea.addClass('dragover');
+                            });
+
+                            uploadArea.on('dragleave', function (e) {
+                                e.preventDefault();
+                                uploadArea.removeClass('dragover');
+                            });
+
+                            uploadArea.on('drop', function (e) {
+                                e.preventDefault();
+                                uploadArea.removeClass('dragover');
+                                handleFiles(e.originalEvent.dataTransfer.files);
+                            });
+
+                            function handleFiles(files) {
+                                if (files.length > 0) {
+                                    let file = files[0];
+
+                                    // 🔽 This is the fix: assign the dropped file to the input element
+                                    let dataTransfer = new DataTransfer();
+                                    dataTransfer.items.add(file);
+                                    input[0].files = dataTransfer.files;
+
+                                    console.log('Input files:', input[0].files); // Make sure this logs a FileList with 1 file
+
+                                    // Show loader
+                                    progress.removeClass('d-none');
+                                    progressBar.css('width', '0%');
+
+                                    // Fake loading effect
+                                    let fakeProgress = 0;
+                                    let interval = setInterval(function () {
+                                        fakeProgress += 10;
+                                        progressBar.css('width', fakeProgress + '%');
+
+                                        if (fakeProgress >= 100) {
+                                            clearInterval(interval);
+
+                                            // Preview image
+                                            let reader = new FileReader();
+                                            reader.onload = function (e) {
+                                                uploadedImage.find('img').attr('src', e.target.result);
+                                                uploadedImage.removeClass('d-none');
+                                                progress.addClass('d-none');
+
+                                                // Show file name and size
+                                                $('#file-details .file-name').text(file.name);
+                                                $('#file-details .file-size').text((file.size / 1024).toFixed(2) + ' KB');
+                                            }
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }, 100);
+                                }
+                            }
+
+                            // Remove image
+                            removeButton.on('click', function () {
+                                uploadedImage.addClass('d-none');
+                                input.val(''); // Clear the input
+                            });
+                        });
+
                         $(document).ready(function () {
                             let input = $('#product-image-main');
                             let uploadArea = $('#upload-area');
