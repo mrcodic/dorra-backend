@@ -37,6 +37,7 @@ class OrderController extends Controller
     public function checkout(CheckoutRequest $request)
     {
         $order = $this->orderService->checkout($request);
+        dd($order);
         if (Arr::get($order,'paymentDetails') === false)
         {
             return Response::api(HttpEnum::BAD_REQUEST,
