@@ -297,7 +297,6 @@
                                                     <!-- Action Buttons -->
                                                     <div class="d-flex justify-content-between mt-3">
                                                         <button type="button"
-                                                                data-repeater-delete
                                                                 class="btn btn-outline-danger open-delete-carousel-modal"
                                                                 data-bs-toggle="modal"
                                                                 data-bs-target="#deleteCarouselModal"
@@ -1216,6 +1215,28 @@
                         }
                     })
                     $(document).ready(function () {
+                        $(document).on('click', '.upload-card', function () {
+                            $(this).siblings('input[type="file"]').trigger('click');
+                        });
+                        $(document).on('change', 'input[type="file"]', function (e) {
+                            const input = this;
+                            const wrapper = $(this).closest('.upload-wrapper');
+                            const preview = wrapper.find('.uploaded-image');
+                            const img = preview.find('img');
+
+                            if (input.files && input.files[0]) {
+                                const reader = new FileReader();
+                                reader.onload = function (e) {
+                                    img.attr('src', e.target.result);
+                                    preview.removeClass('d-none');
+                                };
+                                reader.readAsDataURL(input.files[0]);
+                            } else {
+                                img.attr('src', '');
+                                preview.addClass('d-none');
+                            }
+                        });
+
                         let input = $('#partner-image-main');
                         let uploadArea = $('#partner-upload-area');
                         let progress = $('#partner-upload-progress');
@@ -1777,6 +1798,8 @@
                     $(document).ready(function () {
                         $('.invoice-repeater').repeater({
                             show: function () {
+                                $(this).find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
+
                                 $(this).slideDown();
                                 feather && feather.replace();
 
@@ -1807,8 +1830,6 @@
                             }
                         });
                     });
-
-
                 </script>
                 <script>
                     $(document).ready(function () {
