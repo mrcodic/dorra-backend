@@ -108,6 +108,30 @@ $configData = Helper::applClasses();
         });
     }
 
+
+    function setupClearInput(inputId, buttonId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+
+        if (input && button) {
+            button.addEventListener('click', function () {
+                if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                } else {
+                    input.value = '';
+                }
+
+                input.dispatchEvent(new Event('change'));
+
+                // Submit the form that contains the input
+                const form = input.closest('form');
+                if (form) {
+                    form.submit(); // <-- submit the form to reload data
+                }
+            });
+        }
+    }
+
 </script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
 

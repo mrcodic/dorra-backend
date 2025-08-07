@@ -51,6 +51,13 @@
                                 id="search-sub-category-form"
                                 placeholder="Search subcategory..."
                                 style="height: 38px;">
+                            <button type="button" id="clearSubCategorySearchInput"
+                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                             background: transparent; border: none; font-weight: bold;
+                            color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                                    title="Clear filter">
+                                &times;
+                            </button>
                         </form>
                     </div>
 
@@ -161,6 +168,8 @@
     <script src="{{ asset('js/scripts/pages/app-sub-category-list.js') }}?v={{ time() }}"></script>
     <script>
         $(document).ready(function () {
+            setupClearInput('search-sub-category-form', 'clearSubCategorySearchInput');
+
             // Select all toggle
             $('#select-all-checkbox').on('change', function () {
                 $('.category-checkbox').prop('checked', this.checked);

@@ -49,24 +49,33 @@
                                 id="search-product-form"
                                 placeholder="Search category..."
                                 style="height: 38px;">
+                            <button type="button" id="clearSearchInput"
+                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                background: transparent; border: none; font-weight: bold;
+                     color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                                    title="Clear filter">
+                                &times;
+                            </button>
                         </form>
                     </div>
 
-                    <div class="col-6 col-md-2 col-lg-2">
-                        <select id="categorySelect" name="category_id" class="form-select category-select">
-                            <option value=""  selected disabled>Product</option>
+                    <div class="col-6 col-md-2 col-lg-2" style="position: relative;">
+                        <select id="categorySelect" name="category_id" class="form-select category-select pe-5">
+                            <option value="" selected disabled>Product</option>
                             @foreach($associatedData['categories'] as $category)
                                 <option value="{{ $category->id }}">{{ $category->name}}</option>
                             @endforeach
                         </select>
-                        <button type="button" id="clearProductFilter"
+
+                        <button type="button" id="clearCategoryFilter"
                                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                       background: transparent; border: none; font-weight: bold;
-                       color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                                title="Clear filter">
+        background: transparent; border: none; font-weight: bold;
+        color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                                title="Clear search">
                             &times;
                         </button>
                     </div>
+
 
 
                     <div class="col-6 col-md-2 col-lg-2">
@@ -79,11 +88,12 @@
                             </select>
                             <button type="button" id="clearTagFilter"
                                     style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                       background: transparent; border: none; font-weight: bold;
-                       color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                background: transparent; border: none; font-weight: bold;
+                     color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
                                     title="Clear filter">
                                 &times;
                             </button>
+
                         </div>
                     </div>
 
@@ -134,19 +144,18 @@
                     </div>
                 </div>
             </div>
-            @include('modals.delete',[
+        <!-- list and filter end -->
+        @include('modals.delete',[
                      'id' => 'deleteProductModal',
                      'formId' => 'deleteProductForm',
                      'title' => 'Delete Product',
                      ])
-            @include('modals.delete',[
-            'id' => 'deleteProductsModal',
-            'formId' => 'bulk-delete-form',
-            'title' => 'Delete Categories',
-            'confirmText' => 'Are you sure you want to delete this items?',
-            ])
-        </div>
-        <!-- list and filter end -->
+        @include('modals.delete',[
+        'id' => 'deleteProductsModal',
+        'formId' => 'bulk-delete-form',
+        'title' => 'Delete Categories',
+        'confirmText' => 'Are you sure you want to delete this items?',
+        ])
     </section>
     <!-- users list ends -->
 @endsection
@@ -180,17 +189,20 @@
         const productsCreateUrl = "{{ route('products.create') }}";
     </script>
     <script>
-        document.getElementById('clearTagFilter').addEventListener('click', function () {
-            const select = document.getElementById('tagSelect');
-            select.selectedIndex = 0; // Select the first option (placeholder)
-            select.dispatchEvent(new Event('change')); // If you have JS that listens to this
+        $(document).ready(function () {
+
+            setupClearInput('search-product-form', 'clearSearchInput');
+            setupClearInput('tagSelect', 'clearTagFilter');
+            setupClearInput('categorySelect', 'clearCategoryFilter');
+
         });
     </script>
+
     <script>
         document.getElementById('clearProductFilter').addEventListener('click', function () {
             const select = document.getElementById('categorySelect');
             select.selectedIndex = 0; // Select the first option (placeholder)
-            select.dispatchEvent(new Event('change')); // If you have JS that listens to this
+            select.dispatchEvent(new Event('change')); // Trigger change event
         });
     </script>
 

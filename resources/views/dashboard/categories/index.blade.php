@@ -52,6 +52,13 @@
                                 id="search-category-form"
                                 placeholder="Search product..."
                                 style="height: 38px;">
+                            <button type="button" id="clearCategorySearchInput"
+                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                             background: transparent; border: none; font-weight: bold;
+                            color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                                    title="Clear filter">
+                                &times;
+                            </button>
                         </form>
                     </div>
 
@@ -169,6 +176,8 @@
 
     <script>
         $(document).ready(function () {
+            setupClearInput('search-category-form', 'clearCategorySearchInput');
+
             // Select all toggle
             $('#select-all-checkbox').on('change', function () {
                 $('.category-checkbox').prop('checked', this.checked);
