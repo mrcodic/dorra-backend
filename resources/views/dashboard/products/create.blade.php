@@ -238,7 +238,7 @@
                                         </div>
                                         <div class="col border rounded-3 p-1">
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input " type="radio" name="has_custom_prices" id="defaultPrice" value="0">
+                                                <input class="form-check-input" type="radio" name="has_custom_prices" id="defaultPrice" value="0">
                                                 <div>
                                                     <label class="form-check-label label-text d-block" for="defaultPrice">Default Quantity</label>
                                                     <label class="form-check-label text-dark" for="defaultPrice">Default Price</label>
@@ -260,7 +260,7 @@
                                                         <div class="col-md-4">
                                                             <div class="mb-2">
                                                                 <label class="form-label label-text">Quantity</label>
-                                                                <input type="number" name="prices[][quantity]" class="form-control" placeholder="Add Quantity"
+                                                                <input type="number"  name="prices[][quantity]" class="form-control" placeholder="Add Quantity"
 
                                                                 />
                                                             </div>

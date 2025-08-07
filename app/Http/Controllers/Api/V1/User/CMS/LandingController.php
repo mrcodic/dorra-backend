@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CMS\CarouselResource;
 use App\Http\Resources\CMS\LandingReviewResource;
+use App\Http\Resources\FaqResource;
 use App\Http\Resources\MediaResource;
 use App\Models\Carousel;
+use App\Repositories\Interfaces\FaqRepositoryInterface;
 use App\Repositories\Interfaces\LandingReviewRepositoryInterface;
 use App\Services\CategoryService;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -54,6 +56,13 @@ class LandingController extends Controller
     {
         $reviewsWithoutImages = $landingReviewRepository->query()->whereType('without_image')->get();
         return Response::api(data: LandingReviewResource::collection($reviewsWithoutImages));
+    }
+
+    public function faqs(FaqRepositoryInterface $faqRepository)
+    {
+        $faqs = $faqRepository->all(columns: ['id','question', 'answer']);
+        return Response::api(data: FaqResource::collection($faqs));
+
     }
 
 }

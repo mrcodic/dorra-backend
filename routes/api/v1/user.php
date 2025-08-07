@@ -162,5 +162,6 @@ Route::prefix("landing/")->controller(LandingController::class)->group(function 
     Route::get('partners' , 'partners');
     Route::get('reviews-with-images' , 'reviewsWithImages');
     Route::get('reviews-without-images' , 'reviewsWithoutImages');
+    Route::get('faqs' , 'faqs');
 });
 
