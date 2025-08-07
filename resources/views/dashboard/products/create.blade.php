@@ -477,7 +477,7 @@
             </div>
         </div>
     </div>
-    </div>
+
     @include("modals.products.add-size")
 </section>
 @endsection
@@ -488,9 +488,97 @@
 @endsection
 
 @section('page-script')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-<script>
+    <script>
+        console.log(jQuery.fn.jquery);
+
+        $(document).ready(function () {
+            const form = $("#product-form");
+            let currentStep = 0;
+
+            const steps = [
+                $("#step1"),
+                $("#step2"),
+                $("#step3")
+            ];
+
+            const navTabs = $("#formTabs .nav-link");
+
+            // jQuery Validation
+            form.validate({
+                ignore: [],
+                errorClass: "is-invalid",
+                validClass: "is-valid",
+                errorElement: "div",
+                errorPlacement: function (error, element) {
+                    error.addClass("invalid-feedback");
+                    if (element.closest('.input-group').length) {
+                        error.insertAfter(element.closest('.input-group'));
+                    } else {
+                        error.insertAfter(element);
+                    }
+                },
+                rules: {
+                    "name[en]": "required",
+                    "name[ar]": "required",
+                    "image": "required",
+                    "category_id": "required",
+                    "dimensions[]": {
+                        required: true,
+                        minlength: 1
+                    }
+                },
+                messages: {
+                    "name[en]": "Please enter the category name in English.",
+                    "name[ar]": "Please enter the category name in Arabic.",
+                    "image": "Please upload a category image.",
+                    "category_id": "Please select a product.",
+                    "dimensions[]": "Please select at least one size."
+                }
+            });
+
+            // Step UI control
+            function goToStep(index) {
+                $(".tab-pane").removeClass("active d-block").addClass("d-none");
+                steps[index].removeClass("d-none").addClass("active d-block");
+
+                navTabs.removeClass("active");
+                navTabs.eq(index).addClass("active");
+
+                currentStep = index;
+            }
+
+            $(".next-tab").on("click", function () {
+                // Validate only visible fields
+                const currentFields = steps[currentStep].find("input, select, textarea").filter(":visible");
+                if (currentFields.length === 0 || currentFields.toArray().every(field => $(field).valid())) {
+                    if (currentStep < steps.length - 1) {
+                        goToStep(currentStep + 1);
+                    }
+                }
+            });
+
+            $(".prev-tab").on("click", function () {
+                if (currentStep > 0) {
+                    goToStep(currentStep - 1);
+                }
+            });
+
+            // Optional: disable manual tab clicks forward
+            navTabs.on("click", function (e) {
+                e.preventDefault();
+                const step = parseInt($(this).data("step"));
+
+                if (step <= currentStep) {
+                    goToStep(step);
+                }
+            });
+
+            // Start on first step
+            goToStep(0);
+        });
+    </script>
+
+    <script>
     $(document).ready(function() {
         // Optional if you want to clear when user reloads
         window.addEventListener("beforeunload", function() {

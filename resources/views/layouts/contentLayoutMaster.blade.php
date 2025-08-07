@@ -32,6 +32,9 @@ $configData = Helper::applClasses();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 
+
+    <!-- jQuery Validation -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     {{-- Include core + vendor Styles --}}
   @include('panels/styles')
     @stack('styles')
@@ -133,6 +136,6 @@ $configData = Helper::applClasses();
     }
 
 </script>
-<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+
 
 @stack('scripts')

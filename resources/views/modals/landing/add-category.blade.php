@@ -16,7 +16,7 @@
                             <div class="form-group mb-2">
                                 <label for="productsSelect" class="label-text mb-1">Products</label>
                                 <select id="productsSelect" class="form-select category-select" name="category_id">
-                                    <option value="" disabled>Choose product</option>
+                                    <option value="" disabled selected>Choose product</option>
                                     @foreach($allCategories as $category)
                                         <option value="{{ $category->id }}">
                                             {{ $category->getTranslation('name', app()->getLocale()) }}
