@@ -34,6 +34,7 @@ class TeamResource extends JsonResource
             'ownered_by_me' => $this->owner?->id == auth('sanctum')->user()?->id,
             'designs_count' => $this->designs_count,
             'designs' => DesignResource::collection($this->whenLoaded('designs')),
+            'delete_since' => $this->deleted_at?->diffForHumans(),
 
         ];
     }

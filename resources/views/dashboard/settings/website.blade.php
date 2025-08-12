@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Settings Details')
-@section('main-page', 'Details')
+@section('main-page', 'Website')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -124,7 +124,7 @@
                         </button>
                     </div>
                     </div>
-                
+
                     <div class="row">
                         @forelse($categories as $category)
                             <!-- Product Card -->
@@ -181,7 +181,7 @@
                         </form>
 
                     </div>
-                
+
                     <div class="invoice-repeater">
                                       {{-- Add button --}}
                         <div class="text-start d-flex justify-content-end mb-2">
@@ -202,12 +202,13 @@
                                     <div data-repeater-item>
                                         <div class="col-md-12 mb-2">
                                             <div class="card p-1 mb-4 border rounded-md shadow-sm">
-                                                <form action="{{ route("carousels.update", $carousel->id) }}"
+                                                <form action="{{ route("carousels.update") }}"
                                                       method="POST"
                                                       enctype="multipart/form-data"
                                                       class="carousel">
                                                     @csrf
                                                     @method("PUT")
+                                                        <input type="hidden" name="carousels[{{ $loop->index }}][id]" value="{{ $carousel->id }}">
 
                                                     <!-- Website Image Upload -->
                                                     <label class="form-label">Website Image</label>
@@ -222,8 +223,7 @@
                                                         <input type="file" name="image"
                                                                class="form-control d-none image-input"
                                                                accept="image/*">
-                                                        <div
-                                                            class="uploaded-image{{ $carousel->getFirstMediaUrl('carousels') ? '':'d-none' }}  mt-2">
+                                                        <div class="uploaded-image{{ $carousel->getFirstMediaUrl('carousels') ? '': 'd-none' }}  mt-2">
                                                             <img
                                                                 src="{{ $carousel->getFirstMediaUrl('carousels') }}"
                                                                 class="img-fluid rounded"
@@ -345,7 +345,7 @@
                                                                class="form-control d-none image-input"
                                                                accept="image/*">
                                                         <div
-                                                            class="uploaded-image  mt-2">
+                                                            class="uploaded-image d-none  mt-2">
                                                             <img
                                                                 src=""
                                                                 class="img-fluid rounded"
@@ -370,7 +370,7 @@
                                                                class="form-control d-none image-input"
                                                                accept="image/*">
                                                         <div
-                                                            class="uploaded-image mt-2">
+                                                            class="uploaded-image d-none mt-2">
                                                             <img
                                                                 src=""
                                                                 class="img-fluid rounded"
@@ -526,7 +526,7 @@
 
                         </div>
 
-                   
+
                     </div>
 
 
@@ -866,7 +866,7 @@
                                 <h5 class="text-black fs-16">Added Reviews</h5>
                                 <div class="row row-cols-1 row-cols-md-2 g-3 mt-2 ">
                                     @foreach($reviewsWithImages as $review)
-                                        <div class="col-md-6 mb-2"  style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">                                        
+                                        <div class="col-md-6 mb-2"  style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
                                                 <div class="p-1 d-flex">
                                                     <img
                                                         src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
@@ -892,7 +892,7 @@
                                                             </button>
                                                         </form>
                                                     </div>
-                                                </div>                                          
+                                                </div>
                                         </div>
                                     @endforeach
                                 </div>
@@ -902,7 +902,7 @@
                         </div>
 
                         <div class="card mt-2 border rounded">
-                            
+
                             <div class="card-body">
                                   <p class="fs-4 text-black ">Words of Praise</p>
                                 <!-- Header with toggle -->
@@ -974,8 +974,8 @@
                                     <h5 class="text-black fs-16">Added Reviews</h5>
                                     <div class="row row-cols-1 row-cols-md-2 g-3 ">
                                         @foreach($reviewsWithoutImages as $review)
-                                               <div class="col-md-6 mb-2"  style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">  
-                                              
+                                               <div class="col-md-6 mb-2"  style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+
                                                     <div class="p-1 d-flex">
                                                         <div>
                                                             <strong>{{ $review->customer }}</strong>
@@ -1001,9 +1001,9 @@
                                                         <small
                                                             class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                         <p class="mb-1">{{ $review->review }}</p>
-                                            
+
                                                     </div>
-                                       
+
                                             </div>
                                         @endforeach
                                     </div>
@@ -1016,7 +1016,7 @@
 
                 </div>
 
-           
+
             <!-- tab8 -->
             <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
                 <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"

@@ -16,6 +16,7 @@ use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Traits\HandlesTryCatch;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -63,14 +64,16 @@ class SettingController extends Controller
         return view("dashboard.settings.website", get_defined_vars());
     }
 
-    public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository,$id = null)
+    public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository)
     {
         $validatedData = $request->validated();
-        dd($id);
-        collect($validatedData['carousels'])->each(function ($carouselData, $index) use ($carouselRepository,$id) {
+
+        collect($validatedData['carousels'])->each(function ($carouselData, $index) use ($carouselRepository) {
 
             $model = $carouselRepository->query()->updateOrCreate(
-                ['id' =>$id?? null],
+                [
+                    'id' => $carouselData['id'] ?? null
+                ],
                 [
                     'title' => [
                         'en' => $carouselData['title_en'],
@@ -89,7 +92,7 @@ class SettingController extends Controller
                     request()->file("carousels.$index.mobile_image"),
                     $model,
                     collectionName: "mobile_carousels",
-                    clearExisting: true
+                    clearExisting: (bool)Arr::get($carouselData,'id')
                 );
             }
 
@@ -98,7 +101,7 @@ class SettingController extends Controller
                     request()->file("carousels.$index.image"),
                     $model,
                     collectionName: "carousels",
-                    clearExisting: true
+                    clearExisting: (bool)Arr::get($carouselData,'id')
                 );
             }
         });
@@ -109,7 +112,8 @@ class SettingController extends Controller
     {
         $carousel = $carouselRepository->find($id);
         if ($carousel && $carousel->hasMedia()) {
-            $carousel->clearMediaCollection();
+            $carousel->clearMediaCollection('mobile_carousels');
+            $carousel->clearMediaCollection('carousels');
         }
         $carousel->delete();
         return Response::api();
