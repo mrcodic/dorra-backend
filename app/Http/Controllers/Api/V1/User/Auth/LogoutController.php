@@ -32,12 +32,12 @@ class LogoutController extends Controller
                 minutes: -1, // expire immediately
                 path: '/',
                 domain: '.dorraprint.com',
-                secure: true, // match how it was set
-                httpOnly: true, // match original
-                raw: false,
+                secure: false, // match how it was set
+                httpOnly: false,
+
                 sameSite: 'Lax' // match original
             )
-        );;
+        );
 
 
     }
