@@ -35,6 +35,42 @@ class UpdateCarouselRequest extends BaseRequest
             'carousels.*.mobile_image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],
         ];
     }
+    public function messages(): array
+    {
+        return [
+            'carousels.required' => 'At least one carousel item is required.',
+            'carousels.array' => 'Carousels data must be sent as an array.',
+
+            'carousels.*.id.integer' => 'Carousel ID must be a valid number.',
+            'carousels.*.id.exists' => 'The selected carousel does not exist.',
+
+            'carousels.*.title_en.required' => 'The English title is required.',
+            'carousels.*.title_en.string' => 'The English title must be a text.',
+            'carousels.*.title_en.max' => 'The English title may not be longer than 255 characters.',
+
+            'carousels.*.title_ar.required' => 'The Arabic title is required.',
+            'carousels.*.title_ar.string' => 'The Arabic title must be a text.',
+            'carousels.*.title_ar.max' => 'The Arabic title may not be longer than 255 characters.',
+
+            'carousels.*.subtitle_en.required' => 'The English subtitle is required.',
+            'carousels.*.subtitle_en.string' => 'The English subtitle must be a text.',
+            'carousels.*.subtitle_en.max' => 'The English subtitle may not be longer than 255 characters.',
+
+            'carousels.*.subtitle_ar.required' => 'The Arabic subtitle is required.',
+            'carousels.*.subtitle_ar.string' => 'The Arabic subtitle must be a text.',
+            'carousels.*.subtitle_ar.max' => 'The Arabic subtitle may not be longer than 255 characters.',
+
+            'carousels.*.product_id.required' => 'Please select a product.',
+            'carousels.*.product_id.integer' => 'The product ID must be a valid number.',
+            'carousels.*.product_id.exists' => 'The selected product does not exist.',
+
+            'carousels.*.image.image' => 'The website image must be an image file.',
+            'carousels.*.image.mimes' => 'The website image must be a file of type: jpeg, png, jpg, svg.',
+
+            'carousels.*.mobile_image.image' => 'The mobile image must be an image file.',
+            'carousels.*.mobile_image.mimes' => 'The mobile image must be a file of type: jpeg, png, jpg, svg.',
+        ];
+    }
 
 
 
