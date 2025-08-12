@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Response;
 
 class LogoutController extends Controller
@@ -20,9 +21,21 @@ class LogoutController extends Controller
     public function __invoke(Request $request)
     {
         $this->authService->logout($request);
-        return Response::api(
-            message: 'You are successfully logged out',
-        );
+        return response()->json([
+            'message' => 'You are successfully logged out'
+        ])->withCookie(
+            Cookie::make(
+                name: 'dorra_auth_token',
+                value: null,
+                minutes: -1, // expire immediately
+                path: '/',
+                domain: '.dorraprint.com',
+                secure: true, // match how it was set
+                httpOnly: true, // match original
+                raw: false,
+                sameSite: 'Lax' // match original
+            )
+        );;
 
 
     }
