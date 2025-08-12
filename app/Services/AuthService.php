@@ -168,19 +168,6 @@ class AuthService
 
         }
 
-        Cookie::queue(
-            Cookie::make(
-                name: 'dorra_auth_token',
-                value: null,
-                minutes: -1, // expire immediately
-                path: '/',
-                domain: '.dorraprint.com',
-                secure: true, // match how it was set if using HTTPS
-                httpOnly: true, // match original if it was HTTP only
-                raw: false,
-                sameSite: 'Lax' // match original SameSite setting
-            )
-        );
         return $user->currentAccessToken()->delete();
     }
 
