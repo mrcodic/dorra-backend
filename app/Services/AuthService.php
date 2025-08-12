@@ -73,7 +73,7 @@ class AuthService
                 'provider_id' => $googleUser->getId(),
             ]);
 
-            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
+            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(10))->plainTextToken;
             $user->token = $plainTextToken;
 
             return $user;
@@ -144,8 +144,10 @@ class AuthService
     {
         $user = $request->user();
         $cookieValue = request()->cookie('cookie_id');
-//        $user->currentAccessToken()->delete();
+        $user->currentAccessToken()->delete();
         $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         if ($cookieValue) {
             $guest = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
