@@ -116,15 +116,15 @@
                         <span class="fw-semibold fs-4 ms-1" style="color: #24B094;">7 Products</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
-                        <p class="fw-semibold text-black fs-16">Added Products</p>
-                        <div class="col-3 ms-auto ">
-                            <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
-                                    data-bs-target="#addLandingCategoryModal">
-                                Add Product
-                            </button>
-                        </div>
+                            <p class="fw-semibold text-black fs-16">Added Products</p>
+                    <div class="col-3 ms-auto ">
+                        <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                                data-bs-target="#addLandingCategoryModal">
+                            Add Product
+                        </button>
                     </div>
-
+                    </div>
+                
                     <div class="row">
                         @forelse($categories as $category)
                             <!-- Product Card -->
@@ -181,9 +181,9 @@
                         </form>
 
                     </div>
-
+                
                     <div class="invoice-repeater">
-                        {{-- Add button --}}
+                                      {{-- Add button --}}
                         <div class="text-start d-flex justify-content-end mb-2">
                             <button type="button" data-repeater-create class="btn btn-primary">
                                 <i data-feather="plus"></i> Add Carousel
@@ -202,7 +202,7 @@
                                     <div data-repeater-item>
                                         <div class="col-md-12 mb-2">
                                             <div class="card p-1 mb-4 border rounded-md shadow-sm">
-                                                <form action="{{ route("carousels.update", $carousel->id ?? null) }}"
+                                                <form action="{{ route("carousels.update", $carousel->id) }}"
                                                       method="POST"
                                                       enctype="multipart/form-data"
                                                       class="carousel">
@@ -526,7 +526,7 @@
 
                         </div>
 
-
+                   
                     </div>
 
 
@@ -866,34 +866,33 @@
                                 <h5 class="text-black fs-16">Added Reviews</h5>
                                 <div class="row row-cols-1 row-cols-md-2 g-3 mt-2 ">
                                     @foreach($reviewsWithImages as $review)
-                                        <div class="col-md-6 mb-2"
-                                             style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                                            <div class="p-1 d-flex">
-                                                <img
-                                                    src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
-                                                    class="rounded me-3"
-                                                    style="width: 50px; height: 50px; object-fit: cover;">
-                                                <div>
-                                                    <strong>{{ $review->customer }}</strong>
-                                                    <div class="text-warning">
-                                                        @for($i = 1; $i <= 5; $i++)
-                                                            <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
-                                                        @endfor
+                                        <div class="col-md-6 mb-2"  style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">                                        
+                                                <div class="p-1 d-flex">
+                                                    <img
+                                                        src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
+                                                        class="rounded me-3"
+                                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                                    <div>
+                                                        <strong>{{ $review->customer }}</strong>
+                                                        <div class="text-warning">
+                                                            @for($i = 1; $i <= 5; $i++)
+                                                                <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
+                                                            @endfor
+                                                        </div>
+                                                        <small
+                                                            class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                        <p class="mb-1">{{ $review->review }}</p>
+                                                        <form class="remove-review"
+                                                              action="{{ route("reviews.remove", $review->id) }}"
+                                                              method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                Remove
+                                                            </button>
+                                                        </form>
                                                     </div>
-                                                    <small
-                                                        class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
-                                                    <p class="mb-1">{{ $review->review }}</p>
-                                                    <form class="remove-review"
-                                                          action="{{ route("reviews.remove", $review->id) }}"
-                                                          method="POST">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                            Remove
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
+                                                </div>                                          
                                         </div>
                                     @endforeach
                                 </div>
@@ -903,9 +902,9 @@
                         </div>
 
                         <div class="card mt-2 border rounded">
-
+                            
                             <div class="card-body">
-                                <p class="fs-4 text-black ">Words of Praise</p>
+                                  <p class="fs-4 text-black ">Words of Praise</p>
                                 <!-- Header with toggle -->
                                 <div
                                     class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
@@ -975,33 +974,36 @@
                                     <h5 class="text-black fs-16">Added Reviews</h5>
                                     <div class="row row-cols-1 row-cols-md-2 g-3 ">
                                         @foreach($reviewsWithoutImages as $review)
-                                            <div class="col-md-6 mb-2"
-                                                 style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-
-                                                <div class="p-1 d-flex">
-                                                    <div>
-                                                        <strong>{{ $review->customer }}</strong>
-                                                        <div class="text-warning">
-                                                            @for($i = 1; $i <= 5; $i++)
-                                                                <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
-                                                            @endfor
+                                               <div class="col-md-6 mb-2"  style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">  
+                                              
+                                                    <div class="p-1 d-flex">
+                                                        <div>
+                                                            <strong>{{ $review->customer }}</strong>
+                                                            <div class="text-warning">
+                                                                @for($i = 1; $i <= 5; $i++)
+                                                                    <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
+                                                                @endfor
+                                                            </div>
+                                                            <small
+                                                                class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                            <p class="mb-1">{{ $review->review }}</p>
+                                                            <form class="remove-review"
+                                                                  action="{{ route("reviews.remove", $review->id) }}"
+                                                                  method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                        class="btn btn-sm btn-outline-danger">
+                                                                    Remove
+                                                                </button>
+                                                            </form>
                                                         </div>
                                                         <small
                                                             class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                         <p class="mb-1">{{ $review->review }}</p>
-                                                        <form class="remove-review"
-                                                              action="{{ route("reviews.remove", $review->id) }}"
-                                                              method="POST">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                    class="btn btn-sm btn-outline-danger">
-                                                                Remove
-                                                            </button>
-                                                        </form>
+                                            
                                                     </div>
-                                                </div>
-
+                                       
                                             </div>
                                         @endforeach
                                     </div>
@@ -1014,6 +1016,12 @@
 
                 </div>
 
+           
+            <!-- tab8 -->
+            <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
+                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                    <span class="fw-semibold text-black fs-4">Show partners section</span>
 
                 <!-- tab8 -->
                 <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
@@ -1029,32 +1037,39 @@
                             <input type="hidden" name="value" value="{{ setting('partners_section') ? 1 : 0 }}"
                                    id="partnerSectionValue">
 
-                            <div class="form-check form-switch">
-                                <input
-                                    class="form-check-input toggle-switch"
-                                    type="checkbox"
-                                    id="partnerSectionToggle"
-                                    {{ setting('partners_section') ? 'checked' : '' }}
-                                >
-                            </div>
-                        </form>
-                    </div>
+                <p class="fw-semibold text-black fs-4">Photo</p>
+                <div class="position-relative">
+                    <div class="row g-2 mb-2">
+                        <div class="col-12">
+                            <form id="createPartner" action="{{ route("partners.create") }}" method="post"
+                                  enctype="multipart/form-data">
+                                @csrf
+                                <input type="file" name="image" id="partner-image-main" class="form-control d-none"
+                                       accept="image/*">
 
-                    <p class="fw-semibold text-black fs-4">Photo</p>
-                    <div class="position-relative">
-                        <div class="row g-2 mb-2">
-                            <div class="col-12">
-                                <form id="createPartner" action="{{ route("partners.create") }}" method="post"
-                                      enctype="multipart/form-data">
-                                    @csrf
-                                    <input type="file" name="image" id="partner-image-main" class="form-control d-none"
-                                           accept="image/*">
+                                <!-- Custom Upload Card -->
+                                <div id="partner-upload-area" class="upload-card">
+                                    <div id="partner-upload-content">
+                                        <i data-feather="upload" class="mb-2"></i>
+                                        <p>Drag image here to upload</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <!-- Progress Bar -->
+                                    <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
+                                        <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
+                                             style="width: 0%"></div>
+                                    </div>
 
-                                    <!-- Custom Upload Card -->
-                                    <div id="partner-upload-area" class="upload-card">
-                                        <div id="partner-upload-content">
-                                            <i data-feather="upload" class="mb-2"></i>
-                                            <p>Drag image here to upload</p>
+
+                                    <!-- Uploaded Image Preview -->
+                                    <div id="partner-uploaded-image"
+                                         class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                        <img src="" alt="Uploaded" class="img-fluid rounded"
+                                             style="width: 50px; height: 50px; object-fit: cover;">
+                                        <div id="file-details" class="file-details">
+                                            <div class="file-name fw-bold"></div>
+                                            <div class="file-size text-muted small"></div>
                                         </div>
                                     </div>
                                     <div>
@@ -1086,19 +1101,25 @@
                                         <button type="submit" class="col-3 btn btn-primary  mt-3 mb-3">Add Partner
                                         </button>
                                     </div>
-                                </form>
-                                <p class="fw-semibold text-black fs-16">Added Partners</p>
-                                <div class="row">
+
+                                </div>
+                                <div class="row d-flex justify-content-end">
+                                    <button type="submit" class="col-3 btn btn-primary  mt-3 mb-3">Add Partner
+                                    </button>
+                                </div>
+                            </form>
+                            <p class="fw-semibold text-black fs-16">Added Partners</p>
+                            <div class="row">
+                                <!-- Product Card -->
+                                @forelse($partners as $partner)
                                     <!-- Product Card -->
-                                    @forelse($partners as $partner)
-                                        <!-- Product Card -->
-                                        <div class="col-md-6 mb-3">
-                                            <div class="p-2 d-flex flex-row align-items-center justify-content-between"
-                                                 style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                                                <!-- Image -->
-                                                <img src="{{ $partner->getUrl() }}" alt="Product"
-                                                     class="me-3 rounded"
-                                                     style="width: 80px; height: 80px; object-fit: cover;">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="p-2 d-flex flex-row align-items-center justify-content-between"
+                                             style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                            <!-- Image -->
+                                            <img src="{{ $partner->getUrl() }}" alt="Product"
+                                                 class="me-3 rounded"
+                                                 style="width: 80px; height: 80px; object-fit: cover;">
 
                                                 <!-- Remove Button -->
                                                 <form id="remove-partner"
@@ -1155,6 +1176,7 @@
 
                 </div>
             </div>
+             </div>
             @include("modals.landing.add-category")
 
             @endsection
