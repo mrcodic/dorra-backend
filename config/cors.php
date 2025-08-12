@@ -5,7 +5,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://dorraprint.com'],
+    'allowed_origins' => ['https://dorraprint.com','https://app.dorraprint.com',],
 
     'allowed_origins_patterns' => [],
 
