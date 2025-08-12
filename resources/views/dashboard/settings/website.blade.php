@@ -223,7 +223,7 @@
                                                         <input type="file" name="image"
                                                                class="form-control d-none image-input"
                                                                accept="image/*">
-                                                        <div class="uploaded-image{{ $carousel->getFirstMediaUrl('carousels') ? '': 'd-none' }}  mt-2">
+                                                        <div class="uploaded-image {{ $carousel->getFirstMediaUrl('carousels') ? '': 'd-none' }}  mt-2">
                                                             <img
                                                                 src="{{ $carousel->getFirstMediaUrl('carousels') }}"
                                                                 class="img-fluid rounded"
