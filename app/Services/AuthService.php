@@ -144,7 +144,9 @@ class AuthService
     {
         $user = $request->user();
         $cookieValue = request()->cookie('cookie_id');
-
+        $user->currentAccessToken()->delete();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         if ($cookieValue) {
             $guest = $this->guestRepository->query()
@@ -168,7 +170,6 @@ class AuthService
 
         }
 
-        return $user->currentAccessToken()->delete();
     }
 
 
