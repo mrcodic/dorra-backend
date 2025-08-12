@@ -62,8 +62,9 @@ use Illuminate\Support\Facades\Log;
             'Authorization' => 'Bearer ' . $this->config['secret_key'],
             'Content-Type' => 'application/json',
         ])->post($this->baseUrl . '/v1/intention/', $dto->toArray());
-
         $result = $response->json();
+        dd($result);
+        
         Log::error('Failed to create payment intention', [
             'response' => $result,
             'vzx' => $response,
