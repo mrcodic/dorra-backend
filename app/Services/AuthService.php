@@ -11,6 +11,7 @@ use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -77,6 +78,7 @@ class AuthService
             return $user;
 
         } catch (Exception $exception) {
+            Log::error($exception->getMessage());
             return false;
         }
     }
