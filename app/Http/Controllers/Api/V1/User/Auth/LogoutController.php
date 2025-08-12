@@ -27,14 +27,14 @@ class LogoutController extends Controller
         ])->withCookie(
             cookie(
                 'dorra_auth_token',
-                '',           // empty value
-                -60,          // expire in past
-                '/',
-                '.dorraprint.com',
-                false,
-                false,
-                false,
-                'Lax'
+                '',              // empty value
+                -60,             // expired in past
+                '/',             // path
+                '.dorraprint.com', // domain
+                false,           // secure
+                false,           // httpOnly
+                false,           // raw
+                'Lax'            // sameSite
             )
         );
 
