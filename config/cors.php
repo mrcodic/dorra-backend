@@ -10,6 +10,7 @@ return [
         'https://app.dorraprint.com',
         'https://dev.dorraprint.com',
         'https://admin.dorraprint.com',
+        'localhost:3000'
     ],
 
     'allowed_origins_patterns' => [],
