@@ -25,7 +25,7 @@ class UpdateCarouselRequest extends BaseRequest
     {
         return [
             'carousels' => 'required|array',
-            'carousels.*.id' => ['required', 'integer', 'exists:carousels,id'],
+            'carousels.*.id' => ['nullable', 'integer', 'exists:carousels,id'],
             'carousels.*.title_en' => ['required', 'string', 'max:255'],
             'carousels.*.title_ar' => ['required', 'string', 'max:255'],
             'carousels.*.subtitle_en' => ['required', 'string', 'max:255'],
