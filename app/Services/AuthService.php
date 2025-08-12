@@ -11,6 +11,7 @@ use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
@@ -166,7 +167,11 @@ class AuthService
             }
 
         }
-
+        Cookie::queue(Cookie::forget(
+            'dorra_auth_token',
+            '/',
+            '.dorraprint.com'    
+        ));
         return $user->currentAccessToken()->delete();
     }
 
