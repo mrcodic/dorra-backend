@@ -63,9 +63,10 @@ class SettingController extends Controller
         return view("dashboard.settings.website", get_defined_vars());
     }
 
-    public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository,$id)
+    public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository,$id = null)
     {
         $validatedData = $request->validated();
+        dd($id);
         collect($validatedData['carousels'])->each(function ($carouselData, $index) use ($carouselRepository,$id) {
 
             $model = $carouselRepository->query()->updateOrCreate(
@@ -205,5 +206,4 @@ class SettingController extends Controller
 
 
 }
-
 

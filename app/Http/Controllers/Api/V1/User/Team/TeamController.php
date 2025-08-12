@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User\Team;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TeamResource;
+use App\Models\Design;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -14,7 +15,9 @@ use App\Services\TeamService;
 
 class TeamController extends Controller
 {
-    public function __construct(public TeamService $teamService){}
+    public function __construct(public TeamService $teamService)
+    {
+    }
 
     public function store(StoreTeamRequest $request)
     {
@@ -37,9 +40,10 @@ class TeamController extends Controller
 
     public function show($id)
     {
-        return Response::api(data: TeamResource::make( $this->teamService->showResource($id)));
+        return Response::api(data: TeamResource::make($this->teamService->showResource($id)));
 
     }
+
     public function bulkDelete(Request $request)
     {
         $request->validate([
@@ -84,7 +88,8 @@ class TeamController extends Controller
         $this->teamService->bulkRestore($request->teams);
         return Response::api();
     }
-    public function assignToDesign(Request $request,$teamId)
+
+    public function assignToDesign(Request $request, $teamId)
     {
         $request->validate(['designs' => ['required', 'array'],
             'designs.*' => ['required', 'string', 'exists:designs,id',
@@ -93,5 +98,28 @@ class TeamController extends Controller
         return Response::api();
     }
 
+    public function bulkDeleteDesigns(Request $request,$id)
+    {
+        $validatedData = $request->validate(['designs' => ['required', 'array'],
+            'designs.*' => ['required', 'string', 'exists:designs,id',
+                Rule::exists('designs', 'id')->whereNull('deleted_at')],
+            function ($attribute, $value, $fail) use ($id) {
+                $exists = Design::whereKey($value)
+                    ->whereNull('deleted_at')
+                    ->whereHas('teams', function ($query) use ($id) {
+                        $query->where('teams.id', $id);
+                    })
+                    ->exists();
+
+                if (! $exists) {
+                    $fail("The selected design ({$value}) does not belong to this team or no longer exists.");
+                }
+            }
+        ]);
+        $this->teamService->bulkDeleteDesigns($validatedData,$id);
+        return Response::api();
+
+
+    }
 
 }

@@ -169,6 +169,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/notifications', 'notifications')->name('settings.notifications');
 
         Route::post('/carousels/{carousel?}','createOrUpdateCarousel')->name('carousels.update');
+
         Route::delete('carousels/{carousel}', 'removeCarousel')->name('carousels.remove');
 
         Route::put('landing-sections', 'landingSections')->name('landing-sections.update');

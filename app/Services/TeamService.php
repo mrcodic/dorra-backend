@@ -58,6 +58,12 @@ use Illuminate\Support\Arr;
         $team = $this->repository->find($teamId);
         $team->designs()->syncWithoutDetaching(request()->designs);
     }
+
+    public function bulkDeleteDesigns($validatedData,$teamId)
+    {
+        $team = $this->repository->find($teamId);
+        $team->designs()->detach(request()->designs);
+    }
     public function bulkForceResources($ids)
     {
         return $this->repository->query()->withTrashed()->whereIn('id', $ids)->forceDelete();

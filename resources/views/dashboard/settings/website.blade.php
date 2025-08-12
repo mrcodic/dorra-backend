@@ -115,13 +115,16 @@
                         <span class="fw-semibold text-black fs-4">You can add up to</span>
                         <span class="fw-semibold fs-4 ms-1" style="color: #24B094;">7 Products</span>
                     </div>
-                    <p class="fw-semibold text-black fs-4">Added Products</p>
-                    <div class="col-3 ms-auto mb-3">
-                        <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
-                                data-bs-target="#addLandingCategoryModal">
-                            Add Product
-                        </button>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="fw-semibold text-black fs-16">Added Products</p>
+                        <div class="col-3 ms-auto ">
+                            <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                                    data-bs-target="#addLandingCategoryModal">
+                                Add Product
+                            </button>
+                        </div>
                     </div>
+
                     <div class="row">
                         @forelse($categories as $category)
                             <!-- Product Card -->
@@ -155,7 +158,7 @@
                 <!-- tab2 -->
                 <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
                     <!-- Card -->
-                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
                          style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
                         <span class="fw-semibold text-black fs-4">Show Hero Section</span>
 
@@ -180,6 +183,12 @@
                     </div>
 
                     <div class="invoice-repeater">
+                        {{-- Add button --}}
+                        <div class="text-start d-flex justify-content-end mb-2">
+                            <button type="button" data-repeater-create class="btn btn-primary">
+                                <i data-feather="plus"></i> Add Carousel
+                            </button>
+                        </div>
                         <div class="invoice-repeater">
 
                             <div data-repeater-list="carousels">
@@ -192,8 +201,8 @@
                         ])
                                     <div data-repeater-item>
                                         <div class="col-md-12 mb-2">
-                                            <div class="card p-4 mb-4 border rounded shadow-sm">
-                                                <form action="{{ route("carousels.update", $carousel->id) }}"
+                                            <div class="card p-1 mb-4 border rounded-md shadow-sm">
+                                                <form action="{{ route("carousels.update", $carousel->id ?? null) }}"
                                                       method="POST"
                                                       enctype="multipart/form-data"
                                                       class="carousel">
@@ -204,8 +213,8 @@
                                                     <label class="form-label">Website Image</label>
                                                     <div class="upload-wrapper">
                                                         <div
-                                                            class="upload-card border p-3 cursor-pointer text-center bg-light">
-                                                            <div class="upload-content">
+                                                            class="upload-card ">
+                                                            <div class="upload-content" id="upload-content">
                                                                 <i data-feather="upload" class="mb-2"></i>
                                                                 <p>Click to upload website image</p>
                                                             </div>
@@ -229,8 +238,8 @@
                                                     <label class="form-label mt-3">Mobile Image</label>
                                                     <div class="upload-wrapper">
                                                         <div
-                                                            class="upload-card border p-3 cursor-pointer text-center bg-light">
-                                                            <div class="upload-content">
+                                                            class="upload-card ">
+                                                            <div class="upload-content" id="upload-content">
                                                                 <i data-feather="upload" class="mb-2"></i>
                                                                 <p>Click to upload mobile image</p>
                                                             </div>
@@ -315,7 +324,7 @@
                                     <div data-repeater-item>
                                         <div class="col-md-12 mb-2">
                                             <div class="card p-4 mb-4 border rounded shadow-sm">
-                                                <form action="{{ route("carousels.update") }}"
+                                                <form action="{{ route("carousels.update", null) }}"
                                                       method="POST"
                                                       enctype="multipart/form-data"
                                                       class="carousel">
@@ -326,8 +335,8 @@
                                                     <label class="form-label">Website Image</label>
                                                     <div class="upload-wrapper">
                                                         <div
-                                                            class="upload-card border p-3 cursor-pointer text-center bg-light">
-                                                            <div class="upload-content">
+                                                            class="upload-card ">
+                                                            <div class="upload-content" id="upload-content">
                                                                 <i data-feather="upload" class="mb-2"></i>
                                                                 <p>Click to upload website image</p>
                                                             </div>
@@ -351,8 +360,8 @@
                                                     <label class="form-label mt-3">Mobile Image</label>
                                                     <div class="upload-wrapper">
                                                         <div
-                                                            class="upload-card border p-3 cursor-pointer text-center bg-light">
-                                                            <div class="upload-content">
+                                                            class="upload-card">
+                                                            <div class="upload-content" id="upload-content">
                                                                 <i data-feather="upload" class="mb-2"></i>
                                                                 <p>Click to upload mobile image</p>
                                                             </div>
@@ -409,7 +418,7 @@
                                                             <option disabled selected>Select a product</option>
                                                             @foreach($products as $product)
                                                                 <option value="{{ $product->id }}"
-                                                                   >
+                                                                >
                                                                     {{ $product->name }}
                                                                 </option>
                                                             @endforeach
@@ -448,7 +457,7 @@
                                                    accept="image/*">
 
                                             <div class="upload-card">
-                                                <div class="upload-content">
+                                                <div class="upload-content" id="upload-content">
                                                     <i data-feather="upload" class="mb-2"></i>
                                                     <p>Drag image here to upload</p>
                                                 </div>
@@ -517,12 +526,7 @@
 
                         </div>
 
-                        {{-- Add button --}}
-                        <div class="text-start mt-1">
-                            <button type="button" data-repeater-create class="btn btn-outline-secondary">
-                                <i data-feather="plus"></i> Add Carousel
-                            </button>
-                        </div>
+
                     </div>
 
 
@@ -601,7 +605,7 @@
                              style="z-index: 1000;"></div>
                     </div>
 
-                    <p class="fw-semibold text-black fs-4">Added Designs</p>
+                    <p class="fw-semibold text-black fs-16">Added Designs</p>
                     <div class="row">
                         <!-- Product Card -->
                         @forelse($templates as $template)
@@ -729,7 +733,7 @@
 
                 <div class="tab-pane fade" id="tab7" role="tabpanel" aria-labelledby="tab7-tab">
                     <!-- Header with toggle -->
-                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
                          style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
                         <span class="fw-semibold text-black fs-4">Show Testimonials Section</span>
 
@@ -752,7 +756,8 @@
                         </form>
                     </div>
                     <div class="card mb-4">
-                        <div class="card-body">
+                        <div class="card-body border rounded">
+                            <p class="fs-4 text-black ">Reviews With Images</p>
                             <!-- Header with toggle -->
                             <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
                                  style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
@@ -857,37 +862,36 @@
                             </form>
 
                             <!-- Added Products List -->
-                            <div class="mt-4">
-                                <h5>Added Reviews</h5>
-                                <div class="row row-cols-1 row-cols-md-2 g-3 mt-2">
+                            <div class="mt-2">
+                                <h5 class="text-black fs-16">Added Reviews</h5>
+                                <div class="row row-cols-1 row-cols-md-2 g-3 mt-2 ">
                                     @foreach($reviewsWithImages as $review)
-                                        <div class="col">
-                                            <div class="card h-100 shadow-sm border-0">
-                                                <div class="card-body d-flex">
-                                                    <img
-                                                        src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
-                                                        class="rounded me-3"
-                                                        style="width: 50px; height: 50px; object-fit: cover;">
-                                                    <div>
-                                                        <strong>{{ $review->customer }}</strong>
-                                                        <div class="text-warning">
-                                                            @for($i = 1; $i <= 5; $i++)
-                                                                <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
-                                                            @endfor
-                                                        </div>
-                                                        <small
-                                                            class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
-                                                        <p class="mb-1">{{ $review->review }}</p>
-                                                        <form class="remove-review"
-                                                              action="{{ route("reviews.remove", $review->id) }}"
-                                                              method="POST">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                                Remove
-                                                            </button>
-                                                        </form>
+                                        <div class="col-md-6 mb-2"
+                                             style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                            <div class="p-1 d-flex">
+                                                <img
+                                                    src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
+                                                    class="rounded me-3"
+                                                    style="width: 50px; height: 50px; object-fit: cover;">
+                                                <div>
+                                                    <strong>{{ $review->customer }}</strong>
+                                                    <div class="text-warning">
+                                                        @for($i = 1; $i <= 5; $i++)
+                                                            <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
+                                                        @endfor
                                                     </div>
+                                                    <small
+                                                        class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                    <p class="mb-1">{{ $review->review }}</p>
+                                                    <form class="remove-review"
+                                                          action="{{ route("reviews.remove", $review->id) }}"
+                                                          method="POST">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                            Remove
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
@@ -898,8 +902,10 @@
 
                         </div>
 
-                        <div class="card mb-4">
+                        <div class="card mt-2 border rounded">
+
                             <div class="card-body">
+                                <p class="fs-4 text-black ">Words of Praise</p>
                                 <!-- Header with toggle -->
                                 <div
                                     class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
@@ -961,40 +967,41 @@
                                     <input type="hidden" name="type" value="without_image">
 
                                     <div class="text-end">
-                                        <button type="submit" class="btn btn-primary mt-2">Add Review</button>
+                                        <button type="submit" class="btn btn-primary ">Add Review</button>
                                     </div>
                                 </form>
                                 <!-- Added Products List -->
-                                <div class="mt-4">
-                                    <h5>Added Reviews</h5>
-                                    <div class="row row-cols-1 row-cols-md-2 g-3 mt-2">
+                                <div class="mt-2">
+                                    <h5 class="text-black fs-16">Added Reviews</h5>
+                                    <div class="row row-cols-1 row-cols-md-2 g-3 ">
                                         @foreach($reviewsWithoutImages as $review)
-                                            <div class="col">
-                                                <div class="card h-100 shadow-sm border-0">
-                                                    <div class="card-body d-flex">
-                                                        <div>
-                                                            <strong>{{ $review->customer }}</strong>
-                                                            <div class="text-warning">
-                                                                @for($i = 1; $i <= 5; $i++)
-                                                                    <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
-                                                                @endfor
-                                                            </div>
-                                                            <small
-                                                                class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
-                                                            <p class="mb-1">{{ $review->review }}</p>
-                                                            <form class="remove-review"
-                                                                  action="{{ route("reviews.remove", $review->id) }}"
-                                                                  method="POST">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                        class="btn btn-sm btn-outline-danger">
-                                                                    Remove
-                                                                </button>
-                                                            </form>
+                                            <div class="col-md-6 mb-2"
+                                                 style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+
+                                                <div class="p-1 d-flex">
+                                                    <div>
+                                                        <strong>{{ $review->customer }}</strong>
+                                                        <div class="text-warning">
+                                                            @for($i = 1; $i <= 5; $i++)
+                                                                <i class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
+                                                            @endfor
                                                         </div>
+                                                        <small
+                                                            class="text-muted">{{ \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                        <p class="mb-1">{{ $review->review }}</p>
+                                                        <form class="remove-review"
+                                                              action="{{ route("reviews.remove", $review->id) }}"
+                                                              method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-sm btn-outline-danger">
+                                                                Remove
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </div>
+
                                             </div>
                                         @endforeach
                                     </div>
@@ -1007,147 +1014,146 @@
 
                 </div>
 
-            </div>
-            <!-- tab8 -->
-            <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
-                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                    <span class="fw-semibold text-black fs-4">Show partners section</span>
 
-                    <form id="partnerSectionForm" action="{{ route('landing-sections.update') }}"
-                          method="POST">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="key" value="partners_section">
-                        <input type="hidden" name="value" value="{{ setting('partners_section') ? 1 : 0 }}"
-                               id="partnerSectionValue">
+                <!-- tab8 -->
+                <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show partners section</span>
 
-                        <div class="form-check form-switch">
-                            <input
-                                class="form-check-input toggle-switch"
-                                type="checkbox"
-                                id="partnerSectionToggle"
-                                {{ setting('partners_section') ? 'checked' : '' }}
-                            >
-                        </div>
-                    </form>
-                </div>
+                        <form id="partnerSectionForm" action="{{ route('landing-sections.update') }}"
+                              method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="partners_section">
+                            <input type="hidden" name="value" value="{{ setting('partners_section') ? 1 : 0 }}"
+                                   id="partnerSectionValue">
 
-                <p class="fw-semibold text-black fs-4">Photo</p>
-                <div class="position-relative">
-                    <div class="row g-2 mb-2">
-                        <div class="col-9">
-                            <form id="createPartner" action="{{ route("partners.create") }}" method="post"
-                                  enctype="multipart/form-data">
-                                @csrf
-                                <input type="file" name="image" id="partner-image-main" class="form-control d-none"
-                                       accept="image/*">
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input toggle-switch"
+                                    type="checkbox"
+                                    id="partnerSectionToggle"
+                                    {{ setting('partners_section') ? 'checked' : '' }}
+                                >
+                            </div>
+                        </form>
+                    </div>
 
-                                <!-- Custom Upload Card -->
-                                <div id="partner-upload-area" class="upload-card">
-                                    <div id="partner-upload-content">
-                                        <i data-feather="upload" class="mb-2"></i>
-                                        <p>Drag image here to upload</p>
-                                    </div>
+                    <p class="fw-semibold text-black fs-4">Photo</p>
+                    <div class="position-relative">
+                        <div class="row g-2 mb-2">
+                            <div class="col-12">
+                                <form id="createPartner" action="{{ route("partners.create") }}" method="post"
+                                      enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="file" name="image" id="partner-image-main" class="form-control d-none"
+                                           accept="image/*">
 
-
-                                </div>
-                                <div>
-                                    <!-- Progress Bar -->
-                                    <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
-                                        <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
-                                             style="width: 0%"></div>
-                                    </div>
-
-
-                                    <!-- Uploaded Image Preview -->
-                                    <div id="partner-uploaded-image"
-                                         class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                        <img src="" alt="Uploaded" class="img-fluid rounded"
-                                             style="width: 50px; height: 50px; object-fit: cover;">
-                                        <div id="file-details" class="file-details">
-                                            <div class="file-name fw-bold"></div>
-                                            <div class="file-size text-muted small"></div>
+                                    <!-- Custom Upload Card -->
+                                    <div id="partner-upload-area" class="upload-card">
+                                        <div id="partner-upload-content">
+                                            <i data-feather="upload" class="mb-2"></i>
+                                            <p>Drag image here to upload</p>
                                         </div>
-                                        <button type="button" id="partner-remove-image"
-                                                class="btn btn-sm position-absolute text-danger"
-                                                style="top: 5px; right: 5px; background-color: #FFEEED">
-                                            <i data-feather="trash"></i>
+                                    </div>
+                                    <div>
+                                        <!-- Progress Bar -->
+                                        <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
+                                            <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
+                                                 style="width: 0%"></div>
+                                        </div>
+
+
+                                        <!-- Uploaded Image Preview -->
+                                        <div id="partner-uploaded-image"
+                                             class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                            <img src="" alt="Uploaded" class="img-fluid rounded"
+                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                            <div id="file-details" class="file-details">
+                                                <div class="file-name fw-bold"></div>
+                                                <div class="file-size text-muted small"></div>
+                                            </div>
+                                            <button type="button" id="partner-remove-image"
+                                                    class="btn btn-sm position-absolute text-danger"
+                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                <i data-feather="trash"></i>
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                    <div class="row d-flex justify-content-end">
+                                        <button type="submit" class="col-3 btn btn-primary  mt-3 mb-3">Add Partner
                                         </button>
                                     </div>
-
-                                </div>
-                                <div class="col-3">
-                                    <button type="submit" class="btn btn-primary w-100 mt-3 mb-3">Add Partner
-                                    </button>
-                                </div>
-                            </form>
-                            <p class="fw-semibold text-black fs-4">Added Partners</p>
-                            <div class="row">
-                                <!-- Product Card -->
-                                @forelse($partners as $partner)
+                                </form>
+                                <p class="fw-semibold text-black fs-16">Added Partners</p>
+                                <div class="row">
                                     <!-- Product Card -->
-                                    <div class="col-md-6 mb-3">
-                                        <div class="p-2 d-flex flex-row align-items-center"
-                                             style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                                            <!-- Image -->
-                                            <img src="{{ $partner->getUrl() }}" alt="Product"
-                                                 class="me-3 rounded"
-                                                 style="width: 80px; height: 80px; object-fit: cover;">
+                                    @forelse($partners as $partner)
+                                        <!-- Product Card -->
+                                        <div class="col-md-6 mb-3">
+                                            <div class="p-2 d-flex flex-row align-items-center justify-content-between"
+                                                 style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                                <!-- Image -->
+                                                <img src="{{ $partner->getUrl() }}" alt="Product"
+                                                     class="me-3 rounded"
+                                                     style="width: 80px; height: 80px; object-fit: cover;">
 
-                                            <!-- Remove Button -->
-                                            <form id="remove-partner"
-                                                  action="{{ route("partners.remove",$partner->id) }}"
-                                                  method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button
-                                                    class="btn btn-outline-secondary btn-sm ms-2"
-                                                    data-id="{{ $partner->id }}">
-                                                    Remove
-                                                </button>
-                                            </form>
+                                                <!-- Remove Button -->
+                                                <form id="remove-partner"
+                                                      action="{{ route("partners.remove",$partner->id) }}"
+                                                      method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button
+                                                        class="btn btn-outline-secondary btn-sm ms-2"
+                                                        data-id="{{ $partner->id }}">
+                                                        Remove
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
-                                    </div>
-                                @empty
-                                    <div class="col-12 text-center my-5">
-                                        <div class="mt-3 text-muted fs-5">No partners added yet.</div>
-                                    </div>
-                                @endforelse
-                            </div>
+                                    @empty
+                                        <div class="col-12 text-center my-5">
+                                            <div class="mt-3 text-muted fs-5">No partners added yet.</div>
+                                        </div>
+                                    @endforelse
+                                </div>
 
+                            </div>
                         </div>
+
                     </div>
 
                 </div>
 
-            </div>
+                <!-- tab9 -->
+                <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show faq section</span>
 
-            <!-- tab9 -->
-            <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
-                <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                     style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                    <span class="fw-semibold text-black fs-4">Show faq section</span>
+                        <form id="faqSectionForm" action="{{ route('landing-sections.update') }}"
+                              method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="faq_section">
+                            <input type="hidden" name="value" value="{{ setting('faq_section') ? 1 : 0 }}"
+                                   id="faqSectionValue">
 
-                    <form id="faqSectionForm" action="{{ route('landing-sections.update') }}"
-                          method="POST">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="key" value="faq_section">
-                        <input type="hidden" name="value" value="{{ setting('faq_section') ? 1 : 0 }}"
-                               id="faqSectionValue">
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input toggle-switch"
+                                    type="checkbox"
+                                    id="faqSectionToggle"
+                                    {{ setting('faq_section') ? 'checked' : '' }}
+                                >
+                            </div>
+                        </form>
+                    </div>
 
-                        <div class="form-check form-switch">
-                            <input
-                                class="form-check-input toggle-switch"
-                                type="checkbox"
-                                id="faqSectionToggle"
-                                {{ setting('faq_section') ? 'checked' : '' }}
-                            >
-                        </div>
-                    </form>
                 </div>
-
             </div>
             @include("modals.landing.add-category")
 
@@ -1176,9 +1182,9 @@
 
             @section('page-script')
                 <script !src="">
-                    handleAjaxFormSubmit("#deleteCarouselForm",{
+                    handleAjaxFormSubmit("#deleteCarouselForm", {
                         successMessage: "Carousel removed Successfully",
-                        onSuccess: function (){
+                        onSuccess: function () {
                             $('#deleteCarouselModal').modal('hide');
                             location.reload();
                         }
