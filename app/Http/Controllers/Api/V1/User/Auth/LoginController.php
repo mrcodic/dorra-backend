@@ -38,6 +38,7 @@ class LoginController extends Controller
         return  redirect()->away(config('services.site_url').'Home')->withCookie(cookie(
             name: 'dorra_auth_token',
             value: $user->token,
+            minutes: 60 * 24 * 7,
             path: '/',
             domain: '.dorraprint.com',
             secure: false,
