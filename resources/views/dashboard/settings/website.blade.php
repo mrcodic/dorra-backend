@@ -183,12 +183,8 @@
                     </div>
 
                     <div class="invoice-repeater">
-                                      {{-- Add button --}}
-                        <div class="text-start d-flex justify-content-end mb-2">
-                            <button type="button" data-repeater-create class="btn btn-primary">
-                                <i data-feather="plus"></i> Add Carousel
-                            </button>
-                        </div>
+
+
                         <div class="invoice-repeater">
 
                             <div data-repeater-list="carousels">
@@ -526,8 +522,12 @@
                             </div>
 
                         </div>
-
-
+                        {{-- Add button --}}
+                        <div class="text-start d-flex justify-content-end mb-2">
+                            <button type="button" data-repeater-create class="btn btn-primary">
+                                <i data-feather="plus"></i> Add Carousel
+                            </button>
+                        </div>
                     </div>
 
 

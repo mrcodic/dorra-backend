@@ -25,7 +25,7 @@ class LandingController extends Controller
 
     public function carousels()
     {
-        $carousels = Carousel::with('product')->get();
+        $carousels = Carousel::with('product')->latest()->get();
         return Response::api(data: CarouselResource::collection($carousels));
     }
 
