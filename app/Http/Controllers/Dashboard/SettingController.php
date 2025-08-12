@@ -67,9 +67,7 @@ class SettingController extends Controller
     public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository)
     {
         $validatedData = $request->validated();
-
         collect($validatedData['carousels'])->each(function ($carouselData, $index) use ($carouselRepository) {
-
             $model = $carouselRepository->query()->updateOrCreate(
                 [
                     'id' => $carouselData['id'] ?? null

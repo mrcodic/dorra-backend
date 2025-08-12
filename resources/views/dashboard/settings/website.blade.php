@@ -208,6 +208,7 @@
                                                       class="carousel">
                                                     @csrf
                                                     @method("PUT")
+
                                                         <input type="hidden" name="carousels[{{ $loop->index }}][id]" value="{{ $carousel->id }}">
 
                                                     <!-- Website Image Upload -->
