@@ -32,7 +32,7 @@ class UserResource extends JsonResource
             'country_details' => CountryCodeResource::make($this->whenLoaded('countryCode')),
             'connected_accounts' => SocialAccountResource::collection($this->whenLoaded('socialAccounts')),
             'notification_types' => NotificationTypeResource::collection($this->whenLoaded('notificationTypes')),
-            'dorra_auth_token' => $this->when(isset($this->token), $this->token),
+            'token' => $this->when(isset($this->token), $this->token),
         ];
     }
 
