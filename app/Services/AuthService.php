@@ -167,16 +167,11 @@ class AuthService
             }
 
         }
-        setcookie(
+        Cookie::queue(Cookie::forget(
             'dorra_auth_token',
-            '',
-            time() - 3600,
             '/',
-            '.dorraprint.com',
-            false, // secure
-            false  // httponly
-        );
-
+            'dorraprint.com'
+        ));
         return $user->currentAccessToken()->delete();
     }
 
