@@ -26,16 +26,18 @@ class LogoutController extends Controller
             'message' => 'You are successfully logged out'
         ])->withCookie(
             cookie(
-                name: 'dorra_auth_token',
-                value: null,
-                minutes:  -60, // expire immediately
-                path: '/',
-                domain: '.dorraprint.com',
-                secure: false,
-                httpOnly: false,
-                sameSite: 'Lax'
+                'dorra_auth_token',
+                '',           // empty value
+                -60,          // expire in past
+                '/',
+                '.dorraprint.com',
+                false,
+                false,
+                false,
+                'Lax'
             )
         );
+
 
 
 
