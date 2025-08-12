@@ -146,8 +146,6 @@ class AuthService
         $cookieValue = request()->cookie('cookie_id');
         $user->currentAccessToken()->delete();
         $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
         if ($cookieValue) {
             $guest = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
