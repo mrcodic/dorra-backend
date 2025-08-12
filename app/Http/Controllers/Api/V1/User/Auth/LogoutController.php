@@ -28,7 +28,7 @@ class LogoutController extends Controller
             cookie(
                 name: 'dorra_auth_token',
                 value: null,
-                minutes: -1, // expire immediately
+                minutes:  -60, // expire immediately
                 path: '/',
                 domain: '.dorraprint.com',
                 secure: false,
