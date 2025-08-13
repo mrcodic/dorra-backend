@@ -123,17 +123,21 @@ class CartService extends BaseService
                 'cart' => ['Item not found in cart.'],
             ]);
         }
-        $item->delete();
-        $cart->update([
-            'price' => $cart->items()->sum('sub_total'),
-        ]);
-        if ($cart->items()->count() == 1)
-        {
+        $this->handleTransaction(function () use ($item, $cart) {
+            if ($cart->items()->count() == 1)
+            {
+                $cart->update([
+                    'discount_code_id' => null,
+                    'discount_amount' => 0,
+                ]);
+            }
+            $item->delete();
             $cart->update([
-                'discount_code_id' => null,
-                'discount_amount' => 0,
+                'price' => $cart->items()->sum('sub_total'),
             ]);
-        }
+        });
+
+
 
         return Response::api(message: "Item removed from cart successfully.");
 
