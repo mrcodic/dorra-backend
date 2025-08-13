@@ -30,7 +30,7 @@ class PaymentRequestData
         $amountCents = (int) ((int)$this->order->total_price * 100);
         $baseItems = $this->order->orderItems->map(fn($item) => [
             'name' => Str::limit($item?->itemable->name ?? 'Item', 50, ''),
-            'amount' => (int) round($item->sub_total * 100),
+            'amount' => (int) round((int) $item->sub_total * 100),
             'quantity' => 1,
         ])->toArray();
 
@@ -47,7 +47,7 @@ class PaymentRequestData
         if (setting('tax') > 0) {
             $extraItems[] = [
                 'name' => Str::limit( 'Tax', 50, ''),
-                'amount' => (int) round((int) getPriceAfterTax(setting('tax'), $this->order->subtotal) * 100),
+                'amount' => (int) round((int) getPriceAfterTax( (int)setting('tax'), (int)$this->order->subtotal) * 100),
                 'quantity' => 1,
             ];
         }
