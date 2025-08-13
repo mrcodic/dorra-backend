@@ -1156,35 +1156,35 @@
 
                 </div>
 
+                <!-- tab9 -->
+                <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show faq section</span>
 
+                        <form id="faqSectionForm" action="{{ route('landing-sections.update') }}"
+                              method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="faq_section">
+                            <input type="hidden" name="value" value="{{ setting('faq_section') ? 1 : 0 }}"
+                                   id="faqSectionValue">
+
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input toggle-switch"
+                                    type="checkbox"
+                                    id="faqSectionToggle"
+                                    {{ setting('faq_section') ? 'checked' : '' }}
+                                >
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
 
             </div>
-                    <!-- tab9 -->
-                    <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show faq section</span>
 
-                            <form id="faqSectionForm" action="{{ route('landing-sections.update') }}"
-                                  method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="faq_section">
-                                <input type="hidden" name="value" value="{{ setting('faq_section') ? 1 : 0 }}"
-                                       id="faqSectionValue">
-
-                                <div class="form-check form-switch">
-                                    <input
-                                        class="form-check-input toggle-switch"
-                                        type="checkbox"
-                                        id="faqSectionToggle"
-                                        {{ setting('faq_section') ? 'checked' : '' }}
-                                    >
-                                </div>
-                            </form>
-                        </div>
-
-                    </div>
              </div>
             @include("modals.landing.add-category")
 
