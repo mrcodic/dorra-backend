@@ -39,7 +39,7 @@ class PaymentRequestData
         if (setting('delivery') > 0) {
             $extraItems[] = [
                 'name' => Str::limit( 'Delivery Fee', 50, ''),
-                'amount' => (int) round(setting('delivery')  * 100),
+                'amount' => (int) round((int) setting('delivery')  * 100),
                 'quantity' => 1,
             ];
         }
