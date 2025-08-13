@@ -127,6 +127,13 @@ class CartService extends BaseService
         $cart->update([
             'price' => $cart->items()->sum('sub_total'),
         ]);
+        if ($cart->items()->count() == 1)
+        {
+            $cart->update([
+                'discount_code_id' => null,
+                'discount_amount' => 0,
+            ]);
+        }
 
         return Response::api(message: "Item removed from cart successfully.");
 
