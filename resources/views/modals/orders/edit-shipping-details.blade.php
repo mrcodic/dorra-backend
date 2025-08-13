@@ -188,6 +188,7 @@
                 @csrf
                 <h5 class="mb-2 text-black fs-4">Add new address</h5>
                 <input type="hidden" name="user_id" value="{{ $model->user?->id }}">
+                <input type="hidden" name="guest_id" value="{{ $model->guest?->id }}">
 
                 <div class="mb-2">
                     <label class="form-label label-text">Address Label</label>
