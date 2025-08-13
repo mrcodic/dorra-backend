@@ -110,6 +110,7 @@ class TemplateController extends DashboardController
 
     public function getProductTemplates()
     {
+
         $productId = request()->input('productId');
         $templates = $this->templateService->getProductTemplates($productId);
         if (request()->ajax()) {
@@ -129,7 +130,12 @@ class TemplateController extends DashboardController
                 })->live()->get();
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
         }
-        $templateData = TemplateResource::collection($templates)
+
+        $templateData = TemplateResource::collection($templates->filter(function ($template) {
+            $template
+                ->whereNull('design_data')
+                ->orWhereNull('design_back_data');
+        }))
             ->additional([
                 'product' => [
                     'name' => $this->productRepositoryInterface->query()->whereKey($productId)?->value('name')

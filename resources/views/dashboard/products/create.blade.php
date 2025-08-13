@@ -765,7 +765,10 @@
                 // Re-render feather icons
                 feather.replace();
             }
+
         });
+
+
     </script>
 
 
