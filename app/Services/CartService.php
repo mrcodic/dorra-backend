@@ -164,12 +164,12 @@ class CartService extends BaseService
             'ratio' => $cart->price
                 ? (
                     ($discountCode?->type === TypeEnum::PERCENTAGE
-                        ? $discountCode?->value
+                        ? $discountCode?->value * 100
                         : ($discountCode?->value / $cart->price) * 100
                     ) . '%'
                 )
                 : '0%',
-            'value' => $discountCode?->value ?? 0,
+            'value' => getDiscountAmount($discountCode, $cart->price) ?? 0,
         ];
     }
    public function removeDiscount(): void
