@@ -112,7 +112,7 @@
                                             <label class="form-label label-text" for="product-images">Category Images</label>
 
                                             <!-- HTML (no changes needed, just make sure it's like this) -->
-                                            <input type="file" id="product-images" class="form-control d-none"  accept="image/*" multiple>
+                                            <input type="file" name="images[]" id="product-images" class="form-control d-none"  accept="image/*" multiple>
                                             <div id="multi-upload-area" class="upload-card">
                                                 <div id="multi-upload-content">
                                                     <i data-feather="upload" class="mb-2"></i>
