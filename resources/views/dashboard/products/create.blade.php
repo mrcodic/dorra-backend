@@ -672,66 +672,57 @@
         });
     });
 </script>
-<script>
-    // JavaScript (FULLY WORKING)
-    $(document).ready(function () {
-        const input = $('#product-images');
-        const uploadArea = $('#multi-upload-area');
-        const uploadedImages = $('#multi-uploaded-images');
-        let selectedFiles = [];
+    <script>
+        $(document).ready(function() {
+            let input = $('#product-images');
+            let uploadArea = $('#multi-upload-area');
+            let uploadedImages = $('#multi-uploaded-images');
 
-        uploadArea.on('click', function () {
-            input.click();
-        });
-
-        input.on('change', function (e) {
-            const files = Array.from(e.target.files);
-            handleFiles(files);
-            input.val(''); // allow re-uploading same file
-        });
-
-        uploadArea.on('dragover', function (e) {
-            e.preventDefault();
-            uploadArea.addClass('dragover');
-        });
-
-        uploadArea.on('dragleave', function (e) {
-            e.preventDefault();
-            uploadArea.removeClass('dragover');
-        });
-
-        uploadArea.on('drop', function (e) {
-            e.preventDefault();
-            uploadArea.removeClass('dragover');
-            const files = Array.from(e.originalEvent.dataTransfer.files);
-            handleFiles(files);
-        });
-
-        function handleFiles(files) {
-            // First filter out non-images and duplicates
-            const newFiles = files.filter(file => {
-                if (!file.type.startsWith('image/')) return false;
-                return !selectedFiles.some(f => f.name === file.name && f.size === file.size);
+            // Click to open file input
+            uploadArea.on('click', function() {
+                input.click();
             });
 
-            selectedFiles = [...selectedFiles, ...newFiles];
-
-            // Create previews for all new files
-            newFiles.forEach(file => {
-                previewImage(file);
+            // Handle input change
+            input.on('change', function(e) {
+                handleFiles(e.target.files);
             });
 
-            // Now simulate upload for all files at once
-            simulateUpload();
-        }
+            // Drag and Drop
+            uploadArea.on('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.addClass('dragover');
+            });
 
-        function previewImage(file) {
-            const wrapper = $(`
-            <div class="image-wrapper position-relative mb-3 d-flex align-items-center gap-2" data-filename="${file.name}">
-                <img src="" alt="Preview" style="width: 50px; height: 50px; object-fit: cover; display: none;">
+            uploadArea.on('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.removeClass('dragover');
+            });
+
+            uploadArea.on('drop', function(e) {
+                e.preventDefault();
+                uploadArea.removeClass('dragover');
+                handleFiles(e.originalEvent.dataTransfer.files);
+            });
+
+            function handleFiles(files) {
+                for (let i = 0; i < files.length; i++) {
+                    uploadFile(files[i]);
+                }
+            }
+
+            function uploadFile(file) {
+                if (!file.type.startsWith('image/')) return;
+
+                const fileSizeKB = (file.size / 1024).toFixed(2) + ' KB';
+
+                // Create wrapper with image hidden initially
+                let wrapper = $(`
+            <div class="image-wrapper position-relative mb-3 d-flex align-items-center gap-2">
+                <img src="" alt="Uploading..." style="width: 50px; height: 50px; object-fit: cover; display: none;">
                 <div class="file-info">
                     <div class="file-name fw-bold">${file.name}</div>
-                    <div class="file-size text-muted small">${(file.size / 1024).toFixed(2)} KB</div>
+                    <div class="file-size text-muted small">${fileSizeKB}</div>
                     <div class="progress mt-2 w-50" style="height: 6px;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                     </div>
@@ -742,46 +733,41 @@
             </div>
         `);
 
-            uploadedImages.append(wrapper);
+                uploadedImages.append(wrapper);
 
-            // Remove button
-            wrapper.find('.remove-btn').on('click', function () {
-                selectedFiles = selectedFiles.filter(f => !(f.name === file.name && f.size === file.size));
-                wrapper.remove();
-            });
+                let progressBar = wrapper.find('.progress-bar');
+                let imgTag = wrapper.find('img');
 
-            feather.replace();
-        }
+                // Fake upload progress
+                let progress = 0;
+                let interval = setInterval(function() {
+                    progress += 10;
+                    progressBar.css('width', progress + '%');
 
-        function simulateUpload() {
-            // Reset all progress bars to 0
-            $('.progress-bar').css('width', '0%');
+                    if (progress >= 100) {
+                        clearInterval(interval);
 
-            // Simulate upload progress for all files at once
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                $('.progress-bar').css('width', `${progress}%`);
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    // Process all images when upload is complete
-                    selectedFiles.forEach(file => {
-                        const wrapper = $(`.image-wrapper[data-filename="${file.name}"]`);
-                        const imgTag = wrapper.find('img');
-
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
+                        // Display the image after "upload" finishes
+                        let reader = new FileReader();
+                        reader.onload = function(e) {
                             imgTag.attr('src', e.target.result).fadeIn();
                             wrapper.find('.progress').remove();
-                        };
+                        }
                         reader.readAsDataURL(file);
-                    });
-                }
-            }, 100);
-        }
-    });
-</script>
+                    }
+                }, 100);
+
+                // Remove button
+                wrapper.find('.remove-btn').on('click', function() {
+                    wrapper.remove();
+                });
+
+                // Re-render feather icons
+                feather.replace();
+            }
+        });
+    </script>
+
 
 <script>
     $(document).ready(function() {
