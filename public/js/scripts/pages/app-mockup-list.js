@@ -107,10 +107,11 @@ function fetchMockups(page = 1) {
             per_page: $('.filter-paginate-number').val()
         },
         success: res => {
-            $('#templates-container').html(res.data.cards);
+            console.log(res.data)
+            $('#mockups-container').html(res.data.cards);
             $('#pagination-container').html(res.data.pagination);
         },
-        error: xhr => console.error('Failed to fetch templates:', xhr)
+        error: xhr => console.error('Failed to fetch mockups:', xhr)
     });
 
     $('.filter-paginate-number').on('change', () => fetchMockups(1));

@@ -24,19 +24,7 @@ class LogoutController extends Controller
 
         return response()->json([
             'message' => 'You are successfully logged out'
-        ])->withCookie(
-            cookie(
-                'dorra_auth_token',
-                '',              // empty value
-                -60,             // expired in past
-                '/',             // path
-                '.dorraprint.com', // domain
-                false,           // secure
-                false,           // httpOnly
-                false,           // raw
-                'Lax'            // sameSite
-            )
-        );
+        ]);
 
 
 

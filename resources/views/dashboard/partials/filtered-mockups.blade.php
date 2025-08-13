@@ -78,7 +78,7 @@
             </div>
         </div>
     </div>
-    @include('modals.mockups.edit-mockup',['mockup' => $mockup])
+    @include('modals.mockups.edit-mockup',['mockup' => $mockup, 'associatedData' => $associatedData])
 
 @empty
     <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"

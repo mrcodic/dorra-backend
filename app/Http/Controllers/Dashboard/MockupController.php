@@ -45,9 +45,7 @@ class MockupController extends DashboardController
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination, perPage: request('per_page', 16));
 
         $associatedData = $this->getAssociatedData('index');
-        if (request()->expectsJson()) {
-            return Response::api(data: MockupResource::collection($data->load('types'))->response()->getData(true));
-        }
+
         if (request()->ajax()) {
             $cards = view('dashboard.partials.filtered-mockups', compact('data'))->render();
 
@@ -64,8 +62,13 @@ class MockupController extends DashboardController
                 'total' => is_countable($data) ? count($data) : $data->total(),
             ]);
         }
+        elseif (request()->expectsJson()) {
+            return Response::api(data: MockupResource::collection($data->load('types'))->response()->getData(true));
+        }
+        else{
+            return view("dashboard.mockups.index", get_defined_vars());
+        }
 
-        return view("dashboard.mockups.index", get_defined_vars());
     }
 
     public function mockupTypes()

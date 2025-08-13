@@ -168,8 +168,8 @@
                     </div>
 
 
-                <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="templates-container">
-                    @include("dashboard.partials.filtered-mockups")
+                <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="mockups-container">
+                    @include("dashboard.partials.filtered-mockups",['associatedData' => $associatedData])
                 </div>
                 <div id="pagination-container">
                     @if ($data instanceof \Illuminate\Pagination\LengthAwarePaginator)

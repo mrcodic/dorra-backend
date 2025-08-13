@@ -47,7 +47,7 @@ class MockupService extends BaseService
         if (request()->ajax()) {
             return $pageSize === null
                 ? $query->get()
-                : dd(request('product_id'),$query->where('product_id',request('product_id'))->get());
+                : $query->paginate($pageSize)->withQueryString();
         }
         if (request()->expectsJson()) {
             return $query->paginate($pageSize);
