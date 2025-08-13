@@ -30,12 +30,12 @@ class CartResource extends JsonResource
                 'ratio' => $this->price
                     ? (
                         ($this->discountCode?->type === TypeEnum::PERCENTAGE
-                            ? number_format( $this->discountCode?->value, 2, '.', '')
+                            ? number_format( $this->discountCode?->value * 100, 2, '.', '')
                             : number_format( ($this->discountCode?->value / $this->price) * 100, 2, '.', '')
                         ) . '%'
                     )
                     : '0%',
-                'value' => $this->discountCode?->value ?? 0,
+                'value' =>getDiscountAmount($this->discountCode, $this->price)  ?? 0,
             ],
 
         ];
