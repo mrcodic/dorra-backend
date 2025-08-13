@@ -47,7 +47,7 @@ class PaymentRequestData
         if (setting('tax') > 0) {
             $extraItems[] = [
                 'name' => Str::limit( 'Tax', 50, ''),
-                'amount' => (int) round((int) getPriceAfterTax( (int)setting('tax'), (int)$this->order->subtotal) * 100),
+                'amount' => (int) round(((int) getPriceAfterTax(setting('tax'), $this->order->subtotal)) * 100),
                 'quantity' => 1,
             ];
         }
