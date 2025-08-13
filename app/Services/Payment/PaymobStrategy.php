@@ -63,7 +63,7 @@ use Illuminate\Support\Facades\Log;
             'Content-Type' => 'application/json',
         ])->post($this->baseUrl . '/v1/intention/', $dto->toArray());
         $result = $response->json();
-//        dd($result, $dto->toArray());
+        dd($result, $dto->toArray());
 
         Log::error('Failed to create payment intention', [
             'response' => $result,
