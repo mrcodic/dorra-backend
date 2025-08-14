@@ -66,7 +66,7 @@
                                     <div class="form-group mb-2">
                                         <label for="statusSelect" class="label-text mb-1">Status</label>
                                         <select id="statusSelect" name="status" class="form-select select2">
-                                            <option value="">Choose status</option>
+                                            <option value="" disabled selected>Choose status</option>
                                             @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
                                                 <option value="{{ $status->value }}" @selected($status == $model->status)>{{ $status->label() }}</option>
                                             @endforeach
@@ -242,15 +242,15 @@
     <script>
         $(document).ready(function () {
             $('#productsSelect').select2({
-                placeholder: "Choose Product",
+                placeholder: "Choose Products",
                 allowClear: true
             });
             $('#tagsSelect').select2({
-                placeholder: "Choose Tag",
+                placeholder: "Choose Tags",
                 allowClear: true
             });
             $('#colorsSelect').select2({
-                placeholder: "Choose Color",
+                placeholder: "Choose Colors",
                 allowClear: true
             });
 

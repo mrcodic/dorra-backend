@@ -262,15 +262,15 @@
     <script>
         $(document).ready(function () {
             $('#productsSelect').select2({
-                placeholder: "Choose Product",
+                placeholder: "Choose Products",
                 allowClear: true
             });
             $('#tagsSelect').select2({
-                placeholder: "Choose Tag",
+                placeholder: "Choose Tags",
                 allowClear: true
             });
             $('#colorsSelect').select2({
-                placeholder: "Choose Color",
+                placeholder: "Choose Colors",
                 allowClear: true
             });
 
