@@ -209,6 +209,11 @@ return [
             'integer' => 'You must select a valid product.',
             'exists' => 'The selected product does not exist.',
         ],
+        'role_id' => [
+            'required' => 'The role is required.',
+            'integer' => 'You must select a valid role.',
+            'exists' => 'The selected role does not exist.',
+        ],
         'images' => [
             'array' => 'The product images must be an array.',
         ],

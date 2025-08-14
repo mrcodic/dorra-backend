@@ -73,6 +73,7 @@
                     <div class="mb-2">
                         <label for="status" class="form-label">Status</label>
                         <select class="form-select" name="status" id="status">
+                            <option value="" disabled selected>select Status</option>
                             <option value="1">Active</option>
                             <option value="0">Block</option>
                         </select>
@@ -120,7 +121,7 @@
                 },
                 password_confirmation: { required: true, equalTo: "#password" },
                 status: { required: true },
-                role_id: { required: false },
+                role_id: { required: true },
                 image: { extension: "jpg|jpeg|png|svg" }
             },
             messages: {
