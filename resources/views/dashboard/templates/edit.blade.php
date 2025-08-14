@@ -2,7 +2,8 @@
 @section('title', 'Edit Templates')
 @section('main-page', 'Templates')
 @section('sub-page', 'Edit Templates')
-
+@section('main-page-url', route("product-templates.index"))
+@section('sub-page-url',  route("product-templates.edit",$model->id))
 @section('vendor-style')
     <!-- Vendor CSS Files -->
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
