@@ -114,9 +114,9 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <div class="d-flex" style="gap: 5px;">
-                        <div class="rounded-circle" style="width: 24px; height: 24px; background-color: #FF5733;"></div>
-                        <div class="rounded-circle" style="width: 24px; height: 24px; background-color: #33B5FF;"></div>
-                        <div class="rounded-circle" style="width: 24px; height: 24px; background-color: #9B59B6;"></div>
+                        @foreach($template->colors as $color)
+                        <div class="rounded-circle" style="width: 24px; height: 24px; background-color: {{$color}};"></div>
+                        @endforeach
                     </div>
                     <span class="badge text-dark p-75 px-2 template-status-label"
                           data-template-id="{{ $template->id }}"
