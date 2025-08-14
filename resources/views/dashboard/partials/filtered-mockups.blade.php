@@ -274,9 +274,22 @@
             const types = $(this).data("types"); // array of type IDs
             const productId = $(this).data("product-id");
             const rawColors = $(this).attr("data-colors");
-            const images = $(this).data("images");
 
-            // Handle colors
+            // ✅ Always read raw JSON for images to avoid jQuery's auto-parse issues
+            let rawImages = $(this).attr("data-images");
+            let imageList = [];
+            try {
+                let parsed = JSON.parse(rawImages);
+                if (Array.isArray(parsed)) {
+                    imageList = parsed;
+                } else if (parsed && typeof parsed === "object") {
+                    imageList = Object.values(parsed); // turn keyed object into array
+                }
+            } catch (e) {
+                imageList = [];
+            }
+
+            // ✅ Colors parsing
             let colors = [];
             try {
                 colors = JSON.parse(rawColors);
@@ -287,19 +300,18 @@
                 colors = [];
             }
 
-            // Set form action
+            // ✅ Set form action
             const actionUrl = "{{ route('mockups.update', ':id') }}".replace(":id", id);
             $("#editMockupForm").attr("action", actionUrl);
 
-            // Set name and product
+            // ✅ Set name & product
             $("#edit-mockup-name").val(name);
             $("#edit-products-select").val(productId).trigger("change");
 
-            // Reset checkboxes
+            // ✅ Reset and check appropriate types
             const checkboxes = $("#editMockupModal .type-checkbox");
             checkboxes.prop("checked", false).prop("disabled", false);
 
-            // Check appropriate types
             types.forEach(function (typeId) {
                 checkboxes.each(function () {
                     if (parseInt($(this).data("type-id")) === parseInt(typeId)) {
@@ -308,14 +320,37 @@
                 });
             });
 
-            // Set colors globally
+            // ✅ Set colors
             editPreviousColors = colors;
             renderAllColors();
 
-            // Trigger change to refresh file inputs & enforce checkbox logic
+            // ✅ Trigger change so inputs are rendered for checked types
             checkboxes.trigger("change");
 
-            // Optional: reset upload preview UI
+            // ✅ Inject image previews *after* inputs are rendered
+            setTimeout(() => {
+                imageList.forEach(img => {
+                    console.log(img.custom_properties)
+                    const typeName = img.custom_properties?.side || '';
+                    const fileType = img.custom_properties?.role || ''; // e.g., 'base' or 'mask'
+
+                    if (typeName && fileType) {
+                        const inputId = `${typeName}-${fileType}-input`;
+                        const preview = $(`#${inputId}`).siblings('.upload-card').find('.preview');
+
+                        if (preview.length) {
+                            preview.html(`
+                        <img src="${img.original_url}"
+                             alt="Preview"
+                             class="img-fluid rounded border"
+                             style="max-height:120px;">
+                    `);
+                        }
+                    }
+                });
+            }, 50); // Small delay so DOM is ready
+
+            // ✅ Reset main product image area
             $("#edit-uploaded-image").addClass("d-none").find("img").attr("src", "");
             $("#file-details .file-name").text("");
             $("#file-details .file-size").text("");

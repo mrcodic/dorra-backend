@@ -43,7 +43,9 @@
                             <select id="edit-products-select" name="product_id" class="form-select">
                                 <option value="" disabled>Choose product</option>
                                 @foreach($associatedData['products'] as $product)
-                                    <option value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
+                                    <option value="{{ $product->id }}">
+                                        {{ $product->getTranslation('name', app()->getLocale()) }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -84,127 +86,127 @@
     </div>
 </div>
 <script !src="">
-    document.addEventListener('DOMContentLoaded', function () {
-        const checkboxes = document.querySelectorAll('.type-checkbox');
-        const editFileInputsContainer = document.getElementById('editFileInputsContainer');
-
-        function renderFileInputs() {
-            if (!editFileInputsContainer) return;
-
-            editFileInputsContainer.innerHTML = ''; // Clear existing inputs
-
-            let selectedTypes = Array.from(checkboxes)
-                .filter(checkbox => checkbox.checked)
-                .map(cb => cb.dataset.typeName);
-
-            selectedTypes.forEach(type => {
-                const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
-                const uniqueId = type + '-' + Math.random().toString(36).substring(7);
-
-                const block = document.createElement('div');
-                block.classList.add('mb-3');
-
-                block.innerHTML = `
-                    <label class="form-label label-text">${typeLabel} Base Image</label>
-                    <input type="file" name="${type}_base_image" id="${type}-base-input" class="d-none" accept="image/*">
-                    <div class="upload-card upload-area" data-input-id="${type}-base-input">
-                        <div class="upload-content">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>${typeLabel} Base Image: Drag file here or click to upload</p>
-                            <div class="preview mt-1"></div>
-                        </div>
-                    </div>
-
-                    <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
-                    <input type="file" name="${type}_mask_image" id="${type}-mask-input" class="d-none" accept="image/*">
-                    <div class="upload-card upload-area" data-input-id="${type}-mask-input">
-                        <div class="upload-content">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
-                            <div class="preview mt-1"></div>
-                        </div>
-                    </div>
-                `;
-
-                editFileInputsContainer.appendChild(block);
-            });
-
-            feather.replace(); // Re-render feather icons
-            bindUploadAreas(); // Bind dynamic handlers
-        }
-
-        function bindUploadAreas() {
-            document.querySelectorAll('.upload-area').forEach(area => {
-                const inputId = area.dataset.inputId;
-                const input = document.getElementById(inputId);
-                const preview = area.querySelector('.preview');
-
-                area.addEventListener('click', () => input?.click());
-
-                area.addEventListener('dragover', e => {
-                    e.preventDefault();
-                    area.classList.add('dragover');
-                });
-
-                area.addEventListener('dragleave', e => {
-                    e.preventDefault();
-                    area.classList.remove('dragover');
-                });
-
-                area.addEventListener('drop', e => {
-                    e.preventDefault();
-                    area.classList.remove('dragover');
-                    handleFiles(e.dataTransfer.files, input, preview);
-                });
-
-                input?.addEventListener('change', e => {
-                    handleFiles(e.target.files, input, preview);
-                });
-            });
-        }
-
-        function handleFiles(files, input, preview) {
-            if (!files.length) return;
-
-            const file = files[0];
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="img-fluid rounded border" style="max-height: 120px;">`;
-            };
-            reader.readAsDataURL(file);
-
-            // For drag/drop: manually assign to input
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            input.files = dataTransfer.files;
-        }
-
-        function toggleCheckboxes() {
-            let frontChecked = false;
-            let backChecked = false;
-            let noneChecked = false;
-
-            checkboxes.forEach(checkbox => {
-                const type = checkbox.dataset.typeName;
-                if (type === 'front' && checkbox.checked) frontChecked = true;
-                if (type === 'back' && checkbox.checked) backChecked = true;
-                if (type === 'none' && checkbox.checked) noneChecked = true;
-            });
-
-            checkboxes.forEach(checkbox => {
-                const type = checkbox.dataset.typeName;
-                checkbox.disabled = (
-                    (noneChecked && (type === 'front' || type === 'back')) ||
-                    ((frontChecked || backChecked) && type === 'none')
-                );
-            });
-
-            renderFileInputs();
-        }
-
-        checkboxes.forEach(checkbox => checkbox.addEventListener('change', toggleCheckboxes));
-        toggleCheckboxes(); // Init
-    });
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     const checkboxes = document.querySelectorAll('.type-checkbox');
+    //     const editFileInputsContainer = document.getElementById('editFileInputsContainer');
+    //
+    //     function renderFileInputs() {
+    //         if (!editFileInputsContainer) return;
+    //
+    //         editFileInputsContainer.innerHTML = ''; // Clear existing inputs
+    //
+    //         let selectedTypes = Array.from(checkboxes)
+    //             .filter(checkbox => checkbox.checked)
+    //             .map(cb => cb.dataset.typeName);
+    //
+    //         selectedTypes.forEach(type => {
+    //             const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+    //             const uniqueId = type + '-' + Math.random().toString(36).substring(7);
+    //
+    //             const block = document.createElement('div');
+    //             block.classList.add('mb-3');
+    //
+    //             block.innerHTML = `
+    //                 <label class="form-label label-text">${typeLabel} Base Image</label>
+    //                 <input type="file" name="${type}_base_image" id="${type}-base-input" class="d-none" accept="image/*">
+    //                 <div class="upload-card upload-area" data-input-id="${type}-base-input">
+    //                     <div class="upload-content">
+    //                         <i data-feather="upload" class="mb-2"></i>
+    //                         <p>${typeLabel} Base Image: Drag file here or click to upload</p>
+    //                         <div class="preview mt-1"></div>
+    //                     </div>
+    //                 </div>
+    //
+    //                 <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
+    //                 <input type="file" name="${type}_mask_image" id="${type}-mask-input" class="d-none" accept="image/*">
+    //                 <div class="upload-card upload-area" data-input-id="${type}-mask-input">
+    //                     <div class="upload-content">
+    //                         <i data-feather="upload" class="mb-2"></i>
+    //                         <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
+    //                         <div class="preview mt-1"></div>
+    //                     </div>
+    //                 </div>
+    //             `;
+    //
+    //             editFileInputsContainer.appendChild(block);
+    //         });
+    //
+    //         feather.replace(); // Re-render feather icons
+    //         bindUploadAreas(); // Bind dynamic handlers
+    //     }
+    //
+    //     function bindUploadAreas() {
+    //         document.querySelectorAll('.upload-area').forEach(area => {
+    //             const inputId = area.dataset.inputId;
+    //             const input = document.getElementById(inputId);
+    //             const preview = area.querySelector('.preview');
+    //
+    //             area.addEventListener('click', () => input?.click());
+    //
+    //             area.addEventListener('dragover', e => {
+    //                 e.preventDefault();
+    //                 area.classList.add('dragover');
+    //             });
+    //
+    //             area.addEventListener('dragleave', e => {
+    //                 e.preventDefault();
+    //                 area.classList.remove('dragover');
+    //             });
+    //
+    //             area.addEventListener('drop', e => {
+    //                 e.preventDefault();
+    //                 area.classList.remove('dragover');
+    //                 handleFiles(e.dataTransfer.files, input, preview);
+    //             });
+    //
+    //             input?.addEventListener('change', e => {
+    //                 handleFiles(e.target.files, input, preview);
+    //             });
+    //         });
+    //     }
+    //
+    //     function handleFiles(files, input, preview) {
+    //         if (!files.length) return;
+    //
+    //         const file = files[0];
+    //         const reader = new FileReader();
+    //         reader.onload = function (e) {
+    //             preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="img-fluid rounded border" style="max-height: 120px;">`;
+    //         };
+    //         reader.readAsDataURL(file);
+    //
+    //         // For drag/drop: manually assign to input
+    //         const dataTransfer = new DataTransfer();
+    //         dataTransfer.items.add(file);
+    //         input.files = dataTransfer.files;
+    //     }
+    //
+    //     function toggleCheckboxes() {
+    //         let frontChecked = false;
+    //         let backChecked = false;
+    //         let noneChecked = false;
+    //
+    //         checkboxes.forEach(checkbox => {
+    //             const type = checkbox.dataset.typeName;
+    //             if (type === 'front' && checkbox.checked) frontChecked = true;
+    //             if (type === 'back' && checkbox.checked) backChecked = true;
+    //             if (type === 'none' && checkbox.checked) noneChecked = true;
+    //         });
+    //
+    //         checkboxes.forEach(checkbox => {
+    //             const type = checkbox.dataset.typeName;
+    //             checkbox.disabled = (
+    //                 (noneChecked && (type === 'front' || type === 'back')) ||
+    //                 ((frontChecked || backChecked) && type === 'none')
+    //             );
+    //         });
+    //
+    //         renderFileInputs();
+    //     }
+    //
+    //     checkboxes.forEach(checkbox => checkbox.addEventListener('change', toggleCheckboxes));
+    //     toggleCheckboxes(); // Init
+    // });
 
 </script>
 

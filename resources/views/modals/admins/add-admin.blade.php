@@ -107,8 +107,17 @@
                 first_name: { required: true, maxlength: 255 },
                 last_name: { required: true, maxlength: 255 },
                 email: { required: true, email: true },
-                phone_number: { required: true, minlength: 11, maxlength: 11 },
-                password: { required: true, minlength: 8 },
+                phone_number: {
+                    required: true,
+                    minlength: 11,
+                    maxlength: 11,
+                    phoneEgypt: true // ✅ Custom phone rule
+                },
+                password: {
+                    required: true,
+                    minlength: 8,
+                    pwcheck: true
+                },
                 password_confirmation: { required: true, equalTo: "#password" },
                 status: { required: true },
                 role_id: { required: false },
@@ -124,11 +133,13 @@
                 phone_number: {
                     required: "Please enter a phone number.",
                     minlength: "Phone number must be 11 digits.",
-                    maxlength: "Phone number must be 11 digits."
+                    maxlength: "Phone number must be 11 digits.",
+                    phoneEgypt: "Phone number must start with 010, 011, 012, or 015 and be 11 digits long."
                 },
                 password: {
                     required: "Please enter a password.",
-                    minlength: "Password must be at least 8 characters."
+                    minlength: "Your password must be at least 8 characters long.",
+                    pwcheck: "Password must contain uppercase, lowercase, number, and symbol. Example: MyP@ssw0rd!"
                 },
                 password_confirmation: {
                     required: "Please confirm the password.",
@@ -154,6 +165,21 @@
                 }
             }
         });
+
+// ✅ Strong password check
+        $.validator.addMethod("pwcheck", function(value) {
+            return /[A-Z]/.test(value) &&  // Uppercase
+                /[a-z]/.test(value) &&  // Lowercase
+                /\d/.test(value) &&     // Number
+                /[^A-Za-z0-9]/.test(value); // Symbol
+        });
+
+// ✅ Egyptian phone number check
+        $.validator.addMethod("phoneEgypt", function(value) {
+            return /^01[0125][0-9]{8}$/.test(value);
+        });
+
+
 
         // ✅ Call handleAjaxFormSubmit once
         handleAjaxFormSubmit('#addAdminForm', {

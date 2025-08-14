@@ -30,12 +30,13 @@ class StoreAdminRequest extends BaseRequest
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:admins,email'],
             'phone_number' => ['required', 'string','digits:11',],
-            'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+            'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()
+                ->mixedCase()
+                ->numbers()
+                ->symbols()],
             'status' => ['required', 'boolean'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
-            'role_id' => ['nullable', 'integer', 'exists:roles,id'],];
+            'role_id' => ['required', 'integer', 'exists:roles,id'],];
 
     }
-
-
 }

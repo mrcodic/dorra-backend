@@ -37,7 +37,7 @@
                             <div class="form-group mb-2">
                                 <label for="productsSelect" class="label-text mb-1">Product</label>
                                 <select id="productsSelect" name="product_id" class="form-select">
-                                    <option value="" disabled>Choose product</option>
+                                    <option value="" disabled selected>Choose product</option>
                                     @foreach($associatedData['products'] as $product)
                                     <option
                                         value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>

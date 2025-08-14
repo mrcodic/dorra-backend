@@ -130,13 +130,13 @@ return [
     'uuid' => 'The :attribute must be a valid UUID.',
     'phone' => 'The :attribute field must be a valid number.',
     'password' => [
-        'min' => 'The password must be at least :min characters.',
-        'letters' => 'The password must contain at least one letter.',
-        'mixed' => 'The password must include both uppercase and lowercase letters.',
-        'numbers' => 'The password must contain at least one number.',
-        'symbols' => 'The password must contain at least one special character.',
-        'uncompromised' => 'The given password has appeared in a data leak. Please choose a different password.',
+        'min' => 'Your password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special symbol. Example: MyP@ssw0rd!',
+        'letters' => 'Your password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special symbol. Example: MyP@ssw0rd!',
+        'mixed' => 'Your password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special symbol. Example: MyP@ssw0rd!',
+        'numbers' => 'Your password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special symbol. Example: MyP@ssw0rd!',
+        'symbols' => 'Your password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special symbol. Example: MyP@ssw0rd!',
     ],
+
 
 
     /*
