@@ -114,7 +114,7 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <div class="d-flex" style="gap: 5px;">
-                        @foreach($template->colors as $color)
+                        @foreach($template->colors ?? [] as $color)
                         <div class="rounded-circle" style="width: 24px; height: 24px; background-color: {{$color}};"></div>
                         @endforeach
                     </div>
