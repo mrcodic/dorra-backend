@@ -45,8 +45,9 @@ class ProductService extends BaseService
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $locale = app()->getLocale();
-                $search = request('search_value');
-                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+                    $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                        '%' . strtolower(request('search_value')) . '%'
+                    ]);
                 } else {
                     $query->whereRaw('1 = 0');
                 }

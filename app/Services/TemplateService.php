@@ -45,7 +45,9 @@ class TemplateService extends BaseService
             ->when(request()->filled('search_value'), function ($q) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $locale = app()->getLocale();
-                    $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
+                    $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                        '%' . strtolower(request('search_value')) . '%'
+                    ]);
                 } else {
                     $q->whereRaw('1 = 0');
                 }
