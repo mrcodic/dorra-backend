@@ -34,7 +34,11 @@ class MockupService extends BaseService
             ->query()
             ->with(['product:id,name'])
             ->when(request()->filled('search_value'), function ($q) {
-                $q->where("name", 'LIKE', '%' . request('search_value') . '%');
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $q->where('name', 'LIKE', '%' . request('search_value') . '%');
+                } else {
+                    $q->whereRaw('1 = 0');
+                }
             })
             ->when(request()->filled('product_id'), fn($q) => $q->whereProductId(request('product_id')))
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('product_id', request()->array('product_ids')))

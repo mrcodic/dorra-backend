@@ -94,9 +94,13 @@ class OrderService extends BaseService
             ->with($this->relations)
             ->withCount(['orderItems'])
             ->when(request()->filled('search_value'), function ($query) {
-                $locale = app()->getLocale();
-                $search = request('search_value');
-                $query->where("order_number->{$locale}", 'LIKE', "%{$search}%");
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $locale = app()->getLocale();
+                    $search = request('search_value');
+                    $query->where("order_number->{$locale}", 'LIKE', "%{$search}%");
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             })
             ->latest();
 
@@ -654,7 +658,7 @@ class OrderService extends BaseService
             if ($design->product_price_id && $design->productPrice) {
                 $customProductPrice = $design->productPrice->price;
                 $basePrice = 0;
-                   $totalPrice = $customProductPrice * $quantity;
+                $totalPrice = $customProductPrice * $quantity;
             } else {
                 $customProductPrice = 0;
                 $basePrice = $design->product ? $design->product->base_price : 0;

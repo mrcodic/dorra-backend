@@ -31,9 +31,13 @@ class LocationService extends BaseService
             ->query()
             ->with($this->relations)
             ->when(request()->filled('search_value'), function ($query) {
-                $locale = app()->getLocale();
-                $search = request('search_value');
-                $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $locale = app()->getLocale();
+                    $search = request('search_value');
+                    $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             })
             ->latest();
 

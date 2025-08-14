@@ -25,7 +25,8 @@ class UserService extends BaseService
             ->query(['id', 'first_name', 'last_name', 'email', 'status', 'created_at'])
             ->withCount('orders')
             ->when(request()->filled('search_value'), function ($query) {
-                $search = request('search_value');
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $search = request('search_value');
                 $words = preg_split('/\s+/', $search);
                 $query->where(function ($query) use ($words) {
                     foreach ($words as $word) {
@@ -35,6 +36,9 @@ class UserService extends BaseService
                         });
                     }
                 });
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
             })->latest();

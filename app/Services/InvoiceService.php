@@ -21,9 +21,13 @@ class InvoiceService extends BaseService
         ->query()
             ->with(['order'])
             ->when(request()->filled('search_value'), function ($query) {
-                $locale = app()->getLocale();
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $locale = app()->getLocale();
                 $search = request('search_value');
                 $query->where("invoice_number->{$locale}", 'LIKE', "%{$search}%");
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             })
             ->latest();
 

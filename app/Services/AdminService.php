@@ -52,7 +52,8 @@ class AdminService extends BaseService
             ->query(['id', 'first_name', 'last_name', 'email', 'phone_number', 'status', 'created_at'])
             ->with(['roles', 'media'])
             ->when(request()->filled('search_value'), function ($query) {
-                $search = request('search_value');
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $search = request('search_value');
                 $words = preg_split('/\s+/', $search);
                 $query->where(function ($query) use ($words) {
                     foreach ($words as $word) {
@@ -62,6 +63,9 @@ class AdminService extends BaseService
                         });
                     }
                 });
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             })
             ->when(request()->filled('role_id'), function ($query) {
                 $query->whereHas('roles', function ($query) {

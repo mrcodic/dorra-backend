@@ -25,8 +25,12 @@ class DiscountCodeService extends BaseService
             ->query(['id', 'code', 'type', 'max_usage', 'used', 'expired_at', 'scope','value'])
             ->with(['categories:id,name','products:id,name'])
             ->when(request()->filled('search_value'), function ($query) {
-                $search = request('search_value');
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $search = request('search_value');
                 $query->where('code', 'LIKE', "%{$search}%");
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             })
             ->orderBy('created_at', request('created_at', 'desc'));
 

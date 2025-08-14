@@ -124,3 +124,14 @@ function commentableModelClass(string $type): ?string
         default => null,
     };
 }
+
+    function hasMeaningfulSearch($value): bool
+    {
+        if (!is_string($value) || trim($value) === '') {
+
+            return false;
+        }
+        // Remove SQL wildcards and see if something remains
+        $stripped = trim(str_replace(['%', '_'], '', $value));
+        return $stripped !== '';
+    }

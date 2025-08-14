@@ -21,9 +21,13 @@ class TagService extends BaseService
             ->query(['id', 'name','created_at'])
             ->withCount(['templates', 'products'])
             ->when(request()->filled('search_value'), function ($query) use ( $locale) {
-                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                     '%' . strtolower(request('search_value')) . '%'
                 ]);
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
             })

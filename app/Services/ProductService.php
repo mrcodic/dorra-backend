@@ -43,9 +43,13 @@ class ProductService extends BaseService
             ->with($this->relations)
             ->withCount(['category', 'tags','confirmedOrders'])
             ->when(request()->filled('search_value'), function ($query) {
-                $locale = app()->getLocale();
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $locale = app()->getLocale();
                 $search = request('search_value');
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             })
             ->when(request()->filled('category_id'), function ($query) {
                 $query->whereCategoryId(request()->get('category_id'));

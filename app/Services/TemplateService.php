@@ -43,8 +43,12 @@ class TemplateService extends BaseService
             ->query()
             ->with(['products:id,name', 'tags', 'types'])
             ->when(request()->filled('search_value'), function ($q) {
-                $locale = app()->getLocale();
-                $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $locale = app()->getLocale();
+                    $q->where("name->{$locale}", 'LIKE', '%' . request('search_value') . '%');
+                } else {
+                    $q->whereRaw('1 = 0');
+                }
             })
             ->when(request()->filled('product_id'), function ($query) use ($productId) {
                 $query->whereHas('products', function ($q) use ($productId) {
@@ -203,6 +207,7 @@ class TemplateService extends BaseService
 //        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user(),"template_assets");
 
     }
+
     public function search($request)
     {
         $locale = App::getLocale();
@@ -230,7 +235,7 @@ class TemplateService extends BaseService
     public function removeFromLanding($templateId)
     {
         $template = $this->repository->find($templateId);
-          return tap($template, function ($template) {
+        return tap($template, function ($template) {
             $template->update(['is_landing' => false]);
         });
     }
