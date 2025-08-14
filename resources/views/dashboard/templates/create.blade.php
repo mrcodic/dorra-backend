@@ -1,7 +1,10 @@
  @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Templates')
-
+ @section('main-page', 'Templates')
+ @section('sub-page', 'Add New Template')
+ @section('main-page-url', route("product-templates.index"))
+ @section('sub-page-url',  route("product-templates.create"))
 @section('vendor-style')
     <!-- Vendor CSS Files -->
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
