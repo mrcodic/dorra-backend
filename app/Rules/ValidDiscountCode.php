@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\Enums\DiscountCode\ScopeEnum;
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\DiscountCode;
 use App\Models\Product;
@@ -11,13 +12,16 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class ValidDiscountCode implements ValidationRule
 {
-    public function __construct(public ?Product $product = null, public ?Category $category = null)
+    public function __construct(public ?Product $product = null, public ?Category $category = null , public ?Cart $cart = null)
     {
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $code = DiscountCode::whereCode($value)->first();
+        if ($this->cart->price < $code->value) {
+            $fail('Discount code is not valid for this product.');
+        }
         if (!$code) {
             $fail('Discount code does not exist.');
             return;

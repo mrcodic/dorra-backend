@@ -62,7 +62,7 @@
                     <div class="mb-2">
                         <label for="role" class="form-label">Role</label>
                         <select class="form-select" name="role_id" id="role">
-                            <option selected disabled>Select Role</option>
+                            <option selected disabled>select role</option>
                             @foreach($associatedData['roles'] as $role)
                                 <option value="{{ $role->id }}">{{ $role->getTranslation('name', app()->getLocale()) }}</option>
                             @endforeach
@@ -73,7 +73,7 @@
                     <div class="mb-2">
                         <label for="status" class="form-label">Status</label>
                         <select class="form-select" name="status" id="status">
-                            <option value="" disabled selected>select Status</option>
+                            <option value="" disabled selected>select status</option>
                             <option value="1">Active</option>
                             <option value="0">Block</option>
                         </select>
