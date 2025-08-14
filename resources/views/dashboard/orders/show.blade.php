@@ -2,7 +2,8 @@
 @section('title', 'Show Order')
 @section('main-page', 'Orders')
 @section('sub-page', 'Show Order')
-
+@section('main-page-url', route("orders.index"))
+@section('sub-page-url',  route("orders.show"))
 @section('vendor-style')
 <!-- Vendor CSS Files -->
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
@@ -38,7 +39,7 @@
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone" value="{{ optional($model->orderAddress->first())->phone }}" readonly>
+                    <input type="text" cla  ss="form-control" name="phone" value="{{ optional($model->orderAddress->first())->phone }}" readonly>
                 </div>
 
 

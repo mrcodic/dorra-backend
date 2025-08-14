@@ -31,11 +31,13 @@ class Template extends Model implements HasMedia
         'design_back_data',
         'description',
         'is_landing',
+        'colors'
     ];
     protected $casts = [
         'status' => StatusEnum::class,
         'type' => TypeEnum::class,
         'unit' => UnitEnum::class,
+        'colors' => 'array'
     ];
 
     protected $attributes = [

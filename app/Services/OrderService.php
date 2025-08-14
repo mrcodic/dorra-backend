@@ -107,7 +107,7 @@ class OrderService extends BaseService
             ->addColumn('user_name', function ($order) {
                 return $order->user
                     ? ($order->user->first_name . ' ' . $order->user->last_name)
-                    : 'No User';
+                    : 'Guest';
             })
             ->addColumn('items', function ($order) {
                 return $order->order_items_count ?? 0;
