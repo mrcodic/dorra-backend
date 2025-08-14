@@ -9,12 +9,14 @@ use App\Models\Template;
 use App\Http\Requests\Template\{StoreTemplateRequest,
     StoreTranslatedTemplateRequest,
     UpdateTemplateEditorRequest,
-    UpdateTemplateRequest};
+    UpdateTemplateRequest
+};
 use App\Http\Resources\{MediaResource, Template\TemplateResource};
 use App\Repositories\Interfaces\{ProductRepositoryInterface,
     ProductSpecificationRepositoryInterface,
     TagRepositoryInterface,
-    TemplateRepositoryInterface};
+    TemplateRepositoryInterface
+};
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Cache, Response};
@@ -59,8 +61,8 @@ class TemplateController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'index' => ["tags", "media", "products","types"],
-            'edit' => ['products','types']
+            'index' => ["tags", "media", "products", "types"],
+            'edit' => ['products', 'types']
         ];
 
     }
@@ -105,7 +107,7 @@ class TemplateController extends DashboardController
 
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['products.dimensions','types'])));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['products.dimensions', 'types'])));
     }
 
     public function getProductTemplates()
@@ -131,7 +133,9 @@ class TemplateController extends DashboardController
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
         }
 
-        $templateData = TemplateResource::collection($templates)
+        $templateData = TemplateResource::collection($templates->filter(function ($template) {
+            return $template->design_data !== null || $template->design_back_data !== null;
+        }))
             ->additional([
                 'product' => [
                     'name' => $this->productRepositoryInterface->query()->whereKey($productId)?->value('name')
@@ -167,6 +171,7 @@ class TemplateController extends DashboardController
         return Response::api(data: MediaResource::make($media));
 
     }
+
     public function search(Request $request)
     {
         $templates = $this->templateService->search($request);
