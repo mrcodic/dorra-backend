@@ -25,12 +25,12 @@ class RolesAndPermissionsSeeder extends Seeder
             ]);
         }
 
-        foreach (RoleEnum::cases() as $roleEnum) {
-           $role = Role::query()->firstOrCreate([
-                'name' => $roleEnum->value,
-               'guard_name' => 'web',
-            ]);
-           $role->syncPermissions($roleEnum->permissions());
-        }
+//        foreach (RoleEnum::cases() as $roleEnum) {
+//           $role = Role::query()->firstOrCreate([
+//                'name' => $roleEnum->value,
+//               'guard_name' => 'web',
+//            ]);
+//           $role->syncPermissions($roleEnum->permissions());
+//        }
     }
 }

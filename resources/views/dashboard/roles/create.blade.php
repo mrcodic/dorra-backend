@@ -91,16 +91,21 @@
                             </td>
 
                             @foreach(\App\Enums\Permission\PermissionAction::values() as $action)
+                                 @php
+                                     $permissionKey = strtolower($group) . '_' . strtolower($action);
+                                     $isAvailable = in_array($permissionKey, $groupPermissions->toArray());
 
+//                                  dump($permissionKey,$groupPermissions->pluck('name')->toArray(), $isAvailable);
+                                @endphp
                                 <td>
                                     <div class="form-check">
-
                                             <input
                                                 type="checkbox"
                                                 class="form-check-input permission-checkbox {{ $group }}-checkbox"
                                                 name="permissions[]"
-                                                value="{{$group.$action }}"
+                                                value="{{strtolower($group).'_'.strtolower($action) }}"
                                                 id="{{ $group.$action }}"
+                                                @disabled(!$isAvailable)
                                             />
 
                                     </div>

@@ -8,7 +8,7 @@ enum PermissionAction: string
 {
     use EnumHelpers;
     case Create = 'Create';
-    case Read = 'Read';
+    case Show = 'Show';
     case Update = 'Update';
     case Delete = 'Delete';
 
