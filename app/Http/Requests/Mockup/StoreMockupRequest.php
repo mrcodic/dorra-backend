@@ -46,7 +46,7 @@ class StoreMockupRequest extends BaseRequest
             'front_mask_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
-                'mimes:png',
+//                'mimes:png',
             ],
 
             'back_base_image' => [

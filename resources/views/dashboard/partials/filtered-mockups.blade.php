@@ -12,6 +12,7 @@
                 ];
             });
     @endphp
+
     <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row" data-template-id="{{ $mockup->id }}">
         <div class="position-relative border rounded-3" style="box-shadow: 0px 4px 6px 0px #4247460F;">
             <!-- Checkbox -->
@@ -78,6 +79,7 @@
             </div>
         </div>
     </div>
+
     @include('modals.mockups.edit-mockup',['mockup' => $mockup, 'associatedData' => $associatedData])
 
 @empty

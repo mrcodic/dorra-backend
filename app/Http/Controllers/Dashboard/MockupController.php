@@ -47,7 +47,7 @@ class MockupController extends DashboardController
         $associatedData = $this->getAssociatedData('index');
 
         if (request()->ajax()) {
-            $cards = view('dashboard.partials.filtered-mockups', compact('data'))->render();
+            $cards = view('dashboard.partials.filtered-mockups', compact('data','associatedData'))->render();
 
             $pagination = '';
             if ($data instanceof \Illuminate\Pagination\LengthAwarePaginator) {
