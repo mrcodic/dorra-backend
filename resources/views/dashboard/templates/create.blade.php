@@ -78,7 +78,7 @@
                                     <div class="form-group mb-2">
                                         <label for="tagsSelect" class="label-text mb-1">Tags</label>
                                         <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
-                                            <option value="" readonly>Choose tag</option>
+                                            <option value="" disabled selected>Choose tag</option>
                                             @foreach($associatedData['tags'] as $tag)
                                                 <option value="{{ $tag->id }}">
                                                     {{ $tag->getTranslation('name', app()->getLocale()) }}
@@ -98,7 +98,7 @@
                                         <label for="productsSelect" class="label-text mb-1">Products</label>
                                         <select id="productsSelect" class="form-select select2" name="product_ids[]"
                                                 multiple>
-                                            <option value="" disabled>Choose Product</option>
+                                            <option value="" disabled selected>Choose Product</option>
                                             @foreach($associatedData['products'] as $product)
                                                 <option value="{{ $product->id }}">
                                                     {{ $product->getTranslation('name', app()->getLocale()) }}
