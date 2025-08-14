@@ -159,7 +159,7 @@ class CartService extends BaseService
         $product = $allSameProduct ? $items->first()->product : null;
         $category = $allSameCategory ? $items->first()->product->category : null;
         $request->validate([
-            'code' => ['required', new ValidDiscountCode($product, $category)],
+            'code' => ['required', new ValidDiscountCode($product, $category, $cart)],
         ]);
         $discountCode = $this->discountCodeRepository->query()
             ->whereCode($request->code)

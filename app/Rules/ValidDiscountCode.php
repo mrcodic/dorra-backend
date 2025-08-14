@@ -19,7 +19,7 @@ class ValidDiscountCode implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $code = DiscountCode::whereCode($value)->first();
-        if ($this->cart->price < $code->value) {
+        if ($this->cart?->price < $code->value) {
             $fail('Discount code is not valid for this product.');
         }
         if (!$code) {
