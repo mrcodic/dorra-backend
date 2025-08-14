@@ -11,7 +11,7 @@
                     <div class="form-group mb-2">
                         <label for="discountType" class="label-text mb-1">Type</label>
                         <select id="discountType" class="form-select select2"  name="type" >
-                            <option value="">Select discount code type</option>
+                            <option value="" disabled selected>Select discount code type</option>
                             @foreach(\App\Enums\DiscountCode\TypeEnum::cases() as $case)
                                 <option value="{{ $case->value }}">{{ $case->label() }}</option>
                             @endforeach

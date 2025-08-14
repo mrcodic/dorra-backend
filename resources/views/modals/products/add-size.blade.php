@@ -23,7 +23,7 @@
                         <div class="form-group mb-2">
                             <label for="mockup-type" class="label-text mb-1">Unit</label>
                             <select id="mockup-type" name="unit" class="form-select">
-                                <option value="" disabled>select unit type</option>
+                                <option value="" disabled selected>select unit type</option>
                                 @foreach(\App\Enums\Product\UnitEnum::cases() as $type)
                                     <option value="{{ $type->value }}"> {{ $type->label() }}</option>
                                 @endforeach

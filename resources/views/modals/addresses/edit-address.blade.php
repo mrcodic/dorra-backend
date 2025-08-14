@@ -22,7 +22,7 @@
                         <div class="col-6">
                             <label class="form-label label-text">Country</label>
                             <select id="modalAddressCountry" name="country_id" class=" form-select country-select">
-                                <option value="">Select a Country</option>
+                                <option value="" disabled selected>Select a Country</option>
                                 @foreach($countries as $country)
                                     <option value="{{ $country->id }}" @selected($country->id == $address->state->country->id)> {{ $country->name }}</option>
                                 @endforeach
@@ -34,7 +34,7 @@
                             <select id="modalAddressState" name="state_id" class="form-select state-select" data-selected-id="{{ $address->state_id }}">
 
 
-                            <option value="" >Select a State</option>
+                            <option value="" disabled selected>Select a State</option>
                             </select>
                             <div id="state-url" data-url="{{ route('states') }}"></div>
 

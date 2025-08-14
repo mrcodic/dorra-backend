@@ -83,7 +83,7 @@
               class="form-select"
               aria-label="Default select example"
             >
-              <option selected>Status</option>
+              <option selected disabled>Status</option>
               <option value="1" @selected($user->status == "Active")>Active</option>
               <option value="0" @selected($user->status == "Blocked")>Blocked</option>
             </select>
