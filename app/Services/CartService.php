@@ -241,7 +241,6 @@ class CartService extends BaseService
             'sub_total' => $priceDetails['sub_total'],
             'specs_price' => $priceDetails['specs_sum'],
             'product_price' => $priceDetails['product_price'],
-            'quantity' => Arr::get($priceDetails, 'quantity'),
         ]);
 
         $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
