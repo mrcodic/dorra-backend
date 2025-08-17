@@ -20,10 +20,8 @@ class SaveController extends Controller
             ->when(request()->filled('category_id'), function ($query) {
                 $query->whereRelation('category', 'id', request('category_id'));
             })
-            ->when(request()->filled('date'), function ($query) {
-                $query->orderBy('date', request('date'));
-            })
-            ->latest()
+
+            ->orderBy('created_at', request('date','desc'))
             ->get();
 
 
@@ -32,9 +30,8 @@ class SaveController extends Controller
             ->when(request()->filled('category_id'), function ($query) {
                 $query->whereRelation('product.category', 'id', request('category_id'));
             })
-            ->when(request()->filled('date'), function ($query) {
-                $query->orderBy('date', request('date'));
-            })
+            ->orderBy('created_at', request('date','desc'))
+
             ->latest()
             ->get();
         return Response::api(data: [
