@@ -1097,10 +1097,7 @@
                                     </div>
 
                                 </div>
-                                <div class="row d-flex justify-content-end">
-                                    <button type="submit" class="col-3 btn btn-primary  mt-3 mb-3">Add Partner
-                                    </button>
-                                </div>
+                          
                             </form>
                             <p class="fw-semibold text-black fs-16">Added Partners</p>
                             <div class="row">
