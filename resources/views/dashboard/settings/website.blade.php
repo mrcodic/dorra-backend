@@ -904,9 +904,9 @@
                                           method="POST">
                                         @csrf
                                         @method('PUT')
-                                        <input type="hidden" name="key" value="reviews_with_images_section">
+                                        <input type="hidden" name="key" value="reviews_without_images_section">
                                         <input type="hidden" name="value"
-                                               value="{{ setting('reviews_with_images_section') ? 1 : 0 }}"
+                                               value="{{ setting('reviews_without_images_section') ? 1 : 0 }}"
                                                id="reviewsWithoutImagesSectionValue">
 
                                         <div class="form-check form-switch">
@@ -914,7 +914,7 @@
                                                 class="form-check-input toggle-switch"
                                                 type="checkbox"
                                                 id="reviewsWithoutImagesSectionToggle"
-                                                {{ setting('reviews_with_images_section') ? 'checked' : '' }}
+                                                {{ setting('reviews_without_images_section') ? 'checked' : '' }}
                                             >
                                         </div>
                                     </form>
@@ -1723,6 +1723,24 @@
                             const isChecked = this.checked;
                             const valueInput = document.getElementById('reviewsWithoutImagesSectionValue');
                             const form = document.getElementById('reviewsWithoutImagesSectionForm');
+
+                            valueInput.value = isChecked ? 1 : 0;
+
+                            form.requestSubmit(); // Triggers the form submit event, which your AJAX listener handles
+                        });
+                    });
+                </script>
+            <script>
+                    $(function () {
+                        handleAjaxFormSubmit("#reviewsWithImagesSectionForm", {
+                            successMessage: "Request completed Successfully",
+                            resetForm: false,
+                        });
+
+                        document.getElementById('reviewsWithImagesSectionToggle').addEventListener('change', function () {
+                            const isChecked = this.checked;
+                            const valueInput = document.getElementById('reviewsWithImagesSectionValue');
+                            const form = document.getElementById('reviewsWithImagesSectionForm');
 
                             valueInput.value = isChecked ? 1 : 0;
 
