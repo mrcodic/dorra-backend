@@ -1,14 +1,13 @@
 <?php
 
 
+use App\Http\Controllers\Dashboard\MockupController;
 use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\ProductController;
-use App\Http\Controllers\Api\V1\User\{General\MainController,};
-use App\Http\Controllers\Dashboard\MockupController;
 use App\Http\Controllers\Dashboard\TemplateController;
+use App\Http\Controllers\Shared\{General\MainController,};
 use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Route;
-
 
 
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");

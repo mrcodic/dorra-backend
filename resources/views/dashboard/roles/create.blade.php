@@ -91,12 +91,11 @@
                             </td>
 
                             @foreach(\App\Enums\Permission\PermissionAction::values() as $action)
-                                 @php
-                                     $permissionKey = strtolower($group) . '_' . strtolower($action);
-                                     $isAvailable = in_array($permissionKey, $groupPermissions->toArray());
-
-//                                  dump($permissionKey,$groupPermissions->pluck('name')->toArray(), $isAvailable);
+                                @php
+                                    $permissionKey = strtolower($group) . '_' . strtolower($action);
+                                    $isAvailable = in_array($permissionKey, $groupPermissions->pluck('name')->toArray());
                                 @endphp
+
                                 <td>
                                     <div class="form-check">
                                             <input

@@ -190,12 +190,13 @@
                             <div data-repeater-list="carousels">
                                 @forelse($carousels as $carousel)
                                     @include('modals.delete',[
-                        'id' => 'deleteCarouselModal',
-                        'formId' => 'deleteCarouselForm',
-                        'title' => 'Delete Carousel',
-                        'action' => route("carousels.remove",$carousel->id),
-                        ])
+                            'id' => 'deleteCarouselModal',
+                             'formId' => 'deleteCarouselForm',
+                               'title' => 'Delete Carousel',
+                             'action' => route("carousels.remove",$carousel->id),
+                         ])
                                     <div data-repeater-item>
+
                                         <div class="col-md-12 mb-2">
                                             <div class="card p-1 mb-4 border rounded-md shadow-sm">
                                                 <form action="{{ route("carousels.update") }}"
@@ -206,20 +207,16 @@
                                                     @method("PUT")
 
                                                         <input type="hidden" name="carousels[{{ $loop->index }}][id]" value="{{ $carousel->id }}">
-
+                                                    <!-- will be filled dynamically -->
+                                                    <div class="website-media-ids"></div>
+                                                    <div class="mobile-media-ids"></div>
                                                     <!-- Website Image Upload -->
                                                     <label class="form-label">Website Image</label>
+                                                    <div class="dropzone website-dropzone"></div>
+
+                                                    <small class="text d-block mb-2">Recommended: 1920*520 px, max 2 MB</small>
+
                                                     <div class="upload-wrapper">
-                                                        <div
-                                                            class="upload-card ">
-                                                            <div class="upload-content" id="upload-content">
-                                                                <i data-feather="upload" class="mb-2"></i>
-                                                                <p>Click to upload website image</p>
-                                                            </div>
-                                                        </div>
-                                                        <input type="file" name="image"
-                                                               class="form-control d-none image-input"
-                                                               accept="image/*">
                                                         <div class="uploaded-image {{ $carousel->getFirstMediaUrl('carousels') ? '': 'd-none' }}  mt-2">
                                                             <img
                                                                 src="{{ $carousel->getFirstMediaUrl('carousels') }}"
@@ -233,17 +230,11 @@
 
                                                     <!-- Mobile Image Upload -->
                                                     <label class="form-label mt-3">Mobile Image</label>
+                                                    <div class="dropzone mobile-dropzone"></div>
+
+                                                    <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+
                                                     <div class="upload-wrapper">
-                                                        <div
-                                                            class="upload-card ">
-                                                            <div class="upload-content" id="upload-content">
-                                                                <i data-feather="upload" class="mb-2"></i>
-                                                                <p>Click to upload mobile image</p>
-                                                            </div>
-                                                        </div>
-                                                        <input type="file" name="mobile_image"
-                                                               class="form-control d-none image-input"
-                                                               accept="image/*">
                                                         <div
                                                             class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels') ? '':'d-none' }} mt-2">
                                                             <img
@@ -327,20 +318,14 @@
                                                       class="carousel">
                                                     @csrf
                                                     @method("PUT")
-
+                                                    <div class="website-media-ids"></div>
+                                                    <div class="mobile-media-ids"></div>
+                                                    <input type="hidden" name="carousels[0][id]" value="">
                                                     <!-- Website Image Upload -->
                                                     <label class="form-label">Website Image</label>
+                                                    <div class="dropzone website-dropzone"></div>
+                                                    <small class="text d-block mb-2">Recommended: 1920*520 px, max 2 MB</small>
                                                     <div class="upload-wrapper">
-                                                        <div
-                                                            class="upload-card ">
-                                                            <div class="upload-content" id="upload-content">
-                                                                <i data-feather="upload" class="mb-2"></i>
-                                                                <p>Click to upload website image</p>
-                                                            </div>
-                                                        </div>
-                                                        <input type="file" name="image"
-                                                               class="form-control d-none image-input"
-                                                               accept="image/*">
                                                         <div
                                                             class="uploaded-image d-none  mt-2">
                                                             <img
@@ -354,18 +339,11 @@
                                                     </div>
 
                                                     <!-- Mobile Image Upload -->
+                                                    <!-- Mobile Image Upload -->
                                                     <label class="form-label mt-3">Mobile Image</label>
+                                                    <div class="dropzone mobile-dropzone"></div>
+                                                    <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
                                                     <div class="upload-wrapper">
-                                                        <div
-                                                            class="upload-card">
-                                                            <div class="upload-content" id="upload-content">
-                                                                <i data-feather="upload" class="mb-2"></i>
-                                                                <p>Click to upload mobile image</p>
-                                                            </div>
-                                                        </div>
-                                                        <input type="file" name="mobile_image"
-                                                               class="form-control d-none image-input"
-                                                               accept="image/*">
                                                         <div
                                                             class="uploaded-image d-none mt-2">
                                                             <img
@@ -442,39 +420,45 @@
                             </div>
 
                             {{-- Hidden template for new carousel --}}
-                            {{-- Blank template for repeater --}}
                             <div data-repeater-item style="display: none;">
                                 <div class="col-md-12 mb-2">
                                     <div class="card p-4 mb-4 border rounded shadow-sm">
                                         <form method="POST" action="{{ route('carousels.update') }}"
                                               enctype="multipart/form-data" class="carousel">
                                             @csrf
-                                            <input type="file" name="image"
-                                                   class="carousel-image-input form-control d-none"
-                                                   accept="image/*">
+                                            <div class="website-media-ids"></div>
+                                            <div class="mobile-media-ids"></div>
 
-                                            <div class="upload-card">
-                                                <div class="upload-content" id="upload-content">
-                                                    <i data-feather="upload" class="mb-2"></i>
-                                                    <p>Drag image here to upload</p>
+                                            <!-- Website Image Upload -->
+                                            <label class="form-label">Website Image</label>
+                                            <div class="dropzone website-dropzone"></div>
+                                            <small class="text d-block mb-2">Recommended: 1920*520 px, max 2 MB</small>
+                                            <div class="upload-wrapper">
+                                                <div class="uploaded-image d-none mt-2">
+                                                    <img src="" class="img-fluid rounded"
+                                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                                </div>
+                                                <div class="progress upload-progress d-none">
+                                                    <div class="progress-bar" style="width: 0%"></div>
                                                 </div>
                                             </div>
 
-                                            <div
-                                                class="uploaded-image position-relative mt-1 d-flex align-items-center gap-2 d-none">
-                                                <img src="" alt="Uploaded" class="img-fluid rounded"
-                                                     style="width: 50px; height: 50px; object-fit: cover;">
-                                                <div class="file-details">
-                                                    <div class="file-name fw-bold"></div>
-                                                    <div class="file-size text-muted small"></div>
+                                            <!-- Mobile Image Upload -->
+                                            <label class="form-label mt-3">Mobile Image</label>
+                                            <div class="dropzone mobile-dropzone"></div>
+                                            <small class="text-muted d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+                                            <div class="upload-wrapper">
+                                                <div class="uploaded-image d-none mt-2">
+                                                    <img src="" class="img-fluid rounded"
+                                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                                </div>
+                                                <div class="progress upload-progress d-none">
+                                                    <div class="progress-bar" style="width: 0%"></div>
                                                 </div>
                                             </div>
 
-                                            <div class="progress upload-progress d-none">
-                                                <div class="progress-bar" style="width: 0%"></div>
-                                            </div>
-
-                                            <div class="row mb-3 mt-3">
+                                            <!-- Titles -->
+                                            <div class="row mb-3 mt-4">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Title in English</label>
                                                     <input type="text" name="title_en" class="form-control">
@@ -485,6 +469,7 @@
                                                 </div>
                                             </div>
 
+                                            <!-- Subtitles -->
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Subtitle in English</label>
@@ -496,17 +481,18 @@
                                                 </div>
                                             </div>
 
+                                            <!-- Product Selection -->
                                             <div class="mb-2">
                                                 <label class="form-label">Select Product</label>
                                                 <select name="product_id" class="form-select">
                                                     <option disabled selected>Select a product</option>
                                                     @foreach($products as $product)
-                                                        <option
-                                                            value="{{ $product->id }}">{{ $product->name }}</option>
+                                                        <option value="{{ $product->id }}">{{ $product->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
 
+                                            <!-- Action Buttons -->
                                             <div class="d-flex justify-content-between mt-2">
                                                 <button type="button" data-repeater-delete
                                                         class="btn btn-outline-danger">
@@ -520,6 +506,7 @@
                                     </div>
                                 </div>
                             </div>
+
 
                         </div>
                         {{-- Add button --}}
@@ -1212,6 +1199,132 @@
             @endsection
 
             @section('page-script')
+
+            <script>
+                Dropzone.autoDiscover = false; // 🔑 prevents Dropzone from auto-binding
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    @foreach($carousels as $index => $carousel)
+                    initCarouselDropzone({{ $index }});
+                    @endforeach
+
+                    @if($carousels->isEmpty())
+                    initCarouselDropzone(0);
+                    @endif
+                });
+                function initCarouselDropzone($item) {
+                    $item = $($item);
+
+                    // ensure containers exist
+                    if ($item.find('.website-media-ids').length === 0) {
+                        $item.append('<div class="website-media-ids"></div>');
+                    }
+                    if ($item.find('.mobile-media-ids').length === 0) {
+                        $item.append('<div class="mobile-media-ids"></div>');
+                    }
+
+                    let websiteEl = $item.find('.website-dropzone')[0];
+                    if (websiteEl && !websiteEl.dropzone) {
+                        new Dropzone(websiteEl, {
+                            url: "{{ route('media.store') }}",
+                            maxFilesize: 2,
+                            maxFiles: 1,
+                            dictRemoveFile: "✕",
+                            acceptedFiles: ".jpeg,.jpg,.png,.svg",
+                            addRemoveLinks: true,
+                            init: function () {
+                                this.on("maxfilesexceeded", function (file) {
+                                    this.removeAllFiles();  // remove old one
+                                    this.addFile(file);     // add the new one
+                                });
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            success: function (file, response) {
+                                let hidden = document.createElement('input');
+                                hidden.type = "hidden";
+                                hidden.name = $item.find('input[name*="[id]"]').attr('name')
+                                    .replace('[id]', '[website_media_ids][]');
+                                hidden.value = response.data.id;
+                                $item.find('.website-media-ids').append(hidden);
+                            },
+                            removedfile: function (file) {
+                                if (file.previewElement != null) {
+                                    file.previewElement.parentNode.removeChild(file.previewElement);
+                                }
+                                if (file._hiddenInput) {
+                                    file._hiddenInput.remove();
+                                }
+
+                                if (file.xhr) {
+                                    let response = JSON.parse(file.xhr.response);
+
+                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                        }
+                                    });
+                                }
+
+                            }
+
+                        });
+                    }
+
+                    let mobileEl = $item.find('.mobile-dropzone')[0];
+                    if (mobileEl && !mobileEl.dropzone) {
+                        new Dropzone(mobileEl, {
+                            url: "{{ route('media.store') }}",
+                            maxFilesize: 2,
+                            maxFiles: 1,
+                            acceptedFiles: ".jpeg,.jpg,.png,.svg",
+                            addRemoveLinks: true,
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            dictRemoveFile: "✕",
+                            init: function () {
+                                this.on("maxfilesexceeded", function (file) {
+                                    this.removeAllFiles();  // remove old one
+                                    this.addFile(file);     // add the new one
+                                });
+                            },
+                            success: function (file, response) {
+                                let hidden = document.createElement('input');
+                                hidden.type = "hidden";
+                                hidden.name = $item.find('input[name*="[id]"]').attr('name')
+                                    .replace('[id]', '[mobile_media_ids][]');
+                                hidden.value = response.data.id;
+                                $item.find('.mobile-media-ids').append(hidden);
+                            },
+                            removedfile: function (file) {
+                                if (file.previewElement != null) {
+                                    file.previewElement.parentNode.removeChild(file.previewElement);
+                                }
+                                if (file._hiddenInput) {
+                                    file._hiddenInput.remove();
+                                }
+
+                                if (file.xhr) {
+                                    let response = JSON.parse(file.xhr.response);
+
+                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                        }
+                                    });
+                                }
+
+                            }
+
+                        });
+                    }
+                }
+
+            </script>
                 <script !src="">
                     handleAjaxFormSubmit("#deleteCarouselForm", {
                         successMessage: "Carousel removed Successfully",
@@ -1833,13 +1946,19 @@
 
                 <script>
                     $(document).ready(function () {
+                        $('[data-repeater-item]').each(function () {
+                            initCarouselDropzone($(this));
+                        });
                         $('.invoice-repeater').repeater({
                             show: function () {
                                 $(this).find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
 
                                 $(this).slideDown();
                                 feather && feather.replace();
-
+                                let $newItem = $(this);
+                                setTimeout(function () {
+                                    initCarouselDropzone($newItem);
+                                }, 100);
                                 const items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
                                 items.each(function (index) {
                                     // Hide delete button if it's the only one

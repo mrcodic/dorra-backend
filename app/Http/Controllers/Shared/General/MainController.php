@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\User\General;
+namespace App\Http\Controllers\Shared\General;
 
 
 use App\Enums\Product\UnitEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dimension\StoreDimensionRequest;
-use App\Models\Type;
-use App\Services\TeamService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
     CountryResource,
@@ -20,11 +18,13 @@ use App\Http\Resources\{CategoryResource,
     Template\TypeResource};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
+use App\Models\Type;
 use App\Repositories\Interfaces\{CountryRepositoryInterface, DimensionRepositoryInterface, StateRepositoryInterface};
 use App\Services\CategoryService;
 use App\Services\DesignService;
 use App\Services\FolderService;
 use App\Services\TagService;
+use App\Services\TeamService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -138,11 +138,12 @@ class MainController extends Controller
         return Response::api(data: MediaResource::make($assetMedia));
     }
 
-    public function addMedia(Request $request, $id)
+    public function addMedia(Request $request, $id=null)
     {
-        $model = ($request->resource)::find($id);
-        $media = addMediaToResource($request->allFiles(), $model, clearExisting: true);
-        return Response::api(data: $media);
+        $global  = GlobalAsset::create(['title' => $request->title, 'type' => $request->type]);
+//        $model = ($request->resource)::find($id);
+        $media = addMediaToResource($request->allFiles(), $global,collectionName: $request->collection_name, clearExisting: true);
+        return Response::api(data: MediaResource::make($media));
     }
 
     public function trash()

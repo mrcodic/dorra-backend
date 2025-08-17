@@ -11,7 +11,6 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     CMS\LandingController,
     Design\DesignController,
     Folder\FolderController,
-    General\MainController,
     Invitation\InvitationController,
     Order\OrderController,
     Payment\PaymentController,
@@ -24,6 +23,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Team\TeamController,
     Template\TemplateController};
 use App\Http\Controllers\Shared\CommentController;
+use App\Http\Controllers\Shared\General\MainController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 

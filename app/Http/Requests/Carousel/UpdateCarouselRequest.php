@@ -31,8 +31,8 @@ class UpdateCarouselRequest extends BaseRequest
             'carousels.*.subtitle_en' => ['required', 'string', 'max:255'],
             'carousels.*.subtitle_ar' => ['required', 'string', 'max:255'],
             'carousels.*.product_id' => ['required', 'integer', 'exists:products,id'],
-            'carousels.*.image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],
-            'carousels.*.mobile_image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'carousels.*.website_media_ids' => ['sometimes','exists:media,id'],
+            'carousels.*.mobile_media_ids' => ['sometimes','exists:media,id',],
         ];
     }
     public function messages(): array

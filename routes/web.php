@@ -1,30 +1,30 @@
 <?php
 
-use App\Http\Controllers\Api\V1\User\General\MainController;
 use App\Http\Controllers\Dashboard\{AdminController,
+    CategoryController,
+    DiscountCodeController,
     FaqController,
     InvoiceController,
+    LocationController,
     MessageController,
     MockupController,
+    OfferController,
     OrderController,
     PermissionController,
     ProductController,
     ProductSpecificationController,
+    ProfileController,
     ReviewController,
     RoleController,
+    SettingController,
     ShippingAddressController,
     SubCategoryController,
     TagController,
     TemplateController,
-    UserController,
-    CategoryController,
-    ProfileController,
-    DiscountCodeController,
-    SettingController,
-    OfferController,
-    LocationController
+    UserController
 };
 use App\Http\Controllers\Shared\CommentController;
+use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,8 +54,8 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'categories', 'as' => 'categories.', 'controller' => CategoryController::class,], function () {
         Route::get('/data', 'getData')->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
-        Route::get('/search',  'search')->name('search');
-        Route::post('/landing',  'addToLanding')->name('landing');
+        Route::get('/search', 'search')->name('search');
+        Route::post('/landing', 'addToLanding')->name('landing');
         Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
     });
     Route::delete('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
@@ -143,9 +143,9 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
         Route::get('/data', [TemplateController::class, 'getData'])->name('data');
-        Route::get('/search',  'search')->name('search');
+        Route::get('/search', 'search')->name('search');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
-        Route::post('/landing',  'addToLanding')->name('landing');
+        Route::post('/landing', 'addToLanding')->name('landing');
         Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
     });
     Route::post('/store-templates', [TemplateController::class, 'storeAndRedirect'])->name('templates.redirect.store');
@@ -168,7 +168,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/website', 'website')->name('settings.website');
         Route::get('/notifications', 'notifications')->name('settings.notifications');
 
-        Route::post('/carousels/{carousel?}','createOrUpdateCarousel')->name('carousels.update');
+        Route::post('/carousels/{carousel?}', 'createOrUpdateCarousel')->name('carousels.update');
 
         Route::delete('carousels/{carousel}', 'removeCarousel')->name('carousels.remove');
 
@@ -191,7 +191,7 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/mockups', MockupController::class);
 
-    Route::apiResource('/products', ProductController::class)->only(['show','index']);
+    Route::apiResource('/products', ProductController::class)->only(['show', 'index']);
 
 
 });
@@ -211,7 +211,7 @@ Route::prefix('api/v1/')->group(function () {
         Route::get('units', 'units')->name('units');
         Route::delete('media/{media}', 'removeMedia')->name('remove-media');
         Route::post('media/{resource}', 'addMedia')->name('add-media');
-            Route::post('dimensions', 'storeDimension')->name('dimensions.store');
+        Route::post('dimensions', 'storeDimension')->name('dimensions.store');
         Route::get('admin-check', 'adminCheck')->name('admin-check');
     });
 
@@ -229,7 +229,7 @@ Route::prefix('api/v1/')->group(function () {
 
     });
     Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'destroy']);
-    Route::patch('templates/{template}', [TemplateController::class,'updateEditorData']);
+    Route::patch('templates/{template}', [TemplateController::class, 'updateEditorData']);
 
     Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
     Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
@@ -254,6 +254,7 @@ Route::prefix('api/v1/')->group(function () {
     });
 
     Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);
-
+    Route::post('addMedia', [MainController::class, 'addMedia'])->name("media.store");
+    Route::delete('/media/{media}', [MainController::class, 'removeMedia'])->name("media.destroy");
 
 });

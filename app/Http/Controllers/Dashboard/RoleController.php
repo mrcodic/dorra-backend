@@ -29,7 +29,10 @@ class RoleController extends DashboardController
                 'permissions' => $this->permissionRepository->query()->get()->groupBy('group'),
             ],
             'index' => [
-                'roles' => $this->roleRepository->all(columns: ['id', 'name']),
+                'roles' => $this->roleRepository->query()
+                    ->withCount('users')
+                    ->with('users')
+                    ->get(columns: ['id', 'name']),
             ],
         ];
         $this->methodRelations = [

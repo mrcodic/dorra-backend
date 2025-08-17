@@ -36,7 +36,11 @@ $configData = Helper::applClasses();
     <!-- jQuery Validation -->
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     {{-- Include core + vendor Styles --}}
-  @include('panels/styles')
+
+    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" />
+    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+
+    @include('panels/styles')
     @stack('styles')
 
 </head>

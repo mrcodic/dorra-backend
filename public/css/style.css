@@ -16,6 +16,19 @@
     border-radius: 12px;
     color: #121212;
 }
+.dropzone.dz-dashed {
+    border: 2px dashed #6c757d;   /* dashed gray border */
+    border-radius: 8px;
+    background: #f9f9f9;
+    padding: 20px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.dropzone.dz-dashed.dz-drag-hover {
+    background: #eef6ff;          /* light blue when dragging */
+    border-color: #0d6efd;        /* Bootstrap primary */
+}
 
 .label-text {
     color: #121212;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Carousel\UpdateCarouselRequest;
 use App\Http\Requests\Template\UpdateTemplateRequest;
+use App\Models\Carousel;
 use App\Models\GlobalAsset;
 use App\Models\Review;
 use App\Repositories\Interfaces\CarouselRepositoryInterface;
@@ -65,13 +66,14 @@ class SettingController extends Controller
     }
 
     public function createOrUpdateCarousel(UpdateCarouselRequest $request, CarouselRepositoryInterface $carouselRepository)
+
     {
         $validatedData = $request->validated();
-        collect($validatedData['carousels'])->each(function ($carouselData, $index) use ($carouselRepository) {
-            $model = $carouselRepository->query()->updateOrCreate(
-                [
-                    'id' => $carouselData['id'] ?? null
-                ],
+        collect($validatedData['carousels'])->each(function ($carouselData) use ($carouselRepository) {
+
+            // Create or update carousel
+            $carousel = $carouselRepository->query()->updateOrCreate(
+                ['id' => $carouselData['id'] ?? null],
                 [
                     'title' => [
                         'en' => $carouselData['title_en'],
@@ -85,22 +87,26 @@ class SettingController extends Controller
                 ]
             );
 
-            if (request()->hasFile("carousels.$index.mobile_image")) {
-                handleMediaUploads(
-                    request()->file("carousels.$index.mobile_image"),
-                    $model,
-                    collectionName: "mobile_carousels",
-                    clearExisting: (bool)Arr::get($carouselData,'id')
-                );
+            // Attach website media
+            if (Arr::get($carouselData,'website_media_ids')) {
+                $carousel->clearMediaCollection('carousels');
+                Media::whereIn('id', $carouselData['website_media_ids'])
+                    ->update([
+                        'model_type' => Carousel::class,
+                        'model_id'   => $carousel->id,
+                        'collection_name' => 'carousels',
+                    ]);
             }
 
-            if (request()->hasFile("carousels.$index.image")) {
-                handleMediaUploads(
-                    request()->file("carousels.$index.image"),
-                    $model,
-                    collectionName: "carousels",
-                    clearExisting: (bool)Arr::get($carouselData,'id')
-                );
+            // Attach mobile media
+            if (Arr::get($carouselData,'mobile_media_ids')) {
+                $carousel->clearMediaCollection('mobile_carousels');
+                Media::whereIn('id', $carouselData['mobile_media_ids'])
+                    ->update([
+                        'model_type' => Carousel::class,
+                        'model_id'   => $carousel->id,
+                        'collection_name' => 'mobile_carousels',
+                    ]);
             }
         });
 

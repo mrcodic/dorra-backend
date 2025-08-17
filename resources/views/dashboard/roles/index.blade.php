@@ -46,23 +46,13 @@
 
           <div class="d-flex justify-content-between">
             <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
+                @foreach($role->users as $user)
               <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Jimmy Ressula" class="avatar avatar-sm pull-up">
-                <img class="rounded-circle" src="{{asset('images/avatars/4.png')}}" alt="Avatar" />
+                <img class="rounded-circle" src="{{$user->getFirstMedia('admins') ?? asset('images/default-user.png')}}" alt="Avatar" />
               </li>
-              <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="John Doe" class="avatar avatar-sm pull-up">
-                <img class="rounded-circle" src="{{asset('images/avatars/1.png')}}" alt="Avatar" />
-              </li>
-              <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Kristi Lawker" class="avatar avatar-sm pull-up">
-                <img class="rounded-circle" src="{{asset('images/avatars/2.png')}}" alt="Avatar" />
-              </li>
-              <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Kaith D'souza" class="avatar avatar-sm pull-up">
-                <img class="rounded-circle" src="{{asset('images/avatars/5.png')}}" alt="Avatar" />
-              </li>
-              <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Danny Paul" class="avatar avatar-sm pull-up">
-                <img class="rounded-circle" src="{{asset('images/avatars/7.png')}}" alt="Avatar" />
-              </li>
+                @endforeach
             </ul>
-            <span>7 Users</span>
+            <span>{{ $role->users_count }} Users</span>
           </div>
                 <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
                     <div class="role-heading">
