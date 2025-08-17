@@ -276,20 +276,27 @@ class CartService extends BaseService
 
     private function handleSpecs(array $specs, $cartItem): void
     {
-        collect($specs)->each(function ($spec) use ($cartItem) {
-            $option = $this->optionRepository->query()->find($spec['option']);
-            $specification = $this->specificationRepository->query()->find($spec['id']);
+        $syncData = collect($specs)
+            ->map(function ($spec) use ($cartItem) {
+                $option = $this->optionRepository->query()->find($spec['option']);
+                $specification = $this->specificationRepository->query()->find($spec['id']);
 
-            if ($option && $specification) {
-                $cartItem->specs()->delete();
-                $cartItem->specs()->updateOrCreate(
-                    ['cart_item_id' => $cartItem->id, 'product_specification_id' => $specification->id],
-                    [
+                if ($option && $specification) {
+                    return [
+                        'cart_item_id' => $cartItem->id,
+                        'product_specification_id' => $specification->id,
                         'spec_option_id' => $option->id,
-                    ]
-                );
-            }
-        });
+                    ];
+                }
+
+                return null;
+            })
+            ->filter()
+            ->values();
+
+        $cartItem->specs()->delete();
+        $cartItem->specs()->insert($syncData->toArray());
     }
+
 
 }

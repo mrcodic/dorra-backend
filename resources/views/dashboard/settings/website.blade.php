@@ -1097,7 +1097,7 @@
                                     </div>
 
                                 </div>
-                          
+
                             </form>
                             <p class="fw-semibold text-black fs-16">Added Partners</p>
                             <div class="row">
