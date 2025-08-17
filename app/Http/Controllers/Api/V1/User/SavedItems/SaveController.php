@@ -17,7 +17,9 @@ class SaveController extends Controller
         $user = auth('sanctum')->user();
         $savedProducts = $user->savedProducts()
             ->with('category')
-            ->whereRelation('category', 'id', request('category_id'))
+            ->when(request()->filled('category_id'), function ($query) {
+                $query->whereRelation('category', 'id', request('category_id'));
+            })
             ->when(request()->filled('date'), function ($query) {
                 $query->orderBy('date', request('date'));
             })
@@ -27,7 +29,9 @@ class SaveController extends Controller
 
         $savedDesigns = $user->savedDesigns()
             ->with('product.category')
-            ->whereRelation('product.category', 'id', request('category_id'))
+            ->when(request()->filled('category_id'), function ($query) {
+                $query->whereRelation('product.category', 'id', request('category_id'));
+            })
             ->when(request()->filled('date'), function ($query) {
                 $query->orderBy('date', request('date'));
             })
