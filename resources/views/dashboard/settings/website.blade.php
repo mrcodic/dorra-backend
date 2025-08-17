@@ -1226,7 +1226,7 @@
                             url: "{{ route('media.store') }}",
                             maxFilesize: 2,
                             maxFiles: 1,
-                            dictDefaultMessage: "Drag/Drop files here",
+                            dictDefaultMessage: "Drag images here to upload",
                             dictRemoveFile: "✕",
                             acceptedFiles: ".jpeg,.jpg,.png,.svg",
                             addRemoveLinks: true,
@@ -1279,8 +1279,8 @@
                             maxFiles: 1,
                             acceptedFiles: ".jpeg,.jpg,.png,.svg",
                             addRemoveLinks: true,
-                            dictDefaultMessage: "Drag/Drop files here",
-                            
+                            dictDefaultMessage: "Drag images here to upload",
+
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             },
