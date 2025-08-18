@@ -21,6 +21,7 @@ class ValidDiscountCode implements ValidationRule
         $code = DiscountCode::whereCode($value)->first();
         if (!$code) {
             $fail('Discount code does not exist.');
+            return;
         }
         if ($this->cart?->price < $code?->value) {
             $fail('Discount code is not valid for this product.');
