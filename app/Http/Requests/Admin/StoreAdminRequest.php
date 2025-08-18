@@ -35,7 +35,7 @@ class StoreAdminRequest extends BaseRequest
                 ->numbers()
                 ->symbols()],
             'status' => ['required', 'boolean'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'image_id' => ['nullable','exists:media,id'],
             'role_id' => ['required', 'integer', 'exists:roles,id'],];
 
     }

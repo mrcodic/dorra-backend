@@ -30,7 +30,7 @@ const dt_user_table = $(".admin-list-table").DataTable({
         {data: "id"},
         {data: "name"},
         {data: "email"},
-        // {data: "role"},
+        {data: "role"},
         {
             data: "status",
             render: function (data, type, row, meta) {

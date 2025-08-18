@@ -142,7 +142,7 @@ class MainController extends Controller
     {
 //        $global  = GlobalAsset::create(['title' => $request->title, 'type' => $request->type]);
 ////        $model = ($request->resource)::find($id);
-        $media = handleMediaUploads($request->allFiles(),null,$request->collection_name, clearExisting: true);
+        $media = handleMediaUploads($request->allFiles(),null, clearExisting: true);
         return Response::api(data: MediaResource::make($media));
     }
 

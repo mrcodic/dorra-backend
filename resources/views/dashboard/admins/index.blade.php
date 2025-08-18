@@ -44,74 +44,91 @@
                         id="search-category-form" placeholder="Search here" style="height: 38px;">
                 </form>
 
-                <div class="col-12 col-md-2">
-                    <select name="role_id" class="form-select filter-role">
+                <div class="col-2 col-md-2 col-lg-2">
+                    <select name="role_id" class="form-select filter-role" id="roleSelect">
                         <option value="" selected disabled>Role</option>
                         @foreach($associatedData['roles'] as $role)
                         <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale())}}</option>
                         @endforeach
                     </select>
+                    <button type="button" id="clearRoleFilter" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+        background: transparent; border: none; font-weight: bold;
+        color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear search">
+                        &times;
+                    </button>
                 </div>
-                <div class="col-12 col-md-2">
+                <div class="col-2 col-md-2 col-lg-2">
                     <select name="status" class="form-select filter-status">
                         <option value="" selected disabled>Status</option>
                         <option value="0">Blocked</option>
                         <option value="1">Active</option>
                     </select>
                 </div>
-                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                <button type="button" class="btn btn-outline-primary ms-2" data-bs-toggle="modal"
                     data-bs-target="#addAdminModal">
                     Add New Admin
                 </button>
             </div>
-
-            <table class="admin-list-table table">
-                <thead class="table-light">
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="select-all-checkbox">
-                        </th>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Join Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-            </table>
-            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                <div class="delete-container d-flex flex-column flex-md-row justify-content-between">
-                    <p id="selected-count-text">0 admins are selected</p>
-                    <form id="bulk-delete-form" method="POST" action="{{ route('admins.bulk-delete') }}">
-                        @csrf
-                        <button type="submit" id="delete-selected-btn"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                            <i data-feather="trash-2"></i> Delete Selected
-                        </button>
-                    </form>
-
-
-                </div>
+            <div class="col-12 col-md-2">
+                <select name="status" class="form-select filter-status">
+                    <option value="" selected disabled>Status</option>
+                    <option value="0">Blocked</option>
+                    <option value="1">Active</option>
+                </select>
             </div>
-
-
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                data-bs-target="#addAdminModal">
+                Add New Admin
+            </button>
         </div>
-        @include('modals/admins/add-admin')
-        @include('modals/admins/edit-admin')
 
-        @include('modals.delete',[
-        'id' => 'deleteAdminModal',
-        'formId' => 'deleteAdminForm',
-        'title' => 'Delete Admin',
-        ])
-        @include('modals.delete',[
-        'id' => 'deleteAdminsModal',
-        'formId' => 'bulk-delete-form',
-        'title' => 'Delete Admins',
-        'confirmText' => 'Are you sure you want to delete this items?',
-        ])
+        <table class="admin-list-table table">
+            <thead class="table-light">
+                <tr>
+                    <th>
+                        <input type="checkbox" id="select-all-checkbox">
+                    </th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Join Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        </table>
+        <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+            <div class="delete-container d-flex flex-column flex-md-row justify-content-between">
+                <p id="selected-count-text">0 admins are selected</p>
+                <form id="bulk-delete-form" method="POST" action="{{ route('admins.bulk-delete') }}">
+                    @csrf
+                    <button type="submit" id="delete-selected-btn"
+                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
+                </form>
+
+
+            </div>
+        </div>
+
+
+    </div>
+    @include('modals/admins/add-admin')
+    @include('modals/admins/edit-admin')
+
+    @include('modals.delete',[
+    'id' => 'deleteAdminModal',
+    'formId' => 'deleteAdminForm',
+    'title' => 'Delete Admin',
+    ])
+    @include('modals.delete',[
+    'id' => 'deleteAdminsModal',
+    'formId' => 'bulk-delete-form',
+    'title' => 'Delete Admins',
+    'confirmText' => 'Are you sure you want to delete this items?',
+    ])
 
     </div>
     <!-- list and filter end -->
@@ -150,6 +167,8 @@
 
 <script>
     $(document).ready(function () {
+            setupClearInput('roleSelect', 'clearRoleFilter');
+
             // Select all toggle
             $('#select-all-checkbox').on('change', function () {
                 $('.category-checkbox').prop('checked', this.checked);

@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Validation\ValidationException;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Yajra\DataTables\DataTables;
 
 class CategoryService extends BaseService
@@ -27,6 +28,34 @@ class CategoryService extends BaseService
         return $paginate ? $query->paginate($perPage) : $query->get();
     }
 
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    {
+        $model = $this->repository->create($validatedData);
+        if (Arr::has($validatedData, 'image_id')) {
+            Media::where('id', $validatedData['image_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id'   => $model->id,
+                    'collection_name' => 'categories',
+                ]);
+        }
+        return $model->load($relationsToLoad);
+    }
+
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->repository->update($validatedData, $id);
+        if (Arr::has($validatedData, 'image_id')) {
+            $model->clearMediaCollection('categories');
+            Media::where('id', $validatedData['image_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id'   => $model->id,
+                    'collection_name' => 'categories',
+                ]);
+        }
+        return $model->load($relationsToLoad);
+    }
     public function getSubCategories()
     {
         return $this->repository->getWithFilters();

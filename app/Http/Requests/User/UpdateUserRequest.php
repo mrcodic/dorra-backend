@@ -36,7 +36,9 @@ class UpdateUserRequest extends BaseRequest
             'status' => ['required', 'boolean'],
             'password' => ['sometimes', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'country_code_id' => ['sometimes', 'exists:country_codes,id'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],];
+            'image_id' => ['nullable','exists:media,id'],
+
+        ];
     }
 
     protected function prepareForValidation()

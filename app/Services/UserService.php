@@ -6,6 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rules\Password;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Yajra\DataTables\DataTables;
 use App\Repositories\{Interfaces\UserRepositoryInterface, Base\BaseRepositoryInterface};
 
@@ -17,6 +18,36 @@ class UserService extends BaseService
     {
         $this->repository = $repository;
         parent::__construct($repository);
+    }
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    {
+        $model = $this->repository->create($validatedData);
+        if (isset($validatedData['image_id'])) {
+            Media::where('id', $validatedData['image_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id'   => $model->id,
+                    'collection_name' => 'users',
+                ]);
+        }
+        return $model->load($relationsToLoad);
+    }
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+
+        $model = $this->repository->update($validatedData, $id);
+
+        if (isset($validatedData['image_id'])) {
+            $model->clearMediaCollection('users');
+            Media::where('id', $validatedData['image_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id'   => $model->id,
+                    'collection_name' => 'users',
+                ]);
+        }
+
+        return $model;
     }
 
     public function getData(): JsonResponse

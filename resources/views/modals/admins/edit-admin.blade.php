@@ -4,6 +4,8 @@
             <form id="editAdminForm" enctype="multipart/form-data" action="" method="POST">
                 @csrf
                 @method("PUT")
+                <div class="edit-avatar-media-ids"></div> <!-- hidden input gets appended here -->
+
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
 
                 <div class="modal-header mb-1">
@@ -13,13 +15,19 @@
                 <div class="modal-body pt-0">
                     <!-- Avatar + Upload -->
                     <div class="d-flex align-items-end mb-3">
-                        <img  alt="Avatar" src="{{ asset("images/default-usr.png") }}"
-                             class="rounded-circle border avatarPreview" style="width: 48px; height: 48px;">
-                        <div>
-                            <label for="avatarInput" class="lined-btn mx-1">Change photo</label>
-                            <input type="file" class="d-none avatarInput" name="image" accept="image/*">
+                        <img alt="Avatar"
+                             src="{{ asset('images/default-user.png') }}"
+                             class="rounded-circle border avatarPreview"
+                             style="width: 48px; height: 48px;">
+
+                        <div class="ms-2">
+                            <div id="editAvatarDropzone" class="dropzone border rounded p-2"
+                                 style="width: 200px; cursor: pointer;">
+                                <div class="dz-message">Drop avatar here or click</div>
+                            </div>
                         </div>
                     </div>
+
 
                     <!-- First Name + Last Name -->
                     <div class="row mb-2">
@@ -88,7 +96,49 @@
         </div>
     </div>
 </div>
+<script !src="">
+    Dropzone.autoDiscover = false;
 
+    const editAvatarDropzone = new Dropzone("#editAvatarDropzone", {
+        url: "{{ route('media.store') }}",
+        paramName: "image",
+        maxFiles: 1,
+        acceptedFiles: "image/*",
+        addRemoveLinks: true,
+        headers: {
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        },
+        init: function () {
+            this.on("success", function (file, response) {
+                // Clear previous hidden inputs
+                document.querySelector('.edit-avatar-media-ids').innerHTML = "";
+
+                // Create hidden input with image_id
+                let hidden = document.createElement('input');
+                hidden.type = "hidden";
+                hidden.name = "image_id";
+                hidden.value = response.data.id; // ✅ matches your response
+                document.querySelector('.edit-avatar-media-ids').appendChild(hidden);
+
+                // Update avatar preview
+                const preview = document.querySelector('#editAdminModal .avatarPreview');
+                preview.src = response.data.url;
+            });
+
+            this.on("removedfile", function () {
+                // Reset preview
+                const preview = document.querySelector('#editAdminModal .avatarPreview');
+                preview.src = "{{ asset('images/default-user.png') }}";
+
+                // Remove hidden input too
+                document.querySelector('.edit-avatar-media-ids').innerHTML = "";
+            });
+        }
+    });
+
+
+
+</script>
 <script>
     // For Edit Admin Modal
     document.querySelectorAll('#editAdminModal .avatarInput').forEach(input => {
@@ -130,13 +180,13 @@
     });
 
 
-    $(document).ready(function () {
         handleAjaxFormSubmit('#editAdminForm', {
             successMessage: "✅ Admin updated successfully!",
             closeModal: '#editAdminModal',
             onSuccess: function (response, $form) {
                 $(".admin-list-table").DataTable().ajax.reload(null, false); // false = stay on current page
+                location.reload()
             }
         });
-    });
+
 </script>

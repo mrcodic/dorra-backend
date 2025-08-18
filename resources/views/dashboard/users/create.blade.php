@@ -24,6 +24,7 @@
 <div class="bs-stepper checkout-tab-steps">
     <form id="checkout-form" class="bs-stepper checkout-tab-steps add-new-user" method="post" enctype="multipart/form-data" action="{{ route("users.store") }}">
         @csrf
+        <div class="user-media-ids"> </div>
         <!-- Wizard starts -->
         <div class="bs-stepper-header">
             <div class="step" data-target="#step-info" role="tab" id="step-info-trigger">
@@ -77,19 +78,16 @@
             <!-- step 1 -->
             <div id="step-info" class="content" role="tabpanel" aria-labelledby="step-info-trigger">
 
-                <!-- Avatar Upload -->
+                <!-- Avatar Upload with Dropzone -->
                 <div class="mb-2 text-center">
-                    <!-- Hidden input -->
-                    <input type="file" id="avatarInput" name="image" accept="image/*" style="display: none;" />
-
-                    <!-- Clickable avatar card -->
-                    <div id="avatarCard" style="width: 150px; margin: auto; cursor: pointer;">
-                        <img id="avatarPreview" src="{{asset('images/avatar.png')}}" alt="Avatar" class="rounded-circle border" style="width: 48px; height: 48px; object-fit: cover;">
-                        <div id="avatarName" class="mt-2 " style="width: 150px; margin: auto; cursor: pointer; border: 1px solid #ccc; border-radius: 10px; padding: 10px;">
-                            Upload Photo
+                    <div id="avatar-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
+                        <div class="dz-message" data-dz-message>
+                            <span>Drop photo here or click to upload</span>
                         </div>
                     </div>
+                    <input type="hidden" name="image" id="uploadedImage">
                 </div>
+
 
 
                 <!-- First Name and Last Name -->
@@ -300,6 +298,132 @@
 @section('page-script')
 <!-- Page js files -->
 <script src="{{ asset(mix('js/scripts/pages/app-ecommerce-checkout.js')) }}"></script>
+<script>
+    Dropzone.autoDiscover = false;
+
+    const avatarDropzone = new Dropzone("#avatar-dropzone", {
+        url: "{{ route('media.store') }}",
+        paramName: "file",
+        maxFiles: 1,
+        acceptedFiles: "image/*",
+        headers: {
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        addRemoveLinks: true,
+        init: function () {
+            this.on("success", function (file, response) {
+                if (response.data.success && response.data.url) {
+                    $("#uploadedImage").val(response.data.url);
+                }
+            });
+            this.on("removedfile", function () {
+                $("#uploadedImage").val("");
+            });
+        } ,
+        success: function (file, response) {
+            // Add hidden input for submitted form
+            let hidden = document.createElement('input');
+            hidden.type = "hidden";
+            hidden.name = "image_id"; // backend expects image_id
+            hidden.value = response.data.id;
+            file._hiddenInput = hidden;
+            document.querySelector('.user-media-ids').appendChild(hidden);
+        },
+    });
+</script>
+
+<script !src="">
+    $(document).ready(function () {
+        // jQuery Validation for Add User form
+        $(".add-new-user").validate({
+            rules: {
+                first_name: {
+                    required: true,
+                    maxlength: 255
+                },
+                last_name: {
+                    required: true,
+                    maxlength: 255
+                },
+                email: {
+                    required: true,
+                    email: true
+                },
+                phone_number: {
+                    required: true,
+                    minlength: 7,
+                    maxlength: 15,
+                    digits: true
+                },
+                country_code_id: {
+                    required: true
+                },
+                password: {
+                    required: true,
+                    minlength: 8,
+                    pwcheck: true
+                },
+                password_confirmation: {
+                    required: true,
+                    equalTo: "#password"
+                },
+                status: {
+                    required: true
+                },
+                "addresses[0][label]": {
+                    required: true,
+                    minlength: 3
+                },
+                "addresses[0][line]": {
+                    required: true,
+                    minlength: 3
+                },
+                "addresses[0][state_id]": {
+                    required: true
+                }
+            },
+            messages: {
+                first_name: "First name is required",
+                last_name: "Last name is required",
+                email: {
+                    required: "Email is required",
+                    email: "Enter a valid email"
+                },
+                phone_number: {
+                    required: "Phone number is required",
+                    digits: "Only digits allowed"
+                },
+                password: {
+                    required: "Password is required",
+                    minlength: "Password must be at least 8 characters"
+
+                },
+                password_confirmation: {
+                    required: "Confirm your password",
+                    equalTo: "Passwords do not match"
+                },
+                "addresses[0][label]": "Address label is required",
+                "addresses[0][line]": "Address line is required",
+                "addresses[0][state_id]": "Please select a state"
+            },
+            errorPlacement: function (error, element) {
+                error.addClass("text-danger small");
+                error.insertAfter(element);
+            },
+            submitHandler: function (form) {
+                form.submit(); // Submit if valid
+            }
+        });
+        // ✅ Strong password check
+        $.validator.addMethod("pwcheck", function(value) {
+            return /[A-Z]/.test(value) &&  // Uppercase
+                /[a-z]/.test(value) &&  // Lowercase
+                /\d/.test(value) &&     // Number
+                /[^A-Za-z0-9]/.test(value); // Symbol
+        });
+    });
+
+</script>
 <script>
     const toggle = document.getElementById('account_status_toggle');
     const hiddenInput = document.getElementById('account_status');

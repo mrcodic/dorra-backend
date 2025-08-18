@@ -13,6 +13,14 @@
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+    <style>
+        #edit-user-dropzone .dz-image img {
+            width: 100% !important;   /* fill container */
+            height: auto !important;  /* keep aspect ratio */
+            object-fit: contain;      /* prevent cropping */
+        }
+
+    </style>
 @endsection
 
 @section('page-style')
@@ -89,30 +97,26 @@
                                 <form action="{{ route("users.update",$model->id) }}" id="editUserForm" method="post">
                                     @csrf
                                     @method("PUT")
+                                    <div class="edit-user-media-ids"></div>
                                     <input type="hidden" id="status" name="status">
-                                    <div class="d-flex align-items-center justify-content-between ">
-                                        <img
-                                            class="img-fluid rounded-circle mb-2 uploaded-image"
-                                            src="{{$model->image?->getUrl() ?? asset('images/avatar.png')}}"
-                                            height="48"
-                                            width="48"
-                                            alt="User avatar"/>
-                                        <div>
-                                            <button type="button" class="btn bg-white text-danger fs-5 remove-old-image"
-                                                    data-image-id="{{$model->image?->id }}">Remove Photo
-                                            </button>
+                                        <div class="d-flex align-items-center justify-content-between ">
+                                            <div id="edit-user-dropzone"
+                                                 class="dropzone border rounded p-3 upload-card"
+                                                 style="cursor:pointer; min-height:150px;">
+                                                <div class="dz-message" data-dz-message>
+                                                    <span>Drop photo here or click to upload</span>
+                                                </div>
+                                            </div>
 
-                                            <button type="button" class="btn btn-outline-secondary fs-5"
-                                                    id="changePhotoBtn">
-                                                Change Photo
-                                            </button>
+                                            <!-- Hidden input for image_id -->
+                                            <input type="hidden" name="image_id" id="uploadedImage" value="{{ $model->getFirstMedia('users')?->id ?? '' }}">
 
-                                            <input type="file" id="photoInput" name="image" accept="image/*"
-                                                   style="display: none;">
+                                            <!-- Pass existing image info -->
+                                            <input type="hidden" id="existingImageUrl" value="{{ $model->getFirstMediaUrl('users') }}">
+                                            <input type="hidden" id="existingImageName" value="{{ $model->getFirstMedia('users')?->file_name ?? 'Current Photo' }}">
+
+
                                         </div>
-
-
-                                    </div>
 
 
                                     <!-- First Name and Last Name -->
@@ -424,6 +428,7 @@
 
     </section>
 
+
 @endsection
 
 @section('vendor-script')
@@ -450,6 +455,57 @@
 @endsection
 
 @section('page-script')
+    <script>
+        Dropzone.autoDiscover = false;
+
+        const editDropzone = new Dropzone("#edit-user-dropzone", {
+            url: "{{ route('media.store') }}", // route that uploads new media
+            paramName: "file",
+            maxFiles: 1,
+            acceptedFiles: "image/*",
+
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            init: function () {
+                let existingImageUrl = $("#existingImageUrl").val();
+                let existingImageName = $("#existingImageName").val();
+
+                // ✅ Preload user’s current avatar if exists
+                if (existingImageUrl) {
+                    let mockFile = { name: existingImageName, size: 12345, accepted: true };
+                    this.emit("addedfile", mockFile);
+                    this.emit("thumbnail", mockFile, existingImageUrl);
+                    this.emit("complete", mockFile);
+                    this.files.push(mockFile);
+                }
+
+                // ✅ When new image uploaded
+                this.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        $("#uploadedImage").val(response.data.id);
+
+                            // Add hidden input for submitted form
+                            let hidden = document.createElement('input');
+                            hidden.type = "hidden";
+                            hidden.name = "image_id"; // backend expects image_id
+                            hidden.value = response.data.id;
+                            file._hiddenInput = hidden;
+                            document.querySelector('.edit-user-media-ids').appendChild(hidden);
+
+                    }
+                });
+
+                // ✅ On remove, clear hidden input
+                this.on("removedfile", function () {
+                    $("#uploadedImage").val("");
+                });
+            }
+        });
+    </script>
+
+
     <script>
         // Trigger the file input click when the "Change Photo" button is clicked
         document.getElementById('changePhotoBtn').addEventListener('click', function () {

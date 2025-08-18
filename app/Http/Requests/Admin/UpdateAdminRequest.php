@@ -21,7 +21,7 @@ class UpdateAdminRequest extends BaseRequest
             'email' => ['sometimes', 'email', Rule::unique('admins', 'email')->ignore($id)],
             'phone_number' => ['required', 'string', 'min:10', 'max:15'],
             'status' => ['sometimes', 'boolean'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'image_id' => ['nullable','exists:media,id'],
             'role_id' => ['sometimes', 'integer', 'exists:roles,id'],
             'password' => [
                 'nullable',

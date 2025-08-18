@@ -23,7 +23,7 @@ class SendInvitationsJob implements ShouldQueue
 
     protected $emails;
 
-    public function __construct(public ?Team $team, public ?Design $design, array $emails)
+    public function __construct(public ?Team $team =null, public ?Design $design = null, array $emails)
     {
 
         $this->emails = $emails;

@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Carousel;
 use App\Models\Role;
 use App\Repositories\Interfaces\AdminRepositoryInterface;
 use Illuminate\Support\Arr;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Yajra\DataTables\Facades\DataTables;
 
 class AdminService extends BaseService
@@ -23,8 +25,13 @@ class AdminService extends BaseService
             $model->assignRole(Role::findById($validatedData['role_id']));
 
         }
-        if (isset($validatedData['image'])) {
-            handleMediaUploads($validatedData['image'], $model);
+        if (isset($validatedData['image_id'])) {
+            Media::where('id', $validatedData['image_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id'   => $model->id,
+                    'collection_name' => 'admins',
+                ]);
         }
 
         return $model->load($relationsToLoad);
@@ -37,9 +44,14 @@ class AdminService extends BaseService
         }
         $model = $this->repository->update($validatedData, $id);
 
-        $files = request()->allFiles();
-        if ($files) {
-            handleMediaUploads($files, $model, clearExisting: true);
+        if (isset($validatedData['image_id'])) {
+            $model->clearMediaCollection('admins');
+            Media::where('id', $validatedData['image_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id'   => $model->id,
+                    'collection_name' => 'admins',
+                ]);
         }
 
         return $model;
@@ -83,6 +95,10 @@ class AdminService extends BaseService
             })
             ->editColumn('created_at', function ($admin) {
                 return $admin->created_at->format('d/m/Y');
+            })
+            ->addColumn('role', function ($admin) {
+                $role = $admin->roles->first();
+                return $role ? ($role->name[app()->getLocale()] ?? '-') : '-';
             })
             ->editColumn('status', function ($admin) {
                 return $admin->status == 1 ? "active" : "blocked";

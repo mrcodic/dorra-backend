@@ -8,7 +8,7 @@ use Spatie\Translatable\HasTranslations;
 class Role extends SpatieRole
 {
     use HasTranslations;
-    public $translatable = ['name', 'description',];
+    public $translatable  = ['name', 'description',];
     protected $casts = [
         'name' => 'array',
         'description' => 'array',
