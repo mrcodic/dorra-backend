@@ -31,7 +31,7 @@ use Illuminate\Support\Arr;
     {
         $model = $this->repository->create($validatedData);
         if (Arr::get($validatedData, 'emails')) {
-            SendInvitationsJob::dispatch(team: $model, emails: $validatedData['emails']);
+            SendInvitationsJob::dispatch(emails: $validatedData['emails'],team: $model);
         }
         return $model->load($relationsToLoad);
     }
