@@ -91,19 +91,17 @@
         addRemoveLinks: true,
         dictDefaultMessage: "Drop image here or click to upload",
         init: function () {
-            let dz = this;
 
 
-            // On success -> save uploaded image_id or url
-            dz.on("success", function (file, response) {
-                if (response.data.success && response.data.id) {
-                    console.log(response.data.id)
-                    $("#editUploadedImage").val(response.data.id);
+            this.on("success", function (file, response) {
+                if (response.success && response.data) {
+                    $("#editUploadedImage").val(response.data.id); // store image_id
+                    $("#edit-preview-image").attr("src", response.data.url);
                 }
             });
 
             // On remove -> clear hidden input
-            dz.on("removedfile", function () {
+            this.on("removedfile", function () {
                 $("#editUploadedImage").val("");
             });
         }
