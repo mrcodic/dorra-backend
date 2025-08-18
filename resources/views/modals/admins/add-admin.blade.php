@@ -12,13 +12,12 @@
 
                 <div class="modal-body pt-0">
                     <!-- Avatar + Upload -->
-                    <div class="d-flex align-items-end mb-3">
-                        <img id="avatarPreview" src="{{ asset('images/avatar.png') }}" alt="Avatar"
-                             class="rounded-circle border" style="width: 48px; height: 48px;">
-                        <div>
-                            <label for="avatarInput" class="lined-btn mx-1">Add Photo</label>
-                            <input type="file" class="d-none" id="avatarInput" name="image" accept="image/*">
+                    <div class="mb-3">
+                        <label class="form-label">Profile Photo</label>
+                        <div id="avatarDropzone" class="dropzone border rounded p-3 text-center">
+                            <div class="dz-message">Drag & drop photo or click to upload</div>
                         </div>
+                        <div class="avatar-media-ids"></div> <!-- hidden input gets appended here -->
                     </div>
 
                     <!-- First Name + Last Name -->
@@ -91,7 +90,56 @@
         </div>
     </div>
 </div>
+<script !src="">
 
+    Dropzone.autoDiscover = false; // prevent auto init
+
+    let avatarDropzone = new Dropzone("#avatarDropzone", {
+        url: "{{ route('media.store') }}", // Laravel media upload route
+        maxFiles: 1,
+        maxFilesize: 2, // MB
+        acceptedFiles: ".jpeg,.jpg,.png,.svg",
+        addRemoveLinks: true,
+        dictDefaultMessage: "Drag & drop photo or click to upload",
+        dictRemoveFile: "✕",
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        init: function () {
+            this.on("maxfilesexceeded", function (file) {
+                this.removeAllFiles();
+                this.addFile(file);
+            });
+        },
+        success: function (file, response) {
+            // Add hidden input for submitted form
+            let hidden = document.createElement('input');
+            hidden.type = "hidden";
+            hidden.name = "image_id"; // backend expects image_id
+            hidden.value = response.data.id;
+            file._hiddenInput = hidden;
+            document.querySelector('.avatar-media-ids').appendChild(hidden);
+        },
+        removedfile: function (file) {
+            if (file.previewElement) {
+                file.previewElement.remove();
+            }
+            if (file._hiddenInput) {
+                file._hiddenInput.remove();
+            }
+            if (file.xhr) {
+                let response = JSON.parse(file.xhr.response);
+                fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                    method: "DELETE",
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+            }
+        }
+    });
+
+</script>
 <script>
     $(document).ready(function () {
         // Show avatar preview

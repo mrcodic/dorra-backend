@@ -29,7 +29,7 @@ class CartItemObserver
                 $cartItem->sub_total = $subTotal;
                 $cartItem->saveQuietly();
             } else {
-                $subTotal = ($cartItem->product_price * $cartItem->quantity) + $cartItem->specs_price;
+                $subTotal = $cartItem->product_price+ $cartItem->specs_price * $cartItem->quantity;
                 $cartItem->sub_total = $subTotal;
                 $cartItem->saveQuietly();
             }

@@ -140,9 +140,9 @@ class MainController extends Controller
 
     public function addMedia(Request $request, $id=null)
     {
-        $global  = GlobalAsset::create(['title' => $request->title, 'type' => $request->type]);
-//        $model = ($request->resource)::find($id);
-        $media = addMediaToResource($request->allFiles(), $global,collectionName: $request->collection_name, clearExisting: true);
+//        $global  = GlobalAsset::create(['title' => $request->title, 'type' => $request->type]);
+////        $model = ($request->resource)::find($id);
+        $media = handleMediaUploads($request->allFiles(),null,$request->collection_name, clearExisting: true);
         return Response::api(data: MediaResource::make($media));
     }
 

@@ -41,7 +41,7 @@ class OtpController extends Controller
                 'otp' => ["wrong or invalid otp"]
             ]);
         }
-        return Response::api(message: "Otp confirmed successfully, you can rest password.", data: [
+        return Response::api(message: "Otp confirmed successfully, you can reset password.", data: [
             'email' => $request->email,
             'reset_token' => $resetToken,
         ]);
