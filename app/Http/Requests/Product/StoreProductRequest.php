@@ -39,9 +39,9 @@ class StoreProductRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png','max:1024'],
             'images' => ['nullable', 'array'],
-            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png'],
+            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png','max:1024'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'sub_category_id' => ['nullable', 'integer', 'exists:categories,id', function ($attribute, $value, $fail) {
                 $category = Category::find($value);

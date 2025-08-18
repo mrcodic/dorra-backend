@@ -17,12 +17,16 @@
                         <div id="category-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
                             <div class="dz-message" data-dz-message>
                                 <span>Drop image here or click to upload</span>
+
                             </div>
                         </div>
 
                         <!-- hidden input to store uploaded image_id -->
                         <input type="hidden" name="image_id" id="uploadedImage">
                     </div>
+                    <span class="image-hint small text-end" >
+                        Max size: 1MB | Dimensions: 512x512 px
+                    </span>
 
                     <!-- Name in Arabic and English -->
                     <div class="row my-3">
@@ -67,6 +71,8 @@
         url: "{{ route('media.store') }}",   // backend route for image upload
         paramName: "file",
         maxFiles: 1,
+        maxFilesize: 1, // MB
+
         acceptedFiles: "image/*",
         headers: {
             "X-CSRF-TOKEN": "{{ csrf_token() }}"
@@ -76,12 +82,24 @@
         init: function () {
             this.on("success", function (file, response) {
                 if (response.success && response.data) {
+                    file._hiddenInputId = response.data.id;
+
                     $("#uploadedImage").val(response.data.id); // store image_id
                 }
             });
 
-            this.on("removedfile", function () {
-                $("#uploadedImage").val(""); // clear when removed
+            this.on("removedfile", function (file) {
+                $("#uploadedImage").val("");
+                if (file._hiddenInputId) {
+                    fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                        method: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    });
+                    $("#preview-image").attr("src", "").addClass("d-none");
+
+                }
             });
         }
     });
