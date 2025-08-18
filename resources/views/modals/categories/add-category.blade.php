@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="addCategoryModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="addCategoryForm" enctype="multipart/form-data" action="{{ route("categories.store") }}">
+            <form id="addCategoryForm" enctype="multipart/form-data" action="{{ route('categories.store') }}">
                 @csrf
 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
@@ -9,40 +9,20 @@
                     <h5 class="modal-title fs-3" id="exampleModalLabel">Add New Product</h5>
                 </div>
                 <div class="modal-body flex-grow-1">
+
                     <div class="mb-1">
-                        <label class="form-label label-text" for="add-category-image">Image*</label>
+                        <label class="form-label label-text">Image*</label>
 
-                        <!-- Hidden file input -->
-                        <input type="file" name="image" id="add-category-image" class="form-control d-none" accept="image/*">
-
-                        <!-- Custom Upload Area -->
-                        <div id="add-upload-area" class="upload-card">
-                            <div id="add-upload-content">
-                                <i data-feather="upload" class="mb-2"></i>
-                                <p>Drag image here to upload</p>
+                        <!-- Dropzone upload area -->
+                        <div id="category-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
+                            <div class="dz-message" data-dz-message>
+                                <span>Drop image here or click to upload</span>
                             </div>
                         </div>
 
-                        <!-- Upload Progress -->
-                        <div id="add-upload-progress" class="progress mt-2 d-none w-50">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                        </div>
-
-                        <!-- Uploaded Image Preview -->
-                        <div id="add-uploaded-image" class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                            <img src="" alt="Uploaded" class="img-fluid rounded" style="width: 50px; height: 50px; object-fit: cover;">
-                            <div id="add-file-details" class="file-details">
-                                <div class="file-name fw-bold"></div>
-                                <div class="file-size text-muted small"></div>
-                            </div>
-                            <button type="button" id="add-remove-image" class="btn btn-sm position-absolute text-danger" style="top: 5px; right: 5px; background-color: #FFEEED">
-                                <i data-feather="trash"></i>
-                            </button>
-                        </div>
+                        <!-- hidden input to store uploaded image_id -->
+                        <input type="hidden" name="image_id" id="uploadedImage">
                     </div>
-
-
-
 
                     <!-- Name in Arabic and English -->
                     <div class="row my-3">
@@ -64,10 +44,9 @@
                         </div>
                         <div class="col-6">
                             <label class="form-label label-text">Description (AR)</label>
-                            <textarea class="form-control" id="add-category-description-ar" placeholder="Enter Description Name(En)" name="description[ar]" rows="2"></textarea>
+                            <textarea class="form-control" id="add-category-description-ar" placeholder="Enter Description Name(Ar)" name="description[ar]" rows="2"></textarea>
                         </div>
                     </div>
-
                 </div>
 
                 <div class="modal-footer border-top-0">
@@ -76,89 +55,34 @@
                         <span class="btn-text">Save</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
                     </button>
-
                 </div>
             </form>
         </div>
     </div>
 </div>
 <script>
-    $(document).ready(function () {
-        const input = $('#add-category-image');
-        const uploadArea = $('#add-upload-area');
-        const progressBar = $('#add-upload-progress .progress-bar');
-        const progressContainer = $('#add-upload-progress');
-        const uploadedImage = $('#add-uploaded-image');
-        const imgPreview = $('#add-uploaded-image img');
-        const fileNameDisplay = $('#add-file-details .file-name');
-        const fileSizeDisplay = $('#add-file-details .file-size');
-        const removeBtn = $('#add-remove-image');
+    Dropzone.autoDiscover = false;
 
-        // Click upload area to open file input
-        uploadArea.on('click', function () {
-            input.click();
-        });
-
-        // Drag over style
-        uploadArea.on('dragover', function (e) {
-            e.preventDefault();
-            uploadArea.addClass('dragover');
-        });
-
-        uploadArea.on('dragleave', function (e) {
-            e.preventDefault();
-            uploadArea.removeClass('dragover');
-        });
-
-        uploadArea.on('drop', function (e) {
-            e.preventDefault();
-            uploadArea.removeClass('dragover');
-            const files = e.originalEvent.dataTransfer.files;
-            if (files.length > 0) handleFile(files[0]);
-        });
-
-        // File input change
-        input.on('change', function (e) {
-            if (e.target.files.length > 0) handleFile(e.target.files[0]);
-        });
-
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) return;
-
-            const fileSizeKB = (file.size / 1024).toFixed(2) + ' KB';
-            progressContainer.removeClass('d-none');
-            progressBar.css('width', '0%');
-
-            let progress = 0;
-            const interval = setInterval(function () {
-                progress += 10;
-                progressBar.css('width', progress + '%');
-                if (progress >= 100) {
-                    clearInterval(interval);
-
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        imgPreview.attr('src', e.target.result);
-                        fileNameDisplay.text(file.name);
-                        fileSizeDisplay.text(fileSizeKB);
-                        uploadedImage.removeClass('d-none');
-                        progressContainer.addClass('d-none');
-                    };
-                    reader.readAsDataURL(file);
+    const categoryDropzone = new Dropzone("#category-dropzone", {
+        url: "{{ route('media.store') }}",   // backend route for image upload
+        paramName: "file",
+        maxFiles: 1,
+        acceptedFiles: "image/*",
+        headers: {
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        addRemoveLinks: true,
+        dictDefaultMessage: "Drop image here or click to upload",
+        init: function () {
+            this.on("success", function (file, response) {
+                if (response.success && response.data) {
+                    $("#uploadedImage").val(response.data.id); // store image_id
                 }
-            }, 100);
+            });
+
+            this.on("removedfile", function () {
+                $("#uploadedImage").val(""); // clear when removed
+            });
         }
-
-        // Remove image
-        removeBtn.on('click', function () {
-            imgPreview.attr('src', '');
-            fileNameDisplay.text('');
-            fileSizeDisplay.text('');
-            uploadedImage.addClass('d-none');
-            input.val('');
-        });
-
-        // Replace icons if needed
-        feather.replace();
     });
 </script>

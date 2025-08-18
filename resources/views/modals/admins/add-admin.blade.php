@@ -101,7 +101,6 @@
         acceptedFiles: ".jpeg,.jpg,.png,.svg",
         addRemoveLinks: true,
         dictDefaultMessage: "Drag & drop photo or click to upload",
-        dictRemoveFile: "✕",
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },

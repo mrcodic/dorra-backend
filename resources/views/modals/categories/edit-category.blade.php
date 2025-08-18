@@ -13,20 +13,16 @@
 
                     <!-- Image Upload -->
                     <div class="mb-1">
-                        <label class="form-label label-text" for="edit-category-image">Image*</label>
-
-                        <!-- Hidden file input -->
-                        <input type="file" name="image" id="edit-category-image" class="form-control d-none" accept="image/*">
-
-                        <!-- Custom Upload Area -->
-                        <div id="edit-upload-area" class="upload-card">
-                            <div id="edit-upload-content">
-                                <i data-feather="upload" class="mb-2"></i>
-                                <p>Drag image here to upload</p>
+                        <label class="form-label label-text">Image*</label>
+                        <div id="edit-category-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
+                            <div class="dz-message" data-dz-message>
+                                <span>Drop photo here or click to upload</span>
                             </div>
                         </div>
+                        <input type="hidden" name="image_id" id="editUploadedImage">
+                    </div>
 
-                        <!-- Upload Progress -->
+                    <!-- Upload Progress -->
                         <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
                             <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                         </div>
@@ -66,7 +62,7 @@
                             <textarea class="form-control" id="edit-category-description-ar" name="description[ar]" rows="2"></textarea>
                         </div>
                     </div>
-                </div>
+
 
                 <div class="modal-footer border-top-0">
                     <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
@@ -78,9 +74,42 @@
                 </div>
             </form>
         </div>
+        </div>
     </div>
 </div>
+<script !src="">
+    Dropzone.autoDiscover = false;
 
+    const editDropzone = new Dropzone("#edit-category-dropzone", {
+        url: "{{ route('media.store') }}", // adjust to your media upload route
+        paramName: "file",
+        maxFiles: 1,
+        acceptedFiles: "image/*",
+        headers: {
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        addRemoveLinks: true,
+        dictDefaultMessage: "Drop image here or click to upload",
+        init: function () {
+            let dz = this;
+
+
+            // On success -> save uploaded image_id or url
+            dz.on("success", function (file, response) {
+                if (response.data.success && response.data.id) {
+                    console.log(response.data.id)
+                    $("#editUploadedImage").val(response.data.id);
+                }
+            });
+
+            // On remove -> clear hidden input
+            dz.on("removedfile", function () {
+                $("#editUploadedImage").val("");
+            });
+        }
+    });
+
+</script>
 <script>
     $(document).ready(function () {
         const input = $('#edit-category-image');

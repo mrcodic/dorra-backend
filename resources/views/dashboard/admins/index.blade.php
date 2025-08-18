@@ -52,18 +52,26 @@
                     </form>
 
                     <div class="col-2 col-md-2 col-lg-2">
-                        <select name="role_id" class="form-select filter-role">
+                        <select name="role_id" class="form-select filter-role" id="roleSelect">
                             <option value="" selected disabled>Role</option>
                             @foreach($associatedData['roles'] as $role)
-                                <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale())}}</option>
+                                <option
+                                    value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale())}}</option>
                             @endforeach
                         </select>
+                        <button type="button" id="clearRoleFilter"
+                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+        background: transparent; border: none; font-weight: bold;
+        color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                                title="Clear search">
+                            &times;
+                        </button>
                     </div>
                     <div class="col-2 col-md-2 col-lg-2">
                         <select name="status" class="form-select filter-status">
                             <option value="" selected disabled>Status</option>
-                                <option value="0">Blocked</option>
-                                <option value="1">Active</option>
+                            <option value="0">Blocked</option>
+                            <option value="1">Active</option>
                         </select>
                     </div>
                     <button type="button" class="btn btn-outline-primary ms-2" data-bs-toggle="modal"
@@ -157,6 +165,8 @@
 
     <script>
         $(document).ready(function () {
+            setupClearInput('roleSelect', 'clearRoleFilter');
+
             // Select all toggle
             $('#select-all-checkbox').on('change', function () {
                 $('.category-checkbox').prop('checked', this.checked);

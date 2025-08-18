@@ -19,14 +19,13 @@ class ValidDiscountCode implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $code = DiscountCode::whereCode($value)->first();
-        if ($this->cart?->price < $code->value) {
-            $fail('Discount code is not valid for this product.');
-        }
         if (!$code) {
             $fail('Discount code does not exist.');
-            return;
         }
-
+        if ($this->cart?->price < $code?->value) {
+            $fail('Discount code is not valid for this product.');
+        }
+        
         if ($code->expired_at && $code->expired_at <= now()) {
             $fail('Discount code has expired.');
             return;

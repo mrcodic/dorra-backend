@@ -41,7 +41,7 @@ class UpdateCategoryRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
-            'image' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,svg'],
+            'image_id' => ['sometimes', 'exists:media,id'],
         ];
     }
 
