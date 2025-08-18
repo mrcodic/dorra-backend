@@ -54,6 +54,9 @@ class Admin extends Authenticatable implements HasMedia
             get: fn(?string $value) => $this->getFirstMedia('admins')
         );
     }
-
+    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id');
+    }
 
 }
