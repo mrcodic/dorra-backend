@@ -1227,7 +1227,6 @@
                             maxFilesize: 2,
                             maxFiles: 1,
                             dictDefaultMessage: "Drag images here to upload",
-                            dictRemoveFile: "✕",
                             acceptedFiles: ".jpeg,.jpg,.png,.svg",
                             addRemoveLinks: true,
                             init: function () {
@@ -1284,7 +1283,7 @@
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             },
-                            dictRemoveFile: "✕",
+
                             init: function () {
                                 this.on("maxfilesexceeded", function (file) {
                                     this.removeAllFiles();  // remove old one
