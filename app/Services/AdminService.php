@@ -96,6 +96,10 @@ class AdminService extends BaseService
             ->editColumn('created_at', function ($admin) {
                 return $admin->created_at->format('d/m/Y');
             })
+            ->addColumn('role', function ($admin) {
+                $role = $admin->roles->first();
+                return $role ? ($role->name[app()->getLocale()] ?? '-') : '-';
+            })
             ->editColumn('status', function ($admin) {
                 return $admin->status == 1 ? "active" : "blocked";
             })

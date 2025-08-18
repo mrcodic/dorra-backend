@@ -89,7 +89,7 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
-                        {{--                        <th>Role</th>--}}
+                        <th>Role</th>
                         <th>Status</th>
                         <th>Join Date</th>
                         <th>Actions</th>
