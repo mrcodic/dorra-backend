@@ -49,12 +49,14 @@ class FolderController extends Controller
         $validatedData = $request->validate([
             'folder_id' => ['required', 'integer', 'exists:folders,id',],
             'designs' => ['required', 'array'],
-            'designs.*' => ['nullable', 'string', 'exists:designs,id', function ($attribute, $value, $fail) {
-                $design = Design::find($value);
-                if ($design && !$design->users()->pluck('id')->contains(auth('sanctum')->id())) {
-                    $fail("The selected design does not belong to you or you are not a member of this design.");
-                }
-            }]
+            'designs.*' => ['nullable', 'string', 'exists:designs,id',
+//                function ($attribute, $value, $fail) {
+//                $design = Design::find($value);
+//                if ($design && !$design->users()->pluck('id')->contains(auth('sanctum')->id())) {
+//                    $fail("The selected design does not belong to you or you are not a member of this design.");
+//                }
+//            }
+            ]
         ]);
         $this->folderService->assignDesignsToFolder($validatedData);
         return Response::api();
