@@ -35,7 +35,7 @@ class InvitationController extends Controller
     {
         $design = $request->design_id ? $this->designRepository->find($request->design_id) : null;
         $team = $request->team_id ? $this->teamRepository->find($request->team_id) : null;
-        SendInvitationsJob::dispatch($team, $design, $request->emails);
+        SendInvitationsJob::dispatch(team:$team, design:$design, emails: $request->emails);
 
 
         return Response::api();
