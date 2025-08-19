@@ -110,6 +110,7 @@ class CartService extends BaseService
 
     public function deleteItemFromCart($itemId)
     {
+        $message = "Item removed from cart successfully.";
         $cart = $this->resolveUserCart();
         if (!$cart) {
             throw ValidationException::withMessages([
@@ -131,16 +132,15 @@ class CartService extends BaseService
                     'discount_amount' => 0,
                 ]);
             }
+            if ($cart->price - $item->sub_total < $cart->discount_amount) {
+                $message = "The item $item->name  has been removed from your cart. Since the cart total is now lower, the discount code is no longer valid.";
+            }
             $item->delete();
             $cart->update([
                 'price' => $cart->items()->sum('sub_total'),
             ]);
         });
-
-
-
-        return Response::api(message: "Item removed from cart successfully.");
-
+        return $message;
     }
 
 

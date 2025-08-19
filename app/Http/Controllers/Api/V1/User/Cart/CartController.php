@@ -13,7 +13,9 @@ use Illuminate\Validation\{Rule, ValidationException};
 
 class CartController extends Controller
 {
-    public function __construct(public CartService $cartService){}
+    public function __construct(public CartService $cartService)
+    {
+    }
 
     public function store(StoreCartItemRequest $request)
     {
@@ -36,15 +38,16 @@ class CartController extends Controller
     public function destroy(Request $request)
     {
         $request->validate(['item_id' => 'required', 'exists:items,id']);
-        $this->cartService->deleteItemFromCart($request->item_id);
-        return Response::api();
+        $message = $this->cartService->deleteItemFromCart($request->item_id);
+        return Response::api(message: $message);
     }
 
     public function applyDiscount(Request $request)
     {
 
-        return Response::api(data:$this->cartService->applyDiscount($request));
+        return Response::api(data: $this->cartService->applyDiscount($request));
     }
+
     public function removeDiscount(Request $request)
     {
         $this->cartService->removeDiscount();
