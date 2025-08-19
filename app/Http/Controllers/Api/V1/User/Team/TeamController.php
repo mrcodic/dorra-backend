@@ -96,7 +96,7 @@ class TeamController extends Controller
                 Rule::exists('designs', 'id')->whereNull('deleted_at')],
             function ($attribute, $value, $fail) use($teamId){
                 $design = Design::find($value);
-                if ($design && !$design->teams()->pluck('id')->contains($teamId)) {
+                if ($design && $design->teams()->pluck('id')->contains($teamId)) {
                     $fail("The selected design already added to that team.");
                 }
             }
