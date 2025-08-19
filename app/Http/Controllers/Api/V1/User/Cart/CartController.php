@@ -92,8 +92,8 @@ class CartController extends Controller
 
     public function updatePriceDetails(UpdateCartItemRequest $request, $itemId)
     {
-        $itemSpecs = $this->cartService->updatePriceDetails($request->validated(), $itemId);
-        return Response::api(data: new CartItemResource($itemSpecs));
+        $result = $this->cartService->updatePriceDetails($request->validated(), $itemId);
+        return Response::api(message: $result[0],data: new CartItemResource($result[1]));
     }
 
 }

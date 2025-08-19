@@ -216,6 +216,7 @@ class CartService extends BaseService
 
     public function addQuantity($request, $id)
     {
+        $message = "Request completed successfully.";
         $cartItem = $this->cartItemRepository->find($id);
         if ($cartItem->product->has_custom_prices) {
             $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
@@ -223,7 +224,14 @@ class CartService extends BaseService
         } else {
             $updated = $cartItem->update($request->only(['quantity']));
         }
-        return $updated;
+        if ($cartItem->cart->price - $cartItem->sub_total < $cartItem->cart->discount_amount) {
+            $cartItem->cart->update([
+                'discount_code_id' => null,
+                'discount_amount' => 0,
+            ]);
+            $message = "Since the cart total is now lower, the discount code is no longer valid.";
+        }
+        return $message;
     }
 
     public function priceDetails($itemId)
@@ -239,6 +247,7 @@ class CartService extends BaseService
 
     public function updatePriceDetails($validatedData, $itemId)
     {
+        $message = "Request completed successfully.";
         $cartItem = $this->cartItemRepository->query()
             ->select(['id', 'product_id', 'quantity', 'sub_total', 'product_price', 'cart_id'])
             ->find($itemId);
@@ -251,9 +260,15 @@ class CartService extends BaseService
             'specs_price' => $priceDetails['specs_sum'],
             'product_price' => $priceDetails['product_price'],
         ]);
-
+        if ($cartItem->cart->price - $cartItem->sub_total < $cartItem->cart->discount_amount) {
+            $cartItem->cart->update([
+                'discount_code_id' => null,
+                'discount_amount' => 0,
+            ]);
+            $message = "Since the cart total is now lower, the discount code is no longer valid.";
+        }
         $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
-        return $cartItem;
+        return [$message, $cartItem];
     }
 
     private function calculatePriceDetails(array $validatedData, $product, $price = null): array
