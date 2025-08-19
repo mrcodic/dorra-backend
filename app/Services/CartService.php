@@ -218,40 +218,19 @@ class CartService extends BaseService
     {
         $message = "Request completed successfully.";
         $cartItem = $this->cartItemRepository->find($id);
-
-        if (!$cartItem) {
-            return "Cart item not found.";
-        }
-
         if ($cartItem->product->has_custom_prices) {
-            $productPrice = $this->productPriceRepository->find($request->product_price_id);
-
-            if (!$productPrice) {
-                return "Invalid product price selected.";
-            }
-
-            $cartItem->update([
-                'product_price_id' => $productPrice->id,
-                'price'            => $productPrice->price,
-                'quantity'         => $request->quantity ?? $cartItem->quantity,
-            ]);
+            $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
+            $updated = $cartItem->update(['product_price' => $productPrice->price, 'quantity' => $productPrice->quantity]);
         } else {
-            $cartItem->update([
-                'quantity' => $request->quantity ?? $cartItem->quantity,
-            ]);
+            $updated = $cartItem->update($request->only(['quantity']));
         }
-        $cart = $cartItem->cart;
-        $cartTotal = $cart->items()->sum('sub_total');
-
-        if ($cartTotal < $cart->discount_amount) {
-            $cart->update([
+        if ($cartItem->cart->price - $cartItem->sub_total < $cartItem->cart->discount_amount) {
+            $cartItem->cart->update([
                 'discount_code_id' => null,
-                'discount_amount'  => 0,
+                'discount_amount' => 0,
             ]);
-
             $message = "Since the cart total is now lower, the discount code is no longer valid.";
         }
-
         return $message;
     }
 
