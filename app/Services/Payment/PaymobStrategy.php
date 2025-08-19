@@ -67,7 +67,7 @@ use Illuminate\Support\Facades\Log;
             'response' => $result,
             'vzx' => $response,
         ]);
-     
+
         if ($response->failed() || empty($result['client_secret']) || empty($result['id'])) {
             Log::error('Failed to create payment intention', [
                 'response' => $result,

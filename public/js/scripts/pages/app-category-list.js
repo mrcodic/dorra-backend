@@ -19,14 +19,13 @@ const dt_user_table = $(".category-list-table").DataTable({
     columns: [
         {
             data: null,
-            orderable: false,
             searchable: false,
             render: function (data) {
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
-        {data: "name", orderable: false},
-        {data: "sub_categories", orderable: false},
+        {data: "name"},
+        {data: "sub_categories"},
         {
             data: "products",
             render: function (data, type, row) {
@@ -41,11 +40,11 @@ const dt_user_table = $(".category-list-table").DataTable({
                 `;
             }
         },
-        {data: "no_of_products", orderable: false},
-        {data: "added_date", orderable: false},
+        {data: "no_of_products"},
+        {data: "added_date"},
         {
             data: "id",
-            orderable: false,
+  
             searchable: false,
             render: function (data, type, row) {
                 return `
