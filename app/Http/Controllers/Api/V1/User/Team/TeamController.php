@@ -93,13 +93,15 @@ class TeamController extends Controller
     {
         $request->validate(['designs' => ['required', 'array'],
             'designs.*' => ['required', 'string', 'exists:designs,id',
-                Rule::exists('designs', 'id')->whereNull('deleted_at')],
-            function ($attribute, $value, $fail) use($teamId){
-                $team = Team::find($teamId);
-                if ($team && $team->designs()->pluck('id')->contains($value)) {
-                    $fail("The selected design already added to that team.");
+                Rule::exists('designs', 'id')->whereNull('deleted_at'),
+                function ($attribute, $value, $fail) use($teamId){
+                    $team = Team::find($teamId);
+                    if ($team && $team->designs()->pluck('id')->contains($value)) {
+                        $fail("The selected design already added to that team.");
+                    }
                 }
-            }
+                ],
+
             ]);
         $this->teamService->assignToDesign($teamId);
         return Response::api();
