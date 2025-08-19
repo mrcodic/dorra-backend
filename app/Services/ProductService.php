@@ -123,6 +123,7 @@ class ProductService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
+        dd($validatedData);
         return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $product = $this->repository->create($validatedData);
             $product->load($this->relations);

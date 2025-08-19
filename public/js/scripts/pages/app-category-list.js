@@ -44,7 +44,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         {data: "added_date"},
         {
             data: "id",
-  
+
             searchable: false,
             render: function (data, type, row) {
                 return `
