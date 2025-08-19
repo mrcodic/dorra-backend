@@ -133,7 +133,6 @@ class CartService extends BaseService
                 ]);
             }
             if ($cart->price - $item->sub_total < $cart->discount_amount) {
-                $item->delete();
                 $cart->update([
                     'discount_code_id' => null,
                     'discount_amount' => 0,
@@ -146,6 +145,7 @@ class CartService extends BaseService
             $cart->update([
                 'discount_code_id' => null,
                 'discount_amount' => 0,
+                'price' => $cart->items()->sum('sub_total'),
             ]);
 
         });
