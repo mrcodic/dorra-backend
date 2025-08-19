@@ -103,7 +103,9 @@
                                                 </div>
 
 
-                                            </div>
+                                            </div>                           <span class="image-hint small text-end">
+                        Max size: 1MB | Dimensions: 512x512 px
+                    </span>
                                             <div>
                                                 <!-- Progress Bar -->
                                                 <div id="upload-progress" class="progress mt-2 d-none w-50">
@@ -154,7 +156,9 @@
                                                     <p>Drag images here to upload</p>
                                                 </div>
                                             </div>
-
+                                            <span class="image-hint small text-end">
+                        Max size: 1MB | Dimensions: 512x512 px
+                    </span>
                                             <!-- Uploaded Images Preview Area -->
                                             <div id="multi-uploaded-images" class=" mt-3"></div>
                                         </div>

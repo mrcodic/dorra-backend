@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User\Folder;
 
 use App\Http\Controllers\Controller;
 
+use Illuminate\Validation\Rule;
 use App\Http\Requests\Folder\{StoreFolderRequest, UpdateFolderRequest};
 use App\Http\Resources\FolderResource;
 use App\Models\Design;
@@ -48,12 +49,14 @@ class FolderController extends Controller
         $validatedData = $request->validate([
             'folder_id' => ['required', 'integer', 'exists:folders,id',],
             'designs' => ['required', 'array'],
-            'designs.*' => ['nullable', 'string', 'exists:designs,id', function ($attribute, $value, $fail) {
-                $design = Design::find($value);
-                if ($design && !$design->users()->pluck('id')->contains(auth('sanctum')->id())) {
-                    $fail("The selected design does not belong to you or you are not a member of this design.");
-                }
-            }]
+            'designs.*' => ['nullable', 'string', 'exists:designs,id',
+//                function ($attribute, $value, $fail) {
+//                $design = Design::find($value);
+//                if ($design && !$design->users()->pluck('id')->contains(auth('sanctum')->id())) {
+//                    $fail("The selected design does not belong to you or you are not a member of this design.");
+//                }
+//            }
+            ]
         ]);
         $this->folderService->assignDesignsToFolder($validatedData);
         return Response::api();
@@ -101,5 +104,29 @@ class FolderController extends Controller
         ]);
         $this->folderService->bulkRestore($request->folders);
         return Response::api();
+    }
+
+    public function bulkDeleteDesigns(Request $request,$id)
+    {
+        $validatedData = $request->validate(['designs' => ['required', 'array'],
+            'designs.*' => ['required', 'string', 'exists:designs,id',
+                Rule::exists('designs', 'id')->whereNull('deleted_at')],
+            function ($attribute, $value, $fail) use ($id) {
+                $exists = Design::whereKey($value)
+                    ->whereNull('deleted_at')
+                    ->whereHas('teams', function ($query) use ($id) {
+                        $query->where('teams.id', $id);
+                    })
+                    ->exists();
+
+                if (! $exists) {
+                    $fail("The selected design ({$value}) does not belong to this team or no longer exists.");
+                }
+            }
+        ]);
+        $this->folderService->bulkDeleteDesigns($validatedData,$id);
+        return Response::api();
+
+
     }
 }

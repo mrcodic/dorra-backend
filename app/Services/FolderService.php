@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class FolderService extends BaseService
 {
-    public function __construct(FolderRepositoryInterface $repository,public DesignRepositoryInterface $designRepository)
+    public function __construct(FolderRepositoryInterface $repository, public DesignRepositoryInterface $designRepository)
     {
         parent::__construct($repository);
     }
@@ -22,9 +22,10 @@ class FolderService extends BaseService
                 $query->where('name', 'like', '%' . $search . '%');
             })
             ->where('user_id', auth('sanctum')->id())
-            ->orderBy('created_at',request('date','desc'))
+            ->orderBy('created_at', request('date', 'desc'))
             ->get();
     }
+
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->repository->create($validatedData);
@@ -39,12 +40,12 @@ class FolderService extends BaseService
 
     public function assignDesignsToFolder($validatedData)
     {
-       return $this->repository->query()->find($validatedData['folder_id'])->designs()->syncWithoutDetaching($validatedData['designs']);
+        return $this->repository->query()->find($validatedData['folder_id'])->designs()->syncWithoutDetaching($validatedData['designs']);
     }
 
     public function bulkDeleteResources($ids)
     {
-        $folders= $this->repository->query()->whereIn('id', $ids)->get();
+        $folders = $this->repository->query()->whereIn('id', $ids)->get();
 
         collect($folders)->each(function ($folder) {
             collect($folder->designs)->each(function ($design) {
@@ -55,9 +56,10 @@ class FolderService extends BaseService
 
         });
     }
+
     public function bulkForceDeleteResources($ids)
     {
-        $folders= $this->repository->query()->withTrashed()->whereIn('id', $ids)->get();
+        $folders = $this->repository->query()->withTrashed()->whereIn('id', $ids)->get();
 
         collect($folders)->each(function ($folder) {
             collect($folder->designs)->each(function ($design) {
@@ -68,7 +70,7 @@ class FolderService extends BaseService
         });
     }
 
-    public function updateResource($validatedData, $id, $relationsToLoad =[])
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
         if (!empty($validatedData['designs'])) {
@@ -76,6 +78,7 @@ class FolderService extends BaseService
         }
         return $model->load($relationsToLoad);
     }
+
     public function trash()
     {
         return $this->repository->query()
@@ -85,4 +88,9 @@ class FolderService extends BaseService
             ->get();
     }
 
+    public function bulkDeleteDesigns($validatedData, $folderId): void
+    {
+        $folder = $this->repository->find($folderId);
+        $folder->designs()->detach($validatedData);
+    }
 }

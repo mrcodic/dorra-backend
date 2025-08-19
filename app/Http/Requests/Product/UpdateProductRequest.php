@@ -45,10 +45,10 @@ class UpdateProductRequest extends BaseRequest
             'image' => ['image', 'mimes:jpg,jpeg,png',
                 Rule::requiredIf(function () use($id){
                    return !Product::find($id)->getFirstMedia("product_main_image");
-                })
+                }),'max:1024'
                 ],
             'images' => ['nullable', 'array'],
-            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png'],
+            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png','max:1024'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'sub_category_id' => ['nullable', 'integer', 'exists:categories,id', function ($attribute, $value, $fail) {
                 $category = Category::find($value);

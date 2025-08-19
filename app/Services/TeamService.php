@@ -63,7 +63,7 @@ use Illuminate\Support\Arr;
     public function bulkDeleteDesigns($validatedData, $teamId)
     {
         $team = $this->repository->find($teamId);
-        $team->designs()->detach(request()->designs);
+        $team->designs()->detach($validatedData);
     }
 
     public function bulkForceResources($ids)
