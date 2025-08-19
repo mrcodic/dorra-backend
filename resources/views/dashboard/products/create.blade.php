@@ -83,16 +83,22 @@
                                                 <label class="form-label label-text" for="product-image-main">Category
                                                     Image (main)*</label>
 
-                                                <div id="product-main-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
-                                                        <span>Drop image here or click to upload</span>
+                                                <!-- Hidden real input -->
+                                                <input type="file" name="image" id="product-image-main"
+                                                       class="form-control d-none" accept="image/*">
+
+                                                <!-- Custom Upload Card -->
+                                                <div id="upload-area" class="upload-card">
+                                                    <div id="upload-content">
+                                                        <i data-feather="upload" class="mb-2"></i>
+                                                        <p>Drag image here to upload</p>
                                                     </div>
 
 
                                                 </div>
                                                 <span class="image-hint small text-end">
-                                                         Max size: 1MB | Dimensions: 512x512 px
-                                                </span>
+                        Max size: 1MB | Dimensions: 512x512 px
+                    </span>
                                                 <div>
                                                     <!-- Progress Bar -->
                                                     <div id="upload-progress" class="progress mt-2 d-none w-50">
@@ -125,22 +131,24 @@
                                         <!-- Multiple Images Upload -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="product-images">Category Images</label>
+                                                <label class="form-label label-text" for="product-images">Category
+                                                    Images</label>
 
-                                                <!-- Dropzone container -->
-                                                <div id="multi-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
+                                                <!-- HTML (no changes needed, just make sure it's like this) -->
+                                                <input type="file" name="images[]" id="product-images"
+                                                       class="form-control d-none" accept="image/*" multiple>
+                                                <div id="multi-upload-area" class="upload-card">
+                                                    <div id="multi-upload-content">
                                                         <i data-feather="upload" class="mb-2"></i>
-                                                        <p>Drag images here or click to upload</p>
+                                                        <p>Drag images here to upload</p>
                                                     </div>
                                                 </div>
-
-                                                <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2"></div>
-
+                                                <div id="multi-uploaded-images" class="mt-3"></div>
                                                 <span class="image-hint small text-end">
-      Max size: 1MB | Dimensions: 512x512 px
-    </span>
+                        Max size: 1MB | Dimensions: 512x512 px
+                    </span>
                                             </div>
+
                                         </div>
 
 
@@ -559,11 +567,11 @@
                                 </div>
                             </div>
                             <!--third tab content end -->
-
+                    </div>
 
                     </form>
 
-                </div>
+
                 </div>
             </div>
         </div>
@@ -578,46 +586,6 @@
 @endsection
 
 @section('page-script')
-    <script>
-        Dropzone.autoDiscover = false;
-
-        const categoryDropzone = new Dropzone("#product-main-dropzone", {
-            url: "{{ route('media.store') }}",   // backend route for image upload
-            paramName: "file",
-            maxFiles: 1,
-            maxFilesize: 1, // MB
-
-            acceptedFiles: "image/*",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            addRemoveLinks: true,
-            dictDefaultMessage: "Drop image here or click to upload",
-            init: function () {
-                this.on("success", function (file, response) {
-                    if (response.success && response.data) {
-                        file._hiddenInputId = response.data.id;
-
-                        $("#uploadedImage").val(response.data.id); // store image_id
-                    }
-                });
-
-                this.on("removedfile", function (file) {
-                    $("#uploadedImage").val("");
-                    if (file._hiddenInputId) {
-                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                            method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        });
-                        $("#preview-image").attr("src", "").addClass("d-none");
-
-                    }
-                });
-            }
-        });
-    </script>
     <script>
         console.log(jQuery.fn.jquery);
 
