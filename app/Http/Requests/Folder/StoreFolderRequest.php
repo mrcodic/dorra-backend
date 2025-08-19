@@ -34,6 +34,12 @@ class StoreFolderRequest extends BaseRequest
 ////                        $fail("The selected design does not belong to you or you are not a member of this design.");
 ////                    }
 //                },
+                function ($attribute, $value, $fail) {
+                    $design = Design::find($value);
+                    if ($design && !$design->folders()->pluck('id')->contains($this->folder_id)) {
+                        $fail("The selected design already added to that folder.");
+                    }
+                }
             ],
         ];
 
