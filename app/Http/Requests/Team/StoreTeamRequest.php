@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Team;
 
+use App\Enums\Invitation\StatusEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Invitation;
+use App\Models\User;
 use Illuminate\Validation\Rule;
 
 class StoreTeamRequest extends BaseRequest
@@ -38,6 +41,34 @@ class StoreTeamRequest extends BaseRequest
         ];
     }
 
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            if ($this->emails && is_array($this->emails)) {
+                foreach ($this->emails as $email) {
+                    $existingAccepted = Invitation::where('email', $email)
+                        ->where('status', StatusEnum::ACCEPTED)
+                        ->when($this->design_id, fn($q) => $q->where('design_id', $this->design_id))
+                        ->when($this->team_id, fn($q) => $q->where('team_id', $this->team_id))
+                        ->exists();
+
+                    if ($existingAccepted) {
+                        $validator->errors()->add('emails', "The email {$email} has already accepted a previous invitation.");
+                    }
+                }
+            }
+
+            if ($this->emails && is_array($this->emails)) {
+                $invalidEmails = collect($this->emails)->reject(function ($email) {
+                    return User::where('email', $email)->exists();
+                });
+
+                if ($invalidEmails->isNotEmpty()) {
+                    $validator->errors()->add('emails', 'These emails do not exist: ' . $invalidEmails->implode(', '));
+                }
+            }
+        });
+    }
 
 
 }
