@@ -139,7 +139,7 @@ class CartService extends BaseService
                     'discount_amount' => 0,
                     'price' => $cart->items()->sum('sub_total'),
                 ]);
-               return "The item $item->name  has been removed from your cart. Since the cart total is now lower, the discount code is no longer valid.";
+               return "The item has been removed from your cart. Since the cart total is now lower, the discount code is no longer valid.";
 
             }
             $item->delete();
