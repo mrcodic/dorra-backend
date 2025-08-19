@@ -56,7 +56,7 @@ class PaymentRequestData
         if ($this->order?->discount_amount > 0) {
             $extraItems[] = [
                 'name' => Str::limit('Discount', 50, ''),
-                'amount' => -(int) round((int) $this->order->discount_amount * 100),
+                'amount' => -(int) round($this->order->discount_amount) * 100,
                 'quantity' => 1,
             ];
         }
