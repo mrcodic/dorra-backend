@@ -58,7 +58,7 @@ class FolderController extends Controller
 //            }
             function ($attribute, $value, $fail) {
                 $design = Design::find($value);
-                if ($design && !$design->folders()->pluck('id')->contains($this->folder_id)) {
+                if ($design && !$design->folders()->pluck('id')->contains(request()->folder_id)) {
                     $fail("The selected design already added to that folder.");
                 }
             }
