@@ -106,8 +106,9 @@ class TeamController extends Controller
             $team = Team::find($teamId);
 
             if ($team) {
-                $assignedIds = $team->designs()->pluck('id')->toArray();
-                
+                $assignedIds = $team->designs()->pluck('designs.id')->toArray();
+
+
                 $duplicateIds = array_intersect($request->designs, $assignedIds);
 
                 if (!empty($duplicateIds)) {
