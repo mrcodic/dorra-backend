@@ -124,7 +124,7 @@ class CartService extends BaseService
                 'cart' => ['Item not found in cart.'],
             ]);
         }
-        $this->handleTransaction(function () use ($item, $cart) {
+        $message =  $this->handleTransaction(function () use ($item, $cart) {
             if ($cart->items()->count() == 1)
             {
                 $cart->update([
@@ -133,12 +133,21 @@ class CartService extends BaseService
                 ]);
             }
             if ($cart->price - $item->sub_total < $cart->discount_amount) {
-                $message = "The item $item->name  has been removed from your cart. Since the cart total is now lower, the discount code is no longer valid.";
+                $item->delete();
+                $cart->update([
+                    'discount_code_id' => null,
+                    'discount_amount' => 0,
+                    'price' => $cart->items()->sum('sub_total'),
+                ]);
+               return "The item $item->name  has been removed from your cart. Since the cart total is now lower, the discount code is no longer valid.";
+
             }
             $item->delete();
             $cart->update([
-                'price' => $cart->items()->sum('sub_total'),
+                'discount_code_id' => null,
+                'discount_amount' => 0,
             ]);
+
         });
         return $message;
     }
