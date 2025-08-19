@@ -19,6 +19,7 @@ return [
     "Orders" => "Orders",
     "Categories" => "Categories",
     "Subcategories" => "Subcategories",
+    "SubProducts" => "SubProducts",
     "Tags" => "Tags",
     "Forms & Tables" => "Forms & Tables",
     "Pages" => "Pages",

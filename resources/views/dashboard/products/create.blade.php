@@ -148,7 +148,7 @@
                                                 <label class="form-label label-text" for="category">Product*</label>
                                                 <select name="category_id" id="category"
                                                         class="form-control category-select">
-                                                    <option value="" disabled>Select product</option>
+                                                    <option value="" selected disabled>Select product</option>
                                                     @foreach($associatedData['categories'] as $category)
                                                         <option
                                                             value="{{ $category->id }}">{{ $category->name }}</option>
@@ -160,11 +160,11 @@
                                         <div class="col-md-6">
                                             <div class="mb-2">
                                                 <label class="form-label label-text"
-                                                       for="sub-category">Subcategory</label>
+                                                       for="sub-category">Subproduct</label>
                                                 <select name="sub_category_id" id="sub-category"
                                                         class="form-control sub-category-select"
                                                         data-sub-category-url="{{ route('sub-categories') }}">
-                                                    <option value="">Select subcategory</option>
+                                                    <option value="" selected disabled>Select subproduct</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -654,13 +654,6 @@
                         // ✅ This will now set the hidden field correctly
                         document.getElementById("uploadedImage").value = response.data.id;
 
-                        // show preview
-                        const previewContainer = document.getElementById("uploaded-image");
-                        previewContainer.classList.remove("d-none");
-                        previewContainer.querySelector("img").src = response.data.original_url;
-                        previewContainer.querySelector(".file-name").textContent = file.name;
-                        previewContainer.querySelector(".file-size").textContent =
-                            (file.size / 1024).toFixed(1) + " KB";
                     }
 
             });
@@ -1199,7 +1192,7 @@
                     url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
                     method: "GET",
                     success: function (res) {
-                        $subCategorySelect.empty().append('<option value="">Select subcategory</option>');
+                        $subCategorySelect.empty().append('<option value="">Select subproduct</option>');
                         $.each(res.data, (i, s) => $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`));
                     },
                     error: function () {
