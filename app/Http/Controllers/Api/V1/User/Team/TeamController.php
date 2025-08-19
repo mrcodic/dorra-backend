@@ -8,6 +8,7 @@ use App\Models\Design;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\Team\{StoreTeamRequest};
 
@@ -89,21 +90,42 @@ class TeamController extends Controller
         return Response::api();
     }
 
+
     public function assignToDesign(Request $request, $teamId)
     {
-        $request->validate(['designs' => ['required', 'array'],
-            'designs.*' => ['required', 'string', 'exists:designs,id',
+        $validator = Validator::make($request->all(), [
+            'designs' => ['required', 'array'],
+            'designs.*' => [
+                'required',
+                'string',
                 Rule::exists('designs', 'id')->whereNull('deleted_at'),
-                function ($attribute, $value, $fail) use($teamId){
-                    $team = Team::find($teamId);
-                    if ($team && $team->designs()->pluck('id')->contains($value)) {
-                        $fail("The selected design already added to that team.");
-                    }
-                }
-                ],
+            ],
+        ]);
 
-            ]);
+        $validator->after(function ($validator) use ($request, $teamId) {
+            $team = Team::find($teamId);
+
+            if ($team) {
+                $assignedIds = $team->designs()->pluck('id')->toArray();
+                
+                $duplicateIds = array_intersect($request->designs, $assignedIds);
+
+                if (!empty($duplicateIds)) {
+                    $designNames = Design::whereIn('id', $duplicateIds)->pluck('name')->toArray();
+                    $namesList = implode(', ', $designNames);
+
+                    $validator->errors()->add(
+                        'designs',
+                        "The following designs are already assigned to this team: {$namesList}."
+                    );
+                }
+            }
+        });
+
+        $validator->validate();
+
         $this->teamService->assignToDesign($teamId);
+
         return Response::api();
     }
 
