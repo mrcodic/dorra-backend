@@ -224,7 +224,7 @@ class CartService extends BaseService
         } else {
             $updated = $cartItem->update($request->only(['quantity']));
         }
-        if ($cartItem->cart->price - $cartItem->sub_total < $cartItem->cart->discount_amount) {
+        if ($cartItem->cart->price < $cartItem->cart->discount_amount) {
             $cartItem->cart->update([
                 'discount_code_id' => null,
                 'discount_amount' => 0,
@@ -260,7 +260,7 @@ class CartService extends BaseService
             'specs_price' => $priceDetails['specs_sum'],
             'product_price' => $priceDetails['product_price'],
         ]);
-        if ($cartItem->cart->price - $cartItem->sub_total < $cartItem->cart->discount_amount) {
+        if ($cartItem->cart->price < $cartItem->cart->discount_amount) {
             $cartItem->cart->update([
                 'discount_code_id' => null,
                 'discount_amount' => 0,
