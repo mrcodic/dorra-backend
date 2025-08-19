@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\Product\ProductResource;
-use App\Models\Product;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\TagRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Product\{StoreProductRequest, UpdateProductRequest};
 use App\Services\ProductService;
 

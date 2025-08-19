@@ -118,6 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('designs/assign-to-folder', [FolderController::class, 'assignDesignsToFolder']);
     Route::prefix('folders/')->controller(FolderController::class)->group(function () {
         Route::post('bulk-delete', 'bulkDelete');
+        Route::delete('{folder}/designs/bulk-delete', 'bulkDeleteDesigns');
         Route::post('bulk-force-delete', 'bulkForceDelete');
         Route::post('bulk-restore', 'bulkRestore');
     });
@@ -149,6 +150,7 @@ Route::controller(PaymentController::class)->group(function () {
     Route::post('payment/callback', 'handleCallback');
     Route::get('payment/redirect', 'handleRedirect');
 });
+
 Route::prefix('invitations/')->controller(InvitationController::class)->group(function () {
     Route::post('send', 'send')->name('invitation.send');
     Route::get('accept', 'accept')
