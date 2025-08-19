@@ -2,7 +2,8 @@
     @section('title', 'User View - Account')
     @section('main-page', 'Users')
     @section('sub-page', 'Show User')
-
+    @section('main-page-url', route("users.index"))
+    @section('sub-page-url',  route("users.show",$model->id))
     @section('vendor-style')
         {{-- Page Css files --}}
         <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
