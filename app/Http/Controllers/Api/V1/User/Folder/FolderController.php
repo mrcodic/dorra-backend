@@ -56,9 +56,9 @@ class FolderController extends Controller
 //                    $fail("The selected design does not belong to you or you are not a member of this design.");
 //                }
 //            }
-            function ($attribute, $value, $fail) {
+            function ($attribute, $value, $fail) use($request) {
                 $design = Design::find($value);
-                if ($design && !$design->folders()->pluck('id')->contains(request()->folder_id)) {
+                if ($design && !$design->folders()->pluck('id')->contains($request->folder_id)) {
                     $fail("The selected design already added to that folder.");
                 }
             }
