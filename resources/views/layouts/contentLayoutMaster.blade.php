@@ -42,6 +42,7 @@ $configData = Helper::applClasses();
 
     @include('panels/styles')
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/style.css') }} ?v={{ time() }}">
 
 </head>
 <!-- END: Head-->
