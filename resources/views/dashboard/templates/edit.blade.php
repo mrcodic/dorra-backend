@@ -3,163 +3,163 @@
 @section('main-page', 'Templates')
 @section('sub-page', 'Edit Templates')
 @section('main-page-url', route("product-templates.index"))
-@section('sub-page-url',  route("product-templates.edit",$model->id))
+@section('sub-page-url', route('product-templates.edit',$model->id))
 @section('vendor-style')
-    <!-- Vendor CSS Files -->
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+<!-- Vendor CSS Files -->
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 @endsection
 
 @section('content')
-    <section id="multiple-column-form ">
-        <div class="row ">
-            <div class="col-12 ">
-                <div class="card">
-                    <div class="card-body ">
-                        <form id="editTemplateForm" enctype="multipart/form-data" method="post" action="{{ route('product-templates.update',$model->id) }}">
-                            @csrf
-                            @method("PUT")
-                            <div class="flex-grow-1">
-                                <div class="">
-                                    <div class="form-group mb-2">
-                                        <label class="label-text mb-1">Template Type</label>
-                                        <div class="row">
-                                            @foreach(\App\Models\Type::all(['id','value']) as $type)
-                                                <div class="col">
-                                                    <label class="radio-box">
-                                                        <input
-                                                            class="form-check-input type-checkbox"
-                                                            type="checkbox"
-                                                            name="types[]"
-                                                            value="{{ $type->value }}"
-                                                            data-type-name="{{ strtolower($type->value->name) }}"
-                                                            @checked($model->types->contains($type->id))
-
-                                                        >
-                                                        <span>{{ $type->value->label() }}</span>
-                                                    </label>
-                                                </div>
-                                            @endforeach
-                                        </div>
-
-                                    </div>
-
-
+<section id="multiple-column-form ">
+    <div class="row ">
+        <div class="col-12 ">
+            <div class="card">
+                <div class="card-body ">
+                    <form id="editTemplateForm" enctype="multipart/form-data" method="post"
+                        action="{{ route('product-templates.update',$model->id) }}">
+                        @csrf
+                        @method("PUT")
+                        <div class="flex-grow-1">
+                            <div class="">
+                                <div class="form-group mb-2">
+                                    <label class="label-text mb-1">Template Type</label>
                                     <div class="row">
-                                        <div class="col-md-6 mb-2">
-                                            <label for="templateNameAr" class="label-text mb-1">Name (AR)</label>
-                                            <input type="text" id="templateNameAr" class="form-control"
-                                                   name="name[ar]"
-                                                   value="{{ $model->getTranslation('name','ar') }}"
-                                                   placeholder="Template Name in Arabic">
+                                        @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                        <div class="col-md-4 mb-1">
+                                            <label class="radio-box">
+                                                <input class="form-check-input type-checkbox" type="checkbox"
+                                                    name="types[]" value="{{ $type->value }}"
+                                                    data-type-name="{{ strtolower($type->value->name) }}"
+                                                    @checked($model->types->contains($type->id))
+
+                                                >
+                                                <span>{{ $type->value->label() }}</span>
+                                            </label>
                                         </div>
-
-                                        <div class="col-md-6 mb-2">
-                                            <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
-                                            <input type="text" id="templateNameEn" class="form-control"
-                                                   name="name[en]"
-                                                   value="{{ $model->getTranslation('name','en') }}"
-                                                   placeholder="Template Name in English">
-                                        </div>
-                                    </div>
-
-
-                                    <div class="form-group mb-2">
-                                        <label for="statusSelect" class="label-text mb-1">Status</label>
-                                        <select id="statusSelect" name="status" class="form-select select2">
-                                            <option value="" disabled selected>Choose status</option>
-                                            @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
-                                                <option value="{{ $status->value }}" @selected($status == $model->status)>{{ $status->label() }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-2">
-                                            <label for="templateDescription" class="label-text mb-1">Description
-                                                (AR)</label>
-                                            <textarea id="templateDescription" class="form-control" rows="3"
-                                                      name="description[ar]"
-                                                      placeholder="Template Description in Arabic">{{ $model->getTranslation('description','ar') }}</textarea>
-                                        </div>
-                                        <div class="col-md-6 mb-2">
-                                            <label for="templateDescription" class="label-text mb-1">Description
-                                                (EN)</label>
-                                            <textarea id="templateDescription" class="form-control" rows="3"
-                                                      name="description[en]"
-                                                      placeholder="Template Description in English">{{ $model->getTranslation('description','en') }}</textarea>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="form-group mb-2">
-                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>
-                                        <select id="tagsSelect" class="form-select select2" name="tags[]"multiple>
-                                            @foreach($associatedData['tags'] as $tag)
-                                                <option value="{{ $tag->id }}" @selected($model->tags->contains($tag->id))>
-                                                    {{ $tag->getTranslation('name', app()->getLocale()) }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-{{--                                    <!-- Colors -->--}}
-{{--                                    <div class="form-group mb-2">--}}
-{{--                                        <label for="colorsSelect" class="label-text mb-1">Colors</label>--}}
-{{--                                        <select id="colorsSelect" name="colors[]" class="form-select select2" multiple>--}}
-{{--                                            <option value="">Choose colors</option>--}}
-{{--                                            <!-- Add dynamic options here if needed -->--}}
-{{--                                        </select>--}}
-{{--                                    </div>--}}
-                                    <div class="form-group mb-2">
-                                        <label for="productsSelect" class="label-text mb-1">Products</label>
-                                        <select id="productsSelect" class="form-select select2" name="product_ids[]" multiple>
-                                            @foreach($associatedData['products'] as $product)
-                                                <option
-                                                    value="{{ $product->id }}"
-                                                    @selected($product->id == $model->products->contains('id', $product->id))>
-                                                    {{ $product->getTranslation('name', app()->getLocale()) }}</option>
-                                            @endforeach
-                                        </select>
+                                        @endforeach
                                     </div>
                                 </div>
+
+
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <label for="templateNameAr" class="label-text mb-1">Name (AR)</label>
+                                        <input type="text" id="templateNameAr" class="form-control" name="name[ar]"
+                                            value="{{ $model->getTranslation('name','ar') }}"
+                                            placeholder="Template Name in Arabic">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
+                                        <input type="text" id="templateNameEn" class="form-control" name="name[en]"
+                                            value="{{ $model->getTranslation('name','en') }}"
+                                            placeholder="Template Name in English">
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group mb-2">
+                                    <label for="statusSelect" class="label-text mb-1">Status</label>
+                                    <select id="statusSelect" name="status" class="form-select select2">
+                                        <option value="" disabled selected>Choose status</option>
+                                        @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
+                                        <option value="{{ $status->value }}" @selected($status==$model->status)>{{
+                                            $status->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <label for="templateDescription" class="label-text mb-1">Description
+                                            (AR)</label>
+                                        <textarea id="templateDescription" class="form-control" rows="3"
+                                            name="description[ar]"
+                                            placeholder="Template Description in Arabic">{{ $model->getTranslation('description','ar') }}</textarea>
+                                    </div>
+                                    <div class="col-md-6 ">
+                                        <label for="templateDescription" class="label-text mb-1">Description
+                                            (EN)</label>
+                                        <textarea id="templateDescription" class="form-control" rows="3"
+                                            name="description[en]"
+                                            placeholder="Template Description in English">{{ $model->getTranslation('description','en') }}</textarea>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group mb-2">
+                                    <label for="tagsSelect" class="label-text mb-1">Tags</label>
+                                    <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
+                                        @foreach($associatedData['tags'] as $tag)
+                                        <option value="{{ $tag->id }}" @selected($model->tags->contains($tag->id))>
+                                            {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                {{--
+                                <!-- Colors -->--}}
+                                {{-- <div class="form-group mb-2">--}}
+                                    {{-- <label for="colorsSelect" class="label-text mb-1">Colors</label>--}}
+                                    {{-- <select id="colorsSelect" name="colors[]" class="form-select select2"
+                                        multiple>--}}
+                                        {{-- <option value="">Choose colors</option>--}}
+                                        {{--
+                                        <!-- Add dynamic options here if needed -->--}}
+                                        {{--
+                                    </select>--}}
+                                    {{-- </div>--}}
+                                <div class="form-group mb-2">
+                                    <label for="productsSelect" class="label-text mb-1">Products</label>
+                                    <select id="productsSelect" class="form-select select2" name="product_ids[]"
+                                        multiple>
+                                        @foreach($associatedData['products'] as $product)
+                                        <option value="{{ $product->id }}" @selected($product->id ==
+                                            $model->products->contains('id', $product->id))>
+                                            {{ $product->getTranslation('name', app()->getLocale()) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
+                        </div>
 
 
-                            <div class="d-flex justify-content-between pt-2">
-                                <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
-                                <div class="d-flex gap-1">
-                                    <a href="{{ config("services.editor_url")."templates/".$model->id}}"
-                                       class="btn btn-outline-secondary fs-5 "
-                                       target="_blank"
+                        <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
+                            <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
+                            <div class="d-flex gap-1">
+                                <a href="{{ config(" services.editor_url")."templates/".$model->id}}"
+                                    class="btn btn-outline-secondary fs-5 "
+                                    target="_blank"
                                     >
-                                        <i data-feather="edit-3"></i>
-                                        <span>Edit Design</span>
+                                    <i data-feather="edit-3"></i>
+                                    <span>Edit Design</span>
 
-                                    </a>
-                                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
-                                            id="SaveChangesButton">
-                                        <span>Save Changes</span>
-                                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
-                                              role="status" aria-hidden="true"></span>
-                                    </button>
-                                </div>
+                                </a>
+                                <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
+                                    id="SaveChangesButton">
+                                    <span>Save Changes</span>
+                                    <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                        role="status" aria-hidden="true"></span>
+                                </button>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 @endsection
 
 
 @section('vendor-script')
-    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 @endsection
 
 
 @section('page-script')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
             const checkboxes = document.querySelectorAll('.type-checkbox');
 
             function toggleCheckboxes() {
@@ -194,10 +194,10 @@
             // Initial state
             toggleCheckboxes();
         });
-    </script>
+</script>
 
-    <script !src="">
-        $('#cancelButton').on('click', function(e) {
+<script !src="">
+    $('#cancelButton').on('click', function(e) {
             e.preventDefault();
 
             // Reset the form inputs to initial values
@@ -212,9 +212,9 @@
             });
         });
 
-    </script>
-    <script !src="">
-        handleAjaxFormSubmit("#editTemplateForm", {
+</script>
+<script !src="">
+    handleAjaxFormSubmit("#editTemplateForm", {
             successMessage: "Template updated successfully",
             onSuccess: function (response, $form) {
                 setTimeout(function () {
@@ -226,21 +226,21 @@
         });
 
 
-    </script>
-    <script !src="">
-        $(document).ready(function () {
+</script>
+<script !src="">
+    $(document).ready(function () {
             const preselectedProductId = $('#productsSelect').val();
             if (preselectedProductId) {
                 $('#productsSelect').trigger('change');
             }
         });
 
-    </script>
-    <script !src="">
+</script>
+<script !src="">
 
-    </script>
-    <script>
-        $(document).ready(function () {
+</script>
+<script>
+    $(document).ready(function () {
             $('#productsSelect').select2({
                 placeholder: "Choose Products",
                 allowClear: true
@@ -255,9 +255,9 @@
             });
 
         });
-    </script>
-    <script !src="">
-        function updateDeleteButtons(containerSelector) {
+</script>
+<script !src="">
+    function updateDeleteButtons(containerSelector) {
             $(containerSelector).find('[data-repeater-list]').each(function () {
                 var items = $(this).find('[data-repeater-item]');
                 items.each(function () {
@@ -342,6 +342,6 @@
             updateDeleteButtons($('.outer-repeater'));
             initializeImageUploaders($('.outer-repeater'));
         });
-    </script>
+</script>
 
 @endsection
