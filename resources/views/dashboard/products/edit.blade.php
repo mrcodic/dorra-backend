@@ -140,7 +140,7 @@ $q->where('product_id', $model->id);
                                     <!-- Category & Subcategory -->
                                     <div class="col-md-6">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="category">Category</label>
+                                            <label class="form-label label-text" for="category">Product</label>
                                             <select name="category_id" id="category"
                                                 class="form-control category-select">
                                                 <option value="">Select category</option>
@@ -155,11 +155,11 @@ $q->where('product_id', $model->id);
                                     <!-- Subcategory -->
                                     <div class="col-md-6">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="sub_category">Subcategory</label>
+                                            <label class="form-label label-text" for="sub_category">SubProduct</label>
                                             <select name="sub_category_id" id="sub_category"
                                                 class="form-control sub-category-select"
                                                 data-sub-category-url="{{ route('sub-categories') }}">
-                                                <option value="">Select subcategory</option>
+                                                <option value="">Select subproduct</option>
                                                 @php
                                                 $subCategories =
                                                 App\Models\Category::whereParentId($model->category_id)->get();
@@ -190,17 +190,7 @@ $q->where('product_id', $model->id);
                                     </div>
 
                                     <!-- Has Mockup -->
-                                    <div class="col-md-12">
-                                        <div class="mb-2 d-flex align-items-center gap-2">
-                                            <label class="form-label label-text ">Is this category has Mockup?</label>
-                                            <div class="form-check form-switch">
-                                                <input type="hidden" name="has_mockup" value="0" />
-                                                <input class="form-check-input" type="checkbox" id="has_mockup"
-                                                    name="has_mockup" value="1" @checked($model->has_mockup == 1)
-                                                />
-                                                </select>
-                                            </div>
-                                        </div>
+
 
                                         <!-- Has Mockup -->
                                         <div class="col-md-12">
@@ -1399,7 +1389,7 @@ $q->where('product_id', $model->id);
                     url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
                     method: "GET",
                     success: function (res) {
-                        $subCategorySelect.empty().append('<option value="">Select subcategory</option>');
+                        $subCategorySelect.empty().append('<option value="">Select subproduct</option>');
                         $.each(res.data, (i, s) => $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`));
                     },
                     error: function () {
