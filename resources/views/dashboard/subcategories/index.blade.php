@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'SubCategory List')
-@section('main-page', 'Subcategories')
+@section('title', 'SubProduct List')
+@section('main-page', 'SubProducts')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -76,7 +76,7 @@
                            data-bs-toggle="modal"
                            data-bs-target="#addSubCategoryModal">
                             <i data-feather="plus"></i>
-                            Add New Subcategory
+                            Add New Subproduct
                         </a>
                     </div>
 

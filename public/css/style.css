@@ -35,6 +35,20 @@ table.dataTable thead .sorting_desc:after {
     background: #eef6ff;          /* light blue when dragging */
     border-color: #0d6efd;        /* Bootstrap primary */
 }
+/* Make Dropzone preview larger */
+.dropzone .dz-preview .dz-image {
+    width: 200px;   /* adjust width */
+    height: 200px;  /* adjust height */
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Make sure image fits without cropping */
+.dropzone .dz-preview .dz-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* <-- keeps full image visible */
+}
 
 .label-text {
     color: #121212;

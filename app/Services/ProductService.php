@@ -178,7 +178,6 @@ class ProductService extends BaseService
                     'collection_name' => 'product_main_image',
                 ]);
             if (isset($validatedData['images_ids'])) {
-                $product->clearMediaCollection('products');
                 collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
                     Media::where('id', $imageId)
                         ->update([
@@ -281,12 +280,24 @@ class ProductService extends BaseService
             });
         }
 
-        if (isset($validatedData['image'])) {
-            handleMediaUploads($validatedData['image'], $product, 'product_main_image', clearExisting: true);
-        }
-        if (isset($validatedData['images'])) {
-            handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
+        if (isset($validatedData['image_id'])) {
+            Media::where('id', $validatedData['image_id'])
+                ->update([
+                    'model_type' => get_class($product),
+                    'model_id'   => $product->id,
+                    'collection_name' => 'product_main_image',
+                ]);
 
+        }
+        if (isset($validatedData['images_ids'])) {
+            collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
+                Media::where('id', $imageId)
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'product_extra_images',
+                    ]);
+            });
         }
         return $product;
     }

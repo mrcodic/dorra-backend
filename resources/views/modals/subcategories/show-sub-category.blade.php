@@ -3,7 +3,7 @@
         <div class="add-new-user modal-content pt-0 fs-3">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
             <div class="modal-header mb-1">
-                <h5 class="modal-title" id="exampleModalLabel">Show Subcategory</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Show Subproduct</h5>
             </div>
             <div class="modal-body flex-grow-1">
                 <input type="hidden" name="" id="sub-category-id">

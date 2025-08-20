@@ -77,7 +77,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Main Image Upload -->
+
                                         <!-- Main Image Upload -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
@@ -101,21 +101,7 @@
                  Max size: 1MB | Dimensions: 512x512 px
         </span>
 
-                                                <!-- Uploaded Image Preview -->
-                                                <div id="uploaded-image"
-                                                     class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                                    <img src="" alt="Uploaded" class="img-fluid rounded"
-                                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                                    <div id="file-details" class="file-details">
-                                                        <div class="file-name fw-bold"></div>
-                                                        <div class="file-size text-muted small"></div>
-                                                    </div>
-                                                    <button type="button" id="remove-image"
-                                                            class="btn btn-sm position-absolute text-danger"
-                                                            style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                        <i data-feather="trash"></i>
-                                                    </button>
-                                                </div>
+
                                             </div>
                                         </div>
 
