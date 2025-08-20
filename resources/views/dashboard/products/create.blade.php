@@ -182,48 +182,43 @@
                                     <!-- Dimensions -->
 
                                     <div class="col-md-12 mb-2">
-                                        <div class="">
+                                        <div>
                                             <label class="form-label label-text">Category Size*</label>
+
                                             <!-- Standard Dimensions -->
                                             <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start"
-                                                id="standard-dimensions-container">
+                                                 id="standard-dimensions-container">
                                                 @foreach($associatedData['dimensions'] as $dimension)
-                                                <label
-                                                    class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center cursor-pointer"
-                                                    for="dimension-checkbox-{{ $dimension['id'] }}"
-                                                    style="width: 100px;">
-                                                    <input class="form-check-input me-1" type="checkbox"
-                                                        name="dimensions[]"
-                                                        id="dimension-checkbox-{{ $dimension['id'] }}"
-                                                        value="{{ $dimension['id'] }}" style="pointer-events: none" />
-                                                    <span class="form-check-label mb-0">
-                                                        {{ $dimension['name'] }}
-                                                    </span>
-
-                                                    <!-- Main Image Upload -->
-                                                    <div class="col-md-12">
-                                                        <div class="mb-2">
-                                                            <label class="form-label label-text"
-                                                                for="product-image-main">
-                                                                Category Image (main)*
-                                                            </label>
-                                                            @endforeach
-                                                        </div>
-
-                                                        <!-- Custom Dimensions -->
-                                                        <div class="d-flex gap-3 mt-2" id="custom-dimensions-container">
-                                                            <!-- Custom dimensions from sessionStorage will be injected here -->
-                                                        </div>
-                                                    </div>
-                                                    <button type="button" class="upload-card w-100 mt-2"
-                                                        data-bs-toggle="modal" data-bs-target="#addSizeModal">Add
-                                                        Custom Size
-                                                    </button>
-
+                                                    <label
+                                                        class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center cursor-pointer"
+                                                        for="dimension-checkbox-{{ $dimension['id'] }}"
+                                                        style="width: 100px;">
+                                                        <input class="form-check-input me-1" type="checkbox"
+                                                               name="dimensions[]"
+                                                               id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                               value="{{ $dimension['id'] }}" style="pointer-events: none" />
+                                                        <span class="form-check-label mb-0">
+                        {{ $dimension['name'] }}
+                    </span>
+                                                    </label>
+                                                @endforeach
                                             </div>
-                                        </div>
 
-                                        <!-- Has Mockup -->
+                                            <!-- Custom Dimensions -->
+                                            <div class="d-flex gap-3 mt-2" id="custom-dimensions-container">
+                                                <!-- Custom dimensions from sessionStorage will be injected here -->
+                                            </div>
+
+                                            <!-- Add Custom Size Button -->
+                                            <button type="button" class="upload-card w-100 mt-2"
+                                                    data-bs-toggle="modal" data-bs-target="#addSizeModal">
+                                                Add Custom Size
+                                            </button>
+                                        </div>
+                                    </div>
+
+
+                                    <!-- Has Mockup -->
                                         <div class="col-md-12">
                                             <div class="mb-2 d-flex align-items-center gap-2">
                                                 <label class="form-label label-text ">Is this category has
