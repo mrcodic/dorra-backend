@@ -8,6 +8,7 @@ use App\Models\Design;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\Team\{StoreTeamRequest};
 
@@ -89,12 +90,43 @@ class TeamController extends Controller
         return Response::api();
     }
 
+
     public function assignToDesign(Request $request, $teamId)
     {
-        $request->validate(['designs' => ['required', 'array'],
-            'designs.*' => ['required', 'string', 'exists:designs,id',
-                Rule::exists('designs', 'id')->whereNull('deleted_at')]]);
+        $validator = Validator::make($request->all(), [
+            'designs' => ['required', 'array'],
+            'designs.*' => [
+                'required',
+                'string',
+                Rule::exists('designs', 'id')->whereNull('deleted_at'),
+            ],
+        ]);
+
+        $validator->after(function ($validator) use ($request, $teamId) {
+            $team = Team::find($teamId);
+
+            if ($team) {
+                $assignedIds = $team->designs()->pluck('designs.id')->toArray();
+
+
+                $duplicateIds = array_intersect($request->designs, $assignedIds);
+
+                if (!empty($duplicateIds)) {
+                    $designNames = Design::whereIn('id', $duplicateIds)->pluck('name')->toArray();
+                    $namesList = implode(', ', $designNames);
+
+                    $validator->errors()->add(
+                        'designs',
+                        "The following designs are already assigned to this team: {$namesList}."
+                    );
+                }
+            }
+        });
+
+        $validator->validate();
+
         $this->teamService->assignToDesign($teamId);
+
         return Response::api();
     }
 

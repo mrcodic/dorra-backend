@@ -78,49 +78,47 @@
                                         </div>
 
                                         <!-- Main Image Upload -->
+                                        <!-- Main Image Upload -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="product-image-main">Category
-                                                    Image (main)*</label>
+                                                <label class="form-label label-text" for="product-image-main">
+                                                    Category Image (main)*
+                                                </label>
 
-                                                <div id="product-main-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
+                                                <!-- Dropzone Container -->
+                                                <div id="product-main-dropzone"
+                                                     class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
                                                     <div class="dz-message" data-dz-message>
                                                         <span>Drop image here or click to upload</span>
                                                     </div>
-
-
                                                 </div>
+
+                                                <!-- ✅ Hidden input outside Dropzone -->
+                                                <input type="hidden" name="image_id" id="uploadedImage">
+
                                                 <span class="image-hint small text-end">
-                                                         Max size: 1MB | Dimensions: 512x512 px
-                                                </span>
-                                                <div>
-                                                    <!-- Progress Bar -->
-                                                    <div id="upload-progress" class="progress mt-2 d-none w-50">
-                                                        <div
-                                                            class="progress-bar progress-bar-striped progress-bar-animated"
-                                                            style="width: 0%"></div>
+                 Max size: 1MB | Dimensions: 512x512 px
+        </span>
+
+                                                <!-- Uploaded Image Preview -->
+                                                <div id="uploaded-image"
+                                                     class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                                    <img src="" alt="Uploaded" class="img-fluid rounded"
+                                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                                    <div id="file-details" class="file-details">
+                                                        <div class="file-name fw-bold"></div>
+                                                        <div class="file-size text-muted small"></div>
                                                     </div>
-
-
-                                                    <!-- Uploaded Image Preview -->
-                                                    <div id="uploaded-image"
-                                                         class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                                        <img src="" alt="Uploaded" class="img-fluid rounded"
-                                                             style="width: 50px; height: 50px; object-fit: cover;">
-                                                        <div id="file-details" class="file-details">
-                                                            <div class="file-name fw-bold"></div>
-                                                            <div class="file-size text-muted small"></div>
-                                                        </div>
-                                                        <button type="button" id="remove-image"
-                                                                class="btn btn-sm position-absolute text-danger"
-                                                                style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                            <i data-feather="trash"></i>
-                                                        </button>
-                                                    </div>
-
+                                                    <button type="button" id="remove-image"
+                                                            class="btn btn-sm position-absolute text-danger"
+                                                            style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                        <i data-feather="trash"></i>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
+
 
                                         <!-- Multiple Images Upload -->
                                         <div class="col-md-12">
@@ -134,12 +132,12 @@
                                                         <p>Drag images here or click to upload</p>
                                                     </div>
                                                 </div>
-
+                                                <input type="hidden" name="images_ids[]" id="images_ids">
                                                 <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2"></div>
 
                                                 <span class="image-hint small text-end">
-      Max size: 1MB | Dimensions: 512x512 px
-    </span>
+                                               Max size: 1MB | Dimensions: 512x512 px
+                                             </span>
                                             </div>
                                         </div>
 
@@ -150,7 +148,7 @@
                                                 <label class="form-label label-text" for="category">Product*</label>
                                                 <select name="category_id" id="category"
                                                         class="form-control category-select">
-                                                    <option value="" disabled>Select product</option>
+                                                    <option value="" selected disabled>Select product</option>
                                                     @foreach($associatedData['categories'] as $category)
                                                         <option
                                                             value="{{ $category->id }}">{{ $category->name }}</option>
@@ -162,11 +160,11 @@
                                         <div class="col-md-6">
                                             <div class="mb-2">
                                                 <label class="form-label label-text"
-                                                       for="sub-category">Subcategory</label>
+                                                       for="sub-category">Subproduct</label>
                                                 <select name="sub_category_id" id="sub-category"
                                                         class="form-control sub-category-select"
                                                         data-sub-category-url="{{ route('sub-categories') }}">
-                                                    <option value="">Select subcategory</option>
+                                                    <option value="" selected disabled>Select subproduct</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -581,12 +579,67 @@
     <script>
         Dropzone.autoDiscover = false;
 
-        const categoryDropzone = new Dropzone("#product-main-dropzone", {
+        const multiDropzone = new Dropzone("#multi-dropzone", {
             url: "{{ route('media.store') }}",   // backend route for image upload
+            paramName: "file",
+            maxFiles: 10,              // allow up to 10 images
+            maxFilesize: 1,            // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drag images here or click to upload",
+            init: function () {
+                this.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        // save file id on the file object
+                        file._hiddenInputId = response.data.id;
+
+                        // append hidden input for each uploaded file
+                        let hiddenInput = document.createElement("input");
+                        hiddenInput.type = "hidden";
+                        hiddenInput.name = "images_ids[]";
+                        hiddenInput.value = response.data.id;
+                        hiddenInput.id = "hidden-image-" + response.data.id;
+
+                        document.querySelector("#multi-uploaded-images").appendChild(hiddenInput);
+
+
+                    }
+                });
+
+                this.on("removedfile", function (file) {
+                    if (file._hiddenInputId) {
+                        // remove hidden input
+                        let hiddenInput = document.getElementById("hidden-image-" + file._hiddenInputId);
+                        if (hiddenInput) hiddenInput.remove();
+
+                        // remove preview
+                        let previewImg = document.getElementById("preview-image-" + file._hiddenInputId);
+                        if (previewImg) previewImg.remove();
+
+                        // delete from server
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script>
+        Dropzone.autoDiscover = false;
+
+        const categoryDropzone = new Dropzone("#product-main-dropzone", {
+            url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
             maxFilesize: 1, // MB
-
             acceptedFiles: "image/*",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
@@ -598,12 +651,15 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
 
-                        $("#uploadedImage").val(response.data.id); // store image_id
+                        // ✅ This will now set the hidden field correctly
+                        document.getElementById("uploadedImage").value = response.data.id;
+
                     }
-                });
+
+            });
 
                 this.on("removedfile", function (file) {
-                    $("#uploadedImage").val("");
+                    document.getElementById("uploadedImage").value = "";
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -611,11 +667,19 @@
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             }
                         });
-                        $("#preview-image").attr("src", "").addClass("d-none");
-
                     }
+
+                    // hide preview
+                    document.getElementById("uploaded-image").classList.add("d-none");
                 });
             }
+        });
+
+        // Handle remove button manually
+        document.getElementById("remove-image").addEventListener("click", function () {
+            categoryDropzone.removeAllFiles(true);
+            document.getElementById("uploadedImage").value = "";
+            document.getElementById("uploaded-image").classList.add("d-none");
         });
     </script>
     <script>
@@ -1128,7 +1192,7 @@
                     url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
                     method: "GET",
                     success: function (res) {
-                        $subCategorySelect.empty().append('<option value="">Select subcategory</option>');
+                        $subCategorySelect.empty().append('<option value="">Select subproduct</option>');
                         $.each(res.data, (i, s) => $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`));
                     },
                     error: function () {

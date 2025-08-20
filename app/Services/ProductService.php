@@ -123,6 +123,7 @@ class ProductService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
+
         return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $product = $this->repository->create($validatedData);
             $product->load($this->relations);
@@ -170,9 +171,22 @@ class ProductService extends BaseService
 
                 });
             }
-            handleMediaUploads($validatedData['image'], $product, 'product_main_image');
-            if (isset($validatedData['images'])) {
-                handleMediaUploads($validatedData['images'], $product, 'product_extra_images');
+            Media::where('id', $validatedData['image_id'])
+                ->update([
+                    'model_type' => get_class($product),
+                    'model_id'   => $product->id,
+                    'collection_name' => 'product_main_image',
+                ]);
+            if (isset($validatedData['images_ids'])) {
+                $product->clearMediaCollection('products');
+                collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
+                    Media::where('id', $imageId)
+                        ->update([
+                            'model_type' => get_class($product),
+                            'model_id'   => $product->id,
+                            'collection_name' => 'product_extra_images',
+                        ]);
+                });
 
             }
             return $product;

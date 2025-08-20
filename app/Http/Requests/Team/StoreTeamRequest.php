@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Team;
 
+use App\Enums\Invitation\StatusEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Invitation;
+use App\Models\User;
 use Illuminate\Validation\Rule;
 
 class StoreTeamRequest extends BaseRequest
@@ -33,11 +36,26 @@ class StoreTeamRequest extends BaseRequest
             'name' => ['required', 'string', 'max:255',],
             'owner_id' => ['nullable', 'integer', 'exists:users,id'],
             'emails' => ['nullable', 'array'],
-            'emails.*' => ['nullable', 'email','exists:users,email'],
+            'emails.*' => ['nullable', 'email'],
 
         ];
     }
 
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+
+            if ($this->emails && is_array($this->emails)) {
+                $invalidEmails = collect($this->emails)->reject(function ($email) {
+                    return User::where('email', $email)->exists();
+                });
+
+                if ($invalidEmails->isNotEmpty()) {
+                    $validator->errors()->add('emails', 'These emails do not exist: ' . $invalidEmails->implode(', '));
+                }
+            }
+        });
+    }
 
 
 }

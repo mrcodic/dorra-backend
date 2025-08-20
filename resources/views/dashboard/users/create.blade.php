@@ -3,6 +3,8 @@
 @section('title', 'Create User')
 @section('main-page', 'Users')
 @section('sub-page', 'Add New User')
+@section('main-page-url', route("users.index"))
+@section('sub-page-url',  route("users.create"))
 
 @section('vendor-style')
 <!-- Vendor css files -->

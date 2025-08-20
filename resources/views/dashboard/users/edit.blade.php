@@ -3,7 +3,8 @@
 @section('title', 'Edit User')
 @section('main-page', 'Users')
 @section('sub-page', 'Edit User')
-
+@section('main-page-url', route("users.index"))
+@section('sub-page-url',  route("users.edit",$model->id))
 @section('vendor-style')
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
