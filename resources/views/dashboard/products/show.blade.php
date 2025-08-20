@@ -137,11 +137,11 @@
                         </div>
                         <div class="my-1 d-flex flex-column flex-md-row gap-1">
                             <div class="d-flex flex-column col-md-6">
-                                <span class="mb-1 fw-bold label-text">Category</span>
+                                <span class="mb-1 fw-bold label-text">Product</span>
                                 <span class="fw-semibold disabled-field">{{ $model->category?->name }}</span>
                             </div>
                             <div class="d-flex flex-column col-md-6">
-                                <span class="mb-1 fw-bold label-text">Subcategory</span>
+                                <span class="mb-1 fw-bold label-text">Subproduct</span>
                                 <span class="fw-semibold disabled-field">{{ $model->subCategory?->name ?? "-" }}</span>
                             </div>
                         </div>

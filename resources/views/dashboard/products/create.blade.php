@@ -237,75 +237,110 @@
                                             <button type="button" class="btn btn-primary next-tab">Next</button>
                                         </div>
                                     </div>
-                                </div>
-                                <!--end of the first tab content -->
-                                <!--second tab content -->
-                                <div class="tab-pane d-none" id="step2">
+                        </div>
+                            <!--end of the first tab content -->
+                        <!--second tab content -->
+                        <div class="tab-pane d-none" id="step2">
 
-                                    <!-- Price Option Toggle -->
-                                    <div class="col-md-12">
-                                        <div class="mb-2">
-                                            <label class="form-label label-text d-block">Quantity & Price
-                                                Options</label>
-                                            <label class="form-label label-text mt-2">Quantity Type*</label>
-                                            <div class="row gap-1 d-flex flex-column flex-md-row" style="margin: 2px;">
-                                                <div class="col border rounded-3 p-1">
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio"
-                                                            name="has_custom_prices" id="customPrice" value="1">
-                                                        <div>
-                                                            <label class="form-check-label label-text d-block"
-                                                                for="customPrice">Add Quantity Manually</label>
-                                                            <label class="form-check-label text-dark"
-                                                                for="customPrice">Custom
-                                                                Prices</label>
-                                                        </div>
-
-                                                    </div>
+                            <!-- Price Option Toggle -->
+                            <div class="col-md-12">
+                                <div class="mb-2">
+                                    <label class="form-label label-text d-block">Quantity & Price
+                                        Options</label>
+                                    <label class="form-label label-text mt-2">Quantity Type*</label>
+                                    <div class="row gap-1 d-flex flex-column flex-md-row" style="margin: 2px;">
+                                        <div class="col border rounded-3 p-1">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio"
+                                                       name="has_custom_prices" id="customPrice" value="1">
+                                                <div>
+                                                    <label class="form-check-label label-text d-block"
+                                                           for="customPrice">Add Quantity Manually</label>
+                                                    <label class="form-check-label text-dark"
+                                                           for="customPrice">Custom
+                                                        Prices</label>
                                                 </div>
-                                                <div class="col border rounded-3 p-1">
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio"
-                                                            name="has_custom_prices" id="defaultPrice" value="0">
-                                                        <div>
-                                                            <label class="form-check-label label-text d-block"
-                                                                for="defaultPrice">Default Quantity</label>
-                                                            <label class="form-check-label text-dark"
-                                                                for="defaultPrice">Default
-                                                                Price</label>
-                                                        </div>
-                                                    </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col border rounded-3 p-1">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio"
+                                                       name="has_custom_prices" id="defaultPrice" value="0">
+                                                <div>
+                                                    <label class="form-check-label label-text d-block"
+                                                           for="defaultPrice">Default Quantity</label>
+                                                    <label class="form-check-label text-dark"
+                                                           for="defaultPrice">Default
+                                                        Price</label>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <span class="image-hint small text-end">
-                                        Max size: 1MB | Dimensions: 512x512 px
-                                    </span>
-
-
                                 </div>
                             </div>
+
+                            <!-- Default Price -->
+                            <div class="col-md-12" id="default-price-section" style="display: none;">
+                                <div class="mb-2">
+                                    <label class="form-label label-text" for="base_price">Original Price</label>
+                                    <input type="text" id="base_price" name="base_price" class="form-control"
+                                           placeholder="Original Price" />
+                                </div>
+                            </div>
+                            <!-- Custom Prices -->
+                            <div class="col-md-12" id="custom-price-section" style="display: none;">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="invoice-repeater">
+                                            <div data-repeater-list="prices">
+                                                <div data-repeater-item>
+                                                    <div class="row d-flex align-items-end">
+                                                        <div class="col-md-4">
+                                                            <div class="mb-1">
+                                                                <label class="form-label label-text">Quantity</label>
+                                                                <input type="number" name="prices[][quantity]" class="form-control" placeholder="Add Quantity" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="mb-1">
+                                                                <label class="form-label label-text">Price (EGP)</label>
+                                                                <input type="text" name="prices[][price]" class="form-control" placeholder="Add Price" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="mb-1">
+                                                                <button type="button" class="btn btn-outline-danger text-nowrap px-1" data-repeater-delete>
+                                                                    <i data-feather="x" class="me-25"></i> <span>Delete</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <button type="button" class="w-100  rounded-3 p-1 bg-white text-dark" style="border:2px dashed #CED5D4;" data-repeater-create>
+                                                        <i data-feather="plus" class="me-25"></i> <span>Add New Quantity</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-secondary prev-tab">Previous</button>
+                                <button type="button" class="btn btn-primary next-tab">Next</button>
+                            </div>
+
+                            <!--end of the second tab content -->
+
                         </div>
-                </div>
-            </div>
 
-            <!-- Default Price -->
-            <div class="col-md-12" id="default-price-section" style="display: none;">
-                <div class="mb-2">
-                    <label class="form-label label-text" for="base_price">Original Price</label>
-                    <input type="text" id="base_price" name="base_price" class="form-control"
-                        placeholder="Original Price" />
-                </div>
-            </div>
 
-            <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-secondary prev-tab">Previous</button>
-                <button type="button" class="btn btn-primary next-tab">Next</button>
-            </div>
-        </div>
-        <!--end of the second tab content -->
         <!--third tab content -->
         <div class="tab-pane d-none" id="step3">
             <!-- Specifications -->
@@ -499,13 +534,10 @@
     <!--third tab content end -->
 
 
-    </form>
 
-    </div>
-    </div>
-    </div>
-    </div>
-
+                </div>
+ </div>
+        </form>
     @include("modals.products.add-size")
 </section>
 @endsection
