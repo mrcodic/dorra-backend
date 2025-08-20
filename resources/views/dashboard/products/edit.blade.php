@@ -131,9 +131,9 @@ $q->where('product_id', $model->id);
                                             <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2"></div>
 
                                             <span class="image-hint small text-end">
-                                                <<<<<<< HEAD Max size: 1MB | Dimensions: 512x512 px </span>
-                                                    <!-- Uploaded Images Preview Area -->
-                                                    <div id="multi-uploaded-images" class=" mt-3"></div>
+                                                Max size: 1MB | Dimensions: 512x512 px </span>
+                                            <!-- Uploaded Images Preview Area -->
+                                            <div id="multi-uploaded-images" class=" mt-3"></div>
                                         </div>
                                     </div>
                                     @if($model->getMedia('product_extra_images')->isNotEmpty())
@@ -147,12 +147,10 @@ $q->where('product_id', $model->id);
                                                 1024, 1) }}
                                                 KB
                                             </div>
-                                            =======
                                             Max size: 1MB | Dimensions: 512x512 px
                                             </span>
                                         </div>
                                     </div>
-                                    >>>>>>> 8d20577a9517603bebb3b19d92110ffdab81492b
 
 
                                     <!-- Category & Subcategory -->
@@ -215,7 +213,6 @@ $q->where('product_id', $model->id);
                                                 <input type="hidden" name="has_mockup" value="0" />
                                                 <input class="form-check-input" type="checkbox" id="has_mockup"
                                                     name="has_mockup" value="1" @checked($model->has_mockup == 1)
-
                                                 />
 
                                             </div>
@@ -251,10 +248,6 @@ $q->where('product_id', $model->id);
                                             <div class="d-flex gap-3 mt-2 mb-2" id="custom-dimensions-container">
                                                 <!-- Custom dimensions from sessionStorage will be injected here -->
                                             </div>
-
-
-
-
 
                                         </div>
                                         <button type="button" class="upload-card w-100 mt-1" data-bs-toggle="modal"
