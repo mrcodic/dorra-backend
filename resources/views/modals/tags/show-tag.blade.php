@@ -8,29 +8,29 @@
             <div class="modal-body flex-grow-1">
                 <input type="hidden" id="tag-id">
                 <!-- Name in Arabic and English -->
-                <div class="row mb-3">
-                    <div class="col-6">
+                <div class="row mb-1">
+                    <div class="col-md-6">
                         <label class="form-label label-text">Name (EN)</label>
                         <input type="text" class="form-control" id="tag-name-en" disabled />
                     </div>
-                    <div class="col-6">
+                    <div class="col-md-6">
                         <label class="form-label label-text">Name (AR)</label>
                         <input type="text" class="form-control" id="tag-name-ar" disabled />
                     </div>
                 </div>
 
                 <!-- Number of Products -->
-                <div class="mb-3">
+                <div class="mb-1">
                     <label class="form-label label-text">Number of Products</label>
                     <input type="number" id="tag-products" class="form-control" disabled />
                 </div>
-                <div class="mb-3">
+                <div class="mb-1">
                     <label class="form-label label-text">Number of Templates</label>
                     <input type="number" id="tag-templates" class="form-control" disabled />
                 </div>
 
                 <!-- Added Date -->
-                <div class="mb-4">
+                <div class="mb-1">
                     <label class="form-label label-text">Added Date</label>
                     <input type="date" id="tag-date" class="form-control" disabled />
                 </div>

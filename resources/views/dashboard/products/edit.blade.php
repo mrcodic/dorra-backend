@@ -159,7 +159,7 @@ $q->where('product_id', $model->id);
                                             <select name="sub_category_id" id="sub_category"
                                                 class="form-control sub-category-select"
                                                 data-sub-category-url="{{ route('sub-categories') }}">
-                                                <option value=""  disabled selected>Select subproduct</option>
+                                                <option value="" disabled selected>Select subproduct</option>
                                                 @php
                                                 $subCategories =
                                                 App\Models\Category::whereParentId($model->category_id)->get();
@@ -190,223 +190,234 @@ $q->where('product_id', $model->id);
                                     </div>
 
                                     <!-- Has Mockup -->
+                                    <<<<<<< HEAD <div class="col-md-12">
+                                        <div class="mb-2 d-flex align-items-center gap-2">
+                                            <label class="form-label label-text ">Is this category has
+                                                Mockup?</label>
+                                            <div class="form-check form-switch">
+                                                <input type="hidden" name="has_mockup" value="0" />
+                                                <input class="form-check-input" type="checkbox" id="has_mockup"
+                                                    name="has_mockup" value="1" @checked($model->has_mockup == 1)
+
+                                                />
+                                                =======
 
 
-                                        <!-- Has Mockup -->
-                                        <div class="col-md-12">
-                                            <div class="mb-2 d-flex align-items-center gap-2">
-                                                <label class="form-label label-text ">Is this category has
-                                                    Mockup?</label>
-                                                <div class="form-check form-switch">
-                                                    <input type="hidden" name="has_mockup" value="0" />
-                                                    <input class="form-check-input" type="checkbox" id="has_mockup"
-                                                        name="has_mockup" value="1" @checked($model->has_mockup == 1)
+                                                <!-- Has Mockup -->
+                                                <div class="col-md-12">
+                                                    <div class="mb-2 d-flex align-items-center gap-2">
+                                                        <label class="form-label label-text ">Is this category has
+                                                            Mockup?</label>
+                                                        <div class="form-check form-switch">
+                                                            <input type="hidden" name="has_mockup" value="0" />
+                                                            <input class="form-check-input" type="checkbox"
+                                                                id="has_mockup" name="has_mockup" value="1"
+                                                                @checked($model->has_mockup == 1)
 
-                                                    />
+                                                            />
 
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Dimensions -->
+
+                                                <div class="col-md-12">
+                                                    <div class="mb-1">
+                                                        <label class="form-label label-text">Category Size</label>
+                                                        <!-- Standard Dimensions -->
+                                                        <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2"
+                                                            id="standard-dimensions-container">
+                                                            @foreach($dimensions as $dimension)
+                                                            <div class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center"
+                                                                style="width: 100px">
+                                                                <input class="form-check-input me-1" type="checkbox"
+                                                                    name="dimensions[]"
+                                                                    id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                                    value="{{ $dimension['id'] }}"
+                                                                    @checked($model->dimensions->contains($dimension->id))
+                                                                />
+                                                                <label class="form-check-label mb-0"
+                                                                    for="dimension-checkbox-{{ $dimension['id'] }}">
+                                                                    {{ $dimension['name'] }}
+                                                                </label>
+                                                            </div>
+                                                            @endforeach
+                                                        </div>
+
+                                                        <!-- Custom Dimensions -->
+                                                        <div class="d-flex gap-3 mt-2 mb-2"
+                                                            id="custom-dimensions-container">
+                                                            <!-- Custom dimensions from sessionStorage will be injected here -->
+                                                        </div>
+
+                                                        >>>>>>> 915748425f91e33c9d39b81a9382f892fdc250e4
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Dimensions -->
+
+                                            <div class="col-md-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label label-text d-block">Quantity & Price
+                                                        Options</label>
+                                                    <label class="form-label label-text mt-2">Quantity Type</label>
+                                                    <div class="row gap-1 d-flex flex-column flex-md-row"
+                                                        style="margin: 2px;">
+                                                        <div class="col border rounded-3 p-1">
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input" type="radio"
+                                                                    name="has_custom_prices" id="customPrice" value="1"
+                                                                    @checked($model->has_custom_prices == 1)
+                                                                @disabled($model->has_custom_prices == 0)>
+                                                                <div>
+                                                                    <label class="form-check-label label-text d-block"
+                                                                        for="customPrice">Add Quantity Manually</label>
+                                                                    <label class="form-check-label text-dark"
+                                                                        for="customPrice">Custom
+                                                                        Prices</label>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="col border rounded-3 p-1">
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input " type="radio"
+                                                                    name="has_custom_prices" id="defaultPrice" value="0"
+                                                                    @checked($model->has_custom_prices ==
+                                                                0)@disabled($model->has_custom_prices == 1)>
+                                                                <div>
+                                                                    <label class="form-check-label label-text d-block"
+                                                                        for="customPrice">Default Quantity</label>
+                                                                    <label class="form-check-label text-dark"
+                                                                        for="defaultPrice">Default
+                                                                        Price</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Dimensions -->
+                                        <!-- Custom Prices -->
+                                        <div class="col-md-12" id="custom-price-section"
+                                            style="{{  $model->has_custom_prices == 1 ? '': 'display: none;' }}">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="invoice-repeater">
+                                                        <div data-repeater-list="prices">
+                                                            @forelse($model->prices as $price)
+                                                            <div data-repeater-item>
+                                                                <div class="row d-flex align-items-end">
+                                                                    <div class="col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <label
+                                                                                class="form-label label-text">Quantity</label>
+                                                                            <input type="number" name="quantity"
+                                                                                value="{{ $price->quantity }}"
+                                                                                class="form-control"
+                                                                                placeholder="Add Quantity" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label label-text">Price
+                                                                                (EGP)</label>
+                                                                            <input type="text" name="price"
+                                                                                value="{{ $price->price }}"
+                                                                                class="form-control"
+                                                                                placeholder="Add Price" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <button type="button"
+                                                                                class="btn btn-outline-danger text-nowrap px-1"
+                                                                                style="display: none"
+                                                                                data-repeater-delete>
+                                                                                <i data-feather="x" class="me-25"></i>
+                                                                                <span>Delete</span>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-                                        <div class="col-md-12">
+                                                            </div>
+                                                            @empty
+                                                            <div data-repeater-item>
+                                                                <div class="row d-flex align-items-end">
+                                                                    <div class="col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <label
+                                                                                class="form-label label-text">Quantity</label>
+                                                                            <input type="number" name="quantity"
+                                                                                class="form-control"
+                                                                                placeholder="Add Quantity" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label label-text">Price
+                                                                                (EGP)</label>
+                                                                            <input type="text" name="price"
+                                                                                class="form-control"
+                                                                                placeholder="Add Price" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <button type="button"
+                                                                                class="btn btn-outline-danger text-nowrap px-1"
+                                                                                style="display: none"
+                                                                                data-repeater-delete>
+                                                                                <i data-feather="x" class="me-25"></i>
+                                                                                <span>Delete</span>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            @endforelse
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <button type="button"
+                                                                    class="w-100  rounded-3 p-1 bg-white text-dark"
+                                                                    style="border:2px dashed #CED5D4;"
+                                                                    data-repeater-create>
+                                                                    <i data-feather="plus" class="me-25"></i> <span>Add
+                                                                        New
+                                                                        Quantity</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- Default Price -->
+                                        <div class="col-md-12" id="default-price-section"
+                                            style="{{ $model->has_custom_prices == 0 ? '' : 'display:none;' }}">
                                             <div class="mb-1">
-                                                <label class="form-label label-text">Category Size</label>
-                                                <!-- Standard Dimensions -->
-                                                <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2"
-                                                    id="standard-dimensions-container">
-                                                    @foreach($dimensions as $dimension)
-                                                    <div class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center"
-                                                        style="width: 100px">
-                                                        <input class="form-check-input me-1" type="checkbox"
-                                                            name="dimensions[]"
-                                                            id="dimension-checkbox-{{ $dimension['id'] }}"
-                                                            value="{{ $dimension['id'] }}"
-                                                            @checked($model->dimensions->contains($dimension->id))
-                                                        />
-                                                        <label class="form-check-label mb-0"
-                                                            for="dimension-checkbox-{{ $dimension['id'] }}">
-                                                            {{ $dimension['name'] }}
-                                                        </label>
-                                                    </div>
-                                                    @endforeach
-                                                </div>
-
-                                                <!-- Custom Dimensions -->
-                                                <div class="d-flex gap-3 mt-2 mb-2" id="custom-dimensions-container">
-                                                    <!-- Custom dimensions from sessionStorage will be injected here -->
-                                                </div>
-
-
-                                            </div>
-                                            <button type="button" class="upload-card w-100 mt-1" data-bs-toggle="modal"
-                                                data-bs-target="#addSizeModal">Add Custom Size
-                                            </button>
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="d-flex justify-content-end ">
-                                        <button type="button" class="btn btn-primary next-tab mt-2">Next</button>
-                                    </div>
-                                </div>
-                                <!-- first tab content end -->
-
-                                <!--second tab content -->
-                                <div class="tab-pane d-none" id="step2">
-                                    <!-- Price Option Toggle -->
-                                    <div class="col-md-12">
-                                        <div class="mb-1">
-                                            <label class="form-label label-text d-block">Quantity & Price
-                                                Options</label>
-                                            <label class="form-label label-text mt-2">Quantity Type</label>
-                                            <div class="row gap-1 d-flex flex-column flex-md-row" style="margin: 2px;">
-                                                <div class="col border rounded-3 p-1">
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio"
-                                                            name="has_custom_prices" id="customPrice" value="1"
-                                                            @checked($model->has_custom_prices == 1) @disabled($model->has_custom_prices == 0)>
-                                                        <div>
-                                                            <label class="form-check-label label-text d-block"
-                                                                for="customPrice">Add Quantity Manually</label>
-                                                            <label class="form-check-label text-dark"
-                                                                for="customPrice">Custom
-                                                                Prices</label>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                                <div class="col border rounded-3 p-1">
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input " type="radio"
-                                                            name="has_custom_prices" id="defaultPrice" value="0"
-                                                            @checked($model->has_custom_prices == 0)@disabled($model->has_custom_prices == 1)>
-                                                        <div>
-                                                            <label class="form-check-label label-text d-block"
-                                                                for="customPrice">Default Quantity</label>
-                                                            <label class="form-check-label text-dark"
-                                                                for="defaultPrice">Default
-                                                                Price</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <label class="form-label label-text" for="base_price">Original Price
+                                                    (EGP)
+                                                    (Per
+                                                    Item)</label>
+                                                <input type="text" id="base_price" name="base_price"
+                                                    value="{{ $model->base_price }}" class="form-control"
+                                                    placeholder="Original Price" />
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <!-- Custom Prices -->
-                                    <div class="col-md-12" id="custom-price-section"
-                                        style="{{  $model->has_custom_prices == 1 ? '': 'display: none;' }}">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="invoice-repeater">
-                                                    <div data-repeater-list="prices">
-                                                        @forelse($model->prices as $price)
-                                                        <div data-repeater-item>
-                                                            <div class="row d-flex align-items-end">
-                                                                <div class="col-md-4">
-                                                                    <div class="mb-1">
-                                                                        <label
-                                                                            class="form-label label-text">Quantity</label>
-                                                                        <input type="number" name="quantity"
-                                                                            value="{{ $price->quantity }}"
-                                                                            class="form-control"
-                                                                            placeholder="Add Quantity" />
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="mb-1">
-                                                                        <label class="form-label label-text">Price
-                                                                            (EGP)</label>
-                                                                        <input type="text" name="price"
-                                                                            value="{{ $price->price }}"
-                                                                            class="form-control"
-                                                                            placeholder="Add Price" />
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="mb-1">
-                                                                        <button type="button"
-                                                                            class="btn btn-outline-danger text-nowrap px-1"
-                                                                            style="display: none" data-repeater-delete>
-                                                                            <i data-feather="x" class="me-25"></i>
-                                                                            <span>Delete</span>
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-                                                        @empty
-                                                        <div data-repeater-item>
-                                                            <div class="row d-flex align-items-end">
-                                                                <div class="col-md-4">
-                                                                    <div class="mb-1">
-                                                                        <label
-                                                                            class="form-label label-text">Quantity</label>
-                                                                        <input type="number" name="quantity"
-                                                                            class="form-control"
-                                                                            placeholder="Add Quantity" />
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="mb-1">
-                                                                        <label class="form-label label-text">Price
-                                                                            (EGP)</label>
-                                                                        <input type="text" name="price"
-                                                                            class="form-control"
-                                                                            placeholder="Add Price" />
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="mb-1">
-                                                                        <button type="button"
-                                                                            class="btn btn-outline-danger text-nowrap px-1"
-                                                                            style="display: none" data-repeater-delete>
-                                                                            <i data-feather="x" class="me-25"></i>
-                                                                            <span>Delete</span>
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-                                                        @endforelse
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <button type="button"
-                                                                class="w-100  rounded-3 p-1 bg-white text-dark"
-                                                                style="border:2px dashed #CED5D4;" data-repeater-create>
-                                                                <i data-feather="plus" class="me-25"></i> <span>Add New
-                                                                    Quantity</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-secondary prev-tab">Previous</button>
+                                            <button type="button" class="btn btn-primary next-tab">Next</button>
                                         </div>
-                                    </div>
-
-
-                                    <!-- Default Price -->
-                                    <div class="col-md-12" id="default-price-section"
-                                        style="{{ $model->has_custom_prices == 0 ? '' : 'display:none;' }}">
-                                        <div class="mb-1">
-                                            <label class="form-label label-text" for="base_price">Original Price (EGP)
-                                                (Per
-                                                Item)</label>
-                                            <input type="text" id="base_price" name="base_price"
-                                                value="{{ $model->base_price }}" class="form-control"
-                                                placeholder="Original Price" />
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <button type="button" class="btn btn-secondary prev-tab">Previous</button>
-                                        <button type="button" class="btn btn-primary next-tab">Next</button>
-                                    </div>
                                 </div>
                                 <!--second tab content end -->
 
