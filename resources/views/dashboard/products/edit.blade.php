@@ -143,7 +143,7 @@ $q->where('product_id', $model->id);
                                             <label class="form-label label-text" for="category">Product</label>
                                             <select name="category_id" id="category"
                                                 class="form-control category-select">
-                                                <option value="">Select category</option>
+                                                <option value="" disabled selected>Select product</option>
                                                 @foreach($associatedData['categories'] as $category)
                                                 <option value="{{ $category->id }}" @selected($category->id ==
                                                     $model->category?->id)>{{ $category->name }}</option>
@@ -159,7 +159,7 @@ $q->where('product_id', $model->id);
                                             <select name="sub_category_id" id="sub_category"
                                                 class="form-control sub-category-select"
                                                 data-sub-category-url="{{ route('sub-categories') }}">
-                                                <option value="">Select subproduct</option>
+                                                <option value=""  disabled selected>Select subproduct</option>
                                                 @php
                                                 $subCategories =
                                                 App\Models\Category::whereParentId($model->category_id)->get();
@@ -267,7 +267,7 @@ $q->where('product_id', $model->id);
                                                     <div class="form-check form-check-inline">
                                                         <input class="form-check-input" type="radio"
                                                             name="has_custom_prices" id="customPrice" value="1"
-                                                            @checked($model->has_custom_prices == 1)>
+                                                            @checked($model->has_custom_prices == 1) @disabled($model->has_custom_prices == 0)>
                                                         <div>
                                                             <label class="form-check-label label-text d-block"
                                                                 for="customPrice">Add Quantity Manually</label>
@@ -282,7 +282,7 @@ $q->where('product_id', $model->id);
                                                     <div class="form-check form-check-inline">
                                                         <input class="form-check-input " type="radio"
                                                             name="has_custom_prices" id="defaultPrice" value="0"
-                                                            @checked($model->has_custom_prices == 0)>
+                                                            @checked($model->has_custom_prices == 0)@disabled($model->has_custom_prices == 1)>
                                                         <div>
                                                             <label class="form-check-label label-text d-block"
                                                                 for="customPrice">Default Quantity</label>
