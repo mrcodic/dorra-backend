@@ -9,12 +9,12 @@
                 <input type="hidden" name="" id="sub-category-id">
                 <input type="hidden" name="" id="parent-id">
                 <!-- Name in Arabic and English -->
-                <div class="row mb-3">
-                    <div class="col-6">
+                <div class="row mb-1">
+                    <div class="col-md-6">
                         <label class="form-label label-text">Name (EN)</label>
                         <input type="text" class="form-control" id="sub-category-name-en" disabled />
                     </div>
-                    <div class="col-6">
+                    <div class="col-md-6">
                         <label class="form-label label-text">Name (AR)</label>
                         <input type="text" class="form-control" id="sub-category-name-ar" disabled />
                     </div>
@@ -22,19 +22,19 @@
 
 
                 <!-- Subcategories -->
-                <div class="mb-3">
+                <div class="mb-1">
                     <label class="form-label label-text" for="parent-name">Main Product</label>
                     <input type="text" class="form-control" id="parent-name" disabled />
                 </div>
 
                 <!-- Number of Products -->
-                <div class="mb-3">
+                <div class="mb-1">
                     <label class="form-label label-text">Number of Categories</label>
                     <input type="number" id="sub-category-products" class="form-control" disabled />
                 </div>
 
                 <!-- Added Date -->
-                <div class="mb-4">
+                <div class="mb-1">
                     <label class="form-label label-text">Added Date</label>
                     <input type="date" id="sub-category-date" class="form-control" disabled />
                 </div>
