@@ -21,6 +21,104 @@
 @section('page-style')
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+
+<style>
+    /* Responsive table accordion styles */
+    @media (max-width: 768px) {
+
+        /* Hide the last column on mobile */
+        .sub-category-list-table th:nth-child(5) {
+            display: none !important;
+        }
+
+        .sub-category-list-table tbody tr:not(.details-row) td:nth-child(5) {
+            display: none !important;
+        }
+
+        /* Style for clickable rows */
+        .sub-category-list-table tbody tr:not(.details-row) {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Add expand indicator to the role column */
+        .sub-category-list-table tbody tr:not(.details-row) td:nth-child(1) {
+            position: relative;
+            padding-left: 20px !important;
+        }
+
+        .expand-icon {
+            position: absolute;
+            left: 70%;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: transform 0.3s ease;
+            color: #666;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .expand-icon.expanded {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        /* Details row styling */
+        .details-row {
+            background-color: #F9FDFC !important;
+            display: none;
+        }
+
+        .details-row.show {
+            display: table-row !important;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #212529;
+            font-size: 14px;
+        }
+    }
+
+    /* Ensure normal behavior on desktop */
+    @media (min-width: 769px) {
+        .details-row {
+            display: none !important;
+        }
+
+        .expand-icon {
+            display: none !important;
+        }
+    }
+</style>
 @endsection
 
 @section('content')
@@ -37,31 +135,22 @@
             </div>
         </div>
         <div class="card-datatable table-responsive pt-0">
-            <div class="row gx-2 gy-2 align-items-center px-1">
+            <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
 
                 {{-- Search Input --}}
-                <div class="col-12 col-md-7">
-                    <form action="" method="get" class="position-relative">
-                        <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
-                        <input
-                            type="text"
-                            class="form-control ps-5 border rounded-3"
-                            name="search_value"
-                            id="search-tag-form"
-                            placeholder="Search tag..."
-                            style="height: 38px;">
-                        <button type="button" id="clearTagSearchInput"
-                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5">
+                    <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                        id="search-tag-form" placeholder="Search tag..." style="height: 38px;">
+                    <button type="button" id="clearTagSearchInput" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                              background: transparent; border: none; font-weight: bold;
-                            color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                                title="Clear filter">
-                            &times;
-                        </button>
-                    </form>
-                </div>
+                            color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
+                        &times;
+                    </button>
+                </form>
 
                 {{-- Filter Dropdown --}}
-                <div class="col-6 col-md-2">
+                <div class="col-12 col-md-3">
                     <select name="created_at" class="form-select filter-date">
                         <option value="" disabled>Date</option>
                         <option value="asc">Oldest</option>
@@ -70,10 +159,9 @@
                 </div>
 
                 {{-- Add Button --}}
-                <div class="col-6 col-md-3 text-md-end">
+                <div class="col-12 col-md-3 text-md-end">
                     <a class="btn btn-outline-primary w-100 w-md-auto d-flex align-items-center justify-content-center "
-                        data-bs-toggle="modal"
-                        data-bs-target="#addTagModal">
+                        data-bs-toggle="modal" data-bs-target="#addTagModal">
                         <i data-feather="plus"></i>
                         Add New Tag
                     </a>
@@ -100,18 +188,17 @@
 
                 <div class="delete-container">
                     <p id="selected-count-text">0 Tags are selected</p>
-                    <button type="submit"  id="delete-selected-btn"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteTagsModal"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
+                    <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
+                        data-bs-target="#deleteTagsModal"
+                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                         <i data-feather="trash-2"></i> Delete Selected
                     </button>
-                    <form style="display: none;" id="bulk-delete-form" method="POST" action="{{ route('tags.bulk-delete') }}">
+                    <form style="display: none;" id="bulk-delete-form" method="POST"
+                        action="{{ route('tags.bulk-delete') }}">
                         @csrf
-                        <button  type="submit"  id="delete-selected-btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#deleteTagsModal"
-                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
+                        <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
+                            data-bs-target="#deleteTagsModal"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                             <i data-feather="trash-2"></i> Delete Selected
                         </button>
                     </form>
@@ -121,10 +208,10 @@
             </div>
 
             @include('modals.delete',[
-          'id' => 'deleteTagModal',
-          'formId' => 'deleteTagForm',
-          'title' => 'Delete Tag',
-          ])
+            'id' => 'deleteTagModal',
+            'formId' => 'deleteTagForm',
+            'title' => 'Delete Tag',
+            ])
             @include('modals.delete',[
             'id' => 'deleteTagsModal',
             'formId' => 'bulk-delete-form',
@@ -162,9 +249,10 @@
 @endsection
 
 @section('page-script')
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
 <script>
     const tagsDataUrl = "{{ route('tags.data') }}";
     const locale = "{{ app()->getLocale() }}";
