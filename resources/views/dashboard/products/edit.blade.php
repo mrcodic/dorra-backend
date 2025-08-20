@@ -141,7 +141,7 @@
                                                 <div id="multi-uploaded-images" class=" mt-3"></div>
                                             </div>
                                         </div>
-                                 
+
                                         <!-- Category & Subcategory -->
                                         <div class="col-md-6">
                                             <div class="mb-1">

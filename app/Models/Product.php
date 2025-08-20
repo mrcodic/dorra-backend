@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Mockup;
 use App\Enums\Product\StatusEnum;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
@@ -28,6 +29,22 @@ class Product extends Model implements HasMedia
         'status',
         'has_mockup',
     ];
+
+    protected static function booted()
+    {
+        static::updated(function (Product $product) {
+            if ($product->wasChanged('base_price'))
+            {
+                DB::table('cart_items')
+                    ->where('product_id', $product->id)
+                    ->update([
+                        'product_price' => $product->base_price,
+                        'updated_at' => now(),
+                    ]);
+            }
+
+        });
+    }
 
     public function price(): Attribute
     {
@@ -132,6 +149,11 @@ class Product extends Model implements HasMedia
         return $this->morphMany(Save::class, 'savable');
     }
 
+    public function carts(): BelongsToMany
+    {
+        return $this->belongsToMany(Cart::class, 'cart_items');
+    }
+
     public function getAllProductImages()
     {
         return $this->getMedia('product_extra_images')
@@ -155,6 +177,8 @@ class Product extends Model implements HasMedia
             'status' => StatusEnum::class,
         ];
     }
+
+
 
 
 }
