@@ -118,135 +118,130 @@
                                     </div>
 
 
-                                    <<<<<<< HEAD <!-- Multiple Images Upload -->
-                                        <div class="col-md-12">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="product-images">Category
-                                                    Images</label>
+                                    <!-- Multiple Images Upload -->
+                                    <div class="col-md-12">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="product-images">Category
+                                                Images</label>
 
-                                                <!-- Dropzone container -->
-                                                <div id="multi-dropzone" class="dropzone border rounded p-3"
-                                                    style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
-                                                        <i data-feather="upload" class="mb-2"></i>
-                                                        <p>Drag images here or click to upload</p>
-                                                    </div>
+                                            <!-- Dropzone container -->
+                                            <div id="multi-dropzone" class="dropzone border rounded p-3"
+                                                style="cursor:pointer; min-height:150px;">
+                                                <div class="dz-message" data-dz-message>
+                                                    <i data-feather="upload" class="mb-2"></i>
+                                                    <p>Drag images here or click to upload</p>
                                                 </div>
-                                                <input type="hidden" name="images_ids[]" id="images_ids">
-                                                <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2">
-                                                </div>
-
-                                                <span class="image-hint small text-end">
-                                                    Max size: 1MB | Dimensions: 512x512 px
-                                                </span>
                                             </div>
-                                        </div>
-
-
-                                        <!-- Category & Subcategory -->
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="category">Product*</label>
-                                                <select name="category_id" id="category"
-                                                    class="form-control category-select">
-                                                    <option value="" selected disabled>Select product</option>
-                                                    @foreach($associatedData['categories'] as $category)
-                                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                                    @endforeach
-                                                </select>
+                                            <input type="hidden" name="images_ids[]" id="images_ids">
+                                            <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2">
                                             </div>
+
+                                            <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 512x512 px
+                                            </span>
                                         </div>
+                                    </div>
 
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text"
-                                                    for="sub-category">Subproduct</label>
-                                                <select name="sub_category_id" id="sub-category"
-                                                    class="form-control sub-category-select"
-                                                    data-sub-category-url="{{ route('sub-categories') }}">
-                                                    <option value="" selected disabled>Select subproduct</option>
-                                                </select>
-                                            </div>
+
+                                    <!-- Category & Subcategory -->
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="category">Product*</label>
+                                            <select name="category_id" id="category"
+                                                class="form-control category-select">
+                                                <option value="" selected disabled>Select product</option>
+                                                @foreach($associatedData['categories'] as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
+                                    </div>
 
-                                        <!-- Tags -->
-                                        <div class="col-md-12">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="tags">Tags</label>
-                                                <select name="tags[]" id="tags" class="select2 form-select" multiple>
-                                                    @foreach($associatedData['tags'] as $tag)
-                                                    <option value="{{ $tag->id }}">{{ $tag->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="sub-category">Subproduct</label>
+                                            <select name="sub_category_id" id="sub-category"
+                                                class="form-control sub-category-select"
+                                                data-sub-category-url="{{ route('sub-categories') }}">
+                                                <option value="" selected disabled>Select subproduct</option>
+                                            </select>
                                         </div>
-                                        <!-- Dimensions -->
+                                    </div>
 
-                                        <div class="col-md-12 mb-2">
-                                            <div class="">
-                                                <label class="form-label label-text">Category Size*</label>
-                                                <!-- Standard Dimensions -->
-                                                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start"
-                                                    id="standard-dimensions-container">
-                                                    @foreach($associatedData['dimensions'] as $dimension)
-                                                    <label
-                                                        class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center cursor-pointer"
-                                                        for="dimension-checkbox-{{ $dimension['id'] }}"
-                                                        style="width: 100px;">
-                                                        <input class="form-check-input me-1" type="checkbox"
-                                                            name="dimensions[]"
-                                                            id="dimension-checkbox-{{ $dimension['id'] }}"
-                                                            value="{{ $dimension['id'] }}"
-                                                            style="pointer-events: none" />
-                                                        <span class="form-check-label mb-0">
-                                                            {{ $dimension['name'] }}
-                                                        </span>
-                                                        =======
+                                    <!-- Tags -->
+                                    <div class="col-md-12">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="tags">Tags</label>
+                                            <select name="tags[]" id="tags" class="select2 form-select" multiple>
+                                                @foreach($associatedData['tags'] as $tag)
+                                                <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <!-- Dimensions -->
 
-                                                        <!-- Main Image Upload -->
-                                                        <div class="col-md-12">
-                                                            <div class="mb-2">
-                                                                <label class="form-label label-text"
-                                                                    for="product-image-main">
-                                                                    Category Image (main)*
-                                                                    >>>>>>> 8d20577a9517603bebb3b19d92110ffdab81492b
-                                                                </label>
-                                                                @endforeach
-                                                            </div>
+                                    <div class="col-md-12 mb-2">
+                                        <div class="">
+                                            <label class="form-label label-text">Category Size*</label>
+                                            <!-- Standard Dimensions -->
+                                            <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start"
+                                                id="standard-dimensions-container">
+                                                @foreach($associatedData['dimensions'] as $dimension)
+                                                <label
+                                                    class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center cursor-pointer"
+                                                    for="dimension-checkbox-{{ $dimension['id'] }}"
+                                                    style="width: 100px;">
+                                                    <input class="form-check-input me-1" type="checkbox"
+                                                        name="dimensions[]"
+                                                        id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                        value="{{ $dimension['id'] }}" style="pointer-events: none" />
+                                                    <span class="form-check-label mb-0">
+                                                        {{ $dimension['name'] }}
+                                                    </span>
 
-                                                            <!-- Custom Dimensions -->
-                                                            <div class="d-flex gap-3 mt-2"
-                                                                id="custom-dimensions-container">
-                                                                <!-- Custom dimensions from sessionStorage will be injected here -->
-                                                            </div>
+                                                    <!-- Main Image Upload -->
+                                                    <div class="col-md-12">
+                                                        <div class="mb-2">
+                                                            <label class="form-label label-text"
+                                                                for="product-image-main">
+                                                                Category Image (main)*
+                                                            </label>
+                                                            @endforeach
                                                         </div>
-                                                        <button type="button" class="upload-card w-100 mt-2"
-                                                            data-bs-toggle="modal" data-bs-target="#addSizeModal">Add
-                                                            Custom Size
-                                                        </button>
 
-                                                </div>
-                                            </div>
-
-                                            <!-- Has Mockup -->
-                                            <div class="col-md-12">
-                                                <div class="mb-2 d-flex align-items-center gap-2">
-                                                    <label class="form-label label-text ">Is this category has
-                                                        Mockup?*</label>
-                                                    <div class="form-check form-switch">
-                                                        <input type="hidden" name="has_mockup" value="0" />
-                                                        <input class="form-check-input" type="checkbox" id="has_mockup"
-                                                            name="has_mockup" value="1" />
-
+                                                        <!-- Custom Dimensions -->
+                                                        <div class="d-flex gap-3 mt-2" id="custom-dimensions-container">
+                                                            <!-- Custom dimensions from sessionStorage will be injected here -->
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
+                                                    <button type="button" class="upload-card w-100 mt-2"
+                                                        data-bs-toggle="modal" data-bs-target="#addSizeModal">Add
+                                                        Custom Size
+                                                    </button>
 
-
-                                            <div class="d-flex justify-content-end">
-                                                <button type="button" class="btn btn-primary next-tab">Next</button>
                                             </div>
                                         </div>
+
+                                        <!-- Has Mockup -->
+                                        <div class="col-md-12">
+                                            <div class="mb-2 d-flex align-items-center gap-2">
+                                                <label class="form-label label-text ">Is this category has
+                                                    Mockup?*</label>
+                                                <div class="form-check form-switch">
+                                                    <input type="hidden" name="has_mockup" value="0" />
+                                                    <input class="form-check-input" type="checkbox" id="has_mockup"
+                                                        name="has_mockup" value="1" />
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-primary next-tab">Next</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <!--end of the first tab content -->
                                 <!--second tab content -->

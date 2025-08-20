@@ -26,12 +26,12 @@
     /* Responsive table accordion styles */
     @media (max-width: 768px) {
 
-        /* Hide the last 4 columns on mobile */
-        .sub-category-list-table th:nth-child(4) {
+        /* Hide the last column on mobile */
+        .sub-category-list-table th:nth-child(5) {
             display: none !important;
         }
 
-        .sub-category-list-table tbody tr:not(.details-row) td:nth-child(4) {
+        .sub-category-list-table tbody tr:not(.details-row) td:nth-child(5) {
             display: none !important;
         }
 
@@ -149,42 +149,23 @@
                         &times;
                     </button>
                 </form>
-            </div>
+                {{-- Filter Select - 10% on md+, half width on sm --}}
+                <div class="col-12 col-md-2">
+                    <select name="created_at" class="form-select filter-date">
+                        <option value="" disabled>Date</option>
+                        <option value="asc">Oldest</option>
+                        <option value="desc">Newest</option>
+                    </select>
+                </div>
 
-            {{-- Filter Select - 10% on md+, half width on sm --}}
-            <div class="col-6 col-md-2">
-                <select name="created_at" class="form-select filter-date">
-                    <option value="" disabled>Date</option>
-                    <option value="asc">Oldest</option>
-                    <option value="desc">Newest</option>
-                </select>
-            </div>
-
-            {{-- Add Button - 20% on md+, full width on xs --}}
-            <div class="col-6 col-md-3 text-md-end">
-                <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                    data-bs-target="#addSubCategoryModal">
-                    <i data-feather="plus"></i>
-                    Add New Subproduct
-                </a>
-            </div>
-
-            {{-- Filter Select - 10% on md+, half width on sm --}}
-            <div class="col-12 col-md-3">
-                <select name="created_at" class="form-select filter-date">
-                    <option value="" disabled>Date</option>
-                    <option value="asc">Oldest</option>
-                    <option value="desc">Newest</option>
-                </select>
-            </div>
-
-            {{-- Add Button - 20% on md+, full width on xs --}}
-            <div class="col-12 col-md-3 text-md-end">
-                <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                    data-bs-target="#addSubCategoryModal">
-                    <i data-feather="plus"></i>
-                    Add New Subcategory
-                </a>
+                {{-- Add Button - 20% on md+, full width on xs --}}
+                <div class="col-12 col-md-4 text-md-end">
+                    <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
+                        data-bs-target="#addSubCategoryModal">
+                        <i data-feather="plus"></i>
+                        Add New Subproducts
+                    </a>
+                </div>
             </div>
 
         </div>
@@ -337,25 +318,13 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
                 
                 // Get data for details
-                const actions = $row.find('td:nth-child(7)').html() || '';
+                const actions = $row.find('td:nth-child(5)').html() || '';
                 
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="3">
+                        <td colspan="4">
                             <div class="details-content">
-                                <div class="detail-row">
-                                    <span class="detail-label">Categories:</span>
-                                    <span class="detail-value">${categories}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">No. Of Categories:</span>
-                                    <span class="detail-value">${noOfCategories}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Added Date:</span>
-                                    <span class="detail-value">${addedDate}</span>
-                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Actions:</span>
                                     <span class="detail-value">${actions}</span>
