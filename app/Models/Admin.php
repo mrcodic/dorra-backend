@@ -14,6 +14,7 @@ class Admin extends Authenticatable implements HasMedia
 {
     use InteractsWithMedia, HasRoles;
 
+    protected $guard_name = 'web';
     protected $fillable = [
         'first_name',
         'last_name',

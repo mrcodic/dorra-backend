@@ -123,7 +123,6 @@ class ProductService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-
         return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $product = $this->repository->create($validatedData);
             $product->load($this->relations);
@@ -151,7 +150,7 @@ class ProductService extends BaseService
                     ]);
 
 
-                    collect($specification['specification_options'])->each(function ($option, $index) use ($productSpecification) {
+                    collect($specification['specification_options'])->each(function ($option, $index) use ($productSpecification, $product) {
 
                         $productOption = $productSpecification->options()->create([
                             'value' => [
@@ -161,10 +160,13 @@ class ProductService extends BaseService
                             'price' => $option['price'],
                         ]);
 
-                        if (isset($option['image'])) {
-                            if ($option['image'] instanceof UploadedFile) {
-                                handleMediaUploads([$option['image']], $productOption);
-                            }
+                        if (isset($option['option_image'])) {
+                            Media::where('id', $option['option_image'])
+                                ->update([
+                                    'model_type' => get_class($productOption),
+                                    'model_id'   => $productOption->id,
+                                    'collection_name' => 'productSpecificationOptions',
+                                ]);
                         }
                     });
 

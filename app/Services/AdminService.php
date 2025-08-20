@@ -22,7 +22,9 @@ class AdminService extends BaseService
     {
         $model = $this->repository->create($validatedData);
         if (Arr::get($validatedData, 'role_id')) {
-            $model->assignRole(Role::findById($validatedData['role_id']));
+            $model->roles()->attach($validatedData['role_id'], [
+                'model_type' => get_class($model)
+            ]);
 
         }
         if (isset($validatedData['image_id'])) {
@@ -43,7 +45,12 @@ class AdminService extends BaseService
             unset($validatedData['password'], $validatedData['password_confirmation']);
         }
         $model = $this->repository->update($validatedData, $id);
+        if (Arr::get($validatedData, 'role_id')) {
+            $model->roles()->attach($validatedData['role_id'], [
+                'model_type' => get_class($model)
+            ]);
 
+        }
         if (isset($validatedData['image_id'])) {
             $model->clearMediaCollection('admins');
             Media::where('id', $validatedData['image_id'])
