@@ -3,7 +3,9 @@ $.ajaxSetup({
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
 });
+
 const dt_user_table = $(".category-list-table").DataTable({
+
     processing: true,
     serverSide: true,
     searching: false, // using custom search
@@ -287,25 +289,34 @@ $(document).ready(function () {
         });
     });
 
+// ================== VIEW DETAILS ==================
     $(document).on("click", ".view-details", function (e) {
-        // Get the data from attributes
-        var $table = $(".category-list-table").DataTable();
-        var $row = $(this).closest("tr");
+        e.preventDefault();
+
+        var $table  = $(".category-list-table").DataTable();
+        var $row    = $(this).closest("tr");
         var rowData = $table.row($row).data();
-        const subCategories = rowData.children.map(function (child) {
-            return child["name"][locale];
-        });
+
+        // Safely get subcategories
+        let subCategories = [];
+        if (rowData && rowData.children) {
+            subCategories = rowData.children.map(function (child) {
+                return child["name"][locale];
+            });
+        }
+
+        // Category details from data attributes
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
+        const products       = $(this).data("products");
+        const addedDate      = $(this).data("showdate");
+        const descriptionAr  = $(this).data("description_ar");
+        const descriptionEn  = $(this).data("description_en");
+        const image          = $(this).data("image");
+        const imageId        = $(this).data("image_id");
+        const id             = $(this).data("id");
 
-        const products = $(this).data("products");
-        const addedDate = $(this).data("showdate");
-        const descriptionAr = $(this).data("description_ar");
-        const descriptionEn = $(this).data("description_en");
-        const image = $(this).data("image");
-        const imageId = $(this).data("image_id");
-        const id = $(this).data("id");
-        // Populate modal
+        // Populate modal fields
         $("#showCategoryModal #category-name-ar").val(categoryNameAR);
         $("#showCategoryModal #category-name-en").val(categoryNameEn);
         $("#showCategoryModal #category-products").val(products);
@@ -316,47 +327,52 @@ $(document).ready(function () {
         $("#showCategoryModal #category-id").val(id);
         $("#showCategoryModal #image-id").val(imageId);
 
-        // Create badges for subcategories
-        let badgesHtml = "";
-        subCategories.forEach(function (subcategory) {
-            badgesHtml += `<span class="badge bg-light text-dark border">${subcategory}</span>`;
-        });
-
-        // Set the badges HTML in the modal
-        $("#subcategories-container").html(badgesHtml ? badgesHtml : "-");
+        // Build badges
+        let badgesHtml = subCategories.length
+            ? subCategories.map(s => `<span class="badge bg-light text-dark border">${s}</span>`).join("")
+            : "-";
+        $("#subcategories-container").html(badgesHtml);
 
         // Show modal
-        const modal = new bootstrap.Modal(
-            document.getElementById("showCategoryModal")
-        );
-        modal.show();
+        new bootstrap.Modal(document.getElementById("showCategoryModal")).show();
     });
 
+
+// ================== EDIT DETAILS ==================
     $(document).on("click", ".edit-details", function (e) {
-        // Get the data from attributes
-        var $table = $(".category-list-table").DataTable();
-        var $row = $(this).closest("tr");
+        e.preventDefault();
+
+        var $table  = $(".category-list-table").DataTable();
+        var $row    = $(this).closest("tr");
         var rowData = $table.row($row).data();
-        const subCategories = rowData.children.map(function (child) {
-            return child["name"][locale];
-        });
+
+        // Safely get subcategories
+        let subCategories = [];
+        if (rowData && rowData.children) {
+            subCategories = rowData.children.map(function (child) {
+                return child["name"][locale];
+            });
+        }
+
+        // Category details from data attributes
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
+        const products       = $(this).data("products");
+        const addedDate      = $(this).data("showdate");
+        const descriptionAr  = $(this).data("description_ar");
+        const descriptionEn  = $(this).data("description_en");
+        const image          = $(this).data("image");
+        const imageId        = $(this).data("image_id");
+        const id             = $(this).data("id");
 
-        const products = $(this).data("products");
-        const addedDate = $(this).data("showdate");
-        const descriptionAr = $(this).data("description_ar");
-        const descriptionEn = $(this).data("description_en");
-        const image = $(this).data("image");
-        const imageId = $(this).data("image_id");
-        $(".remove-old-image").on("click", function (e) {
+        // Remove old image handler (avoid duplicates with .off)
+        $(".remove-old-image").off("click").on("click", function (e) {
             e.preventDefault();
-
             var imageElement = $(this).closest(".uploaded-image");
             $.ajax({
                 url: "api/media/" + imageId,
                 method: "DELETE",
-                success: function (response) {
+                success: function () {
                     imageElement.remove();
                     Toastify({
                         text: "Image Removed Successfully",
@@ -368,41 +384,30 @@ $(document).ready(function () {
                     }).showToast();
                 },
                 error: function (xhr) {
-                    console.log(xhr.responseJson.errors);
+                    console.log(xhr.responseJSON.errors);
                 },
             });
         });
 
-        const id = $(this).data("id");
-        // Populate modal
+        // Populate modal fields
         $("#editCategoryModal #edit-category-name-ar").val(categoryNameAR);
         $("#editCategoryModal #edit-category-name-en").val(categoryNameEn);
         $("#editCategoryModal #edit-category-products").val(products);
         $("#editCategoryModal #edit-category-date").val(addedDate);
-        $("#editCategoryModal #edit-category-description-ar").val(
-            descriptionAr
-        );
-        $("#editCategoryModal #edit-category-description-en").val(
-            descriptionEn
-        );
+        $("#editCategoryModal #edit-category-description-ar").val(descriptionAr);
+        $("#editCategoryModal #edit-category-description-en").val(descriptionEn);
         $("#editCategoryModal #edit-uploaded-image").removeClass("d-none");
         $("#editCategoryModal #edit-preview-image").attr("src", image);
         $("#editCategoryModal #edit-category-id").val(id);
 
-        // Create badges for subcategories
-        let badgesHtml = "";
-        subCategories.forEach(function (subcategory) {
-            badgesHtml += `<span class="badge bg-light text-dark border">${subcategory}</span>`;
-        });
-
-        // Set the badges HTML in the modal
+        // Build badges
+        let badgesHtml = subCategories.length
+            ? subCategories.map(s => `<span class="badge bg-light text-dark border">${s}</span>`).join("")
+            : "-";
         $("#subcategories-container").html(badgesHtml);
 
         // Show modal
-        const modal = new bootstrap.Modal(
-            document.getElementById("editCategoryModal")
-        );
-        modal.show();
+        new bootstrap.Modal(document.getElementById("editCategoryModal")).show();
     });
 
     $("#editButton").on("click", function () {

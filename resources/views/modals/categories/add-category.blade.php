@@ -1,4 +1,4 @@
-<div class="modal modal-slide-in new-user-modal fade" id="addCategoryModal">
+<div class="modal modal-slide-in new-user-modal fade "  id="addCategoryModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
             <form id="addCategoryForm" enctype="multipart/form-data" action="{{ route('categories.store') }}">

@@ -41,7 +41,7 @@
 
                 <!-- Subcategories -->
                 <div class="mb-1">
-                    <label class="form-label label-text" id="category-subcategories">Subcategories</label>
+                    <label class="form-label label-text" id="category-subcategories">Subproducts</label>
                     <div id="subcategories-container" class="d-flex flex-wrap gap-2"></div>
                 </div>
 
