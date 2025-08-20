@@ -22,6 +22,110 @@
 @section('page-style')
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+
+<style>
+    /* Responsive table accordion styles */
+    @media (max-width: 768px) {
+
+        /* Hide the last 4 columns on mobile */
+        .product-list-table th:nth-child(5),
+        .product-list-table th:nth-child(6),
+        .product-list-table th:nth-child(7),
+        .product-list-table th:nth-child(8) {
+            display: none !important;
+        }
+
+        .product-list-table tbody tr:not(.details-row) td:nth-child(5),
+        .product-list-table tbody tr:not(.details-row) td:nth-child(6),
+        .product-list-table tbody tr:not(.details-row) td:nth-child(7),
+        .product-list-table tbody tr:not(.details-row) td:nth-child(8) {
+            display: none !important;
+        }
+
+        /* Style for clickable rows */
+        .product-list-table tbody tr:not(.details-row) {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Add expand indicator to the role column */
+        .product-list-table tbody tr:not(.details-row) td:nth-child(1) {
+            position: relative;
+            padding-left: 20px !important;
+        }
+
+        .expand-icon {
+            position: absolute;
+            left: 70%;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: transform 0.3s ease;
+            color: #666;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .expand-icon.expanded {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        /* Details row styling */
+        .details-row {
+            background-color: #F9FDFC !important;
+            display: none;
+        }
+
+        .details-row.show {
+            display: table-row !important;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #212529;
+            font-size: 14px;
+        }
+    }
+
+    /* Ensure normal behavior on desktop */
+    @media (min-width: 769px) {
+        .details-row {
+            display: none !important;
+        }
+
+        .expand-icon {
+            display: none !important;
+        }
+    }
+</style>
 @endsection
 
 @section('content')
@@ -37,22 +141,20 @@
             </div>
         </div>
         <div class="card-datatable table-responsive pt-0">
-            <div class="row gx-2 gy-2 align-items-center px-1">
-                <div class="col-12 col-md-6">
-                    <form action="" method="get" class="position-relative">
-                        <i data-feather="search"
-                            class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
-                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                            id="search-product-form" placeholder="Search category..." style="height: 38px;">
-                        <button type="button" id="clearSearchInput" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
+                <form action="" method="get"
+                    class="position-relative position-relative flex-grow-1 me-1 col-12 col-md-4">
+                    <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                        id="search-product-form" placeholder="Search category..." style="height: 38px;">
+                    <button type="button" id="clearSearchInput" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                 background: transparent; border: none; font-weight: bold;
                      color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
-                            &times;
-                        </button>
-                    </form>
-                </div>
+                        &times;
+                    </button>
+                </form>
 
-                <div class="col-6 col-md-2 col-lg-2" style="position: relative;">
+                <div class="col-12 col-md-2" style="position: relative;">
                     <select id="categorySelect" name="category_id" class="form-select category-select pe-5">
                         <option value="" selected disabled>Product</option>
                         @foreach($associatedData['categories'] as $category)
@@ -69,7 +171,7 @@
 
 
 
-                <div class="col-6 col-md-2 col-lg-2">
+                <div class="col-12 col-md-2">
                     <div style="position: relative;">
                         <select name="tag_id" class="tag-select form-select pe-5" id="tagSelect">
                             <option value="" selected disabled>Tag</option>
@@ -86,7 +188,7 @@
                     </div>
                 </div>
 
-                <div class="col-12 col-md-2 text-md-end">
+                <div class="col-12 col-md-3 text-md-end">
                     <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route('products.create') }}">
                         Add New Category
                     </a>
@@ -169,21 +271,21 @@
 @endsection
 
 @section('page-script')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://unpkg.com/feather-icons"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
 <script>
     const productsDataUrl = "{{ route('products.data') }}";
-        const productsCreateUrl = "{{ route('products.create') }}";
+    const productsCreateUrl = "{{ route('products.create') }}";
 </script>
 <script>
     $(document).ready(function () {
 
-            setupClearInput('search-product-form', 'clearSearchInput');
-            setupClearInput('tagSelect', 'clearTagFilter');
-            setupClearInput('categorySelect', 'clearCategoryFilter');
-
+        setupClearInput('search-product-form', 'clearSearchInput');
+        setupClearInput('tagSelect', 'clearTagFilter');
+        setupClearInput('categorySelect', 'clearCategoryFilter');
         });
 </script>
 
@@ -197,56 +299,186 @@
 
 <script>
     $(document).ready(function () {
-            // Select all toggle
-            $('#select-all-checkbox').on('change', function () {
-                $('.category-checkbox').prop('checked', this.checked);
-                updateBulkDeleteVisibility();
+    setupClearInput('roleSelect', 'clearRoleFilter');
+
+    // Select all toggle
+    $('#select-all-checkbox').on('change', function () {
+        $('.category-checkbox').prop('checked', this.checked);
+        updateBulkDeleteVisibility();
+    });
+
+    // When individual checkbox changes
+    $(document).on('change', '.category-checkbox', function () {
+        if (!this.checked) {
+            $('#select-all-checkbox').prop('checked', false);
+        } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
+            $('#select-all-checkbox').prop('checked', true);
+        }
+        updateBulkDeleteVisibility();
+    });
+
+    // Simple accordion toggle function
+    function toggleAccordion($row) {
+        if ($(window).width() > 768) return; // Only on mobile
+        
+        const $detailsRow = $row.next('.details-row');
+        const $icon = $row.find('.expand-icon');
+        
+        // Close all other details
+        $('.details-row.show').removeClass('show');
+        $('.expand-icon.expanded').removeClass('expanded');
+        
+        // If this row has details and they're not currently shown
+        if ($detailsRow.length && !$detailsRow.hasClass('show')) {
+            $detailsRow.addClass('show');
+            $icon.addClass('expanded');
+        }
+    }
+
+    // Accordion click handler with event delegation
+    $(document).on('click.accordion', '.product-list-table tbody tr:not(.details-row)', function(e) {
+        // Prevent accordion when clicking interactive elements
+        if ($(e.target).is('input, button, a, .btn') || 
+            $(e.target).closest('input, button, a, .btn').length > 0) {
+            return;
+        }
+        
+        e.stopPropagation();
+        toggleAccordion($(this));
+    });
+
+    // Initialize accordion after DataTable draw
+    function initAccordion() {
+        if ($(window).width() <= 768) {
+            $('.product-list-table tbody tr:not(.details-row)').each(function() {
+                const $row = $(this);
+                
+                // Remove existing details and icons first
+                $row.find('.expand-icon').remove();
+                $row.next('.details-row').remove();
+                
+                // Add expand icon to role column
+                $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
+                
+                // Get data for details
+                const noOfPuchas = $row.find('td:nth-child(5)').html() || '';
+                const addedDate = $row.find('td:nth-child(6)').html() || '';
+                const rating = $row.find('td:nth-child(7)').html() || '';
+                const actions = $row.find('td:nth-child(8)').html() || '';
+                
+                // Create details row
+                const detailsHtml = `
+                    <tr class="details-row">
+                        <td colspan="4">
+                            <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">No. Of Purchase:</span>
+                                    <span class="detail-value">${noOfPuchas}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Added Date:</span>
+                                    <span class="detail-value">${addedDate}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Rating</span>
+                                    <span class="detail-value">${rating}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Actions:</span>
+                                    <span class="detail-value">${actions}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                
+                $row.after(detailsHtml);
             });
+        } else {
+            // Remove mobile elements on desktop
+            $('.details-row').remove();
+            $('.expand-icon').remove();
+        }
+    }
 
-            // When individual checkbox changes
-            $(document).on('change', '.category-checkbox', function () {
-                // If any is unchecked, uncheck "Select All"
-                if (!this.checked) {
-                    $('#select-all-checkbox').prop('checked', false);
-                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
-                    $('#select-all-checkbox').prop('checked', true);
-                }
-                updateBulkDeleteVisibility();
-            });
+    // Handle window resize
+    $(window).on('resize', function() {
+        setTimeout(initAccordion, 100);
+    });
 
+    // On DataTable events
+    $(document).on('draw.dt', '.product-list-table', function () {
+        $('#bulk-delete-container').hide();
+        $('#select-all-checkbox').prop('checked', false);
+        
+        // Reinitialize accordion after DataTable operations
+        setTimeout(initAccordion, 100);
+    });
 
-            // On table redraw (e.g. pagination, search)
-            $(document).on('draw.dt', function () {
-                $('#bulk-delete-container').hide();
-                $('#select-all-checkbox').prop('checked', false);
-            });
+    // Close bulk delete container
+    $(document).on('click', '#close-bulk-delete', function () {
+        $('#bulk-delete-container').hide();
+        $('.category-checkbox').prop('checked', false);
+        $('#select-all-checkbox').prop('checked', false);
+    });
 
-            // Close bulk delete container
-            $(document).on('click', '#close-bulk-delete', function () {
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
-            });
+    // Update the bulk delete container visibility
+    function updateBulkDeleteVisibility() {
+        const selectedCheckboxes = $('.category-checkbox:checked');
+        const count = selectedCheckboxes.length;
 
-            // Update the bulk delete container visibility
-            function updateBulkDeleteVisibility() {
-                const selectedCheckboxes = $('.category-checkbox:checked');
-                const count = selectedCheckboxes.length;
+        if (count > 0) {
+            $('#selected-count-text').text(`${count} User${count > 1 ? 's are' : ' is'} selected`);
+            $('#bulk-delete-container').show();
+        } else {
+            $('#bulk-delete-container').hide();
+        }
+    }
 
-                if (count > 0) {
-                    $('#selected-count-text').text(`${count} Product${count > 1 ? 's' : ''} are selected`);
-                    $('#bulk-delete-container').show();
-                } else {
-                    $('#bulk-delete-container').hide();
-                }
-            }
-
-        });
+    // Initialize on page load
+    setTimeout(function() {
+        initAccordion();
+    }, 500);
+});
 </script>
-
-
 
 
 {{-- Page js files --}}
 <script src="{{ asset('js/scripts/pages/app-product-list.js') }}?v={{ time() }}"></script>
+
+<script>
+    // Backup accordion handler in case the main one doesn't work
+$(document).ready(function() {
+    // Alternative click handler
+    $(document).off('click.accordion').on('click.accordion', '.product-list-table tbody tr:not(.details-row)', function(e) {
+        console.log('Accordion clicked'); // Debug log
+        
+        if ($(window).width() <= 768) {
+            // Skip if clicking on interactive elements
+            if ($(e.target).is('input, button, a') || $(e.target).closest('input, button, a').length) {
+                return;
+            }
+            
+            const $currentRow = $(this);
+            const $detailsRow = $currentRow.next('.details-row');
+            const $icon = $currentRow.find('.expand-icon');
+            
+            // Toggle logic
+            if ($detailsRow.hasClass('show')) {
+                // Close this one
+                $detailsRow.removeClass('show');
+                $icon.removeClass('expanded');
+            } else {
+                // Close all others first
+                $('.details-row.show').removeClass('show');
+                $('.expand-icon.expanded').removeClass('expanded');
+                
+                // Open this one
+                $detailsRow.addClass('show');
+                $icon.addClass('expanded');
+            }
+        }
+    });
+});
+</script>
 @endsection

@@ -4,332 +4,514 @@
 @section('main-page', 'Categories')
 @section('sub-page', 'Add New Category')
 @section('main-page-url', route("products.index"))
-@section('sub-page-url',  route("products.create"))
+@section('sub-page-url', route("products.create"))
 
 
 @section('vendor-style')
-    <!-- Vendor CSS Files -->
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+<!-- Vendor CSS Files -->
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 @endsection
 
 @section('content')
-    <section id="multiple-column-form ">
-        <div class="row ">
-            <div class="col-12 ">
-                <div class="card">
+<section id="multiple-column-form ">
+    <div class="row ">
+        <div class="col-12">
+            <div class="card">
 
-                    <div class="card-body ">
-                        <ul class="nav nav-tabs mb-4 w-100 d-flex justify-content-center px-5" id="formTabs">
-                            <li class="nav-item" style="width: 30%;">
-                                <a class="nav-link active" data-step="0" href="#">Category Details</a>
-                            </li>
-                            <li class="nav-item" style="width: 30%;">
-                                <a class="nav-link" data-step="1" href="#">Quantity & Price</a>
-                            </li>
-                            <li class="nav-item" style="width: 30%;">
-                                <a class="nav-link" data-step="2" href="#">Category Specs</a>
-                            </li>
-                        </ul>
+                <div class="card-body ">
+                    <ul class="nav nav-tabs mb-2 w-100 d-flex justify-content-center" id="formTabs">
+                        <li class="nav-item" style="width: 30%;">
+                            <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Category
+                                Details</a>
+                        </li>
+                        <li class="nav-item" style="width: 30%;">
+                            <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity & Price</a>
+                        </li>
+                        <li class="nav-item" style="width: 30%;">
+                            <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Category Specs</a>
+                        </li>
+                    </ul>
 
-                        <form id="product-form" class="form px-5 " action="{{ route('products.store') }}" method="POST"
-                              enctype="multipart/form-data" novalidate>
-                            @csrf
+                    <form id="product-form" class="form" action="{{ route('products.store') }}" method="POST"
+                        enctype="multipart/form-data" novalidate>
+                        @csrf
 
-                            <div class="tab-content">
-                                <!-- first tab content -->
-                                <div class="tab-pane active" id="step1">
-                                    <div class="row">
-                                        <!-- Category Name EN/AR -->
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="product-name-en">Category Name
-                                                    (EN)*</label>
-                                                <input type="text" id="product-name-en" class="form-control"
-                                                       name="name[en]" placeholder="Category Name (EN)"/>
+                        <div class="tab-content">
+                            <!-- first tab content -->
+                            <div class="tab-pane active" id="step1">
+                                <div class="row">
+                                    <!-- Category Name EN/AR -->
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="product-name-en">Category Name
+                                                (EN)*</label>
+                                            <input type="text" id="product-name-en" class="form-control" name="name[en]"
+                                                placeholder="Category Name (EN)" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="product-name-ar">Category Name
+                                                (AR)*</label>
+                                            <input type="text" id="product-name-ar" class="form-control" name="name[ar]"
+                                                placeholder="Category Name (AR)" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Description EN/AR -->
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="description-en">Category
+                                                Description (EN)</label>
+                                            <textarea name="description[en]" id="description-en" class="form-control"
+                                                placeholder="Category Description (EN)"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="description-ar">Category
+                                                Description (AR)</label>
+                                            <textarea name="description[ar]" id="description-ar" class="form-control"
+                                                placeholder="Category Description (AR)"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Main Image Upload -->
+                                    <!-- Main Image Upload -->
+                                    <div class="col-md-12">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="product-image-main">
+                                                Category Image (main)*
+                                            </label>
+
+                                            <!-- Dropzone Container -->
+                                            <div id="product-main-dropzone" class="dropzone border rounded p-3"
+                                                style="cursor:pointer; min-height:150px;">
+                                                <div class="dz-message" data-dz-message>
+                                                    <span>Drop image here or click to upload</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- ✅ Hidden input outside Dropzone -->
+                                            <input type="hidden" name="image_id" id="uploadedImage">
+
+                                            <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 512x512 px
+                                            </span>
+
+                                            <!-- Uploaded Image Preview -->
+                                            <div id="uploaded-image"
+                                                class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                                <img src="" alt="Uploaded" class="img-fluid rounded"
+                                                    style="width: 50px; height: 50px; object-fit: cover;">
+                                                <div id="file-details" class="file-details">
+                                                    <div class="file-name fw-bold"></div>
+                                                    <div class="file-size text-muted small"></div>
+                                                </div>
+                                                <button type="button" id="remove-image"
+                                                    class="btn btn-sm position-absolute text-danger"
+                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                    <i data-feather="trash"></i>
+                                                </button>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="product-name-ar">Category Name
-                                                    (AR)*</label>
-                                                <input type="text" id="product-name-ar" class="form-control"
-                                                       name="name[ar]" placeholder="Category Name (AR)"/>
-                                            </div>
-                                        </div>
+                                    </div>
 
-                                        <!-- Description EN/AR -->
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="description-en">Category
-                                                    Description (EN)</label>
-                                                <textarea name="description[en]" id="description-en"
-                                                          class="form-control"
-                                                          placeholder="Category Description (EN)"></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="description-ar">Category
-                                                    Description (AR)</label>
-                                                <textarea name="description[ar]" id="description-ar"
-                                                          class="form-control"
-                                                          placeholder="Category Description (AR)"></textarea>
-                                            </div>
-                                        </div>
 
-                                        <!-- Main Image Upload -->
-                                        <!-- Main Image Upload -->
-                                        <div class="col-md-12">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="product-image-main">
-                                                    Category Image (main)*
+                                    <!-- Multiple Images Upload -->
+                                    <div class="col-md-12">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="product-images">Category
+                                                Images</label>
+
+                                            <!-- Dropzone container -->
+                                            <div id="multi-dropzone" class="dropzone border rounded p-3"
+                                                style="cursor:pointer; min-height:150px;">
+                                                <div class="dz-message" data-dz-message>
+                                                    <i data-feather="upload" class="mb-2"></i>
+                                                    <p>Drag images here or click to upload</p>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="images_ids[]" id="images_ids">
+                                            <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2"></div>
+
+                                            <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 512x512 px
+                                            </span>
+                                        </div>
+                                    </div>
+
+
+                                    <!-- Category & Subcategory -->
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="category">Product*</label>
+                                            <select name="category_id" id="category"
+                                                class="form-control category-select">
+                                                <option value="" selected disabled>Select product</option>
+                                                @foreach($associatedData['categories'] as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="sub-category">Subproduct</label>
+                                            <select name="sub_category_id" id="sub-category"
+                                                class="form-control sub-category-select"
+                                                data-sub-category-url="{{ route('sub-categories') }}">
+                                                <option value="" selected disabled>Select subproduct</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tags -->
+                                    <div class="col-md-12">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="tags">Tags</label>
+                                            <select name="tags[]" id="tags" class="select2 form-select" multiple>
+                                                @foreach($associatedData['tags'] as $tag)
+                                                <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <!-- Dimensions -->
+
+                                    <div class="col-md-12 mb-2">
+                                        <div class="">
+                                            <label class="form-label label-text">Category Size*</label>
+                                            <!-- Standard Dimensions -->
+                                            <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start"
+                                                id="standard-dimensions-container">
+                                                @foreach($associatedData['dimensions'] as $dimension)
+                                                <label
+                                                    class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center cursor-pointer"
+                                                    for="dimension-checkbox-{{ $dimension['id'] }}"
+                                                    style="width: 100px;">
+                                                    <input class="form-check-input me-1" type="checkbox"
+                                                        name="dimensions[]"
+                                                        id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                        value="{{ $dimension['id'] }}" style="pointer-events: none" />
+                                                    <span class="form-check-label mb-0">
+                                                        {{ $dimension['name'] }}
+                                                    </span>
                                                 </label>
+                                                @endforeach
+                                            </div>
 
-                                                <!-- Dropzone Container -->
-                                                <div id="product-main-dropzone"
-                                                     class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
-                                                        <span>Drop image here or click to upload</span>
-                                                    </div>
+                                            <!-- Custom Dimensions -->
+                                            <div class="d-flex gap-3 mt-2" id="custom-dimensions-container">
+                                                <!-- Custom dimensions from sessionStorage will be injected here -->
+                                            </div>
+                                        </div>
+                                        <button type="button" class="upload-card w-100 mt-2" data-bs-toggle="modal"
+                                            data-bs-target="#addSizeModal">Add Custom Size
+                                        </button>
+
+                                    </div>
+                                </div>
+
+                                <!-- Has Mockup -->
+                                <div class="col-md-12">
+                                    <div class="mb-2 d-flex align-items-center gap-2">
+                                        <label class="form-label label-text ">Is this category has Mockup?*</label>
+                                        <div class="form-check form-switch">
+                                            <input type="hidden" name="has_mockup" value="0" />
+                                            <input class="form-check-input" type="checkbox" id="has_mockup"
+                                                name="has_mockup" value="1" />
+
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-primary next-tab">Next</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!--end of the first tab content -->
+                        <!--second tab content -->
+                        <div class="tab-pane d-none" id="step2">
+
+                            <!-- Price Option Toggle -->
+                            <div class="col-md-12">
+                                <div class="mb-2">
+                                    <label class="form-label label-text d-block">Quantity & Price Options</label>
+                                    <label class="form-label label-text mt-2">Quantity Type*</label>
+                                    <div class="row gap-1 d-flex flex-column flex-md-row" style="margin: 2px;">
+                                        <div class="col border rounded-3 p-1">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="has_custom_prices"
+                                                    id="customPrice" value="1">
+                                                <div>
+                                                    <label class="form-check-label label-text d-block"
+                                                        for="customPrice">Add Quantity Manually</label>
+                                                    <label class="form-check-label text-dark" for="customPrice">Custom
+                                                        Prices</label>
                                                 </div>
 
-                                                <!-- ✅ Hidden input outside Dropzone -->
-                                                <input type="hidden" name="image_id" id="uploadedImage">
+                                            </div>
+                                        </div>
+                                        <div class="col border rounded-3 p-1">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="has_custom_prices"
+                                                    id="defaultPrice" value="0">
+                                                <div>
+                                                    <label class="form-check-label label-text d-block"
+                                                        for="defaultPrice">Default Quantity</label>
+                                                    <label class="form-check-label text-dark" for="defaultPrice">Default
+                                                        Price</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                                <span class="image-hint small text-end">
-                 Max size: 1MB | Dimensions: 512x512 px
-        </span>
-
-                                                <!-- Uploaded Image Preview -->
-                                                <div id="uploaded-image"
-                                                     class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                                    <img src="" alt="Uploaded" class="img-fluid rounded"
-                                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                                    <div id="file-details" class="file-details">
-                                                        <div class="file-name fw-bold"></div>
-                                                        <div class="file-size text-muted small"></div>
+                            <!-- Custom Prices -->
+                            <div class="col-md-12" id="custom-price-section" style="display: none;">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="invoice-repeater">
+                                            <div data-repeater-list="prices">
+                                                <div data-repeater-item>
+                                                    <div class="row d-flex align-items-end">
+                                                        <div class="col-md-4">
+                                                            <div class="mb-2">
+                                                                <label class="form-label label-text">Quantity</label>
+                                                                <input type="number" name="prices[][quantity]"
+                                                                    class="form-control" placeholder="Add Quantity"
+                                                                    step="1" inputmode="numeric" min="1" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="mb-2">
+                                                                <label class="form-label label-text">Price
+                                                                    (EGP)</label>
+                                                                <input type="number" name="prices[][price]"
+                                                                    class="form-control" placeholder="Add Price" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="mb-2">
+                                                                <button type="button"
+                                                                    class="btn btn-outline-danger text-nowrap px-1"
+                                                                    style="display: none" data-repeater-delete>
+                                                                    <i data-feather="x" class="me-25"></i>
+                                                                    <span>Delete</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <button type="button" id="remove-image"
-                                                            class="btn btn-sm position-absolute text-danger"
-                                                            style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                        <i data-feather="trash"></i>
+
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <button type="button"
+                                                        class="w-100  rounded-3 p-1 bg-white text-dark"
+                                                        style="border:2px dashed #CED5D4;" data-repeater-create>
+                                                        <i data-feather="plus" class="me-25"></i> <span>Add New
+                                                            Quantity</span>
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
-
-
-                                        <!-- Multiple Images Upload -->
-                                        <div class="col-md-12">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="product-images">Category Images</label>
-
-                                                <!-- Dropzone container -->
-                                                <div id="multi-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
-                                                        <i data-feather="upload" class="mb-2"></i>
-                                                        <p>Drag images here or click to upload</p>
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" name="images_ids[]" id="images_ids">
-                                                <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2"></div>
-
-                                                <span class="image-hint small text-end">
-                                               Max size: 1MB | Dimensions: 512x512 px
-                                             </span>
-                                            </div>
-                                        </div>
-
-
-                                        <!-- Category & Subcategory -->
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="category">Product*</label>
-                                                <select name="category_id" id="category"
-                                                        class="form-control category-select">
-                                                    <option value="" selected disabled>Select product</option>
-                                                    @foreach($associatedData['categories'] as $category)
-                                                        <option
-                                                            value="{{ $category->id }}">{{ $category->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text"
-                                                       for="sub-category">Subproduct</label>
-                                                <select name="sub_category_id" id="sub-category"
-                                                        class="form-control sub-category-select"
-                                                        data-sub-category-url="{{ route('sub-categories') }}">
-                                                    <option value="" selected disabled>Select subproduct</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <!-- Tags -->
-                                        <div class="col-md-12">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="tags">Tags</label>
-                                                <select name="tags[]" id="tags" class="select2 form-select" multiple>
-                                                    @foreach($associatedData['tags'] as $tag)
-                                                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <!-- Dimensions -->
-
-                                        <div class="col-md-12 mb-2">
-                                            <div class="">
-                                                <label class="form-label label-text">Category Size*</label>
-                                                <!-- Standard Dimensions -->
-                                                <div class="d-flex gap-3" id="standard-dimensions-container">
-                                                    @foreach($associatedData['dimensions'] as $dimension)
-                                                        <label
-                                                            class="form-check option-box rounded border py-1 px-3 d-flex align-items-center cursor-pointer"
-                                                            for="dimension-checkbox-{{ $dimension['id'] }}">
-                                                            <input
-                                                                class="form-check-input me-2"
-                                                                type="checkbox"
-                                                                name="dimensions[]"
-                                                                id="dimension-checkbox-{{ $dimension['id'] }}"
-                                                                value="{{ $dimension['id'] }}"
-                                                                style="pointer-events: none"/>
-                                                            <span class="form-check-label mb-0 flex-grow-1">
-                                                        {{ $dimension['name'] }}
-                                                    </span>
-                                                        </label>
-                                                    @endforeach
-                                                </div>
-
-                                                <!-- Custom Dimensions -->
-                                                <div class="d-flex gap-3 mt-2" id="custom-dimensions-container">
-                                                    <!-- Custom dimensions from sessionStorage will be injected here -->
-                                                </div>
-                                            </div>
-                                            <button type="button" class="upload-card w-100 mt-2" data-bs-toggle="modal"
-                                                    data-bs-target="#addSizeModal">Add Custom Size
-                                            </button>
-
-                                        </div>
-                                    </div>
-
-                                    <!-- Has Mockup -->
-                                    <div class="col-md-12">
-                                        <div class="mb-2 d-flex align-items-center gap-2">
-                                            <label class="form-label label-text ">Is this category has Mockup?*</label>
-                                            <div class="form-check form-switch">
-                                                <input type="hidden" name="has_mockup" value="0"/>
-                                                <input
-                                                    class="form-check-input"
-                                                    type="checkbox"
-                                                    id="has_mockup"
-                                                    name="has_mockup"
-                                                    value="1"/>
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="d-flex justify-content-end">
-                                        <button type="button" class="btn btn-primary next-tab">Next</button>
                                     </div>
                                 </div>
                             </div>
-                            <!--end of the first tab content -->
-                            <!--second tab content -->
-                            <div class="tab-pane d-none" id="step2">
 
-                                <!-- Price Option Toggle -->
-                                <div class="col-md-12">
-                                    <div class="mb-2">
-                                        <label class="form-label label-text d-block">Quantity & Price Options</label>
-                                        <label class="form-label label-text mt-2">Quantity Type*</label>
-                                        <div class="row gap-2 " style="margin: 2px;">
-                                            <div class="col border rounded-3 p-1">
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio"
-                                                           name="has_custom_prices" id="customPrice" value="1">
-                                                    <div>
-                                                        <label class="form-check-label label-text d-block"
-                                                               for="customPrice">Add Quantity Manually</label>
-                                                        <label class="form-check-label text-dark" for="customPrice">Custom
-                                                            Prices</label>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                            <div class="col border rounded-3 p-1">
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio"
-                                                           name="has_custom_prices" id="defaultPrice" value="0">
-                                                    <div>
-                                                        <label class="form-check-label label-text d-block"
-                                                               for="defaultPrice">Default Quantity</label>
-                                                        <label class="form-check-label text-dark" for="defaultPrice">Default
-                                                            Price</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <!-- Default Price -->
+                            <div class="col-md-12" id="default-price-section" style="display: none;">
+                                <div class="mb-2">
+                                    <label class="form-label label-text" for="base_price">Original Price</label>
+                                    <input type="text" id="base_price" name="base_price" class="form-control"
+                                        placeholder="Original Price" />
                                 </div>
+                            </div>
 
-                                <!-- Custom Prices -->
-                                <div class="col-md-12" id="custom-price-section" style="display: none;">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="invoice-repeater">
-                                                <div data-repeater-list="prices">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-secondary prev-tab">Previous</button>
+                                <button type="button" class="btn btn-primary next-tab">Next</button>
+                            </div>
+                        </div>
+                        <!--end of the second tab content -->
+                        <!--third tab content -->
+                        <div class="tab-pane d-none" id="step3">
+                            <!-- Specifications -->
+                            <div class="col-12">
+                                <div class="mb-2">
+                                    <label class="form-label label-text">Category Specs</label>
+                                    <div class="">
+                                        <div>
+                                            <!-- Outer Repeater for Specifications -->
+                                            <div class="outer-repeater">
+                                                <div data-repeater-list="specifications">
                                                     <div data-repeater-item>
-                                                        <div class="row d-flex align-items-end">
-                                                            <div class="col-md-4">
-                                                                <div class="mb-2">
-                                                                    <label
-                                                                        class="form-label label-text">Quantity</label>
-                                                                    <input
-                                                                        type="number"
-                                                                        name="prices[][quantity]"
+                                                        <!-- Specification Fields -->
+                                                        <div class="row mt-1">
+                                                            <div class="col-md-6">
+                                                                <div class="mb-1">
+                                                                    <label class="form-label label-text">Name
+                                                                        (EN)</label>
+                                                                    <input type="text" name="name_en"
                                                                         class="form-control"
-                                                                        placeholder="Add Quantity"
-                                                                        step="1"
-                                                                        inputmode="numeric"
-                                                                        min="1"
-                                                                    />
+                                                                        placeholder="Specification Name (EN)" />
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-4">
-                                                                <div class="mb-2">
-                                                                    <label class="form-label label-text">Price
-                                                                        (EGP)</label>
-                                                                    <input type="number" name="prices[][price]"
-                                                                           class="form-control"
-                                                                           placeholder="Add Price"/>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="mb-2">
-                                                                    <button type="button"
-                                                                            class="btn btn-outline-danger text-nowrap px-1"
-                                                                            style="display: none" data-repeater-delete>
-                                                                        <i data-feather="x" class="me-25"></i> <span>Delete</span>
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
 
+                                                            <div class="col-md-6">
+                                                                <div class="mb-2">
+                                                                    <label class="form-label label-text">Name
+                                                                        (AR)</label>
+                                                                    <input type="text" name="name_ar"
+                                                                        class="form-control"
+                                                                        placeholder="Specification Name (AR)" />
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Inner Repeater for Specification Options -->
+                                                            <div class="inner-repeater">
+                                                                <div data-repeater-list="specification_options">
+                                                                    <div data-repeater-item>
+                                                                        <div
+                                                                            class="row d-flex flex-column flex-md-row gap-1 gap-md-0 mt-2">
+                                                                            <!-- Option Name (EN) -->
+                                                                            <div class="col">
+                                                                                <label
+                                                                                    class="form-label label-text">Value
+                                                                                    (EN)</label>
+                                                                                <input type="text" name="value_en"
+                                                                                    class="form-control"
+                                                                                    placeholder="Option (EN)" />
+                                                                            </div>
+
+                                                                            <!-- Option Name (AR) -->
+                                                                            <div class="col">
+                                                                                <label
+                                                                                    class="form-label label-text">Value
+                                                                                    (AR)</label>
+                                                                                <input type="text" name="value_ar"
+                                                                                    class="form-control"
+                                                                                    placeholder="Option (AR)" />
+                                                                            </div>
+
+                                                                            <!-- Option Price -->
+                                                                            <div class="col">
+                                                                                <label
+                                                                                    class="form-label label-text">Price
+                                                                                    (EGP) (Optional)</label>
+                                                                                <input type="text" name="price"
+                                                                                    class="form-control"
+                                                                                    placeholder="Price" />
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row d-flex align-items-end mt-2">
+                                                                            <!-- Option Image -->
+                                                                            <div class="col-md-12">
+                                                                                <label
+                                                                                    class="form-label label-text">Option
+                                                                                    Image</label>
+
+                                                                                <!-- Hidden real input -->
+                                                                                <!-- Hidden real input -->
+                                                                                <input type="file" name="image"
+                                                                                    class="form-control d-none option-image-input"
+                                                                                    accept="image/*">
+
+                                                                                <!-- Custom Upload Card -->
+                                                                                <div
+                                                                                    class="upload-card option-upload-area">
+                                                                                    <div
+                                                                                        class="d-flex justify-content-center align-items-center gap-1">
+                                                                                        <i data-feather="upload"
+                                                                                            class="mb-2"></i>
+                                                                                        <p>Drag image here to
+                                                                                            upload</p>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <!-- Progress Bar -->
+                                                                                <div
+                                                                                    class="progress mt-2 d-none w-50 option-upload-progress">
+                                                                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                                                        style="width: 0%"></div>
+                                                                                </div>
+
+                                                                                <!-- Uploaded Image Preview -->
+                                                                                <div
+                                                                                    class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2 option-uploaded-image">
+                                                                                    <img src="" alt="Uploaded"
+                                                                                        class="img-fluid rounded option-image-preview"
+                                                                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                                                                    <div class="file-details">
+                                                                                        <div
+                                                                                            class="file-name fw-bold option-file-name">
+                                                                                        </div>
+                                                                                        <div
+                                                                                            class="file-size text-muted small option-file-size">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <button type="button"
+                                                                                        class="btn btn-sm position-absolute text-danger option-remove-image"
+                                                                                        style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                                                        <i data-feather="trash"></i>
+                                                                                    </button>
+                                                                                </div>
+
+                                                                                <div class="col-12 text-end mt-1 mb-2">
+                                                                                    <button type="button"
+                                                                                        class="btn btn-outline-danger"
+                                                                                        data-repeater-delete>
+                                                                                        <i data-feather="x"
+                                                                                            class="me-25"></i> Delete
+                                                                                        Value
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Add Option Button -->
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <button type="button"
+                                                                            class="btn primary-text-color bg-white mt-2"
+                                                                            data-repeater-create>
+                                                                            <i data-feather="plus"></i> <span> Add New
+                                                                                Value</span>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- End of Inner Repeater -->
+
+                                                            <!-- Delete Specification Button -->
+                                                            <div class="col-12 text-end mt-1 mb-2">
+                                                                <button type="button" class="btn btn-outline-danger"
+                                                                    data-repeater-delete>
+                                                                    <i data-feather="x" class="me-25"></i> Delete
+                                                                    Spec
+                                                                </button>
+                                                            </div>
+
+                                                        </div>
                                                     </div>
                                                 </div>
+
+                                                <!-- Add New Specification Button -->
                                                 <div class="row">
                                                     <div class="col-12">
-                                                        <button type="button"
-                                                                class="w-100  rounded-3 p-1 bg-white text-dark"
-                                                                style="border:2px dashed #CED5D4;" data-repeater-create>
-                                                            <i data-feather="plus" class="me-25"></i> <span>Add New Quantity</span>
+                                                        <button type="button" class="w-100 rounded-3 p-1 text-dark"
+                                                            style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                            data-repeater-create>
+                                                            <i data-feather="plus" class="me-25"></i> <span>Add New
+                                                                Spec</span>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -338,246 +520,54 @@
                                     </div>
                                 </div>
 
-                                <!-- Default Price -->
-                                <div class="col-md-12" id="default-price-section" style="display: none;">
-                                    <div class="mb-2">
-                                        <label class="form-label label-text" for="base_price">Original Price</label>
-                                        <input type="text" id="base_price" name="base_price" class="form-control"
-                                               placeholder="Original Price"/>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button type="button" class="btn btn-secondary prev-tab">Previous</button>
-                                    <button type="button" class="btn btn-primary next-tab">Next</button>
-                                </div>
-                            </div>
-                            <!--end of the second tab content -->
-                            <!--third tab content -->
-                            <div class="tab-pane d-none" id="step3">
-                                <!-- Specifications -->
-                                <div class="col-12">
-                                    <div class="mb-2">
-                                        <label class="form-label label-text">Category Specs</label>
-                                        <div class="">
-                                            <div>
-                                                <!-- Outer Repeater for Specifications -->
-                                                <div class="outer-repeater">
-                                                    <div data-repeater-list="specifications">
-                                                        <div data-repeater-item>
-                                                            <!-- Specification Fields -->
-                                                            <div class="row mt-1">
-                                                                <div class="col-md-6">
-                                                                    <div class="mb-2">
-                                                                        <label class="form-label label-text">Name
-                                                                            (EN)</label>
-                                                                        <input type="text" name="name_en"
-                                                                               class="form-control"
-                                                                               placeholder="Specification Name (EN)"/>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="col-md-6">
-                                                                    <div class="mb-2">
-                                                                        <label class="form-label label-text">Name
-                                                                            (AR)</label>
-                                                                        <input type="text" name="name_ar"
-                                                                               class="form-control"
-                                                                               placeholder="Specification Name (AR)"/>
-                                                                    </div>
-                                                                </div>
-
-                                                                <!-- Inner Repeater for Specification Options -->
-                                                                <div class="inner-repeater">
-                                                                    <div data-repeater-list="specification_options">
-                                                                        <div data-repeater-item>
-                                                                            <div
-                                                                                class="row d-flex align-items-end mt-2">
-                                                                                <!-- Option Name (EN) -->
-                                                                                <div class="col">
-                                                                                    <label
-                                                                                        class="form-label label-text">Value
-                                                                                        (EN)</label>
-                                                                                    <input type="text" name="value_en"
-                                                                                           class="form-control"
-                                                                                           placeholder="Option (EN)"/>
-                                                                                </div>
-
-                                                                                <!-- Option Name (AR) -->
-                                                                                <div class="col">
-                                                                                    <label
-                                                                                        class="form-label label-text">Value
-                                                                                        (AR)</label>
-                                                                                    <input type="text" name="value_ar"
-                                                                                           class="form-control"
-                                                                                           placeholder="Option (AR)"/>
-                                                                                </div>
-
-                                                                                <!-- Option Price -->
-                                                                                <div class="col">
-                                                                                    <label
-                                                                                        class="form-label label-text">Price
-                                                                                        (EGP) (Optional)</label>
-                                                                                    <input type="text" name="price"
-                                                                                           class="form-control"
-                                                                                           placeholder="Price"/>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div
-                                                                                class="row d-flex align-items-end mt-2">
-                                                                                <!-- Option Image -->
-                                                                                <div class="col-md-12">
-                                                                                    <label
-                                                                                        class="form-label label-text">Option
-                                                                                        Image</label>
-
-                                                                                    <!-- Hidden real input -->
-                                                                                    <!-- Hidden real input -->
-                                                                                    <input type="file" name="image"
-                                                                                           class="form-control d-none option-image-input"
-                                                                                           accept="image/*">
-
-                                                                                    <!-- Custom Upload Card -->
-                                                                                    <div
-                                                                                        class="upload-card option-upload-area">
-                                                                                        <div
-                                                                                            class="d-flex justify-content-center align-items-center gap-1">
-                                                                                            <i data-feather="upload"
-                                                                                               class="mb-2"></i>
-                                                                                            <p>Drag image here to
-                                                                                                upload</p>
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                    <!-- Progress Bar -->
-                                                                                    <div
-                                                                                        class="progress mt-2 d-none w-50 option-upload-progress">
-                                                                                        <div
-                                                                                            class="progress-bar progress-bar-striped progress-bar-animated"
-                                                                                            style="width: 0%"></div>
-                                                                                    </div>
-
-                                                                                    <!-- Uploaded Image Preview -->
-                                                                                    <div
-                                                                                        class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2 option-uploaded-image">
-                                                                                        <img src="" alt="Uploaded"
-                                                                                             class="img-fluid rounded option-image-preview"
-                                                                                             style="width: 50px; height: 50px; object-fit: cover;">
-                                                                                        <div class="file-details">
-                                                                                            <div
-                                                                                                class="file-name fw-bold option-file-name"></div>
-                                                                                            <div
-                                                                                                class="file-size text-muted small option-file-size"></div>
-                                                                                        </div>
-                                                                                        <button type="button"
-                                                                                                class="btn btn-sm position-absolute text-danger option-remove-image"
-                                                                                                style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                                                            <i data-feather="trash"></i>
-                                                                                        </button>
-                                                                                    </div>
-
-                                                                                    <div
-                                                                                        class="col-12 text-end mt-1 mb-2">
-                                                                                        <button type="button"
-                                                                                                class="btn btn-outline-danger"
-                                                                                                data-repeater-delete>
-                                                                                            <i data-feather="x"
-                                                                                               class="me-25"></i> Delete
-                                                                                            Value
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <!-- Add Option Button -->
-                                                                    <div class="row">
-                                                                        <div class="col-12">
-                                                                            <button type="button"
-                                                                                    class="btn primary-text-color bg-white mt-2"
-                                                                                    data-repeater-create>
-                                                                                <i data-feather="plus"></i> <span> Add New Value</span>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <!-- End of Inner Repeater -->
-
-                                                                <!-- Delete Specification Button -->
-                                                                <div class="col-12 text-end mt-1 mb-2">
-                                                                    <button type="button" class="btn btn-outline-danger"
-                                                                            data-repeater-delete>
-                                                                        <i data-feather="x" class="me-25"></i> Delete
-                                                                        Spec
-                                                                    </button>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Add New Specification Button -->
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <button type="button" class="w-100 rounded-3 p-1 text-dark"
-                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
-                                                                    data-repeater-create>
-                                                                <i data-feather="plus" class="me-25"></i> <span>Add New Spec</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Free Shipping -->
-                                    {{-- <div class="col-md-12 col-12 mb-2">--}}
+                                <!-- Free Shipping -->
+                                {{-- <div class="col-md-12 col-12 mb-2">--}}
                                     {{-- <div class="form-check form-switch">--}}
-                                    {{-- <input type="hidden" name="is_free_shipping" value="0">--}}
-                                    {{-- <input type="checkbox" class="form-check-input" id="free-shipping" name="is_free_shipping" value="1">--}}
-                                    {{-- <label class="form-check-label" for="free-shipping">Category available for free shipping</label>--}}
+                                        {{-- <input type="hidden" name="is_free_shipping" value="0">--}}
+                                        {{-- <input type="checkbox" class="form-check-input" id="free-shipping"
+                                            name="is_free_shipping" value="1">--}}
+                                        {{-- <label class="form-check-label" for="free-shipping">Category available for
+                                            free shipping</label>--}}
+                                        {{-- </div>--}}
                                     {{-- </div>--}}
-                                    {{-- </div>--}}
-                                    {{-- </div>--}}
+                                {{--
+                            </div>--}}
 
-                                    <!-- Submit -->
-                                    <div class="col-12 d-flex justify-content-end gap-1">
-                                        <button type="button" class="btn btn-secondary prev-tab">Previous</button>
-                                        <button type="submit" class="btn btn-primary me-1 saveChangesButton"
-                                                id="SaveChangesButton">
-                                            <span class="btn-text">Add Category</span>
-                                            <span id="saveLoader"
-                                                  class="spinner-border spinner-border-sm d-none saveLoader"
-                                                  role="status" aria-hidden="true"></span>
-                                        </button>
+                            <!-- Submit -->
+                            <div class="col-12 d-flex justify-content-end gap-1">
+                                <button type="button" class="btn btn-secondary prev-tab">Previous</button>
+                                <button type="submit" class="btn btn-primary me-1 saveChangesButton"
+                                    id="SaveChangesButton">
+                                    <span class="btn-text">Add Category</span>
+                                    <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                        role="status" aria-hidden="true"></span>
+                                </button>
 
-                                    </div>
-                                </div>
                             </div>
-                            <!--third tab content end -->
-
-
-                        </form>
-
-                    </div>
+                        </div>
                 </div>
+                <!--third tab content end -->
+
+
+                </form>
+
             </div>
         </div>
+    </div>
+    </div>
 
-        @include("modals.products.add-size")
-    </section>
+    @include("modals.products.add-size")
+</section>
 @endsection
 
 @section('vendor-script')
-    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
-    <script>
-        Dropzone.autoDiscover = false;
+<script>
+    Dropzone.autoDiscover = false;
 
         const multiDropzone = new Dropzone("#multi-dropzone", {
             url: "{{ route('media.store') }}",   // backend route for image upload
@@ -630,10 +620,10 @@
                 });
             }
         });
-    </script>
+</script>
 
-    <script>
-        Dropzone.autoDiscover = false;
+<script>
+    Dropzone.autoDiscover = false;
 
         const categoryDropzone = new Dropzone("#product-main-dropzone", {
             url: "{{ route('media.store') }}",
@@ -681,9 +671,9 @@
             document.getElementById("uploadedImage").value = "";
             document.getElementById("uploaded-image").classList.add("d-none");
         });
-    </script>
-    <script>
-        console.log(jQuery.fn.jquery);
+</script>
+<script>
+    console.log(jQuery.fn.jquery);
 
         $(document).ready(function () {
             const form = $("#product-form");
@@ -770,20 +760,20 @@
             // Start on first step
             goToStep(0);
         });
-    </script>
+</script>
 
-    <script>
-        $(document).ready(function () {
+<script>
+    $(document).ready(function () {
             // Optional if you want to clear when user reloads
             window.addEventListener("beforeunload", function () {
                 sessionStorage.removeItem("custom_dimensions");
             });
 
         });
-    </script>
+</script>
 
-    <script>
-        $(document).ready(function () {
+<script>
+    $(document).ready(function () {
             let input = $('#product-image-main');
             let uploadArea = $('#upload-area');
             let progress = $('#upload-progress');
@@ -865,9 +855,9 @@
                 input.val(''); // Clear the input
             });
         });
-    </script>
-    <script>
-        $(document).ready(function () {
+</script>
+<script>
+    $(document).ready(function () {
             let input = $('#product-images');
             let uploadArea = $('#multi-upload-area');
             let uploadedImages = $('#multi-uploaded-images');
@@ -963,11 +953,11 @@
         });
 
 
-    </script>
+</script>
 
 
-    <script>
-        $(document).ready(function () {
+<script>
+    $(document).ready(function () {
             let optionInput = $('#option-image-input');
             let optionUploadArea = $('#option-upload-area');
             let optionProgress = $('#option-upload-progress');
@@ -1043,11 +1033,11 @@
                 $('#option-uploaded-image .file-size').text('');
             });
         });
-    </script>
+</script>
 
 
-    <script>
-        $(document).ready(function () {
+<script>
+    $(document).ready(function () {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1253,10 +1243,10 @@
                 });
             });
         });
-    </script>
+</script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
             const steps = ["step1", "step2", "step3"];
             let currentStep = 0;
 
@@ -1306,6 +1296,6 @@
             // Initial load
             showStep(currentStep);
         });
-    </script>
+</script>
 
 @endsection
