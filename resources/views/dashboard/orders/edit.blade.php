@@ -1,4 +1,3 @@
-
 @extends('layouts/contentLayoutMaster')
 @section('title', 'Edit Order')
 @section('main-page', 'Orders')
@@ -11,9 +10,10 @@
 
 @section('content')
 
-<div class="container bg-white rounded-3 p-3">
+<div class="bg-white rounded-3 p-2">
     <div class="d-flex align-items-center justify-content-between mb-3">
-        <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">{{$model->order_number}}</span></div>
+        <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span
+                class="fs-4 text-black fw-bold">{{$model->order_number}}</span></div>
         <div class="d-flex align-items-center status-pill justify-content-center">
             <div class="status-icon me-1">
                 <i data-feather="check"></i> <!-- You can dynamically change the icon -->
@@ -21,10 +21,10 @@
             <span class="status-text">Confirmed</span>
         </div>
     </div>
-    <form id="order-form" class="form" action="{{ route('orders.update',$model->id) }}"
-                method="POST" enctype="multipart/form-data">
-                @csrf
-                @method("PUT")
+    <form id="order-form" class="form" action="{{ route('orders.update',$model->id) }}" method="POST"
+        enctype="multipart/form-data">
+        @csrf
+        @method("PUT")
         <div class="row">
             <!-- Left Column -->
             <div class="col-12 col-md-4">
@@ -33,56 +33,62 @@
 
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
-                    <input type="text" class="form-control" name="first_name" value="{{ optional($model->orderAddress->first())->first_name }}">
+                    <input type="text" class="form-control" name="first_name"
+                        value="{{ optional($model->orderAddress->first())->first_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
-                    <input type="text" class="form-control" name="last_name" value="{{ optional($model->orderAddress->first())->last_name }}">
+                    <input type="text" class="form-control" name="last_name"
+                        value="{{ optional($model->orderAddress->first())->last_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
-                    <input type="email" class="form-control" name="email" value="{{ optional($model->orderAddress->first())->email }}">
+                    <input type="email" class="form-control" name="email"
+                        value="{{ optional($model->orderAddress->first())->email }}">
                 </div>
-                <div class="mb-4">
+                <div class="mb-2">
                     <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone" value="{{ optional($model->orderAddress->first())->phone }}">
+                    <input type="text" class="form-control" name="phone"
+                        value="{{ optional($model->orderAddress->first())->phone }}">
                 </div>
 
 
                 <!-- Shipping Details -->
                 @php
-                    $address = optional($model->orderAddress->first());
+                $address = optional($model->orderAddress->first());
                 @endphp
 
                 @if($address)
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="mb-0 fs-16 text-black">
-                            {{ $address->type === 'pickup' ? 'Pickup Details' : 'Shipping Details' }}
-                        </h5>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0 fs-16 text-black">
+                        {{ $address->type === 'pickup' ? 'Pickup Details' : 'Shipping Details' }}
+                    </h5>
 
-                        <button type="button" class="lined-btn" data-bs-toggle="modal" data-bs-target="#editOrderShippingModal">
-                            Edit
-                        </button>
-                    </div>
+                    <button type="button" class="lined-btn" data-bs-toggle="modal"
+                        data-bs-target="#editOrderShippingModal">
+                        Edit
+                    </button>
+                </div>
 
-                    <span class="text-black fs-16 fw-bold mb-1">
-                        {{ $address->type === 'pickup' ? 'Location:' : 'Address:' }}
-                    </span>
+                <span class="text-black fs-16 fw-bold mb-1">
+                    {{ $address->type === 'pickup' ? 'Location:' : 'Address:' }}
+                </span>
 
-                    <div class="border rounded p-2 mb-2 text-black fs-5">
-                        @if($address->type === 'pickup')
-                            {{ $address->location_name }}<br>
-                            {{ $address->state }}, {{ $address->country }}
-                        @else
-                            {{ $address->address_line }}, {{ $address->address_label }}<br>
-                            {{ $address->state }}, {{ $address->country }}
-                        @endif
-                    </div>
+                <div class="border rounded p-2 mb-2 text-black fs-5">
+                    @if($address->type === 'pickup')
+                    {{ $address->location_name }}<br>
+                    {{ $address->state }}, {{ $address->country }}
+                    @else
+                    {{ $address->address_line }}, {{ $address->address_label }}<br>
+                    {{ $address->state }}, {{ $address->country }}
+                    @endif
+                </div>
                 @endif
                 <span class="text-black fs-16 fw-bold mb-1">Delivery Instructions:</span>
                 <div class="border rounded p-1 mb-2 text-black fs-5">
 
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+                    et dolore magna aliqua.
                 </div>
 
                 <div class="rounded p-1 d-flex align-items-center text-black" style="background-color: #FCF8FC;">
@@ -95,61 +101,64 @@
             </div>
             <!-- Right Column -->
             <div class="col-12 col-md-8">
-               <div class="p-1 rounded" style="background-color: #FCF8FC;">
+                <div class="p-1 rounded" style="background-color: #FCF8FC;">
                     <p class="mb-1 fs-16 text-dark">Order Placed on:</p>
                     <p class="fs-16 text-black">{{ $model->created_at->format('F d, Y') }}</p>
                 </div>
 
 
-                    @php
-                        use App\Enums\Order\StatusEnum;
-                    @endphp
+                @php
+                use App\Enums\Order\StatusEnum;
+                @endphp
 
-                    <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
-                    <select class="form-select mb-4" name="status">
-                        @foreach (StatusEnum::cases() as $status)
-                            <option value="{{ $status->value }}"
-                                {{ (old('status', $model->status?->value) == $status->value) ? 'selected' : '' }}>
-                                {{ $status->label() }}
-                            </option>
-                        @endforeach
-                    </select>
+                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
+                <select class="form-select mb-4" name="status">
+                    @foreach (StatusEnum::cases() as $status)
+                    <option value="{{ $status->value }}" {{ (old('status', $model->status?->value) == $status->value) ?
+                        'selected' : '' }}>
+                        {{ $status->label() }}
+                    </option>
+                    @endforeach
+                </select>
 
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
                 @foreach ($model->orderItems as $orderItem)
-                    @php
-                        $product = $orderItem->product;
-                    @endphp
-                    <div class="mb-1">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div class="d-flex">
-                                <img src="{{ $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable)))) }}" class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+                @php
+                $product = $orderItem->product;
+                @endphp
+                <div class="mb-1">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="d-flex">
+                            <img src="{{ $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable)))) }}"
+                                class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
 
-                                <div>
-                                    <div class="fw-bold text-black fs-16">
-                                        {{ $product->name ?? 'No Product Found' }}
-                                    </div>
-                                    <div class="text-dark fs-5">
-                                        Qty: {{ $orderItem->quantity }}
-                                    </div>
+                            <div>
+                                <div class="fw-bold text-black fs-16">
+                                    {{ $product->name ?? 'No Product Found' }}
                                 </div>
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold text-black">
-                                    ${{ number_format($orderItem->sub_total ?? 0, 2) }}
+                                <div class="text-dark fs-5">
+                                    Qty: {{ $orderItem->quantity }}
                                 </div>
-                                @if ($model->orderItems->count() > 1 )
-                                    <form class="delete-design-form d-inline" method="POST" action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $orderItem->id]) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn" data-design-id="{{ $orderItem->id }}">
-                                            Delete
-                                        </button>
-                                    </form>
-                                @endif
                             </div>
                         </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-black">
+                                ${{ number_format($orderItem->sub_total ?? 0, 2) }}
+                            </div>
+                            @if ($model->orderItems->count() > 1 )
+                            <form class="delete-design-form d-inline" method="POST"
+                                action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $orderItem->id]) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn"
+                                    data-design-id="{{ $orderItem->id }}">
+                                    Delete
+                                </button>
+                            </form>
+                            @endif
+                        </div>
                     </div>
+                </div>
                 @endforeach
 
 
@@ -167,14 +176,16 @@
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
                         Delivery
-                        <i data-feather="info" data-bs-toggle="tooltip" title="Delivery charges may vary based on location."></i>
+                        <i data-feather="info" data-bs-toggle="tooltip"
+                            title="Delivery charges may vary based on location."></i>
                     </span>
                     <span class="fs-16 text-black">$ {{$model->delivery_amount}}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
                         Tax
-                        <i data-feather="info" data-bs-toggle="tooltip" title="Tax is calculated as per applicable laws."></i>
+                        <i data-feather="info" data-bs-toggle="tooltip"
+                            title="Tax is calculated as per applicable laws."></i>
                     </span>
                     <span class="fs-16 text-black">$ {{$model->tax_amount}}</span>
                 </div>
@@ -198,13 +209,13 @@
                 </div>
 
                 <!-- Action Buttons -->
-                    <div class="d-flex gap-2 justify-content-between ">
+                <div class="d-flex flex-wrap-reverse gap-2 justify-content-between ">
 
 
                     <button class="btn btn-outline-secondary">Discard Changes</button>
                     <div class="d-flex gap-1">
                         <button class="btn btn-outline-secondary">Cancel Order</button>
-                        <button  class="btn btn-primary">Save changes</button>
+                        <button class="btn btn-primary">Save changes</button>
                     </div>
                 </div>
             </div>

@@ -5,66 +5,66 @@
 @section('sub-page', 'Add New Order')
 
 @section('vendor-style')
-    <!-- Vendor CSS Files -->
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+<!-- Vendor CSS Files -->
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 
-    <style>
-        .pill-selected {
-            background-color: #24B094 !important;
-            color: white !important;
-        }
+<style>
+    .pill-selected {
+        background-color: #24B094 !important;
+        color: white !important;
+    }
 
-        .category-pill.pill-selected {
-            background-color: #24B094 !important;
-            color: white !important;
-        }
+    .category-pill.pill-selected {
+        background-color: #24B094 !important;
+        color: white !important;
+    }
 
-        .category-pill,
-        .tag-pill {
-            cursor: pointer;
-        }
-    </style>
+    .category-pill,
+    .tag-pill {
+        cursor: pointer;
+    }
+</style>
 
 @endsection
 
 @section('content')
-    @php
-        use Illuminate\Support\Facades\Cache;
+@php
+use Illuminate\Support\Facades\Cache;
 
-        $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
-        $pricingSubtotal = $orderData['pricing_details']['sub_total'] ?? 0;
-        $quantity = $orderData['pricing_details']['quantity'] ?? 0;
-        $tax = number_format($pricingSubtotal * 0.1, 2);
-        $deliveryFee = isset($orderData['delivery_fee']) ? number_format($orderData['delivery_fee'], 2) : '30.00';
-        $discountAmount = isset($orderData['discount_amount']) ? number_format($orderData['discount_amount'], 2) : '0.00';
-        $total = isset($orderData['total']) ? number_format($orderData['total'], 2) : number_format($pricingSubtotal + 30 + ($pricingSubtotal * 0.1), 2);
-    @endphp
-    <div class="container bg-white rounded-3 "
-         style="min-height: 100vh;padding-top:60px;padding-left:146px;padding-right:146px">
+$orderData = Cache::get(getOrderStepCacheKey()) ?? [];
+$pricingSubtotal = $orderData['pricing_details']['sub_total'] ?? 0;
+$quantity = $orderData['pricing_details']['quantity'] ?? 0;
+$tax = number_format($pricingSubtotal * 0.1, 2);
+$deliveryFee = isset($orderData['delivery_fee']) ? number_format($orderData['delivery_fee'], 2) : '30.00';
+$discountAmount = isset($orderData['discount_amount']) ? number_format($orderData['discount_amount'], 2) : '0.00';
+$total = isset($orderData['total']) ? number_format($orderData['total'], 2) : number_format($pricingSubtotal + 30 +
+($pricingSubtotal * 0.1), 2);
+@endphp
+<div class=" bg-white rounded-3">
 
-        <!-- Step 1 -->
+    <!-- Step 1 -->
 
-        @include('dashboard.orders.steps.step1')
+    @include('dashboard.orders.steps.step1')
 
-        <!-- Step 2 -->
-        @include('dashboard.orders.steps.step2')
+    <!-- Step 2 -->
+    @include('dashboard.orders.steps.step2')
 
 
-        <!-- Step 3 -->
-        @include('dashboard.orders.steps.step3')
-        <!-- Step 4 -->
-        @include('dashboard.orders.steps.step4')
-        <!-- Step 5 -->
-        @include('dashboard.orders.steps.step5')
+    <!-- Step 3 -->
+    @include('dashboard.orders.steps.step3')
+    <!-- Step 4 -->
+    @include('dashboard.orders.steps.step4')
+    <!-- Step 5 -->
+    @include('dashboard.orders.steps.step5')
 
-        <!-- Step 6 -->
-        @include('dashboard.orders.steps.step6')
-        <!-- Step 7 -->
-        @include('dashboard.orders.steps.step7')
-        <!-- Step 8 -->
-        @include('dashboard.orders.steps.step8')
+    <!-- Step 6 -->
+    @include('dashboard.orders.steps.step6')
+    <!-- Step 7 -->
+    @include('dashboard.orders.steps.step7')
+    <!-- Step 8 -->
+    @include('dashboard.orders.steps.step8')
 
-    </div>
+</div>
 
 @endsection
 
@@ -75,16 +75,16 @@
 
 
 @section('vendor-script')
-    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
             feather.replace();
 
             // Read the step from the URL
@@ -159,9 +159,9 @@
                 productFilters.style.display = this.value.trim() ? 'block' : 'none';
             });
         });
-    </script>
+</script>
 <script>
-      $(document).ready(function () {
+    $(document).ready(function () {
           handleAjaxFormSubmit(".order-form", {
             successMessage: "Order created successfully!",
             onSuccess: function (response, $form) {

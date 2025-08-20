@@ -15,8 +15,7 @@
 
                     <!-- Color circles -->
                     <h4> Colors</h4>
-                    <div
-                        style="
+                    <div style="
               width: 656px;
               height: 64px;
               padding-top: 8px;

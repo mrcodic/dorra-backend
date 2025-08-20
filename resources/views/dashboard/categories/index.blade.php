@@ -213,8 +213,6 @@
 
                 </div>
             </div>
-
-
         </div>
 
         @include('modals.delete',[
