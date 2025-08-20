@@ -878,8 +878,8 @@ $q->where('product_id', $model->id);
                 dz.on("removedfile", function (file) {
                     if (file._hiddenInputId) {
                         let hiddenInput = document.getElementById("hidden-image-" + file._hiddenInputId);
-                        if (hiddenInput) hiddenInput.remove();
-
+                        // if (hiddenInput) hiddenInput.remove();
+                        console.log(file._hiddenInputId)
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
                             headers: {
