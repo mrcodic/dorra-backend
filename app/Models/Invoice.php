@@ -14,4 +14,13 @@ class Invoice extends Model
     {
         return $this->belongsTo(Order::class);
     }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function designs(): \Illuminate\Database\Eloquent\Relations\MorphToMany
+    {
+        return $this->morphToMany(Design::class, 'designable');
+  }
 }

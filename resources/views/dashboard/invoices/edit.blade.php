@@ -38,15 +38,15 @@
 
         <div class="mb-2">
             <label class="form-label fw-bold">Name</label>
-            <input type="text" class="form-control" value="{{ $model->user->first_name }}"  name="name" value="John Doe" readonly>
+            <input type="text" class="form-control" value="{{ $model->user?->first_name }}"  name="name" value="John Doe" readonly>
         </div>
         <div class="mb-2">
             <label class="form-label fw-bold">Email</label>
-            <input type="email" class="form-control" value="{{ $model->user->email }}" name="email" value="john@example.com" readonly>
+            <input type="email" class="form-control" value="{{ $model->user?->email }}" name="email" value="john@example.com" readonly>
         </div>
         <div class="mb-2">
             <label class="form-label fw-bold">Phone</label>
-            <input type="text" class="form-control" value="{{ $model->user->phone_number }}" name="phone" value="+1 123 456 7890" readonly>
+            <input type="text" class="form-control" value="{{ $model->user?->phone_number }}" name="phone" value="+1 123 456 7890" readonly>
         </div>
     </div>
 
@@ -106,7 +106,7 @@
                     <p class="mb-1 fs-16 text-dark">Order Placed on:</p>
                     <p class="fs-16 text-black">April 30, 2025</p> --}}
                 </div>
-              
+
                 <!-- Items List -->
                  @foreach ($model->designs as $design)
                     @php
@@ -143,13 +143,13 @@
                     </div>
                 @endforeach
 
-                
+
                 <br>
                 <br>
                 <br>
                 <br>
                 <br>
-          
+
                 <hr>
 
 
@@ -196,7 +196,7 @@
                 </div>
 
                 <!-- Status Display -->
-              
+
 
                 <!-- Action Buttons -->
                 <div class="d-flex gap-2 justify-content-between ">
