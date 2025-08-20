@@ -14,22 +14,23 @@
                 <div class="modal-body">
                     <input type="hidden" id="edit-sub-category-id">
 
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="edit-sub-category-name-en" class="form-label label-text">Name (EN)</label>
                         <input type="text" class="form-control" id="edit-sub-category-name-en" name="name[en]">
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="edit-sub-category-name-ar" class="form-label label-text">Name (AR)</label>
                         <input type="text" class="form-control" id="edit-sub-category-name-ar" name="name[ar]">
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="edit-sub-category-parent-id" class="form-label label-text">Main Product</label>
-                        <select name="parent_id"  class="form-select">
+                        <select name="parent_id" class="form-select">
                             <option value="" disabled selected>Choose Main Product</option>
                             @foreach($associatedData['categories'] as $category)
-                                <option value="{{ $category->id }}">{{ $category->getTranslation('name', app()->getLocale()) }}</option>
+                            <option value="{{ $category->id }}">{{ $category->getTranslation('name', app()->getLocale())
+                                }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -39,7 +40,8 @@
                     <button type="button" class="btn btn-outline-secondary " data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary  saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Save Changes</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                            aria-hidden="true"></span>
                     </button>
                 </div>
 
