@@ -241,7 +241,7 @@ return [
             'required_if' => 'Base price is required if custom pricing is not enabled.',
             'prohibited_if' => 'Base price must not be set if custom pricing is enabled.',
             'numeric' => 'Base price must be a numeric value.',
-            'min' => 'Base price must be at least 0.',
+            'min' => 'Base price must be at least 1.',
         ],
         'prices' => [
             'required_if' => 'Prices are required if custom pricing is enabled.',
@@ -251,12 +251,12 @@ return [
         'prices.*.quantity' => [
             'required' => 'Each custom price tier must include a quantity.',
             'integer' => 'Quantity must be an integer.',
-            'min' => 'Quantity must be at least 0.',
+            'min' => 'Quantity must be at least 1.',
         ],
         'prices.*.price' => [
             'required' => 'Each custom price tier must include a price.',
             'integer' => 'Price must be an integer.',
-            'min' => 'Price must be at least 0.',
+            'min' => 'Price must be at least 1.',
         ],
         'specifications' => [
             'required' => 'Product specifications are required.',
@@ -290,7 +290,7 @@ return [
         'specifications.*.specification_options.*.price' => [
             'nullable' => 'Option price is optional.',
             'numeric' => 'Option price must be numeric.',
-            'min' => 'Option price must be at least 0.',
+            'min' => 'Option price must be at least 1.',
         ],
         'specifications.*.specification_options.*.image' => [
             'nullable' => 'Option image is optional.',
