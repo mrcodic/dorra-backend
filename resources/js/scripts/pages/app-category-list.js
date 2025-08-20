@@ -11,10 +11,10 @@ const dt_user_table = $(".category-list-table").DataTable({
         url: categoriesDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $('#search-category-form').val(); // get from input
-            d.created_at = $('.filter-date').val();
+            d.search_value = $("#search-category-form").val(); // get from input
+            d.created_at = $(".filter-date").val();
             return d;
-        }
+        },
     },
     columns: [
         {
@@ -23,12 +23,12 @@ const dt_user_table = $(".category-list-table").DataTable({
             searchable: false,
             render: function (data) {
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            }
+            },
         },
-        {data: "name"},
-        {data: "sub_categories"},
-        {data: "no_of_products"},
-        {data: "added_date"},
+        { data: "name" },
+        { data: "sub_categories" },
+        { data: "no_of_products" },
+        { data: "added_date" },
         {
             data: "id",
             orderable: false,
@@ -46,7 +46,9 @@ const dt_user_table = $(".category-list-table").DataTable({
                                    data-image_id="${row.imageId}"
                                    data-description_en="${row.description_en}"
                                    data-description_ar="${row.description_ar}"
-                                   data-subcategories="${row.children.map((child) => child.name)}"
+                                   data-subcategories="${row.children.map(
+                                       (child) => child.name
+                                   )}"
                                    data-products="${row.no_of_products}"
                                    data-showdate="${row.show_date}">
                                                 <i data-feather="eye"></i>
@@ -63,7 +65,9 @@ const dt_user_table = $(".category-list-table").DataTable({
                                    data-image_id="${row.imageId}"
                                    data-description_en="${row.description_en}"
                                    data-description_ar="${row.description_ar}"
-                                   data-subcategories="${row.children.map((child) => child.name)}"
+                                   data-subcategories="${row.children.map(
+                                       (child) => child.name
+                                   )}"
                                    data-products="${row.no_of_products}"
                                    data-showdate="${row.show_date}">
 
@@ -81,8 +85,8 @@ const dt_user_table = $(".category-list-table").DataTable({
 
           </div>
         `;
-            }
-        }
+            },
+        },
     ],
     order: [[1, "asc"]],
     dom:
@@ -104,14 +108,14 @@ const dt_user_table = $(".category-list-table").DataTable({
         searchPlaceholder: "Search..",
         paginate: {
             previous: "&nbsp;",
-            next: "&nbsp;"
-        }
-    }
+            next: "&nbsp;",
+        },
+    },
 });
 
 // Custom search with debounce
 let searchTimeout;
-$('#search-category-form').on('keyup', function () {
+$("#search-category-form").on("keyup", function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
@@ -120,44 +124,47 @@ $('#search-category-form').on('keyup', function () {
 
 // Custom search with debounce
 
-$('.filter-date').on('change', function () {
+$(".filter-date").on("change", function () {
     dt_user_table.draw();
 });
 
-
 // Checkbox select all
-$('#select-all-checkbox').on('change', function () {
-    $('.category-checkbox').prop('checked', this.checked);
+$("#select-all-checkbox").on("change", function () {
+    $(".category-checkbox").prop("checked", this.checked);
     updateBulkDeleteVisibility();
 });
 
 // Single checkbox toggle
-$(document).on('change', '.category-checkbox', function () {
+$(document).on("change", ".category-checkbox", function () {
     if (!this.checked) {
-        $('#select-all-checkbox').prop('checked', false);
-    } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
-        $('#select-all-checkbox').prop('checked', true);
+        $("#select-all-checkbox").prop("checked", false);
+    } else if (
+        $(".category-checkbox:checked").length ===
+        $(".category-checkbox").length
+    ) {
+        $("#select-all-checkbox").prop("checked", true);
     }
     updateBulkDeleteVisibility();
 });
 
 // Redraw table resets checkboxes
-dt_user_table.on('draw', function () {
-    $('#select-all-checkbox').prop('checked', false);
-    $('#bulk-delete-container').hide();
+dt_user_table.on("draw", function () {
+    $("#select-all-checkbox").prop("checked", false);
+    $("#bulk-delete-container").hide();
 });
 
 // Update bulk delete container
 function updateBulkDeleteVisibility() {
-    const selected = $('.category-checkbox:checked').length;
+    const selected = $(".category-checkbox:checked").length;
     if (selected > 0) {
-        $('#selected-count-text').text(`${selected} Category${selected > 1 ? 'ies' : 'y'} are selected`);
-        $('#bulk-delete-container').show();
+        $("#selected-count-text").text(
+            `${selected} Category${selected > 1 ? "ies" : "y"} are selected`
+        );
+        $("#bulk-delete-container").show();
     } else {
-        $('#bulk-delete-container').hide();
+        $("#bulk-delete-container").hide();
     }
 }
-
 
 // Listen to checkbox change
 $(document).on("change", ".category-checkbox", function () {
@@ -165,19 +172,18 @@ $(document).on("change", ".category-checkbox", function () {
     $("#bulk-delete-container").toggle(checkedCount > 0);
 });
 // Select All functionality
-$(document).on('change', '#select-all-checkbox', function () {
-    const isChecked = $(this).is(':checked');
-    $('.category-checkbox').prop('checked', isChecked).trigger('change');
+$(document).on("change", "#select-all-checkbox", function () {
+    const isChecked = $(this).is(":checked");
+    $(".category-checkbox").prop("checked", isChecked).trigger("change");
 });
 // Update "Select All" checkbox based on individual selections
-$(document).on('change', '.category-checkbox', function () {
-    const all = $('.category-checkbox').length;
-    const checked = $('.category-checkbox:checked').length;
+$(document).on("change", ".category-checkbox", function () {
+    const all = $(".category-checkbox").length;
+    const checked = $(".category-checkbox:checked").length;
 
-    $('#select-all-checkbox').prop('checked', all === checked);
-    $('#bulk-delete-container').toggle(checked > 0);
+    $("#select-all-checkbox").prop("checked", all === checked);
+    $("#bulk-delete-container").toggle(checked > 0);
 });
-
 
 // Optional: Hide button when table is redrawn
 dt_user_table.on("draw", function () {
@@ -185,9 +191,9 @@ dt_user_table.on("draw", function () {
 });
 
 $(document).ready(function () {
-    const saveButton = $('.saveChangesButton');
-    const saveLoader = $('.saveLoader');
-    const saveButtonText = $('.saveChangesButton .btn-text');
+    const saveButton = $(".saveChangesButton");
+    const saveLoader = $(".saveLoader");
+    const saveButtonText = $(".saveChangesButton .btn-text");
     $(document).ready(function () {
         // Check if the product was added successfully
         if (sessionStorage.getItem("Category_added") == "true") {
@@ -210,9 +216,9 @@ $(document).ready(function () {
         e.preventDefault();
 
         var formData = new FormData(this);
-        saveButton.prop('disabled', true);
-        saveLoader.removeClass('d-none');
-        saveButtonText.addClass('d-none');
+        saveButton.prop("disabled", true);
+        saveLoader.removeClass("d-none");
+        saveButtonText.addClass("d-none");
         $.ajax({
             url: $(this).attr("action"), // dynamic action URL
             type: "POST",
@@ -228,9 +234,9 @@ $(document).ready(function () {
                     backgroundColor: "#28C76F",
                     close: true,
                 }).showToast();
-                saveButton.prop('disabled', false);
-                saveLoader.addClass('d-none');
-                saveButtonText.removeClass('d-none');
+                saveButton.prop("disabled", false);
+                saveLoader.addClass("d-none");
+                saveButtonText.removeClass("d-none");
                 $("#addCategoryForm")[0].reset();
                 $("#addCategoryModal").modal("hide");
                 $("#add-uploaded-image").addClass("d-none");
@@ -247,7 +253,6 @@ $(document).ready(function () {
                 var errors = xhr.responseJSON.errors;
                 for (var key in errors) {
                     if (errors.hasOwnProperty(key)) {
-
                         Toastify({
                             text: errors[key][0],
                             duration: 4000,
@@ -256,16 +261,14 @@ $(document).ready(function () {
                             backgroundColor: "#EA5455",
                             close: true,
                         }).showToast();
-
                     }
                 }
-                saveButton.prop('disabled', false);
-                saveLoader.addClass('d-none');
-                saveButtonText.removeClass('d-none');
+                saveButton.prop("disabled", false);
+                saveLoader.addClass("d-none");
+                saveButtonText.removeClass("d-none");
             },
         });
     });
-
 
     $(document).on("click", ".view-details", function (e) {
         // Get the data from attributes
@@ -303,7 +306,7 @@ $(document).ready(function () {
         });
 
         // Set the badges HTML in the modal
-        $("#subcategories-container").html(badgesHtml ? badgesHtml :"-");
+        $("#subcategories-container").html(badgesHtml ? badgesHtml : "-");
 
         // Show modal
         const modal = new bootstrap.Modal(
@@ -329,13 +332,12 @@ $(document).ready(function () {
         const descriptionEn = $(this).data("description_en");
         const image = $(this).data("image");
         const imageId = $(this).data("image_id");
-        $('.remove-old-image').on('click', function (e) {
-
+        $(".remove-old-image").on("click", function (e) {
             e.preventDefault();
 
-            var imageElement = $(this).closest('.uploaded-image');
+            var imageElement = $(this).closest(".uploaded-image");
             $.ajax({
-                url: 'api/media/' + imageId,
+                url: "api/media/" + imageId,
                 method: "DELETE",
                 success: function (response) {
                     imageElement.remove();
@@ -345,14 +347,13 @@ $(document).ready(function () {
                         gravity: "top",
                         position: "right",
                         backgroundColor: "#28a745",
-                        close: true
+                        close: true,
                     }).showToast();
                 },
                 error: function (xhr) {
-                    console.log(xhr.responseJson.errors)
-                }
-            })
-
+                    console.log(xhr.responseJson.errors);
+                },
+            });
         });
 
         const id = $(this).data("id");
@@ -361,9 +362,13 @@ $(document).ready(function () {
         $("#editCategoryModal #edit-category-name-en").val(categoryNameEn);
         $("#editCategoryModal #edit-category-products").val(products);
         $("#editCategoryModal #edit-category-date").val(addedDate);
-        $("#editCategoryModal #edit-category-description-ar").val(descriptionAr);
-        $("#editCategoryModal #edit-category-description-en").val(descriptionEn);
-        $("#editCategoryModal #edit-uploaded-image").removeClass('d-none');
+        $("#editCategoryModal #edit-category-description-ar").val(
+            descriptionAr
+        );
+        $("#editCategoryModal #edit-category-description-en").val(
+            descriptionEn
+        );
+        $("#editCategoryModal #edit-uploaded-image").removeClass("d-none");
         $("#editCategoryModal #edit-preview-image").attr("src", image);
         $("#editCategoryModal #edit-category-id").val(id);
 
@@ -396,15 +401,15 @@ $(document).ready(function () {
         $("#edit-category-description-en").val(descEN);
         $("#edit-category-description-ar").val(descAR);
         $("#edit-category-id").val(id);
-        $("#edit-uploaded-image").removeClass('d-none');
+        $("#edit-uploaded-image").removeClass("d-none");
         $("#edit-preview-image").attr("src", image);
-        $('.remove-old-image').on('click', function (e) {
+        $(".remove-old-image").on("click", function (e) {
             e.preventDefault();
 
-            var imageElement = $(this).closest('.uploaded-image');
+            var imageElement = $(this).closest(".uploaded-image");
 
             $.ajax({
-                url: 'api/media/' + imageId,
+                url: "api/media/" + imageId,
                 method: "DELETE",
                 success: function (response) {
                     imageElement.remove();
@@ -414,12 +419,12 @@ $(document).ready(function () {
                         gravity: "top",
                         position: "right",
                         backgroundColor: "#28a745",
-                        close: true
+                        close: true,
                     }).showToast();
                 },
                 error: function (xhr) {
-                    console.log(xhr.responseJSON.errors)
-                }
+                    console.log(xhr.responseJSON.errors);
+                },
             });
         });
 
@@ -429,9 +434,9 @@ $(document).ready(function () {
     $("#editCategoryForm").on("submit", function (e) {
         e.preventDefault(); // prevent default form submission
         var categoryId = $(this).find("#edit-category-id").val();
-        saveButton.prop('disabled', true);
-        saveLoader.removeClass('d-none');
-        saveButtonText.addClass('d-none');
+        saveButton.prop("disabled", true);
+        saveLoader.removeClass("d-none");
+        saveButtonText.addClass("d-none");
         $.ajax({
             url: `categories/${categoryId}`,
             type: "POST", // IMPORTANT: Laravel expects POST + method spoofing (@method('PUT'))
@@ -439,9 +444,9 @@ $(document).ready(function () {
             processData: false,
             contentType: false,
             success: function (response) {
-                saveLoader.addClass('d-none');
-                saveButtonText.removeClass('d-none');
-                saveButton.prop('disabled', false);
+                saveLoader.addClass("d-none");
+                saveButtonText.removeClass("d-none");
+                saveButton.prop("disabled", false);
                 Toastify({
                     text: "Category updated successfully!",
                     duration: 3000,
@@ -463,12 +468,12 @@ $(document).ready(function () {
                 $("#edit-image-preview").attr("src", "");
                 $("#edit-image-details").hide();
 
-                $('.category-list-table').DataTable().ajax.reload();
+                $(".category-list-table").DataTable().ajax.reload();
             },
             error: function (xhr) {
-                saveLoader.addClass('d-none');
-                saveButtonText.removeClass('d-none');
-                saveButton.prop('disabled', false);
+                saveLoader.addClass("d-none");
+                saveButtonText.removeClass("d-none");
+                saveButton.prop("disabled", false);
                 var errors = xhr.responseJSON.errors;
                 for (var key in errors) {
                     if (errors.hasOwnProperty(key)) {
@@ -507,7 +512,6 @@ $(document).ready(function () {
         }
     });
 
-
     $(document).on("click", ".open-delete-category-modal", function () {
         const categoryId = $(this).data("id");
         $("#deleteCategoryForm").data("id", categoryId);
@@ -521,7 +525,6 @@ $(document).ready(function () {
             url: `/categories/${categoryId}`,
             method: "DELETE",
             success: function (res) {
-
                 $("#deleteCategoryModal").modal("hide");
 
                 Toastify({
@@ -533,11 +536,8 @@ $(document).ready(function () {
                     close: true,
                 }).showToast();
                 $(".category-list-table").DataTable().ajax.reload(null, false);
-
-
             },
             error: function () {
-
                 $("#deleteCategoryModal").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",
@@ -547,19 +547,18 @@ $(document).ready(function () {
                     backgroundColor: "#EA5455", // red
                     close: true,
                 }).showToast();
-                              $(".category-list-table").DataTable().ajax.reload(null, false);
-
+                $(".category-list-table").DataTable().ajax.reload(null, false);
             },
         });
     });
 
-
-
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();
-        const selectedIds = $(".category-checkbox:checked").map(function () {
-            return $(this).val();
-        }).get();
+        const selectedIds = $(".category-checkbox:checked")
+            .map(function () {
+                return $(this).val();
+            })
+            .get();
 
         if (selectedIds.length === 0) return;
 
@@ -583,11 +582,10 @@ $(document).ready(function () {
 
                 // Reload DataTable
 
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
+                $("#bulk-delete-container").hide();
+                $(".category-checkbox").prop("checked", false);
+                $("#select-all-checkbox").prop("checked", false);
                 $(".category-list-table").DataTable().ajax.reload(null, false);
-
             },
             error: function () {
                 $("#deleteCategoriesModal").modal("hide");
@@ -602,16 +600,13 @@ $(document).ready(function () {
 
                 // Reload DataTable
 
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
+                $("#bulk-delete-container").hide();
+                $(".category-checkbox").prop("checked", false);
+                $("#select-all-checkbox").prop("checked", false);
                 $(".category-list-table").DataTable().ajax.reload(null, false);
-
             },
         });
-
     });
-
 
     // Delete the selected image
     $("#delete-image-button").on("click", function () {
@@ -649,8 +644,4 @@ $(document).ready(function () {
         $("#add-image-preview").attr("src", ""); // clear the img src
         $("#add-image-details").hide(); // hide file details
     });
-
-
-
-
 });

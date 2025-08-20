@@ -1,7 +1,8 @@
 <div class="modal modal-slide-in new-user-modal fade" id="addNewAddressModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="addAddressForm" class="row gy-1 gx-2" method="post" action="{{ route('shipping-addresses.store') }}">
+            <form id="addAddressForm" class="row gy-1 gx-2" method="post"
+                action="{{ route('shipping-addresses.store') }}">
                 @csrf
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
@@ -9,26 +10,27 @@
                 </div>
                 <div class="modal-body flex-grow-1">
                     <input type="hidden" name="user_id" value="{{ $modelId }}">
-                    <div class="row my-3">
+                    <div class="row my-1">
                         <div class="col-12">
                             <label class="form-label label-text">Address Label</label>
                             <input type="text" class="form-control" placeholder="Choose Address Label"
-                                   id="add-category-name-en" name="label"/>
+                                id="add-category-name-en" name="label" />
                             <div class="invalid-feedback" id="label-error"></div>
                         </div>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-6">
+                    <div class="row mb-1">
+                        <div class="col-md-6">
                             <label class="form-label label-text">Country</label>
-                            <select id="modalAddressCountry" name="country_id" class="form-select address-country-select">
+                            <select id="modalAddressCountry" name="country_id"
+                                class="form-select address-country-select">
                                 <option value="" disabled selected>Select a Country</option>
                                 @foreach($countries as $country)
-                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                <option value="{{ $country->id }}">{{ $country->name }}</option>
                                 @endforeach
                             </select>
                             <div class="invalid-feedback" id="country_id-error"></div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-md-6">
                             <label class="form-label label-text">State</label>
                             <select id="modalAddressState" name="state_id" class="form-select address-state-select">
                                 <option value="" disabled selected>Select a State</option>
@@ -37,11 +39,11 @@
                             <div id="state-url" data-url="{{ route('states') }}"></div>
                         </div>
                     </div>
-                    <div class="row my-3">
+                    <div class="row my-1">
                         <div class="col-12">
                             <label class="form-label label-text">Address Line</label>
                             <input type="text" class="form-control" placeholder="Choose Address Line"
-                                   id="add-category-name-en" name="line"/>
+                                id="add-category-name-en" name="line" />
                             <div class="invalid-feedback" id="line-error"></div>
                         </div>
                     </div>
@@ -50,7 +52,8 @@
                     <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="saveChangesButton">
                         <span class="btn-text">Add</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </form>

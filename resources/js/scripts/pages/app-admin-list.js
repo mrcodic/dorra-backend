@@ -11,9 +11,9 @@ const dt_user_table = $(".category-list-table").DataTable({
         url: categoriesDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $('#search-category-form').val(); // get from input
+            d.search_value = $("#search-category-form").val(); // get from input
             return d;
-        }
+        },
     },
     columns: [
         {
@@ -22,7 +22,7 @@ const dt_user_table = $(".category-list-table").DataTable({
             searchable: false,
             render: function (data) {
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            }
+            },
         },
         { data: "name" },
         { data: "sub_categories" },
@@ -31,7 +31,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         {
             data: "id",
             orderable: false,
-            searchable:false,
+            searchable: false,
             render: function (data, type, row, meta) {
                 console.log(data);
                 return `
@@ -67,9 +67,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
         ">",
-    buttons: [
-
-    ],
+    buttons: [],
     drawCallback: function () {
         feather.replace();
     },
@@ -79,14 +77,14 @@ const dt_user_table = $(".category-list-table").DataTable({
         searchPlaceholder: "Search..",
         paginate: {
             previous: "&nbsp;",
-            next: "&nbsp;"
-        }
-    }
+            next: "&nbsp;",
+        },
+    },
 });
 
 // Custom search with debounce
 let searchTimeout;
-$('#search-category-form').on('keyup', function () {
+$("#search-category-form").on("keyup", function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
@@ -94,49 +92,54 @@ $('#search-category-form').on('keyup', function () {
 });
 
 // Checkbox select all
-$('#select-all-checkbox').on('change', function () {
-    $('.category-checkbox').prop('checked', this.checked);
+$("#select-all-checkbox").on("change", function () {
+    $(".category-checkbox").prop("checked", this.checked);
     updateBulkDeleteVisibility();
 });
 
 // Single checkbox toggle
-$(document).on('change', '.category-checkbox', function () {
+$(document).on("change", ".category-checkbox", function () {
     if (!this.checked) {
-        $('#select-all-checkbox').prop('checked', false);
-    } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
-        $('#select-all-checkbox').prop('checked', true);
+        $("#select-all-checkbox").prop("checked", false);
+    } else if (
+        $(".category-checkbox:checked").length ===
+        $(".category-checkbox").length
+    ) {
+        $("#select-all-checkbox").prop("checked", true);
     }
     updateBulkDeleteVisibility();
 });
 
 // Redraw table resets checkboxes
-dt_user_table.on('draw', function () {
-    $('#select-all-checkbox').prop('checked', false);
-    $('#bulk-delete-container').hide();
+dt_user_table.on("draw", function () {
+    $("#select-all-checkbox").prop("checked", false);
+    $("#bulk-delete-container").hide();
 });
 
 // Update bulk delete container
 function updateBulkDeleteVisibility() {
-    const selected = $('.category-checkbox:checked').length;
+    const selected = $(".category-checkbox:checked").length;
     if (selected > 0) {
-        $('#selected-count-text').text(`${selected} Category${selected > 1 ? 'ies' : 'y'} are selected`);
-        $('#bulk-delete-container').show();
+        $("#selected-count-text").text(
+            `${selected} Category${selected > 1 ? "ies" : "y"} are selected`
+        );
+        $("#bulk-delete-container").show();
     } else {
-        $('#bulk-delete-container').hide();
+        $("#bulk-delete-container").hide();
     }
 }
 
 // Optional: Handle bulk delete form submission with confirmation
-$('#bulk-delete-form').on('submit', function (e) {
+$("#bulk-delete-form").on("submit", function (e) {
     e.preventDefault();
 
     Swal.fire({
-        title: 'Are you sure?',
-        text: 'You are about to delete selected categories.',
-        icon: 'warning',
+        title: "Are you sure?",
+        text: "You are about to delete selected categories.",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: 'Yes, delete',
-        cancelButtonText: 'Cancel'
+        confirmButtonText: "Yes, delete",
+        cancelButtonText: "Cancel",
     }).then((result) => {
         if (result.isConfirmed) {
             this.submit();
@@ -150,19 +153,18 @@ $(document).on("change", ".category-checkbox", function () {
     $("#bulk-delete-container").toggle(checkedCount > 0);
 });
 // Select All functionality
-$(document).on('change', '#select-all-checkbox', function () {
-    const isChecked = $(this).is(':checked');
-    $('.category-checkbox').prop('checked', isChecked).trigger('change');
+$(document).on("change", "#select-all-checkbox", function () {
+    const isChecked = $(this).is(":checked");
+    $(".category-checkbox").prop("checked", isChecked).trigger("change");
 });
 // Update "Select All" checkbox based on individual selections
-$(document).on('change', '.category-checkbox', function () {
-    const all = $('.category-checkbox').length;
-    const checked = $('.category-checkbox:checked').length;
+$(document).on("change", ".category-checkbox", function () {
+    const all = $(".category-checkbox").length;
+    const checked = $(".category-checkbox:checked").length;
 
-    $('#select-all-checkbox').prop('checked', all === checked);
-    $('#bulk-delete-container').toggle(checked > 0);
+    $("#select-all-checkbox").prop("checked", all === checked);
+    $("#bulk-delete-container").toggle(checked > 0);
 });
-
 
 // Optional: Hide button when table is redrawn
 dt_user_table.on("draw", function () {
@@ -231,13 +233,13 @@ $(document).ready(function () {
         });
     });
 
-
-
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();
-        const selectedIds = $(".category-checkbox:checked").map(function () {
-            return $(this).val();
-        }).get();
+        const selectedIds = $(".category-checkbox:checked")
+            .map(function () {
+                return $(this).val();
+            })
+            .get();
 
         if (selectedIds.length === 0) return;
 
@@ -271,19 +273,22 @@ $(document).ready(function () {
 
                         // Reload DataTable
 
-                        $('#bulk-delete-container').hide();
-                        $('.category-checkbox').prop('checked', false);
-                        $('#select-all-checkbox').prop('checked', false);
-                        $(".category-list-table").DataTable().ajax.reload(null, false);
-
+                        $("#bulk-delete-container").hide();
+                        $(".category-checkbox").prop("checked", false);
+                        $("#select-all-checkbox").prop("checked", false);
+                        $(".category-list-table")
+                            .DataTable()
+                            .ajax.reload(null, false);
                     },
                     error: function () {
-                        Swal.fire("Error", "Could not delete selected categories.", "error");
+                        Swal.fire(
+                            "Error",
+                            "Could not delete selected categories.",
+                            "error"
+                        );
                     },
                 });
             }
         });
     });
-
-
 });

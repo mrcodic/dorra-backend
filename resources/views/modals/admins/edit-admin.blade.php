@@ -14,15 +14,13 @@
 
                 <div class="modal-body pt-0">
                     <!-- Avatar + Upload -->
-                    <div class="d-flex align-items-end mb-3">
-                        <img alt="Avatar"
-                             src="{{ asset('images/default-user.png') }}"
-                             class="rounded-circle border avatarPreview"
-                             style="width: 48px; height: 48px;">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-1 mb-3">
+                        <img alt="Avatar" src="{{ asset('images/default-user.png') }}"
+                            class="rounded-circle border avatarPreview" style="width: 48px; height: 48px;">
 
                         <div class="ms-2">
                             <div id="editAvatarDropzone" class="dropzone border rounded p-2"
-                                 style="width: 200px; cursor: pointer;">
+                                style="width: 200px; cursor: pointer;">
                                 <div class="dz-message">Drop avatar here or click</div>
                             </div>
                         </div>
@@ -31,11 +29,11 @@
 
                     <!-- First Name + Last Name -->
                     <div class="row mb-2">
-                        <div class="col">
+                        <div class="col-12 col-md-6">
                             <label for="first_name" class="form-label">First Name</label>
                             <input type="text" class="form-control" name="first_name" id="first_name">
                         </div>
-                        <div class="col">
+                        <div class="col-12 col-md-6">
                             <label for="last_name" class="form-label">Last Name</label>
                             <input type="text" class="form-control" name="last_name" id="last_name">
                         </div>
@@ -63,7 +61,7 @@
                     <div class="mb-2">
                         <label for="password_confirmation" class="form-label">Confirm Password</label>
                         <input type="password" class="form-control" name="password_confirmation"
-                               id="password_confirmation">
+                            id="password_confirmation">
                     </div>
 
                     <!-- Role -->
@@ -72,8 +70,8 @@
                         <select class="form-select" name="role" id="role">
                             <option selected disabled>Select Role</option>
                             @foreach($associatedData['roles'] as $role)
-                                <option
-                                    value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale()) }}</option>
+                            <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale()) }}
+                            </option>
                             @endforeach
                         </select>
                     </div>

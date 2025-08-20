@@ -31,16 +31,18 @@ $discountTypes = [
     <div class="row">
         <!-- order Chart Card starts -->
         <div class="col-lg-3 col-sm-6 col-12">
-            <div class="card border border-2">
-                <div class="card-header flex-column align-items-start pb-0">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color: #FCF8FC; width: 40px; height: 40px;">
+            <div class="card border-2">
+                <div class="card-header flex-column gap-1 align-items-start pb-0">
+                    <div class="d-flex gap-1 align-items-center">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
                             <i data-feather="file-text" class="font-medium-5" style="color: #24B094;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Total Orders</p>
                     </div>
                     <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> EGP</h2>
-                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month</h2>
+                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
+                                class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
                 <div id="order-chart"></div>
             </div>
@@ -48,51 +50,57 @@ $discountTypes = [
         <!-- order Chart Card ends -->
         <!-- Earnings Chart Card starts -->
         <div class="col-lg-3 col-sm-6 col-12">
-            <div class="card border border-2">
-                <div class="card-header flex-column align-items-start pb-0">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color: #FCF8FC; width: 40px; height: 40px;">
+            <div class="card border-2">
+                <div class="card-header flex-column gap-1 align-items-start pb-0">
+                    <div class="d-flex gap-1 align-items-center">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
                             <i data-feather="tag" class="font-medium-5" style="color: #4E2775;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Earnings</p>
                     </div>
                     <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> EGP</h2>
-                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month</h2>
+                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
+                                class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
                 <div id="gained-chart"></div>
             </div>
         </div>
         <!-- Earnings Chart Card ends -->
-                 <!-- Visits Chart Card starts -->
+        <!-- Visits Chart Card starts -->
         <div class="col-lg-3 col-sm-6 col-12">
-            <div class="card border border-2">
-                <div class="card-header flex-column align-items-start pb-0">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color: #FCF8FC; width: 40px; height: 40px;">
+            <div class="card border-2">
+                <div class="card-header flex-column gap-1 align-items-start pb-0">
+                    <div class="d-flex gap-1 align-items-center">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
                             <i data-feather="eye" class="font-medium-5" style="color: #F8AB1B"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Visits</p>
                     </div>
                     <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> EGP</h2>
-                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month</h2>
+                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
+                                class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
                 <div id="visits-chart"></div>
             </div>
         </div>
         <!-- Visits Chart Card ends -->
 
-                      <!-- Refunded Chart Card starts -->
+        <!-- Refunded Chart Card starts -->
         <div class="col-lg-3 col-sm-6 col-12">
-            <div class="card border border-2">
-                <div class="card-header flex-column align-items-start pb-0">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color: #FCF8FC; width: 40px; height: 40px;">
+            <div class="card border-2">
+                <div class="card-header flex-column gap-1 align-items-start pb-0">
+                    <div class="d-flex gap-1 align-items-center">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
                             <i data-feather="rotate-ccw" class="font-medium-5" style="color: #222245"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Refunded</p>
                     </div>
                     <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> EGP</h2>
-                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month</h2>
+                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
+                                class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
                 <div id="refund-chart"></div>
             </div>
@@ -102,37 +110,36 @@ $discountTypes = [
     <div class="row">
         {{-- Products Card --}}
         <div class="col-md-6">
-            <div class="card border border-2 p-2">
-                <div class="d-flex justify-content-between align-items-center mb-50">
+            <div class="card border-2 p-2">
+                <div class="d-flex flex-column flex-lg-row justify-content-between mb-50">
                     <p class="fs-2 text-black">Products</p>
-                    <div class="d-flex flex-column align-items-center">
-                        <div class="d-flex align-items-center ">
-                            <span class=" rounded-1 me-1" style="width: 24px; height: 6px;background-color:#24B094"></span>
-                            <span class="me-auto">Published</span>
+                    <div class="d-flex align-items-center gap-1 gap-lg-4">
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="d-flex align-items-center ">
+                                <span class=" rounded-1 me-1"
+                                    style="width: 24px; height: 6px;background-color:#24B094"></span>
+                                <span class="me-auto">Published</span>
+                            </div>
+
+                            <span class="">65 Products</span>
                         </div>
 
-                        <span class="">65 Products</span>
-                    </div>
+                        <div class="d-flex flex-column ">
+                            <div class="d-flex align-items-center ">
+                                <span class=" rounded-1 me-1"
+                                    style="width: 24px; height: 6px;background-color:#B3E3D8"></span>
+                                <span class="me-auto">Published</span>
+                            </div>
 
-                    <div class="d-flex flex-column ">
-                        <div class="d-flex align-items-center ">
-                            <span class=" rounded-1 me-1" style="width: 24px; height: 6px;background-color:#B3E3D8"></span>
-                            <span class="me-auto">Published</span>
+                            <span class="">65 Products</span>
                         </div>
-
-                        <span class="">65 Products</span>
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="fs-6 text-black "><span class="fs-2 fw-bold ">75</span> Products</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div
-                            class="progress-bar"
-                            role="progressbar"
-                            aria-valuenow="70"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                            style="width: 70%"></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0"
+                            aria-valuemax="100" style="width: 70%"></div>
                     </div>
                 </div>
             </div>
@@ -142,35 +149,34 @@ $discountTypes = [
 
         {{-- Templates Card --}}
         <div class="col-md-6">
-            <div class="card border border-2 p-2">
-                <div class="d-flex justify-content-between align-items-center mb-50">
+            <div class="card border-2 p-2">
+                <div class="d-flex flex-column flex-lg-row justify-content-between mb-50">
                     <p class="fs-2 text-black">Templates</p>
-                    <div class="d-flex flex-column align-items-center">
-                        <div class="d-flex align-items-center ">
-                            <span class=" rounded-1 me-1" style="width: 24px; height: 6px;background-color:#24B094"></span>
-                            <span class="me-auto">Published</span>
+                    <div class="d-flex align-items-center gap-1 gap-lg-4">
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="d-flex align-items-center ">
+                                <span class=" rounded-1 me-1"
+                                    style="width: 24px; height: 6px;background-color:#24B094"></span>
+                                <span class="me-auto">Published</span>
+                            </div>
+                            <span class="">65 Templates</span>
                         </div>
-                        <span class="">65 Templates</span>
-                    </div>
 
-                    <div class="d-flex flex-column ">
-                        <div class="d-flex align-items-center ">
-                            <span class=" rounded-1 me-1" style="width: 24px; height: 6px;background-color:#B3E3D8"></span>
-                            <span class="me-auto">Published</span>
+                        <div class="d-flex flex-column ">
+                            <div class="d-flex align-items-center ">
+                                <span class=" rounded-1 me-1"
+                                    style="width: 24px; height: 6px;background-color:#B3E3D8"></span>
+                                <span class="me-auto">Published</span>
+                            </div>
+                            <span class="">65 Templates</span>
                         </div>
-                        <span class="">65 Templates</span>
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="fs-6 text-black "><span class="fs-2 fw-bold ">75</span> Templates</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div
-                            class="progress-bar"
-                            role="progressbar"
-                            aria-valuenow="70"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                            style="width: 70%"></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0"
+                            aria-valuemax="100" style="width: 70%"></div>
                     </div>
                 </div>
             </div>
@@ -179,7 +185,7 @@ $discountTypes = [
     </div>
     <div class="row">
         <!-- Vists and Sales chart -->
-        <div class="col-md-8">
+        <div class="col-md-12 col-lg-8">
             <div class="d-flex justify-content-end">
                 <select id="yearSelect" class="form-select w-auto mb-1 ">
                     {{-- Years will be inserted by JavaScript --}}
@@ -190,11 +196,12 @@ $discountTypes = [
         <!-- Vists and Sales chart end -->
 
         <!-- Line Area Chart Card -->
-        <div class="col-lg-4 col-sm-6 col-12 ">
-            <div class="card border border-2">
+        <div class="col-lg-4 col-12">
+            <div class="card border-2">
                 <div class="card-header flex-column align-items-start pb-0">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color: #FCF8FC; width: 40px; height: 40px;">
+                    <div class="d-flex gap-1 align-items-center">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
                             <i data-feather="tag" class="font-medium-5" style="color: #4E2775;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Sales</p>
@@ -206,19 +213,22 @@ $discountTypes = [
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center w-100 mt-1">
-                            <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month</h2>
+                            <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
+                                        class="font-medium-5"></i></span> Highest Month</h2>
                             <span class="text-black">December</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center w-100 ">
-                            <h2 class="  fs-5" style="color: #E74943;"><span> <i data-feather="trending-down" class="font-medium-5"></i></span> Lowest Month</h2>
+                            <h2 class="  fs-5" style="color: #E74943;"><span> <i data-feather="trending-down"
+                                        class="font-medium-5"></i></span> Lowest Month</h2>
                             <span class="text-black">March</span>
                         </div>
                     </div>
                 </div>
                 <hr class="mx-2" />
                 <div class="card-header flex-column align-items-start pb-0 mt-0 pt-0">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color:#FFFEF3; width: 40px; height: 40px;">
+                    <div class="d-flex gap-1 align-items-center">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                            style="background-color:#FFFEF3; width: 40px; height: 40px;">
                             <i data-feather="eye" class="font-medium-5" style="color: #F8AB1B;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Visits</p>
@@ -230,11 +240,13 @@ $discountTypes = [
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center w-100 mt-1">
-                            <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month</h2>
+                            <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
+                                        class="font-medium-5"></i></span> Highest Month</h2>
                             <span class="text-black">December</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center w-100 mb-1">
-                            <h2 class="  fs-5" style="color: #E74943;"><span> <i data-feather="trending-down" class="font-medium-5"></i></span> Lowest Month</h2>
+                            <h2 class="  fs-5" style="color: #E74943;"><span> <i data-feather="trending-down"
+                                        class="font-medium-5"></i></span> Lowest Month</h2>
                             <span class="text-black">March</span>
                         </div>
                     </div>
@@ -244,18 +256,19 @@ $discountTypes = [
         <!--/ Line Area Chart Card -->
     </div>
 
-    <div class="row d-flex align-items-stretch mb-2">
+    <div class="row d-flex gap-1 gap-md-0 align-items-stretch mb-2">
         <!-- Popular Products -->
         <div class="col-md-6">
-            <div class="card border border-2 p-2 h-100">
+            <div class="card border p-1 h-100">
                 <h2 class="fs-4 text-black">Popular Products</h2>
                 <!-- Product Card -->
                 <div class="d-flex justify-content-between align-items-center">
                     <!-- Left: Product Info -->
                     <div class="d-flex align-items-center">
-                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Product Image" class="mx-1 rounded" style="width: 56px; height: 56px; object-fit: cover;">
+                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Product Image" class="mx-1 rounded"
+                            style="width: 56px; height: 56px; object-fit: cover;">
                         <div class="d-flex flex-column">
-                            <span class="fs-16 text-black ">Product Name</span>
+                            <span class="fs-14 text-black">Product Name</span>
                             <span class="">In Stock: 25</span>
                             <span class="">Added: 2025-05-27</span>
                         </div>
@@ -263,8 +276,9 @@ $discountTypes = [
 
                     <!-- Right: Sold Info -->
                     <div class="d-flex align-items-center">
-                        <span class="fw-bold mx-1">Sold: 500</span>
-                        <img src="{{ asset('images/success.svg') }}" alt="Product Image" class=" rounded" style="width: 20px; height: 20px; object-fit: cover;">
+                        <span class="fw-bold">Sold: 500</span>
+                        <img src="{{ asset('images/success.svg') }}" alt="Product Image" class=" rounded"
+                            style="width: 20px; height: 20px; object-fit: cover;">
 
                     </div>
                 </div>
@@ -273,13 +287,14 @@ $discountTypes = [
 
         <!-- Popular Templates -->
         <div class="col-md-6">
-            <div class="card border border-2 p-2 h-100">
+            <div class="card border p-1 h-100">
                 <h2 class="fs-4 text-black">Popular Templates</h2>
                 <!-- Templates Card -->
                 <div class="d-flex justify-content-between align-items-center">
                     <!-- Left: Templates Info -->
                     <div class="d-flex align-items-center">
-                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Product Image" class="mx-1 rounded" style="width: 56px; height: 56px; object-fit: cover;">
+                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Product Image" class="mx-1 rounded"
+                            style="width: 56px; height: 56px; object-fit: cover;">
                         <div>
                             <p class="mb-25 fw-bold">Log Template</p>
                             <p class="mb-0 ">Added: 2025-05-27</p>
@@ -289,7 +304,8 @@ $discountTypes = [
                     <!-- Right: Sold Info -->
                     <div class="d-flex align-items-center">
                         <span class="fw-bold mx-1">Customized: 500</span>
-                        <img src="{{ asset('images/success.svg') }}" alt="Product Image" class=" rounded" style="width: 20px; height: 20px; object-fit: cover;">
+                        <img src="{{ asset('images/success.svg') }}" alt="Product Image" class=" rounded"
+                            style="width: 20px; height: 20px; object-fit: cover;">
 
                     </div>
                 </div>
@@ -297,10 +313,10 @@ $discountTypes = [
         </div>
     </div>
 
-    <div class="row d-flex align-items-stretch">
+    <div class="row d-flex gap-1 gap-md-0 align-items-stretch">
         <!-- Discount Codes Chart -->
         <div class="col-md-6">
-            <div class="card border border-2 p-2 h-100">
+            <div class="card border p-2 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-50">
                     <p class="fs-2 text-black">Discount Codes</p>
                 </div>
@@ -309,7 +325,8 @@ $discountTypes = [
                     @foreach ($discountTypes as $type)
                     <div class="d-flex flex-column align-items-center me-2 mb-1">
                         <div class="d-flex align-items-center">
-                            <span class="rounded-1 me-1" style="width: 24px; height: 6px; background-color: {{ $type['color'] }}"></span>
+                            <span class="rounded-1 me-1"
+                                style="width: 24px; height: 6px; background-color: {{ $type['color'] }}"></span>
                             <span>{{ $type['label'] }}</span>
                         </div>
                     </div>
@@ -320,7 +337,8 @@ $discountTypes = [
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <div class="w-75">
                         <div class="progress" style="height: 6px; width: {{ $type['width'] }}">
-                            <div class="progress-bar" role="progressbar" style="width: 100%; background-color: {{ $type['color'] }}"></div>
+                            <div class="progress-bar" role="progressbar"
+                                style="width: 100%; background-color: {{ $type['color'] }}"></div>
                         </div>
                     </div>
                     <span class="text-black" style="font-size: 12px;"><span>200</span> Discount Code</span>
@@ -331,10 +349,11 @@ $discountTypes = [
 
         <!-- Revenue Card -->
         <div class="col-md-6">
-            <div class="card border border-2 h-100">
+            <div class="card border h-100">
                 <div class="card-header flex-column align-items-start pb-0">
                     <div class="d-flex align-items-center mb-1">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color: #FCF8FC; width: 40px; height: 40px;">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
                             <i data-feather="tag" class="font-medium-5" style="color: #4E2775;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0 ms-2">Revenue</p>

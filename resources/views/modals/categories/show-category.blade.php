@@ -8,7 +8,7 @@
             <div class="modal-body flex-grow-1">
                 <input type="hidden" id="image-id">
                 <!-- Image Upload with Preview -->
-                <div id="imagePreviewContainer" class="mt-2 d-flex justify-content-between align-items-between  ">
+                <div id="imagePreviewContainer" class="mt-2 d-flex justify-content-between align-items-between">
                     <label for="imageUpload" class="text-black small d-block cursor-pointer label-text">Image</label>
                     <img id="imagePreview" class="img-fluid rounded" style="max-width: 64px;" />
                 </div>
@@ -16,43 +16,43 @@
                 <div class="text-muted small mt-1" id="imageDetails" style="display: none;">image.jpg • 32.00 KB</div>
 
                 <!-- Name in Arabic and English -->
-                <div class="row my-3">
-                    <div class="col-6">
+                <div class="row my-1">
+                    <div class="col-md-6">
                         <label class="form-label label-text">Name (EN)</label>
                         <input type="text" class="form-control" id="category-name-en" disabled />
                     </div>
-                    <div class="col-6">
+                    <div class="col-md-6">
                         <label class="form-label label-text">Name (AR)</label>
                         <input type="text" class="form-control" id="category-name-ar" disabled />
                     </div>
                 </div>
 
                 <!-- Description in Arabic and English -->
-                <div class="row mb-3">
-                    <div class="col-6">
+                <div class="row mb-1">
+                    <div class="col-lg-6">
                         <label class="form-label label-text">Description (EN)</label>
                         <textarea class="form-control" id="category-description-en" rows="2" disabled></textarea>
                     </div>
-                    <div class="col-6">
+                    <div class="col-lg-6">
                         <label class="form-label label-text">Description (AR)</label>
                         <textarea class="form-control" id="category-description-ar" rows="2" disabled></textarea>
                     </div>
                 </div>
 
                 <!-- Subcategories -->
-                <div class="mb-3">
+                <div class="mb-1">
                     <label class="form-label label-text" id="category-subcategories">Subcategories</label>
                     <div id="subcategories-container" class="d-flex flex-wrap gap-2"></div>
                 </div>
 
                 <!-- Number of Products -->
-                <div class="mb-3">
+                <div class="mb-1">
                     <label class="form-label label-text">Number of Categories</label>
                     <input type="number" id="category-products" class="form-control" disabled />
                 </div>
 
                 <!-- Added Date -->
-                <div class="mb-4">
+                <div class="mb-1">
                     <label class="form-label label-text">Added Date</label>
                     <input type="date" id="category-date" class="form-control" disabled />
                 </div>
