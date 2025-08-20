@@ -184,7 +184,8 @@ $q->where('product_id', $model->id);
                                                 <option value="{{ $tag->id }}" @if(in_array($tag->id,
                                                     $model->tags->pluck('id')->toArray())) selected @endif >{{
                                                     $tag->name }}</option>
-                                                <<<<<<< HEAD @endforeach </select>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
 
@@ -197,11 +198,7 @@ $q->where('product_id', $model->id);
                                                 <input class="form-check-input" type="checkbox" id="has_mockup"
                                                     name="has_mockup" value="1" @checked($model->has_mockup == 1)
                                                 />
-
-                                                =======
-                                                @endforeach
                                                 </select>
-                                                >>>>>>> 7ab0b6a5fc3edae918e3ba50a18d1a01042e15e0
                                             </div>
                                         </div>
 
