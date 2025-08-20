@@ -89,10 +89,6 @@
             }
         }
 
-        .details-content {
-            padding: 10px;
-        }
-
         .detail-row {
             display: flex;
             justify-content: space-between;

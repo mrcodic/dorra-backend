@@ -14,17 +14,17 @@
                     <!-- Image Upload -->
                     <div class="mb-1">
                         <label class="form-label label-text">Image*</label>
-                        <div id="edit-category-dropzone" class="dropzone border rounded p-3"
-                             style="cursor:pointer; min-height:150px;">
+                        <div id="edit-category-dropzone" class="dropzone border rounded"
+                            style="cursor:pointer; min-height:150px;">
                             <div class="dz-message" data-dz-message>
                                 <span>Drop photo here or click to upload</span>
                             </div>
                         </div>
-                        <span class="image-hint small text position-absolute" style="bottom: 5px; right: 10px;">
-                        Max size: 1MB | Dimensions: 512x512 px
-                    </span>
                         <input type="hidden" name="image_id" id="editUploadedImage">
                     </div>
+                    <span class="image-hint small">
+                        Max size: 1MB | Dimensions: 512x512 px
+                    </span>
 
                     <!-- Upload Progress -->
                     <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
@@ -33,54 +33,50 @@
 
                     <!-- Uploaded Image Preview -->
                     <div id="edit-uploaded-image"
-                         class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                        class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
                         <img src="" id="edit-preview-image" alt="Uploaded" class="img-fluid rounded"
-                             style="width: 50px; height: 50px; object-fit: cover;">
+                            style="width: 50px; height: 50px; object-fit: cover;">
                         <div id="edit-file-details" class="file-details">
                             <div class="file-name fw-bold"></div>
                             <div class="file-size text-muted small"></div>
                         </div>
-                        {{--                            <button type="button" id="edit-remove-image" data-image_id="" class="btn btn-sm position-absolute text-danger remove-old-image" style="top: 5px; right: 5px; background-color: #FFEEED">--}}
-                        {{--                                <i data-feather="trash"></i>--}}
-                        {{--                            </button>--}}
                     </div>
+                    <!-- Name and Description Fields -->
+                    <div class="row my-1">
+                        <div class="col-md-6">
+                            <label class="form-label label-text">Name (EN)</label>
+                            <input type="text" class="form-control" id="edit-category-name-en" name="name[en]" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label label-text">Name (AR)</label>
+                            <input type="text" class="form-control" id="edit-category-name-ar" name="name[ar]" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-1">
+                        <div class="col-lg-6">
+                            <label class="form-label label-text">Description (EN)</label>
+                            <textarea class="form-control" id="edit-category-description-en" name="description[en]"
+                                rows="2"></textarea>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label label-text">Description (AR)</label>
+                            <textarea class="form-control" id="edit-category-description-ar" name="description[ar]"
+                                rows="2"></textarea>
+                        </div>
+                    </div>
+
+
                 </div>
-
-                <!-- Name and Description Fields -->
-                <div class="row my-3">
-                    <div class="col-6">
-                        <label class="form-label label-text">Name (EN)</label>
-                        <input type="text" class="form-control" id="edit-category-name-en" name="name[en]"/>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label label-text">Name (AR)</label>
-                        <input type="text" class="form-control" id="edit-category-name-ar" name="name[ar]"/>
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-6">
-                        <label class="form-label label-text">Description (EN)</label>
-                        <textarea class="form-control" id="edit-category-description-en" name="description[en]"
-                                  rows="2"></textarea>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label label-text">Description (AR)</label>
-                        <textarea class="form-control" id="edit-category-description-ar" name="description[ar]"
-                                  rows="2"></textarea>
-                    </div>
-                </div>
-
-
                 <div class="modal-footer border-top-0">
                     <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="editSaveChangesButton">
                         <span class="btn-text">Save Changes</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                              aria-hidden="true"></span>
+                            aria-hidden="true"></span>
                     </button>
-
                 </div>
+
             </form>
         </div>
     </div>

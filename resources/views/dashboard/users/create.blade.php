@@ -22,25 +22,25 @@
 
 @section('content')
 <div class="bs-stepper checkout-tab-steps">
-    <form id="checkout-form" class="bs-stepper checkout-tab-steps add-new-user" method="post" enctype="multipart/form-data" action="{{ route("users.store") }}">
+    <form id="checkout-form" class="bs-stepper checkout-tab-steps add-new-user" method="post"
+        enctype="multipart/form-data" action="{{ route('users.store') }}">
         @csrf
-        <div class="user-media-ids"> </div>
+        <div class="user-media-ids"></div>
         <!-- Wizard starts -->
         <div class="bs-stepper-header">
             <div class="step" data-target="#step-info" role="tab" id="step-info-trigger">
-                <button type="button" class="step-trigger">
+                <button type="button" class="step-trigger d-flex align-items-center gap-1">
                     <span class="bs-stepper-box">
                         01
                     </span>
                     <span class="bs-stepper-label">
                         <span class="bs-stepper-title">User Information</span>
-
                     </span>
                 </button>
             </div>
             <div class="line"></div>
             <div class="step" data-target="#step-password" role="tab" id="step-password-trigger">
-                <button type="button" class="step-trigger">
+                <button type="button" class="step-trigger d-flex align-items-center gap-1">
                     <span class="bs-stepper-box">
                         02
                     </span>
@@ -50,19 +50,8 @@
                 </button>
             </div>
             <div class="line"></div>
-{{--            <div class="step" data-target="#step-payment" role="tab" id="step-payment-trigger">--}}
-{{--                <button type="button" class="step-trigger">--}}
-{{--                    <span class="bs-stepper-box">--}}
-{{--                        03--}}
-{{--                    </span>--}}
-{{--                    <span class="bs-stepper-label">--}}
-{{--                        <span class="bs-stepper-title">Payment</span>--}}
-{{--                    </span>--}}
-{{--                </button>--}}
-{{--            </div>--}}
-{{--            <div class="line"></div>--}}
             <div class="step" data-target="#step-address" role="tab" id="step-address-trigger">
-                <button type="button" class="step-trigger">
+                <button type="button" class="step-trigger d-flex align-items-center gap-1">
                     <span class="bs-stepper-box">
                         03
                     </span>
@@ -80,12 +69,13 @@
 
                 <!-- Avatar Upload with Dropzone -->
                 <div class="mb-2 text-center">
-                    <div id="avatar-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
+                    <div id="avatar-dropzone" class="dropzone" style="cursor:pointer;">
                         <div class="dz-message" data-dz-message>
-                            <span>Drop photo here or click to upload</span>
+                            <button type="button" class="btn btn-outline-primary" data-bs-target="#avatar-dropzone">
+                                Upload Photo
+                            </button>
                         </div>
                     </div>
-                    <input type="hidden" name="image" id="uploadedImage">
                 </div>
 
 
@@ -94,18 +84,21 @@
                 <div class="row mb-2">
                     <div class="col-md-6">
                         <label for="first_name" class="form-label label-text ">First Name</label>
-                        <input type="text" id="first_name" name="first_name" class="form-control" placeholder="Enter first name" required>
+                        <input type="text" id="first_name" name="first_name" class="form-control"
+                            placeholder="Enter first name" required>
                     </div>
                     <div class="col-md-6">
                         <label for="last_name" class="form-label label-text ">Last Name</label>
-                        <input type="text" id="last_name" name="last_name" class="form-control" placeholder="Enter last name" required>
+                        <input type="text" id="last_name" name="last_name" class="form-control"
+                            placeholder="Enter last name" required>
                     </div>
                 </div>
 
                 <!-- Email Address -->
                 <div class="mb-2">
                     <label for="email" class="form-label label-text ">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter email address" required>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter email address"
+                        required>
                 </div>
 
                 <!-- Phone Number (Country Code + Number) -->
@@ -114,25 +107,29 @@
                         <label for="phone-code" class="form-label label-text ">Country Code</label>
                         <select id="phone-code" name="country_code_id" class="form-select" required>
                             @foreach($associatedData['country_codes'] as $countryCode)
-                                <option value="{{ $countryCode->id }}" data-phone-code="{{ $countryCode->phone_code }}">{{ $countryCode->phone_code }} ({{ $countryCode->iso_code }})</option>
+                            <option value="{{ $countryCode->id }}" data-phone-code="{{ $countryCode->phone_code }}">{{
+                                $countryCode->phone_code }} ({{ $countryCode->iso_code }})</option>
                             @endforeach
                             <!-- Add more countries as needed -->
                         </select>
                     </div>
                     <div class="col-md-8">
                         <label for="phone_number" class="form-label label-text ">Phone Number</label>
-                        <input type="tel" id="phone_number" name="phone_number" class="form-control" placeholder="Enter phone number" required>
-                        <input type="hidden"  name="full_phone_number" id="full_phone_number" />
+                        <input type="tel" id="phone_number" name="phone_number" class="form-control"
+                            placeholder="Enter phone number" required>
+                        <input type="hidden" name="full_phone_number" id="full_phone_number" />
 
                     </div>
                 </div>
 
                 <!-- Account Status Toggle -->
                 <div class="">
-                    <div class="form-check form-switch border rounded-3 p-1 d-flex justify-content-between align-items-center">
+                    <div
+                        class="form-check form-switch border rounded-3 p-1 d-flex justify-content-between align-items-center">
                         <div class="d-flex flex-column">
                             <label class="form-check-label text-dark" for="account_status">Account Active</label>
-                            <span class="active-label rounded-3 status-label primary-text-color text-center d-flex justify-content-center align-items-center">Active</span>
+                            <span
+                                class="active-label rounded-3 status-label primary-text-color text-center d-flex justify-content-center align-items-center">Active</span>
                         </div>
 
                         <!-- Visible Toggle -->
@@ -161,14 +158,8 @@
 
                         </div>
                         <div class="input-group input-group-merge form-password-toggle">
-                            <input
-                                type="password"
-                                class="form-control form-control-merge"
-                                id="password"
-                                name="password"
-                                tabindex="2"
-                                placeholder="Enter password"
-                                aria-describedby="password" />
+                            <input type="password" class="form-control form-control-merge" id="password" name="password"
+                                tabindex="2" placeholder="Enter password" aria-describedby="password" />
                             <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
                         </div>
                     </div>
@@ -179,13 +170,8 @@
 
                         </div>
                         <div class="input-group input-group-merge form-password-toggle">
-                            <input
-                                type="password"
-                                class="form-control form-control-merge"
-                                id="login-password"
-                                name="password_confirmation"
-                                tabindex="2"
-                                placeholder="Confirm Password"
+                            <input type="password" class="form-control form-control-merge" id="login-password"
+                                name="password_confirmation" tabindex="2" placeholder="Confirm Password"
                                 aria-describedby="login-password" />
                             <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
                         </div>
@@ -200,49 +186,60 @@
                 </div>
             </div>
             <!-- step 3 -->
-{{--            <div id="step-payment" class="content" role="tabpanel" aria-labelledby="step-payment-trigger">--}}
-{{--                <div id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">--}}
-{{--                    <!-- Cardholder Name (Optional) Label -->--}}
-{{--                    <div class="mb-1">--}}
-{{--                        <label class="form-label">Cardholder Name (Optional)</label>--}}
-{{--                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter cardholder name" />--}}
-{{--                    </div>--}}
-{{--                    <div class="mb-1">--}}
-{{--                        <label class="form-label">Card Number</label>--}}
-{{--                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter Card Number" />--}}
-{{--                    </div>--}}
-{{--                    <!-- Country and State -->--}}
-{{--                    <div class="d-flex justify-content-between gap-1 mb-1">--}}
-{{--                        <div class="w-50">--}}
-{{--                            <label class="form-label">Expiration Date</label>--}}
-{{--                            <input type="date" name="label" id="label" class="form-control" placeholder="Expiration Date" />--}}
-{{--                        </div>--}}
-{{--                        <div class="w-50">--}}
-{{--                            <label class="form-label">CVV</label>--}}
-{{--                            <input type="text" name="label" id="label" class="form-control" placeholder="Enter CVV" />--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
+            {{-- <div id="step-payment" class="content" role="tabpanel" aria-labelledby="step-payment-trigger">--}}
+                {{-- <div id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">--}}
+                    {{--
+                    <!-- Cardholder Name (Optional) Label -->--}}
+                    {{-- <div class="mb-1">--}}
+                        {{-- <label class="form-label">Cardholder Name (Optional)</label>--}}
+                        {{-- <input type="text" name="label" id="label" class="form-control"
+                            placeholder="Enter cardholder name" />--}}
+                        {{-- </div>--}}
+                    {{-- <div class="mb-1">--}}
+                        {{-- <label class="form-label">Card Number</label>--}}
+                        {{-- <input type="text" name="label" id="label" class="form-control"
+                            placeholder="Enter Card Number" />--}}
+                        {{-- </div>--}}
+                    {{--
+                    <!-- Country and State -->--}}
+                    {{-- <div class="d-flex justify-content-between gap-1 mb-1">--}}
+                        {{-- <div class="w-50">--}}
+                            {{-- <label class="form-label">Expiration Date</label>--}}
+                            {{-- <input type="date" name="label" id="label" class="form-control"
+                                placeholder="Expiration Date" />--}}
+                            {{-- </div>--}}
+                        {{-- <div class="w-50">--}}
+                            {{-- <label class="form-label">CVV</label>--}}
+                            {{-- <input type="text" name="label" id="label" class="form-control"
+                                placeholder="Enter CVV" />--}}
+                            {{-- </div>--}}
+                        {{-- </div>--}}
 
-{{--                    <!-- Address Line -->--}}
-{{--                    <div class="mb-1">--}}
-{{--                        <label for="line" class="form-label">Email Address</label>--}}
-{{--                        <input type="text" name="line" id="line" class="form-control" placeholder="Enter email address" />--}}
-{{--                    </div>--}}
+                    {{--
+                    <!-- Address Line -->--}}
+                    {{-- <div class="mb-1">--}}
+                        {{-- <label for="line" class="form-label">Email Address</label>--}}
+                        {{-- <input type="text" name="line" id="line" class="form-control"
+                            placeholder="Enter email address" />--}}
+                        {{-- </div>--}}
 
-{{--                    <div class="d-flex gap-1 justify-content-end">--}}
-{{--                        <button type="button" class="btn btn-outline-secondary  btn-prev place-order">Back</button>--}}
-{{--                        <button type="button" class="btn btn-primary  btn-next place-order">Next</button>--}}
+                    {{-- <div class="d-flex gap-1 justify-content-end">--}}
+                        {{-- <button type="button"
+                            class="btn btn-outline-secondary  btn-prev place-order">Back</button>--}}
+                        {{-- <button type="button" class="btn btn-primary  btn-next place-order">Next</button>--}}
 
-{{--                    </div>--}}
-{{--                </div>--}}
-{{--            </div>--}}
+                        {{-- </div>--}}
+                    {{--
+                </div>--}}
+                {{-- </div>--}}
             <!-- step 4 -->
             <div id="step-address" class="content" role="tabpanel" aria-labelledby="step-address-trigger">
-                <div id="checkout-payment" class="list-view product-checkout p-3" onsubmit="return false;">
+                <div id="checkout-payment" class="list-view product-checkout" onsubmit="return false;">
                     <!-- Address Label -->
                     <div class="mb-1">
                         <label for="label" class="form-label">Address Label</label>
-                        <input type="text" name="label" id="label" class="form-control" placeholder="Enter Address Label" />
+                        <input type="text" name="label" id="label" class="form-control"
+                            placeholder="Enter Address Label" />
                     </div>
 
                     <!-- Country and State -->
@@ -252,7 +249,7 @@
                             <select id="country-select" class="form-select country-select">
                                 <option value="">Select Country</option>
                                 @foreach($associatedData['countries'] as $country)
-                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                <option value="{{ $country->id }}">{{ $country->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -267,15 +264,18 @@
                     <!-- Address Line -->
                     <div class="mb-1">
                         <label for="line" class="form-label">Address Line</label>
-                        <input type="text" name="line" id="line" class="form-control" placeholder="Enter Address Line" />
+                        <input type="text" name="line" id="line" class="form-control"
+                            placeholder="Enter Address Line" />
                     </div>
 
                     <!-- Buttons -->
                     <div class="d-flex gap-1 justify-content-end mt-2">
                         <button type="button" class="btn btn-outline-secondary btn-prev place-order">Back</button>
-                        <button type="submit" class="btn btn-primary btn-next place-order saveChangesButton" id="saveChangesButton">
+                        <button type="submit" class="btn btn-primary btn-next place-order saveChangesButton"
+                            id="saveChangesButton">
                             <span class="btn-text">Save</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                role="status" aria-hidden="true"></span>
                         </button>
                     </div>
                 </div>

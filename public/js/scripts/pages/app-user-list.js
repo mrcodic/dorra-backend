@@ -14,10 +14,10 @@ var dt_user_table = $(".user-list-table").DataTable({
         url: usersDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $('#search-user-form').val(); // get from input
-            d.created_at = $('.filter-date').val();
+            d.search_value = $("#search-user-form").val(); // get from input
+            d.created_at = $(".filter-date").val();
             return d;
-        }
+        },
     },
     columns: [
         {
@@ -26,7 +26,7 @@ var dt_user_table = $(".user-list-table").DataTable({
             orderable: false,
             render: function (data) {
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            }
+            },
         },
         { data: "name" },
         { data: "email" },
@@ -112,7 +112,7 @@ var dt_user_table = $(".user-list-table").DataTable({
 
 // Custom search with debounce
 let searchTimeout;
-$('#search-user-form').on('keyup', function () {
+$("#search-user-form").on("keyup", function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
@@ -121,7 +121,7 @@ $('#search-user-form').on('keyup', function () {
 
 // Custom search with debounce
 
-$('.filter-date').on('change', function () {
+$(".filter-date").on("change", function () {
     dt_user_table.draw();
 });
 
@@ -256,7 +256,6 @@ $(document).ready(function () {
             url: `/users/${userId}`,
             method: "DELETE",
             success: function (res) {
-
                 $("#deleteUserModal").modal("hide");
 
                 Toastify({
@@ -268,11 +267,8 @@ $(document).ready(function () {
                     close: true,
                 }).showToast();
                 $(".user-list-table").DataTable().ajax.reload(null, false);
-
-
             },
             error: function () {
-
                 $("#deleteUserModal").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",
@@ -283,16 +279,17 @@ $(document).ready(function () {
                     close: true,
                 }).showToast();
                 $(".user-list-table").DataTable().ajax.reload(null, false);
-
             },
         });
     });
 
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();
-        const selectedIds = $(".category-checkbox:checked").map(function () {
-            return $(this).val();
-        }).get();
+        const selectedIds = $(".category-checkbox:checked")
+            .map(function () {
+                return $(this).val();
+            })
+            .get();
 
         if (selectedIds.length === 0) return;
         $.ajax({
@@ -315,11 +312,10 @@ $(document).ready(function () {
 
                 // Reload DataTable
 
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
+                $("#bulk-delete-container").hide();
+                $(".category-checkbox").prop("checked", false);
+                $("#select-all-checkbox").prop("checked", false);
                 $(".user-list-table").DataTable().ajax.reload(null, false);
-
             },
             error: function () {
                 $("#deleteUsersModal").modal("hide");
@@ -334,15 +330,11 @@ $(document).ready(function () {
 
                 // Reload DataTable
 
-                $('#bulk-delete-container').hide();
-                $('.user-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
+                $("#bulk-delete-container").hide();
+                $(".user-checkbox").prop("checked", false);
+                $("#select-all-checkbox").prop("checked", false);
                 $(".category-list-table").DataTable().ajax.reload(null, false);
-
             },
         });
-
     });
-
-
 });

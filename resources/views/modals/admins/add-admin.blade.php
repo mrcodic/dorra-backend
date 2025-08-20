@@ -22,11 +22,11 @@
 
                     <!-- First Name + Last Name -->
                     <div class="row mb-2">
-                        <div class="col">
+                        <div class="col-12 col-md-6">
                             <label for="first_name" class="form-label">First Name</label>
                             <input type="text" class="form-control" name="first_name" id="first_name">
                         </div>
-                        <div class="col">
+                        <div class="col-12 col-md-6">
                             <label for="last_name" class="form-label">Last Name</label>
                             <input type="text" class="form-control" name="last_name" id="last_name">
                         </div>
@@ -54,7 +54,7 @@
                     <div class="mb-2">
                         <label for="password_confirmation" class="form-label">Confirm Password</label>
                         <input type="password" class="form-control" name="password_confirmation"
-                               id="password_confirmation">
+                            id="password_confirmation">
                     </div>
 
                     <!-- Role -->
@@ -63,7 +63,8 @@
                         <select class="form-select" name="role_id" id="role">
                             <option selected disabled>select role</option>
                             @foreach($associatedData['roles'] as $role)
-                                <option value="{{ $role->id }}">{{ $role->getTranslation('name', app()->getLocale()) }}</option>
+                            <option value="{{ $role->id }}">{{ $role->getTranslation('name', app()->getLocale()) }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
@@ -83,7 +84,8 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="saveChangesButton">
                         <span class="btn-text">Add</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </form>
@@ -91,7 +93,6 @@
     </div>
 </div>
 <script !src="">
-
     Dropzone.autoDiscover = false; // prevent auto init
 
     let avatarDropzone = new Dropzone("#avatarDropzone", {
