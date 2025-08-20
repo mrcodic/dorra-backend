@@ -7,7 +7,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
 
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editSubCategoryModalLabel">Edit Subcategory</h5>
+                    <h5 class="modal-title" id="editSubCategoryModalLabel">Edit Subproduct</h5>
 
                 </div>
 

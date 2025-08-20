@@ -36,14 +36,14 @@
                     "slug": "app-user-list"
                 },
                 {
-                    "url": "/products",
-                    "name": "Categories",
+                    "url": "/sub-categories",
+                    "name": "SubProducts",
                     "icon": "circle",
                     "slug": "app-user-list"
                 },
                 {
-                    "url": "/sub-categories",
-                    "name": "SubProducts",
+                    "url": "/products",
+                    "name": "Categories",
                     "icon": "circle",
                     "slug": "app-user-list"
                 },

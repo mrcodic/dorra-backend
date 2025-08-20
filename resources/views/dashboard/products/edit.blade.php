@@ -90,81 +90,50 @@ $q->where('product_id', $model->id);
 
                                     <!-- Main Image Upload -->
                                     <div class="col-md-12">
-                                        <div class="mb-1">
-                                            <label class="form-label label-text" for="product-image-main">Category Image
-                                                (main)*</label>
+                                        <div class="mb-2">
+                                            <label class="form-label label-text" for="product-image-main">
+                                                Category Image (main)
+                                            </label>
 
-                                            <!-- Hidden real input -->
-                                            <input type="file" name="image" id="product-image-main"
-                                                class="form-control d-none" accept="image/*">
-
-                                            <!-- Custom Upload Card -->
-                                            <div id="upload-area" class="upload-card">
-                                                <div id="upload-content">
-                                                    <i data-feather="upload" class="mb-2"></i>
-                                                    <p>Drag image here to upload</p>
+                                            <!-- Dropzone Container -->
+                                            <div id="product-main-dropzone" class="dropzone border rounded p-3"
+                                                style="cursor:pointer; min-height:150px;">
+                                                <div class="dz-message" data-dz-message>
+                                                    <span>Drop image here or click to upload</span>
                                                 </div>
+                                            </div>
 
+                                            <!-- ✅ Hidden input outside Dropzone -->
+                                            <input type="hidden" name="image_id" id="uploadedImage">
 
-                                            </div> <span class="image-hint small text-end">
+                                            <span class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 512x512 px
                                             </span>
-                                            <div>
-                                                <!-- Progress Bar -->
-                                                <div id="upload-progress" class="progress mt-2 d-none w-50">
-                                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                                        style="width: 0%"></div>
-                                                </div>
 
 
-                                                <!-- Uploaded Image Preview -->
-                                                @php $image = $model->getFirstMedia('product_main_image') @endphp
-
-                                                <div id="uploaded-image"
-                                                    class="uploaded-image {{$image ? '' :'d-none '}}position-relative mt-1 d-flex align-items-center gap-2">
-                                                    <img src="{{ $image?->getUrl() }}" alt="Uploaded"
-                                                        class="img-fluid rounded"
-                                                        style="width: 50px; height: 50px; object-fit: cover;">
-                                                    <div id="file-details" class="file-details">
-                                                        <div class="file-name fw-bold">{{ $image?->file_name }}</div>
-                                                        <div class="file-size text-muted small">{{
-                                                            number_format($image?->size / 1024, 1) }}
-                                                            KB
-                                                        </div>
-                                                    </div>
-                                                    {{-- <button type="button" id="remove-image" --}} {{--
-                                                        class="btn btn-sm position-absolute text-danger remove-old-image"
-                                                        --}} {{-- data-image-id="{{ $image?->id }}" --}} {{--
-                                                        style="top: 5px; right: 5px; background-color: #FFEEED">--}}
-                                                        {{-- <i data-feather="trash"></i>--}}
-                                                        {{-- </button>--}}
-                                                </div>
-
-                                            </div>
                                         </div>
                                     </div>
                                     <!-- Multiple Images Upload -->
                                     <div class="col-md-12">
-                                        <div class="mb-1">
+                                        <div class="mb-2">
                                             <label class="form-label label-text" for="product-images">Category
                                                 Images</label>
 
-                                            <!-- Hidden real input -->
-                                            <input type="file" name="images[]" id="product-images"
-                                                class="form-control d-none" multiple accept="image/*">
-
-                                            <!-- Custom Upload Card -->
-                                            <div id="multi-upload-area" class="upload-card">
-                                                <div id="multi-upload-content">
+                                            <!-- Dropzone container -->
+                                            <div id="multi-dropzone" class="dropzone border rounded p-3"
+                                                style="cursor:pointer; min-height:150px;">
+                                                <div class="dz-message" data-dz-message>
                                                     <i data-feather="upload" class="mb-2"></i>
-                                                    <p>Drag images here to upload</p>
+                                                    <p>Drag images here or click to upload</p>
                                                 </div>
                                             </div>
+                                            <input type="hidden" name="images_ids[]" id="images_ids">
+                                            <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2"></div>
+
                                             <span class="image-hint small text-end">
-                                                Max size: 1MB | Dimensions: 512x512 px
-                                            </span>
-                                            <!-- Uploaded Images Preview Area -->
-                                            <div id="multi-uploaded-images" class=" mt-3"></div>
+                                                <<<<<<< HEAD Max size: 1MB | Dimensions: 512x512 px </span>
+                                                    <!-- Uploaded Images Preview Area -->
+                                                    <div id="multi-uploaded-images" class=" mt-3"></div>
                                         </div>
                                     </div>
                                     @if($model->getMedia('product_extra_images')->isNotEmpty())
@@ -178,18 +147,14 @@ $q->where('product_id', $model->id);
                                                 1024, 1) }}
                                                 KB
                                             </div>
-
+                                            =======
+                                            Max size: 1MB | Dimensions: 512x512 px
+                                            </span>
                                         </div>
-
-                                        <button type="button"
-                                            class="btn btn-sm position-absolute text-danger remove-old-image"
-                                            data-image-id="{{ $image->id }}"
-                                            style="top: 5px; right: 5px; background-color: #FFEEED">
-                                            <i data-feather="trash"></i>
-                                        </button>
                                     </div>
-                                    @endforeach
-                                    @endif
+                                    >>>>>>> 8d20577a9517603bebb3b19d92110ffdab81492b
+
+
                                     <!-- Category & Subcategory -->
                                     <div class="col-md-6">
                                         <div class="mb-1">
@@ -843,6 +808,151 @@ $q->where('product_id', $model->id);
 @endsection
 
 @section('page-script')
+<script>
+    Dropzone.autoDiscover = false;
+
+        const multiDropzone = new Dropzone("#multi-dropzone", {
+            url: "{{ route('media.store') }}",   // backend route for image upload
+            paramName: "file",
+            maxFiles: 10,
+            maxFilesize: 1, // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drag images here or click to upload",
+            init: function () {
+                let dz = this;
+
+                // ✅ Show existing images if editing
+                    @if($model->getMedia('product_extra_images')->isNotEmpty())
+                    @foreach($model->getMedia('product_extra_images') as $media)
+                {
+                    const multiMockFile = {
+                        name: "{{ $media->file_name }}",
+                        size: {{ $media->size ?? 12345 }},
+                        _hiddenInputId: "{{ $media->id }}"
+                    };
+
+                    dz.emit("addedfile", multiMockFile);
+                    dz.emit("thumbnail", multiMockFile, "{{ $media->getUrl() }}");
+                    dz.emit("success", multiMockFile);
+                    dz.emit("complete", multiMockFile);
+                    dz.files.push(multiMockFile);
+
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "images_ids[]";
+                    input.value = "{{ $media->id }}";
+                    input.id = "hidden-image-{{ $media->id }}";
+                    document.querySelector("#multi-uploaded-images").appendChild(input);
+                }
+                @endforeach
+                @endif
+
+
+                // ✅ On upload success
+                dz.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        file._hiddenInputId = response.data.id;
+
+                        let hiddenInput = document.createElement("input");
+                        hiddenInput.type = "hidden";
+                        hiddenInput.name = "images_ids[]";
+                        hiddenInput.value = response.data.id;
+                        hiddenInput.id = "hidden-image-" + response.data.id;
+                        document.querySelector("#multi-uploaded-images").appendChild(hiddenInput);
+                    }
+                });
+
+                // ✅ On remove
+                dz.on("removedfile", function (file) {
+                    if (file._hiddenInputId) {
+                        let hiddenInput = document.getElementById("hidden-image-" + file._hiddenInputId);
+                        if (hiddenInput) hiddenInput.remove();
+
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
+                });
+            }
+        });
+</script>
+
+<script>
+    Dropzone.autoDiscover = false;
+
+        const categoryDropzone = new Dropzone("#product-main-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            maxFilesize: 1, // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop image here or click to upload",
+            init: function () {
+                let dz = this;
+
+                // ✅ Show existing image if editing
+                @if(!empty($media = $model->getFirstMedia('product_main_image')))
+                // In categoryDropzone (single image)
+                let mainMockFile = {
+                    name: "{{ $media->file_name }}",
+                    size: {{ $media->size ?? 12345 }},
+                    _hiddenInputId: "{{ $media->id }}"
+                };
+                dz.emit("addedfile", mainMockFile);
+                dz.emit("thumbnail", mainMockFile, "{{ $media->getUrl() }}");
+                dz.emit("complete", mainMockFile);
+                dz.files.push(mainMockFile);
+
+                // also set hidden input
+                document.getElementById("uploadedImage").value = "{{ $media->id }}";
+                document.getElementById("uploaded-image").classList.remove("d-none");
+                @endif
+
+                // ✅ On success
+                dz.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedImage").value = response.data.id;
+                    }
+                });
+
+                // ✅ On remove
+                dz.on("removedfile", function (file) {
+                    console.log("Fs")
+
+                    document.getElementById("uploadedImage").value = "";
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
+                    document.getElementById("uploaded-image").classList.add("d-none");
+                });
+            }
+        });
+
+        // ✅ Manual remove
+        document.getElementById("remove-image").addEventListener("click", function () {
+            categoryDropzone.removeAllFiles(true);
+            document.getElementById("uploadedImage").value = "";
+            document.getElementById("uploaded-image").classList.add("d-none");
+        });
+</script>
+
 
 <script>
     $(document).ready(function () {

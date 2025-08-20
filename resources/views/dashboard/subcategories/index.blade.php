@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'SubCategory List')
-@section('main-page', 'Subcategories')
+@section('title', 'SubProduct List')
+@section('main-page', 'SubProducts')
 
 @section('vendor-style')
 {{-- Page Css files --}}
@@ -149,78 +149,97 @@
                         &times;
                     </button>
                 </form>
-
-                {{-- Filter Select - 10% on md+, half width on sm --}}
-                <div class="col-12 col-md-3">
-                    <select name="created_at" class="form-select filter-date">
-                        <option value="" disabled>Date</option>
-                        <option value="asc">Oldest</option>
-                        <option value="desc">Newest</option>
-                    </select>
-                </div>
-
-                {{-- Add Button - 20% on md+, full width on xs --}}
-                <div class="col-12 col-md-3 text-md-end">
-                    <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                        data-bs-target="#addSubCategoryModal">
-                        <i data-feather="plus"></i>
-                        Add New Subcategory
-                    </a>
-                </div>
-
             </div>
 
-
-            <table class="sub-category-list-table table">
-                <thead class="table-light">
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="select-all-checkbox">
-                        </th>
-                        <th>Name</th>
-                        <th>NO.of Categories</th>
-                        <th>Added Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-            </table>
-            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                <div class="delete-container">
-                    <p id="selected-count-text">0 Categories are selected</p>
-                    <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                        data-bs-target="#deleteSubCategoriesModal"
-                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
-                        <i data-feather="trash-2"></i> Delete Selected
-                    </button>
-                    <form style="display: none;" id="bulk-delete-form" method="POST"
-                        action="{{ route('categories.bulk-delete') }}">
-                        @csrf
-                        <button type="submit" id="delete-selected-btn"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                            <i data-feather="trash-2"></i> Delete Selected
-                        </button>
-                    </form>
-
-
-                </div>
+            {{-- Filter Select - 10% on md+, half width on sm --}}
+            <div class="col-6 col-md-2">
+                <select name="created_at" class="form-select filter-date">
+                    <option value="" disabled>Date</option>
+                    <option value="asc">Oldest</option>
+                    <option value="desc">Newest</option>
+                </select>
             </div>
-            @include('modals.delete',[
-            'id' => 'deleteSubCategoryModal',
-            'formId' => 'deleteSubCategoryForm',
-            'title' => 'Delete SubCategory',
-            ])
-            @include('modals.delete',[
-            'id' => 'deleteSubCategoriesModal',
-            'formId' => 'bulk-delete-form',
-            'title' => 'Delete Subcategories',
-            'confirmText' => 'Are you sure you want to delete this items?',
-            ])
-            @include('modals.subcategories.show-sub-category')
-            @include('modals.subcategories.edit-sub-category')
-            @include('modals.subcategories.add-sub-category')
+
+            {{-- Add Button - 20% on md+, full width on xs --}}
+            <div class="col-6 col-md-3 text-md-end">
+                <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
+                    data-bs-target="#addSubCategoryModal">
+                    <i data-feather="plus"></i>
+                    Add New Subproduct
+                </a>
+            </div>
+
+            {{-- Filter Select - 10% on md+, half width on sm --}}
+            <div class="col-12 col-md-3">
+                <select name="created_at" class="form-select filter-date">
+                    <option value="" disabled>Date</option>
+                    <option value="asc">Oldest</option>
+                    <option value="desc">Newest</option>
+                </select>
+            </div>
+
+            {{-- Add Button - 20% on md+, full width on xs --}}
+            <div class="col-12 col-md-3 text-md-end">
+                <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
+                    data-bs-target="#addSubCategoryModal">
+                    <i data-feather="plus"></i>
+                    Add New Subcategory
+                </a>
+            </div>
 
         </div>
-        <!-- list and filter end -->
+
+
+        <table class="sub-category-list-table table">
+            <thead class="table-light">
+                <tr>
+                    <th>
+                        <input type="checkbox" id="select-all-checkbox">
+                    </th>
+                    <th>Name</th>
+                    <th>NO.of Categories</th>
+                    <th>Added Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        </table>
+        <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+            <div class="delete-container">
+                <p id="selected-count-text">0 Categories are selected</p>
+                <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
+                    data-bs-target="#deleteSubCategoriesModal"
+                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
+                    <i data-feather="trash-2"></i> Delete Selected
+                </button>
+                <form style="display: none;" id="bulk-delete-form" method="POST"
+                    action="{{ route('categories.bulk-delete') }}">
+                    @csrf
+                    <button type="submit" id="delete-selected-btn"
+                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
+                </form>
+
+
+            </div>
+        </div>
+        @include('modals.delete',[
+        'id' => 'deleteSubCategoryModal',
+        'formId' => 'deleteSubCategoryForm',
+        'title' => 'Delete SubCategory',
+        ])
+        @include('modals.delete',[
+        'id' => 'deleteSubCategoriesModal',
+        'formId' => 'bulk-delete-form',
+        'title' => 'Delete Subcategories',
+        'confirmText' => 'Are you sure you want to delete this items?',
+        ])
+        @include('modals.subcategories.show-sub-category')
+        @include('modals.subcategories.edit-sub-category')
+        @include('modals.subcategories.add-sub-category')
+
+    </div>
+    <!-- list and filter end -->
 </section>
 <!-- users list ends -->
 @endsection
