@@ -1,7 +1,8 @@
 <div class="modal modal-slide-in new-user-modal fade" id="addPermissionModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="addPermissionForm" enctype="multipart/form-data" method="post" action="{{ route('permissions.store') }}">
+            <form id="addPermissionForm" enctype="multipart/form-data" method="post"
+                action="{{ route('permissions.store') }}">
                 @csrf
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
@@ -9,16 +10,16 @@
                 </div>
                 <div class="modal-body flex-grow-1">
                     <!-- Name in Arabic and English -->
-                    <div class="row mb-3">
-                        <div class="col-6">
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
                             <label class="form-label">Permission Name (EN)</label>
                             <input type="text" class="form-control" placeholder="Enter Permission Name(En)"
-                                   id="add-tag-name-en" name="group[en]"/>
+                                id="add-tag-name-en" name="group[en]" />
                         </div>
-                        <div class="col-6">
+                        <div class="col-md-6 mb-1">
                             <label class="form-label">Permission Name (AR)</label>
                             <input type="text" class="form-control" placeholder="Enter Permission Name(Ar)"
-                                   id="add-tag-name-ar" name="group[ar]"/>
+                                id="add-tag-name-ar" name="group[ar]" />
                         </div>
                     </div>
                 </div>
@@ -26,7 +27,8 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Add</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </form>

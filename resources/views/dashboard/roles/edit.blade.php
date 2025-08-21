@@ -9,32 +9,21 @@
 @endsection
 
 @section('content')
-<div class="container bg-white p-3">
+<div class="bg-white p-2">
     <!-- Add role form -->
     <form id="editRoleForm" class="row" method="post" action="{{ route('roles.update', $model->id) }}">
         @csrf
         @method("PUT")
         <div class="col-12">
             <label class="form-label" for="modalRoleName">Role Name</label>
-            <input
-                type="text"
-                id="modalRoleName"
-                name="role"
-                value="{{ $model->name }}"
-                class="form-control"
-                placeholder="Enter role name"
-                tabindex="-1"
-                data-msg="Please enter role name" />
+            <input type="text" id="modalRoleName" name="role" value="{{ $model->name }}" class="form-control"
+                placeholder="Enter role name" tabindex="-1" data-msg="Please enter role name" />
         </div>
 
         <!-- New Role Description field -->
         <div class="col-12 mt-1">
             <label class="form-label" for="modalRoleDescription">Role Description</label>
-            <textarea
-                id="modalRoleDescription"
-                name="modalRoleDescription"
-                class="form-control"
-                rows="3"
+            <textarea id="modalRoleDescription" name="modalRoleDescription" class="form-control" rows="3"
                 placeholder="Enter role description"
                 data-msg="Please enter a description for the role">{{ $model->description }}</textarea>
         </div>
@@ -61,34 +50,31 @@
                     </thead>
                     <tbody>
 
-                        @foreach($model->permissions->groupBy('group') as  $group => $groupPermissions)
-                            <tr>
-                                <td>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input row-checkbox" data-group="{{ $group }}"
-                                        @checked($groupPermissions->count() == 4 )
-                                        />
-                                        <span>{{ $group }}</span>
-                                    </div>
-                                </td>
+                        @foreach($model->permissions->groupBy('group') as $group => $groupPermissions)
+                        <tr>
+                            <td>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input row-checkbox"
+                                        data-group="{{ $group }}" @checked($groupPermissions->count() == 4 )
+                                    />
+                                    <span>{{ $group }}</span>
+                                </div>
+                            </td>
 
-                                @foreach(['Create', 'Read', 'Update', 'Delete'] as $action)
-                                    <td>
-                                        <div class="form-check">
+                            @foreach(['Create', 'Read', 'Update', 'Delete'] as $action)
+                            <td>
+                                <div class="form-check">
 
-                                            <input
-                                                type="checkbox"
-                                                class="form-check-input permission-checkbox {{ $group }}-checkbox"
-                                                name="permissions[]"
-                                                value="{{$group.$action }}"
-                                                id="{{ $group.$action }}"
-                                                @checked($groupPermissions->contains('name', $group . $action))
+                                    <input type="checkbox"
+                                        class="form-check-input permission-checkbox {{ $group }}-checkbox"
+                                        name="permissions[]" value="{{$group.$action }}" id="{{ $group.$action }}"
+                                        @checked($groupPermissions->contains('name', $group . $action))
 
-                                            />
-                                        </div>
-                                    </td>
-                                @endforeach
-                            </tr>
+                                    />
+                                </div>
+                            </td>
+                            @endforeach
+                        </tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -97,11 +83,11 @@
             <!-- Permission table -->
         </div>
         <div class="d-flex justify-content-between mt-2">
-        <button type="submit" class="btn btn-outline-danger">Delete</button>
-        <div class="d-flex gap-1">
-            <button type="submit" class="btn btn-outline-secondary">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save</button>
-        </div>
+            <button type="submit" class="btn btn-outline-danger">Delete</button>
+            <div class="d-flex gap-1">
+                <button type="submit" class="btn btn-outline-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
         </div>
     </form>
     <!--/ Add role form -->

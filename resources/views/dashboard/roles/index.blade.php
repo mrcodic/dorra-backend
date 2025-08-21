@@ -22,22 +22,20 @@
 @endsection
 
 @section('content')
-<div class="container bg-white p-2" style="min-height: 770px;">
+<div class="bg-white p-2" style="min-height: 770px;">
   <!-- Header actions -->
-  <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
-    <div class="mb-1 w-75">
-      <input type="text" class="form-control" placeholder="Search here" style="min-width: 250px;">
+  <div class="d-flex gap-1 align-items-center flex-wrap mb-2">
+    <div class="col-12 col-md-8">
+      <input type="text" class="form-control" placeholder="Search here">
     </div>
-    <div>
-      <a class="btn btn-outline-primary" href="/roles/create">
-        <i data-feather="plus" class="me-25"></i> Add New Role
-      </a>
-    </div>
+    <a class="btn btn-outline-primary col-12 col-md-3" href="/roles/create">
+      <i data-feather="plus"></i> Add New Role
+    </a>
   </div>
 
   <!-- Role cards -->
   <div class="row">
-      @foreach($associatedData['roles'] as $role)
+    @foreach($associatedData['roles'] as $role)
 
     <div class="col-xl-4 col-lg-6 col-md-6">
       <div class="card">
@@ -46,29 +44,31 @@
 
           <div class="d-flex justify-content-between">
             <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                @foreach($role->users as $user)
-              <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Jimmy Ressula" class="avatar avatar-sm pull-up">
-                <img class="rounded-circle" src="{{$user->getFirstMedia('admins') ?? asset('images/default-user.png')}}" alt="Avatar" />
+              @foreach($role->users as $user)
+              <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Jimmy Ressula"
+                class="avatar avatar-sm pull-up">
+                <img class="rounded-circle" src="{{$user->getFirstMedia('admins') ?? asset('images/default-user.png')}}"
+                  alt="Avatar" />
               </li>
-                @endforeach
+              @endforeach
             </ul>
             <span>{{ $role->users_count }} Users</span>
           </div>
-                <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
-                    <div class="role-heading">
-                        <h4 class="">{{ $role->name }}</h4>
-                        <a href="{{ route("roles.edit",$role->id) }}" class="role-edit-modal" >
-                            Edit Role
-                        </a>
-                    </div>
+          <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
+            <div class="role-heading">
+              <h4 class="">{{ $role->name }}</h4>
+              <a href="{{ route('roles.edit',$role->id) }}" class="role-edit-modal">
+                Edit Role
+              </a>
+            </div>
 
-                </div>
+          </div>
 
         </div>
 
       </div>
     </div>
-      @endforeach
+    @endforeach
 
     {{-- Repeat for more role cards --}}
   </div>
