@@ -86,7 +86,9 @@ class PaymentController extends Controller
             $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
         } elseif (!$isSuccess && $isPending) {
             $paymentStatus = StatusEnum::PENDING;
-   $transaction->order?->delete();
+            Log::info('Deleting order', ['order' => $transaction->order]);
+
+            $transaction->order?->forceDelete();
             $transaction->update([
                 'payment_status' => $paymentStatus,
                 'payment_method' => $paymentMethod,
@@ -95,7 +97,9 @@ class PaymentController extends Controller
 
         } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
-   $transaction->order?->delete();
+            Log::info('dgfdgd order', ['order' => $transaction->order]);
+
+            $transaction->order?->forceDelete();
         }
 
         Log::info('Failed to create payment intention', [
