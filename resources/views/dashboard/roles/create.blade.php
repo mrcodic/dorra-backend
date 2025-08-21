@@ -9,51 +9,31 @@
 @endsection
 
 @section('content')
-<div class="container bg-white p-3">
+<div class="bg-white p-2">
     <!-- Add role form -->
     <form id="addRoleForm" class="row" method="post" action="{{ route('roles.store') }}">
         @csrf
-        <div class="col-6">
+        <div class="col-md-6 mb-1">
             <label class="form-label" for="modalRoleName">Role Name (EN)</label>
-            <input
-                type="text"
-                id="modalRoleName"
-                name="name[en]"
-                class="form-control"
-                placeholder="Enter role name in english"
-                tabindex="-1"
-                data-msg="Please enter role name" />
+            <input type="text" id="modalRoleName" name="name[en]" class="form-control"
+                placeholder="Enter role name in english" tabindex="-1" data-msg="Please enter role name" />
         </div>
-        <div class="col-6">
+        <div class="col-md-6 mb-1">
             <label class="form-label" for="modalRoleName">Role Name (Ar)</label>
-            <input
-                type="text"
-                id="modalRoleName"
-                name="name[ar]"
-                class="form-control"
-                placeholder="Enter role name in arabic"
-                tabindex="-1"
-                data-msg="Please enter role name" />
+            <input type="text" id="modalRoleName" name="name[ar]" class="form-control"
+                placeholder="Enter role name in arabic" tabindex="-1" data-msg="Please enter role name" />
         </div>
 
         <!-- New Role Description field -->
-        <div class="col-6 mt-1">
+        <div class="col-md-6 mt-1">
             <label class="form-label" for="modalRoleDescription">Role Description (EN)</label>
-            <textarea
-                id="modalRoleDescription"
-                name="description[en]"
-                class="form-control"
-                rows="3"
+            <textarea id="modalRoleDescription" name="description[en]" class="form-control" rows="3"
                 placeholder="Enter role description in english"
                 data-msg="Please enter a description for the role"></textarea>
         </div>
-        <div class="col-6 mt-1">
+        <div class="col-md-6 mt-1">
             <label class="form-label" for="modalRoleDescription">Role Description (AR)</label>
-            <textarea
-                id="modalRoleDescription"
-                name="description[ar]"
-                class="form-control"
-                rows="3"
+            <textarea id="modalRoleDescription" name="description[ar]" class="form-control" rows="3"
                 placeholder="Enter role description in arabic"
                 data-msg="Please enter a description for the role "></textarea>
         </div>
@@ -80,38 +60,35 @@
                     </thead>
                     <tbody>
 
-                    @foreach($associatedData['permissions'] as $group => $groupPermissions)
+                        @foreach($associatedData['permissions'] as $group => $groupPermissions)
                         <tr>
                             <td>
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input row-checkbox" data-group="{{ $group }}" />
+                                    <input type="checkbox" class="form-check-input row-checkbox"
+                                        data-group="{{ $group }}" />
 
                                     <span>{{ $group }}</span>
                                 </div>
                             </td>
 
                             @foreach(\App\Enums\Permission\PermissionAction::values() as $action)
-                                @php
-                                    $permissionKey = strtolower($group) . '_' . strtolower($action);
-                                    $isAvailable = in_array($permissionKey, $groupPermissions->pluck('name')->toArray());
-                                @endphp
+                            @php
+                            $permissionKey = strtolower($group) . '_' . strtolower($action);
+                            $isAvailable = in_array($permissionKey, $groupPermissions->pluck('name')->toArray());
+                            @endphp
 
-                                <td>
-                                    <div class="form-check">
-                                            <input
-                                                type="checkbox"
-                                                class="form-check-input permission-checkbox {{ $group }}-checkbox"
-                                                name="permissions[]"
-                                                value="{{strtolower($group).'_'.strtolower($action) }}"
-                                                id="{{ $group.$action }}"
-                                                @disabled(!$isAvailable)
-                                            />
+                            <td>
+                                <div class="form-check">
+                                    <input type="checkbox"
+                                        class="form-check-input permission-checkbox {{ $group }}-checkbox"
+                                        name="permissions[]" value="{{strtolower($group).'_'.strtolower($action) }}"
+                                        id="{{ $group.$action }}" @disabled(!$isAvailable) />
 
-                                    </div>
-                                </td>
+                                </div>
+                            </td>
                             @endforeach
                         </tr>
-                    @endforeach
+                        @endforeach
 
                     </tbody>
                 </table>

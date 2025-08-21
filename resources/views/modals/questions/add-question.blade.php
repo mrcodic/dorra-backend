@@ -10,25 +10,29 @@
                 </div>
                 <div class="modal-body flex-grow-1">
                     <!-- Question in Arabic and English -->
-                    <div class="row mb-3">
-                        <div class="col-6">
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Question (EN)</label>
-                            <textarea class="form-control" id="add-category-description-en" placeholder="Write your question here(En)" name="description[en]" rows="2"></textarea>
+                            <textarea class="form-control" id="add-category-description-en"
+                                placeholder="Write your question here(En)" name="description[en]" rows="2"></textarea>
                         </div>
-                        <div class="col-6">
+                        <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Question (AR)</label>
-                            <textarea class="form-control" id="add-category-description-ar" placeholder="Write your question here(Ar)" name="description[ar]" rows="2"></textarea>
+                            <textarea class="form-control" id="add-category-description-ar"
+                                placeholder="Write your question here(Ar)" name="description[ar]" rows="2"></textarea>
                         </div>
                     </div>
-                                        <!-- Answer in Arabic and English -->
-                    <div class="row mb-3">
-                        <div class="col-6">
+                    <!-- Answer in Arabic and English -->
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Answer (EN)</label>
-                            <textarea class="form-control" id="add-category-description-en" placeholder="Enter Answer(En)" name="description[en]" rows="2"></textarea>
+                            <textarea class="form-control" id="add-category-description-en"
+                                placeholder="Enter Answer(En)" name="description[en]" rows="2"></textarea>
                         </div>
-                        <div class="col-6">
+                        <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Answer (AR)</label>
-                            <textarea class="form-control" id="add-category-description-ar" placeholder="Enter Answer(Ar)" name="description[ar]" rows="2"></textarea>
+                            <textarea class="form-control" id="add-category-description-ar"
+                                placeholder="Enter Answer(Ar)" name="description[ar]" rows="2"></textarea>
                         </div>
                     </div>
 
@@ -38,7 +42,8 @@
                     <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="saveChangesButton">
                         <span class="btn-text">Save</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                            aria-hidden="true"></span>
                     </button>
 
                 </div>
