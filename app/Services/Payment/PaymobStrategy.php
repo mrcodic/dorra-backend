@@ -75,15 +75,6 @@ use Illuminate\Support\Facades\Log;
             ]);
             return false;
         }
-        $cart = Arr::get($data, 'cart');
-        $cart?->items()->delete();
-        if ($cart && $cart->discountCode) {
-            $cart->discountCode->increment('used');
-        }
-        $cart?->update(['price' => 0, 'discount_amount' => 0, 'discount_code_id' => null]);
-
-
-
         $orderData = [
             'checkout_url' => $this->baseUrl . '/unifiedcheckout/?publicKey='
                 . $this->config['public_key']

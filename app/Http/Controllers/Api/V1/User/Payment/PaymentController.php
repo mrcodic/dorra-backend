@@ -11,10 +11,12 @@ use App\Models\Guest;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
+use App\Services\CartService;
 use App\Services\Payment\PaymentGatewayFactory;
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
@@ -64,7 +66,7 @@ class PaymentController extends Controller
         return Response::api(data: $paymentDetails);
     }
 
-    public function handleCallback(Request $request)
+    public function handleCallback(Request $request, CartService $cartService)
     {
         $data = $request->json()->all();
         $paymentMethod = data_get($data, 'obj.source_data.sub_type');
@@ -88,11 +90,20 @@ class PaymentController extends Controller
             'paymobOrderId' => $paymobOrderId,
             'status' => $paymentStatus,
         ]);
-        $transaction->update([
-            'payment_status' => $paymentStatus,
-            'payment_method' => $paymentMethod,
-            'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
-        ]);
+        $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus,$data, $cartService) {
+            $cart = $cartService->getCurrentUserOrGuestCart();
+            $cart?->items()->delete();
+            if ($cart && $cart->discountCode) {
+                $cart->discountCode->increment('used');
+            }
+            $cart?->update(['price' => 0, 'discount_amount' => 0, 'discount_code_id' => null]);
+            $transaction->update([
+                'payment_status' => $paymentStatus,
+                'payment_method' => $paymentMethod,
+                'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
+            ]);
+        });
+
         return Response::api();
     }
 
