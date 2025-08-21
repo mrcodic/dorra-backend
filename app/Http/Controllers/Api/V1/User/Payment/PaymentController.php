@@ -84,17 +84,20 @@ class PaymentController extends Controller
         if ($isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::PAID;
             $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
-        } elseif (!$isSuccess && $isPending) {
+
+        } elseif ($isPending) {
             $paymentStatus = StatusEnum::PENDING;
-            $transaction->order->delete();
-        } elseif ($isSuccess && $isPending) {
-            $paymentStatus = StatusEnum::PENDING;
-            $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
-        }
-        elseif (!$isSuccess && !$isPending) {
-            $transaction->order->delete();
+            $transaction->update([
+                'payment_status'   => $paymentStatus,
+                'payment_method'   => $paymentMethod,
+                'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
+            ]);
+
+        } else {
             $paymentStatus = StatusEnum::UNPAID;
+            $transaction->order?->delete();
         }
+
         Log::info('Failed to create payment intention', [
             'paymobOrderId' => $paymobOrderId,
             'status' => $paymentStatus,
