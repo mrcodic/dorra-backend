@@ -13,27 +13,26 @@
                         <!-- Mockup Name -->
                         <div class="form-group mb-2">
                             <label for="edit-mockup-name" class="label-text mb-1">Mockup Name</label>
-                            <input type="text" id="edit-mockup-name" class="form-control" name="name" placeholder="Mockup Name">
+                            <input type="text" id="edit-mockup-name" class="form-control" name="name"
+                                placeholder="Mockup Name">
                         </div>
 
                         <!-- Mockup Type -->
                         <div class="form-group mb-2">
-                            <label for="mockup-type" class="label-text mb-1 d-block">Mockup Type</label>
-                        <div class="d-flex flex-wrap gap-3">
-                            @foreach(\App\Models\Type::all(['id','value']) as $type)
-                                <label class="radio-box d-flex align-items-center gap-1">
-                                    <input
-                                        class="form-check-input type-checkbox"
-                                        type="checkbox"
-                                        name="types[]"
-                                        value="{{ $type->value }}"
-                                        data-type-id = {{ $type->id }}
+                            <label for="mockup-type" class="label-text mb-1">Mockup Type</label>
+                            <div class="row">
+                                @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                <div class="col-md-4 mb-1">
+                                    <label class="radio-box">
+                                        <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
+                                            value="{{ $type->value }}" data-type-id={{ $type->id }}
                                         data-type-name="{{ strtolower($type->value->name) }}"
-                                    >
-                                    <span>{{ $type->value->label() }}</span>
-                                </label>
-                            @endforeach
-                        </div>
+                                        >
+                                        <span>{{ $type->value->label() }}</span>
+                                    </label>
+                                </div>
+                                @endforeach
+                            </div>
                         </div>
 
 
@@ -43,9 +42,9 @@
                             <select id="edit-products-select" name="product_id" class="form-select">
                                 <option value="" disabled>Choose product</option>
                                 @foreach($associatedData['products'] as $product)
-                                    <option value="{{ $product->id }}">
-                                        {{ $product->getTranslation('name', app()->getLocale()) }}
-                                    </option>
+                                <option value="{{ $product->id }}">
+                                    {{ $product->getTranslation('name', app()->getLocale()) }}
+                                </option>
                                 @endforeach
                             </select>
                         </div>
@@ -54,7 +53,8 @@
                         <div class="form-group mb-2">
                             <label class="label-text mb-1 d-block">Colors</label>
                             <div class="d-flex flex-wrap align-items-center gap-1">
-                                <button type="button" id="openEditColorPicker" class="gradient-edit-picker-trigger border"></button>
+                                <button type="button" id="openEditColorPicker"
+                                    class="gradient-edit-picker-trigger border"></button>
                                 <div id="edit-selected-colors" class="d-flex gap-1 flex-wrap align-items-center">
                                     <div id="previous-colors" class="d-flex flex-wrap gap-1"></div>
                                 </div>
@@ -78,7 +78,8 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Save Changes</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </form>

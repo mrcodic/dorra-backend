@@ -4,240 +4,229 @@
 @section('main-page', 'Mockups')
 
 @section('vendor-style')
-    {{-- Page Css files --}}
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
-    <style>
-        .gradient-picker-trigger {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-image: url('/images/AddColor.svg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            border: 1px solid #ccc;
-            cursor: pointer;
-            position: relative;
-        }
+{{-- Page Css files --}}
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+<style>
+    .gradient-picker-trigger {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-image: url('/images/AddColor.svg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        position: relative;
+    }
 
-        /* Hide any accidental injected .pcr-button */
-        .gradient-picker-trigger .pcr-button {
-            display: none !important;
-        }
+    /* Hide any accidental injected .pcr-button */
+    .gradient-picker-trigger .pcr-button {
+        display: none !important;
+    }
 
 
-        .selected-color-wrapper {
-            width: 28px;
-            height: 28px;
-        }
+    .selected-color-wrapper {
+        width: 28px;
+        height: 28px;
+    }
 
-        .selected-color-dot {
-            width: 100%;
-            height: 100%;
-            padding: 1px;
-            border-radius: 50%;
-            border: 2px solid #ccc;
-            box-sizing: border-box;
-            background-clip: content-box;
-        }
+    .selected-color-dot {
+        width: 100%;
+        height: 100%;
+        padding: 1px;
+        border-radius: 50%;
+        border: 2px solid #ccc;
+        box-sizing: border-box;
+        background-clip: content-box;
+    }
 
-        .selected-color-inner {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-        }
+    .selected-color-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+    }
 
-        .remove-color-btn {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: #F4F6F6 !important;
-            color: #424746 !important;
-            border-radius: 5px;
-            width: 16px;
-            height: 16px;
-            font-size: 16px;
-            line-height: 1;
-            padding: 1px;
-            display: none;
-        }
+    .remove-color-btn {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #F4F6F6 !important;
+        color: #424746 !important;
+        border-radius: 5px;
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        line-height: 1;
+        padding: 1px;
+        display: none;
+    }
 
-        .selected-color-wrapper:hover .remove-color-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .gradient-edit-picker-trigger {
-                   width: 40px;
-                   height: 40px;
-                   border-radius: 50%;
-                   background-image: url('/images/AddColor.svg') !important;
-                   /* force override */
-                   background-size: cover;
-                   background-position: center;
-                   background-repeat: no-repeat;
-                   border: 1px solid #ccc;
-                   cursor: pointer;
-                   position: relative;
-               }
+    .selected-color-wrapper:hover .remove-color-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        /* Hide any accidental injected .pcr-button */
-        .gradient-edit-picker-trigger .pcr-button {
-            display: none !important;
-        }
-    </style>
+    .gradient-edit-picker-trigger {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-image: url('/images/AddColor.svg') !important;
+        /* force override */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        position: relative;
+    }
+
+    /* Hide any accidental injected .pcr-button */
+    .gradient-edit-picker-trigger .pcr-button {
+        display: none !important;
+    }
+</style>
 
 @endsection
 
 @section('page-style')
-    {{-- Page Css files --}}
-    <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+{{-- Page Css files --}}
+<link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 @endsection
 
 @section('content')
-    <!-- users list start -->
-    <section class="">
+<!-- users list start -->
+<section class="">
 
-        <!-- list and filter start -->
-        <div class="card">
-            <div class="card-body ">
+    <!-- list and filter start -->
+    <div class="card">
+        <div class="card-body ">
 
-                <div class="row">
-                    <div class="col-md-4 user_role"></div>
-                    <div class="col-md-4 user_plan"></div>
-                    <div class="col-md-4 user_status"></div>
-                </div>
+            <div class="row">
+                <div class="col-md-4 user_role"></div>
+                <div class="col-md-4 user_plan"></div>
+                <div class="col-md-4 user_status"></div>
             </div>
-            <div class=" pt-0">
-                <div class="row gx-2  align-items-center px-1">
-                    {{-- Filters Row --}}
-                    <div class="row gx-2 ">
-                        {{-- Search Input --}}
-                        <div class="col-12 col-md-6">
-                            <form action="" method="get" class="position-relative">
-                                <i data-feather="search"
-                                   class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
-                                <input
-                                    type="text"
-                                    class="form-control ps-5 border rounded-3"
-                                    name="search_value"
-                                    id="search-category-form"
-                                    placeholder="Search mockup..."
-                                    style="height: 38px;">
-                            </form>
-                        </div>
+        </div>
+        <div class=" pt-0">
+            <div class="row align-items-center px-1">
+                {{-- Filters Row --}}
+                <div class="px-1 d-flex flex-wrap align-items-center gap-1">
+                    {{-- Search Input --}}
+                    <form action="" method="get" class="position-relative col-12 col-md-4 col-lg-6">
+                        <i data-feather="search"
+                            class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                            id="search-category-form" placeholder="Search mockup..." style="height: 38px;">
+                    </form>
 
 
 
-                        {{-- Product Filter --}}
-                        <div class="col-6 col-md-2">
-                            <select name="product" class="form-select filter-product select2"
-                                    data-placeholder="Product">
-                                <option value="">Product</option>
-                                @foreach($associatedData['products'] as $product)
-                                    <option
-                                        value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        {{-- Type Filter --}}
-                        <div class="col-6 col-md-2">
-                            <select name="type" class="form-select filter-type select2" data-placeholder="Type">
-                                <option value="">Type</option>
-                                @foreach(\App\Models\Type::all(['id','value']) as $type)
-                                <option value="{{ $type->id }}">{{ $type->value->label() }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-6 col-md-2">
-                            <a class="btn btn-outline-secondary"  data-bs-toggle="modal"
-                               data-bs-target="#addMockupModal" href="">
-                                <i data-feather="plus"></i>
-                                Create Mockup
-                            </a>
-                        </div>
+                    {{-- Product Filter --}}
+                    <div class="col-12 col-md-2 col-lg-1">
+                        <select name="product" class="form-select filter-product select2" data-placeholder="Product">
+                            <option value="">Product</option>
+                            @foreach($associatedData['products'] as $product)
+                            <option value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale())
+                                }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-
+                    {{-- Type Filter --}}
+                    <div class="col-12 col-md-2 col-lg-1">
+                        <select name="type" class="form-select filter-type select2" data-placeholder="Type">
+                            <option value="">Type</option>
+                            @foreach(\App\Models\Type::all(['id','value']) as $type)
+                            <option value="{{ $type->id }}">{{ $type->value->label() }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="mockups-container">
-                    @include("dashboard.partials.filtered-mockups",['associatedData' => $associatedData])
-                </div>
-                <div id="pagination-container">
-                    @if ($data instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                        <div class="mt-2 px-1">
-                            {{ $data->withQueryString()->links('pagination::bootstrap-5') }}
-                        </div>
-                    @endif
+                    {{-- create mockup button --}}
+                    <a class="btn btn-outline-primary col-12 col-md-3 col-lg-2" data-bs-toggle="modal"
+                        data-bs-target="#addMockupModal" href="">
+                        <i data-feather="plus"></i>
+                        Create Mockup
+                    </a>
                 </div>
             </div>
 
-            <!-- Bulk Delete Bar -->
-            <div id="bulk-delete-container" class="my-2 bulk-delete-container " style="display: none;">
-                <div class="delete-container mx-auto">
-                    <p id="selected-count-text">0 Mockups are selected</p>
-
-                    <button type="button" id="delete-selected-btn"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteMockupsModal">
-                        <i data-feather="trash-2"></i> Delete Selected
-                    </button>
-                </div>
+            <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="mockups-container">
+                @include("dashboard.partials.filtered-mockups",['associatedData' => $associatedData])
             </div>
-
-
+            <div id="pagination-container">
+                @if ($data instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                <div class="mt-2 px-1">
+                    {{ $data->withQueryString()->links('pagination::bootstrap-5') }}
+                </div>
+                @endif
+            </div>
         </div>
 
-        @include('modals.mockups.show-mockup')
-        @include('modals.delete',[
-        'id' => 'deleteMockupModal',
-        'formId' => 'deleteMockupForm',
-        'title' => 'Delete Mockup',
-        ])
-        @include('modals.delete',[
-        'id' => 'deleteMockupsModal',
-        'formId' => 'bulk-delete-form',
-        'title' => 'Delete Mockups',
-        'confirmText' => 'Are you sure you want to delete this items?',
-        ])
-        @include('modals.mockups.add-mockup')
-        <!-- list and filter end -->
-    </section>
-    <!-- users list ends -->
+        <!-- Bulk Delete Bar -->
+        <div id="bulk-delete-container" class="my-2 bulk-delete-container " style="display: none;">
+            <div class="delete-container mx-auto">
+                <p id="selected-count-text">0 Mockups are selected</p>
+
+                <button type="button" id="delete-selected-btn"
+                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns"
+                    data-bs-toggle="modal" data-bs-target="#deleteMockupsModal">
+                    <i data-feather="trash-2"></i> Delete Selected
+                </button>
+            </div>
+        </div>
+
+
+    </div>
+
+    @include('modals.mockups.show-mockup')
+    @include('modals.delete',[
+    'id' => 'deleteMockupModal',
+    'formId' => 'deleteMockupForm',
+    'title' => 'Delete Mockup',
+    ])
+    @include('modals.delete',[
+    'id' => 'deleteMockupsModal',
+    'formId' => 'bulk-delete-form',
+    'title' => 'Delete Mockups',
+    'confirmText' => 'Are you sure you want to delete this items?',
+    ])
+    @include('modals.mockups.add-mockup')
+    <!-- list and filter end -->
+</section>
+<!-- users list ends -->
 @endsection
 
 @section('vendor-script')
-    {{-- Vendor js files --}}
-    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+{{-- Vendor js files --}}
+<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
 @endsection
 
 @section('page-script')
-    <script src="{{ asset('js/scripts/pages/app-mockup-list.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/scripts/pages/app-mockup-list.js') }}?v={{ time() }}"></script>
 
-    <script>
-        handleAjaxFormSubmit("#editMockupForm", {
+<script>
+    handleAjaxFormSubmit("#editMockupForm", {
             successMessage: "Mockup Updated Successfully",
             onSuccess: function() {
                 $('#editMockupModal').modal('hide');
@@ -259,12 +248,12 @@
 
 
         const locale = "{{ app()->getLocale() }}";
-    </script>
+</script>
 
 
-    {{-- Page js files --}}
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+{{-- Page js files --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
             const bulkContainer = document.getElementById("bulk-delete-container");
 
             function updateSelectionStatus() {
@@ -280,6 +269,6 @@
                 cb.addEventListener("change", updateSelectionStatus);
             });
         });
-    </script>
+</script>
 
 @endsection

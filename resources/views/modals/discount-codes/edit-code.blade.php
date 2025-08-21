@@ -12,27 +12,30 @@
                 <div class="modal-body flex-grow-1">
                     <div class="form-group mb-2">
                         <label for="discountType" class="label-text mb-1">Type</label>
-                        <input type="text" id="discountType" class="form-control"  disabled>
+                        <input type="text" id="discountType" class="form-control" disabled>
 
                     </div>
 
                     <div class="form-group mb-2">
                         <label for="prefix" class="label-text mb-1">Prefix</label>
-                        <input type="text" name="code" id="prefix" class="form-control" placeholder="Add prefix here" disabled>
+                        <input type="text" name="code" id="prefix" class="form-control" placeholder="Add prefix here"
+                            disabled>
                     </div>
 
                     <div class="form-group mb-2">
                         <label for="discountValue" class="label-text mb-1">Discount Value</label>
-                        <input type="text" name="value" id="discountValue" class="form-control" placeholder="Enter discount value here" disabled>
+                        <input type="text" name="value" id="discountValue" class="form-control"
+                            placeholder="Enter discount value here" disabled>
                     </div>
 
 
-                    <div class="d-flex gap-1">
-                        <div class="form-group mb-2 col-6">
+                    <div class="d-flex flex-column flex-md-row gap-1">
+                        <div class="form-group col-12 col-md-6">
                             <label for="restrictions" class="label-text mb-1">Restrictions</label>
-                            <input type="number" name="max_usage" id="restrictions" class="form-control" placeholder="Enter number of usage times">
+                            <input type="number" name="max_usage" id="restrictions" class="form-control"
+                                placeholder="Enter number of usage times">
                         </div>
-                        <div class="form-group mb-2 col-6">
+                        <div class="form-group mb-2 col-12 col-md-6">
                             <label for="expiryDate" class="label-text mb-1">Expiry Date</label>
                             <input type="date" name="expired_at" id="expiryDate" class="form-control">
                         </div>
@@ -41,7 +44,7 @@
                     <!-- Radio switch for Products or Categories -->
                     <div class="form-group mb-2">
                         <label for="scopeType" class="label-text mb-1">Type</label>
-                        <input type="text" id="scopeType" class="form-control"  disabled>
+                        <input type="text" id="scopeType" class="form-control" disabled>
 
                     </div>
 
@@ -61,8 +64,9 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                            <span >Save Changes</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                            <span>Save Changes</span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                role="status" aria-hidden="true"></span>
                         </button>
                     </div>
 
@@ -144,11 +148,3 @@
         });
     });
 </script>
-
-
-
-
-
-
-
-

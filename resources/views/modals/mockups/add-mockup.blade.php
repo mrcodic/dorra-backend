@@ -1,83 +1,81 @@
-    <div class="modal modal-slide-in new-user-modal fade" id="addMockupModal">
-        <div class="modal-dialog">
-            <div class="add-new-user modal-content pt-0">
-                <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
-                    @csrf
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
-                    <div class="modal-header mb-1">
-                        <h5 class="modal-title" id="exampleModalLabel">Add Mockup</h5>
-                    </div>
-                    <div class="modal-body flex-grow-1">
-                        <div class="">
-                            <div class="form-group mb-2">
-                                <label for="templateName" class="label-text mb-1">Mockup Name</label>
-                                <input type="text" id="templateName" class="form-control" name="name"
-                                    placeholder="Mockup Name">
-                            </div>
+<div class="modal modal-slide-in new-user-modal fade" id="addMockupModal">
+    <div class="modal-dialog">
+        <div class="add-new-user modal-content pt-0">
+            <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
+                @csrf
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                <div class="modal-header mb-1">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Mockup</h5>
+                </div>
+                <div class="modal-body flex-grow-1">
+                    <div class="">
+                        <div class="form-group mb-2">
+                            <label for="templateName" class="label-text mb-1">Mockup Name</label>
+                            <input type="text" id="templateName" class="form-control" name="name"
+                                placeholder="Mockup Name">
+                        </div>
 
-                            <div class="form-group mb-2">
-                                <label for="mockup-type" class="label-text mb-1 d-block">Mockup Type</label>
-                                <div class="d-flex flex-wrap gap-3">
-                                    @foreach(\App\Models\Type::all(['id','value']) as $type)
-                                        <label class="radio-box d-flex align-items-center gap-1">
-                                            <input
-                                                class="form-check-input type-checkbox"
-                                                type="checkbox"
-                                                name="types[]"
-                                                value="{{ $type->value }}"
-                                                data-type-name="{{ strtolower($type->value->name) }}"
-                                            >
-                                            <span>{{ $type->value->label() }}</span>
-                                        </label>
-                                    @endforeach
+                        <div class="form-group mb-2">
+                            <label for="mockup-type" class="label-text mb-1">Mockup Type</label>
+                            <div class="row">
+                                @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                <div class="col-md-4 mb-1">
+                                    <label class="radio-box">
+                                        <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
+                                            value="{{ $type->value }}"
+                                            data-type-name="{{ strtolower($type->value->name) }}">
+                                        <span>{{ $type->value->label() }}</span>
+                                    </label>
                                 </div>
+                                @endforeach
                             </div>
+                        </div>
 
 
-                            <div class="form-group mb-2">
-                                <label for="productsSelect" class="label-text mb-1">Product</label>
-                                <select id="productsSelect" name="product_id" class="form-select">
-                                    <option value="" disabled selected>Choose product</option>
-                                    @foreach($associatedData['products'] as $product)
-                                    <option
-                                        value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale()) }}</option>
-                                    @endforeach
-                                </select>
+                        <div class="form-group mb-2">
+                            <label for="productsSelect" class="label-text mb-1">Product</label>
+                            <select id="productsSelect" name="product_id" class="form-select">
+                                <option value="" disabled selected>Choose product</option>
+                                @foreach($associatedData['products'] as $product)
+                                <option value="{{ $product->id }}">{{ $product->getTranslation('name',
+                                    app()->getLocale()) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="label-text mb-1 d-block">Colors</label>
+                            <div class="d-flex flex-wrap align-items-center gap-1">
+                                <button type="button" id="openColorPicker"
+                                    class="gradient-picker-trigger border"></button>
+
+
+                                <span id="selected-colors" class=" d-flex gap-1 flex-wrap align-items-center"></span>
                             </div>
-                            <div class="mb-2">
-                                <label class="label-text mb-1 d-block">Colors</label>
-                                <div class="d-flex flex-wrap align-items-center gap-1">
-                                    <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+                            {{-- <input type="hidden" name="colors[]" id="colorsInput">--}}
+                            <div id="colorsInputContainer"></div>
 
+                        </div>
 
-                                    <span id="selected-colors" class=" d-flex gap-1 flex-wrap align-items-center"></span>
-                                </div>
-    {{--                            <input type="hidden" name="colors[]" id="colorsInput">--}}
-                                <div id="colorsInputContainer"></div>
-
+                        <div class="col-md-12">
+                            <div id="fileInputsContainer" class="dynamic-upload-container mb-1">
                             </div>
-
-                            <div class="col-md-12">
-                                <div id="fileInputsContainer" class="dynamic-upload-container mb-1">
-                                </div>
-                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer border-top-0">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                             <span class="btn-text">Create</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                                aria-hidden="true"></span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                role="status" aria-hidden="true"></span>
                         </button>
                     </div>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
+</div>
 
-        <script>
-
-                document.addEventListener('DOMContentLoaded', function () {
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
                 const checkboxes = document.querySelectorAll('.type-checkbox');
                 const fileInputsContainer = document.getElementById('fileInputsContainer');
 
@@ -198,14 +196,14 @@
                 checkboxes.forEach(checkbox => checkbox.addEventListener('change', toggleCheckboxes));
                 toggleCheckboxes(); // Init
             });
-        </script>
+</script>
 
 
 
 
 
-    <script>
-        $(document).ready(function() {
+<script>
+    $(document).ready(function() {
 
             handleAjaxFormSubmit("#addMockupForm", {
                 successMessage: "Mockup Created Successfully",
@@ -395,4 +393,4 @@
 
     });
 
-    </script>
+</script>

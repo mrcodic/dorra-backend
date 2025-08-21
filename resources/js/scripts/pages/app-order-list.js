@@ -18,12 +18,12 @@ var dt_user_table = $(".order-list-table").DataTable({
         {
             data: "tags",
             render: function (data, type, row) {
-                if (!Array.isArray(JSON.parse(data))) return '';
+                if (!Array.isArray(JSON.parse(data))) return "";
                 return `
             <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                 ${JSON.parse(data)
                     .map(
-                        tag => `
+                        (tag) => `
                         <span style="
                             background-color: #FCF8FC;
                             color: #000;
