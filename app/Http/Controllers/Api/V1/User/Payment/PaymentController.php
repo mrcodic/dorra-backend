@@ -87,7 +87,7 @@ class PaymentController extends Controller
 
         } elseif (!$isSuccess && $isPending) {
             $paymentStatus = StatusEnum::PENDING;
-            $transaction->order?->delete();
+            $transaction->order()->delete();
             $transaction->update([
                 'payment_status'   => $paymentStatus,
                 'payment_method'   => $paymentMethod,
@@ -96,6 +96,7 @@ class PaymentController extends Controller
 
         } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
+            
             $transaction->order?->delete();
         }
 
