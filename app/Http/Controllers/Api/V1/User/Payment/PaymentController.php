@@ -66,7 +66,7 @@ class PaymentController extends Controller
         return Response::api(data: $paymentDetails);
     }
 
-    public function handleCallback(Request $request, CartService $cartService)
+    public function handleCallback(Request $request)
     {
         $data = $request->json()->all();
         $paymentMethod = data_get($data, 'obj.source_data.sub_type');
@@ -91,19 +91,12 @@ class PaymentController extends Controller
             'paymobOrderId' => $paymobOrderId,
             'status' => $paymentStatus,
         ]);
-        $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus,$data, $cartService) {
-            $cart = $cartService->getCurrentUserOrGuestCart();
-            $cart?->items()->delete();
-            if ($cart && $cart->discountCode) {
-                $cart->discountCode->increment('used');
-            }
-            $cart?->update(['price' => 0, 'discount_amount' => 0, 'discount_code_id' => null]);
-            $transaction->update([
-                'payment_status' => $paymentStatus,
-                'payment_method' => $paymentMethod,
-                'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
-            ]);
-        });
+        $transaction->update([
+            'payment_status' => $paymentStatus,
+            'payment_method' => $paymentMethod,
+            'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
+        ]);
+
 
         return Response::api();
     }
