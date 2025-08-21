@@ -16,7 +16,6 @@ use App\Services\Payment\PaymentGatewayFactory;
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
@@ -66,7 +65,7 @@ class PaymentController extends Controller
         return Response::api(data: $paymentDetails);
     }
 
-    public function handleCallback(Request $request, CartService $cartService)
+    public function handleCallback(Request $request)
     {
         $data = $request->json()->all();
         $paymentMethod = data_get($data, 'obj.source_data.sub_type');
@@ -85,12 +84,12 @@ class PaymentController extends Controller
             $paymentStatus = StatusEnum::PENDING;
         } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
-            $transaction->order->delete();
         }
         Log::info('Failed to create payment intention', [
             'paymobOrderId' => $paymobOrderId,
             'status' => $paymentStatus,
         ]);
+        $cartService = app(CartService::class);
         $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data, $cartService) {
             // Clear cart after payment
             $cart = $cartService->getCurrentUserOrGuestCart();

@@ -75,6 +75,7 @@ use Illuminate\Support\Facades\Log;
             ]);
             return false;
         }
+
         $orderData = [
             'checkout_url' => $this->baseUrl . '/unifiedcheckout/?publicKey='
                 . $this->config['public_key']
