@@ -26,6 +26,7 @@ class DesignObserver
         {
             $designVersion = $design->versions()->create([
                 'design_data' => $design->design_data,
+                'design_back_data' => $design->design_back_data,
                 'version' => $design->current_version,
             ]);
             CopyDesignMediaJob::dispatch($design, $designVersion);

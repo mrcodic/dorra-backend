@@ -14,12 +14,12 @@
 
 
                     <!-- Name in Arabic and English -->
-                    <div class="row mb-3">
-                        <div class="col-6">
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Name (EN)</label>
                             <input type="text" class="form-control" id="edit-tag-name-en" name="name[en]" />
                         </div>
-                        <div class="col-6">
+                        <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Name (AR)</label>
                             <input type="text" class="form-control" id="edit-tag-name-ar" name="name[ar]" />
                         </div>

@@ -55,6 +55,12 @@ class DesignService extends BaseService
                     ->last()
                     ?->copy($design, 'designs');
 
+                     $this->templateRepository
+                    ->find($validatedData['template_id'])
+                    ->getMedia('back_templates')
+                    ->last()
+                    ?->copy($design, 'back_designs');
+
 
                 return $design->load([
                     'product.prices',

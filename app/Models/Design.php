@@ -26,6 +26,7 @@ class Design extends Model implements HasMedia
         'guest_id',
         'template_id',
         'design_data',
+        'design_back_data',
         'current_version',
         'product_price_id',
         'quantity',
