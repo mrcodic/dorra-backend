@@ -85,7 +85,7 @@ class PaymentController extends Controller
             $paymentStatus = StatusEnum::PAID;
             $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
 
-        } elseif ($isPending) {
+        } elseif (!$isSuccess && $isPending) {
             $paymentStatus = StatusEnum::PENDING;
             $transaction->order?->delete();
             $transaction->update([
@@ -94,7 +94,7 @@ class PaymentController extends Controller
                 'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
             ]);
 
-        } else {
+        } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
             $transaction->order?->delete();
         }
