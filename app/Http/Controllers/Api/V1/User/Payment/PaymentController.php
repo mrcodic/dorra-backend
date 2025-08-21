@@ -11,6 +11,7 @@ use App\Models\Guest;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
+use App\Services\CartService;
 use App\Services\Payment\PaymentGatewayFactory;
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\RedirectResponse;
@@ -64,6 +65,9 @@ class PaymentController extends Controller
         return Response::api(data: $paymentDetails);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function handleCallback(Request $request)
     {
         $data = $request->json()->all();
@@ -79,21 +83,64 @@ class PaymentController extends Controller
 
         if ($isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::PAID;
+            $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
         } elseif (!$isSuccess && $isPending) {
             $paymentStatus = StatusEnum::PENDING;
+   $transaction->order?->delete();
+            $transaction->update([
+                'payment_status' => $paymentStatus,
+                'payment_method' => $paymentMethod,
+                'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
+            ]);
+
         } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
+   $transaction->order?->delete();
         }
+
         Log::info('Failed to create payment intention', [
             'paymobOrderId' => $paymobOrderId,
             'status' => $paymentStatus,
         ]);
+
+
+        // Update transaction
         $transaction->update([
             'payment_status' => $paymentStatus,
             'payment_method' => $paymentMethod,
             'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
         ]);
         return Response::api();
+    }
+
+    /**
+     * @param $transaction
+     * @param mixed $paymentMethod
+     * @param StatusEnum $paymentStatus
+     * @param array $data
+     * @return void
+     * @throws \Exception
+     */
+    public function resetCart($transaction, mixed $paymentMethod, StatusEnum $paymentStatus, array $data): void
+    {
+        $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data) {
+            $cart = $transaction->order->user?->cart ?? $transaction->order->guest?->cart;
+            if ($cart) {
+                $cart->items()->delete();
+
+                if ($cart->discountCode) {
+                    $cart->discountCode->increment('used');
+                }
+
+                $cart->update([
+                    'price' => 0,
+                    'discount_amount' => 0,
+                    'discount_code_id' => null,
+                ]);
+            }
+
+
+        });
     }
 
     public function handleRedirect(Request $request): RedirectResponse
