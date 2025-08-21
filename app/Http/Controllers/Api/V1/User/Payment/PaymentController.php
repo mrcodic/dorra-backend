@@ -89,10 +89,9 @@ class PaymentController extends Controller
             'paymobOrderId' => $paymobOrderId,
             'status' => $paymentStatus,
         ]);
-        $cartService = app(CartService::class);
+
         $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data, $cartService) {
-            // Clear cart after payment
-            $cart = $cartService->getCurrentUserOrGuestCart();
+            $cart = $transaction->order->user?->cart ?? $transaction->order->guest?->cart;
             if ($cart) {
                 $cart->items()->delete();
 
