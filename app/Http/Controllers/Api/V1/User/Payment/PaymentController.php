@@ -87,7 +87,7 @@ class PaymentController extends Controller
 
         } elseif ($isPending) {
             $paymentStatus = StatusEnum::PENDING;
-            $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
+            $transaction->order?->delete();
             $transaction->update([
                 'payment_status'   => $paymentStatus,
                 'payment_method'   => $paymentMethod,
