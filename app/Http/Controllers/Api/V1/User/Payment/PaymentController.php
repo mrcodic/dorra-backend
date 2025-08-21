@@ -65,6 +65,9 @@ class PaymentController extends Controller
         return Response::api(data: $paymentDetails);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function handleCallback(Request $request)
     {
         $data = $request->json()->all();
@@ -80,9 +83,14 @@ class PaymentController extends Controller
 
         if ($isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::PAID;
+            $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
         } elseif (!$isSuccess && $isPending) {
             $paymentStatus = StatusEnum::PENDING;
-        } elseif (!$isSuccess && !$isPending) {
+        } elseif ($isSuccess && $isPending) {
+            $paymentStatus = StatusEnum::PENDING;
+            $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
+        }
+        elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
         }
         Log::info('Failed to create payment intention', [
@@ -90,30 +98,13 @@ class PaymentController extends Controller
             'status' => $paymentStatus,
         ]);
 
-        $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data) {
-            $cart = $transaction->order->user?->cart ?? $transaction->order->guest?->cart;
-            if ($cart) {
-                $cart->items()->delete();
 
-                if ($cart->discountCode) {
-                    $cart->discountCode->increment('used');
-                }
-
-                $cart->update([
-                    'price'             => 0,
-                    'discount_amount'   => 0,
-                    'discount_code_id'  => null,
-                ]);
-            }
-
-            // Update transaction
-            $transaction->update([
-                'payment_status'   => $paymentStatus,
-                'payment_method'   => $paymentMethod,
-                'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
-            ]);
-        });
-
+        // Update transaction
+        $transaction->update([
+            'payment_status'   => $paymentStatus,
+            'payment_method'   => $paymentMethod,
+            'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
+        ]);
         return Response::api();
     }
 
@@ -136,5 +127,35 @@ class PaymentController extends Controller
             return redirect()->to($transaction->failure_url);
         }
 
+    }
+
+    /**
+     * @param $transaction
+     * @param mixed $paymentMethod
+     * @param StatusEnum $paymentStatus
+     * @param array $data
+     * @return void
+     * @throws \Exception
+     */
+    public function resetCart($transaction, mixed $paymentMethod, StatusEnum $paymentStatus, array $data): void
+    {
+        $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data) {
+            $cart = $transaction->order->user?->cart ?? $transaction->order->guest?->cart;
+            if ($cart) {
+                $cart->items()->delete();
+
+                if ($cart->discountCode) {
+                    $cart->discountCode->increment('used');
+                }
+
+                $cart->update([
+                    'price' => 0,
+                    'discount_amount' => 0,
+                    'discount_code_id' => null,
+                ]);
+            }
+
+
+        });
     }
 }
