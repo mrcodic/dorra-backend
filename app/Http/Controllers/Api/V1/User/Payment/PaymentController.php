@@ -90,7 +90,7 @@ class PaymentController extends Controller
             'status' => $paymentStatus,
         ]);
 
-        $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data, $cartService) {
+        $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data) {
             $cart = $transaction->order->user?->cart ?? $transaction->order->guest?->cart;
             if ($cart) {
                 $cart->items()->delete();
