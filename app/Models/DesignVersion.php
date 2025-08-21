@@ -13,6 +13,7 @@ class DesignVersion extends Model implements HasMedia
     protected $fillable =[
         'design_id',
         'design_data',
+        'design_back_data',
         'version',
     ];
 

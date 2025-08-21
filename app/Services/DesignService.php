@@ -55,6 +55,12 @@ class DesignService extends BaseService
                     ->last()
                     ?->copy($design, 'designs');
 
+                     $this->templateRepository
+                    ->find($validatedData['template_id'])
+                    ->getMedia('back_templates')
+                    ->last()
+                    ?->copy($design, 'back_designs');
+
 
                 return $design->load([
                     'product.prices',
@@ -86,7 +92,10 @@ class DesignService extends BaseService
     {
         $model = $this->repository->update($validatedData, $id);
         if (isset($validatedData['base64_preview_image'])) {
-            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model);
+            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'designs');
+        }
+        if (isset($validatedData['back_base64_preview_image'])) {
+            ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model,'back_designs');
         }
         return $model->load($relationsToLoad);
     }

@@ -37,6 +37,7 @@ class DesignController extends Controller
             'user_id',
             'guest_id',
             'design_data',
+            'design_back_data',
             'design_image',
             'current_version',
             'name',

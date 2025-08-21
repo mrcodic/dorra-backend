@@ -26,8 +26,12 @@ class CopyDesignMediaJob implements ShouldQueue
     public function handle(): void
     {
         $firstMedia = $this->design->getFirstMedia('designs');
+        $backFirstMedia = $this->design->getFirstMedia('back_designs');
         if ($firstMedia) {
             $firstMedia->copy($this->designVersion, 'design-versions');
+        }
+        if ($backFirstMedia) {
+            $backFirstMedia->copy($this->designVersion, 'back-design-versions');
         }
     }
 }

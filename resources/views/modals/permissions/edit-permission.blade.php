@@ -1,12 +1,12 @@
-<div class="modal modal-slide-in new-user-modal fade" id="editTagModal">
+<div class="modal modal-slide-in new-user-modal fade" id="editPermissionModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="editTagForm" enctype="multipart/form-data" action="">
+            <form id="editPermissionForm" enctype="multipart/form-data" action="">
                 @csrf
                 @method("PUT")
                 <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
-                    <h5 class="modal-title fs-3" id="exampleModalLabel">Edit Tag</h5>
+                    <h5 class="modal-title fs-3" id="exampleModalLabel">Edit Permission</h5>
                 </div>
                 <div class="modal-body flex-grow-1">
                     <input type="hidden" id="edit-tag-id">
@@ -14,13 +14,13 @@
 
 
                     <!-- Name in Arabic and English -->
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label label-text">Name (EN)</label>
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label label-text">Permission Name (EN)</label>
                             <input type="text" class="form-control" id="edit-tag-name-en" name="name[en]" />
                         </div>
-                        <div class="col-6">
-                            <label class="form-label label-text">Name (AR)</label>
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label label-text">Permission Name (AR)</label>
                             <input type="text" class="form-control" id="edit-tag-name-ar" name="name[ar]" />
                         </div>
                     </div>

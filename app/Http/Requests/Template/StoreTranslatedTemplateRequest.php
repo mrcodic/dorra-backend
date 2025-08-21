@@ -54,6 +54,7 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'types' => ['required', 'array'],
             'types.*' => ['integer', 'exists:types,id'],
             'design_data' => ['sometimes', 'json'],
+            'design_back_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],

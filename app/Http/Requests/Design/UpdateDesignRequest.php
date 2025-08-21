@@ -28,7 +28,9 @@ class UpdateDesignRequest extends BaseRequest
     {
         return [
             'design_data' => ['sometimes', 'json'],
+            'design_back_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string', 'required_without:design_image'],
+            'back_base64_preview_image' => ['sometimes', 'string'],
             'design_image' => ['sometimes', 'file', 'mimetypes:image/svg+xml', 'max:2048', 'required_without:base64_preview_image'],
             'name' => ['sometimes','string','max:255'],
             'description' => ['sometimes','string','max:1000'],

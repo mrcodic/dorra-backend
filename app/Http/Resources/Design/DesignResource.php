@@ -23,7 +23,12 @@ class DesignResource extends JsonResource
             'name'=> $this->name,
             'description'=> $this->description,
             'design_data' => $this->when(request('design_data') == true, $this->design_data),
+            'design_back_data' => $this->when(
+                request()->boolean('with_design_data', true),
+                $this->design_back_data
+            ),
             'design_image' => $this->getFirstMediaUrl('designs'),
+            'back_design_image' => $this->getFirstMediaUrl('back_designs'),
             'current_version' => $this->current_version,
             'product' => ProductResource::make($this->whenLoaded('product')),
             'owner' => UserResource::make($this->whenLoaded('owner')),

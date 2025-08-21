@@ -190,7 +190,22 @@
 
 
                 </div>
+
+
             </div>
+            @include('modals.delete',[
+            'id' => 'deleteCategoryModal',
+            'formId' => 'deleteCategoryForm',
+            'title' => 'Delete Category',
+            ])
+            @include('modals.delete',[
+            'id' => 'deleteCategoriesModal',
+            'formId' => 'bulk-delete-form',
+            'title' => 'Delete Categories',
+            'confirmText' => 'Are you sure you want to delete this items?',
+            ])
+            @include('modals.location.edit-location')
+            @include('modals.location.add-location')
 
 
         </div>
@@ -417,6 +432,11 @@ $(document).ready(function() {
     });
 });
 </script>
+
+
+@endsection
+{{-- Page js files --}}
+<script src="{{ asset('js/scripts/pages/app-location.js') }}?v={{ time() }}"></script>
 
 
 @endsection
