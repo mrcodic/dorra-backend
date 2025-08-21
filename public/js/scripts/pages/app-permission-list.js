@@ -53,16 +53,13 @@ const dt_user_table = $(".permissions-list-table").DataTable({
             render: function (data, type, row, meta) {
                 return `
         <div class="d-flex gap-1">
-             <a href="/products/${data}" class="">
-                <i data-feather="eye"></i>
-              </a>
-              <a href="/products/${data}/edit" class="">
+              <a href="" class="" data-bs-target="#editPermissionModal" data-bs-toggle="modal">
                 <i data-feather="edit-3"></i>
               </a>
 
               <a href="#" class=" text-danger open-delete-product-modal" data-id="${data}"
                 data-bs-toggle="modal"
-                data-bs-target="#deleteProductModal" >
+                data-bs-target="#deletePermissionModal" >
                 <i data-feather="trash-2"></i>
               </a>
 

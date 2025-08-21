@@ -84,7 +84,19 @@
             </div>
 
         </div>
+        @include('modals.delete',[
+  'id' => 'deletePermissionModal',
+  'formId' => 'deletePermissionForm',
+  'title' => 'Delete Permission',
+  ])
+        @include('modals.delete',[
+        'id' => 'deletePermissionsModal',
+        'formId' => 'bulk-delete-form',
+        'title' => 'Delete Permissions',
+        'confirmText' => 'Are you sure you want to delete this items?',
+        ])
         @include("modals.permissions.add-permission")
+        @include("modals.permissions.edit-permission")
         <!-- list and filter end -->
     </section>
     <!-- users list ends -->
