@@ -23,11 +23,17 @@ class ProductSpecificationOption extends Model implements HasMedia
         static::updated(function (ProductSpecificationOption $specificationOption) {
             if ($specificationOption->wasChanged('price'))
             {
-                CartItemSpec::where('spec_option_id', $specificationOption->id)->get()
-                    ->each(function ($item) use ($specificationOption) {
+                CartItemSpec::where('spec_option_id', $specificationOption->id)
+                    ->with('cartItem.specs.productSpecificationOption')
+                    ->get()
+                    ->each(function ($item) {
                         $cartItem = $item->cartItem;
+
                         if ($cartItem) {
-                            $newSpecsPrice = $cartItem->specs()->sum('productSpecificationOption.price');
+                            $newSpecsPrice = $cartItem->specs
+                                ->map(fn ($spec) => $spec->productSpecificationOption?->price ?? 0)
+                                ->sum();
+
                             $cartItem->update([
                                 'specs_price' => $newSpecsPrice,
                                 'sub_total'   => ($cartItem->product_price * $cartItem->quantity) + $newSpecsPrice,
