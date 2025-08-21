@@ -84,19 +84,18 @@ class PaymentController extends Controller
         if ($isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::PAID;
             $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
-
         } elseif (!$isSuccess && $isPending) {
             $paymentStatus = StatusEnum::PENDING;
-            $transaction->order()->delete();
+   $transaction->order?->delete();
             $transaction->update([
-                'payment_status'   => $paymentStatus,
-                'payment_method'   => $paymentMethod,
+                'payment_status' => $paymentStatus,
+                'payment_method' => $paymentMethod,
                 'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
             ]);
 
         } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
-            $transaction->order()->delete();
+   $transaction->order?->delete();
         }
 
         Log::info('Failed to create payment intention', [
@@ -107,32 +106,11 @@ class PaymentController extends Controller
 
         // Update transaction
         $transaction->update([
-            'payment_status'   => $paymentStatus,
-            'payment_method'   => $paymentMethod,
+            'payment_status' => $paymentStatus,
+            'payment_method' => $paymentMethod,
             'response_message' => json_encode($data, JSON_UNESCAPED_UNICODE),
         ]);
         return Response::api();
-    }
-
-    public function handleRedirect(Request $request): RedirectResponse
-    {
-        $requestedData = $request->all();
-        $paymobOrderId = data_get($requestedData, 'order');
-        $success = data_get($requestedData, 'success') == 'true';
-        $pending = data_get($requestedData, 'pending') == 'true';
-        $transaction = Transaction::whereTransactionId($paymobOrderId)->first();
-        if (!$transaction) {
-            return redirect()->to(config('services.frontend_base_url'));
-        } else {
-            if ($success) {
-                return redirect()->to($transaction->success_url);
-            }
-            if ($pending) {
-                return redirect()->to($transaction->pending_url);
-            }
-            return redirect()->to($transaction->failure_url);
-        }
-
     }
 
     /**
@@ -163,5 +141,26 @@ class PaymentController extends Controller
 
 
         });
+    }
+
+    public function handleRedirect(Request $request): RedirectResponse
+    {
+        $requestedData = $request->all();
+        $paymobOrderId = data_get($requestedData, 'order');
+        $success = data_get($requestedData, 'success') == 'true';
+        $pending = data_get($requestedData, 'pending') == 'true';
+        $transaction = Transaction::whereTransactionId($paymobOrderId)->first();
+        if (!$transaction) {
+            return redirect()->to(config('services.frontend_base_url'));
+        } else {
+            if ($success) {
+                return redirect()->to($transaction->success_url);
+            }
+            if ($pending) {
+                return redirect()->to($transaction->pending_url);
+            }
+            return redirect()->to($transaction->failure_url);
+        }
+
     }
 }
