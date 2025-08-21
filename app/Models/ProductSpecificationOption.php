@@ -27,7 +27,7 @@ class ProductSpecificationOption extends Model implements HasMedia
                     ->each(function ($item) use ($specificationOption) {
                         $cartItem = $item->cartItem;
                         if ($cartItem) {
-                            $newSpecsPrice = $cartItem->specs()->sum('price');
+                            $newSpecsPrice = $cartItem->specs()->sum('productSpecificationOption.price');
                             $cartItem->update([
                                 'specs_price' => $newSpecsPrice,
                                 'sub_total'   => ($cartItem->product_price * $cartItem->quantity) + $newSpecsPrice,
