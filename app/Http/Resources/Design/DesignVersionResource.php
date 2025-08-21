@@ -17,7 +17,9 @@ class DesignVersionResource extends JsonResource
         return [
             'id' => $this->id,
             'design_data' => $this->design_data,
+            'design_back_data' =>   $this->design_back_data,
             'design_image' => $this->getFirstMediaUrl('design-versions'),
+            'back_design_image' => $this->getFirstMediaUrl('back-design-versions'),
             'version' => $this->version,
 
         ];

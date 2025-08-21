@@ -14,25 +14,21 @@ class DesignObserver
      */
     public function creating(Design $design)
     {
-        if ($design->tempalte_id)
-        {
-            $design->current_version += 1;
-        }
+
     }
+
     public function created(Design $design): void
     {
-        $design->refresh();
-        if ($design->tempalte_id)
-        {
+        if ($design->tempalte_id) {
+            $design->current_version = ($design->current_version ?? 0) + 1;
             $designVersion = $design->versions()->create([
                 'design_data' => $design->design_data,
                 'design_back_data' => $design->design_back_data,
                 'version' => $design->current_version,
             ]);
+
             CopyDesignMediaJob::dispatch($design, $designVersion);
         }
-
-
     }
 
     /**
@@ -40,10 +36,7 @@ class DesignObserver
      */
     public function updating(Design $design): void
     {
-        if ($design->wasChanged('design_data')) {
-            $design->current_version += 1;
 
-        }
     }
 
     /**
@@ -51,12 +44,15 @@ class DesignObserver
      */
     public function updated(Design $design): void
     {
-        if ($design->wasChanged('design_data')) {
+        if ($design->wasChanged('design_data') || $design->wasChanged('design_back_data')) {
+            $design->current_version = ($design->current_version ?? 0) + 1;
+            $design->saveQuietly();
+            $design->refresh();
             $designVersion = $design->versions()->create([
                 'design_data' => $design->design_data,
+                'design_back_data' => $design->design_back_data,
                 'version' => $design->current_version,
             ]);
-
             CopyDesignMediaJob::dispatch($design, $designVersion);
         }
 

@@ -33,6 +33,7 @@ class StoreDesignRequest extends BaseRequest
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
             'design_data' => ['nullable', 'json'],
+            'design_back_data' => ['nullable', 'json'],
             'name' => ['required_without:template_id', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
         ];
@@ -85,6 +86,7 @@ class StoreDesignRequest extends BaseRequest
             'user_id' => $userId,
             'guest_id' => $guestId,
             'design_data' => $template?->design_data ?? $this->input('design_data'),
+            'design_back_data' => $template?->design_back_data ?? $this->input('design_back_data'),
             'name' => $template?->name ?? $this->input('name'),
             'description' => $template?->description ?? $this->input('description'),
             'cookie' => $cookieValue,
