@@ -25,7 +25,7 @@
 @endsection
 
 @section('content')
-<div class="card p-3">
+<div class="card p-2">
     @php
     // Define label + icons for each row
     $paymentRows = [
@@ -43,7 +43,7 @@
             @foreach ($row['icons'] as $icon)
             <img src="{{ asset('images/' . $icon) }}" alt="Payment Icon" style="height: 40px; width: auto;">
             @endforeach
-              <span class="fw-bold text-black">{{ $row['label'] }}</span>
+            <span class="fw-bold text-black">{{ $row['label'] }}</span>
         </div>
 
         <div>
@@ -54,10 +54,10 @@
         </div>
     </div>
     @endforeach
-          <div class="d-flex justify-content-end mt-2">
-            <button class="btn btn-outline-secondary me-1">Discard Changes</button>
-            <button class="btn btn-primary">Save</button>
-        </div>
+    <div class="d-flex justify-content-end mt-2">
+        <button class="btn btn-outline-secondary me-1">Discard Changes</button>
+        <button class="btn btn-primary">Save</button>
+    </div>
 </div>
 
 @endsection

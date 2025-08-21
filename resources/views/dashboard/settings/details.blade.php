@@ -25,9 +25,10 @@
 @endsection
 
 @section('content')
-<div class="card d-flex flex-row">
+<div class="card d-flex flex-column flex-md-row">
     {{-- Left Side: Vertical Tabs --}}
-    <div class="nav flex-column nav-pills  px-2 py-3 gap-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+    <div class="nav d-flex flex-row flex-md-column nav-pills px-1 py-2 gap-2" id="v-pills-tab" role="tablist"
+        aria-orientation="vertical">
         <button class="btn profile-tab active" data-target="tab1">Profile</button>
         <button class="btn profile-tab" data-target="tab2">Social Media Platforms</button>
         <button class="btn profile-tab" data-target="tab3">Address</button>
@@ -35,21 +36,23 @@
     </div>
 
     {{-- Right Side: Tab Content --}}
-    <div class="tab-content flex-grow-1 p-3" id="v-pills-tabContent">
+    <div class="tab-content flex-grow-1 p-2" id="v-pills-tabContent">
         <!-- Profile Section -->
         <div id="tab1">
             <h4 class="mb-2">Profile</h4>
             <form>
                 <div class="row mb-2">
-                    <div class="col-md-10">
+                    <div class="col-md-12">
                         <label for="phone" class="form-label">Phone</label>
-                        <input type="text" id="phone" name="phone" class="form-control" placeholder="Enter phone number" />
+                        <input type="text" id="phone" name="phone" class="form-control"
+                            placeholder="Enter phone number" />
                     </div>
                 </div>
                 <div class="row mb-2">
-                    <div class="col-md-10">
+                    <div class="col-md-12">
                         <label for="store_email" class="form-label">Store Contact Email Address</label>
-                        <input type="email" id="store_email" name="store_email" class="form-control" placeholder="Enter store email" />
+                        <input type="email" id="store_email" name="store_email" class="form-control"
+                            placeholder="Enter store email" />
                     </div>
                 </div>
             </form>
@@ -64,30 +67,29 @@
             <button type="button" class="btn btn-outline-primary mb-2" id="add-social">+ Add Social Media</button>
 
             <!-- Social Media Input Group -->
-            <div id="social-media-group">
-                <div class="row align-items-end mb-2 social-input-row">
-                    <div class="col-md-3">
-                        <label for="platform">Platform</label>
-                        <select name="platform[]" class="form-select">
-                            <option value="facebook"> Facebook</option>
-                            <option value="instagram"> Instagram</option>
-                            <option value="twitter"> Twitter</option>
-                            <option value="tiktok"> TikTok</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
+            <div id="social-media-group" class="d-flex flex-wrap gap-1 social-input-row">
+                <div class="col-12 col-md-5">
+                    <label for="platform">Platform</label>
+                    <select name="platform[]" class="form-select">
+                        <option value="facebook"> Facebook</option>
+                        <option value="instagram"> Instagram</option>
+                        <option value="twitter"> Twitter</option>
+                        <option value="tiktok"> TikTok</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 d-flex gap-1">
+                    <div class="col-8">
                         <label for="social_url">URL</label>
                         <div class="input-group">
                             <span class="input-group-text">https://</span>
                             <input type="text" name="social_url[]" class="form-control" placeholder="yourpage.com" />
                         </div>
                     </div>
-                    <div class="col-md-2 d-flex align-items-end">
+                    <div class="col-4 d-flex align-items-end">
                         <button type="button" class="btn btn-outline-danger delete-social">Delete</button>
                     </div>
                 </div>
             </div>
-
         </div>
 
         <hr />
@@ -118,7 +120,8 @@
             <div class="row mb-2">
                 <div class="col-md-12">
                     <label for="address_line" class="form-label">Address Line</label>
-                    <input type="text" id="address_line" name="address_line" class="form-control" placeholder="Street, building number..." />
+                    <input type="text" id="address_line" name="address_line" class="form-control"
+                        placeholder="Street, building number..." />
                 </div>
             </div>
         </div>
