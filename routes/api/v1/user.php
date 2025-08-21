@@ -28,7 +28,7 @@ use App\Http\Controllers\Shared\General\MainController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
-Route::middleware(LocalizationMiddleware::class)->group(function () {
+//Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('country-codes', [MainController::class, 'countryCodes']);
 
     Route::prefix('register')->group(function () {
@@ -167,6 +167,6 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::get('reviews-without-images' , 'reviewsWithoutImages');
         Route::get('faqs' , 'faqs');
     });
-});
+//});
 
 
