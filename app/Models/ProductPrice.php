@@ -17,8 +17,8 @@ class ProductPrice extends Model
         static::updated(function (ProductPrice $productPrice) {
             if ($productPrice->wasChanged('price'))
             {
-                $product = $productPrice->product->id;
-                CartItem::where('product_id', $product)->get()
+                $product = $productPrice->product;
+                CartItem::where('product_id', $product->id)->get()
                     ->each(function ($item) use ($product) {
                         $item->update([
                             'product_price' => $product->price,
