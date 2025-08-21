@@ -14,7 +14,7 @@ class ProcessBase64Image implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public string $base64Image, public Template $template, public $collection)
+    public function __construct(public string $base64Image, public $template, public $collection = null)
     {
 
     }
