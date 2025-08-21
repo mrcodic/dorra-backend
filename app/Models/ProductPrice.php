@@ -19,11 +19,11 @@ class ProductPrice extends Model
             {
                 $product = $productPrice->product;
                 CartItem::where('product_id', $product->id)->get()
-                    ->each(function ($item) use ($product) {
+                    ->each(function ($item) use ($product, $productPrice) {
                         $item->update([
-                            'product_price' => $product->price,
-                            'quantity' => $product->quantity,
-                            'sub_total'     => $product->price + $item->specs_price - $item->cart->discount_amount,
+                            'product_price' => $productPrice->price,
+                            'quantity' => $productPrice->quantity,
+                            'sub_total'     => $productPrice->price + $item->specs_price - $item->cart->discount_amount,
                         ]);
                     });
 
