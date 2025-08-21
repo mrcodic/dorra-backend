@@ -433,10 +433,7 @@ $(document).ready(function() {
 });
 </script>
 
-
-@endsection
 {{-- Page js files --}}
 <script src="{{ asset('js/scripts/pages/app-location.js') }}?v={{ time() }}"></script>
-
 
 @endsection
