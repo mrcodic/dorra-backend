@@ -85,6 +85,7 @@ class PaymentController extends Controller
             $paymentStatus = StatusEnum::PENDING;
         } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
+            $transaction->order->delete();
         }
         Log::info('Failed to create payment intention', [
             'paymobOrderId' => $paymobOrderId,
