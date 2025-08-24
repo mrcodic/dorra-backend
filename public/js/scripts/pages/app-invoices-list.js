@@ -278,7 +278,7 @@ $(document).on("submit", "#deleteInvoiceForm", function (e) {
                 _token: $('meta[name="csrf-token"]').attr("content"),
             },
             success: function (response) {
-                $("#deleteOrdersModal").modal("hide");
+                $("#deleteInvoicesModal").modal("hide");
                 Toastify({
                     text: "Selected orders deleted successfully!",
                     duration: 1500,
@@ -301,7 +301,7 @@ $(document).on("submit", "#deleteInvoiceForm", function (e) {
 
                     },
                     error: function () {
-                        $("#deleteOrdersModal").modal("hide");
+                        $("#deleteInvoicesModal").modal("hide");
                         Toastify({
                             text: "Something Went Wrong!",
                             duration: 1500,
