@@ -34,6 +34,7 @@ class Product extends Model implements HasMedia
     {
 
         static::updating(function (Product $product) {
+            if ($product->base_price) {
                 CartItem::where('product_id', $product->id)->get()
                     ->each(function ($item) use ($product) {
 
@@ -50,6 +51,7 @@ class Product extends Model implements HasMedia
 
                         $item->update($data);
                     });
+            }
         });
     }
 
