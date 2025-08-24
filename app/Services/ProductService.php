@@ -223,19 +223,18 @@ class ProductService extends BaseService
         if (isset($validatedData['prices'])) {
             $this->handleTransaction(function () use ($product, $validatedData) {
                 $product->update(['base_price' => null]);
+                $product->prices()->delete();
                 if ($validatedData['has_custom_prices']) {
-                    dd($validatedData['has_custom_prices']);
                     CartItem::where('product_id', $product->id)->get()
-                        ->each(function ($item) use ($product) {
+                        ->each(function ($item) use ($product, $validatedData) {
                             $item->update([
-                                'quantity' => $product->prices()->first()->quantity,
-                                'product_price' => $product->prices()->first()->price,
-                                'sub_total'  => ($product->prices()->first()->price * $product->prices()->first()->quantity) + $item->specs_price - $item->cart->discount_amount,
+                                'quantity' => $validatedData['prices'][0]->quantity,
+                                'product_price' => $validatedData['prices'][0]->price,
+                                'sub_total'  => ($validatedData['prices'][0]->price * $validatedData['prices'][0]->quantity) + $item->specs_price - $item->cart->discount_amount,
                             ]);
                         });
+                    dd( CartItem::where('product_id', $product->id)->get());
                 }
-
-                $product->prices()->delete();
                 collect($validatedData['prices'])->each(function ($price) use ($product) {
                     $product->prices()->create([
                         'price' => $price['price'],
