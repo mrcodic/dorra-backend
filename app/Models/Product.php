@@ -49,7 +49,6 @@ class Product extends Model implements HasMedia
 
                         $item->update($data);
                     });
-                dd(CartItem::where('product_id', $product->id)->get());
             }
         });
     }
