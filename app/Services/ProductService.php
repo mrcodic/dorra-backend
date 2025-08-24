@@ -225,6 +225,7 @@ class ProductService extends BaseService
                 $product->update(['base_price' => null]);
                 $product->prices()->delete();
                 if ($validatedData['has_custom_prices'] && $product->isClean('base_price') && $product->has_custom_prices != 1) {
+                    dd($validatedData['has_custom_prices'], $product->isClean('base_price'), $product->has_custom_prices);
                     CartItem::where('product_id', $product->id)->get()
                         ->each(function ($item) use ($product, $validatedData) {
                             $item->update([
