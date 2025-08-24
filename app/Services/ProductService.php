@@ -75,7 +75,7 @@ class ProductService extends BaseService
 //                return $product->category?->name ?? 'uncategorized';
 //            })
             ->addColumn('tags', function ($product) {
-                return $product->tags?->pluck('name');
+                return $product->tags?->pluck('name') ?? "-";
             })
             ->addColumn('rating', function ($product) {
                 return $product->reviews?->pluck('rating')->avg() ?? 0;

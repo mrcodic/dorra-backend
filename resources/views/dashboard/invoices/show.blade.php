@@ -126,18 +126,6 @@
                                 <div class="fw-bold text-black">
                                     ${{ number_format($design->sub_total ?? 0, 2) }}
                                 </div>
-                                @if ($model->designs->count() > 1 )
-                                    <form class="delete-design-form d-inline" method="POST"
-                                          action="{{ route('orders.orderItems.delete', ['orderId' => $model->id, 'designId' => $design->id]) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-danger mt-1 delete-design-btn"
-                                                data-design-id="{{ $design->id }}">
-                                            Delete
-                                        </button>
-                                    </form>
-                                @endif
                             </div>
                         </div>
                     </div>

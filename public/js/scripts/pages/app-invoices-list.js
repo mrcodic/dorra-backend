@@ -23,7 +23,7 @@ var dt_user_table = $(".order-list-table").DataTable({
         { data: "invoice_number" },
         { data: "user_name" },
         { data: "total_price" },
-        { data: "status" },
+        // { data: "status" },
         { data: "issued_date" },
         {
             data: "id",
@@ -36,10 +36,9 @@ var dt_user_table = $(".order-list-table").DataTable({
             </a>
             <a href="#" class="text-danger open-delete-order-modal"
                data-id="${data}"
-               data-name="${row.order_number}"
                data-action="/invoices/${data}"
                data-bs-toggle="modal"
-               data-bs-target="#deleteOrderModal">
+               data-bs-target="#deleteInvoiceModal">
                <i data-feather="trash-2"></i>
             </a>
         </div>
@@ -51,8 +50,8 @@ var dt_user_table = $(".order-list-table").DataTable({
     dom:
         '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
         '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
-        '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
+        // '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
+        // '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
         ">" +
         ">t" +
         '<"d-flex  mx-2 row mb-1"' +
@@ -171,8 +170,8 @@ $(document).ready(function () {
     $(document).on("click", ".open-delete-order-modal", function () {
         const orderId = $(this).data("id");
         console.log(orderId);
-        $("#deleteOrderForm").data("id", orderId);
-        $("#deleteOrderModal").modal("show");
+        $("#deleteInvoiceForm").data("id", orderId);
+        $("#deleteInvoiceModal").modal("show");
     });
 
 
@@ -225,45 +224,7 @@ $(document).ready(function () {
         }
     });
 
-   $(document).on("submit", "#deleteOrderForm", function (e) {
-        e.preventDefault();
-        const OrderId = $(this).data("id");
-        console.log(OrderId);
-
-        $.ajax({
-            url: `/orders/${OrderId}`,
-            method: "DELETE",
-            success: function (res) {
-
-                $("#deleteOrderModal").modal("hide");
-
-                Toastify({
-                    text: "Order deleted successfully!",
-                    duration: 2000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#28C76F",
-                    close: true,
-                }).showToast();
-                $(".order-list-table").DataTable().ajax.reload(null, false);
-
-            },
-            error: function () {
-
-                $("#deleteOrderModal").modal("hide");
-                Toastify({
-                    text: "Something Went Wrong!",
-                    duration: 2000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#EA5455", // red
-                    close: true,
-                }).showToast();
-                              $(".order-list-table").DataTable().ajax.reload(null, false);
-
-            },
-        });
-    });
+  handleAjaxFormSubmit("#deleteInvoiceForm")
 
 
     $(document).on("submit", "#bulk-delete-form", function (e) {
