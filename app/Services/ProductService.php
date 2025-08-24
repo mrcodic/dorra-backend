@@ -230,7 +230,7 @@ class ProductService extends BaseService
                             $item->update([
                                 'quantity' => $validatedData['prices'][0]->quantity,
                                 'product_price' => $validatedData['prices'][0]->price,
-                                'sub_total'  => ($validatedData['prices'][0]->price * $validatedData['prices'][0]->quantity) + $item->specs_price - $item->cart->discount_amount,
+                                'sub_total'  => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity']) + $item->specs_price - $item->cart->discount_amount,
                             ]);
                         });
                     dd( CartItem::where('product_id', $product->id)->get());
