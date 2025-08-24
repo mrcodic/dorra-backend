@@ -199,6 +199,8 @@ class ProductService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+      return  $this->handleTransaction(function () use ($id, $validatedData) {
+
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
@@ -221,10 +223,9 @@ class ProductService extends BaseService
             $product->prices()->delete();
         }
         if (isset($validatedData['prices'])) {
-            $this->handleTransaction(function () use ($product, $validatedData) {
                 $product->update(['base_price' => null]);
                 $product->prices()->delete();
-                dd($validatedData['prices'],$product->getOriginal('has_custom_prices') != 1);
+                dd($validatedData['prices'],$product->has_custom_prices != 1);
                 if ($validatedData['has_custom_prices']  && $product->has_custom_prices != 1) {
                     CartItem::where('product_id', $product->id)->get()
                         ->each(function ($item) use ($product, $validatedData) {
@@ -241,7 +242,7 @@ class ProductService extends BaseService
                         'quantity' => $price['quantity'],
                     ]);
                 });
-            });
+
 
 
         }
@@ -314,6 +315,7 @@ class ProductService extends BaseService
             });
         }
         return $product;
+        });
     }
 
     public function search($request)
