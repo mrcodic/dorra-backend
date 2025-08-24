@@ -283,7 +283,7 @@ $q->where('product_id', $model->id);
                                                     <input class="form-check-input " type="radio"
                                                         name="has_custom_prices" id="defaultPrice" value="0"
                                                         @checked($model->has_custom_prices ==
-                                                    0)>
+                                                   0)>
                                                     <div>
                                                         <label class="form-check-label label-text d-block"
                                                             for="customPrice">Default Quantity</label>

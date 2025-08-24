@@ -43,6 +43,15 @@ class Product extends Model implements HasMedia
                         ]);
                     });
 
+            }elseif ($product->wasChanged('base_price') && $product->has_custom_prices == 1) {
+                CartItem::where('product_id', $product->id)->get()
+                    ->each(function ($item) use ($product) {
+                        $item->update([
+                            'product_price' => $product->base_price,
+                            'quantity' => $product->prices()->first()->quantity,
+                            'sub_total'  => ($product->base_price * $product->prices()->first()->quantity) + $item->specs_price - $item->cart->discount_amount,
+                        ]);
+                    });
             }
 
         });
