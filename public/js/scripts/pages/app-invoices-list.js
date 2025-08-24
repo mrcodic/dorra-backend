@@ -224,8 +224,43 @@ $(document).ready(function () {
         }
     });
 
-  handleAjaxFormSubmit("#deleteInvoiceForm")
+$(document).on("submit", "#deleteInvoiceForm", function (e) {
+    e.preventDefault();
+    const productId = $(this).data("id");
 
+    $.ajax({
+        url: `/invoices/${productId}`,
+        method: "DELETE",
+        success: function (res) {
+            $("#deleteInvoiceModal").modal("hide");
+
+            Toastify({
+                text: "Invoice deleted successfully!",
+                duration: 2000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#28C76F",
+                close: true,
+            }).showToast();
+            $(".order-list-table").DataTable().ajax.reload(null, false);
+
+
+        },
+        error: function () {
+            $("#deleteInvoiceModal").modal("hide");
+            Toastify({
+                text: "Something Went Wrong!",
+                duration: 2000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#EA5455",
+                close: true,
+            }).showToast();
+            $(".order-list-table").DataTable().ajax.reload(null, false);
+
+        },
+    });
+});
 
     $(document).on("submit", "#bulk-delete-form", function (e) {
             e.preventDefault();
