@@ -313,7 +313,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
                 _token: $('meta[name="csrf-token"]').attr("content"),
             },
             success: function (response) {
-                $("#deleteOrdersModal").modal("hide");
+                $("#deleteInvoicesModal").modal("hide");
                 Toastify({
                     text: "Selected orders deleted successfully!",
                     duration: 1500,
