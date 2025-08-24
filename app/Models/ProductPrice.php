@@ -28,6 +28,7 @@ class ProductPrice extends Model
 
                         $item->update([
                             'product_price' => $productPriceValue,
+                            'quantity' => $quantity,
                             'sub_total'     => $productPriceValue + $specsPrice - $discount,
                         ]);
                     });
