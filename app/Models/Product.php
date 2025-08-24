@@ -37,13 +37,13 @@ class Product extends Model implements HasMedia
             if ($product->base_price) {
                 CartItem::where('product_id', $product->id)->get()
                     ->each(function ($item) use ($product) {
-
                         $data = [
                             'product_price' => $product->base_price,
                             'sub_total'     => ($product->base_price * $item->quantity)
                                 + $item->specs_price
                                 - $item->cart->discount_amount,
                         ];
+                        dd($product->prices->isEmpty());
                         if ($product->prices->isEmpty()) {
                             $data['quantity'] = 1;
                         }
