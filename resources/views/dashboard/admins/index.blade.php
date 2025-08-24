@@ -182,6 +182,7 @@
                         <input type="checkbox" id="select-all-checkbox">
                     </th>
                     <th>ID</th>
+                    <th>IMAGE</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>

@@ -168,6 +168,7 @@
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                         </th>
                         <th>Name</th>
+                        <th>IMAGE</th>
                         <th>Email</th>
                         <th>Status</th>
                         <th>Joined Date</th>
@@ -403,14 +404,14 @@
     // Simple accordion toggle function
     function toggleAccordion($row) {
         if ($(window).width() > 768) return; // Only on mobile
-        
+
         const $detailsRow = $row.next('.details-row');
         const $icon = $row.find('.expand-icon');
-        
+
         // Close all other details
         $('.details-row.show').removeClass('show');
         $('.expand-icon.expanded').removeClass('expanded');
-        
+
         // If this row has details and they're not currently shown
         if ($detailsRow.length && !$detailsRow.hasClass('show')) {
             $detailsRow.addClass('show');
@@ -421,11 +422,11 @@
     // Accordion click handler with event delegation
     $(document).on('click.accordion', '.user-list-table tbody tr:not(.details-row)', function(e) {
         // Prevent accordion when clicking interactive elements
-        if ($(e.target).is('input, button, a, .btn') || 
+        if ($(e.target).is('input, button, a, .btn') ||
             $(e.target).closest('input, button, a, .btn').length > 0) {
             return;
         }
-        
+
         e.stopPropagation();
         toggleAccordion($(this));
     });
@@ -435,20 +436,20 @@
         if ($(window).width() <= 768) {
             $('.user-list-table tbody tr:not(.details-row)').each(function() {
                 const $row = $(this);
-                
+
                 // Remove existing details and icons first
                 $row.find('.expand-icon').remove();
                 $row.next('.details-row').remove();
-                
+
                 // Add expand icon to role column
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
-                
+
                 // Get data for details
                 const status = $row.find('td:nth-child(4)').html() || '';
                 const joinedDate = $row.find('td:nth-child(5)').html() || '';
                 const ordersCount = $row.find('td:nth-child(6)').html() || '';
                 const actions = $row.find('td:nth-child(7)').html() || '';
-                
+
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
@@ -474,7 +475,7 @@
                         </td>
                     </tr>
                 `;
-                
+
                 $row.after(detailsHtml);
             });
         } else {
@@ -493,7 +494,7 @@
     $(document).on('draw.dt', '.user-list-table', function () {
         $('#bulk-delete-container').hide();
         $('#select-all-checkbox').prop('checked', false);
-        
+
         // Reinitialize accordion after DataTable operations
         setTimeout(initAccordion, 100);
     });
@@ -533,17 +534,17 @@ $(document).ready(function() {
     // Alternative click handler
     $(document).off('click.accordion').on('click.accordion', '.user-list-table tbody tr:not(.details-row)', function(e) {
         console.log('Accordion clicked'); // Debug log
-        
+
         if ($(window).width() <= 768) {
             // Skip if clicking on interactive elements
             if ($(e.target).is('input, button, a') || $(e.target).closest('input, button, a').length) {
                 return;
             }
-            
+
             const $currentRow = $(this);
             const $detailsRow = $currentRow.next('.details-row');
             const $icon = $currentRow.find('.expand-icon');
-            
+
             // Toggle logic
             if ($detailsRow.hasClass('show')) {
                 // Close this one
@@ -553,7 +554,7 @@ $(document).ready(function() {
                 // Close all others first
                 $('.details-row.show').removeClass('show');
                 $('.expand-icon.expanded').removeClass('expanded');
-                
+
                 // Open this one
                 $detailsRow.addClass('show');
                 $icon.addClass('expanded');

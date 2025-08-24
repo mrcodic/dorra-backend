@@ -29,6 +29,15 @@ var dt_user_table = $(".user-list-table").DataTable({
             },
         },
         { data: "name" },
+        {
+            data: "image",
+            render: function (data, type, row) {
+                return `
+            <img src="${data}" alt="User Image"
+                style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #ccc;" />
+        `;
+            }
+        },
         { data: "email" },
         {
             data: "status",

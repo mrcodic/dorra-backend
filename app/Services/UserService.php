@@ -77,6 +77,9 @@ class UserService extends BaseService
             ->addColumn('name', function ($user) {
                 return $user->name;
             })
+            ->addColumn('image', function ($admin) {
+                return $admin->getFirstMediaUrl('users') ?: asset("images/default-user.png");
+            })
             ->addColumn('joined_date', function ($user) {
                 return $user->created_at?->format('j/n/Y');
             })->make();
