@@ -14,26 +14,26 @@ class ProductPrice extends Model
     ];
     protected static function booted()
     {
-//        static::updated(function (ProductPrice $productPrice) {
-//            if ($productPrice->wasChanged('price') || $productPrice->wasChanged('quantity')) {
-//                $product = $productPrice->product;
-//
-//                CartItem::where('product_id', $product->id)
-//                    ->with('cart') // eager load cart
-//                    ->get()
-//                    ->each(function ($item) use ($productPrice) {
-//                        $productPriceValue = $productPrice->price;
-//                        $quantity = $item->quantity; // keep user’s cart quantity
-//                        $specsPrice = $item->specs_price ?? 0;
-//                        $discount = $item->cart?->discount_amount ?? 0;
-//
-//                        $item->update([
-//                            'product_price' => $productPriceValue,
-//                            'sub_total'     => ($productPriceValue * $quantity) + $specsPrice - $discount,
-//                        ]);
-//                    });
-//            }
-//        });
+        static::updated(function (ProductPrice $productPrice) {
+            if ($productPrice->wasChanged('price') || $productPrice->wasChanged('quantity')) {
+                $product = $productPrice->product;
+
+                CartItem::where('product_id', $product->id)
+                    ->with('cart')
+                    ->get()
+                    ->each(function ($item) use ($productPrice) {
+                        $productPriceValue = $productPrice->price;
+                        $quantity = $item->quantity;
+                        $specsPrice = $item->specs_price ?? 0;
+                        $discount = $item->cart?->discount_amount ?? 0;
+
+                        $item->update([
+                            'product_price' => $productPriceValue,
+                            'sub_total'     => ($productPriceValue * $quantity) + $specsPrice - $discount,
+                        ]);
+                    });
+            }
+        });
 
     }
 
