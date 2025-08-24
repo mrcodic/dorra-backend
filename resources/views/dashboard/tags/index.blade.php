@@ -27,11 +27,13 @@
     @media (max-width: 768px) {
 
         /* Hide the last 2 columns on mobile */
+        .tag-list-table th:nth-child(4),
         .tag-list-table th:nth-child(5),
         .tag-list-table th:nth-child(6) {
             display: none !important;
         }
 
+        .tag-list-table tbody tr:not(.details-row) td:nth-child(4),
         .tag-list-table tbody tr:not(.details-row) td:nth-child(5),
         .tag-list-table tbody tr:not(.details-row) td:nth-child(6) {
             display: none !important;
@@ -324,14 +326,19 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
                 
                 // Get data for details
+                const noOfTemp = $row.find('td:nth-child(4)').html() || '';
                 const addedDate = $row.find('td:nth-child(5)').html() || '';
                 const actions = $row.find('td:nth-child(6)').html() || '';
                 
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="4">
+                        <td colspan="3">
                             <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">No. Of Templates:</span>
+                                    <span class="detail-value">${noOfTemp}</span>
+                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Added Date:</span>
                                     <span class="detail-value">${addedDate}</span>
