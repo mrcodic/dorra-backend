@@ -23,18 +23,18 @@ class CartItemObserver
      */
     public function updated(CartItem $cartItem): void
     {
-        if ($cartItem->wasChanged('quantity')) {
+//        if ($cartItem->wasChanged('quantity')) {
             if ($cartItem->product->has_custom_prices) {
                 $subTotal = $cartItem->product_price + $cartItem->specs_price;
                 $cartItem->sub_total = $subTotal;
                 $cartItem->saveQuietly();
             } else {
-                $subTotal = ($cartItem->product_price+ $cartItem->specs_price )* $cartItem->quantity;
+                $subTotal = ($cartItem->product_price + $cartItem->specs_price )* $cartItem->quantity;
                 $cartItem->sub_total = $subTotal;
                 $cartItem->saveQuietly();
             }
 
-        }
+//        }
 
         $cart = $cartItem->cart;
 

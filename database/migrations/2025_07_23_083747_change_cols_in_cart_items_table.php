@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Design;
+use App\Models\Product;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +21,7 @@ return new class extends Migration
                 $table->string('itemable_id');
                 $table->index(['itemable_type', 'itemable_id'], 'itemable_index');
                 $table->unsignedBigInteger('quantity')->nullable();
-                $table->foreignIdFor(\App\Models\Product::class)->nullable()->constrained()->nullOnDelete();
+                $table->foreignIdFor(Product::class)->nullable()->constrained()->cascadeOnDelete();
             });
         });
     }
@@ -32,7 +34,7 @@ return new class extends Migration
         Schema::table('cart_items', function (Blueprint $table) {
             $table->dropForeign(['product_id']);
             $table->dropColumn(['product_id', 'itemable_id', 'itemable_type']);
-            $table->foreignIdFor(\App\Models\Design::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Design::class)->constrained()->cascadeOnDelete();
         });
     }
 };

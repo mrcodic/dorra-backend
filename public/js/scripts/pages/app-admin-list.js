@@ -28,6 +28,15 @@ const dt_user_table = $(".admin-list-table").DataTable({
             }
         },
         {data: "id"},
+        {
+            data: "image",
+            render: function (data, type, row) {
+                return `
+            <img src="${data}" alt="Admin Image"
+                style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #ccc;" />
+        `;
+            }
+        },
         {data: "name"},
         {data: "email"},
         {data: "role"},

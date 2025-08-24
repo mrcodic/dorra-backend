@@ -183,6 +183,7 @@
                         <th>
                             <input type="checkbox" id="select-all-checkbox">
                         </th>
+                        <th>IMAGE</th>
                         <th>Name</th>
                         <th>SubProducts</th>
                         <th>Categories</th>

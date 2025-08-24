@@ -32,19 +32,28 @@ class Product extends Model implements HasMedia
 
     protected static function booted()
     {
-        static::updated(function (Product $product) {
-            if ($product->wasChanged('base_price'))
-            {
-                DB::table('cart_items')
-                    ->where('product_id', $product->id)
-                    ->update([
-                        'product_price' => $product->base_price,
-                        'updated_at' => now(),
-                    ]);
-            }
 
+        static::updating(function (Product $product) {
+            if ($product->base_price) {
+                CartItem::where('product_id', $product->id)->get()
+                    ->each(function ($item) use ($product) {
+                        $data = [
+                            'product_price' => $product->base_price,
+                            'sub_total'     => ($product->base_price * $item->quantity)
+                                + $item->specs_price
+                                - $item->cart->discount_amount,
+                        ];
+                        if ($product->prices->isNotEmpty()) {
+                            $data['quantity'] = 1;
+                        }
+
+                        $item->update($data);
+                    });
+            }
         });
     }
+
+
 
     public function price(): Attribute
     {

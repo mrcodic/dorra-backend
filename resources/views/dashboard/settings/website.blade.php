@@ -801,7 +801,7 @@
                                             <small class="text-muted">{{
                                                 \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                             <p class="mb-1">{{ $review->review }}</p>
-                                            <form class="remove-review" action="{{ route('reviews.remove', $review->id)
+                                            <form class="remove-review" action="{{ route('reviews.destroy', $review->id)
                                                 }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
@@ -899,8 +899,7 @@
                                                 <small class="text-muted">{{
                                                     \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                 <p class="mb-1">{{ $review->review }}</p>
-                                                <form class="remove-review" action="{{ route(" reviews.remove",
-                                                    $review->id) }}"
+                                                <form class="remove-review" action="{{ route("reviews.destroy",$review->id) }}"
                                                     method="POST">
                                                     @csrf
                                                     @method('DELETE')

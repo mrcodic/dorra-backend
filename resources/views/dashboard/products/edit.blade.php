@@ -267,8 +267,7 @@ $q->where('product_id', $model->id);
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio"
                                                         name="has_custom_prices" id="customPrice" value="1"
-                                                        @checked($model->has_custom_prices == 1)
-                                                    @disabled($model->has_custom_prices == 0)>
+                                                        @checked($model->has_custom_prices == 1)>
                                                     <div>
                                                         <label class="form-check-label label-text d-block"
                                                             for="customPrice">Add Quantity Manually</label>
@@ -284,7 +283,7 @@ $q->where('product_id', $model->id);
                                                     <input class="form-check-input " type="radio"
                                                         name="has_custom_prices" id="defaultPrice" value="0"
                                                         @checked($model->has_custom_prices ==
-                                                    0)@disabled($model->has_custom_prices == 1)>
+                                                   0)>
                                                     <div>
                                                         <label class="form-check-label label-text d-block"
                                                             for="customPrice">Default Quantity</label>
@@ -1490,36 +1489,39 @@ $q->where('product_id', $model->id);
         });
 </script>
 <script>
+    $('.invoice-repeater').find('[data-repeater-delete]').show(); // Show delete button for others
+
     // Repeater
         $('.invoice-repeater').repeater({
+
             show: function () {
                 $(this).slideDown();
                 feather && feather.replace();
 
                 // Recalculate delete button visibility when an item is shown
-                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                items.each(function (index) {
-                    // Hide delete button for the first item (index 0) and show for others
-                    if (index === 0) {
-                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
-                    } else {
+                // var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                // items.each(function (index) {
+                //     // Hide delete button for the first item (index 0) and show for others
+                //     if (index === 0) {
+                //         $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
+                //     } else {
                         $(this).find('[data-repeater-delete]').show(); // Show delete button for others
-                    }
-                });
+                //     }
+                // });
             },
             hide: function (deleteElement) {
                 $(this).slideUp(deleteElement);
 
                 // Recalculate delete button visibility after an item is removed
-                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                items.each(function (index) {
-                    // Hide delete button for the first item (index 0) and show for others
-                    if (index === 0) {
-                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
-                    } else {
+                // var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                // items.each(function (index) {
+                //     // Hide delete button for the first item (index 0) and show for others
+                //     if (index === 0) {
+                //         $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
+                //     } else {
                         $(this).find('[data-repeater-delete]').show(); // Show delete button for others
-                    }
-                });
+                //     }
+                // });
             }
         });
 </script>

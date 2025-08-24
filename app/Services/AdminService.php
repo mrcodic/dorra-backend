@@ -109,6 +109,9 @@ class AdminService extends BaseService
             ->editColumn('status', function ($admin) {
                 return $admin->status == 1 ? "active" : "blocked";
             })
+            ->addColumn('image', function ($admin) {
+                return $admin->getFirstMediaUrl('admins') ?: asset("images/default-user.png");
+            })
             ->addColumn('status_value', function ($admin) {
                 return $admin->status;
             })

@@ -18,11 +18,41 @@ class ProductSpecificationOption extends Model implements HasMedia
     ];
 
     protected $translatable = ['value'];
+    protected static function booted()
+    {
+        static::updated(function (ProductSpecificationOption $specificationOption) {
+            if ($specificationOption->wasChanged('price'))
+            {
+                CartItemSpec::where('spec_option_id', $specificationOption->id)
+                    ->with('cartItem.specs.productSpecificationOption')
+                    ->get()
+                    ->each(function ($item) {
+                        $cartItem = $item->cartItem;
+
+                        if ($cartItem) {
+                            $newSpecsPrice = $cartItem->specs
+                                ->map(fn ($spec) => $spec->productSpecificationOption?->price ?? 0)
+                                ->sum();
+
+                            $cartItem->update([
+                                'specs_price' => $newSpecsPrice,
+                                'sub_total'   => $cartItem->product->has_custom_prices ?
+                                      $cartItem->product_price + $newSpecsPrice
+                                    : ($cartItem->product_price * $cartItem->quantity) + $newSpecsPrice
+                                ,
+                            ]);
+                        }
+                    });
+
+            }
+
+        });
+    }
     public function image(): Attribute
     {
         return Attribute::get(fn () => $this->getFirstMedia('productSpecificationOptions'));
     }
-    
+
     public function price(): Attribute
     {
         return Attribute::get(function ($value) {

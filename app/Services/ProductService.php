@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Filters\SubCategoryFilter;
+use App\Models\CartItem;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\DimensionRepositoryInterface;
@@ -198,6 +199,8 @@ class ProductService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+      return  $this->handleTransaction(function () use ($id, $validatedData) {
+
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
@@ -220,18 +223,27 @@ class ProductService extends BaseService
             $product->prices()->delete();
         }
         if (isset($validatedData['prices'])) {
-            $product->update(['base_price' => null]);
-            collect($validatedData['prices'])->each(function ($price) use ($product) {
-                $product->prices()->updateOrCreate(
-                    [
-                        'product_id' => $product->id,
-                        'quantity' => $price['quantity'],
-                    ],
-                    [
+                $product->update(['base_price' => null]);
+                $product->prices()->delete();
+                if ($validatedData['has_custom_prices']  && $product->has_custom_prices !== 1) {
+                    CartItem::where('product_id', $product->id)->get()
+                        ->each(function ($item) use ($product, $validatedData) {
+                            $item->update([
+                                'quantity' => $validatedData['prices'][0]['quantity'],
+                                'product_price' => $validatedData['prices'][0]['price'],
+                                'sub_total'  => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity']) + $item->specs_price - $item->cart->discount_amount,
+                            ]);
+                        });
+                }
+                collect($validatedData['prices'])->each(function ($price) use ($product) {
+                    $product->prices()->create([
                         'price' => $price['price'],
-                    ]
-                );
-            });
+                        'quantity' => $price['quantity'],
+                    ]);
+                });
+
+
+
         }
         if (isset($validatedData['specifications'])) {
             collect($validatedData['specifications'])->each(function ($specification) use ($product) {
@@ -302,6 +314,7 @@ class ProductService extends BaseService
             });
         }
         return $product;
+        });
     }
 
     public function search($request)

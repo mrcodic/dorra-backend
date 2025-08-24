@@ -26,7 +26,17 @@ const dt_user_table = $(".category-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             },
         },
+        {
+            data: "image",
+            render: function (data, type, row) {
+                return `
+            <img src="${data}" alt="User Image"
+                style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #ccc;" />
+        `;
+            }
+        },
         { data: "name" },
+
         { data: "sub_categories" },
         {
             data: "products",

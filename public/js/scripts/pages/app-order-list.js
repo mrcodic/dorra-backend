@@ -33,7 +33,7 @@ var dt_user_table = $(".order-list-table").DataTable({
     return `
         <div class="d-flex gap-1">
             <a href="/orders/${data}" class="">
-                <i data-feather="file-text"></i>
+                <i data-feather="eye"></i>
             </a>
             <a href="/orders/${data}/edit" class="">
                 <i data-feather="edit"></i>
