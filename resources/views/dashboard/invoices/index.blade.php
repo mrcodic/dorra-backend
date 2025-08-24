@@ -215,7 +215,7 @@
                     </table>
                     <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                         <div class="delete-container">
-                            <p id="selected-count-text">0 Products are selected</p>
+                            <p id="selected-count-text">0 Invoices are selected</p>
                             <button id="delete-selected-btn"
                                     class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
                                 <i data-feather="trash-2"></i> Delete Selected

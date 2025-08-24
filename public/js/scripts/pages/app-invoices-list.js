@@ -211,7 +211,7 @@ $(document).ready(function () {
             return;
         }
 
-        $("#deleteOrdersModal").modal("show");
+        $("#deleteInvoicesModal").modal("show");
     });
 
     $(document).on("click", "#confirm-bulk-delete", function () {
