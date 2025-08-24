@@ -224,7 +224,7 @@ class ProductService extends BaseService
             $this->handleTransaction(function () use ($product, $validatedData) {
                 $product->update(['base_price' => null]);
                 $product->prices()->delete();
-                if ($validatedData['has_custom_prices']) {
+                if ($validatedData['has_custom_prices'] && $product->base_price) {
                     CartItem::where('product_id', $product->id)->get()
                         ->each(function ($item) use ($product, $validatedData) {
                             $item->update([
