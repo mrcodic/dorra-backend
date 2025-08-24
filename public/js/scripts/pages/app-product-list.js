@@ -42,6 +42,7 @@ var dt_user_table = $(".product-list-table").DataTable({
         {
             data: "tags",
             render: function (data, type, row) {
+                if (!data) return '-';
                 if (!Array.isArray(JSON.parse(data))) return '';
                 return `
                     <div style="display: flex; flex-wrap: wrap; gap: 6px;">
