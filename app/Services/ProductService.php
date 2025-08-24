@@ -223,8 +223,7 @@ class ProductService extends BaseService
         if (isset($validatedData['prices'])) {
             $this->handleTransaction(function () use ($product, $validatedData) {
                 $product->update(['base_price' => null]);
-                if ($product->isDirty('has_custom_prices')) {
-                    dd("fdssd",$product->prices()->first()->quantity);
+                if ($validatedData['has_custom_prices']) {
                     CartItem::where('product_id', $product->id)->get()
                         ->each(function ($item) use ($product) {
                             $item->update([
