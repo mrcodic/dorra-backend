@@ -280,8 +280,6 @@
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
                         </form>
-
-
                     </div>
                 </div>
             </div>
