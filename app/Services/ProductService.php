@@ -198,7 +198,6 @@ class ProductService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        dd($validatedData);
         $product = $this->repository->update($validatedData, $id);
         $product->load($this->relations);
         $product->tags()->sync($validatedData['tags'] ?? []);
@@ -230,6 +229,7 @@ class ProductService extends BaseService
                             ->orWhere('price', $price['price']);
                     })
                     ->first();
+                dump($existing);
 
                 if ($existing) {
                     $existing->update([
