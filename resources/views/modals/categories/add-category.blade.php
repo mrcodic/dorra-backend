@@ -1,4 +1,4 @@
-<div class="modal modal-slide-in new-user-modal fade "  id="addCategoryModal">
+<div class="modal modal-slide-in new-user-modal fade " id="addCategoryModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
             <form id="addCategoryForm" enctype="multipart/form-data" action="{{ route('categories.store') }}">
@@ -14,11 +14,11 @@
                         <label class="form-label label-text">Image*</label>
 
                         <!-- Dropzone upload area -->
-                        <div id="category-dropzone" class="dropzone border rounded p-3"
-                            style="cursor:pointer; min-height:150px;">
+                        <div id="category-dropzone"
+                            class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center"
+                            style="border: 2px dashed rgba(0, 0, 0, 0.3);">
                             <div class="dz-message" data-dz-message>
                                 <span>Drop image here or click to upload</span>
-
                             </div>
                         </div>
 

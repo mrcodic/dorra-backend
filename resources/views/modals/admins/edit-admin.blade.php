@@ -19,8 +19,9 @@
                             class="rounded-circle border avatarPreview" style="width: 48px; height: 48px;">
 
                         <div class="ms-2">
-                            <div id="editAvatarDropzone" class="dropzone border rounded p-2"
-                                style="width: 200px; cursor: pointer;">
+                            <div id="editAvatarDropzone"
+                                class="d-flex align-items-center justify-content-center dropzone rounded p-2"
+                                style="border: 2px dashed rgba(0, 0, 0, 0.3);">
                                 <div class="dz-message">Drop avatar here or click</div>
                             </div>
                         </div>

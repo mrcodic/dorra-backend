@@ -207,7 +207,7 @@
 
                                 <!-- Show Order Button -->
                                 <div class="d-flex justify-content-end">
-                                    <a href="{{ route(" orders.show",$order->id) }}" class="btn btn-primary mb-1">Show
+                                    <a href="{{ route('orders.show',$order->id) }}" class="btn btn-primary mb-1">Show
                                         Order</a>
                                 </div>
 
