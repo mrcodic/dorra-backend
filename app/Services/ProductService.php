@@ -226,8 +226,10 @@ class ProductService extends BaseService
                     [
                         'product_id' => $product->id,
                         'quantity' => $price['quantity'],
+                        'price' => $price['price'],
                     ],
                     [
+                        'quantity' => $price['quantity'],
                         'price' => $price['price'],
                     ]
                 );
