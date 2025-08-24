@@ -34,7 +34,7 @@ $side => [
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <div
                         style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:29px">
-                        {{ $mockup->product->name }}
+                        {{ $mockup->product?->name }}
                     </div>
 
                     <div>
