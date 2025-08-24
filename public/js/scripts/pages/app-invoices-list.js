@@ -175,7 +175,11 @@ $(document).ready(function () {
     });
 
 
-
+    $(document).on("submit", "#bulk-delete-form", function (e) {
+        e.preventDefault();
+        const selectedIds = $(".category-checkbox:checked").map(function () {
+            return $(this).val();
+        }).get();
         if (selectedIds.length === 0) {
             Toastify({
                 text: "Please select at least one order to delete!",
