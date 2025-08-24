@@ -199,7 +199,7 @@ $(document).on("click", "#bulk-delete-btn", function (e) {
         return;
     }
 
-    let modalEl = document.getElementById("deleteOrdersModal");
+    let modalEl = document.getElementById("deleteInvoicesModal");
     let modal = bootstrap.Modal.getOrCreateInstance(modalEl);
     modal.show();
 });
@@ -224,7 +224,7 @@ function bulkDeleteOrders(ids) {
             _token: $('meta[name="csrf-token"]').attr("content"),
         },
         success: function () {
-            let modalEl = document.getElementById("deleteOrdersModal");
+            let modalEl = document.getElementById("deleteInvoicesModal");
             let modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
 
@@ -241,7 +241,7 @@ function bulkDeleteOrders(ids) {
             $(".order-list-table").DataTable().ajax.reload(null, false);
         },
         error: function () {
-            let modalEl = document.getElementById("deleteOrdersModal");
+            let modalEl = document.getElementById("deleteInvoicesModal");
             let modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
 
