@@ -179,36 +179,86 @@ $(document).ready(function () {
 
     });
 
-    $(document).on("click", "#bulk-delete-btn", function (e) {
-        e.preventDefault();
-        const selectedIds = $(".category-checkbox:checked").map(function () {
-            return $(this).val();
-        }).get();
+// Bulk delete button handler
+$(document).on("click", "#bulk-delete-btn", function (e) {
+    e.preventDefault();
 
-        if (selectedIds.length === 0) {
+    const selectedIds = $(".category-checkbox:checked").map(function () {
+        return $(this).val();
+    }).get();
+
+    if (selectedIds.length === 0) {
+        Toastify({
+            text: "Please select at least one order to delete!",
+            duration: 2000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#EA5455",
+            close: true,
+        }).showToast();
+        return;
+    }
+
+    let modalEl = document.getElementById("deleteOrdersModal");
+    let modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+});
+
+// Confirm bulk delete modal
+$(document).on("click", "#confirm-bulk-delete", function () {
+    const selectedIds = $(".category-checkbox:checked").map(function () {
+        return $(this).val();
+    }).get();
+
+    if (selectedIds.length > 0) {
+        bulkDeleteOrders(selectedIds);
+    }
+});
+
+function bulkDeleteOrders(ids) {
+    $.ajax({
+        url: "orders/bulk-delete",
+        method: "POST",
+        data: {
+            ids: ids,
+            _token: $('meta[name="csrf-token"]').attr("content"),
+        },
+        success: function () {
+            let modalEl = document.getElementById("deleteOrdersModal");
+            let modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+
             Toastify({
-                text: "Please select at least one order to delete!",
+                text: "Selected orders deleted successfully!",
+                duration: 2000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#28a745",
+                close: true,
+            }).showToast();
+
+            resetBulkSelection();
+            $(".order-list-table").DataTable().ajax.reload(null, false);
+        },
+        error: function () {
+            let modalEl = document.getElementById("deleteOrdersModal");
+            let modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+
+            Toastify({
+                text: "Something Went Wrong!",
                 duration: 2000,
                 gravity: "top",
                 position: "right",
                 backgroundColor: "#EA5455",
                 close: true,
             }).showToast();
-            return;
-        }
 
-        $("#deleteInvoicesModal").modal("show");
+            resetBulkSelection();
+            $(".order-list-table").DataTable().ajax.reload(null, false);
+        },
     });
-
-    $(document).on("click", "#confirm-bulk-delete", function () {
-        const selectedIds = $(".category-checkbox:checked").map(function () {
-            return $(this).val();
-        }).get();
-
-        if (selectedIds.length > 0) {
-            bulkDeleteOrders(selectedIds);
-        }
-    });
+}
 
 $(document).on("submit", "#deleteInvoiceForm", function (e) {
     e.preventDefault();

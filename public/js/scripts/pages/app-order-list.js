@@ -260,7 +260,6 @@ $(document).ready(function () {
         console.log(OrderId);
 
         $.ajax({
-
             url: `/orders/${OrderId}`,
             method: "DELETE",
             success: function (res) {
@@ -313,7 +312,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
                 _token: $('meta[name="csrf-token"]').attr("content"),
             },
             success: function (response) {
-                $("#deleteInvoicesModal").modal("hide");
+                $("#deleteOrdersModal").modal("hide");
                 Toastify({
                     text: "Selected orders deleted successfully!",
                     duration: 1500,
