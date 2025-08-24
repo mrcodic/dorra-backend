@@ -222,17 +222,26 @@ class ProductService extends BaseService
         if (isset($validatedData['prices'])) {
             $product->update(['base_price' => null]);
             collect($validatedData['prices'])->each(function ($price) use ($product) {
-                $product->prices()->updateOrCreate(
-                    [
+                $existing = $product->prices()
+                    ->where('product_id', $product->id)
+                    ->where(function ($q) use ($price) {
+                        $q->where('quantity', $price['quantity'])
+                            ->orWhere('price', $price['price']);
+                    })
+                    ->first();
+
+                if ($existing) {
+                    $existing->update([
+                        'quantity' => $price['quantity'],
+                        'price'    => $price['price'],
+                    ]);
+                } else {
+                    $product->prices()->create([
                         'product_id' => $product->id,
-                        'quantity' => $price['quantity'],
-                        'price' => $price['price'],
-                    ],
-                    [
-                        'quantity' => $price['quantity'],
-                        'price' => $price['price'],
-                    ]
-                );
+                        'quantity'   => $price['quantity'],
+                        'price'      => $price['price'],
+                    ]);
+                }
             });
         }
         if (isset($validatedData['specifications'])) {
