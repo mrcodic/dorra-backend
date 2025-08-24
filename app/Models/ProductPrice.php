@@ -14,9 +14,8 @@ class ProductPrice extends Model
     ];
     protected static function booted()
     {
-        static::updated(function (ProductPrice $productPrice) {
+        static::created(function (ProductPrice $productPrice) {
             if ($productPrice->wasChanged('price') || $productPrice->wasChanged('quantity')) {
-                dd($productPrice->quantity, $productPrice->price);
                 $product = $productPrice->product;
                 CartItem::where('product_id', $product->id)
                     ->with('cart')
