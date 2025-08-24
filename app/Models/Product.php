@@ -44,7 +44,7 @@ class Product extends Model implements HasMedia
                                 + $item->specs_price
                                 - $item->cart->discount_amount,
                         ];
-                        if ($product->has_custom_prices == 1) {
+                        if ($product->has_custom_prices == 0) {
                             $data['quantity'] = 1;
                         }
 
