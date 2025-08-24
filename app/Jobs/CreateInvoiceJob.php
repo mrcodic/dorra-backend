@@ -27,8 +27,6 @@ class CreateInvoiceJob implements ShouldQueue
      */
     public function handle(): void
     {
-
-
        Invoice::updateOrCreate([
             'order_id' => $this->order->id,
         ], [

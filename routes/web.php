@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [InvoiceController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
-    Route::resource('/invoices', InvoiceController::class)->except('show');
+    Route::resource('/invoices', InvoiceController::class)->only(['show','destroy','index']);
 
     Route::group(['prefix' => 'faqs', 'as' => 'faqs.', 'controller' => FaqController::class,], function () {
         Route::get('/data', [FaqController::class, 'getData'])->name('data');

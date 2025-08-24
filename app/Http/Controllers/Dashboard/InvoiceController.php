@@ -13,8 +13,7 @@ class InvoiceController extends DashboardController
     {
         parent::__construct($invoiceService);
         $this->indexView = 'invoices.index';
-        $this->createView = 'invoices.create';
-        $this->editView = 'invoices.edit';
+        $this->showView = 'invoices.show';
         $this->usePagination = true;
         $this->resourceTable = 'invoices';
         $this->methodRelations = [

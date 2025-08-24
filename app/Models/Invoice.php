@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 
 class Invoice extends Model
@@ -13,10 +14,6 @@ class Invoice extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
-    }
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 
     public function designs(): \Illuminate\Database\Eloquent\Relations\MorphToMany
