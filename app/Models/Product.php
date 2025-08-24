@@ -33,7 +33,7 @@ class Product extends Model implements HasMedia
     protected static function booted()
     {
         static::updated(function (Product $product) {
-            if ($product->wasChanged('base_price')&& $product->has_custom_prices == 0)
+            if ($product->wasChanged('base_price') && $product->has_custom_prices == 0)
             {
                 CartItem::where('product_id', $product->id)->get()
                     ->each(function ($item) use ($product) {
@@ -45,18 +45,6 @@ class Product extends Model implements HasMedia
 
             }
 
-        });
-        static::updating(function (Product $product) {
-        if ($product->wasChanged('base_price') && $product->has_custom_prices == 1) {
-            CartItem::where('product_id', $product->id)->get()
-                ->each(function ($item) use ($product) {
-                    $item->update([
-                        'product_price' => $product->base_price,
-                        'quantity' => $product->prices()->first()->quantity,
-                        'sub_total'  => ($product->base_price * $product->prices()->first()->quantity) + $item->specs_price - $item->cart->discount_amount,
-                    ]);
-                });
-        }
         });
     }
 

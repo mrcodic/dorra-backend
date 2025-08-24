@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Filters\SubCategoryFilter;
+use App\Models\CartItem;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\DimensionRepositoryInterface;
@@ -220,14 +221,29 @@ class ProductService extends BaseService
             $product->prices()->delete();
         }
         if (isset($validatedData['prices'])) {
-            $product->update(['base_price' => null]);
-            $product->prices()->delete();
-            collect($validatedData['prices'])->each(function ($price) use ($product) {
-                $product->prices()->create([
-                    'price' => $price['price'],
-                    'quantity' => $price['quantity'],
-                ]);
+            $this->handleTransaction(function () use ($product, $validatedData) {
+                $product->update(['base_price' => null]);
+                if ($product->wasChanged('has_custom_prices')) {
+                    CartItem::where('product_id', $product->id)->get()
+                        ->each(function ($item) use ($product) {
+                            $item->update([
+                                'quantity' => $product->prices()->first()->quantity,
+                                'product_price' => $product->prices()->first()->price,
+                                'sub_total'  => ($product->prices()->first()->price * $product->prices()->first()->quantity) + $item->specs_price - $item->cart->discount_amount,
+                            ]);
+                        });
+                }
+
+                $product->prices()->delete();
+                collect($validatedData['prices'])->each(function ($price) use ($product) {
+                    $product->prices()->create([
+                        'price' => $price['price'],
+                        'quantity' => $price['quantity'],
+                    ]);
+                });
             });
+
+
         }
         if (isset($validatedData['specifications'])) {
             collect($validatedData['specifications'])->each(function ($specification) use ($product) {
