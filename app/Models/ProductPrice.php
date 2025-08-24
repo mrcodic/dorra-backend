@@ -15,7 +15,6 @@ class ProductPrice extends Model
     protected static function booted()
     {
         static::created(function (ProductPrice $productPrice) {
-            dd($productPrice->product->carts->isNotEmpty());
             if ($productPrice->product->carts->isNotEmpty()) {
                 $product = $productPrice->product;
                 CartItem::where('product_id', $product->id)
@@ -29,7 +28,7 @@ class ProductPrice extends Model
 
                         $item->update([
                             'product_price' => $productPriceValue,
-                            'sub_total'     => ($productPriceValue * $quantity) + $specsPrice - $discount,
+                            'sub_total'     => $productPriceValue + $specsPrice - $discount,
                         ]);
                     });
             }
