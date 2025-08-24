@@ -14,8 +14,9 @@
                     <!-- Image Upload -->
                     <div class="mb-1">
                         <label class="form-label label-text">Image*</label>
-                        <div id="edit-category-dropzone" class="dropzone border rounded"
-                            style="cursor:pointer; min-height:150px;">
+                        <div id="edit-category-dropzone"
+                            class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center"
+                            style="border: 2px dashed rgba(0, 0, 0, 0.3);">
                             <div class="dz-message" data-dz-message>
                                 <span>Drop photo here or click to upload</span>
                             </div>

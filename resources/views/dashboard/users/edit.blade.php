@@ -4,7 +4,7 @@
 @section('main-page', 'Users')
 @section('sub-page', 'Edit User')
 @section('main-page-url', route("users.index"))
-@section('sub-page-url',  route("users.edit",$model->id))
+@section('sub-page-url', route("users.edit",$model->id))
 @section('vendor-style')
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
@@ -108,8 +108,9 @@
                                 <div class="edit-user-media-ids"></div>
                                 <input type="hidden" id="status" name="status">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <div id="edit-user-dropzone" class="dropzone border rounded upload-card mb-1 col-12"
-                                        style="cursor:pointer; min-height:150px;">
+                                    <div id="edit-user-dropzone"
+                                        class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center col-12 mb-1"
+                                        style="border: 2px dashed rgba(0, 0, 0, 0.3);">
                                         <div class="dz-message" data-dz-message>
                                             <button type="button" class="btn btn-outline" style="color: #E74943"
                                                 data-bs-target="#avatar-dropzone">Remove
@@ -503,11 +504,14 @@
                     }
                 });
 
+                
+
                 // ✅ On remove, clear hidden input
                 this.on("removedfile", function () {
                     $("#uploadedImage").val("");
                 });
             }
+           
         });
 </script>
 

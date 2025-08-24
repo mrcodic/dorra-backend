@@ -28,6 +28,7 @@
     @media (max-width: 768px) {
 
         /* Hide the last 4 columns on mobile */
+        .product-list-table th:nth-child(4),
         .product-list-table th:nth-child(5),
         .product-list-table th:nth-child(6),
         .product-list-table th:nth-child(7),
@@ -35,6 +36,7 @@
             display: none !important;
         }
 
+        .product-list-table tbody tr:not(.details-row) td:nth-child(4),
         .product-list-table tbody tr:not(.details-row) td:nth-child(5),
         .product-list-table tbody tr:not(.details-row) td:nth-child(6),
         .product-list-table tbody tr:not(.details-row) td:nth-child(7),
@@ -361,6 +363,7 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
                 
                 // Get data for details
+                const tags = $row.find('td:nth-child(4)').html() || '';
                 const noOfPuchas = $row.find('td:nth-child(5)').html() || '';
                 const addedDate = $row.find('td:nth-child(6)').html() || '';
                 const rating = $row.find('td:nth-child(7)').html() || '';
@@ -369,8 +372,12 @@
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="4">
+                        <td colspan="3">
                             <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Tags</span>
+                                    <span class="detail-value">${tags}</span>
+                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">No. Of Purchase:</span>
                                     <span class="detail-value">${noOfPuchas}</span>

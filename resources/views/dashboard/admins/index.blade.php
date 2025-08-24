@@ -30,14 +30,16 @@
         .admin-list-table th:nth-child(5),
         .admin-list-table th:nth-child(6),
         .admin-list-table th:nth-child(7),
-        .admin-list-table th:nth-child(8) {
+        .admin-list-table th:nth-child(8),
+        .admin-list-table th:nth-child(9) {
             display: none !important;
         }
 
         .admin-list-table tbody tr:not(.details-row) td:nth-child(5),
         .admin-list-table tbody tr:not(.details-row) td:nth-child(6),
         .admin-list-table tbody tr:not(.details-row) td:nth-child(7),
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(8) {
+        .admin-list-table tbody tr:not(.details-row) td:nth-child(8),
+        .admin-list-table tbody tr:not(.details-row) td:nth-child(9) {
             display: none !important;
         }
 
@@ -141,16 +143,17 @@
             </div>
         </div>
         <div class="card-datatable table-responsive pt-0">
-            <button type="button" id="clearRoleFilter"
-                style="background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                title="Clear search">
-                &times;
-            </button>
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                <form action="" method="get" class="flex-grow-1 me-1 position-relative col-12 col-md-6">
+                <form action="" method="get" class="d-flex me-1 position-relative col-12 col-md-6">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                         id="search-category-form" placeholder="Search here" style="height: 38px;">
+                    <button type="button" id="clearRoleFilter"
+                        class="position-absolute top-50 translate-middle-y text-muted"
+                        style="right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                        title="Clear search">
+                        &times;
+                    </button>
                 </form>
 
                 <div class="col-12 col-md-2">
@@ -326,16 +329,21 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                 // Get data for details
-                const role = $row.find('td:nth-child(5)').html() || '';
-                const status = $row.find('td:nth-child(6)').html() || '';
-                const joinDate = $row.find('td:nth-child(7)').text().trim() || '';
-                const actions = $row.find('td:nth-child(8)').html() || '';
+                const email = $row.find('td:nth-child(5)').html() || '';
+                const role = $row.find('td:nth-child(6)').html() || '';
+                const status = $row.find('td:nth-child(7)').html() || '';
+                const joinDate = $row.find('td:nth-child(8)').text().trim() || '';
+                const actions = $row.find('td:nth-child(9)').html() || '';
 
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
                         <td colspan="4">
                             <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value">${email}</span>
+                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Role:</span>
                                     <span class="detail-value">${role}</span>

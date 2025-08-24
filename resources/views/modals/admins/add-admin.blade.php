@@ -14,7 +14,9 @@
                     <!-- Avatar + Upload -->
                     <div class="mb-3">
                         <label class="form-label">Profile Photo</label>
-                        <div id="avatarDropzone" class="dropzone border rounded p-3 text-center">
+                        <div id="avatarDropzone"
+                            class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center"
+                            style="border: 2px dashed rgba(0, 0, 0, 0.3);">
                             <div class="dz-message">Drag & drop photo or click to upload</div>
                         </div>
                         <div class="avatar-media-ids"></div> <!-- hidden input gets appended here -->
