@@ -22,7 +22,7 @@ class ProductPrice extends Model
                     ->get()
                     ->each(function ($item) use ($productPrice) {
                         $productPriceValue = $productPrice->price;
-                        $quantity = $item->quantity;
+                        $quantity = $productPrice->quantity;
                         $specsPrice = $item->specs_price ?? 0;
                         $discount = $item->cart?->discount_amount ?? 0;
 
