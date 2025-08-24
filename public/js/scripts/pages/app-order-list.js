@@ -197,11 +197,11 @@ $(document).ready(function () {
 
 
     // Bulk delete form submission
-    $(document).on("submit", "#bulk-delete-form", function (e) {
-        e.preventDefault();
-        const selectedIds = $(".category-checkbox:checked").map(function () {
-            return $(this).val();
-        }).get();
+    // $(document).on("submit", "#bulk-delete-form", function (e) {
+    //     e.preventDefault();
+    //     const selectedIds = $(".category-checkbox:checked").map(function () {
+    //         return $(this).val();
+    //     }).get();
 
         if (selectedIds.length === 0) {
             Toastify({

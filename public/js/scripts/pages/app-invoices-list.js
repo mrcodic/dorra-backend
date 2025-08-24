@@ -175,26 +175,8 @@ $(document).ready(function () {
     });
 
 
-    $(document).on("submit", "#bulk-delete-form", function (e) {
-        e.preventDefault();
-        const selectedIds = $(".category-checkbox:checked").map(function () {
-            return $(this).val();
-        }).get();
-        if (selectedIds.length === 0) {
-            Toastify({
-                text: "Please select at least one order to delete!",
-                duration: 2000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#EA5455",
-                close: true,
-            }).showToast();
-            return;
-        }
 
-        if (confirm(`Are you sure you want to delete ${selectedIds.length} selected order(s)?`)) {
-            bulkDeleteOrders(selectedIds);
-        }
+
     });
 
     $(document).on("click", "#bulk-delete-btn", function (e) {
