@@ -30,14 +30,16 @@
         .category-list-table th:nth-child(4),
         .category-list-table th:nth-child(5),
         .category-list-table th:nth-child(6),
-        .category-list-table th:nth-child(7) {
+        .category-list-table th:nth-child(7),
+        .category-list-table th:nth-child(8) {
             display: none !important;
         }
 
         .category-list-table tbody tr:not(.details-row) td:nth-child(4),
         .category-list-table tbody tr:not(.details-row) td:nth-child(5),
         .category-list-table tbody tr:not(.details-row) td:nth-child(6),
-        .category-list-table tbody tr:not(.details-row) td:nth-child(7) {
+        .category-list-table tbody tr:not(.details-row) td:nth-child(7),
+        .category-list-table tbody tr:not(.details-row) td:nth-child(8) {
             display: none !important;
         }
 
@@ -331,16 +333,21 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                 // Get data for details
-                const categories = $row.find('td:nth-child(4)').html() || '';
-                const noOfCategories = $row.find('td:nth-child(5)').html() || '';
-                const addedDate = $row.find('td:nth-child(6)').html() || '';
-                const actions = $row.find('td:nth-child(7)').html() || '';
+                const subProducts = $row.find('td:nth-child(4)').html() || '';
+                const categories = $row.find('td:nth-child(5)').html() || '';
+                const noOfCategories = $row.find('td:nth-child(6)').html() || '';
+                const addedDate = $row.find('td:nth-child(7)').html() || '';
+                const actions = $row.find('td:nth-child(8)').html() || '';
 
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="3">
+                        <td colspan="4">
                             <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">SubProducts:</span>
+                                    <span class="detail-value">${subProducts}</span>
+                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Categories:</span>
                                     <span class="detail-value">${categories}</span>

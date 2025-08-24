@@ -27,19 +27,19 @@
     @media (max-width: 768px) {
 
         /* Hide the last 4 columns on mobile */
-        .admin-list-table th:nth-child(4),
         .admin-list-table th:nth-child(5),
         .admin-list-table th:nth-child(6),
         .admin-list-table th:nth-child(7),
-        .admin-list-table th:nth-child(8) {
+        .admin-list-table th:nth-child(8),
+        .admin-list-table th:nth-child(9) {
             display: none !important;
         }
 
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(4),
         .admin-list-table tbody tr:not(.details-row) td:nth-child(5),
         .admin-list-table tbody tr:not(.details-row) td:nth-child(6),
         .admin-list-table tbody tr:not(.details-row) td:nth-child(7),
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(8) {
+        .admin-list-table tbody tr:not(.details-row) td:nth-child(8),
+        .admin-list-table tbody tr:not(.details-row) td:nth-child(9) {
             display: none !important;
         }
 
@@ -329,16 +329,16 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                 // Get data for details
-                const email = $row.find('td:nth-child(4)').html() || '';
-                const role = $row.find('td:nth-child(5)').html() || '';
-                const status = $row.find('td:nth-child(6)').html() || '';
-                const joinDate = $row.find('td:nth-child(7)').text().trim() || '';
-                const actions = $row.find('td:nth-child(8)').html() || '';
+                const email = $row.find('td:nth-child(5)').html() || '';
+                const role = $row.find('td:nth-child(6)').html() || '';
+                const status = $row.find('td:nth-child(7)').html() || '';
+                const joinDate = $row.find('td:nth-child(8)').text().trim() || '';
+                const actions = $row.find('td:nth-child(9)').html() || '';
 
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="3">
+                        <td colspan="4">
                             <div class="details-content">
                                 <div class="detail-row">
                                     <span class="detail-label">Email:</span>

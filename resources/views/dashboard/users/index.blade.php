@@ -29,14 +29,16 @@
         .user-list-table th:nth-child(4),
         .user-list-table th:nth-child(5),
         .user-list-table th:nth-child(6),
-        .user-list-table th:nth-child(7) {
+        .user-list-table th:nth-child(7),
+        .user-list-table th:nth-child(8) {
             display: none !important;
         }
 
         .user-list-table tbody tr:not(.details-row) td:nth-child(4),
         .user-list-table tbody tr:not(.details-row) td:nth-child(5),
         .user-list-table tbody tr:not(.details-row) td:nth-child(6),
-        .user-list-table tbody tr:not(.details-row) td:nth-child(7) {
+        .user-list-table tbody tr:not(.details-row) td:nth-child(7),
+        .user-list-table tbody tr:not(.details-row) td:nth-child(8) {
             display: none !important;
         }
 
@@ -445,16 +447,21 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                 // Get data for details
-                const status = $row.find('td:nth-child(4)').html() || '';
-                const joinedDate = $row.find('td:nth-child(5)').html() || '';
-                const ordersCount = $row.find('td:nth-child(6)').html() || '';
-                const actions = $row.find('td:nth-child(7)').html() || '';
+                const email = $row.find('td:nth-child(4)').html() || '';
+                const status = $row.find('td:nth-child(5)').html() || '';
+                const joinedDate = $row.find('td:nth-child(6)').html() || '';
+                const ordersCount = $row.find('td:nth-child(7)').html() || '';
+                const actions = $row.find('td:nth-child(8)').html() || '';
 
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="3">
+                        <td colspan="4">
                             <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value">${email}</span>
+                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Status:</span>
                                     <span class="detail-value">${status}</span>
