@@ -217,7 +217,7 @@
                         <div class="delete-container">
                             <p id="selected-count-text">0 Invoices are selected</p>
                             <button id="delete-selected-btn"
-                                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
+                                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
                         </div>
