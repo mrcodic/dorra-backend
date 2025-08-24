@@ -233,7 +233,6 @@ class ProductService extends BaseService
                                 'sub_total'  => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity']) + $item->specs_price - $item->cart->discount_amount,
                             ]);
                         });
-                    dd( CartItem::where('product_id', $product->id)->get());
                 }
                 collect($validatedData['prices'])->each(function ($price) use ($product) {
                     $product->prices()->create([
