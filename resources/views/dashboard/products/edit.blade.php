@@ -267,8 +267,7 @@ $q->where('product_id', $model->id);
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio"
                                                         name="has_custom_prices" id="customPrice" value="1"
-                                                        @checked($model->has_custom_prices == 1)
-                                                    @disabled($model->has_custom_prices == 0)>
+                                                        @checked($model->has_custom_prices == 1)>
                                                     <div>
                                                         <label class="form-check-label label-text d-block"
                                                             for="customPrice">Add Quantity Manually</label>
@@ -284,7 +283,7 @@ $q->where('product_id', $model->id);
                                                     <input class="form-check-input " type="radio"
                                                         name="has_custom_prices" id="defaultPrice" value="0"
                                                         @checked($model->has_custom_prices ==
-                                                    0)@disabled($model->has_custom_prices == 1)>
+                                                    0)>
                                                     <div>
                                                         <label class="form-check-label label-text d-block"
                                                             for="customPrice">Default Quantity</label>
