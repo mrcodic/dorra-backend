@@ -43,13 +43,13 @@ class Product extends Model implements HasMedia
                                 + $item->specs_price
                                 - $item->cart->discount_amount,
                         ];
-                        dd($product->prices->isEmpty());
                         if ($product->prices->isEmpty()) {
                             $data['quantity'] = 1;
                         }
 
                         $item->update($data);
                     });
+                dd(CartItem::where('product_id', $product->id)->get());
             }
         });
     }
