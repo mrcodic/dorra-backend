@@ -1489,8 +1489,11 @@ $q->where('product_id', $model->id);
         });
 </script>
 <script>
+    $('.invoice-repeater').find('[data-repeater-delete]').show(); // Show delete button for others
+
     // Repeater
         $('.invoice-repeater').repeater({
+
             show: function () {
                 $(this).slideDown();
                 feather && feather.replace();
@@ -1516,8 +1519,8 @@ $q->where('product_id', $model->id);
                 //     if (index === 0) {
                 //         $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
                 //     } else {
-                //         $(this).find('[data-repeater-delete]').show(); // Show delete button for others
-                //     }    
+                        $(this).find('[data-repeater-delete]').show(); // Show delete button for others
+                //     }
                 // });
             }
         });
