@@ -260,6 +260,7 @@ $(document).ready(function () {
         console.log(OrderId);
 
         $.ajax({
+
             url: `/orders/${OrderId}`,
             method: "DELETE",
             success: function (res) {
