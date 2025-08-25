@@ -25,7 +25,7 @@ class ProductPrice extends Model
                         if ($productPriceValue < $item->cart?->discount_amount)
                         {
                             $item->cart->update([
-                                'discount_amount' => null,
+                                'discount_amount' => 0,
                                 'discount_code_id' => null,
                             ]);
                         }
