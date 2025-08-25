@@ -103,6 +103,7 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'invoices', 'as' => 'invoices.', 'controller' => InvoiceController::class,], function () {
         Route::get('/data', [InvoiceController::class, 'getData'])->name('data');
+        Route::get('/export', [InvoiceController::class, 'export'])->name('export');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/invoices', InvoiceController::class)->only(['show','destroy','index']);

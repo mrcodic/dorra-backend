@@ -1,5 +1,5 @@
 @extends('layouts/contentLayoutMaster')
-@section('title', 'Edit Invoice ')
+@section('title', 'Show Invoice ')
 @section('main-page', 'Invoices')
 @section('sub-page', 'Show Invoice')
 @section('main-page-url', route("invoices.index"))
@@ -36,17 +36,17 @@
 
                     <div class="mb-1">
                         <label class="form-label fw-bold">Name</label>
-                        <input type="text" class="form-control" value="{{ $model->order->user?->first_name ?? $model->order->guest?->first_name }}" name="name"
+                        <input type="text" class="form-control" value="{{ $model->order->user?->first_name ?? $model->order?->guest?->first_name }}" name="name"
                                value="John Doe" readonly>
                     </div>
                     <div class="mb-1">
                         <label class="form-label fw-bold">Email</label>
-                        <input type="email" class="form-control" value="{{ $model->order->user?->email ??  $model->order->guest?->email }}" name="email"
+                        <input type="email" class="form-control" value="{{ $model->order->user?->email ??  $model->order?->guest?->email }}" name="email"
                                value="john@example.com" readonly>
                     </div>
                     <div class="mb-1">
                         <label class="form-label fw-bold">Phone</label>
-                        <input type="text" class="form-control" value="{{ $model->order->user?->phone_number ?? $model->order->guest?->email }}" name="phone"
+                        <input type="text" class="form-control" value="{{ $model->order->user?->phone_number ?? $model->order?->guest?->email }}" name="phone"
                                value="+1 123 456 7890" readonly>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                         <p class="fs-16 text-black">April 30, 2025</p> --}}
                 </div>
                 <!-- Items List -->
-                @foreach ($model->order->orderItems as $design)
+                @foreach ($model->order?->orderItems ??[] as $design)
                     @php
                         $product = $design->product;
                     @endphp
@@ -169,7 +169,7 @@
                 </div>
 
                 <!-- Status Display -->
-
+                <a class="btn btn-primary" href="{{ route("invoices.download") }}">Download</a>
 
             </div>
         </form>

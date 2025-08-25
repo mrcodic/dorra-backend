@@ -10,6 +10,11 @@ var dt_user_table = $(".order-list-table").DataTable({
     ajax: {
         url: ordersDataUrl,
         type: "GET",
+        data: function (d) {
+            d.search_value = $("#search-invoice-form").val(); // get from input
+            d.created_at = $(".filter-date").val();
+            return d;
+        },
     },
     columns: [
         {
@@ -82,13 +87,17 @@ var dt_user_table = $(".order-list-table").DataTable({
     },
 });
 
-// Search functionality
+// Custom search with debounce
 let searchTimeout;
-$('#search-product-form').on('keyup', function () {
+$("#search-invoice-form").on("keyup", function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
     }, 300);
+});
+
+$(".filter-date").on("change", function () {
+    dt_user_table.draw();
 });
 
 // Category select with timeout
@@ -116,7 +125,9 @@ $(document).on('change', '#select-all-checkbox', function () {
 });
 
 $(document).on('change', '.category-checkbox', function () {
+
     const totalCheckboxes = $('.category-checkbox').length;
+
     const checkedCheckboxes = $('.category-checkbox:checked').length;
 
     $('#select-all-checkbox').prop('checked', totalCheckboxes === checkedCheckboxes);
@@ -134,55 +145,22 @@ function toggleBulkDeleteContainer() {
 }
 
 $(document).ready(function () {
-    if (sessionStorage.getItem("order_added") == "true") {
-        Toastify({
-            text: "Order added successfully!",
-            duration: 4000,
-            gravity: "top",
-            position: "right",
-            backgroundColor: "#28a745",
-            close: true,
-        }).showToast();
-        sessionStorage.removeItem("order_added");
-    }
 
-    if (sessionStorage.getItem("order_updated") == "true") {
-        Toastify({
-            text: "Order updated successfully!",
-            duration: 4000,
-            gravity: "top",
-            position: "right",
-            backgroundColor: "#28a745",
-            close: true,
-        }).showToast();
-        sessionStorage.removeItem("order_updated");
-    }
 
-    $(document).on("click", ".delete-order", function (e) {
-        e.preventDefault();
-        const orderId = $(this).data("id");
-
-        if (confirm("Are you sure you want to delete this order?")) {
-            deleteOrder(orderId);
-        }
-    });
 
     $(document).on("click", ".open-delete-order-modal", function () {
         const orderId = $(this).data("id");
-        console.log(orderId);
         $("#deleteInvoiceForm").data("id", orderId);
-        $("#deleteInvoiceModal").modal("show");
+        let modalEl = document.getElementById("deleteInvoiceModal");
+        let modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
     });
 
-
-
-
-    });
+});
 
 // Bulk delete button handler
 $(document).on("click", "#bulk-delete-btn", function (e) {
     e.preventDefault();
-
     const selectedIds = $(".category-checkbox:checked").map(function () {
         return $(this).val();
     }).get();
@@ -217,7 +195,7 @@ $(document).on("click", "#confirm-bulk-delete", function () {
 
 function bulkDeleteOrders(ids) {
     $.ajax({
-        url: "orders/bulk-delete",
+        url: "invoices/bulk-delete",
         method: "POST",
         data: {
             ids: ids,
@@ -229,7 +207,7 @@ function bulkDeleteOrders(ids) {
             modal.hide();
 
             Toastify({
-                text: "Selected orders deleted successfully!",
+                text: "Selected invoices deleted successfully!",
                 duration: 2000,
                 gravity: "top",
                 position: "right",
@@ -316,7 +294,7 @@ $(document).on("submit", "#deleteInvoiceForm", function (e) {
             success: function (response) {
                 $("#deleteInvoicesModal").modal("hide");
                 Toastify({
-                    text: "Selected orders deleted successfully!",
+                    text: "Selected invoices deleted successfully!",
                     duration: 1500,
                     gravity: "top",
                     position: "right",
