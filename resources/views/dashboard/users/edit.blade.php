@@ -465,70 +465,70 @@
 @endsection
 
 @section('page-script')
-<script>
-    Dropzone.autoDiscover = false;
+    <script>
+        Dropzone.autoDiscover = false;
 
-        const editDropzone = new Dropzone("#edit-user-dropzone", {
-            url: "{{ route('media.store') }}", // route that uploads new media
-            paramName: "file",
-            maxFiles: 1,
-            acceptedFiles: "image/*",
+            const editDropzone = new Dropzone("#edit-user-dropzone", {
+                url: "{{ route('media.store') }}", // route that uploads new media
+                paramName: "file",
+                maxFiles: 1,
+                acceptedFiles: "image/*",
 
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            addRemoveLinks: true,
-            init: function () {
-                let existingImageUrl = $("#existingImageUrl").val();
-                let existingImageName = $("#existingImageName").val();
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                init: function () {
+                    let existingImageUrl = $("#existingImageUrl").val();
+                    let existingImageName = $("#existingImageName").val();
 
-                // ✅ Preload user’s current avatar if exists
-                if (existingImageUrl) {
-                    let mockFile = { name: existingImageName, size: 12345, accepted: true };
-                    this.emit("addedfile", mockFile);
-                    this.emit("thumbnail", mockFile, existingImageUrl);
-                    this.emit("complete", mockFile);
-                    this.files.push(mockFile);
+                    // ✅ Preload user’s current avatar if exists
+                    if (existingImageUrl) {
+                        let mockFile = { name: existingImageName, size: 12345, accepted: true };
+                        this.emit("addedfile", mockFile);
+                        this.emit("thumbnail", mockFile, existingImageUrl);
+                        this.emit("complete", mockFile);
+                        this.files.push(mockFile);
+                    }
+
+                    // ✅ When new image uploaded
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            $("#uploadedImage").val(response.data.id);
+
+                                // Add hidden input for submitted form
+                                let hidden = document.createElement('input');
+                                hidden.type = "hidden";
+                                hidden.name = "image_id"; // backend expects image_id
+                                hidden.value = response.data.id;
+                                file._hiddenInput = hidden;
+                                document.querySelector('.edit-user-media-ids').appendChild(hidden);
+
+                        }
+                    });
+
+
+
+                    // ✅ On remove, clear hidden input
+                    this.on("removedfile", function (file) {
+                        $("#uploadedImage").val("");
+                        if (file._hiddenInput) {
+                            file._hiddenInput.remove();
+                        }
+                        if (file.xhr) {
+                            let response = JSON.parse(file.xhr.response);
+                            fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                method: "DELETE",
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
                 }
 
-                // ✅ When new image uploaded
-                this.on("success", function (file, response) {
-                    if (response.success && response.data) {
-                        $("#uploadedImage").val(response.data.id);
-
-                            // Add hidden input for submitted form
-                            let hidden = document.createElement('input');
-                            hidden.type = "hidden";
-                            hidden.name = "image_id"; // backend expects image_id
-                            hidden.value = response.data.id;
-                            file._hiddenInput = hidden;
-                            document.querySelector('.edit-user-media-ids').appendChild(hidden);
-
-                    }
-                });
-
-
-
-                // ✅ On remove, clear hidden input
-                this.on("removedfile", function (file) {
-                    $("#uploadedImage").val("");
-                    if (file._hiddenInput) {
-                        file._hiddenInput.remove();
-                    }
-                    if (file.xhr) {
-                        let response = JSON.parse(file.xhr.response);
-                        fetch("{{ url('api/v1/media') }}/" + response.data.id, {
-                            method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        });
-                    }
-                });
-            }
-
-        });
-</script>
+            });
+    </script>
 
 
 <script>

@@ -275,7 +275,14 @@ class ProductService extends BaseService
                                 'price' => $option['price'] ?? 0,
                             ]
                         );
-
+                        if (isset($option['option_image'])) {
+                            Media::where('id', $option['option_image'])
+                                ->update([
+                                    'model_type' => get_class($productOption),
+                                    'model_id'   => $productOption->id,
+                                    'collection_name' => 'productSpecificationOptions',
+                                ]);
+                        }
                         if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
                             handleMediaUploads([$option['image']], $productOption, clearExisting: true);
                         }
