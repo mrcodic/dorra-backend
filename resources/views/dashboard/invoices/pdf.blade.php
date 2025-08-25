@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ public_path('css/pdf.css') }}">
 </head>
 <body>
-<h2>Invoice #{{ $model->invoice_number }}</h2>
+<h2>Invoice {{ $model->invoice_number }}</h2>
 <p><strong>Date:</strong> {{ $model->issued_date }}</p>
 <p><strong>Customer:</strong> {{ $model->order->user?->first_name ?? $model->order?->guest?->first_name }}</p>
 
