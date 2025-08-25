@@ -795,13 +795,12 @@
                                             <strong>{{ $review->customer }}</strong>
                                             <div class="text-warning">
 
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    @if ($i <= $review->rate)
-                                                        <i class="fas fa-star text-warning"></i> {{-- filled --}}
+                                                @for ($i = 1; $i <= 5; $i++) @if ($i <=$review->rate)
+                                                    <i class="fas fa-star text-warning"></i> {{-- filled --}}
                                                     @else
-                                                        <i class="far fa-star text-muted"></i> {{-- empty --}}
+                                                    <i class="far fa-star text-muted"></i> {{-- empty --}}
                                                     @endif
-                                                @endfor
+                                                    @endfor
 
 
 
@@ -909,8 +908,8 @@
                                                 <small class="text-muted">{{
                                                     \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                 <p class="mb-1">{{ $review->review }}</p>
-                                                <form class="remove-review" action="{{ route("reviews.destroy",$review->id) }}"
-                                                    method="POST">
+                                                <form class="remove-review"
+                                                    action="{{ route('reviews.destroy',$review->id) }}" method="POST">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">
