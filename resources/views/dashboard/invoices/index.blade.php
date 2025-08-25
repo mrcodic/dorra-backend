@@ -28,11 +28,13 @@
     @media (max-width: 768px) {
 
         /* Hide the last 4 columns on mobile */
+        .order-list-table th:nth-child(4),
         .order-list-table th:nth-child(5),
         .order-list-table th:nth-child(6) {
             display: none !important;
         }
 
+        .order-list-table tbody tr:not(.details-row) td:nth-child(4),
         .order-list-table tbody tr:not(.details-row) td:nth-child(5),
         .order-list-table tbody tr:not(.details-row) td:nth-child(6) {
             display: none !important;
@@ -169,13 +171,13 @@
                     <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
                         <form action="" method="get" class="d-flex me-1 position-relative col-12 col-md-6">
                             <i data-feather="search"
-                               class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
+                                class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
                             <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                                   id="search-invoice-form" placeholder="Search here" style="height: 38px;">
+                                id="search-invoice-form" placeholder="Search here" style="height: 38px;">
                             <button type="button" id="clearRoleFilter"
-                                    class="position-absolute top-50 translate-middle-y text-muted"
-                                    style="right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                                    title="Clear search">
+                                class="position-absolute top-50 translate-middle-y text-muted"
+                                style="right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                                title="Clear search">
                                 &times;
                             </button>
                         </form>
@@ -187,7 +189,7 @@
                             </select>
                         </div>
 
-                        <a href="{{ route("invoices.export") }}" class="btn btn-outline-primary">
+                        <a href="{{ route('invoices.export') }}" class="btn btn-outline-primary">
                             Export
                         </a>
                     </div>
@@ -209,16 +211,15 @@
                             </th>
                             <th>Actions</th>
                         </tr>
-                        </thead>
-                    </table>
-                    <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                        <div class="delete-container">
-                            <p id="selected-count-text">0 Invoices are selected</p>
-                            <button type="submit"  data-bs-toggle="modal"
-                                    data-bs-target="#deleteInvoicesModal"
-                                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                                <i data-feather="trash-2"></i> Delete Selected
-                            </button>
+                    </thead>
+                </table>
+                <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                    <div class="delete-container">
+                        <p id="selected-count-text">0 Invoices are selected</p>
+                        <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteInvoicesModal"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                            <i data-feather="trash-2"></i> Delete Selected
+                        </button>
                         </form>
                     </div>
                 </div>
@@ -343,14 +344,19 @@
                         $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                         // Get data for details
+                        const price = $row.find('td:nth-child(4)').html() || '';
                         const issuedAt = $row.find('td:nth-child(5)').html() || '';
                         const actions = $row.find('td:nth-child(6)').html() || '';
 
                         // Create details row
                         const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="4">
+                        <td colspan="3">
                             <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Price:</span>
+                                    <span class="detail-value">${price}</span>
+                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Issued Ate:</span>
                                     <span class="detail-value">${issuedAt}</span>
