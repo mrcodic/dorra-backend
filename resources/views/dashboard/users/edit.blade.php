@@ -112,13 +112,16 @@
                                         class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center col-12 mb-1"
                                         style="border: 2px dashed rgba(0, 0, 0, 0.3);">
                                         <div class="dz-message" data-dz-message>
-                                            <button type="button" class="btn btn-outline" style="color: #E74943"
-                                                data-bs-target="#avatar-dropzone">Remove
-                                                Photo</button>
-                                            <button type="button" class="btn btn-outline"
-                                                style="border: 1px solid #CED5D4; border-radius: 15px"
-                                                data-bs-target="#avatar-dropzone">Change
-                                                Photo</button>
+                                            <button type="button" class="btn btn-outline-primary" data-bs-target="#edit-user-dropzone">
+                                                Upload Photo
+                                            </button>
+{{--                                            <button type="button" class="btn btn-outline" style="color: #E74943"--}}
+{{--                                                data-bs-target="#avatar-dropzone">Remove--}}
+{{--                                                Photo</button>--}}
+{{--                                            <button type="button" class="btn btn-outline"--}}
+{{--                                                style="border: 1px solid #CED5D4; border-radius: 15px"--}}
+{{--                                                data-bs-target="#avatar-dropzone">Change--}}
+{{--                                                Photo</button>--}}
 
                                         </div>
                                     </div>
@@ -474,7 +477,7 @@
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
-            addRemoveLinks: false,
+            addRemoveLinks: true,
             init: function () {
                 let existingImageUrl = $("#existingImageUrl").val();
                 let existingImageName = $("#existingImageName").val();
@@ -504,14 +507,26 @@
                     }
                 });
 
-                
+
 
                 // ✅ On remove, clear hidden input
-                this.on("removedfile", function () {
+                this.on("removedfile", function (file) {
                     $("#uploadedImage").val("");
+                    if (file._hiddenInput) {
+                        file._hiddenInput.remove();
+                    }
+                    if (file.xhr) {
+                        let response = JSON.parse(file.xhr.response);
+                        fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
                 });
             }
-           
+
         });
 </script>
 

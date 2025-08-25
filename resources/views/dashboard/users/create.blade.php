@@ -316,10 +316,28 @@
             this.on("success", function (file, response) {
                 if (response.data.success && response.data.url) {
                     $("#uploadedImage").val(response.data.url);
+                    let hidden = document.createElement('input');
+                    hidden.type = "hidden";
+                    hidden.name = "image_id";
+                    hidden.value = response.data.id;
+                    file._hiddenInput = hidden;
+
                 }
             });
-            this.on("removedfile", function () {
+            this.on("removedfile", function (file) {
                 $("#uploadedImage").val("");
+                if (file._hiddenInput) {
+                    file._hiddenInput.remove();
+                }
+                if (file.xhr) {
+                    let response = JSON.parse(file.xhr.response);
+                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                        method: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    });
+                }
             });
         } ,
         success: function (file, response) {
