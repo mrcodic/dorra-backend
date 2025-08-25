@@ -23,10 +23,10 @@ class ProductPrice extends Model
                     ->each(function ($item) use ($productPrice) {
                         $productPriceValue = $productPrice->price;
 
-                        if ($productPriceValue < $item->cart?->discount_amount)
+                        if ((float)$productPriceValue < (float)$item->cart?->discount_amount)
                         {
                             dd($productPriceValue,$item->cart?->discount_amount);
-                            
+
                             $item->cart->update([
                                 'discount_amount' => 0,
                                 'discount_code_id' => null,
