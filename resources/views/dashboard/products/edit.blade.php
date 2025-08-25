@@ -886,71 +886,72 @@ $q->where('product_id', $model->id);
 <script>
     Dropzone.autoDiscover = false;
 
-        const categoryDropzone = new Dropzone("#product-main-dropzone", {
-            url: "{{ route('media.store') }}",
-            paramName: "file",
-            maxFiles: 1,
-            maxFilesize: 1, // MB
-            acceptedFiles: "image/*",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            addRemoveLinks: true,
-            dictDefaultMessage: "Drop image here or click to upload",
-            init: function () {
-                let dz = this;
+    const categoryDropzone = new Dropzone("#product-main-dropzone", {
+        url: "{{ route('media.store') }}",
+        paramName: "file",
+        maxFiles: 1,
+        maxFilesize: 1, // MB
+        acceptedFiles: "image/*",
+        headers: {
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        addRemoveLinks: true,
+        dictDefaultMessage: "Drop image here or click to upload",
+        init: function () {
+            let dz = this;
 
-                // ✅ Show existing image if editing
-                @if(!empty($media = $model->getFirstMedia('product_main_image')))
-                // In categoryDropzone (single image)
-                let mainMockFile = {
-                    name: "{{ $media->file_name }}",
-                    size: {{ $media->size ?? 12345 }},
-                    _hiddenInputId: "{{ $media->id }}"
-                };
-                dz.emit("addedfile", mainMockFile);
-                dz.emit("thumbnail", mainMockFile, "{{ $media->getUrl() }}");
-                dz.emit("complete", mainMockFile);
-                dz.files.push(mainMockFile);
+            // ✅ Show existing image if editing
+            @if(!empty($media = $model->getFirstMedia('product_main_image')))
+            let mainMockFile = {
+                name: "{{ $media->file_name }}",
+                size: {{ $media->size ?? 12345 }},
+                _hiddenInputId: "{{ $media->id }}"
+            };
 
-                // also set hidden input
-                document.getElementById("uploadedImage").value = "{{ $media->id }}";
-                document.getElementById("uploaded-image").classList.remove("d-none");
-                @endif
+            dz.emit("addedfile", mainMockFile);
+            dz.emit("thumbnail", mainMockFile, "{{ $media->getUrl() }}");
+            dz.emit("complete", mainMockFile);
+            dz.files.push(mainMockFile);
 
-                // ✅ On success
-                dz.on("success", function (file, response) {
-                    if (response.success && response.data) {
-                        file._hiddenInputId = response.data.id;
-                        document.getElementById("uploadedImage").value = response.data.id;
-                    }
-                });
+            {{--document.getElementById("uploadedImage").value = "{{ $media->id }}";--}}
+            // document.getElementB     yId("uploaded-image").classList.remove("d-none");
+            @endif
 
-                // ✅ On remove
-                dz.on("removedfile", function (file) {
-                    console.log("Fs")
+            // ✅ On success
+            dz.on("success", function (file, response) {
 
-                    document.getElementById("uploadedImage").value = "";
-                    if (file._hiddenInputId) {
-                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                            method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        });
-                    }
-                    document.getElementById("uploaded-image").classList.add("d-none");
-                });
-            }
-        });
+                if (response?.data?.id) {
+                    file._hiddenInputId = response.data.id;
+                    document.getElementById("uploadedImage").value = response.data.id;
+                }
+            });
 
-        // ✅ Manual remove
-        document.getElementById("remove-image").addEventListener("click", function () {
-            categoryDropzone.removeAllFiles(true);
-            document.getElementById("uploadedImage").value = "";
-            document.getElementById("uploaded-image").classList.add("d-none");
-        });
+            // ✅ On remove
+            dz.on("removedfile", function (file) {
+
+                // document.getElementById("uploadedImage").value = "";
+                // document.getElementById("uploaded-image").classList.add("d-none");
+                console.log(file._hiddenInputId)
+                if (file._hiddenInputId) {
+
+                    fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                        method: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    // ✅ Manual remove button
+    // document.getElementById("remove-image").addEventListener("click", function () {
+    //     categoryDropzone.removeAllFiles(); // triggers removedfile event
+    // });
 </script>
+
+
 
 
 <script>

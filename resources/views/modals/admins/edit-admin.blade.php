@@ -113,10 +113,8 @@
                 document.querySelector('.edit-avatar-media-ids').innerHTML = "";
 
                 // Create hidden input with image_id
-                let hidden = document.createElement('input');
-                hidden.type = "hidden";
-                hidden.name = "image_id";
-                hidden.value = response.data.id; // ✅ matches your response
+                file._hiddenInputId = response.data.id;
+
                 document.querySelector('.edit-avatar-media-ids').appendChild(hidden);
 
                 // Update avatar preview
@@ -126,6 +124,7 @@
 
             this.on("removedfile", function (file) {
                 // Reset preview
+
                 const preview = document.querySelector('#editAdminModal .avatarPreview');
                 preview.src = "{{ asset('images/default-user.png') }}";
 
