@@ -177,7 +177,8 @@
 
         <!-- Bulk Delete Bar -->
         <div id="bulk-delete-container" class="my-2 bulk-delete-container " style="display: none;">
-            <div class="delete-container mx-auto">
+            <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                style="z-index: 10;">
                 <p id="selected-count-text">0 Mockups are selected</p>
 
                 <button type="button" id="delete-selected-btn"
