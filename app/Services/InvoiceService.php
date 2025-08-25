@@ -67,7 +67,10 @@ class InvoiceService extends BaseService
     public function download($id)
     {
         $model = $this->repository->find($id);
-        $pdf = Pdf::loadView('dashboard.invoices.show', compact('model'));
+        $pdf = Pdf::loadView('dashboard.invoices.pdf', compact('model'))->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+        ]);;
         return $pdf->download('invoice.pdf');
     }
 }
