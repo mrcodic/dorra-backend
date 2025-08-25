@@ -176,7 +176,7 @@ class CartService extends BaseService
 
         $cart->update([
             'discount_code_id' => $discountCode->id,
-            'discount_amount' => getDiscountAmount($discountCode, $cart->price - $cart->discount_amount + setting('tax') + setting('delivery')),
+            'discount_amount' => getDiscountAmount($discountCode, $cart->price),
         ]);
 
         return [
