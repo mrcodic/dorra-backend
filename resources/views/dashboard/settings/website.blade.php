@@ -784,9 +784,9 @@
                         <!-- Added Products List -->
                         <div class="mt-2">
                             <h5 class="text-black fs-16">Added Reviews</h5>
-                            <div class="d-flex flex-column flex-md-row gap-1">
+                            <div class="row">
                                 @foreach($reviewsWithImages as $review)
-                                <div class="col-md-6 mb-2"
+                                <div class="col-md-6 mb-1"
                                     style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">
                                     <div class="p-1 d-flex">
                                         <img src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
@@ -822,7 +822,7 @@
                     <div class="card mt-2 border rounded">
 
                         <div class="card-body">
-                            <p class="fs-4 text-black ">Words of Praise</p>
+                            <p class="fs-4 text-black">Words of Praise</p>
                             <!-- Header with toggle -->
                             <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
                                 style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
@@ -883,10 +883,10 @@
                             <!-- Added Products List -->
                             <div class="mt-2">
                                 <h5 class="text-black fs-16">Added Reviews</h5>
-                                <div class="row row-cols-1 row-cols-md-2 g-3 mt-2 ">
+                                <div class="row">
                                     @foreach($reviewsWithoutImages as $review)
                                     <div class="col-md-6 mb-2"
-                                        style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                        style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">
 
                                         <div class="p-1 d-flex">
                                             <div>
@@ -899,9 +899,8 @@
                                                 <small class="text-muted">{{
                                                     \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                 <p class="mb-1">{{ $review->review }}</p>
-                                                <form class="remove-review" action="{{ route("
-                                                    reviews.destroy",$review->id) }}"
-                                                    method="POST">
+                                                <form class="remove-review"
+                                                    action="{{ route('reviews.destroy',$review->id) }}" method="POST">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">
@@ -909,9 +908,9 @@
                                                     </button>
                                                 </form>
                                             </div>
-                                            <small class="text-muted">{{
+                                            {{-- <small class="text-muted">{{
                                                 \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
-                                            <p class="mb-1">{{ $review->review }}</p>
+                                            <p class="mb-1">{{ $review->review }}</p> --}}
 
                                         </div>
 
