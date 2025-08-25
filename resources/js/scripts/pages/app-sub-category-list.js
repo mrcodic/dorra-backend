@@ -10,15 +10,20 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
         url: subCategoriesDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $('#search-sub-category-form').val(); // get from input
-            d.created_at = $('.filter-date').val();
+            d.search_value = $("#search-sub-category-form").val(); // get from input
+            d.created_at = $(".filter-date").val();
             return d;
-        }
+        },
     },
     columns: [
-        { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
+        {
+            data: null,
+            defaultContent: "",
+            orderable: false,
+            render: function (data, type, row, meta) {
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            } },
+            },
+        },
         { data: "name" },
         { data: "sub_category_products_count" },
         { data: "added_date" },
@@ -68,7 +73,6 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
 
           </div>
         `;
-
             },
         },
     ],
@@ -96,26 +100,26 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
     },
 });
 let searchTimeout;
-$('#search-sub-category-form').on('keyup', function () {
+$("#search-sub-category-form").on("keyup", function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
     }, 300);
 });
 
-$('.filter-date').on('change', function () {
+$(".filter-date").on("change", function () {
     dt_user_table.draw();
 });
 
 $(document).ready(function () {
-    const saveButton = $('.saveChangesButton');
-    const saveLoader = $('.saveLoader');
-    const saveButtonText = $('.saveChangesButton .btn-text');
+    const saveButton = $(".saveChangesButton");
+    const saveLoader = $(".saveLoader");
+    const saveButtonText = $(".saveChangesButton .btn-text");
     $("#addSubCategoryForm").on("submit", function (e) {
         e.preventDefault();
-        saveButton.prop('disabled', true);
-        saveLoader.removeClass('d-none');
-        saveButtonText.addClass('d-none');
+        saveButton.prop("disabled", true);
+        saveLoader.removeClass("d-none");
+        saveButtonText.addClass("d-none");
         var formData = new FormData(this);
 
         $.ajax({
@@ -125,7 +129,6 @@ $(document).ready(function () {
             processData: false,
             contentType: false,
             success: function (response) {
-
                 Toastify({
                     text: "SubCategory added successfully!",
                     duration: 2000,
@@ -137,9 +140,9 @@ $(document).ready(function () {
 
                 $("#addSubCategoryForm")[0].reset();
                 $("#addSubCategoryModal").modal("hide");
-                saveButton.prop('disabled', false);
-                saveLoader.addClass('d-none');
-                saveButtonText.removeClass('d-none');
+                saveButton.prop("disabled", false);
+                saveLoader.addClass("d-none");
+                saveButtonText.removeClass("d-none");
                 $(".sub-category-list-table").DataTable().ajax.reload(); // reload your table
             },
             error: function (xhr) {
@@ -154,16 +157,14 @@ $(document).ready(function () {
                             backgroundColor: "#EA5455",
                             close: true,
                         }).showToast();
-                        saveButton.prop('disabled', false);
-                        saveLoader.addClass('d-none');
-                        saveButtonText.removeClass('d-none');
+                        saveButton.prop("disabled", false);
+                        saveLoader.addClass("d-none");
+                        saveButtonText.removeClass("d-none");
                     }
                 }
             },
         });
     });
-
-
 
     $(document).on("click", ".view-details", function (e) {
         const categoryNameAR = $(this).data("name_ar");
@@ -194,8 +195,12 @@ $(document).ready(function () {
         const parentName = $(this).data("parent");
         const parentId = $(this).data("parent_id");
         // Populate modal
-        $("#editSubCategoryModal #edit-sub-category-name-ar").val(categoryNameAR);
-        $("#editSubCategoryModal #edit-sub-category-name-en").val(categoryNameEn);
+        $("#editSubCategoryModal #edit-sub-category-name-ar").val(
+            categoryNameAR
+        );
+        $("#editSubCategoryModal #edit-sub-category-name-en").val(
+            categoryNameEn
+        );
         $("#editSubCategoryModal #edit-sub-category-products").val(products);
         $("#editSubCategoryModal #edit-sub-category-date").val(addedDate);
         $("#editSubCategoryModal #edit-sub-category-id").val(id);
@@ -204,7 +209,6 @@ $(document).ready(function () {
         // Show modal
         $("#editSubCategoryModal").modal("show");
     });
-
 
     $("#editButton").on("click", function () {
         var nameEN = $("#sub-category-name-en").val();
@@ -222,9 +226,9 @@ $(document).ready(function () {
     $("#editSubCategoryForm").on("submit", function (e) {
         e.preventDefault(); // prevent default form submission
         var categoryId = $(this).find("#edit-sub-category-id").val();
-        saveButton.prop('disabled', true);
-        saveLoader.removeClass('d-none');
-        saveButtonText.addClass('d-none');
+        saveButton.prop("disabled", true);
+        saveLoader.removeClass("d-none");
+        saveButtonText.addClass("d-none");
         $.ajax({
             url: `sub-categories/${categoryId}`,
             type: "POST", // IMPORTANT: Laravel expects POST + method spoofing (@method('PUT'))
@@ -232,7 +236,6 @@ $(document).ready(function () {
             processData: false,
             contentType: false,
             success: function (response) {
-
                 Toastify({
                     text: "Subcategory updated successfully!",
                     duration: 3000,
@@ -245,11 +248,12 @@ $(document).ready(function () {
                 // Close modal
                 $("#editSubCategoryModal").modal("hide");
                 $("#showSubCategoryModal").modal("hide");
-                saveButton.prop('disabled', false);
-                saveLoader.addClass('d-none');
-                saveButtonText.removeClass('d-none');
-                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
-
+                saveButton.prop("disabled", false);
+                saveLoader.addClass("d-none");
+                saveButtonText.removeClass("d-none");
+                $(".sub-category-list-table")
+                    .DataTable()
+                    .ajax.reload(null, false);
             },
             error: function (xhr) {
                 var errors = xhr.responseJSON.errors;
@@ -265,20 +269,17 @@ $(document).ready(function () {
                         }).showToast();
                     }
                 }
-                saveButton.prop('disabled', false);
-                saveLoader.addClass('d-none');
-                saveButtonText.removeClass('d-none');
+                saveButton.prop("disabled", false);
+                saveLoader.addClass("d-none");
+                saveButtonText.removeClass("d-none");
             },
         });
     });
 
     $(document).on("click", ".open-delete-sub-category-modal", function () {
-
         const categoryId = $(this).data("id");
         $("#deleteSubCategoryForm").data("id", categoryId);
-
     });
-
 
     $(document).on("submit", "#deleteSubCategoryForm", function (e) {
         e.preventDefault();
@@ -299,7 +300,9 @@ $(document).ready(function () {
                     backgroundColor: "#28C76F",
                     close: true,
                 }).showToast();
-                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
+                $(".sub-category-list-table")
+                    .DataTable()
+                    .ajax.reload(null, false);
             },
             error: function () {
                 $("#deleteSubCategoryModal").modal("hide");
@@ -311,18 +314,20 @@ $(document).ready(function () {
                     backgroundColor: "#EA5455", // red
                     close: true,
                 }).showToast();
-                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
+                $(".sub-category-list-table")
+                    .DataTable()
+                    .ajax.reload(null, false);
             },
         });
-
     });
-
 
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();
-        const selectedIds = $(".category-checkbox:checked").map(function () {
-            return $(this).val();
-        }).get();
+        const selectedIds = $(".category-checkbox:checked")
+            .map(function () {
+                return $(this).val();
+            })
+            .get();
 
         if (selectedIds.length === 0) return;
 
@@ -346,11 +351,12 @@ $(document).ready(function () {
 
                 // Reload DataTable
 
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
-                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
-
+                $("#bulk-delete-container").hide();
+                $(".category-checkbox").prop("checked", false);
+                $("#select-all-checkbox").prop("checked", false);
+                $(".sub-category-list-table")
+                    .DataTable()
+                    .ajax.reload(null, false);
             },
             error: function () {
                 $("#deleteSubCategoriesModal").modal("hide");
@@ -365,15 +371,13 @@ $(document).ready(function () {
 
                 // Reload DataTable
 
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
-                $(".sub-category-list-table").DataTable().ajax.reload(null, false);
-
+                $("#bulk-delete-container").hide();
+                $(".category-checkbox").prop("checked", false);
+                $("#select-all-checkbox").prop("checked", false);
+                $(".sub-category-list-table")
+                    .DataTable()
+                    .ajax.reload(null, false);
             },
         });
-
     });
-
-
 });

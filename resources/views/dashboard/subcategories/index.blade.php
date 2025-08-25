@@ -26,11 +26,13 @@
     /* Responsive table accordion styles */
     @media (max-width: 768px) {
 
-        /* Hide the last column on mobile */
+        /* Hide the last 2 columns on mobile */
+        .sub-category-list-table th:nth-child(4),
         .sub-category-list-table th:nth-child(5) {
             display: none !important;
         }
 
+        .sub-category-list-table tbody tr:not(.details-row) td:nth-child(4),
         .sub-category-list-table tbody tr:not(.details-row) td:nth-child(5) {
             display: none !important;
         }
@@ -318,13 +320,18 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
                 
                 // Get data for details
+                const addedDate = $row.find('td:nth-child(4)').html() || '';
                 const actions = $row.find('td:nth-child(5)').html() || '';
                 
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="4">
+                        <td colspan="3">
                             <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Added Date:</span>
+                                    <span class="detail-value">${addedDate}</span>
+                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Actions:</span>
                                     <span class="detail-value">${actions}</span>
