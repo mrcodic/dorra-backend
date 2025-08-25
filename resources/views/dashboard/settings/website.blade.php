@@ -899,8 +899,9 @@
                                                 <small class="text-muted">{{
                                                     \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                 <p class="mb-1">{{ $review->review }}</p>
-                                                <form class="remove-review"
-                                                    action="{{ route('reviews.destroy',$review->id) }}" method="POST">
+                                                <form class="remove-review" action="{{ route("
+                                                    reviews.destroy",$review->id) }}"
+                                                    method="POST">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">

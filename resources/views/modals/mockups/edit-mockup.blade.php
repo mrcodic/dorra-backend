@@ -102,6 +102,7 @@
 {{--        </div>--}}
 {{--    </div>--}}
 {{--</div>--}}
+
 {{--<script !src="">--}}
 {{--    // document.addEventListener('DOMContentLoaded', function () {--}}
 {{--    //     const checkboxes = document.querySelectorAll('.type-checkbox');--}}
