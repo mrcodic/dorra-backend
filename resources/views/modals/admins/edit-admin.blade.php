@@ -124,13 +124,28 @@
                 preview.src = response.data.url;
             });
 
-            this.on("removedfile", function () {
+            this.on("removedfile", function (file) {
                 // Reset preview
                 const preview = document.querySelector('#editAdminModal .avatarPreview');
                 preview.src = "{{ asset('images/default-user.png') }}";
 
                 // Remove hidden input too
                 document.querySelector('.edit-avatar-media-ids').innerHTML = "";
+                if (file.previewElement) {
+                    file.previewElement.remove();
+                }
+                if (file._hiddenInput) {
+                    file._hiddenInput.remove();
+                }
+                if (file.xhr) {
+                    let response = JSON.parse(file.xhr.response);
+                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                        method: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    });
+                }
             });
         }
     });
@@ -168,7 +183,10 @@
 
             if (file) {
                 const imageUrl = URL.createObjectURL(file);
-                preview.src = imageUrl;
+
+                    const defaultImage = "{{ asset('images/default-user.png') }}";
+                    preview.src = imageUrl ?? defaultImage;
+
                 preview.onload = function () {
                     URL.revokeObjectURL(imageUrl); // free memory
                 };

@@ -263,6 +263,7 @@
 <script>
     const adminsDataUrl = "{{ route('admins.data') }}";
     const adminsCreateUrl = "{{ route('admins.create') }}";
+    const defaultImage ="{{ asset("images/default-user.png") }}";
     const locale = "{{ app()->getLocale() }}";
 </script>
 

@@ -210,7 +210,7 @@ $(document).ready(function () {
         const email = $button.data('email') || '';
         const roleId = $button.data('role-id') || '';
         const status = $button.data('status');
-        const image = $button.data('image') || '{{ asset("images/avatar.png") }}';
+        const image = $button.data('image') || defaultImage;
         console.log(status)
         // Populate modal
         $("#editAdminModal #first_name").val(firstName);

@@ -794,9 +794,19 @@
                                         <div>
                                             <strong>{{ $review->customer }}</strong>
                                             <div class="text-warning">
-                                                @for($i = 1; $i <= 5; $i++) <i
-                                                    class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
-                                                    @endfor
+
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    @if ($i <= $review->rate)
+                                                        <i class="fas fa-star text-warning"></i> {{-- filled --}}
+                                                    @else
+                                                        <i class="far fa-star text-muted"></i> {{-- empty --}}
+                                                    @endif
+                                                @endfor
+
+
+
+
+
                                             </div>
                                             <small class="text-muted">{{
                                                 \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
@@ -899,8 +909,7 @@
                                                 <small class="text-muted">{{
                                                     \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                 <p class="mb-1">{{ $review->review }}</p>
-                                                <form class="remove-review" action="{{ route("
-                                                    reviews.destroy",$review->id) }}"
+                                                <form class="remove-review" action="{{ route("reviews.destroy",$review->id) }}"
                                                     method="POST">
                                                     @csrf
                                                     @method('DELETE')
