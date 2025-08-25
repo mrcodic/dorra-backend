@@ -200,7 +200,8 @@
         </table>
 
         <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-            <div class="delete-container d-flex flex-column flex-md-row justify-content-between">
+            <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                style="z-index: 10;">
                 <p id="selected-count-text">0 admins are selected</p>
                 <form id="bulk-delete-form" method="POST" action="{{ route('admins.bulk-delete') }}">
                     @csrf

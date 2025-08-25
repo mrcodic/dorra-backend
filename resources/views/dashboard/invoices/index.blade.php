@@ -214,7 +214,8 @@
                     </thead>
                 </table>
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                    <div class="delete-container">
+                    <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                        style="z-index: 10;">
                         <p id="selected-count-text">0 Invoices are selected</p>
                         <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteInvoicesModal"
                             class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
