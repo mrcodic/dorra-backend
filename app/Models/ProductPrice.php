@@ -22,6 +22,8 @@ class ProductPrice extends Model
                     ->get()
                     ->each(function ($item) use ($productPrice) {
                         $productPriceValue = $productPrice->price;
+                        
+                        dd($productPriceValue,$item->cart?->discount_amount);
                         if ($productPriceValue < $item->cart?->discount_amount)
                         {
                             $item->cart->update([
