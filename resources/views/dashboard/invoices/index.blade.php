@@ -174,7 +174,7 @@
                             <i data-feather="search"
                                class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
                             <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                                   id="search-category-form" placeholder="Search here" style="height: 38px;">
+                                   id="search-invoice-form" placeholder="Search here" style="height: 38px;">
                             <button type="button" id="clearRoleFilter"
                                     class="position-absolute top-50 translate-middle-y text-muted"
                                     style="right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
@@ -190,10 +190,9 @@
                             </select>
                         </div>
 
-                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                                data-bs-target="#addAdminModal">
+                        <a href="{{ route("invoices.export") }}" class="btn btn-outline-primary">
                             Export
-                        </button>
+                        </a>
                     </div>
 
                     <table class="order-list-table table">
@@ -216,8 +215,8 @@
                     <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                         <div class="delete-container">
                             <p id="selected-count-text">0 Invoices are selected</p>
-                            <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                                    data-bs-target="#deleteOrdersModal"
+                            <button type="submit"  data-bs-toggle="modal"
+                                    data-bs-target="#deleteInvoicesModal"
                                     class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>

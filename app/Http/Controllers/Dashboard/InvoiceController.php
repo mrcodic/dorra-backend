@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 
 class InvoiceController extends DashboardController
@@ -26,6 +27,11 @@ class InvoiceController extends DashboardController
     public function getData(): JsonResponse
     {
         return $this->invoiceService->getData();
+    }
+
+    public function export(): BinaryFileResponse
+    {
+        return $this->invoiceService->export();
     }
 
 
