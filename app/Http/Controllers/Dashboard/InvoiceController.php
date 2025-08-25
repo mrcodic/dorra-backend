@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Services\InvoiceService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -19,7 +20,7 @@ class InvoiceController extends DashboardController
         $this->resourceTable = 'invoices';
         $this->methodRelations = [
 
-            'edit' => ['order' , 'user' , 'designs'],
+            'edit' => ['order', 'user', 'designs'],
         ];
 
     }
@@ -34,5 +35,9 @@ class InvoiceController extends DashboardController
         return $this->invoiceService->export();
     }
 
+    public function download($id)
+    {
+        return $this->invoiceService->download($id);
+    }
 
 }

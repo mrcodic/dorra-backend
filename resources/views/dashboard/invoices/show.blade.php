@@ -169,7 +169,7 @@
                 </div>
 
                 <!-- Status Display -->
-                <a class="btn btn-primary" href="{{ route("invoices.download") }}">Download</a>
+                <a class="btn btn-primary" href="{{ route("invoices.download", $model->id) }}">Download</a>
 
             </div>
         </form>

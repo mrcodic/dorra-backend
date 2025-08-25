@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exports\DiscountCodesExport;
 use App\Exports\InvoicesExport;
 use App\Repositories\Interfaces\InvoiceRepositoryInterface;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
@@ -61,5 +62,12 @@ class InvoiceService extends BaseService
     {
         $invoices = $this->repository->all();
         return Excel::download(new InvoicesExport($invoices), 'Invoices - Dorra Dashboard .xlsx');
+    }
+
+    public function download($id)
+    {
+        $model = $this->repository->find($id);
+        $pdf = Pdf::loadView('dashboard.invoices.show', compact('model'));
+        return $pdf->download('invoice.pdf');
     }
 }
