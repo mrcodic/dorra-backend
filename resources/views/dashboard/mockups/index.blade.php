@@ -123,6 +123,12 @@
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                             id="search-category-form" placeholder="Search mockup..." style="height: 38px;">
+                        <button type="button" id="clearRoleFilter"
+                            class="position-absolute top-50 translate-middle-y text-muted"
+                            style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                            title="Clear search">
+                            &times;
+                        </button>
                     </form>
 
 
