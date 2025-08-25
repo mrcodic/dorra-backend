@@ -67,8 +67,8 @@
             <button type="button" class="btn btn-outline-primary mb-2" id="add-social">+ Add Social Media</button>
 
             <!-- Social Media Input Group -->
-            <div id="social-media-group" class="d-flex flex-wrap gap-1 social-input-row">
-                <div class="col-12 col-md-5">
+            <div id="social-media-group" class="row social-input-row">
+                <div class="col-12 col-lg-6">
                     <label for="platform">Platform</label>
                     <select name="platform[]" class="form-select">
                         <option value="facebook"> Facebook</option>
@@ -77,7 +77,7 @@
                         <option value="tiktok"> TikTok</option>
                     </select>
                 </div>
-                <div class="col-12 col-md-6 d-flex gap-1">
+                <div class="col-12 col-lg-6 d-flex gap-1">
                     <div class="col-8">
                         <label for="social_url">URL</label>
                         <div class="input-group">
