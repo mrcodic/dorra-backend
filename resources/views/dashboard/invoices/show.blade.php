@@ -11,7 +11,7 @@
 
 @section('content')
 <div class="bg-white rounded-3 p-2">
-    <div class="mb-1 mx-auto" style="width: 90%">
+    <div class="mb-2 mx-auto" style="width: 90%">
         <label for="order_number" class="form-label fw-bold text-dark">Invoice Number:</label>
         <input type="text" id="order_number" value="{{ $model->invoice_number }}" name="order_number"
             class="form-control form-control-lg fw-bold" value="#1234567" readonly>
@@ -21,9 +21,8 @@
             <!-- Left Column -->
 
             <div class="mb-2">
-                <label class="form-label fw-bold">Issued Date</label>
-                <input style="background-color: #fff; border: 1px solid #CED5D4;" type="text" class="form-control"
-                    value="{{ $model->issued_date }}" name="issued_date" value="10/20/2025" readonly>
+                <span style="color: #424746">Issued Date: </span>
+                <span style="color: #121212">{{ $model->issued_date }}</span>
             </div>
 
             <!-- Left side: Inputs -->
@@ -31,14 +30,14 @@
                 <h5 class="mb-1 fs-16 text-[#424746]">Invoice to:</h5>
 
                 <div class="row">
-                    <div class="mb-2 col">
+                    <div class="mb-2 col-md-6">
                         <label class="form-label fw-bold">Client</label>
                         <input style="background-color: #fff; border: 1px solid #CED5D4;" type="text"
                             class="form-control" value="{{ $model->order->user?->first_name ??
                                 $model->order?->guest?->first_name }}" name="issued_date" readonly>
                     </div>
 
-                    <div>
+                    <div class="mb-2 col-md-6">
                         <div class="mb-1">
                             <span style="color: #424746">Name: </span>
                             <span style="color: #121212">{{ $model->order->user?->first_name ??
@@ -179,7 +178,8 @@
                 </div>
 
                 <!-- Status Display -->
-                <a class="btn btn-primary" href="{{ route('invoices.download', $model->id) }}">Download</a>
+                <a class="btn btn-primary col-4 col-md-2"
+                    href="{{ route('invoices.download', $model->id) }}">Download</a>
 
             </div>
     </form>
