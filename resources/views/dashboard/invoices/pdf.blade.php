@@ -30,6 +30,10 @@
     </tbody>
 </table>
 
-<h3>Total: ${{ $model->total_price }}</h3>
+<h3>SubTotal: {{ $model->subtotal }}</h3>
+<h3>Total: {{ $model->total_price }}</h3>
+<h3>Tax: {{ $model->tax_amount }}</h3>
+<h3>Discount: {{ $model->discount_amount }}</h3>
+<h3>Delivery: {{ $model->delivery_amount }}</h3>
 </body>
 </html>
