@@ -28,10 +28,10 @@
 <div class="card">
     {{-- Left Side: Vertical Tabs --}}
     <div class="card-body">
-        <ul class="nav nav-tabs nav-fill border-bottom-0">
+        <ul class="nav nav-tabs nav-fill border-bottom-0 d-flex flex-wrap">
             <li class="nav-item">
-                <a class="nav-link active custom-tab" id="tab1-tab" data-bs-toggle="tab" href="#tab1" role="tab"
-                    aria-controls="tab1">1. Navbar</a>
+                <a class="nav-link active custom-tab mx-1 text-center" id="tab1-tab" data-bs-toggle="tab" href="#tab1"
+                    role="tab" aria-controls="tab1">1. Navbar</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link custom-tab" id="tab2-tab" data-bs-toggle="tab" href="#tab2" role="tab"
@@ -123,18 +123,18 @@
                 <div class="row">
                     @forelse($categories as $category)
                     <!-- Product Card -->
-                    <div class="col-md-6 mb-3">
+                    <div class="col-12 col-md-6 mb-2">
                         <div class="p-1 d-flex flex-row align-items-center"
                             style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
                             <!-- Image -->
                             <img src="{{ $category->getFirstMediaUrl('categories') }}" alt="Product"
-                                class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                class="me-1 rounded" style="width: 60px; height: 60px; object-fit: cover;">
                             <!-- Details -->
                             <div class="flex-grow-1">
-                                <div class="fw-semibold text-black fs-5">{{ $category->name }}</div>
+                                <div class="fw-semibold text-black">{{ $category->name }}</div>
                             </div>
                             <!-- Remove Button -->
-                            <button class="btn btn-outline-secondary btn-sm ms-2 remove-category"
+                            <button class="btn btn-outline-secondary btn-sm ms-1 remove-category"
                                 data-id="{{ $category->id }}">
                                 Remove
                             </button>
@@ -250,7 +250,7 @@
                                             </div>
 
                                             <!-- Subtitles -->
-                                            <div class="row mb-3">
+                                            <div class="row mb-2">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Subtitle in English</label>
                                                     <input type="text" name="subtitle_en" class="form-control"
@@ -553,20 +553,20 @@
                     <!-- Product Card -->
                     @forelse($templates as $template)
                     <!-- Product Card -->
-                    <div class="col-md-6 mb-3">
-                        <div class=" p-2 d-flex flex-row align-items-center"
+                    <div class="col-12 col-md-6 mb-2">
+                        <div class="p-1 d-flex flex-row align-items-center"
                             style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
                             <!-- Image -->
                             <img src="{{ $template->getFirstMediaUrl('templates')  }}" alt="Product"
-                                class="me-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                class="me-1 rounded" style="width: 60px; height: 60px; object-fit: cover;">
 
                             <!-- Details -->
                             <div class="flex-grow-1">
-                                <div class="fw-semibold text-black fs-5">{{ $template->name }}</div>
+                                <div class="fw-semibold text-black">{{ $template->name }}</div>
                             </div>
 
                             <!-- Remove Button -->
-                            <button class="btn btn-outline-secondary btn-sm ms-2 remove-template"
+                            <button class="btn btn-outline-secondary btn-sm ms-1 remove-template"
                                 data-id="{{ $template->id }}">
                                 Remove
                             </button>
@@ -784,13 +784,13 @@
                         <!-- Added Products List -->
                         <div class="mt-2">
                             <h5 class="text-black fs-16">Added Reviews</h5>
-                            <div class="row row-cols-1 row-cols-md-2 g-3 mt-2 ">
+                            <div class="d-flex flex-column flex-md-row gap-1">
                                 @foreach($reviewsWithImages as $review)
                                 <div class="col-md-6 mb-2"
-                                    style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                    style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">
                                     <div class="p-1 d-flex">
                                         <img src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
-                                            class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                            class="rounded me-1" style="width: 60px; height: 60px; object-fit: cover;">
                                         <div>
                                             <strong>{{ $review->customer }}</strong>
                                             <div class="text-warning">
@@ -899,7 +899,8 @@
                                                 <small class="text-muted">{{
                                                     \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
                                                 <p class="mb-1">{{ $review->review }}</p>
-                                                <form class="remove-review" action="{{ route("reviews.destroy",$review->id) }}"
+                                                <form class="remove-review" action="{{ route("
+                                                    reviews.destroy",$review->id) }}"
                                                     method="POST">
                                                     @csrf
                                                     @method('DELETE')

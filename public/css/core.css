@@ -13735,7 +13735,6 @@ pre code {
     white-space: nowrap;
 }
 
-
 .table thead th,
 .table tfoot th {
     vertical-align: top;
@@ -15935,7 +15934,7 @@ select:-webkit-autofill {
     min-width: auto;
     font-weight: 500;
     font-size: 1.3rem;
-    padding: 0.61rem 1.2rem;
+    padding: 0.61rem 0;
     border-radius: 0;
     position: relative;
     overflow: hidden;
@@ -27151,6 +27150,7 @@ textarea.form-control-lg {
 .form-select {
     display: block;
     width: 100%;
+    max-width: 100%; 
     padding: 0.571rem 1rem 0.571rem 1rem;
     -moz-padding-start: calc(1rem - 3px);
     font-size: 1rem;
