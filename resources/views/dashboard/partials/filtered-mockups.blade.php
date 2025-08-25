@@ -252,95 +252,96 @@ $side => [
         });
 
 
-        $(".edit-mockup-btn").on("click", function () {
-            const id = $(this).data("id");
-            const name = $(this).data("name");
-            const types = $(this).data("types"); // array of type IDs
-            const productId = $(this).data("product-id");
-            const rawColors = $(this).attr("data-colors");
+        {{--$(".edit-mockup-btn").on("click", function () {--}}
+        {{--    const id = $(this).data("id");--}}
+        {{--    const name = $(this).data("name");--}}
+        {{--    const types = $(this).data("types"); // array of type IDs--}}
+        {{--    console.log(types)--}}
+        {{--    const productId = $(this).data("product-id");--}}
+        {{--    const rawColors = $(this).attr("data-colors");--}}
 
-            // ✅ Always read raw JSON for images to avoid jQuery's auto-parse issues
-            let rawImages = $(this).attr("data-images");
-            let imageList = [];
-            try {
-                let parsed = JSON.parse(rawImages);
-                if (Array.isArray(parsed)) {
-                    imageList = parsed;
-                } else if (parsed && typeof parsed === "object") {
-                    imageList = Object.values(parsed); // turn keyed object into array
-                }
-            } catch (e) {
-                imageList = [];
-            }
+        {{--    // ✅ Always read raw JSON for images to avoid jQuery's auto-parse issues--}}
+        {{--    let rawImages = $(this).attr("data-images");--}}
+        {{--    let imageList = [];--}}
+        {{--    try {--}}
+        {{--        let parsed = JSON.parse(rawImages);--}}
+        {{--        if (Array.isArray(parsed)) {--}}
+        {{--            imageList = parsed;--}}
+        {{--        } else if (parsed && typeof parsed === "object") {--}}
+        {{--            imageList = Object.values(parsed); // turn keyed object into array--}}
+        {{--        }--}}
+        {{--    } catch (e) {--}}
+        {{--        imageList = [];--}}
+        {{--    }--}}
 
-            // ✅ Colors parsing
-            let colors = [];
-            try {
-                colors = JSON.parse(rawColors);
-                if (colors.length === 1 && colors[0].includes(",")) {
-                    colors = colors[0].split(",").map(c => c.trim());
-                }
-            } catch (e) {
-                colors = [];
-            }
+        {{--    // ✅ Colors parsing--}}
+        {{--    let colors = [];--}}
+        {{--    try {--}}
+        {{--        colors = JSON.parse(rawColors);--}}
+        {{--        if (colors.length === 1 && colors[0].includes(",")) {--}}
+        {{--            colors = colors[0].split(",").map(c => c.trim());--}}
+        {{--        }--}}
+        {{--    } catch (e) {--}}
+        {{--        colors = [];--}}
+        {{--    }--}}
 
-            // ✅ Set form action
-            const actionUrl = "{{ route('mockups.update', ':id') }}".replace(":id", id);
-            $("#editMockupForm").attr("action", actionUrl);
+        {{--    // ✅ Set form action--}}
+        {{--    const actionUrl = "{{ route('mockups.update', ':id') }}".replace(":id", id);--}}
+        {{--    $("#editMockupForm").attr("action", actionUrl);--}}
 
-            // ✅ Set name & product
-            $("#edit-mockup-name").val(name);
-            $("#edit-products-select").val(productId).trigger("change");
+        {{--    // ✅ Set name & product--}}
+        {{--    $("#edit-mockup-name").val(name);--}}
+        {{--    $("#edit-products-select").val(productId).trigger("change");--}}
 
-            // ✅ Reset and check appropriate types
-            const checkboxes = $("#editMockupModal .type-checkbox");
-            checkboxes.prop("checked", false).prop("disabled", false);
+        {{--    // ✅ Reset and check appropriate types--}}
+        {{--    const checkboxes = $("#editMockupModal .type-checkbox");--}}
+        {{--    checkboxes.prop("checked", false).prop("disabled", false);--}}
 
-            types.forEach(function (typeId) {
-                checkboxes.each(function () {
-                    if (parseInt($(this).data("type-id")) === parseInt(typeId)) {
-                        $(this).prop("checked", true);
-                    }
-                });
-            });
+        {{--    types.forEach(function (typeId) {--}}
+        {{--        checkboxes.each(function () {--}}
+        {{--            if (parseInt($(this).data("type-id")) === parseInt(typeId)) {--}}
+        {{--                $(this).prop("checked", true);--}}
+        {{--            }--}}
+        {{--        });--}}
+        {{--    });--}}
 
-            // ✅ Set colors
-            editPreviousColors = colors;
-            renderAllColors();
+        {{--    // ✅ Set colors--}}
+        {{--    editPreviousColors = colors;--}}
+        {{--    renderAllColors();--}}
 
-            // ✅ Trigger change so inputs are rendered for checked types
-            checkboxes.trigger("change");
+        {{--    // ✅ Trigger change so inputs are rendered for checked types--}}
+        {{--    checkboxes.trigger("change");--}}
 
-            // ✅ Inject image previews *after* inputs are rendered
-            setTimeout(() => {
-                imageList.forEach(img => {
-                    console.log(img.custom_properties)
-                    const typeName = img.custom_properties?.side || '';
-                    const fileType = img.custom_properties?.role || ''; // e.g., 'base' or 'mask'
+        {{--    // ✅ Inject image previews *after* inputs are rendered--}}
+        {{--    setTimeout(() => {--}}
+        {{--        imageList.forEach(img => {--}}
+        {{--            console.log(img.custom_properties)--}}
+        {{--            const typeName = img.custom_properties?.side || '';--}}
+        {{--            const fileType = img.custom_properties?.role || ''; // e.g., 'base' or 'mask'--}}
 
-                    if (typeName && fileType) {
-                        const inputId = `${typeName}-${fileType}-input`;
-                        const preview = $(`#${inputId}`).siblings('.upload-card').find('.preview');
+        {{--            if (typeName && fileType) {--}}
+        {{--                const inputId = `${typeName}-${fileType}-input`;--}}
+        {{--                const preview = $(`#${inputId}`).siblings('.upload-card').find('.preview');--}}
 
-                        if (preview.length) {
-                            preview.html(`
-                        <img src="${img.original_url}"
-                             alt="Preview"
-                             class="img-fluid rounded border"
-                             style="max-height:120px;">
-                    `);
-                        }
-                    }
-                });
-            }, 50); // Small delay so DOM is ready
+        {{--                if (preview.length) {--}}
+        {{--                    preview.html(`--}}
+        {{--                <img src="${img.original_url}"--}}
+        {{--                     alt="Preview"--}}
+        {{--                     class="img-fluid rounded border"--}}
+        {{--                     style="max-height:120px;">--}}
+        {{--            `);--}}
+        {{--                }--}}
+        {{--            }--}}
+        {{--        });--}}
+        {{--    }, 50); // Small delay so DOM is ready--}}
 
-            // ✅ Reset main product image area
-            $("#edit-uploaded-image").addClass("d-none").find("img").attr("src", "");
-            $("#file-details .file-name").text("");
-            $("#file-details .file-size").text("");
-            $("#edit-upload-progress").addClass("d-none");
-            $("#edit-upload-progress .progress-bar").css("width", "0%");
-        });
+        {{--    // ✅ Reset main product image area--}}
+        {{--    $("#edit-uploaded-image").addClass("d-none").find("img").attr("src", "");--}}
+        {{--    $("#file-details .file-name").text("");--}}
+        {{--    $("#file-details .file-size").text("");--}}
+        {{--    $("#edit-upload-progress").addClass("d-none");--}}
+        {{--    $("#edit-upload-progress .progress-bar").css("width", "0%");--}}
+        {{--});--}}
 
     });
 </script>

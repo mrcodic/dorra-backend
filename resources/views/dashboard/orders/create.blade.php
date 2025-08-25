@@ -3,6 +3,8 @@
 @section('title', 'Add Order')
 @section('main-page', 'Orders')
 @section('sub-page', 'Add New Order')
+@section('main-page-url', route("orders.index"))
+@section('sub-page-url', route("orders.create"))
 
 @section('vendor-style')
 <!-- Vendor CSS Files -->
