@@ -215,32 +215,42 @@
                 </table>
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                     <div class="delete-container">
-                        <p id="selected-count-text">0 Products are selected</p>
-                        <button id="delete-selected-btn"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
+                        <p id="selected-count-text">0 Invoices are selected</p>
+                        <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
+                            data-bs-target="#deleteOrdersModal"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
                             <i data-feather="trash-2"></i> Delete Selected
                         </button>
+                        <form style="display: none;" id="bulk-delete-form" method="POST"
+                            action="{{ route('orders.bulk-delete') }}">
+                            @csrf
+                            <button type="submit" id="delete-selected-btn"
+                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                                <i data-feather="trash-2"></i> Delete Selected
+                            </button>
+                        </form>
                     </div>
                 </div>
-
-
             </div>
-            @include('modals.delete',[
-            'id' => 'deleteInvoiceModal',
-            'formId' => 'deleteInvoiceForm',
-            'title' => 'Delete Invoice',
-            ])
-            @include('modals.delete',[
-            'id' => 'deleteInvoicesModal',
-            'formId' => 'bulk-delete-form',
-            'title' => 'Delete Invoices',
-            'confirmText' => 'Are you sure you want to delete this items?',
-            ])
+
 
         </div>
-        <!-- list and filter end -->
-    </section>
-    <!-- users list ends -->
+        @include('modals.delete',[
+        'id' => 'deleteInvoiceModal',
+        'formId' => 'deleteInvoiceForm',
+        'title' => 'Delete Invoice',
+        ])
+        @include('modals.delete',[
+        'id' => 'deleteInvoicesModal',
+        'formId' => 'bulk-delete-form',
+        'title' => 'Delete Invoices',
+        'confirmText' => 'Are you sure you want to delete this items?',
+        ])
+
+</div>
+<!-- list and filter end -->
+</section>
+<!-- users list ends -->
 </div>
 
 @endsection
@@ -404,7 +414,7 @@
                 const count = selectedCheckboxes.length;
 
                 if (count > 0) {
-                    $('#selected-count-text').text(`${count} User${count > 1 ? 's are' : ' is'} selected`);
+                    $('#selected-count-text').text(`${count} Invoice${count > 1 ? 's are' : ' is'} selected`);
                     $('#bulk-delete-container').show();
                 } else {
                     $('#bulk-delete-container').hide();

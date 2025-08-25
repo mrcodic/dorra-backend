@@ -42,17 +42,29 @@ var dt_user_table = $(".product-list-table").DataTable({
         {
             data: "tags",
             render: function (data, type, row) {
-                if (!Array.isArray(JSON.parse(data))) return '';
+                // If empty, null, or invalid → return "-"
+                if (!data) return '-';
+
+                let tags;
+                try {
+                    tags = JSON.parse(data);
+                } catch (e) {
+                    return '-';
+                }
+
+                if (!Array.isArray(tags) || tags.length === 0) return '-';
+
                 return `
-                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                        ${JSON.parse(data).map(tag => `
-                            <span style="background-color: #FCF8FC; color: #000; padding: 6px 12px; border-radius: 12px; font-size: 14px;">
-                                ${tag}
-                            </span>`).join("")}
-                    </div>
-                `;
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${tags.map(tag => `
+                    <span style="background-color: #FCF8FC; color: #000; padding: 6px 12px; border-radius: 12px; font-size: 14px;">
+                        ${tag}
+                    </span>`).join("")}
+            </div>
+        `;
             }
-        },
+        }
+        ,
         { data: "no_of_purchas" },
         { data: "added_date" },
         { data: "rating" },
