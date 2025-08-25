@@ -40,6 +40,7 @@ $configData = Helper::applClasses();
 
     <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" />
     <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
     @include('panels/styles')
     @stack('styles')
