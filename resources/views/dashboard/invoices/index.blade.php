@@ -29,14 +29,12 @@
 
         /* Hide the last 4 columns on mobile */
         .order-list-table th:nth-child(5),
-        .order-list-table th:nth-child(6),
-        .order-list-table th:nth-child(7) {
+        .order-list-table th:nth-child(6) {
             display: none !important;
         }
 
         .order-list-table tbody tr:not(.details-row) td:nth-child(5),
-        .order-list-table tbody tr:not(.details-row) td:nth-child(6),
-        .order-list-table tbody tr:not(.details-row) td:nth-child(7) {
+        .order-list-table tbody tr:not(.details-row) td:nth-child(6) {
             display: none !important;
         }
 
@@ -352,19 +350,14 @@
                         $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                         // Get data for details
-                        const invoiceStatus = $row.find('td:nth-child(5)').html() || '';
-                        const issuedAt = $row.find('td:nth-child(6)').html() || '';
-                        const actions = $row.find('td:nth-child(7)').html() || '';
+                        const issuedAt = $row.find('td:nth-child(5)').html() || '';
+                        const actions = $row.find('td:nth-child(6)').html() || '';
 
                         // Create details row
                         const detailsHtml = `
                     <tr class="details-row">
                         <td colspan="4">
                             <div class="details-content">
-                                <div class="detail-row">
-                                    <span class="detail-label">Invoice Status:</span>
-                                    <span class="detail-value">${invoiceStatus}</span>
-                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Issued Ate:</span>
                                     <span class="detail-value">${issuedAt}</span>
