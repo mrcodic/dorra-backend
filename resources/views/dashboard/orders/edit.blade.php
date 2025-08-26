@@ -35,28 +35,28 @@
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
                     <input type="text" class="form-control" name="first_name"
-                        value="{{ $model->orderAddress->first()->first_name }}">
+                        value="{{ $model->orderAddress->first_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
                     <input type="text" class="form-control" name="last_name"
-                        value="{{ $model->orderAddress->first()->last_name }}">
+                        value="{{ $model->orderAddress->last_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
                     <input type="email" class="form-control" name="email"
-                        value="{{ $model->orderAddress->first()->email }}">
+                        value="{{ $model->orderAddress->email }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Phone</label>
                     <input type="text" class="form-control" name="phone"
-                        value="{{ $model->orderAddress->first()->phone }}">
+                        value="{{ $model->orderAddress->phone }}">
                 </div>
 
 
                 <!-- Shipping Details -->
                 @php
-                $address = $model->orderAddress->first();
+                $address = $model->orderAddress;
                 @endphp
 
                 @if($address)
