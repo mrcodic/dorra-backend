@@ -18,7 +18,7 @@
 
                     <!-- Shipping Method Selection -->
                     @php
-                        $address = $model->OrderAddress->first();
+                        $address = $model->OrderAddress;
                         $selectedType = $address?->type;
                     @endphp
 

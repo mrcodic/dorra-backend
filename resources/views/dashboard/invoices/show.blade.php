@@ -33,26 +33,21 @@
                     <div class="mb-2 col-md-6">
                         <label class="form-label fw-bold">Client</label>
                         <input style="background-color: #fff; border: 1px solid #CED5D4;" type="text"
-                            class="form-control" value="{{ $model->order->user?->first_name ??
-                                $model->order?->guest?->first_name }}" name="issued_date" readonly>
+                            class="form-control" value="{{ $model->order->orderAddress?->name  }}" name="issued_date" readonly>
                     </div>
 
                     <div class="mb-2 col-md-6">
                         <div class="mb-1">
                             <span style="color: #424746">Name: </span>
-                            <span style="color: #121212">{{ $model->order->user?->first_name ??
-                                $model->order?->guest?->first_name }}</span>
+                            <span style="color: #121212">{{ $model->order->orderAddress?->name  }}</span>
                         </div>
                         <div class="mb-1">
                             <span style="color: #424746">Email Address: </span>
-                            <span style="color: #121212">{{ $model->order->user?->email ?? $model->order?->guest?->email
-                                }}</span>
+                            <span style="color: #121212">{{ $model->order->orderAddress?->email    }}</span>
                         </div>
                         <div class="mb-1">
                             <span style="color: #424746">Phone Number: </span>
-                            <span style="color: #121212">{{ $model->order->user?->phone_number ??
-                                $model->order?->guest?->email
-                                }}</span>
+                            <span style="color: #121212">{{ $model->order->orderAddress?->phone}}</span>
                         </div>
                     </div>
                 </div>

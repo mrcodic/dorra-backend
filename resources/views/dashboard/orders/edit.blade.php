@@ -210,7 +210,7 @@
 
                     <div class="d-flex gap-1">
                         <button type="reset" class="btn btn-outline-secondary">Discard Changes</button>
-                        
+
                         <button class="btn btn-primary">Save changes</button>
                     </div>
                 </div>
