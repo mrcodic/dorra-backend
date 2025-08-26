@@ -11,8 +11,9 @@ var dt_user_table = $(".order-list-table").DataTable({
         url: ordersDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $("#search-category-form").val(); // get from input
+            d.search_value = $("#search-order-form").val(); // get from input
             d.created_at = $(".filter-date").val();
+            d.status = $(".filter-status").val();
             return d;
         },
     },
@@ -101,12 +102,19 @@ var dt_user_table = $(".order-list-table").DataTable({
 
 // Search functionality
 let searchTimeout;
-$('#search-product-form').on('keyup', function () {
+$('#search-order-form').on('keyup', function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
     }, 300);
 });
+$(".filter-date").on("change", function () {
+    dt_user_table.draw();
+});
+$(".filter-status").on("change", function () {
+    dt_user_table.draw();
+});
+
 
 // Category select with timeout
 let categoryFilterTimeout;

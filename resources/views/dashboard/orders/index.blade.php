@@ -152,7 +152,7 @@
                     <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5">
                         <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                               id="search-category-form" placeholder="Search product..." style="height: 38px;">
+                               id="search-order-form" placeholder="Search order..." style="height: 38px;">
                         <button type="button" id="clearCategorySearchInput" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                              background: transparent; border: none; font-weight: bold;
                             color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
@@ -161,6 +161,17 @@
                     </form>
 
                     {{-- Filter Select - 10% on md+, half width on sm --}}
+                    <div class="col-12 col-md-3">
+                        <select name="created_at" class="form-select filter-status">
+                            <option value="" disabled selected>Status</option>
+                            @foreach (\App\Enums\Order\StatusEnum::cases() as $status)
+                                <option value="{{$status}}">
+                                    {{ $status->label() }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="col-12 col-md-3">
                         <select name="created_at" class="form-select filter-date">
                             <option value="" disabled selected>Date</option>

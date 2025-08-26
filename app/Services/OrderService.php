@@ -95,13 +95,17 @@ class OrderService extends BaseService
             ->withCount(['orderItems'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
-                    $locale = app()->getLocale();
                     $search = request('search_value');
-                    $query->where("order_number->{$locale}", 'LIKE', "%{$search}%");
+                    $query->where("order_number", 'LIKE', "%{$search}%");
                 } else {
                     $query->whereRaw('1 = 0');
                 }
+            })->when(request()->filled('created_at'), function ($query) {
+                $query->orderBy('created_at', request('created_at'));
+            })->when(request()->filled('status'), function ($query) {
+                $query->where('status', request('status'));
             })
+
             ->latest();
 
         return DataTables::of($orders)
