@@ -41,7 +41,7 @@ class InvoiceService extends BaseService
             return $invoice->invoice_number;
         })
              ->addColumn('user_name', function ($invoice) {
-                     return $invoice->order->guest ? 'Guest' : $invoice->order->orderAddress?->name;
+                     return $invoice->order?->guest ? 'Guest' : $invoice->order->orderAddress?->name;
 
              })
 
