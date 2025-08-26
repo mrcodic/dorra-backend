@@ -55,8 +55,6 @@ var dt_user_table = $(".order-list-table").DataTable({
     dom:
         '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
         '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
-        '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
         ">" +
         ">t" +
         '<"d-flex  mx-2 row mb-1"' +
