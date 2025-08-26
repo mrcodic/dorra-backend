@@ -18,11 +18,14 @@ class OrderAddress extends Model
         'shipping_method' => OrderTypeEnum::class,
 
     ];
-    protected $appends =['name'];
+
+    protected $appends = ['name'];
 
     public function name(): Attribute
     {
-        return Attribute::get(fn($attribute) => $attribute?->first_name . ' ' . $attribute?->last_name);
+        return Attribute::get(
+            get: fn () => trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''))
+        );
     }
 
     public function order(): BelongsTo
