@@ -31,7 +31,7 @@ class UserController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'show' => ['teams', 'reviews.product', 'addresses.state.country','addresses.user','orders.orderItems'],
+            'show' => ['ownerTeams', 'reviews.product', 'addresses.state.country','addresses.user','orders.orderItems'],
         ];
         $this->relationsToStore = ['addresses'];
         $this->indexView = 'users.index';

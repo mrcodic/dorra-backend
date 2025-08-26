@@ -71,7 +71,7 @@
                         <h2 class="text-black my-1">Teams</h2>
                         <div class="card border rounded p-1 my-2">
                             <div class="d-flex justify-content-between align-items-start">
-
+@dd($model->ownerTeams,$model)
                                 @forelse($model->ownerTeams as $team)
 
                                 <!-- left: Icon and Info -->
