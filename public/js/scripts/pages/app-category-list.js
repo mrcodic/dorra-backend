@@ -35,9 +35,9 @@ const dt_user_table = $(".category-list-table").DataTable({
         `;
             }
         },
-        { data: "name" },
+        {data: "name"},
 
-        { data: "sub_categories" },
+        {data: "sub_categories"},
         {
             data: "products",
             render: function (data, type, row) {
@@ -45,19 +45,19 @@ const dt_user_table = $(".category-list-table").DataTable({
                 return `
                     <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                         ${JSON.parse(data)
-                            .map(
-                                (product) => `
+                    .map(
+                        (product) => `
                             <span style="background-color: #FCF8FC; color: #000; padding: 6px 12px; border-radius: 12px; font-size: 14px;">
                                 ${product}
                             </span>`
-                            )
-                            .join("")}
+                    )
+                    .join("")}
                     </div>
                 `;
             },
         },
-        { data: "no_of_products" },
-        { data: "added_date" },
+        {data: "no_of_products"},
+        {data: "added_date"},
         {
             data: "id",
 
@@ -76,8 +76,8 @@ const dt_user_table = $(".category-list-table").DataTable({
                                    data-description_en="${row.description_en}"
                                    data-description_ar="${row.description_ar}"
                                    data-subcategories="${row.children.map(
-                                       (child) => child.name
-                                   )}"
+                    (child) => child.name
+                )}"
                                    data-products="${row.no_of_products}"
                                    data-showdate="${row.show_date}">
                                                 <i data-feather="eye"></i>
@@ -95,8 +95,8 @@ const dt_user_table = $(".category-list-table").DataTable({
                                    data-description_en="${row.description_en}"
                                    data-description_ar="${row.description_ar}"
                                    data-subcategories="${row.children.map(
-                                       (child) => child.name
-                                   )}"
+                    (child) => child.name
+                )}"
                                    data-products="${row.no_of_products}"
                                    data-showdate="${row.show_date}">
 
@@ -303,8 +303,8 @@ $(document).ready(function () {
     $(document).on("click", ".view-details", function (e) {
         e.preventDefault();
 
-        var $table  = $(".category-list-table").DataTable();
-        var $row    = $(this).closest("tr");
+        var $table = $(".category-list-table").DataTable();
+        var $row = $(this).closest("tr");
         var rowData = $table.row($row).data();
 
         // Safely get subcategories
@@ -318,13 +318,13 @@ $(document).ready(function () {
         // Category details from data attributes
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
-        const products       = $(this).data("products");
-        const addedDate      = $(this).data("showdate");
-        const descriptionAr  = $(this).data("description_ar");
-        const descriptionEn  = $(this).data("description_en");
-        const image          = $(this).data("image");
-        const imageId        = $(this).data("image_id");
-        const id             = $(this).data("id");
+        const products = $(this).data("products");
+        const addedDate = $(this).data("showdate");
+        const descriptionAr = $(this).data("description_ar");
+        const descriptionEn = $(this).data("description_en");
+        const image = $(this).data("image");
+        const imageId = $(this).data("image_id");
+        const id = $(this).data("id");
 
         // Populate modal fields
         $("#showCategoryModal #category-name-ar").val(categoryNameAR);
@@ -352,8 +352,8 @@ $(document).ready(function () {
     $(document).on("click", ".edit-details", function (e) {
         e.preventDefault();
 
-        var $table  = $(".category-list-table").DataTable();
-        var $row    = $(this).closest("tr");
+        var $table = $(".category-list-table").DataTable();
+        var $row = $(this).closest("tr");
         var rowData = $table.row($row).data();
 
         // Safely get subcategories
@@ -367,13 +367,13 @@ $(document).ready(function () {
         // Category details from data attributes
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
-        const products       = $(this).data("products");
-        const addedDate      = $(this).data("showdate");
-        const descriptionAr  = $(this).data("description_ar");
-        const descriptionEn  = $(this).data("description_en");
-        const image          = $(this).data("image");
-        const imageId        = $(this).data("image_id");
-        const id             = $(this).data("id");
+        const products = $(this).data("products");
+        const addedDate = $(this).data("showdate");
+        const descriptionAr = $(this).data("description_ar");
+        const descriptionEn = $(this).data("description_en");
+        const image = $(this).data("image");
+        const imageId = $(this).data("image_id");
+        const id = $(this).data("id");
 
         // Remove old image handler (avoid duplicates with .off)
         $(".remove-old-image").off("click").on("click", function (e) {
@@ -494,7 +494,7 @@ $(document).ready(function () {
 
                 // Optional: Clear form fields
                 $("#editCategoryForm")[0].reset();
-
+                location.reload();
                 // Optional: Remove uploaded image preview
                 $("#edit-image-preview-container").hide();
                 $("#edit-image-preview").attr("src", "");
