@@ -283,9 +283,7 @@ class ProductService extends BaseService
                                     'collection_name' => 'productSpecificationOptions',
                                 ]);
                         }
-                        if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
-                            handleMediaUploads([$option['image']], $productOption, clearExisting: true);
-                        }
+
                     });
                 }
 
@@ -311,6 +309,7 @@ class ProductService extends BaseService
 
         }
         if (isset($validatedData['images_ids'])) {
+            Media::whereCollectionName('product_extra_images')->delete();
             collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
                 Media::where('id', $imageId)
                     ->update([

@@ -44,6 +44,7 @@
                             @csrf
                             @method("PUT")
 
+
                             <div class="tab-content">
                                 <!-- first tab content -->
                                 <div class="tab-pane active" id="step1">
@@ -107,16 +108,17 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- ✅ Hidden input outside Dropzone -->
-                                                <input type="hidden" name="image_id" id="uploadedImage">
+                                                <!-- Hidden input: prefilled if editing -->
+                                                <input type="hidden" name="image_id" id="uploadedImage"
+                                                       value="{{ $model->getFirstMedia('product_main_image')?->id ?? '' }}">
 
                                                 <span class="image-hint small text-end">
-                                                Max size: 1MB | Dimensions: 512x512 px
-                                            </span>
-
-
+            Max size: 1MB | Dimensions: 512x512 px
+        </span>
                                             </div>
                                         </div>
+
+
                                         <!-- Multiple Images Upload -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
@@ -515,8 +517,6 @@
                                                                                                 <label
                                                                                                     class="form-label label-text">Option
                                                                                                     Image</label>
-
-
                                                                                                 <div class="dropzone option-dropzone"
                                                                                                      data-existing-media='{{ json_encode($option->image ? [
          "id" => $option->image->id,
@@ -775,8 +775,8 @@
                                     </div>
                                 </div>
                                 <!--third tab content end -->
-                            </div>
-                        </form>
+
+                    </form>
 
 
                     </div>
@@ -963,43 +963,37 @@
                 dz.emit("thumbnail", mainMockFile, "{{ $media->getUrl() }}");
                 dz.emit("complete", mainMockFile);
                 dz.files.push(mainMockFile);
-
-                {{--document.getElementById("uploadedImage").value = "{{ $media->id }}";--}}
-                // document.getElementB     yId("uploaded-image").classList.remove("d-none");
                 @endif
 
-                // ✅ On success
+                // ✅ On success: update hidden input with new ID
                 dz.on("success", function (file, response) {
-
                     if (response?.data?.id) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedImage").value = response.data.id;
                     }
                 });
 
-                // ✅ On remove
+                // ✅ On remove: clear hidden input + delete from server
                 dz.on("removedfile", function (file) {
-
-                    // document.getElementById("uploadedImage").value = "";
-                    // document.getElementById("uploaded-image").classList.add("d-none");
-                    console.log(file._hiddenInputId)
                     if (file._hiddenInputId) {
-
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             }
                         });
+
+                        // Clear hidden input only if it matches the removed file
+                        let hiddenInput = document.getElementById("uploadedImage");
+                        if (hiddenInput.value == file._hiddenInputId) {
+                            hiddenInput.value = "";
+                        }
                     }
                 });
             }
         });
 
-        // ✅ Manual remove button
-        // document.getElementById("remove-image").addEventListener("click", function () {
-        //     categoryDropzone.removeAllFiles(); // triggers removedfile event
-        // });
+
     </script>
 
 

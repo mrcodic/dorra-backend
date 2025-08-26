@@ -49,7 +49,7 @@ class MainController extends Controller
 
     public function removeMedia(Media $media)
     {
-        deleteMediaById($media->uuid);
+        deleteMediaById($media->id);
         return Response::api();
     }
 
