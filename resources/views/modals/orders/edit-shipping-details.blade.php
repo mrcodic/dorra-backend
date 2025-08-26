@@ -136,66 +136,68 @@
                                value="{{ optional($model->pickupContact)->phone }}" class="form-control">
                     </div>
                 </div>
-                <form id="addAddressForm" class="row gy-1 gx-2" method="post" style="display: @if($selectedType == \App\Enums\Order\OrderTypeEnum::PICKUP  ) 'none' @else ''@endif"
-                      action="{{ route('shipping-addresses.store') }}">
-                    @csrf
-                    <h5 class="mb-2 text-black fs-4">Add new address</h5>
-                    <input type="hidden" name="user_id" value="{{ $model->user?->id }}">
-                    <input type="hidden" name="guest_id" value="{{ $model->guest?->id }}">
+                <div id="addAddressSection">
+                    <form id="addAddressForm" class="row gy-1 gx-2" method="post"
+                          action="{{ route('shipping-addresses.store') }}">
+                        @csrf
+                        <h5 class="mb-2 text-black fs-4">Add new address</h5>
+                        <input type="hidden" name="user_id" value="{{ $model->user?->id }}">
+                        <input type="hidden" name="guest_id" value="{{ $model->guest?->id }}">
 
-                    <div class="mb-2">
-                        <label class="form-label label-text">Address Label</label>
-                        <input type="text" class="form-control" placeholder="Choose Address Label"
-                               id="add-category-name-en" name="label"/>
-                        <div class="invalid-feedback" id="label-error"></div>
-                        <br>
+                        <div class="mb-2">
+                            <label class="form-label label-text">Address Label</label>
+                            <input type="text" class="form-control" placeholder="Choose Address Label"
+                                   id="add-category-name-en" name="label"/>
+                            <div class="invalid-feedback" id="label-error"></div>
+                            <br>
 
 
-                        <div class="row g-2 mb-2">
-                            <div class="col">
-                                <label class="form-label">Country</label>
-                                <select class="form-select address-country-select" name="country_id">
-                                    <option value="">Select Country</option>
-                                    @foreach ($associatedData['countries'] as $country)
-                                        <option value="{{ $country->id }}"
-                                            {{ old('country_id') == $country->id ? 'selected' : '' }}>
-                                            {{ $country->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col">
+                                    <label class="form-label">Country</label>
+                                    <select class="form-select address-country-select" name="country_id">
+                                        <option value="">Select Country</option>
+                                        @foreach ($associatedData['countries'] as $country)
+                                            <option value="{{ $country->id }}"
+                                                {{ old('country_id') == $country->id ? 'selected' : '' }}>
+                                                {{ $country->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-                            <div class="col">
-                                <label class="form-label label-text">State</label>
-                                <select id="modalAddressState" name="state_id" class="form-select address-state-select">
-                                    <option value="">Select a State</option>
-                                </select>
-                                <div class="invalid-feedback" id="state_id-error"></div>
-                                <div id="state-url" data-url="{{ route('states') }}"></div>
-                            </div>
+                                <div class="col">
+                                    <label class="form-label label-text">State</label>
+                                    <select id="modalAddressState" name="state_id" class="form-select address-state-select">
+                                        <option value="">Select a State</option>
+                                    </select>
+                                    <div class="invalid-feedback" id="state_id-error"></div>
+                                    <div id="state-url" data-url="{{ route('states') }}"></div>
+                                </div>
 
-                            <div class="mb-2">
-                                <label class="form-label">Address Line</label>
-                                <input type="text" name="line" class="form-control">
-                            </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Address Line</label>
+                                    <input type="text" name="line" class="form-control">
+                                </div>
 
-                            <div class="mb-2">
-                                <label class="form-label">Delivery Instructions</label>
-                                <textarea class="form-control" rows="2"></textarea>
+                                <div class="mb-2">
+                                    <label class="form-label">Delivery Instructions</label>
+                                    <textarea class="form-control" rows="2"></textarea>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="modal-footer border-top-0">
-                        <button type="reset" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="saveChangesButton">
-                            <span class="btn-text">Add</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                                  aria-hidden="true"></span>
-                        </button>
-                    </div>
-                </form>
+                        <div class="modal-footer border-top-0">
+                            <button type="reset" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="saveChangesButton">
+                                <span class="btn-text">Add</span>
+                                <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                                      aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </form>
 
+                </div>
                 <div class="modal fade" id="selectLocationModal" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-lg modal-dialog-centered">
                         <div class="modal-content rounded-4 shadow">
@@ -317,19 +319,21 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        feather.replace();
         const shipRadio = document.getElementById("shipToCustomer");
         const pickupRadio = document.getElementById("pickUp");
         const shipSection = document.getElementById("shipSection");
         const pickupSection = document.getElementById("pickupSection");
+        const addAddressSection = document.getElementById("addAddressSection"); // NEW
 
         function toggleSections() {
             if (shipRadio.checked) {
                 shipSection.style.display = "block";
                 pickupSection.style.display = "none";
+                addAddressSection.style.display = "block"; // Show Add Address
             } else {
                 shipSection.style.display = "none";
                 pickupSection.style.display = "block";
+                addAddressSection.style.display = "none"; // Hide Add Address
             }
         }
 
@@ -337,6 +341,7 @@
         pickupRadio.addEventListener("change", toggleSections);
         toggleSections();
     });
+
 </script>
 
 <script>
