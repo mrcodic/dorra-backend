@@ -35,28 +35,28 @@
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
                     <input type="text" class="form-control" name="first_name"
-                        value="{{ optional($model->orderAddress->first())->first_name }}">
+                        value="{{ $model->orderAddress->first()->first_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
                     <input type="text" class="form-control" name="last_name"
-                        value="{{ optional($model->orderAddress->first())->last_name }}">
+                        value="{{ $model->orderAddress->first()->last_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
                     <input type="email" class="form-control" name="email"
-                        value="{{ optional($model->orderAddress->first())->email }}">
+                        value="{{ $model->orderAddress->first()->email }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Phone</label>
                     <input type="text" class="form-control" name="phone"
-                        value="{{ optional($model->orderAddress->first())->phone }}">
+                        value="{{ $model->orderAddress->first()->phone }}">
                 </div>
 
 
                 <!-- Shipping Details -->
                 @php
-                $address = optional($model->orderAddress->first());
+                $address = $model->orderAddress->first();
                 @endphp
 
                 @if($address)
