@@ -108,6 +108,10 @@ $('#search-order-form').on('keyup', function () {
         dt_user_table.draw();
     }, 300);
 });
+$('#clear-search').on('click', function () {
+    $('#search-order-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 $(".filter-date").on("change", function () {
     dt_user_table.draw();
 });
