@@ -50,14 +50,16 @@ class MainController extends Controller
 
     public function removeMedia(Media $media)
     {
-        if ($media->model_type || $media->model_id) {
-            $media->deleteQuietly();
+        if (!empty($media->model_type) && !empty($media->model_id)) {
+            $media->deleteQuietly(); 
         } else {
             $media->delete();
         }
-        
 
-        return Response::api();
+        return Response::api([
+            'success' => true,
+            'message' => 'Media removed successfully.'
+        ]);
     }
 
     public function countries()
