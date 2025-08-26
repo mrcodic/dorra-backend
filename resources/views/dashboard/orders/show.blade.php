@@ -22,6 +22,7 @@
         </div>
     </div>
     <form>
+        @dd($model->orderAddress)
         <div class="row">
             <!-- Left Column -->
             <div class="col-12 col-md-4">
