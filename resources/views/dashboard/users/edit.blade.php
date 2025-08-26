@@ -468,66 +468,92 @@
     <script>
         Dropzone.autoDiscover = false;
 
-            const editDropzone = new Dropzone("#edit-user-dropzone", {
-                url: "{{ route('media.store') }}", // route that uploads new media
-                paramName: "file",
-                maxFiles: 1,
-                acceptedFiles: "image/*",
+        const editDropzone = new Dropzone("#edit-user-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            init: function () {
+                let dz = this;
 
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                addRemoveLinks: true,
-                init: function () {
-                    let existingImageUrl = $("#existingImageUrl").val();
-                    let existingImageName = $("#existingImageName").val();
+                let existingImageUrl = $("#existingImageUrl").val();
+                let existingImageName = $("#existingImageName").val();
+                let existingImageId   = $("#uploadedImage").val(); // hidden input already set by backend
 
-                    // ✅ Preload user’s current avatar if exists
-                    if (existingImageUrl) {
-                        let mockFile = { name: existingImageName, size: 12345, accepted: true };
-                        this.emit("addedfile", mockFile);
-                        this.emit("thumbnail", mockFile, existingImageUrl);
-                        this.emit("complete", mockFile);
-                        this.files.push(mockFile);
-                    }
+                // ✅ Preload user’s current avatar if exists
+                if (existingImageUrl && existingImageId) {
+                    let mockFile = {
+                        name: existingImageName || "current_image.jpg",
+                        size: 12345,
+                        accepted: true,
+                        _hiddenInputId: existingImageId
+                    };
 
-                    // ✅ When new image uploaded
-                    this.on("success", function (file, response) {
-                        if (response.success && response.data) {
-                            $("#uploadedImage").val(response.data.id);
+                    dz.emit("addedfile", mockFile);
+                    dz.emit("thumbnail", mockFile, existingImageUrl);
+                    dz.emit("complete", mockFile);
+                    dz.files.push(mockFile);
+                }
 
-                                // Add hidden input for submitted form
-                                let hidden = document.createElement('input');
-                                hidden.type = "hidden";
-                                hidden.name = "image_id"; // backend expects image_id
-                                hidden.value = response.data.id;
-                                file._hiddenInput = hidden;
-                                document.querySelector('.edit-user-media-ids').appendChild(hidden);
+                // ✅ When new image uploaded
+                dz.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        let newId = response.data.id;
 
-                        }
-                    });
-
-
-
-                    // ✅ On remove, clear hidden input
-                    this.on("removedfile", function (file) {
-                        $("#uploadedImage").val("");
-                        if (file._hiddenInput) {
-                            file._hiddenInput.remove();
-                        }
-                        if (file.xhr) {
-                            let response = JSON.parse(file.xhr.response);
-                            fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                        // 🔥 If old image exists, delete it first
+                        let oldId = $("#uploadedImage").val();
+                        if (oldId && oldId !== newId) {
+                            fetch("{{ url('api/v1/media') }}/" + oldId, {
                                 method: "DELETE",
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                                 }
                             });
                         }
-                    });
-                }
 
-            });
+                        // update hidden input
+                        $("#uploadedImage").val(newId);
+
+                        // replace hidden input field in form
+                        document.querySelector(".edit-user-media-ids").innerHTML = "";
+                        let hidden = document.createElement("input");
+                        hidden.type = "hidden";
+                        hidden.name = "image_id";
+                        hidden.value = newId;
+                        file._hiddenInput = hidden;
+                        document.querySelector(".edit-user-media-ids").appendChild(hidden);
+
+                        // store id on file for cleanup when removed
+                        file._hiddenInputId = newId;
+                    }
+                });
+
+                // ✅ On remove
+                dz.on("removedfile", function (file) {
+                    let hiddenInput = $("#uploadedImage");
+                    if (hiddenInput.val() == file._hiddenInputId) {
+                        hiddenInput.val(""); // clear
+                    }
+                    if (file._hiddenInput) {
+                        file._hiddenInput.remove();
+                    }
+
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
     </script>
 
 
