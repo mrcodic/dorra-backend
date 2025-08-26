@@ -205,7 +205,7 @@
                         <div class="status-icon me-1">
                             <i data-feather="check"></i> <!-- You can dynamically change the icon -->
                         </div>
-                        <span class="status-text">Confirmed</span>
+                        <span class="status-text">{{ $model->status->label() }}</span>
                     </div>
                 </div>
 
