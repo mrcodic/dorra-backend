@@ -10,6 +10,11 @@ var dt_user_table = $(".order-list-table").DataTable({
     ajax: {
         url: ordersDataUrl,
         type: "GET",
+        data: function (d) {
+            d.search_value = $("#search-category-form").val(); // get from input
+            d.created_at = $(".filter-date").val();
+            return d;
+        },
     },
     columns: [
         {
