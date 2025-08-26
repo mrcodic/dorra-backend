@@ -72,7 +72,7 @@
                         <div class="card border rounded p-1 my-2">
                             <div class="d-flex justify-content-between align-items-start">
 
-                                @forelse($model->teams as $team)
+                                @forelse($model->ownerTeams as $team)
 
                                 <!-- left: Icon and Info -->
                                 <div class="d-flex gap-2 align-items-center">
