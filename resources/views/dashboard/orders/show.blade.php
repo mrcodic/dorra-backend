@@ -29,27 +29,27 @@
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
                     <input type="text" class="form-control" name="first_name"
-                        value="{{ optional($model->orderAddress->first())->first_name }}" readonly>
+                        value="{{ optional($model->orderAddress)->first_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
                     <input type="text" class="form-control" name="last_name"
-                        value="{{ optional($model->orderAddress->first())->last_name }}" readonly>
+                        value="{{ optional($model->orderAddress)->last_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
                     <input type="email" class="form-control" name="email"
-                        value="{{ optional($model->orderAddress->first())->email }}" readonly>
+                        value="{{ optional($model->orderAddress)->email }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Phone</label>
                     <input type="text" class="form-control" name="phone"
-                        value="{{ optional($model->orderAddress->first())->phone }}" readonly>
+                        value="{{ optional($model->orderAddress)->phone }}" readonly>
                 </div>
 
 
                 @php
-                $address = optional($model->orderAddress->first());
+                $address = optional($model->orderAddress);
                 @endphp
 
                 @if($address)
