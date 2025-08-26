@@ -81,7 +81,7 @@ class ProductService extends BaseService
                 return $product->reviews?->pluck('rating')->avg() ?? 0;
             })
             ->addColumn('image', function ($product) {
-                return $product->getMainImageUrl();
+                return $product->getMainImageUrl() ?: asset('images/default-product.png');
             })
             ->addColumn('no_of_purchas', function ($product) {
                 return $product->confirmed_orders_count;

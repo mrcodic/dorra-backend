@@ -180,11 +180,16 @@ class SettingController extends Controller
             'date' => 'required|date',
             'review' => 'required|string|max:1000',
             'type' => 'required|in:with_image,without_image,other',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_id' => 'required|exists:media,id',
         ]);
 
         $review = $reviewRepository->create($validatedData);
-        handleMediaUploads($request->image, $review, collectionName: "reviews_landing_images");
+        Media::where('id', $validatedData['image_id'])
+            ->update([
+                'model_type' => get_class($review),
+                'model_id'   => $review->id,
+                'collection_name' => 'reviews_landing_images',
+            ]);
         return Response::api();
 
     }
