@@ -171,10 +171,9 @@
 
                     {{-- Add Button - 20% on md+, full width on xs --}}
                     <div class="col-12 col-md-3">
-                        <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                           data-bs-target="#addCategoryModal">
+                        <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route("orders.create") }}">
                             <i data-feather="plus"></i>
-                            Add New Product
+                            Add New Order
                         </a>
                     </div>
 
