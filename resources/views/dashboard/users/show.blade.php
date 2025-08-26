@@ -116,8 +116,7 @@
 
 
                         <div class="d-flex flex-column gap-1">
-                            <a href="{{ route('users.update',$model->id) }}" class="btn btn-primary me-1 w-100"
-                                data-bs-target="#editUser" data-bs-toggle="modal">
+                            <a href="{{ route('users.edit',$model->id) }}" class="btn btn-primary me-1 w-100">
                                 Edit User
                             </a>
                             <button class="btn btn-outline-danger me-1 w-100" data-bs-target="#deleteUserModal"
