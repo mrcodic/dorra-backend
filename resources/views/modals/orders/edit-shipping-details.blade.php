@@ -136,7 +136,7 @@
                                value="{{ optional($model->pickupContact)->phone }}" class="form-control">
                     </div>
                 </div>
-                <form id="addAddressForm" class="row gy-1 gx-2" method="post"
+                <form id="addAddressForm" class="row gy-1 gx-2" method="post" style="display: @if($selectedType == \App\Enums\Order\OrderTypeEnum::PICKUP  ) 'none'@endif"
                       action="{{ route('shipping-addresses.store') }}">
                     @csrf
                     <h5 class="mb-2 text-black fs-4">Add new address</h5>
