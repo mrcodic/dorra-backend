@@ -308,7 +308,7 @@
                         <!-- tab 4 content -->
                         <div class="tab-pane fade" id="tab4">
                             <!-- Total Reviews Section -->
-                            @forelse($model->teams as $team)
+                            @forelse($model->ownerTeams as $team)
                             <div class="d-flex justify-content-between align-items-end ">
                                 <!-- left: Icon and Info -->
                                 <div
