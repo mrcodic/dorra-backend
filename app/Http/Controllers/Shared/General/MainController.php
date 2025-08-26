@@ -15,7 +15,8 @@ use App\Http\Resources\{CategoryResource,
     StateResource,
     TagResource,
     TeamResource,
-    Template\TypeResource};
+    Template\TypeResource
+};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
@@ -41,7 +42,7 @@ class MainController extends Controller
         public DesignService                $designService,
         public FolderService                $folderService,
         public DimensionRepositoryInterface $dimensionRepository,
-        public TeamService                   $teamService,
+        public TeamService                  $teamService,
 
     )
     {
@@ -49,7 +50,13 @@ class MainController extends Controller
 
     public function removeMedia(Media $media)
     {
-        deleteMediaById($media->id);
+        if ($media->model_type || $media->model_id) {
+            $media->deleteQuietly();
+        } else {
+            $media->delete();
+        }
+        
+
         return Response::api();
     }
 
@@ -138,11 +145,11 @@ class MainController extends Controller
         return Response::api(data: MediaResource::make($assetMedia));
     }
 
-    public function addMedia(Request $request, $id=null)
+    public function addMedia(Request $request, $id = null)
     {
 //        $global  = GlobalAsset::create(['title' => $request->title, 'type' => $request->type]);
 ////        $model = ($request->resource)::find($id);
-        $media = handleMediaUploads($request->allFiles(),null, clearExisting: true);
+        $media = handleMediaUploads($request->allFiles(), null, clearExisting: true);
         return Response::api(data: MediaResource::make($media));
     }
 
