@@ -14,7 +14,7 @@
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">{{
                 $model->order_number }}</span></div>
- 
+
     </div>
     <form>
         <div class="row">
@@ -91,7 +91,7 @@
                     <p class="fs-16 text-black">{{ $model->created_at->format('F d, Y') }}</p>
                 </div>
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
-                <p>Completed</p>
+                <p>{{ $model->payment_status }}</p>
 
 
                 @foreach($model->orderItems as $orderItem)
