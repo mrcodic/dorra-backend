@@ -74,7 +74,7 @@
                                 @forelse($model->ownerTeams as $team)
 
                                 <!-- left: Icon and Info -->
-                                <div class="d-flex gap-2 align-items-center">
+                                <div class="d-flex gap-2 align-items-center mb-2">
                                     <div class="">
                                         <i data-feather="users" class="text-primary"></i> <!-- User icon -->
                                     </div>
