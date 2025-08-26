@@ -97,7 +97,7 @@
                                 </button>
                             </div>
                             @php
-                                $address = $model->OrderAddress->first();
+                                $address = $model->OrderAddress;
                             @endphp
 
                             @if($address)
