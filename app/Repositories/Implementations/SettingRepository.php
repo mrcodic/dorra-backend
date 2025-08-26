@@ -15,7 +15,7 @@ class SettingRepository extends BaseRepository implements SettingRepositoryInter
     public function get(?string $key = null, $default = null, ?string $group = null)
     {
         $settings = Cache::rememberForever('app_settings', function () {
-            return Setting::all();
+            return Setting::query()->select('key', 'value', 'group')->get();
         });
 
         if ($group) {
