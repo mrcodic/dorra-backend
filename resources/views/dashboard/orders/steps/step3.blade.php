@@ -32,11 +32,11 @@
                     </span>
                             </div>
                             <p class="fs-4 mb-1"
-                               style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->product->getTranslation('name', app()->getLocale()) }} </p>
+                               style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;height:22px"> {{ $template->getTranslation('name', app()->getLocale()) }} </p>
                         </div> <!-- Tags -->
                         <div class="d-flex flex-wrap justify-content-start gap-1 mb-2"
                              style="min-height: 44px;">
-                            @foreach($template->product->tags as $tag)
+                            @foreach($template->tags as $tag)
                                 <span
                                     class="badge rounded-pill text-black d-flex justify-content-center align-items-center"
                                     style="background-color: #FCF8FC;">{{ $tag->getTranslation('name',app()->getLocale()) }}</span>
