@@ -22,7 +22,6 @@
         </div>
     </div>
     <form>
-        @dd($model->orderAddress)
         <div class="row">
             <!-- Left Column -->
             <div class="col-12 col-md-4">
@@ -30,27 +29,27 @@
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
                     <input type="text" class="form-control" name="first_name"
-                        value="{{ optional($model->orderAddress)->first_name }}" readonly>
+                        value="{{ $model->orderAddress->first_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
                     <input type="text" class="form-control" name="last_name"
-                        value="{{ optional($model->orderAddress)->last_name }}" readonly>
+                        value="{{ $model->orderAddress->last_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
                     <input type="email" class="form-control" name="email"
-                        value="{{ optional($model->orderAddress)->email }}" readonly>
+                        value="{{ $model->orderAddress->email }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Phone</label>
                     <input type="text" class="form-control" name="phone"
-                        value="{{ optional($model->orderAddress)->phone }}" readonly>
+                        value="{{ $model->orderAddress->phone }}" readonly>
                 </div>
 
 
                 @php
-                $address = optional($model->orderAddress);
+                $address = $model->orderAddress;
                 @endphp
 
                 @if($address)
