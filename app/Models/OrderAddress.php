@@ -15,7 +15,7 @@ class OrderAddress extends Model
 
     protected $guarded = [];
     protected $casts = [
-        'shipping_method' => OrderTypeEnum::class,
+        'type' => OrderTypeEnum::class,
 
     ];
 
