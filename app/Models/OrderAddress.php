@@ -22,7 +22,7 @@ class OrderAddress extends Model
 
     public function name(): Attribute
     {
-        return Attribute::get(fn($attribute) => $attribute->first_name . ' ' . $attribute->last_name);
+        return Attribute::get(fn($attribute) => $attribute?->first_name . ' ' . $attribute?->last_name);
     }
 
     public function order(): BelongsTo
