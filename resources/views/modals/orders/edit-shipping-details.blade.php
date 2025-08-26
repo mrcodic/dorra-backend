@@ -54,7 +54,7 @@
                     </div>
 
                     @php
-                        $shippingAddressId = $model->OrderAddress->firstWhere('shipping_address_id', '!=', null)?->shipping_address_id;
+                        $shippingAddressId = $model->OrderAddress->shipping_address_id;
                     @endphp
 
 
