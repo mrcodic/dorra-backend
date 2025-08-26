@@ -9,7 +9,7 @@
 <body>
 <h2>Invoice {{ $model->invoice_number }}</h2>
 <p><strong>Date:</strong> {{ $model->issued_date }}</p>
-<p><strong>Customer:</strong> {{ $model->order->user?->first_name ?? $model->order?->guest?->first_name }}</p>
+<p><strong>Customer:</strong> {{ $model->order->orderAddress?->name }}</p>
 
 <table width="100%" border="1" cellspacing="0" cellpadding="6">
     <thead>
