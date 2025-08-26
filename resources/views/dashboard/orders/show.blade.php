@@ -14,12 +14,7 @@
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">{{
                 $model->order_number }}</span></div>
-        <div class="d-flex align-items-center status-pill justify-content-center">
-            <div class="status-icon me-1">
-                <i data-feather="check"></i>
-            </div>
-            <span class="status-text">Confirmed</span>
-        </div>
+ 
     </div>
     <form>
         <div class="row">
