@@ -30,6 +30,7 @@ class Order extends Model
 
     protected $casts = [
         'status' => StatusEnum::class,
+        'payment_status' => \App\Enums\Payment\StatusEnum::class,
     ];
 
     protected $attributes = [

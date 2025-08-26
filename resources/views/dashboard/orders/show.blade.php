@@ -91,7 +91,7 @@
                     <p class="fs-16 text-black">{{ $model->created_at->format('F d, Y') }}</p>
                 </div>
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
-                <p>{{ $model->payment_status }}</p>
+                <p>{{ $model->payment_status->label() }}</p>
 
 
                 @foreach($model->orderItems as $orderItem)
