@@ -151,7 +151,7 @@
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">Discount</span>
-                    <span class="fs-16 text-black">-${{ $model->discount_amount }}</span>
+                    <span class="fs-16 text-black">-{{ $model->discount_amount }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
