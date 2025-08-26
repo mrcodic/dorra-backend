@@ -95,7 +95,7 @@
         </div>
     </div>
 </div>
-<script !src="">
+<script>
     Dropzone.autoDiscover = false;
 
     const editAvatarDropzone = new Dropzone("#editAvatarDropzone", {
@@ -109,33 +109,36 @@
         },
         init: function () {
             this.on("success", function (file, response) {
-                // Clear previous hidden inputs
-                document.querySelector('.edit-avatar-media-ids').innerHTML = "";
+                if (response.success && response.data) {
+                    // ✅ Clear previous hidden inputs
+                    document.querySelector('.edit-avatar-media-ids').innerHTML = "";
 
-                // Create hidden input with image_id
-                file._hiddenInputId = response.data.id;
+                    // ✅ Create hidden input for image_id
+                    let hidden = document.createElement('input');
+                    hidden.type = "hidden";
+                    hidden.name = "image_id";
+                    hidden.value = response.data.id;
+                    file._hiddenInput = hidden;
+                    document.querySelector('.edit-avatar-media-ids').appendChild(hidden);
 
-                document.querySelector('.edit-avatar-media-ids').appendChild(hidden);
-
-                // Update avatar preview
-                const preview = document.querySelector('#editAdminModal .avatarPreview');
-                preview.src = response.data.url;
+                    // ✅ Update avatar preview
+                    const preview = document.querySelector('#editAdminModal .avatarPreview');
+                    preview.src = response.data.url;
+                }
             });
 
             this.on("removedfile", function (file) {
-                // Reset preview
-
+                // ✅ Reset preview to default
                 const preview = document.querySelector('#editAdminModal .avatarPreview');
                 preview.src = "{{ asset('images/default-user.png') }}";
 
-                // Remove hidden input too
+                // ✅ Remove hidden input
                 document.querySelector('.edit-avatar-media-ids').innerHTML = "";
-                if (file.previewElement) {
-                    file.previewElement.remove();
-                }
                 if (file._hiddenInput) {
                     file._hiddenInput.remove();
                 }
+
+                // ✅ Call API to delete uploaded file
                 if (file.xhr) {
                     let response = JSON.parse(file.xhr.response);
                     fetch("{{ url('api/v1/media') }}/" + response.data.id, {
@@ -148,10 +151,8 @@
             });
         }
     });
-
-
-
 </script>
+
 <script>
     // For Edit Admin Modal
     document.querySelectorAll('#editAdminModal .avatarInput').forEach(input => {
