@@ -107,7 +107,7 @@
                 use App\Enums\Order\StatusEnum;
                 @endphp
 
-                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
+                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Status</label>
                 <select class="form-select mb-4" name="status">
                     @foreach (StatusEnum::cases() as $status)
                     <option value="{{ $status->value }}" {{ (old('status', $model->status?->value) == $status->value) ?
