@@ -55,7 +55,7 @@
                             <span class="badge text-dark p-75 px-2 template-status-label"
                                   data-template-id="{{ $template->id }}"
                                   style="background-color: #CED5D4">
-                        {{ $template->status->label() }}
+                        {{ $template->status?->label() }}
                     </span>
                         </div>
                         <div class="mt-auto"> <!-- Pushes button to bottom -->
