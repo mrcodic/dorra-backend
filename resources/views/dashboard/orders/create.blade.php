@@ -48,22 +48,22 @@ $total = isset($orderData['total']) ? number_format($orderData['total'], 2) : nu
 
     @include('dashboard.orders.steps.step1')
 
-    <!-- Step 2 -->
+{{--    <!-- Step 2 -->--}}
     @include('dashboard.orders.steps.step2')
 
 
-    <!-- Step 3 -->
+{{--    <!-- Step 3 -->--}}
     @include('dashboard.orders.steps.step3')
-    <!-- Step 4 -->
+{{--    <!-- Step 4 -->--}}
     @include('dashboard.orders.steps.step4')
-    <!-- Step 5 -->
+{{--    <!-- Step 5 -->--}}
     @include('dashboard.orders.steps.step5')
 
-    <!-- Step 6 -->
+{{--    <!-- Step 6 -->--}}
     @include('dashboard.orders.steps.step6')
-    <!-- Step 7 -->
+{{--    <!-- Step 7 -->--}}
     @include('dashboard.orders.steps.step7')
-    <!-- Step 8 -->
+{{--    <!-- Step 8 -->--}}
     @include('dashboard.orders.steps.step8')
 
 </div>

@@ -138,9 +138,9 @@ class Product extends Model implements HasMedia
         return $this->hasMany(ProductPrice::class);
     }
 
-    public function reviews(): HasMany
+    public function reviews(): MorphMany
     {
-        return $this->hasMany(Review::class);
+        return $this->morphMany(Review::class,'reviewable');
     }
 
     public function users(): MorphToMany

@@ -141,6 +141,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::apiResource('reviews', ReviewController::class)->only(['index', 'store']);
+    Route::get('reviews-statistics/{reviewable_id}', [ReviewController::class,'statistics']);
 
 
     Route::get('trash', [MainController::class, 'trash'])->name('trash');

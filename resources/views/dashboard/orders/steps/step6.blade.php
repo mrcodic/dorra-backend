@@ -32,8 +32,7 @@
             <!-- Existing Addresses -->
             <div class="d-flex gap-2">
                 @if(!empty($orderData["user_info"]["id"]))
-                @foreach(\App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->get() ??[]as
-                $shippingAddress)
+                @foreach(\App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->get()  as $shippingAddress)
                 <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill text-break">
                     <input class="form-check-input" type="radio" name="shipping_id"
                         id="address{{ $shippingAddress->id }}" value="{{ $shippingAddress->id }}">

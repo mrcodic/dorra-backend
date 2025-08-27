@@ -41,28 +41,28 @@
 
             <!-- Pricing Details -->
             @isset($orderData['pricing_details'])
-            @foreach($orderData['pricing_details'] ??[]as $key => $value)
+            @foreach($orderData['pricing_details'] as $key => $value)
             <input type="hidden" name="pricing_details[{{ $key }}]" value="{{ $value }}">
             @endforeach
             @endisset
 
             <!-- Template Info -->
             @isset($orderData['template_info'])
-            @foreach($orderData['template_info']??[] as $key => $value)
+            @foreach($orderData['template_info'] as $key => $value)
             <input type="hidden" name="template_info[{{ $key }}]" value="{{ $value }}">
             @endforeach
             @endisset
 
             <!-- Personal Info -->
             @isset($orderData['personal_info'])
-            @foreach($orderData['personal_info'] ??[]as $key => $value)
+            @foreach($orderData['personal_info'] as $key => $value)
             <input type="hidden" name="personal_info[{{ $key }}]" value="{{ $value }}">
             @endforeach
             @endisset
 
             <!-- Shipping Info -->
             @isset($orderData['shipping_info'])
-            @foreach($orderData['shipping_info'] ??[] as $key => $value)
+            @foreach($orderData['shipping_info'] as $key => $value)
             <input type="hidden" name="shipping_info[{{ $key }}]" value="{{ $value }}">
             @endforeach
             @endisset
