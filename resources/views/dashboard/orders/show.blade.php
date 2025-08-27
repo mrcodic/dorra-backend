@@ -24,21 +24,21 @@
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
                     <input type="text" class="form-control" name="first_name"
-                        value="{{ $model->orderAddress->first_name }}" readonly>
+                        value="{{ $model->orderAddress?->first_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
                     <input type="text" class="form-control" name="last_name"
-                        value="{{ $model->orderAddress->last_name }}" readonly>
+                        value="{{ $model->orderAddress?->last_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
-                    <input type="email" class="form-control" name="email" value="{{ $model->orderAddress->email }}"
+                    <input type="email" class="form-control" name="email" value="{{ $model->orderAddress?->email }}"
                         readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone" value="{{ $model->orderAddress->phone }}"
+                    <input type="text" class="form-control" name="phone" value="{{ $model->orderAddress?->phone }}"
                         readonly>
                 </div>
 
@@ -59,12 +59,12 @@
                 </span>
 
                 <div class="border rounded p-2 mb-2 text-black text-break">
-                    @if($address->type === 'pickup')
-                    {{ $address->location_name }}<br>
-                    {{ $address->state }}, {{ $address->country }}
+                    @if($address?->type === 'pickup')
+                    {{ $address?->location_name }}<br>
+                    {{ $address?->state }}, {{ $address->country }}
                     @else
-                    {{ $address->address_line }}, {{ $address->address_label }}<br>
-                    {{ $address->state }}, {{ $address->country }}
+                    {{ $address?->address_line }}, {{ $address->address_label }}<br>
+                    {{ $address?->state }}, {{ $address->country }}
                     @endif
                 </div>
                 @endif
@@ -91,7 +91,7 @@
                     <p class="fs-16 text-black">{{ $model->created_at->format('F d, Y') }}</p>
                 </div>
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
-                <p>{{ $model->payment_status->label() }}</p>
+                <p style="font-weight: 700; font-size: 16px;">{{ $model->payment_status->label() }}</p>
 
 
                 @foreach($model->orderItems as $orderItem)

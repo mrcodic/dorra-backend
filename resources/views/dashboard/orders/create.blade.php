@@ -42,7 +42,7 @@ $discountAmount = isset($orderData['discount_amount']) ? number_format($orderDat
 $total = isset($orderData['total']) ? number_format($orderData['total'], 2) : number_format($pricingSubtotal + 30 +
 ($pricingSubtotal * 0.1), 2);
 @endphp
-<div class=" bg-white rounded-3">
+<div class=" bg-white rounded-3 p-2">
 
     <!-- Step 1 -->
 

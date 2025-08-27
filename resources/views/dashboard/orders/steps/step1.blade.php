@@ -7,7 +7,7 @@
             <i data-feather="search"></i>
         </span>
         <input type="text" id="customer-search" class="form-control border-start-0 border-end-0"
-               placeholder="Search for a customer">
+            placeholder="Search for a customer">
         <span class="input-group-text bg-white border-start-0"></span>
     </div>
 

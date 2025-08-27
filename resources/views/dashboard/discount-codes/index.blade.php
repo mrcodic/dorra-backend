@@ -147,7 +147,7 @@
 
                 <div class="col-12 col-md-2">
                     <select class="form-select filter-date">
-                        <option value="">Date</option>
+                        <option value="" selected disabled>Date</option>
                         <option value="asc">asc</option>
                         <option value="desc">desc</option>
                     </select>

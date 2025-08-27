@@ -30,10 +30,10 @@
         <!-- Ship to Customer Section -->
         <div id="shipSection">
             <!-- Existing Addresses -->
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-wrap gap-1">
+                @php use App\Models\ShippingAddress @endphp
                 @if(!empty($orderData["user_info"]["id"]))
-                @foreach(\App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->get() ??[]as
-                $shippingAddress)
+                @foreach(ShippingAddress::whereUserId($orderData["user_info"]["id"])->get() as $shippingAddress)
                 <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill text-break">
                     <input class="form-check-input" type="radio" name="shipping_id"
                         id="address{{ $shippingAddress->id }}" value="{{ $shippingAddress->id }}">
@@ -54,7 +54,7 @@
             <!-- Divider -->
             @if(!empty($orderData["user_info"]["id"]) &&
             \App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->count() > 0)
-            <div class="text-center my-3 fw-bold">OR</div>
+            <div class="text-center my-1 fw-bold">OR</div>
             @endif
 
             <!-- Add New Address -->
