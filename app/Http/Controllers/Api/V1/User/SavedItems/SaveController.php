@@ -26,7 +26,7 @@ class SaveController extends Controller
 
 
         $savedDesigns = $user->savedDesigns()
-            ->with('product.category','owner:name')
+            ->with('product.category','owner')
             ->when(request()->filled('category_id'), function ($query) {
                 $query->whereRelation('product.category', 'id', request('category_id'));
             })
