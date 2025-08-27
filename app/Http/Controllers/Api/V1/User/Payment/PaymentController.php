@@ -87,7 +87,6 @@ class PaymentController extends Controller
         } elseif (!$isSuccess && $isPending) {
             $paymentStatus = StatusEnum::PENDING;
             Log::info('Deleting order', ['order' => $transaction->order]);
-            $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
 
             $transaction->order?->forceDelete();
             $transaction->update([
@@ -98,6 +97,8 @@ class PaymentController extends Controller
 
         } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
+            $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
+            
             Log::info('dgfdgd order', ['order' => $transaction->order]);
 
             $transaction->order?->forceDelete();
