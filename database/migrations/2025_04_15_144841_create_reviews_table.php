@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->longText('review');
             $table->unsignedTinyInteger('rating')->check('rating >= 1 AND rating <= 5');
-            $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
+            $table->morphs('reviewable');
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->longText('comment')->nullable();
             $table->timestamp('comment_at')->nullable();

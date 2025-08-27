@@ -19,7 +19,8 @@ class UpdateDiscountCodeRequest extends BaseRequest
     {
         return [
             'max_usage' => ['nullable', 'integer', 'min:1'],
-            'expired_at' => ['nullable', 'date'],
+            'expired_at' => ['required', 'date', 'after:today'],
+
         ];
     }
 
