@@ -83,7 +83,7 @@ class Product extends Model implements HasMedia
             $query->whereIn('rating', $rates);
         });
     }
-}
+
 
     public function category(): BelongsTo
     {
