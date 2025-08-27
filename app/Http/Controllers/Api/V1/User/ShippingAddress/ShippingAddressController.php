@@ -34,7 +34,7 @@ class ShippingAddressController extends Controller
 
     public function update(UpdateShippingAddressRequest $request, ShippingAddress $shippingAddress)
     {
-        $shippingAddress = $this->shippingAddressService->updateResource($request->validated(), $shippingAddress->id);
+        $shippingAddress = $this->shippingAddressService->updateResource($request->validated(), $shippingAddress->id ,['state.country']);
         return Response::api(data: ShippingAddressResource::make($shippingAddress));
     }
 
