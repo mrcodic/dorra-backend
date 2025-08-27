@@ -16,14 +16,13 @@ class ReviewResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'email' => $this->email,
-            'phone_number' => $this->phone_number,
-            'status' => $this->status,
-            'image' => MediaResource::make($this->image),
-            'country_details' => CountryCodeResource::make($this->whenLoaded('countryCode')),
-
+            'user' => UserResource::make($this->whenLoaded('user')),
+            'rating'    => (int) $this->rating,
+            'review'    => $this->review,
+            'comment'   => $this->comment,
+            'comment_at'=> $this->comment_at ? $this->comment_at->toDateString() : null,
+            'created_at'=> $this->created_at?->toDateString(),
+            'images' => MediaResource::collection($this->whenLoaded('media')),
         ];
     }
 }

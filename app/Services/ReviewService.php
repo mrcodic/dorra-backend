@@ -59,18 +59,27 @@ class ReviewService extends BaseService
 
         return [
             'statistics' => [
-                'total_reviews' => (int) $stats->total_reviews,
-                'rating'        => round((float) $stats->rating, 2),
-                '5_stars'       => (int) $stats->five_stars,
-                '4_stars'       => (int) $stats->four_stars,
-                '3_stars'       => (int) $stats->three_stars,
-                '2_stars'       => (int) $stats->two_stars,
-                '1_stars'       => (int) $stats->one_star,
+                'total_reviews' => (int)$stats->total_reviews,
+                'rating' => round((float)$stats->rating, 2),
+                '5_stars' => (int)$stats->five_stars,
+                '4_stars' => (int)$stats->four_stars,
+                '3_stars' => (int)$stats->three_stars,
+                '2_stars' => (int)$stats->two_stars,
+                '1_stars' => (int)$stats->one_star,
             ],
         ];
     }
 
+    public function productReviews($id)
+    {
+        return $this->repository->query()
+            ->with(['user', 'media'])
+            ->orderBy('created_at', request('date', 'desc'))
+            ->where('reviewable_id', $id)
+            ->where('reviewable_type', Product::class)
+            ->get();
 
+    }
 
 
 }
