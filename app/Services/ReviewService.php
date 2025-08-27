@@ -43,15 +43,14 @@ class ReviewService extends BaseService
     public function statistics(int $id): array
     {
         $stats = $this->repository->query()
-            ->selectRaw('
-        COUNT(*) as total_reviews,
-        AVG(rating) as rating,
-        SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) as five_stars,
-        SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) as four_stars,
-        SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) as three_stars,
-        SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as two_stars,
-        SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as one_star
-    ')
+            ->select([]) // remove the default *
+            ->selectRaw('COUNT(*) as total_reviews')
+            ->selectRaw('AVG(rating) as rating')
+            ->selectRaw('SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) as five_stars')
+            ->selectRaw('SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) as four_stars')
+            ->selectRaw('SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) as three_stars')
+            ->selectRaw('SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as two_stars')
+            ->selectRaw('SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as one_star')
             ->where('reviewable_id', $id)
             ->where('reviewable_type', \App\Models\Product::class)
             ->first();
