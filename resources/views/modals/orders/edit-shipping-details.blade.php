@@ -22,10 +22,10 @@
                     $selectedType = $address?->type;
                     @endphp
 
-                    <div class="mb-2" id="shippingMethodSection">
+                    <div class="mb-1" id="shippingMethodSection">
                         <label class="form-label fw-bold fs-5 mb-2">Shipping Method</label>
-                        <div class="d-flex gap-2">
-                            <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
+                        <div class="d-flex flex-column flex-md-row gap-1">
+                            <div class="col-md-6 form-check border rounded-3 p-1 px-3 flex-fill">
                                 <input class="form-check-input" type="radio" name="type" id="shipToCustomer"
                                     value="{{ \App\Enums\Order\OrderTypeEnum::SHIPPING->value }}"
                                     @checked($selectedType===\App\Enums\Order\OrderTypeEnum::SHIPPING)>
@@ -34,7 +34,7 @@
                                 </label>
                             </div>
 
-                            <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
+                            <div class="col-md-6 form-check border rounded-3 p-1 px-3 flex-fill">
                                 <input class="form-check-input" type="radio" name="type" id="pickUp"
                                     value="{{ \App\Enums\Order\OrderTypeEnum::PICKUP->value }}"
                                     @checked($selectedType===\App\Enums\Order\OrderTypeEnum::PICKUP)>
@@ -46,7 +46,7 @@
                     </div>
 
                     @php
-                    $shippingAddressId = $model->OrderAddress->shipping_address_id;
+                    $shippingAddressId = $model->OrderAddress?->shipping_address_id;
                     @endphp
 
 
@@ -78,11 +78,9 @@
 
                 </div>
             </form> <!-- Divider -->
-            <div class="text-center my-3 fw-bold">OR</div>
+            <div class="text-center my-1 fw-bold">OR</div>
 
-            <div class="">
-
-
+            <div class="p-2">
                 <div id="pickupSection" style="display: none;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 class="form-label ">Pick up Location</h5>
@@ -97,20 +95,20 @@
 
                     @if($address)
                     <div class="border rounded-3 p-1 mb-2">
-                        <p class="text-black">{{ $address->location_name }}</p>
-                        <p>{{ $address->state }} , {{ $address->country }}</p>
+                        <p class="text-black">{{ $address?->location_name }}</p>
+                        <p>{{ $address?->state }} , {{ $address?->country }}</p>
                     </div>
                     @endif
                     <div class="mb-2">
                         <label class="form-label fw-bold">Who's picking up the package?</label>
                     </div>
                     <div class="row g-2 mb-2">
-                        <div class="col">
+                        <div class="col-md-6">
                             <label class="form-label">First Name</label>
                             <input type="text" name="pickup_first_name"
                                 value="{{ optional($model->pickupContact)->first_name }}" class="form-control">
                         </div>
-                        <div class="col">
+                        <div class="col-md-6">
                             <label class="form-label">Last Name</label>
                             <input type="text" name="pickup_last_name"
                                 value="{{ optional($model->pickupContact)->last_name }}" class="form-control">
@@ -143,8 +141,8 @@
                             <br>
 
 
-                            <div class="row g-2 mb-2">
-                                <div class="col">
+                            <div class="row g-2 mb-1">
+                                <div class="col-md-6">
                                     <label class="form-label">Country</label>
                                     <select class="form-select address-country-select" name="country_id">
                                         <option value="">Select Country</option>
@@ -157,7 +155,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col">
+                                <div class="col-md-6">
                                     <label class="form-label label-text">State</label>
                                     <select id="modalAddressState" name="state_id"
                                         class="form-select address-state-select">
@@ -167,12 +165,12 @@
                                     <div id="state-url" data-url="{{ route('states') }}"></div>
                                 </div>
 
-                                <div class="mb-2">
+                                <div class="mb-1">
                                     <label class="form-label">Address Line</label>
                                     <input type="text" name="line" class="form-control">
                                 </div>
 
-                                <div class="mb-2">
+                                <div class="mb-1">
                                     <label class="form-label">Delivery Instructions</label>
                                     <textarea class="form-control" rows="2"></textarea>
                                 </div>
@@ -203,7 +201,8 @@
                             <!-- Body -->
                             <div class="modal-body">
                                 @php
-                                $locationId = $model->OrderAddress->firstWhere('location_id', '!=', null)?->location_id;
+                                $locationId = $model->OrderAddress?->firstWhere('location_id', '!=',
+                                null)?->location_id;
                                 @endphp
 
                                 <div class="mb-3">

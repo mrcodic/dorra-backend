@@ -30,22 +30,20 @@
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
                     <input type="text" class="form-control" name="first_name"
-                        value="{{ $model->orderAddress->first_name }}">
+                        value="{{ $model->orderAddress?->first_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
                     <input type="text" class="form-control" name="last_name"
-                        value="{{ $model->orderAddress->last_name }}">
+                        value="{{ $model->orderAddress?->last_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
-                    <input type="email" class="form-control" name="email"
-                        value="{{ $model->orderAddress->email }}">
+                    <input type="email" class="form-control" name="email" value="{{ $model->orderAddress?->email }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone"
-                        value="{{ $model->orderAddress->phone }}">
+                    <input type="text" class="form-control" name="phone" value="{{ $model->orderAddress?->phone }}">
                 </div>
 
 
@@ -57,7 +55,7 @@
                 @if($address)
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5 class="mb-0 fs-16 text-black">
-                        {{ $address->type === 'pickup' ? 'Pickup Details' : 'Shipping Details' }}
+                        {{ $address?->type === 'pickup' ? 'Pickup Details' : 'Shipping Details' }}
                     </h5>
 
                     <button type="button" class="lined-btn" data-bs-toggle="modal"
@@ -67,16 +65,16 @@
                 </div>
 
                 <span class="text-black fs-16 fw-bold mb-1">
-                    {{ $address->type === 'pickup' ? 'Location:' : 'Address:' }}
+                    {{ $address?->type === 'pickup' ? 'Location:' : 'Address:' }}
                 </span>
 
                 <div class="border rounded p-2 mb-2 text-black text-break">
-                    @if($address->type === 'pickup')
+                    @if($address?->type === 'pickup')
                     {{ $address->location_name }}<br>
-                    {{ $address->state }}, {{ $address->country }}
+                    {{ $address?->state }}, {{ $address?->country }}
                     @else
-                    {{ $address->address_line }}, {{ $address->address_label }}<br>
-                    {{ $address->state }}, {{ $address->country }}
+                    {{ $address?->address_line }}, {{ $address?->address_label }}<br>
+                    {{ $address?->state }}, {{ $address->country }}
                     @endif
                 </div>
                 @endif
