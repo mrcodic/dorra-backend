@@ -279,7 +279,7 @@
                             <div class="d-flex flex-wrap justify-content-between align-items-center mb-1">
                                 <!-- left: Icon and Info -->
                                 <div
-                                    class=" border rounded-3 p-1 d-flex gap-1 align-items-center justify-content-start col-12 col-md-6">
+                                    class=" border rounded-3 p-1 d-flex gap-1 align-items-center justify-content-start col-12 col-md-6 text-break">
                                     <div class=" flex-grow-1">
 
                                         <h5 class="fs-16 text-black"> {{ $address->label }}</h5>
