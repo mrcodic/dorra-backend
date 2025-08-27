@@ -738,11 +738,11 @@
                             <!-- Upload Photo (Drag and Drop Area) -->
                             <div class="mb-1">
                                 <label>Photo</label>
-                                <label>Photo</label>
 
                                 <!-- Dropzone Container -->
-                                <div id="review-image-dropzone" class="dropzone border rounded p-3"
-                                     style="cursor:pointer; min-height:150px;">
+                                <div id="review-image-dropzone"
+                                    class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center col-12 mb-1"
+                                    style="border: 2px dashed rgba(0, 0, 0, 0.3);">
                                     <div class="dz-message" data-dz-message>
                                         <i data-feather="upload" class="mb-2"></i>
                                         <p>Drag image here or click to upload</p>
@@ -1098,8 +1098,8 @@
     @endsection
 
     @section('page-script')
-        <script>
-            Dropzone.autoDiscover = false;
+    <script>
+        Dropzone.autoDiscover = false;
 
             const productImageDropzone = new Dropzone("#review-image-dropzone", {
                 url: "{{ route('media.store') }}", // your upload route
@@ -1116,20 +1116,7 @@
                     let dz = this;
 
                     // ✅ Preload existing image if editing
-                    @if(!empty($media = $review->getFirstMedia('reviews_landing_images')))
-                    let mockFile = {
-                        name: "{{ $media->file_name }}",
-                        size: {{ $media->size ?? 12345 }},
-                        _hiddenInputId: "{{ $media->id }}"
-                    };
-                    dz.emit("addedfile", mockFile);
-                    dz.emit("thumbnail", mockFile, "{{ $media->getUrl() }}");
-                    dz.emit("complete", mockFile);
-                    dz.files.push(mockFile);
-
-                    // set hidden input
-                    document.getElementById("uploadedImage").value = "{{ $media->id }}";
-                    @endif
+             
 
                     // ✅ On success
                     dz.on("success", function (file, response) {
@@ -1160,7 +1147,7 @@
                     });
                 }
             });
-        </script>
+    </script>
 
     <script>
         Dropzone.autoDiscover = false; // 🔑 prevents Dropzone from auto-binding
