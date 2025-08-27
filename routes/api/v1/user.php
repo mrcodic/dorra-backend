@@ -157,7 +157,7 @@ Route::get('templates/{template}', [TemplateController::class, 'show']);
 
 Route::controller(PaymentController::class)->group(function () {
     Route::get('payment-methods', 'paymentMethods');
-    Route::post('get-payment-link', 'getPaymentLink');
+    Route::post('buy-order-again', 'buyOrderAgain');
     Route::post('payment/callback', 'handleCallback');
     Route::get('payment/redirect', 'handleRedirect');
 });

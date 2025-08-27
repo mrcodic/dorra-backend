@@ -102,7 +102,8 @@ class CartService extends BaseService
         return $this->repository->query()
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
-            ->with(['items.product','items.itemable' => function ($query) {
+            ->with([
+                'items.product','items.itemable' => function ($query) {
                 $query->select(['id','name']);
             }])
             ->first();
