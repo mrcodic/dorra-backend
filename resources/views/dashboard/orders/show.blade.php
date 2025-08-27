@@ -63,7 +63,7 @@
                     {{ $address->type === 'pickup' ? 'Location:' : 'Address:' }}
                 </span>
 
-                <div class="border rounded p-2 mb-2 text-black fs-5">
+                <div class="border rounded p-2 mb-2 text-black text-break">
                     @if($address->type === 'pickup')
                     {{ $address->location_name }}<br>
                     {{ $address->state }}, {{ $address->country }}
@@ -96,7 +96,7 @@
                     <p class="fs-16 text-black">{{ $model->created_at->format('F d, Y') }}</p>
                 </div>
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
-                <p>Completed</p>
+                <p style="font-weight: 700; font-size: 16px;">Completed</p>
 
 
                 @foreach($model->orderItems as $orderItem)

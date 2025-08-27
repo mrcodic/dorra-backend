@@ -75,7 +75,7 @@
                     {{ $address->type === 'pickup' ? 'Location:' : 'Address:' }}
                 </span>
 
-                <div class="border rounded p-2 mb-2 text-black fs-5">
+                <div class="border rounded p-2 mb-2 text-black text-break">
                     @if($address->type === 'pickup')
                     {{ $address->location_name }}<br>
                     {{ $address->state }}, {{ $address->country }}
