@@ -7,8 +7,10 @@
                 <input type="text" class="form-control" name="code" placeholder="Enter discount code">
                 <button class="btn btn-secondary" type="submit">Apply</button>
             </div>
-            <div id="discount-code-error" class="invalid-feedback d-block text-danger mt-1" style="display: none;"></div>
-            <div id="discount-code-success" class="valid-feedback d-block text-success mt-1" style="display: none;"></div>
+            <div id="discount-code-error" class="invalid-feedback d-block text-danger mt-1" style="display: none;">
+            </div>
+            <div id="discount-code-success" class="valid-feedback d-block text-success mt-1" style="display: none;">
+            </div>
         </form>
     </div>
 

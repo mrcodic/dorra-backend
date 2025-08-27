@@ -25,7 +25,7 @@
 
     <!-- Navigation Buttons -->
     <div class="d-flex justify-content-end mt-3">
-        <button  class="btn btn-outline-secondary me-1" data-prev-step>Back</button>
+        <button class="btn btn-outline-secondary me-1" data-prev-step>Back</button>
         <form method="post" action="{{ route('orders.store') }}" class="order-form">
             @csrf
             <!-- Hidden inputs for each order data field with null checks -->
@@ -34,37 +34,37 @@
 
             <!-- User Info -->
             @isset($orderData['user_info'])
-                @foreach($orderData['user_info'] as $key => $value)
-                    <input type="hidden" name="user_info[{{ $key }}]" value="{{ $value }}">
-                @endforeach
+            @foreach($orderData['user_info'] as $key => $value)
+            <input type="hidden" name="user_info[{{ $key }}]" value="{{ $value }}">
+            @endforeach
             @endisset
 
             <!-- Pricing Details -->
             @isset($orderData['pricing_details'])
-                @foreach($orderData['pricing_details'] as $key => $value)
-                    <input type="hidden" name="pricing_details[{{ $key }}]" value="{{ $value }}">
-                @endforeach
+            @foreach($orderData['pricing_details'] ??[]as $key => $value)
+            <input type="hidden" name="pricing_details[{{ $key }}]" value="{{ $value }}">
+            @endforeach
             @endisset
 
             <!-- Template Info -->
             @isset($orderData['template_info'])
-                @foreach($orderData['template_info'] as $key => $value)
-                    <input type="hidden" name="template_info[{{ $key }}]" value="{{ $value }}">
-                @endforeach
+            @foreach($orderData['template_info']??[] as $key => $value)
+            <input type="hidden" name="template_info[{{ $key }}]" value="{{ $value }}">
+            @endforeach
             @endisset
 
             <!-- Personal Info -->
             @isset($orderData['personal_info'])
-                @foreach($orderData['personal_info'] as $key => $value)
-                    <input type="hidden" name="personal_info[{{ $key }}]" value="{{ $value }}">
-                @endforeach
+            @foreach($orderData['personal_info'] ??[]as $key => $value)
+            <input type="hidden" name="personal_info[{{ $key }}]" value="{{ $value }}">
+            @endforeach
             @endisset
 
             <!-- Shipping Info -->
             @isset($orderData['shipping_info'])
-                @foreach($orderData['shipping_info'] as $key => $value)
-                    <input type="hidden" name="shipping_info[{{ $key }}]" value="{{ $value }}">
-                @endforeach
+            @foreach($orderData['shipping_info'] ??[] as $key => $value)
+            <input type="hidden" name="shipping_info[{{ $key }}]" value="{{ $value }}">
+            @endforeach
             @endisset
 
             <!-- Notification Options -->
@@ -78,5 +78,3 @@
         </form>
     </div>
 </div>
-
-

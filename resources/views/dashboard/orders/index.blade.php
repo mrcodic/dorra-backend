@@ -149,19 +149,16 @@
                 <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
 
                     <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
-                        <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                        <i data-feather="search"
+                            class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
 
-                        <input type="text" class="form-control ps-5 border rounded-3"
-                               name="search_value"
-                               id="search-order-form"
-                               placeholder="Search order..." style="height: 38px;">
+                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                            id="search-order-form" placeholder="Search order..." style="height: 38px;">
 
                         <!-- Clear button -->
-                        <button type="button" id="clear-search"
-                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                        <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                    background: transparent; border: none; font-weight: bold;
-                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                                title="Clear filter">
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                             &times;
                         </button>
                     </form>
@@ -172,9 +169,9 @@
                         <select name="created_at" class="form-select filter-status">
                             <option value="" disabled selected>Status</option>
                             @foreach (\App\Enums\Order\StatusEnum::cases() as $status)
-                                <option value="{{$status}}">
-                                    {{ $status->label() }}
-                                </option>
+                            <option value="{{$status}}">
+                                {{ $status->label() }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
@@ -189,7 +186,7 @@
 
                     {{-- Add Button - 20% on md+, full width on xs --}}
                     <div class="col-12 col-md-3">
-                        <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route("orders.create") }}">
+                        <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route('orders.create') }}">
                             <i data-feather="plus"></i>
                             Add New Order
                         </a>

@@ -11,7 +11,7 @@
             <div class="d-flex gap-2">
                 <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
                     <input class="form-check-input" type="radio" name="type" id="shipToCustomer"
-                           value="{{ \App\Enums\Order\OrderTypeEnum::SHIPPING->value }}" checked>
+                        value="{{ \App\Enums\Order\OrderTypeEnum::SHIPPING->value }}" checked>
                     <label class="form-check-label fs-4 text-black" for="shipToCustomer">
                         {{ \App\Enums\Order\OrderTypeEnum::SHIPPING->label() }}
                     </label>
@@ -19,7 +19,7 @@
 
                 <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
                     <input class="form-check-input" type="radio" name="type" id="pickUp"
-                           value="{{ \App\Enums\Order\OrderTypeEnum::PICKUP->value }}">
+                        value="{{ \App\Enums\Order\OrderTypeEnum::PICKUP->value }}">
                     <label class="form-check-label fs-4 text-black" for="pickUp">
                         {{ \App\Enums\Order\OrderTypeEnum::PICKUP->label() }}
                     </label>
@@ -32,33 +32,34 @@
             <!-- Existing Addresses -->
             <div class="d-flex gap-2">
                 @if(!empty($orderData["user_info"]["id"]))
-                    @foreach(\App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->get() as $shippingAddress)
-                        <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill">
-                            <input class="form-check-input" type="radio" name="shipping_id"
-                                   id="address{{ $shippingAddress->id }}"
-                                   value="{{ $shippingAddress->id }}">
-                            <label class="form-check-label fs-4 text-black" for="address{{ $shippingAddress->id }}">
-                                <p>{{ $shippingAddress->label }}</p>
-                                <p class="text-dark fs-16">{{ $shippingAddress->line }}</p>
-                            </label>
-                        </div>
-                    @endforeach
+                @foreach(\App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->get() ??[]as
+                $shippingAddress)
+                <div class="col-6 form-check border rounded-3 p-1 px-3 flex-fill text-break">
+                    <input class="form-check-input" type="radio" name="shipping_id"
+                        id="address{{ $shippingAddress->id }}" value="{{ $shippingAddress->id }}">
+                    <label class="form-check-label fs-4 text-black" for="address{{ $shippingAddress->id }}">
+                        <p>{{ $shippingAddress->label }}</p>
+                        <p class="text-dark fs-16">{{ $shippingAddress->line }}</p>
+                    </label>
+                </div>
+                @endforeach
                 @else
-                    <div class="col-12 text-center py-3">
-                        <p class="text-muted">No saved addresses found</p>
-                    </div>
+                <div class="col-12 text-center py-3">
+                    <p class="text-muted">No saved addresses found</p>
+                </div>
                 @endif
             </div>
 
 
             <!-- Divider -->
-            @if(!empty($orderData["user_info"]["id"]) && \App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->count() > 0)
-                <div class="text-center my-3 fw-bold">OR</div>
+            @if(!empty($orderData["user_info"]["id"]) &&
+            \App\Models\ShippingAddress::whereUserId($orderData["user_info"]["id"])->count() > 0)
+            <div class="text-center my-3 fw-bold">OR</div>
             @endif
 
             <!-- Add New Address -->
             <button class="upload-card p-1 w-100 bg-white mt-2" data-bs-toggle="modal"
-                    data-bs-target="#addNewAddressModal">
+                data-bs-target="#addNewAddressModal">
                 <i data-feather="plus"></i>Add New Address
             </button>
         </div>
@@ -71,7 +72,7 @@
                     This will help us deliver your order to the preferred location.
                 </div>
                 <button type="button" class="btn btn-outline-secondary fs-16" data-bs-toggle="modal"
-                        data-bs-target="#selectLocationModal"><i data-feather="map-pin"></i> Select pick up location
+                    data-bs-target="#selectLocationModal"><i data-feather="map-pin"></i> Select pick up location
                 </button>
             </div>
 
@@ -122,7 +123,8 @@
         <button class="btn btn-primary" id="nextStep6" data-next-step>Next</button>
     </div>
     @include('modals.select-location')
-    @include('modals.addresses.add-new-address',['countries' => $associatedData['countries'],'modelId'=>$orderData["user_info"]["id"] ?? 0])
+    @include('modals.addresses.add-new-address',['countries' =>
+    $associatedData['countries'],'modelId'=>$orderData["user_info"]["id"] ?? 0])
 
 </div>
 
@@ -359,6 +361,3 @@
         $('#selectLocationModal').modal('hide');
     });
 </script>
-
-
-
