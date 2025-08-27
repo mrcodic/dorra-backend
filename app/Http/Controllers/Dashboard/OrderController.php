@@ -51,7 +51,8 @@ class OrderController extends DashboardController
             ];
 
         $this->methodRelations = [
-            'edit' => ['orderItems' , 'orderItems.product'],
+            'edit' => ['orderItems' , 'orderItems.product', 'orderItems.itemable' ],
+            'show' => ['orderItems.itemable' , 'orderItems.product'],
         ];
 
     }

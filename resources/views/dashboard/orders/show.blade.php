@@ -14,12 +14,7 @@
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">{{
                 $model->order_number }}</span></div>
-        <div class="d-flex align-items-center status-pill justify-content-center">
-            <div class="status-icon me-1">
-                <i data-feather="check"></i>
-            </div>
-            <span class="status-text">Confirmed</span>
-        </div>
+
     </div>
     <form>
         <div class="row">
@@ -29,27 +24,27 @@
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
                     <input type="text" class="form-control" name="first_name"
-                        value="{{ optional($model->orderAddress->first())->first_name }}" readonly>
+                        value="{{ $model->orderAddress->first_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
                     <input type="text" class="form-control" name="last_name"
-                        value="{{ optional($model->orderAddress->first())->last_name }}" readonly>
+                        value="{{ $model->orderAddress->last_name }}" readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
-                    <input type="email" class="form-control" name="email"
-                        value="{{ optional($model->orderAddress->first())->email }}" readonly>
+                    <input type="email" class="form-control" name="email" value="{{ $model->orderAddress->email }}"
+                        readonly>
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Phone</label>
-                    <input type="text" class="form-control" name="phone"
-                        value="{{ optional($model->orderAddress->first())->phone }}" readonly>
+                    <input type="text" class="form-control" name="phone" value="{{ $model->orderAddress->phone }}"
+                        readonly>
                 </div>
 
 
                 @php
-                $address = optional($model->orderAddress->first());
+                $address = $model->orderAddress;
                 @endphp
 
                 @if($address)
@@ -96,7 +91,7 @@
                     <p class="fs-16 text-black">{{ $model->created_at->format('F d, Y') }}</p>
                 </div>
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
-                <p style="font-weight: 700; font-size: 16px;">Completed</p>
+                <p>{{ $model->payment_status->label() }}</p>
 
 
                 @foreach($model->orderItems as $orderItem)
@@ -147,11 +142,11 @@
                 <h5 class="mt-3 mb-1 text-black fs-16">Pricing Details</h5>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">Subtotal</span>
-                    <span class="fs-4 text-black fw-bold">$ {{ $model->subtotal }} </span>
+                    <span class="fs-4 text-black fw-bold"> {{ $model->subtotal }} </span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">Discount</span>
-                    <span class="fs-16 text-black">-$ {{ $model->discount_amount }}</span>
+                    <span class="fs-16 text-black">-{{ $model->discount_amount }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
@@ -159,7 +154,7 @@
                         <i data-feather="info" data-bs-toggle="tooltip"
                             title="Delivery charges may vary based on location."></i>
                     </span>
-                    <span class="fs-16 text-black">$ {{$model->delivery_amount}}</span>
+                    <span class="fs-16 text-black"> {{$model->delivery_amount}}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
@@ -167,14 +162,14 @@
                         <i data-feather="info" data-bs-toggle="tooltip"
                             title="Tax is calculated as per applicable laws."></i>
                     </span>
-                    <span class="fs-16 text-black">$ {{ $model->tax_amount }}</span>
+                    <span class="fs-16 text-black">{{ $model->tax_amount }}</span>
                 </div>
 
                 <hr class="border-dashed my-1">
 
                 <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
                     <span class="fs-4 text-black ">Total</span>
-                    <span class="fs-4 text-black fw-bold">$ {{$model->total_price}}</span>
+                    <span class="fs-4 text-black fw-bold"> {{$model->total_price}}</span>
                 </div>
 
                 <div class="mb-3">
@@ -183,7 +178,7 @@
                         <div class="status-icon me-1">
                             <i data-feather="check"></i>
                         </div>
-                        <span class="status-text">Confirmed</span>
+                        <span class="status-text">{{ $model->status->label() }}</span>
                     </div>
                 </div>
 

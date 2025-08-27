@@ -131,108 +131,6 @@
 @section('content')
 <div class=" card p-1">
 
-    <!-- Newest Orders -->
-    <div class=" mb-1">
-        <div class=" d-flex  align-items-center collapsed-toggle" data-bs-toggle="collapse"
-            data-bs-target="#newestOrders" aria-expanded="true" style="cursor: pointer;">
-            <i data-feather="chevron-up" class="toggle-icon" data-target="#newestOrders"></i>
-            <h4 class="mb-0 text-black">Newest Orders</h4>
-        </div>
-        <div id="newestOrders" class="collapse show">
-            <div class="row m-1">
-                <div class=" col-md-6  shadow rounded  p-1">
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div class="d-flex justify-content-start align-items-center">
-                            <!-- Images section -->
-                            <div class="d-flex flex-column align-items-start me-1">
-                                <div class="d-flex">
-                                    <img src="{{asset('images/portrait/small/avatar-s-2.jpg') }}"
-                                        class="order-img me-1 mb-1" alt="Product 1">
-                                    <img src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}"
-                                        class="order-img me-1 mb-1" alt="Product 2">
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <img src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}"
-                                        class="order-img me-1" alt="Product 3">
-                                    <div class="more-images-box">+2</div>
-                                </div>
-                            </div>
-
-                            <!-- Order details -->
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-1">Order #1234</h6>
-                                <p class="mb-1 text-muted">Items: Shampoo, Conditioner, Towel</p>
-                                <p class="mb-1 fw-semibold">Total: $45.00</p>
-                                <p class="text-muted small">Placed on: 2025-05-03</p>
-                            </div>
-                        </div>
-
-                        <!-- Status -->
-
-                        <div class="d-flex align-items-center status-pill justify-content-center">
-                            <div class="status-icon me-1">
-                                <i data-feather="box"></i> <!-- Change icon based on status -->
-                            </div>
-                            <span class="status-text">Placed</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Delivered Orders -->
-    <div class=" mb-1">
-        <div class=" d-flex align-items-center collapsed-toggle" data-bs-toggle="collapse"
-            data-bs-target="#deliveredOrders" aria-expanded="false" style="cursor: pointer;">
-            <i data-feather="chevron-down" class="toggle-icon" data-target="#deliveredOrders"></i>
-            <h4 class="mb-0 text-black"> Delivered Orders</h4>
-        </div>
-        <div id="deliveredOrders" class="collapse">
-            <div class="row m-1">
-                <div class=" col-md-6  shadow rounded  p-1">
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div class="d-flex justify-content-start align-items-center">
-                            <!-- Images section -->
-                            <div class="d-flex flex-column align-items-start me-1">
-                                <div class="d-flex">
-                                    <img src="{{asset('images/portrait/small/avatar-s-2.jpg') }}"
-                                        class="order-img me-1 mb-1" alt="Product 1">
-                                    <img src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}"
-                                        class="order-img me-1 mb-1" alt="Product 2">
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <img src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}"
-                                        class="order-img me-1" alt="Product 3">
-                                    <div class="more-images-box">+2</div>
-                                </div>
-                            </div>
-
-                            <!-- Order details -->
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-1">Order #1234</h6>
-                                <p class="mb-1 text-muted">Items: Shampoo, Conditioner, Towel</p>
-                                <p class="mb-1 fw-semibold">Total: $45.00</p>
-                                <p class="text-muted small">Placed on: 2025-05-03</p>
-                            </div>
-                        </div>
-
-                        <!-- Status -->
-
-                        <div class="d-flex align-items-center status-pill justify-content-center">
-                            <div class="status-icon me-1">
-                                <i data-feather="truck"></i> <!-- Change icon based on status -->
-                            </div>
-                            <span class="status-text">Delivered</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
 
     <!-- users list start -->
     <section class="app-user-list">
@@ -248,6 +146,57 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive pt-0">
+                <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
+
+                    <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
+                        <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+
+                        <input type="text" class="form-control ps-5 border rounded-3"
+                               name="search_value"
+                               id="search-order-form"
+                               placeholder="Search order..." style="height: 38px;">
+
+                        <!-- Clear button -->
+                        <button type="button" id="clear-search"
+                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                                title="Clear filter">
+                            &times;
+                        </button>
+                    </form>
+
+
+                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    <div class="col-12 col-md-3">
+                        <select name="created_at" class="form-select filter-status">
+                            <option value="" disabled selected>Status</option>
+                            @foreach (\App\Enums\Order\StatusEnum::cases() as $status)
+                                <option value="{{$status}}">
+                                    {{ $status->label() }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <select name="created_at" class="form-select filter-date">
+                            <option value="" disabled selected>Date</option>
+                            <option value="asc">Oldest</option>
+                            <option value="desc">Newest</option>
+                        </select>
+                    </div>
+
+                    {{-- Add Button - 20% on md+, full width on xs --}}
+                    <div class="col-12 col-md-3">
+                        <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route("orders.create") }}">
+                            <i data-feather="plus"></i>
+                            Add New Order
+                        </a>
+                    </div>
+
+                </div>
+
                 <table class="order-list-table table">
                     <thead class="table-light">
                         <tr>
@@ -336,13 +285,13 @@
             <script>
                 $(document).ready(function () {
                 setupClearInput('roleSelect', 'clearRoleFilter');
-            
+
                 // Select all toggle
                 $('#select-all-checkbox').on('change', function () {
                     $('.category-checkbox').prop('checked', this.checked);
                     updateBulkDeleteVisibility();
                 });
-            
+
                 // When individual checkbox changes
                 $(document).on('change', '.category-checkbox', function () {
                     if (!this.checked) {
@@ -352,25 +301,25 @@
                     }
                     updateBulkDeleteVisibility();
                 });
-            
+
                 // Simple accordion toggle function
                 function toggleAccordion($row) {
                     if ($(window).width() > 768) return; // Only on mobile
-            
+
                     const $detailsRow = $row.next('.details-row');
                     const $icon = $row.find('.expand-icon');
-            
+
                     // Close all other details
                     $('.details-row.show').removeClass('show');
                     $('.expand-icon.expanded').removeClass('expanded');
-            
+
                     // If this row has details and they're not currently shown
                     if ($detailsRow.length && !$detailsRow.hasClass('show')) {
                         $detailsRow.addClass('show');
                         $icon.addClass('expanded');
                     }
                 }
-            
+
                 // Accordion click handler with event delegation
                 $(document).on('click.accordion', '.order-list-table tbody tr:not(.details-row)', function(e) {
                     // Prevent accordion when clicking interactive elements
@@ -378,30 +327,30 @@
                         $(e.target).closest('input, button, a, .btn').length > 0) {
                         return;
                     }
-            
+
                     e.stopPropagation();
                     toggleAccordion($(this));
                 });
-            
+
                 // Initialize accordion after DataTable draw
                 function initAccordion() {
                     if ($(window).width() <= 768) {
                         $('.order-list-table tbody tr:not(.details-row)').each(function() {
                             const $row = $(this);
-            
+
                             // Remove existing details and icons first
                             $row.find('.expand-icon').remove();
                             $row.next('.details-row').remove();
-            
+
                             // Add expand icon to role column
                             $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
-            
+
                             // Get data for details
                             const orderNumber = $row.find('td:nth-child(2)').html() || '';
                             const orderStatus = $row.find('td:nth-child(6)').html() || '';
                             const addedDate = $row.find('td:nth-child(7)').html() || '';
                             const actions = $row.find('td:nth-child(8)').html() || '';
-            
+
                             // Create details row
                             const detailsHtml = `
                                 <tr class="details-row">
@@ -427,7 +376,7 @@
                                     </td>
                                 </tr>
                             `;
-            
+
                             $row.after(detailsHtml);
                         });
                     } else {
@@ -436,33 +385,33 @@
                         $('.expand-icon').remove();
                     }
                 }
-            
+
                 // Handle window resize
                 $(window).on('resize', function() {
                     setTimeout(initAccordion, 100);
                 });
-            
+
                 // On DataTable events
                 $(document).on('draw.dt', '.order-list-table', function () {
                     $('#bulk-delete-container').hide();
                     $('#select-all-checkbox').prop('checked', false);
-            
+
                     // Reinitialize accordion after DataTable operations
                     setTimeout(initAccordion, 100);
                 });
-            
+
                 // Close bulk delete container
                 $(document).on('click', '#close-bulk-delete', function () {
                     $('#bulk-delete-container').hide();
                     $('.category-checkbox').prop('checked', false);
                     $('#select-all-checkbox').prop('checked', false);
                 });
-            
+
                 // Update the bulk delete container visibility
                 function updateBulkDeleteVisibility() {
                     const selectedCheckboxes = $('.category-checkbox:checked');
                     const count = selectedCheckboxes.length;
-            
+
                     if (count > 0) {
                         $('#selected-count-text').text(`${count} User${count > 1 ? 's are' : ' is'} selected`);
                         $('#bulk-delete-container').show();
@@ -470,7 +419,7 @@
                         $('#bulk-delete-container').hide();
                     }
                 }
-            
+
                 // Initialize on page load
                 setTimeout(function() {
                     initAccordion();

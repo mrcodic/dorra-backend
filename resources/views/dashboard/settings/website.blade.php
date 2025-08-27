@@ -738,41 +738,24 @@
                             <!-- Upload Photo (Drag and Drop Area) -->
                             <div class="mb-1">
                                 <label>Photo</label>
-                                <input type="file" name="image" id="product-image-main" class="form-control d-none"
-                                    accept="image/*">
+                                <label>Photo</label>
 
-                                <!-- Custom Upload Card -->
-                                <div id="upload-area" class="upload-card">
-                                    <div id="upload-content">
+                                <!-- Dropzone Container -->
+                                <div id="review-image-dropzone" class="dropzone border rounded p-3"
+                                     style="cursor:pointer; min-height:150px;">
+                                    <div class="dz-message" data-dz-message>
                                         <i data-feather="upload" class="mb-2"></i>
-                                        <p>Drag image here to upload</p>
+                                        <p>Drag image here or click to upload</p>
                                     </div>
-
-
                                 </div>
+
+                                <!-- Hidden input to store uploaded media id -->
+                                <input type="hidden" name="image_id" id="uploadedImage">
+
                                 <div>
-                                    <!-- Progress Bar -->
-                                    <div id="upload-progress" class="progress mt-2 d-none w-50">
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                            style="width: 0%"></div>
-                                    </div>
 
 
-                                    <!-- Uploaded Image Preview -->
-                                    <div id="uploaded-image"
-                                        class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                        <img src="" alt="Uploaded" class="img-fluid rounded"
-                                            style="width: 50px; height: 50px; object-fit: cover;">
-                                        <div id="file-details" class="file-details">
-                                            <div class="file-name fw-bold"></div>
-                                            <div class="file-size text-muted small"></div>
-                                        </div>
-                                        <button type="button" id="remove-image"
-                                            class="btn btn-sm position-absolute text-danger"
-                                            style="top: 5px; right: 5px; background-color: #FFEEED">
-                                            <i data-feather="trash"></i>
-                                        </button>
-                                    </div>
+
                                     <input type="hidden" name="type" value="with_image">
                                     <div class="text-end">
                                         <button type="submit" class="btn btn-primary mt-2">Add Review</button>
@@ -1115,6 +1098,69 @@
     @endsection
 
     @section('page-script')
+        <script>
+            Dropzone.autoDiscover = false;
+
+            const productImageDropzone = new Dropzone("#review-image-dropzone", {
+                url: "{{ route('media.store') }}", // your upload route
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 2, // MB
+                acceptedFiles: "image/*",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop image here or click to upload",
+                init: function () {
+                    let dz = this;
+
+                    // ✅ Preload existing image if editing
+                    @if(!empty($media = $review->getFirstMedia('reviews_landing_images')))
+                    let mockFile = {
+                        name: "{{ $media->file_name }}",
+                        size: {{ $media->size ?? 12345 }},
+                        _hiddenInputId: "{{ $media->id }}"
+                    };
+                    dz.emit("addedfile", mockFile);
+                    dz.emit("thumbnail", mockFile, "{{ $media->getUrl() }}");
+                    dz.emit("complete", mockFile);
+                    dz.files.push(mockFile);
+
+                    // set hidden input
+                    document.getElementById("uploadedImage").value = "{{ $media->id }}";
+                    @endif
+
+                    // ✅ On success
+                    dz.on("success", function (file, response) {
+                        if (response?.data?.id) {
+                            file._hiddenInputId = response.data.id;
+
+                            // remove old hidden input value if exists
+                            document.getElementById("uploadedImage").value = response.data.id;
+                        }
+                    });
+
+                    // ✅ On remove
+                    dz.on("removedfile", function (file) {
+                        let hiddenInput = document.getElementById("uploadedImage");
+
+                        if (hiddenInput.value == file._hiddenInputId) {
+                            hiddenInput.value = "";
+                        }
+
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        </script>
 
     <script>
         Dropzone.autoDiscover = false; // 🔑 prevents Dropzone from auto-binding

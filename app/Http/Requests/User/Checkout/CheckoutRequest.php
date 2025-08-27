@@ -19,7 +19,7 @@ class CheckoutRequest extends FormRequest
                 $cleanedPhone = preg_replace('/\D+/', '', $this->phone_number);
                 if ($cleanedPhone) {
                     $this->merge([
-                        'full_phone_number' => '+' . $countryCode->phone_code . $cleanedPhone,
+                        'full_phone_number' =>$countryCode->phone_code . $cleanedPhone,
                     ]);
                 }
             }

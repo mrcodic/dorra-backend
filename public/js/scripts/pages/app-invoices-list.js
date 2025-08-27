@@ -95,7 +95,10 @@ $("#search-invoice-form").on("keyup", function () {
         dt_user_table.draw();
     }, 300);
 });
-
+$('#clear-search').on('click', function () {
+    $('#search-invoice-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 $(".filter-date").on("change", function () {
     dt_user_table.draw();
 });

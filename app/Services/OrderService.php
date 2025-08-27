@@ -95,13 +95,17 @@ class OrderService extends BaseService
             ->withCount(['orderItems'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
-                    $locale = app()->getLocale();
                     $search = request('search_value');
-                    $query->where("order_number->{$locale}", 'LIKE', "%{$search}%");
+                    $query->where("order_number", 'LIKE', "%{$search}%");
                 } else {
                     $query->whereRaw('1 = 0');
                 }
+            })->when(request()->filled('created_at'), function ($query) {
+                $query->orderBy('created_at', request('created_at'));
+            })->when(request()->filled('status'), function ($query) {
+                $query->where('status', request('status'));
             })
+
             ->latest();
 
         return DataTables::of($orders)
@@ -443,88 +447,79 @@ class OrderService extends BaseService
         return $model->load($relationsToLoad);
     }
 
+
     public function editShippingAddresses($validatedData, $id, $relationsToLoad = [])
     {
+
         $model = $this->repository->find($id);
 
         if (!$model) {
             throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
         }
 
-        $typeMap = [
-            '1' => 'shipping',
-            '2' => 'pickup',
-        ];
+        // Convert incoming type to enum safely
+        $type = $validatedData['type'] instanceof OrderTypeEnum
+            ? $validatedData['type']
+            : OrderTypeEnum::from((int)$validatedData['type']); // ensures 1 => SHIPPING, 2 => PICKUP
 
-        $type = $typeMap[$validatedData['type']] ?? $validatedData['type'];
-
-        if ($type === 'shipping' && isset($validatedData['shipping_address_id']) && $validatedData['shipping_address_id'] !== null) {
+        /** -------------------- SHIPPING -------------------- */
+        if ($type === OrderTypeEnum::SHIPPING && !empty($validatedData['shipping_address_id'])) {
             $newAddressId = $validatedData['shipping_address_id'];
             $shippingAddress = ShippingAddress::with(['state.country'])->findOrFail($newAddressId);
 
-            $orderAddress = $model->orderAddress()->where('type', 'shipping')->first();
+            $orderAddress = $model->orderAddress()->where('type', OrderTypeEnum::SHIPPING)->first();
 
             $addressData = [
                 'shipping_address_id' => $newAddressId,
-                'address_label' => $shippingAddress->label,
-                'address_line' => $shippingAddress->line,
-                'state' => optional($shippingAddress->state)->name,
-                'country' => optional($shippingAddress->state?->country)->name,
+                'address_label'       => $shippingAddress->label,
+                'address_line'        => $shippingAddress->line,
+                'state'               => optional($shippingAddress->state)->name,
+                'country'             => optional($shippingAddress->state?->country)->name,
             ];
 
-            if ($orderAddress) {
-                $orderAddress->update($addressData);
-            } else {
-                $model->orderAddress()->create(array_merge([
-                    'order_id' => $model->id,
-                    'type' => 'shipping',
-                ], $addressData));
-            }
+            $orderAddress
+                ? $orderAddress->update($addressData)
+                : $model->orderAddress()->create([
+                'order_id' => $model->id,
+                'type'     => OrderTypeEnum::SHIPPING,
+                ...$addressData
+            ]);
 
-            $pickupAddress = $model->orderAddress()->where('type', 'pickup')->first();
-            if ($pickupAddress) {
-                $pickupAddress->delete();
-            }
-
-            $pickupContact = $model->pickupContact;
-            if ($pickupContact) {
-                $pickupContact->delete();
-            }
+            // Remove pickup info if switching to shipping
+            $model->orderAddress()->where('type', OrderTypeEnum::PICKUP)->delete();
+            $model->pickupContact()?->delete();
         }
 
-        if ($type === 'pickup' && isset($validatedData['location_id']) && $validatedData['location_id'] !== null) {
+        /** -------------------- PICKUP -------------------- */
+        if ($type === OrderTypeEnum::PICKUP && !empty($validatedData['location_id'])) {
             $location = Location::with(['state', 'state.country'])->findOrFail($validatedData['location_id']);
 
-            $pickupAddress = $model->orderAddress()->where('type', 'pickup')->first();
+            $pickupAddress = $model->orderAddress()->where('type', OrderTypeEnum::PICKUP)->first();
 
             $pickupAddressData = [
-                'location_id' => $location->id,
-                'location_name' => $location->name,
-                'address_label' => $location->name,
-                'address_line' => $location->address_line,
-                'state' => is_object($location->state) ? $location->state->name : ($location->state ?? 'Unknown'),
-                'country' => $location->country ?? $location->state?->country?->name ?? 'Unknown',
+                'location_id'    => $location->id,
+                'location_name'  => $location->name,
+                'address_label'  => $location->name,
+                'address_line'   => $location->address_line,
+                'state'          => $location->state?->name ?? 'Unknown',
+                'country'        => $location->state?->country?->name ?? $location->country ?? 'Unknown',
             ];
 
-            if ($pickupAddress) {
-                $pickupAddress->update($pickupAddressData);
-            } else {
-                $model->orderAddress()->create(array_merge([
-                    'order_id' => $model->id,
-                    'type' => 'pickup',
-                ], $pickupAddressData));
-            }
+            $pickupAddress
+                ? $pickupAddress->update($pickupAddressData)
+                : $model->orderAddress()->create([
+                'order_id' => $model->id,
+                'type'     => OrderTypeEnum::PICKUP,
+                ...$pickupAddressData
+            ]);
 
-            $pickupContactData = [
+            // Handle pickup contact
+            $pickupContactData = array_filter([
                 'first_name' => $validatedData['pickup_first_name'] ?? null,
-                'last_name' => $validatedData['pickup_last_name'] ?? null,
-                'email' => $validatedData['pickup_email'] ?? null,
-                'phone' => $validatedData['pickup_phone'] ?? null,
-            ];
-
-            $pickupContactData = array_filter($pickupContactData, function ($value) {
-                return $value !== null;
-            });
+                'last_name'  => $validatedData['pickup_last_name'] ?? null,
+                'email'      => $validatedData['pickup_email'] ?? null,
+                'phone'      => $validatedData['pickup_phone'] ?? null,
+            ]);
 
             $pickupContact = $model->pickupContact;
 
@@ -532,24 +527,18 @@ class OrderService extends BaseService
                 if (!empty($pickupContactData)) {
                     $pickupContact->update($pickupContactData);
                 }
-            } else {
-                if (!empty($pickupContactData)) {
-                    $model->pickupContact()->create(array_merge([
-                        'order_id' => $model->id,
-                    ], $pickupContactData));
-                }
+            } elseif (!empty($pickupContactData)) {
+                $model->pickupContact()->create([
+                    'order_id' => $model->id,
+                    ...$pickupContactData
+                ]);
             }
 
-            $shippingAddress = $model->orderAddress()->where('type', 'shipping')->first();
-            if ($shippingAddress) {
-                $shippingAddress->delete();
-            }
+            // Remove shipping info if switching to pickup
+            $model->orderAddress()->where('type', OrderTypeEnum::SHIPPING)->delete();
         }
 
-        $freshModel = $model->fresh();
-        $loadedModel = $freshModel->load(!empty($relationsToLoad) ? $relationsToLoad : ['orderAddress', 'pickupContact']);
-
-        return $loadedModel;
+        return $model->fresh()->load($relationsToLoad ?: ['orderAddress', 'pickupContact']);
     }
 
     public function downloadPDF(): Response

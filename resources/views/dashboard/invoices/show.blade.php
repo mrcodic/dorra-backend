@@ -33,26 +33,21 @@
                     <div class="mb-2 col-md-6">
                         <label class="form-label fw-bold">Client</label>
                         <input style="background-color: #fff; border: 1px solid #CED5D4;" type="text"
-                            class="form-control" value="{{ $model->order->user?->first_name ??
-                                $model->order?->guest?->first_name }}" name="issued_date" readonly>
+                            class="form-control" value="{{ $model->order->orderAddress?->name  }}" name="issued_date" readonly>
                     </div>
 
                     <div class="mb-2 col-md-6">
                         <div class="mb-1">
                             <span style="color: #424746">Name: </span>
-                            <span style="color: #121212">{{ $model->order->user?->first_name ??
-                                $model->order?->guest?->first_name }}</span>
+                            <span style="color: #121212">{{ $model->order->orderAddress?->name  }}</span>
                         </div>
                         <div class="mb-1">
                             <span style="color: #424746">Email Address: </span>
-                            <span style="color: #121212">{{ $model->order->user?->email ?? $model->order?->guest?->email
-                                }}</span>
+                            <span style="color: #121212">{{ $model->order->orderAddress?->email    }}</span>
                         </div>
                         <div class="mb-1">
                             <span style="color: #424746">Phone Number: </span>
-                            <span style="color: #121212">{{ $model->order->user?->phone_number ??
-                                $model->order?->guest?->email
-                                }}</span>
+                            <span style="color: #121212">{{ $model->order->orderAddress?->phone}}</span>
                         </div>
                     </div>
                 </div>
@@ -133,7 +128,7 @@
                         </div>
                         <div class="text-end">
                             <div class="fw-bold text-black">
-                                ${{ number_format($design->sub_total ?? 0, 2) }}
+                                {{ number_format($design->sub_total ?? 0, 2) }}
                             </div>
                         </div>
                     </div>
@@ -159,7 +154,7 @@
                         <i data-feather="info" data-bs-toggle="tooltip"
                             title="Delivery charges may vary based on location."></i>
                     </span>
-                    <span class="fs-16 text-black">${{$model->delivery_amount}}</span>
+                    <span class="fs-16 text-black">{{$model->delivery_amount}}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
@@ -167,14 +162,14 @@
                         <i data-feather="info" data-bs-toggle="tooltip"
                             title="Tax is calculated as per applicable laws."></i>
                     </span>
-                    <span class="fs-16 text-black">${{ $model->tax_amount }}</span>
+                    <span class="fs-16 text-black">{{ $model->tax_amount }}</span>
                 </div>
 
                 <hr class="border-dashed my-1">
 
                 <div class="d-flex justify-content-between fw-bold fs-5 mb-2">
                     <span class="fs-4 text-black ">Total</span>
-                    <span class="fs-4 text-black fw-bold">${{$model->total_price}}</span>
+                    <span class="fs-4 text-black fw-bold">{{$model->total_price}}</span>
                 </div>
 
                 <!-- Status Display -->

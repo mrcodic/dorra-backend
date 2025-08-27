@@ -10,6 +10,12 @@ var dt_user_table = $(".order-list-table").DataTable({
     ajax: {
         url: ordersDataUrl,
         type: "GET",
+        data: function (d) {
+            d.search_value = $("#search-order-form").val(); // get from input
+            d.created_at = $(".filter-date").val();
+            d.status = $(".filter-status").val();
+            return d;
+        },
     },
     columns: [
         {
@@ -55,8 +61,6 @@ var dt_user_table = $(".order-list-table").DataTable({
     dom:
         '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
         '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
-        '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
         ">" +
         ">t" +
         '<"d-flex  mx-2 row mb-1"' +
@@ -98,12 +102,23 @@ var dt_user_table = $(".order-list-table").DataTable({
 
 // Search functionality
 let searchTimeout;
-$('#search-product-form').on('keyup', function () {
+$('#search-order-form').on('keyup', function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
     }, 300);
 });
+$('#clear-search').on('click', function () {
+    $('#search-order-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
+$(".filter-date").on("change", function () {
+    dt_user_table.draw();
+});
+$(".filter-status").on("change", function () {
+    dt_user_table.draw();
+});
+
 
 // Category select with timeout
 let categoryFilterTimeout;

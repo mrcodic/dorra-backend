@@ -67,65 +67,7 @@
                         </div>
                     </div>
 
-                    <div class="info-container">
-                        <h2 class="text-black my-1">Teams</h2>
-                        <div class="card border rounded p-1 my-2">
-                            <div class="d-flex justify-content-between align-items-start">
 
-                                @forelse($model->teams as $team)
-
-                                <!-- left: Icon and Info -->
-                                <div class="d-flex gap-2 align-items-center">
-                                    <div class="">
-                                        <i data-feather="users" class="text-primary"></i> <!-- User icon -->
-                                    </div>
-                                    <div class="text-center flex-grow-1">
-
-                                        <h5>{{ $team->owner->name }}’s Team</h5>
-                                        <div class="d-flex align-items-center justify-content-center">
-                                            <i data-feather="calendar"> </i> Joined {{ $team->created_at->format("j M
-                                            Y") }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                @empty
-                                <div class="text-center flex-grow-1">
-                                    <p>No teams
-                                        yet.</p>
-                                </div>
-
-                                @endforelse
-                                <!-- Right: Actions Dropdown -->
-                                <div class="dropdown d-none">
-                                    <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
-                                        <i data-feather="more-horizontal" class=""></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="#">Show all team members</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item text-danger" href="#">Remove from team</a>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                            </div>
-                        </div>
-
-
-                        <div class="d-flex flex-column gap-1">
-                            <a href="{{ route('users.update',$model->id) }}" class="btn btn-primary me-1 w-100"
-                                data-bs-target="#editUser" data-bs-toggle="modal">
-                                Edit User
-                            </a>
-                            <button class="btn btn-outline-danger me-1 w-100" data-bs-target="#deleteUserModal"
-                                data-bs-toggle="modal">
-                                Delete User
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
             <!-- /User Card -->

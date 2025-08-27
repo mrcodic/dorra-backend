@@ -15,11 +15,16 @@ use App\Http\Resources\{CategoryResource,
     StateResource,
     TagResource,
     TeamResource,
-    Template\TypeResource};
+    Template\TypeResource
+};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
-use App\Repositories\Interfaces\{CountryRepositoryInterface, DimensionRepositoryInterface, StateRepositoryInterface};
+use App\Repositories\Interfaces\{CountryRepositoryInterface,
+    DimensionRepositoryInterface,
+    MessageRepositoryInterface,
+    StateRepositoryInterface
+};
 use App\Services\CategoryService;
 use App\Services\DesignService;
 use App\Services\FolderService;
@@ -41,7 +46,7 @@ class MainController extends Controller
         public DesignService                $designService,
         public FolderService                $folderService,
         public DimensionRepositoryInterface $dimensionRepository,
-        public TeamService                   $teamService,
+        public TeamService                  $teamService,
 
     )
     {
@@ -49,7 +54,12 @@ class MainController extends Controller
 
     public function removeMedia(Media $media)
     {
-        deleteMediaById($media->uuid);
+        if (empty($media->model_type) && empty($media->model_id)) {
+            $media->deleteQuietly();
+        } else {
+            $media->delete();
+        }
+
         return Response::api();
     }
 
@@ -138,11 +148,11 @@ class MainController extends Controller
         return Response::api(data: MediaResource::make($assetMedia));
     }
 
-    public function addMedia(Request $request, $id=null)
+    public function addMedia(Request $request, $id = null)
     {
 //        $global  = GlobalAsset::create(['title' => $request->title, 'type' => $request->type]);
 ////        $model = ($request->resource)::find($id);
-        $media = handleMediaUploads($request->allFiles(),null, clearExisting: true);
+        $media = handleMediaUploads($request->allFiles(), null, clearExisting: true);
         return Response::api(data: MediaResource::make($media));
     }
 
@@ -161,5 +171,16 @@ class MainController extends Controller
         return Response::api(data: ['id' => uniqid()]);
     }
 
+    public function contactUs(Request $request, MessageRepositoryInterface $messageRepository)
+    {
+        $validatedData = $request->validate([
+            'email' => 'required|email'
+            , 'message' => 'required'
+            , 'name' => 'required',
+            'phone' => 'required',
+        ]);
+        $messageRepository->create($validatedData);
+        return Response::api();
+    }
 
 }

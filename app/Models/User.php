@@ -146,6 +146,10 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->morphToMany(Team::class,'teamable')->withTimestamps();
     }
+    public function ownerTeams(): HasMany
+    {
+        return $this->hasMany(Team::class,'owner_id');
+    }
 
     public function reviews(): HasMany
     {

@@ -81,7 +81,7 @@ class ProductService extends BaseService
                 return $product->reviews?->pluck('rating')->avg() ?? 0;
             })
             ->addColumn('image', function ($product) {
-                return $product->getMainImageUrl();
+                return $product->getMainImageUrl() ?: asset('images/default-product.png');
             })
             ->addColumn('no_of_purchas', function ($product) {
                 return $product->confirmed_orders_count;
@@ -275,10 +275,15 @@ class ProductService extends BaseService
                                 'price' => $option['price'] ?? 0,
                             ]
                         );
-
-                        if (!empty($option['image']) && $option['image'] instanceof UploadedFile) {
-                            handleMediaUploads([$option['image']], $productOption, clearExisting: true);
+                        if (isset($option['option_image'])) {
+                            Media::where('id', $option['option_image'])
+                                ->update([
+                                    'model_type' => get_class($productOption),
+                                    'model_id'   => $productOption->id,
+                                    'collection_name' => 'productSpecificationOptions',
+                                ]);
                         }
+
                     });
                 }
 
@@ -304,6 +309,7 @@ class ProductService extends BaseService
 
         }
         if (isset($validatedData['images_ids'])) {
+            Media::whereCollectionName('product_extra_images')->delete();
             collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
                 Media::where('id', $imageId)
                     ->update([

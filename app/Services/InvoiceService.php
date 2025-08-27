@@ -41,13 +41,8 @@ class InvoiceService extends BaseService
             return $invoice->invoice_number;
         })
              ->addColumn('user_name', function ($invoice) {
-                 if ($invoice->order && $invoice->order->user) {
-                     return trim($invoice->order->user->first_name . ' ' . $invoice->order->user->last_name);
-                 }
-                 if ($invoice->order && $invoice->order->guest) {
-                     return trim($invoice->order->guest->first_name . ' ' . $invoice->order->guest->last_name);
-                 }
-                 return 'Unknown';
+                     return $invoice->order?->guest ? 'Guest' : $invoice->order?->user?->name;
+
              })
 
              ->addColumn('total_price', function ($invoice) {

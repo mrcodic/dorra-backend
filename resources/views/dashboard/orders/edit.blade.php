@@ -15,12 +15,7 @@
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span
                 class="fs-4 text-black fw-bold">{{$model->order_number}}</span></div>
-        <div class="d-flex align-items-center status-pill justify-content-center">
-            <div class="status-icon me-1">
-                <i data-feather="check"></i> <!-- You can dynamically change the icon -->
-            </div>
-            <span class="status-text">Confirmed</span>
-        </div>
+
     </div>
     <form id="order-form" class="form" action="{{ route('orders.update',$model->id) }}" method="POST"
         enctype="multipart/form-data">
@@ -35,28 +30,28 @@
                 <div class="mb-2">
                     <label class="form-label fw-bold">First Name</label>
                     <input type="text" class="form-control" name="first_name"
-                        value="{{ optional($model->orderAddress->first())->first_name }}">
+                        value="{{ $model->orderAddress->first_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Last Name</label>
                     <input type="text" class="form-control" name="last_name"
-                        value="{{ optional($model->orderAddress->first())->last_name }}">
+                        value="{{ $model->orderAddress->last_name }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>
                     <input type="email" class="form-control" name="email"
-                        value="{{ optional($model->orderAddress->first())->email }}">
+                        value="{{ $model->orderAddress->email }}">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Phone</label>
                     <input type="text" class="form-control" name="phone"
-                        value="{{ optional($model->orderAddress->first())->phone }}">
+                        value="{{ $model->orderAddress->phone }}">
                 </div>
 
 
                 <!-- Shipping Details -->
                 @php
-                $address = optional($model->orderAddress->first());
+                $address = $model->orderAddress;
                 @endphp
 
                 @if($address)
@@ -112,7 +107,7 @@
                 use App\Enums\Order\StatusEnum;
                 @endphp
 
-                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
+                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Status</label>
                 <select class="form-select mb-4" name="status">
                     @foreach (StatusEnum::cases() as $status)
                     <option value="{{ $status->value }}" {{ (old('status', $model->status?->value) == $status->value) ?
@@ -144,9 +139,9 @@
                         </div>
                         <div class="text-end">
                             <div class="fw-bold text-black">
-                                ${{ number_format($orderItem->sub_total ?? 0, 2) }}
+                                {{ number_format($orderItem->sub_total ?? 0, 2) }}
                             </div>
-                            @if ($model->orderItems->count() > 1 )
+                            @if ($model->orderItems->count() > 1 && $model->status == StatusEnum::PENDING)
                             <form class="delete-design-form d-inline" method="POST"
                                 action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $orderItem->id]) }}">
                                 @csrf
@@ -168,11 +163,11 @@
                 <h5 class="mt-3 mb-1 text-black fs-16">Pricing Details</h5>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">Subtotal</span>
-                    <span class="fs-4 text-black fw-bold">$ {{ $model->subtotal }} </span>
+                    <span class="fs-4 text-black fw-bold"> {{ $model->subtotal }} </span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">Discount</span>
-                    <span class="fs-16 text-black">-$ {{$model->discount_amount}}</span>
+                    <span class="fs-16 text-black">- {{$model->discount_amount}}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
@@ -180,7 +175,7 @@
                         <i data-feather="info" data-bs-toggle="tooltip"
                             title="Delivery charges may vary based on location."></i>
                     </span>
-                    <span class="fs-16 text-black">$ {{$model->delivery_amount}}</span>
+                    <span class="fs-16 text-black"> {{$model->delivery_amount}}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-dark fs-16 fw-bold">
@@ -188,14 +183,14 @@
                         <i data-feather="info" data-bs-toggle="tooltip"
                             title="Tax is calculated as per applicable laws."></i>
                     </span>
-                    <span class="fs-16 text-black">$ {{$model->tax_amount}}</span>
+                    <span class="fs-16 text-black"> {{$model->tax_amount}}</span>
                 </div>
 
                 <hr class="border-dashed my-1">
 
                 <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
                     <span class="fs-4 text-black ">Total</span>
-                    <span class="fs-4 text-black fw-bold">$ {{$model->total_price}}</span>
+                    <span class="fs-4 text-black fw-bold"> {{$model->total_price}}</span>
                 </div>
 
                 <!-- Status Display -->
@@ -205,17 +200,18 @@
                         <div class="status-icon me-1">
                             <i data-feather="check"></i> <!-- You can dynamically change the icon -->
                         </div>
-                        <span class="status-text">Confirmed</span>
+                        <span class="status-text">{{ $model->status->label() }}</span>
                     </div>
                 </div>
+
 
                 <!-- Action Buttons -->
                 <div class="d-flex flex-wrap-reverse gap-2 justify-content-between ">
 
 
-                    <button class="btn btn-outline-secondary">Discard Changes</button>
                     <div class="d-flex gap-1">
-                        <button class="btn btn-outline-secondary">Cancel Order</button>
+                        <button type="reset" class="btn btn-outline-secondary">Discard Changes</button>
+
                         <button class="btn btn-primary">Save changes</button>
                     </div>
                 </div>

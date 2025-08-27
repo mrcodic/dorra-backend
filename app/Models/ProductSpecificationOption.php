@@ -18,6 +18,7 @@ class ProductSpecificationOption extends Model implements HasMedia
     ];
 
     protected $translatable = ['value'];
+
     protected static function booted()
     {
         static::updated(function (ProductSpecificationOption $specificationOption) {
