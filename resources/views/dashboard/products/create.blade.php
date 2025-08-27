@@ -448,7 +448,14 @@
                                                                                         <!-- Hidden input to store uploaded file id / path -->
                                                                                         <input type="hidden" name="option_image" class="option-image-hidden">
                                                                                     </div>
-
+                                                                                    <!-- ❌ Delete Option Button -->
+                                                                                    <div class="row mt-2">
+                                                                                        <div class="col-12 text-end">
+                                                                                            <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                                                <i data-feather="x" class="me-25"></i> Delete Value
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -1167,19 +1174,26 @@
                     });
                 });
             }
-
             $('.outer-repeater').repeater({
                 repeaters: [{
                     selector: '.inner-repeater',
                     show: function () {
                         $(this).slideDown();
-                        updateDeleteButtons($(this).closest('.outer-repeater'));
+                        updateDeleteButtons($(this).closest('.inner-repeater'));
                         initializeImageUploaders(this);
                         feather.replace();
                     },
                     hide: function (deleteElement) {
                         $(this).slideUp(deleteElement);
-                        updateDeleteButtons($(this).closest('.outer-repeater'));
+                        updateDeleteButtons($(this).closest('.inner-repeater'));
+                    },
+                    afterAdd: function () {
+                        updateDeleteButtons($(this).closest('.inner-repeater'));
+                        initializeImageUploaders(this);
+                        feather.replace();
+                    },
+                    afterDelete: function () {
+                        updateDeleteButtons($(this).closest('.inner-repeater'));
                     },
                     nestedInputName: 'specification_options'
                 }],
@@ -1203,11 +1217,13 @@
                 }
             });
 
-            // Initialize on page load for already existing items
+// Initialize on page load
             $(document).ready(function () {
                 updateDeleteButtons($('.outer-repeater'));
+                updateDeleteButtons($('.inner-repeater')); // <-- important
                 initializeImageUploaders($('.outer-repeater'));
             });
+
 
 
             $('.select2').select2();
