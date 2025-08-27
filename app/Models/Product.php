@@ -68,13 +68,12 @@
                 get: fn () => $this->reviews?->avg('rating')
             );
         }
-         public function scopeWithReviewRating(Builder $builder, $rates): Builder
-         {
-             $rates = is_array($rates) ? $rates : explode(',', $rates);
-             return $builder->whereHas('reviews', function ($query) use ($rates) {
-                 $query->whereIn('rating', $rates);
-             });
-         }
+
+        public function scopeWithAvgRating(Builder $query)
+        {
+            return $query->withAvg('reviews', 'rating');
+        }
+
 
         public function category(): BelongsTo
         {
