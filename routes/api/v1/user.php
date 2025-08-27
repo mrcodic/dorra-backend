@@ -1,6 +1,7 @@
 <?php
 
 
+
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\LogoutController,
@@ -22,7 +23,8 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     SavedItems\SaveController,
     ShippingAddress\ShippingAddressController,
     Team\TeamController,
-    Template\TemplateController
+    Template\TemplateController,
+    Review\ReviewController
 };
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
@@ -138,6 +140,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('bulk-restore', 'bulkRestore');
     });
 
+    Route::apiResource('reviews', ReviewController::class)->only(['index', 'store']);
+
+
     Route::get('trash', [MainController::class, 'trash'])->name('trash');
 
     Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
@@ -162,6 +167,7 @@ Route::prefix('invitations/')->controller(InvitationController::class)->group(fu
         ->name('invitation.accept')
         ->middleware('signed');
 });
+
 Route::prefix("landing/")->controller(LandingController::class)->group(function () {
     Route::get('carousels', 'carousels');
     Route::get('settings/visibility-sections', 'visibilitySections');
