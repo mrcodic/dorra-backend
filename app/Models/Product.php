@@ -62,18 +62,18 @@ class Product extends Model implements HasMedia
         });
     }
 
-    // public function rating(): Attribute
-    // {
-    //     return Attribute::get(fn(?int $value) => $this->load('reviews:rating')->reviews?->pluck('rating')->avg());
-    // }
+     public function rating(): Attribute
+     {
+         return Attribute::get(fn(?int $value) => $this->load('reviews:rating')->reviews?->pluck('rating')->avg());
+     }
 
-    // public function scopeWithReviewRating(Builder $builder, $rates): Builder
-    // {
-    //     $rates = is_array($rates) ? $rates : explode(',', $rates);
-    //     return $builder->whereHas('reviews', function ($query) use ($rates) {
-    //         $query->whereIn('rating', $rates);
-    //     });
-    // }
+     public function scopeWithReviewRating(Builder $builder, $rates): Builder
+     {
+         $rates = is_array($rates) ? $rates : explode(',', $rates);
+         return $builder->whereHas('reviews', function ($query) use ($rates) {
+             $query->whereIn('rating', $rates);
+         });
+     }
 
     public function category(): BelongsTo
     {
