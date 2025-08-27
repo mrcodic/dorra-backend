@@ -28,7 +28,7 @@ class ShippingAddressController extends Controller
 
     public function show($id)
     {
-        $shippingAddress = $this->shippingAddressService->showResource($id);
+        $shippingAddress = $this->shippingAddressService->showResource($id,['state.country']);
         return Response::api(data: ShippingAddressResource::make($shippingAddress));
     }
 
