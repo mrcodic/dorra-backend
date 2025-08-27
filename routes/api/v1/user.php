@@ -140,7 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('bulk-restore', 'bulkRestore');
     });
 
-    Route::apiResource('reviews', ReviewController::class)->only(['index', 'store']);
+    Route::apiResource('reviews', ReviewController::class)->only(['show', 'store']);
     Route::get('reviews-statistics/{reviewable_id}', [ReviewController::class,'statistics']);
 
 

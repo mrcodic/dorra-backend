@@ -17,7 +17,7 @@ class ShippingAddressController extends Controller
     public function index()
     {
         $shippingAddresses = $this->shippingAddressService->getUserOrGuestShippingAddresses();
-        return Response::api(data: ShippingAddressResource::collection($shippingAddresses));
+        return Response::api(data: ShippingAddressResource::collection($shippingAddresses->load(['state.country'])));
     }
 
     public function store(StoreShippingAddressRequest $request)
@@ -28,13 +28,13 @@ class ShippingAddressController extends Controller
 
     public function show($id)
     {
-        $shippingAddress = $this->shippingAddressService->showResource($id);
+        $shippingAddress = $this->shippingAddressService->showResource($id,['state.country']);
         return Response::api(data: ShippingAddressResource::make($shippingAddress));
     }
 
     public function update(UpdateShippingAddressRequest $request, ShippingAddress $shippingAddress)
     {
-        $shippingAddress = $this->shippingAddressService->updateResource($request->validated(), $shippingAddress->id);
+        $shippingAddress = $this->shippingAddressService->updateResource($request->validated(), $shippingAddress->id );
         return Response::api(data: ShippingAddressResource::make($shippingAddress));
     }
 

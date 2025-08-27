@@ -71,6 +71,7 @@ class PaymentController extends Controller
     public function handleCallback(Request $request)
     {
         $data = $request->json()->all();
+        Log::info('df',$data);
         $paymentMethod = data_get($data, 'obj.source_data.sub_type');
         $paymobOrderId = data_get($data, 'obj.order.id');
         $isSuccess = data_get($data, 'obj.success');
@@ -97,6 +98,8 @@ class PaymentController extends Controller
 
         } elseif (!$isSuccess && !$isPending) {
             $paymentStatus = StatusEnum::UNPAID;
+            $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
+
             Log::info('dgfdgd order', ['order' => $transaction->order]);
 
             $transaction->order?->forceDelete();

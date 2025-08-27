@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Models\Product;
 use App\Models\Review;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
@@ -40,20 +41,45 @@ class ReviewService extends BaseService
 
     }
 
-    public function statistics($id)
+    public function statistics(int $id): array
     {
+        $stats = $this->repository->query()
+            ->select([])
+            ->selectRaw('COUNT(*) as total_reviews')
+            ->selectRaw('AVG(rating) as rating')
+            ->selectRaw('SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) as five_stars')
+            ->selectRaw('SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) as four_stars')
+            ->selectRaw('SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) as three_stars')
+            ->selectRaw('SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as two_stars')
+            ->selectRaw('SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as one_star')
+            ->where('reviewable_id', $id)
+            ->where('reviewable_type', Product::class)
+            ->first();
+
+
         return [
             'statistics' => [
-                'total_reviews' => $this->repository->query()->where('reviewable_id', $id)->count(),
-                'rating' => $this->productRepository->find($id)->rating,
-                '5_stars' => $this->repository->query()->where('reviewable_id', $id)->whereRating(5)->count(),
-                '4_stars' => $this->repository->query()->where('reviewable_id', $id)->whereRating(4)->count(),
-                '3_stars' => $this->repository->query()->where('reviewable_id', $id)->whereRating(3)->count(),
-                '2_stars' => $this->repository->query()->where('reviewable_id', $id)->whereRating(2)->count(),
-                '1_stars' => $this->repository->query()->where('reviewable_id', $id)->whereRating(1)->count(),
+                'total_reviews' => (int)$stats->total_reviews,
+                'rating' => round((float)$stats->rating, 2),
+                '5_stars' => (int)$stats->five_stars,
+                '4_stars' => (int)$stats->four_stars,
+                '3_stars' => (int)$stats->three_stars,
+                '2_stars' => (int)$stats->two_stars,
+                '1_stars' => (int)$stats->one_star,
             ],
-
         ];
     }
+
+    public function productReviews($id)
+    {
+        return $this->repository->query()
+            ->with(['user', 'media'])
+            ->orderBy('created_at', request('date', 'desc'))
+            ->where('reviewable_id', $id)
+            ->where('reviewable_type', Product::class)
+            ->get();
+
+    }
+
 
 }
