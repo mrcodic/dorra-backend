@@ -10,15 +10,6 @@ class StoreReviewRequest extends BaseRequest
     {
         return true;
     }
-
-    protected function prepareForValidation(): void
-    {
-
-            $this->merge([
-                'user_id' => auth('sanctum')->user()->id,
-            ]);
-
-    }
     public function rules(): array
     {
         return [

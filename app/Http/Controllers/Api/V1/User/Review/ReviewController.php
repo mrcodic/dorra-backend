@@ -13,8 +13,17 @@ class ReviewController extends Controller
 
     public function store(StoreReviewRequest $request)
     {
-        $this->reviewService->storeResource($request->validated());
+        $this->reviewService->storeResource(array_merge(
+            $request->validated(),
+            ['user_id' => $request->user()->id]
+        ));
         return Response::api();
+    }
+
+    public function statistics($id)
+    {
+        return Response::api(data: $this->reviewService->statistics($id));
+
     }
 
 }

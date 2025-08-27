@@ -26,14 +26,14 @@ class SaveController extends Controller
 
 
         $savedDesigns = $user->savedDesigns()
-            ->with('product.category')
+            ->with('product.category','owner')
             ->when(request()->filled('category_id'), function ($query) {
                 $query->whereRelation('product.category', 'id', request('category_id'));
             })
             ->orderBy('created_at', request('date','desc'))
-
             ->latest()
             ->get();
+
         return Response::api(data: [
             'designs' => $savedDesigns->isNotEmpty() ? DesignResource::collection($savedDesigns) : [],
             'products' => $savedProducts->isNotEmpty() ? ProductResource::collection($savedProducts) : [],
