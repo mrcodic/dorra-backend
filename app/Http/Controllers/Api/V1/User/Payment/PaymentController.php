@@ -100,6 +100,11 @@ class PaymentController extends Controller
             Log::info('dgfdgd order', ['order' => $transaction->order]);
 
             $transaction->order?->forceDelete();
+        } elseif ($isSuccess && $isPending) {
+            if ($transaction->order->paymentMethod->name == 'Debit/Credit Card'){
+                $transaction->order?->forceDelete();
+            }
+        
         }
 
         Log::info('Failed to create payment intention', [
