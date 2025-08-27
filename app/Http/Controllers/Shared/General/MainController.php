@@ -20,7 +20,11 @@ use App\Http\Resources\{CategoryResource,
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
-use App\Repositories\Interfaces\{CountryRepositoryInterface, DimensionRepositoryInterface, StateRepositoryInterface};
+use App\Repositories\Interfaces\{CountryRepositoryInterface,
+    DimensionRepositoryInterface,
+    MessageRepositoryInterface,
+    StateRepositoryInterface
+};
 use App\Services\CategoryService;
 use App\Services\DesignService;
 use App\Services\FolderService;
@@ -167,5 +171,16 @@ class MainController extends Controller
         return Response::api(data: ['id' => uniqid()]);
     }
 
+    public function contactUs(Request $request, MessageRepositoryInterface $messageRepository)
+    {
+        $validatedData = $request->validate([
+            'email' => 'required|email'
+            , 'message' => 'required'
+            , 'name' => 'required',
+            'phone' => 'required',
+        ]);
+        $messageRepository->create($validatedData);
+        return Response::api();
+    }
 
 }
