@@ -87,6 +87,7 @@ class PaymentController extends Controller
         } elseif (!$isSuccess && $isPending) {
             $paymentStatus = StatusEnum::PENDING;
             Log::info('Deleting order', ['order' => $transaction->order]);
+            $this->resetCart($transaction, $paymentMethod, $paymentStatus, $data);
 
             $transaction->order?->forceDelete();
             $transaction->update([
@@ -100,11 +101,6 @@ class PaymentController extends Controller
             Log::info('dgfdgd order', ['order' => $transaction->order]);
 
             $transaction->order?->forceDelete();
-        } elseif ($isSuccess && $isPending) {
-            if ($transaction->order->paymentMethod->name == 'Debit/Credit Card'){
-                $transaction->order?->forceDelete();
-            }
-        
         }
 
         Log::info('Failed to create payment intention', [
