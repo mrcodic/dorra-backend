@@ -18,7 +18,7 @@ class UpdateShippingAddressRequest extends BaseRequest
     public function prepareForValidation(): void
     {
         $this->merge([
-            'user_id' => $this->user()?->id,
+            'user_id' =>auth('sanctum')?->id,
         ]);
     }
     /**
