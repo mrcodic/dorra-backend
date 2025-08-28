@@ -41,7 +41,7 @@ class ProductResource extends JsonResource
                 fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id())
             ),
             'has_mockup' => (boolean) $this->has_mockup,
-            'product_model_image' => $this->getFirstMedia('product_model_image'),
+            'product_model_image' => $this->getFirstMediaUrl('product_model_image'),
         ];
     }
 }
