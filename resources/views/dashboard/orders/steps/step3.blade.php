@@ -61,8 +61,7 @@ $orderData = Cache::get(getOrderStepCacheKey()) ?? [];
                     <div class="mt-auto">
                         <!-- Pushes button to bottom -->
                         <a class="btn btn-primary w-100"
-                            href="{{ config('editor_url').'templates/'.$template->id.'/users/'.$orderData["
-                            user_info"]["id"] }}">
+                            href="{{ config('editor_url').'templates/'.$template->id.'/users/'.$orderData["user_info"]["id"] }}">
                             Customize Template
                         </a>
                     </div>
