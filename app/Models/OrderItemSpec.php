@@ -14,6 +14,8 @@ class OrderItemSpec extends Model
         'option_name',
         'option_price',
         'order_item_id',
+        'spec_option_id',
+        'product_specification_id',
     ];
 
 }
