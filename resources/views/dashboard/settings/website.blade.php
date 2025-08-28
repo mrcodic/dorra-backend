@@ -280,8 +280,8 @@
                                             <!-- Action Buttons -->
                                             <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
                                                 <button type="button"
-                                                        class="btn btn-outline-danger open-delete-carousel-modal"
-                                                        data-bs-toggle="modal" data-bs-target="#deleteCarouselModal">
+                                                    class="btn btn-outline-danger open-delete-carousel-modal"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteCarouselModal">
                                                     <i data-feather="x" class="me-1"></i> Delete
                                                 </button>
                                                 <button type="submit" class="btn btn-primary">
