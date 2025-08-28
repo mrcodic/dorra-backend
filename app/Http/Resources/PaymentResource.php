@@ -21,9 +21,9 @@ class PaymentResource extends JsonResource
             "code" => $this->code,
             "active" => $this->active,
             "gateway" => [
-                "id" => $this->paymentGateway->id,
-                "name" => $this->paymentGateway->name,
-                "code" => $this->paymentGateway->code,
+                "id" => $this->paymentGateway?->id,
+                "name" => $this->paymentGateway?->name,
+                "code" => $this->paymentGateway?->code,
             ]
 
         ];

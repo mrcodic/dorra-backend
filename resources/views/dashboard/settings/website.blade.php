@@ -278,7 +278,7 @@
                                             </div>
 
                                             <!-- Action Buttons -->
-                                            <div class="d-flex flex-wrap-reverse justify-content-between mt-1">
+                                            <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
                                                 <button type="button"
                                                     class="btn btn-outline-danger open-delete-carousel-modal"
                                                     data-bs-toggle="modal" data-bs-target="#deleteCarouselModal">
@@ -1116,7 +1116,7 @@
                     let dz = this;
 
                     // ✅ Preload existing image if editing
-             
+
 
                     // ✅ On success
                     dz.on("success", function (file, response) {

@@ -9,9 +9,10 @@ class PaymentSeeder extends Seeder
 {
     public function run(): void
     {
+        // 🔹 Seed Paymob gateway
         $paymobConfig = config('services.paymob');
 
-        $gatewayId = DB::table('payment_gateways')->updateOrInsert(
+        DB::table('payment_gateways')->updateOrInsert(
             ['code' => 'paymob'],
             [
                 'name' => 'Paymob',
@@ -27,6 +28,7 @@ class PaymentSeeder extends Seeder
             throw new \Exception("Paymob gateway not found.");
         }
 
+        // 🔹 Seed Paymob methods
         $methods = [
             ['name' => 'Debit/Credit Card', 'code' => 'paymob_card'],
             ['name' => 'Wallet', 'code' => 'paymob_wallet'],
@@ -45,5 +47,17 @@ class PaymentSeeder extends Seeder
                 ]
             );
         }
+
+        // 🔹 Seed Cash on Delivery (no gateway)
+        DB::table('payment_methods')->updateOrInsert(
+            ['code' => 'cash_on_delivery'],
+            [
+                'payment_gateway_id' => null, // COD doesn't belong to an external gateway
+                'name' => 'Cash on Delivery',
+                'active' => true,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
     }
 }

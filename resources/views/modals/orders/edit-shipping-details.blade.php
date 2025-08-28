@@ -28,7 +28,7 @@
                             <div class="col-md-6 form-check border rounded-3 p-1 px-3 flex-fill">
                                 <input class="form-check-input" type="radio" name="type" id="shipToCustomer"
                                     value="{{ \App\Enums\Order\OrderTypeEnum::SHIPPING->value }}"
-                                    @checked($selectedType===\App\Enums\Order\OrderTypeEnum::SHIPPING)>
+                                    @checked($selectedType ==\App\Enums\Order\OrderTypeEnum::SHIPPING)>
                                 <label class="form-check-label fs-4 text-black" for="shipToCustomer">
                                     {{ \App\Enums\Order\OrderTypeEnum::SHIPPING->label() }}
                                 </label>
@@ -52,8 +52,7 @@
 
                     <div id="shipSection">
                         <div class="d-flex gap-1 flex-wrap">
-                            @foreach (collect(optional($model->user)->addresses ?? optional($model->guest)->addresses)
-                            as $address)
+                            @foreach ($model->user->addresses ?? $model->guest->addresses as $address)
                             <div class="col-12 form-check border rounded-3 p-1 px-3 text-break">
                                 <input class="form-check-input" type="radio" name="shipping_address_id"
                                     id="address{{ $address->id }}" value="{{ $address->id }}" {{
