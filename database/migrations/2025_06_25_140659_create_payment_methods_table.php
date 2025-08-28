@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payment_methods', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payment_gateway_id')->constrained('payment_gateways')->onDelete('cascade');
+            $table->foreignId('payment_gateway_id')->nullable()->constrained('payment_gateways')->onDelete('cascade');
             $table->string('name');
             $table->string('code')->unique();
             $table->boolean('active')->default(true);
