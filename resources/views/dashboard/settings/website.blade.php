@@ -278,7 +278,7 @@
                                             </div>
 
                                             <!-- Action Buttons -->
-                                            <div class="d-flex justify-content-between mt-3">
+                                            <div class="d-flex flex-wrap-reverse justify-content-between mt-1">
                                                 <button type="button"
                                                     class="btn btn-outline-danger open-delete-carousel-modal"
                                                     data-bs-toggle="modal" data-bs-target="#deleteCarouselModal">
