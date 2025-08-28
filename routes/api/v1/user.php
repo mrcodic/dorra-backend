@@ -141,7 +141,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('reviews', [ReviewController::class,'store']);
-    Route::get('reviews-statistics/{reviewable_id}', [ReviewController::class,'statistics']);
 
 
     Route::get('trash', [MainController::class, 'trash'])->name('trash');
@@ -179,6 +178,7 @@ Route::prefix("landing/")->controller(LandingController::class)->group(function 
     Route::get('faqs', 'faqs');
 });
 Route::get('reviews/{product_id}', [ReviewController::class,'show']);
+Route::get('reviews-statistics/{reviewable_id}', [ReviewController::class,'statistics']);
 
 //});
 

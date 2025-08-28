@@ -31,8 +31,9 @@ class ReviewController extends Controller
         return Response::api(data: [
             'reviews' => ReviewResource::collection($reviews),
             'all_reviews_images' => MediaResource::collection($allMedia),
-            'user_already_reviewed' => $reviews->pluck('user_id')->contains(auth()->id()),
-            ]);
+            'user_already_reviewed' => $reviews->where('user_id', auth()->id())->isNotEmpty(),
+
+        ]);
     }
     public function statistics($id)
     {
