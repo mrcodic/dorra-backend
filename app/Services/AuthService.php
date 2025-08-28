@@ -88,7 +88,7 @@ class AuthService
     {
         $user = $this->userRepository->findByEmail($validatedData['email']);
         $user->update(['last_login_at' => now()]);
-        
+
         $expiresAt = ($validatedData['remember'] ?? false)
             ? now()->addDays(30)
             : now()->addHours(10);
