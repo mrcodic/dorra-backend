@@ -137,7 +137,7 @@
                                             <img src="{{$item->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($item->itemable)))) }}"
                                                 class="rounded" alt="Item" style="max-width: 55px;" />
                                             <div>
-                                                <div class="text-black fss-16">{{ $item->itemable->name }}</div>
+                                                <div class="text-black fss-16">{{ $item->itemable?->name }}</div>
                                                 <small class="fs-5">Qty: {{ $item->quantity }}</small>
                                             </div>
                                         </div>
