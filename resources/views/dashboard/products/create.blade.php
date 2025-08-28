@@ -96,15 +96,40 @@
                                                     </div>
                                                 </div>
 
+
+
+                                                <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 512x512 px
+                                            </span>
                                                 <!-- ✅ Hidden input outside Dropzone -->
-                                                <input type="hidden" name="image_id" id="uploadedImage">
+                                                <input type="hidden" name="image_id" id="uploadedImageMain">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text" for="product-image-main">
+                                                    Category Model Image (main)*
+                                                </label>
+
+                                                <!-- Dropzone Container -->
+                                                <div id="product-model-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <span>Drop image here or click to upload</span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- ✅ Hidden input outside Dropzone -->
+                                                <input type="hidden" name="image_model_id" id="uploadedImageModel">
 
                                                 <span class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 512x512 px
                                             </span>
 
                                                 <!-- Uploaded Image Preview -->
-                                                <div id="uploaded-image"
+                                                <div id="uploaded-image-model"
                                                      class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
                                                     <img src="" alt="Uploaded" class="img-fluid rounded"
                                                          style="width: 50px; height: 50px; object-fit: cover;">
@@ -435,24 +460,34 @@
                                                                                 <div
                                                                                     class="row d-flex align-items-end mt-2">
                                                                                     <div class="col-md-12">
-                                                                                        <label class="form-label label-text">Option Image</label>
+                                                                                        <label
+                                                                                            class="form-label label-text">Option
+                                                                                            Image</label>
 
                                                                                         <!-- Dropzone container -->
-                                                                                        <div class="dropzone option-dropzone border rounded p-3"
-                                                                                             style="cursor:pointer; min-height:120px;">
-                                                                                            <div class="dz-message" data-dz-message>
+                                                                                        <div
+                                                                                            class="dropzone option-dropzone border rounded p-3"
+                                                                                            style="cursor:pointer; min-height:120px;">
+                                                                                            <div class="dz-message"
+                                                                                                 data-dz-message>
                                                                                                 <span>Drop image here or click to upload</span>
                                                                                             </div>
                                                                                         </div>
 
                                                                                         <!-- Hidden input to store uploaded file id / path -->
-                                                                                        <input type="hidden" name="option_image" class="option-image-hidden">
+                                                                                        <input type="hidden"
+                                                                                               name="option_image"
+                                                                                               class="option-image-hidden">
                                                                                     </div>
                                                                                     <!-- ❌ Delete Option Button -->
                                                                                     <div class="row mt-2">
                                                                                         <div class="col-12 text-end">
-                                                                                            <button type="button" class="btn btn-outline-danger" data-repeater-delete>
-                                                                                                <i data-feather="x" class="me-25"></i> Delete Value
+                                                                                            <button type="button"
+                                                                                                    class="btn btn-outline-danger"
+                                                                                                    data-repeater-delete>
+                                                                                                <i data-feather="x"
+                                                                                                   class="me-25"></i>
+                                                                                                Delete Value
                                                                                             </button>
                                                                                         </div>
                                                                                     </div>
@@ -550,6 +585,57 @@
 @endsection
 
 @section('page-script')
+    <script>
+        Dropzone.autoDiscover = false;
+
+        const categoryDropzone = new Dropzone("#product-model-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            maxFilesize: 1, // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop image here or click to upload",
+            init: function () {
+                this.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        file._hiddenInputId = response.data.id;
+
+                        // ✅ This will now set the hidden field correctly
+                        document.getElementById("uploadedImageModel").value = response.data.id;
+                        file._hiddenInputId = response.data.id;
+                    }
+
+                });
+
+                this.on("removedfile", function (file) {
+                    document.getElementById("uploadedImageModel").value = "";
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
+
+                    // hide preview
+                    document.getElementById("uploaded-image").classList.add("d-none");
+                });
+            }
+        });
+
+        // Handle remove button manually
+        document.getElementById("remove-image").addEventListener("click", function () {
+            categoryDropzone.removeAllFiles(true);
+            document.getElementById("uploadedImage").value = "";
+            document.getElementById("uploaded-image").classList.add("d-none");
+        });
+    </script>
+
     <script>
         Dropzone.autoDiscover = false; // prevent auto init
 
@@ -670,52 +756,49 @@
     <script>
         Dropzone.autoDiscover = false;
 
-        const categoryDropzone = new Dropzone("#product-main-dropzone", {
+        const mainDropzone = new Dropzone("#product-main-dropzone", {
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            maxFilesize: 1, // MB
+            maxFilesize: 1,
             acceptedFiles: "image/*",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
+            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
             addRemoveLinks: true,
-            dictDefaultMessage: "Drop image here or click to upload",
             init: function () {
                 this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedImageMain").value = response.data.id;
 
-                        // ✅ This will now set the hidden field correctly
-                        document.getElementById("uploadedImage").value = response.data.id;
-                        file._hiddenInputId =response.data.id;
+                        // show preview
+                        const preview = document.querySelector("#uploaded-image-main");
+                        preview.classList.remove("d-none");
+                        preview.querySelector("img").src = response.data.url;
+                        preview.querySelector(".file-name").innerText = file.name;
+                        preview.querySelector(".file-size").innerText = (file.size / 1024).toFixed(1) + " KB";
                     }
-
                 });
 
                 this.on("removedfile", function (file) {
-                    document.getElementById("uploadedImage").value = "";
+                    document.getElementById("uploadedImageMain").value = "";
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
+                            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
                         });
                     }
-
-                    // hide preview
-                    document.getElementById("uploaded-image").classList.add("d-none");
+                    document.getElementById("uploaded-image-main").classList.add("d-none");
                 });
             }
         });
 
-        // Handle remove button manually
-        document.getElementById("remove-image").addEventListener("click", function () {
-            categoryDropzone.removeAllFiles(true);
-            document.getElementById("uploadedImage").value = "";
-            document.getElementById("uploaded-image").classList.add("d-none");
+        // Manual remove
+        document.getElementById("remove-image-main").addEventListener("click", function () {
+            mainDropzone.removeAllFiles(true);
+            document.getElementById("uploadedImageMain").value = "";
+            document.getElementById("uploaded-image-main").classList.add("d-none");
         });
+
     </script>
     <script>
         console.log(jQuery.fn.jquery);
@@ -1174,6 +1257,7 @@
                     });
                 });
             }
+
             $('.outer-repeater').repeater({
                 repeaters: [{
                     selector: '.inner-repeater',
@@ -1223,7 +1307,6 @@
                 updateDeleteButtons($('.inner-repeater')); // <-- important
                 initializeImageUploaders($('.outer-repeater'));
             });
-
 
 
             $('.select2').select2();
