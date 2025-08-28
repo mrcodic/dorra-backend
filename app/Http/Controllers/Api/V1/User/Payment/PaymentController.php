@@ -41,19 +41,25 @@ class PaymentController extends Controller
         $request->validate([
             'order_id' => ['required', 'exists:orders,id'],
         ]);
-        $order = $this->orderRepository->query()->find($request->get('order_id'));
-        $cart = $this->cartService->getCurrentUserOrGuestCart();
-        $cart->items()->createMany($order->orderItems->toArray());
-        collect($order->orderItems)->each(function ($orderItem) use ($cart) {
-            $cartItem = $cart->items()->create($orderItem->toArray());
-            $cartItem->specs()->createMany($orderItem->specs->toArray());
+
+        $this->handleTransaction(function () use ($request) {
+            $order = $this->orderRepository->query()->with('orderItems.specs')->find($request->get('order_id'));
+            $cart  = $this->cartService->getCurrentUserOrGuestCart();
+
+            collect($order->orderItems)->each(function ($orderItem) use ($cart) {
+                $existingCartItem = $cart->items()
+                    ->where('product_id', $orderItem->product_id)
+                    ->first();
+                if (!$existingCartItem) {
+                    $cartItem = $cart->items()->create($orderItem->toArray());
+                    $cartItem->specs()->createMany($orderItem->specs->toArray());
+                }
+            });
         });
 
-        dd($cart, $order);
-
-//        $order->orderItems
-
+        return Response::api();
     }
+
 
     /**
      * @throws \Exception
