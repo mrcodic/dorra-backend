@@ -112,7 +112,7 @@
 
                             <!-- Order Card -->
                             <div class="card border rounded-3 p-1 mb-2">
-                                @forelse($model->orders as $order)
+                                @forelse($model->orders->sortByDesc('created_at') as $order)
 
                                 <!-- Order Header -->
                                 <div class="d-flex justify-content-between align-items-center mb-2">
