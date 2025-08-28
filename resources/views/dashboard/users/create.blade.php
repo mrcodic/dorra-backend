@@ -4,7 +4,7 @@
 @section('main-page', 'Users')
 @section('sub-page', 'Add New User')
 @section('main-page-url', route("users.index"))
-@section('sub-page-url',  route("users.create"))
+@section('sub-page-url', route("users.create"))
 
 @section('vendor-style')
 <!-- Vendor css files -->
@@ -87,27 +87,26 @@
                     <div class="col-md-6">
                         <label for="first_name" class="form-label label-text ">First Name</label>
                         <input type="text" id="first_name" name="first_name" class="form-control"
-                            placeholder="Enter first name" required>
+                            placeholder="Enter first name">
                     </div>
                     <div class="col-md-6">
                         <label for="last_name" class="form-label label-text ">Last Name</label>
                         <input type="text" id="last_name" name="last_name" class="form-control"
-                            placeholder="Enter last name" required>
+                            placeholder="Enter last name">
                     </div>
                 </div>
 
                 <!-- Email Address -->
                 <div class="mb-2">
                     <label for="email" class="form-label label-text ">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter email address"
-                        required>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter email address">
                 </div>
 
                 <!-- Phone Number (Country Code + Number) -->
                 <div class="row mb-2">
                     <div class="col-md-4">
                         <label for="phone-code" class="form-label label-text ">Country Code</label>
-                        <select id="phone-code" name="country_code_id" class="form-select" required>
+                        <select id="phone-code" name="country_code_id" class="form-select">
                             @foreach($associatedData['country_codes'] as $countryCode)
                             <option value="{{ $countryCode->id }}" data-phone-code="{{ $countryCode->phone_code }}">{{
                                 $countryCode->phone_code }} ({{ $countryCode->iso_code }})</option>
@@ -118,7 +117,7 @@
                     <div class="col-md-8">
                         <label for="phone_number" class="form-label label-text ">Phone Number</label>
                         <input type="tel" id="phone_number" name="phone_number" class="form-control"
-                            placeholder="Enter phone number" required>
+                            placeholder="Enter phone number">
                         <input type="hidden" name="full_phone_number" id="full_phone_number" />
 
                     </div>
@@ -352,97 +351,347 @@
     });
 </script>
 
-<script !src="">
+<script>
     $(document).ready(function () {
-        // jQuery Validation for Add User form
-        $(".add-new-user").validate({
-            rules: {
-                first_name: {
-                    required: true,
-                    maxlength: 255
-                },
-                last_name: {
-                    required: true,
-                    maxlength: 255
-                },
-                email: {
-                    required: true,
-                    email: true
-                },
-                phone_number: {
-                    required: true,
-                    minlength: 7,
-                    maxlength: 15,
-                    digits: true
-                },
-                country_code_id: {
-                    required: true
-                },
-                password: {
-                    required: true,
-                    minlength: 8,
-                    pwcheck: true
-                },
-                password_confirmation: {
-                    required: true,
-                    equalTo: "#password"
-                },
-                status: {
-                    required: true
-                },
-                "addresses[0][label]": {
-                    required: true,
-                    minlength: 3
-                },
-                "addresses[0][line]": {
-                    required: true,
-                    minlength: 3
-                },
-                "addresses[0][state_id]": {
-                    required: true
-                }
+    // Don't initialize stepper manually - let the existing code handle it
+    // Just get reference to the existing stepper instance
+    let stepper;
+    
+    // Wait for the existing stepper to be initialized
+    setTimeout(function() {
+        const stepperElement = document.querySelector('.bs-stepper');
+        if (stepperElement && window.Stepper) {
+            stepper = new Stepper(stepperElement);
+        }
+    }, 100);
+    
+    // Initialize the validator
+    const validator = $("#checkout-form").validate({
+        rules: {
+            first_name: {
+                required: true,
+                maxlength: 255
             },
-            messages: {
-                first_name: "First name is required",
-                last_name: "Last name is required",
-                email: {
-                    required: "Email is required",
-                    email: "Enter a valid email"
-                },
-                phone_number: {
-                    required: "Phone number is required",
-                    digits: "Only digits allowed"
-                },
-                password: {
-                    required: "Password is required",
-                    minlength: "Password must be at least 8 characters"
+            last_name: {
+                required: true,
+                maxlength: 255
+            },
+            email: {
+                required: true,
+                email: true
+            },
+            phone_number: {
+                required: true,
+                minlength: 7,
+                maxlength: 15,
+                digits: true
+            },
+            country_code_id: {
+                required: true
+            },
+            password: {
+                required: true,
+                minlength: 8,
+                pwcheck: true
+            },
+            password_confirmation: {
+                required: true,
+                equalTo: "#password"
+            },
+            status: {
+                required: true
+            },
+            label: {
+                required: true,
+                minlength: 3
+            },
+            line: {
+                required: true,
+                minlength: 3
+            },
+            state_id: {
+                required: true
+            }
+        },
+        messages: {
+            first_name: "First name is required",
+            last_name: "Last name is required",
+            email: {
+                required: "Email is required",
+                email: "Enter a valid email"
+            },
+            phone_number: {
+                required: "Phone number is required",
+                digits: "Only digits allowed"
+            },
+            country_code_id: "Please select a country code",
+            password: {
+                required: "Password is required",
+                minlength: "Password must be at least 8 characters",
+                pwcheck: "Password must contain uppercase, lowercase, number and symbol"
+            },
+            password_confirmation: {
+                required: "Confirm your password",
+                equalTo: "Passwords do not match"
+            },
+            status: "Account status is required",
+            label: "Address label is required",
+            line: "Address line is required",
+            state_id: "Please select a state"
+        },
+        errorPlacement: function (error, element) {
+            error.addClass("text-danger small");
+            error.insertAfter(element);
+        },
+        onsubmit: false
+    });
 
-                },
-                password_confirmation: {
-                    required: "Confirm your password",
-                    equalTo: "Passwords do not match"
-                },
-                "addresses[0][label]": "Address label is required",
-                "addresses[0][line]": "Address line is required",
-                "addresses[0][state_id]": "Please select a state"
-            },
-            errorPlacement: function (error, element) {
-                error.addClass("text-danger small");
-                error.insertAfter(element);
-            },
-            submitHandler: function (form) {
-                form.submit(); // Submit if valid
+    // Strong password validation method
+    $.validator.addMethod("pwcheck", function(value) {
+        return /[A-Z]/.test(value) &&  // Uppercase
+            /[a-z]/.test(value) &&     // Lowercase
+            /\d/.test(value) &&        // Number
+            /[^A-Za-z0-9]/.test(value); // Symbol
+    }, "Password must contain uppercase, lowercase, number and symbol");
+
+    // Function to validate specific step
+    function validateStep(stepId) {
+        let isValid = true;
+        const stepElement = document.getElementById(stepId);
+        
+        if (!stepElement) return false;
+        
+        // Find all required inputs in this step
+        const inputs = stepElement.querySelectorAll('input[required], select[required], textarea[required], input[name], select[name], textarea[name]');
+        
+        inputs.forEach(function(input) {
+            // Skip certain hidden inputs
+            if (input.type === 'hidden' && !['status', 'full_phone_number'].includes(input.name)) {
+                return;
+            }
+            
+            // Only validate if field has validation rules
+            if (validator.settings.rules[input.name]) {
+                if (!validator.element(input)) {
+                    isValid = false;
+                }
             }
         });
-        // ✅ Strong password check
-        $.validator.addMethod("pwcheck", function(value) {
-            return /[A-Z]/.test(value) &&  // Uppercase
-                /[a-z]/.test(value) &&  // Lowercase
-                /\d/.test(value) &&     // Number
-                /[^A-Za-z0-9]/.test(value); // Symbol
+        
+        return isValid;
+    }
+
+    // Override the Next button click behavior
+    $(document).off('click', '.btn-next').on('click', '.btn-next', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Determine current step based on which Next button was clicked
+        let currentStepId;
+        const parentStep = $(this).closest('.content');
+        if (parentStep.length) {
+            currentStepId = parentStep.attr('id');
+        }
+        
+        console.log('Next clicked, current step:', currentStepId);
+        
+        if (!currentStepId) {
+            console.error('Could not determine current step');
+            return;
+        }
+        
+        // Validate current step
+        const isStepValid = validateStep(currentStepId);
+        console.log('Step validation result:', isStepValid);
+        
+        if (isStepValid) {
+            if (stepper) {
+                stepper.next();
+            } else {
+                console.error('Stepper not initialized');
+            }
+        } else {
+            console.log('Validation failed, staying on current step');
+            // Focus on first error
+            setTimeout(() => {
+                const firstError = document.querySelector(`#${currentStepId} .error:not(:empty)`);
+                if (firstError) {
+                    firstError.previousElementSibling?.focus();
+                }
+            }, 100);
+        }
+    });
+
+    // Override the Previous button click behavior  
+    $(document).off('click', '.btn-prev').on('click', '.btn-prev', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('Previous clicked');
+        
+        if (stepper) {
+            stepper.previous();
+        } else {
+            console.error('Stepper not initialized');
+        }
+    });
+
+    // Form submission handler
+    $(".add-new-user").off('submit').on("submit", function (event) {
+        event.preventDefault();
+        
+        console.log('Form submitted');
+        
+        // Validate all steps before submission
+        const steps = ['step-info', 'step-password', 'step-address'];
+        let allValid = true;
+        let firstInvalidStep = null;
+        
+        steps.forEach((stepId, index) => {
+            const isValid = validateStep(stepId);
+            if (!isValid && !firstInvalidStep) {
+                firstInvalidStep = index;
+                allValid = false;
+            }
+        });
+        
+        if (!allValid) {
+            console.log('Form validation failed, navigating to step:', firstInvalidStep + 1);
+            if (stepper) {
+                stepper.to(firstInvalidStep + 1);
+            }
+            return false;
+        }
+
+        const saveButton = $('.saveChangesButton');
+        const saveLoader = $('.saveLoader');
+        const saveButtonText = $('.saveChangesButton .btn-text');
+        
+        saveButton.prop('disabled', true);
+        saveLoader.removeClass('d-none');
+        saveButtonText.addClass('d-none');
+
+        // Prepare phone number
+        const selectedOption = $("#phone-code option:selected");
+        const phoneCode = selectedOption.data("phone-code") || '';
+        const phoneNumber = $("#phone_number").val() || '';
+        const fullPhoneNumber = phoneCode + phoneNumber.replace(/\D/g, "");
+        $("#full_phone_number").val(fullPhoneNumber);
+
+        const actionUrl = $(this).attr("action");
+        const formData = new FormData(this);
+
+        $.ajax({
+            url: actionUrl,
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                console.log('Success:', response);
+                if (response.success) {
+                    localStorage.setItem('UserAdded', 1);
+                    window.location.href = "/users";
+                }
+                
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
+            },
+            error: function (xhr) {
+                console.error('AJAX Error:', xhr);
+                const errors = xhr.responseJSON?.errors || {};
+                
+                for (const key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        const errorMessage = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                        
+                        if (typeof Toastify !== 'undefined') {
+                            Toastify({
+                                text: errorMessage,
+                                duration: 4000,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#EA5455",
+                                close: true,
+                            }).showToast();
+                        } else if (typeof toastr !== 'undefined') {
+                            toastr.error(errorMessage);
+                        } else {
+                            alert(errorMessage);
+                        }
+                    }
+                }
+                
+                saveButton.prop('disabled', false);
+                saveLoader.addClass('d-none');
+                saveButtonText.removeClass('d-none');
+            }
         });
     });
 
+    // Account status toggle handler
+    const toggle = document.getElementById('account_status_toggle');
+    const hiddenInput = document.getElementById('account_status');
+
+    if (toggle && hiddenInput) {
+        toggle.addEventListener('change', function () {
+            const label = document.querySelector('.active-label');
+            hiddenInput.value = this.checked ? '1' : '0';
+
+            if (this.checked) {
+                label.textContent = "Active";
+                label.classList.remove('bg-secondary', 'text-white', 'bg-gray');
+                label.classList.add('primary-text-color');
+            } else {
+                label.textContent = "Blocked";
+                label.classList.remove('primary-text-color');
+                label.classList.add('bg-secondary', 'text-white');
+            }
+        });
+    }
+
+    // Country/State dropdown handler
+    $(document).on("change", ".country-select", function () {
+        const countryId = $(this).val();
+        const stateSelect = $(".state-select");
+        
+        if (countryId) {
+            $.ajax({
+                url: window.location.origin + "/api/states", // Adjust this URL as needed
+                method: "GET",
+                data: {
+                    "filter[country_id]": countryId
+                },
+                success: function (response) {
+                    stateSelect
+                        .empty()
+                        .append('<option value="">Select State</option>');
+                    
+                    if (response.data && Array.isArray(response.data)) {
+                        $.each(response.data, function (index, state) {
+                            stateSelect.append(
+                                `<option value="${state.id}">${state.name}</option>`
+                            );
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Error loading states:', xhr);
+                    stateSelect
+                        .empty()
+                        .append('<option value="">Error loading states</option>');
+                }
+            });
+        } else {
+            stateSelect
+                .empty()
+                .append('<option value="">Select State</option>');
+        }
+    });
+    
+    console.log('Validation system initialized');
+});
 </script>
 <script>
     const toggle = document.getElementById('account_status_toggle');

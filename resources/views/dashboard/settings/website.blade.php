@@ -719,7 +719,7 @@
                                 <div class="col-md-4">
                                     <label>Rate</label>
                                     <select name="rate" class="form-select">
-                                        <option value="">Select rate</option>
+                                        <option value="" selected disabled>Select rate</option>
                                         @for($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }} ★</option>
                                             @endfor
                                     </select>
