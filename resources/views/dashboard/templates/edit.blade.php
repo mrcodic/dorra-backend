@@ -124,7 +124,7 @@
 
 
                         <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
-                            <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
+                            <button type="reset" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
                             <div class="d-flex gap-1">
                                 <a href="{{ config(" services.editor_url")."templates/".$model->id}}"
                                     class="btn btn-outline-secondary fs-5 "
@@ -159,6 +159,19 @@
 
 @section('page-script')
 <script>
+
+
+
+    // store initial values when page loads
+    const originalProducts = $('#productsSelect').val();
+    const originalTags = $('#tagsSelect').val();
+
+    document.getElementById('cancelButton').addEventListener('click', function (e) {
+        $('#productsSelect').val(originalProducts).trigger('change');
+        $('#tagsSelect').val(originalTags).trigger('change');
+    });
+
+
     document.addEventListener('DOMContentLoaded', function () {
             const checkboxes = document.querySelectorAll('.type-checkbox');
 
@@ -196,23 +209,7 @@
         });
 </script>
 
-<script !src="">
-    $('#cancelButton').on('click', function(e) {
-            e.preventDefault();
 
-            // Reset the form inputs to initial values
-            $('#editTemplateForm')[0].reset();
-
-            // Reset all select2 fields inside the form to their original values
-            $('#editTemplateForm').find('.select2').each(function() {
-                var $select = $(this);
-                // Get the option with selected attribute from original HTML
-                var originalVal = $select.find('option[selected]').val() || '';
-                $select.val(originalVal).trigger('change');
-            });
-        });
-
-</script>
 <script !src="">
     handleAjaxFormSubmit("#editTemplateForm", {
             successMessage: "Template updated successfully",
