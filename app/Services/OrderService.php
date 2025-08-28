@@ -587,7 +587,7 @@ class OrderService extends BaseService
                             'spec_name' => $spec->productSpecification?->name,
                             'option_name' => $spec->productSpecificationOption?->value,
                             'option_price' => $spec->productSpecificationOption?->price,
-                            'product_specification_id' => $spec->id,
+                            'product_specification_id' => $spec->productSpecification->id,
                             'spec_option_id' => $spec->productSpecificationOption->id,
                         ]);
                     });
