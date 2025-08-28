@@ -277,6 +277,7 @@ $(document).ready(function () {
                 $("#add-upload-progress .progress-bar").css("width", "0%");
 
                 $(".category-list-table").DataTable().ajax.reload(); // reload your table
+                location.reload();
             },
             error: function (xhr) {
                 var errors = xhr.responseJSON.errors;
