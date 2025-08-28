@@ -105,7 +105,7 @@ class CartService extends BaseService
             ->with([
                 'items.product','items.itemable' => function ($query) {
                 $query->select(['id','name']);
-            }])
+            },'items.itemable.products'])
             ->first();
     }
 

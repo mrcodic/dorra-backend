@@ -140,7 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('bulk-restore', 'bulkRestore');
     });
 
-    Route::apiResource('reviews', ReviewController::class)->only(['show', 'store']);
+    Route::post('reviews', [ReviewController::class,'store']);
     Route::get('reviews-statistics/{reviewable_id}', [ReviewController::class,'statistics']);
 
 
@@ -178,6 +178,7 @@ Route::prefix("landing/")->controller(LandingController::class)->group(function 
     Route::get('reviews-without-images', 'reviewsWithoutImages');
     Route::get('faqs', 'faqs');
 });
+Route::get('reviews/{product_id}', [ReviewController::class,'show']);
 
 //});
 

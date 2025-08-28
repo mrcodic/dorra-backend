@@ -43,6 +43,12 @@ class PaymentController extends Controller
         ]);
         $order = $this->orderRepository->query()->find($request->get('order_id'));
         $cart = $this->cartService->getCurrentUserOrGuestCart();
+        $cart->items()->createMany($order->orderItems->toArray());
+        collect($order->orderItems)->each(function ($orderItem) use ($cart) {
+            $cartItem = $cart->items()->create($orderItem->toArray());
+            $cartItem->specs()->createMany($orderItem->specs->toArray());
+        });
+
         dd($cart, $order);
 
 //        $order->orderItems
