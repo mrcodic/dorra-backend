@@ -94,7 +94,7 @@ class AuthService
         $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
         $user->token = $plainTextToken;
         $cookieValue = request()->cookie('cookie_id');
-
+        $user->update(['last_login_at' => now()]);
         if ($cookieValue) {
             $guest = $this->guestRepository->query()
                 ->where('cookie_value', $cookieValue)
