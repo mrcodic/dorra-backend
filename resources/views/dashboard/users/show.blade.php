@@ -181,7 +181,7 @@
                                 <!-- Single Review -->
                                 <div class="review-wrapper" data-review-id="{{ $review->id }}">
                                     <div class="d-flex align-items-center gap-1 mb-2">
-                                        <img src="{{$review->product->getMainImageUrl() }}" alt="Avatar"
+                                        <img src="{{$review->reviewable->getMainImageUrl() }}" alt="Avatar"
                                             class="rounded-circle" width="50" height="50">
                                         <div>
                                             <div class="fw-bold text-dark fs-4">{{ $review->review }}</div>
