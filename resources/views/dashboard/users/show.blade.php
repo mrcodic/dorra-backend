@@ -131,7 +131,7 @@
                                 <div class="mb-2">
                                     <h3 class="fs-16 text-black">Items</h3>
                                     <!-- Item 1 -->
-                                    @foreach($orderItems = $order->orderItems->sortByDesc('created_at')as $item)
+                                    @foreach($order->orderItems->sortByDesc('created_at') as $item)
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <div class="d-flex align-items-start gap-2">
                                             <img src="{{$item->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($item->itemable)))) }}"
