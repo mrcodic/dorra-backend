@@ -606,7 +606,7 @@ class OrderService extends BaseService
             if ($selectedPaymentMethod->code == 'cash_on_delivery')
             {
                 return [
-                    'order' => ['id' => $order->id, 'order_number' => $order->order_number],
+                    'order' => ['id' => $order->id, 'number' => $order->order_number],
                     'paymentDetails' => []
                 ];
             }
