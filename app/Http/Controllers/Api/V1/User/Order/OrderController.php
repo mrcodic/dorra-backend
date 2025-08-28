@@ -69,4 +69,9 @@ class OrderController extends Controller
     {
         return Response::api(data: $this->orderService->orderStatuses());
     }
+
+    public function cancelOrder($id)
+    {
+     $this->orderService->cancelOrder($id);
+    }
 }

@@ -146,9 +146,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('trash', [MainController::class, 'trash'])->name('trash');
 
     Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
+    Route::post('cancel-order/{order}', [OrderController::class, 'cancelOrder']);
+    Route::post('buy-order-again', [PaymentController::class, 'buyOrderAgain']);
+
     Route::get('tags', [MainController::class, 'tags'])->name('tags');
 
-    Route::post('buy-order-again', [PaymentController::class, 'buyOrderAgain']);
 });
 
 Route::get('templates', [TemplateController::class, 'index']);
