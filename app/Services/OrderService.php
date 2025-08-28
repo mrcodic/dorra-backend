@@ -601,8 +601,15 @@ class OrderService extends BaseService
             }
             return $order;
         });
-        if ($request->payment_method_id) {
+
             $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
+            if ($selectedPaymentMethod->code == 'cash_on_delivery')
+            {
+                return [
+                    'order' => ['id' => $order->id, 'order_number' => $order->order_number],
+                    'paymentDetails' => []
+                ];
+            }
             $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
             $dto = PaymentRequestData::fromArray(['order' => $order,
                 'user' => auth('sanctum')->user(),
@@ -616,12 +623,8 @@ class OrderService extends BaseService
                 'paymentDetails' => $paymentDetails,
             ];
         }
-        return [
-            'order' => ['id' => $order->id, 'order_number' => $order->order_number],
-            'paymentDetails' => []
-        ];
 
-    }
+
 
     public function trackOrder($id)
     {
