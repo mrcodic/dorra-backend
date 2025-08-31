@@ -65,10 +65,11 @@ class AuthService
             $firstName = $nameParts[0] ?? '';
             $lastName = $nameParts[1] ?? '';
             $email = $googleUser->getEmail();
-            $this->socialAccountRepository->updateOrCreate(['user_id' => $user?->id, 'provider' => 'google',], [
+            $this->socialAccountRepository->updateOrCreate(['email' => $email, 'provider' => 'google',], [
                 'provider_id' => $googleUser->getId(),
                 'first_name' => $firstName,
                 'email' => $email,
+                'user_id' => $user?->id,
                 'last_name' => $lastName,
             ]);
 
