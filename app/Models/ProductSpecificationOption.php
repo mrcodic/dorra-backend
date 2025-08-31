@@ -31,17 +31,17 @@ class ProductSpecificationOption extends Model implements HasMedia
                         $cartItem = $item->cartItem;
 
                         if ($cartItem) {
-                            $newSpecsPrice = collect($cartItem->specs)
+                            $newSpecsPrice = $cartItem->specs
                                 ->map(fn ($spec) => $spec->productSpecificationOption?->price ?? 0)
                                 ->sum();
 
                             $cartItem->update([
                                 'specs_price' => $newSpecsPrice,
-                                'sub_total'   => $cartItem->product->has_custom_prices
-                                    ? $cartItem->product_price + $newSpecsPrice
-                                    : ($cartItem->product_price * $cartItem->quantity) + $newSpecsPrice,
+                                'sub_total'   => $cartItem->product->has_custom_prices ?
+                                      $cartItem->product_price + $newSpecsPrice
+                                    : ($cartItem->product_price * $cartItem->quantity) + $newSpecsPrice
+                                ,
                             ]);
-
                         }
                     });
 

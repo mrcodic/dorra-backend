@@ -19,6 +19,7 @@ class OrderItem extends Model
         'specs_price',
         'sub_total',
         'product_price',
+        'product_price_id',
         'quantity'
     ];
     public function totalPrice(): Attribute
