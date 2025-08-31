@@ -74,7 +74,6 @@ class AuthService
                 'provider_id' => $googleUser->getId(),
                 'first_name' => $firstName,
                 'email' => $email,
-                'user_id' => $user?->id,
                 'last_name' => $lastName,
             ]);
             $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(10))->plainTextToken;
