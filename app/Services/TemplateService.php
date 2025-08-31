@@ -123,6 +123,15 @@ class TemplateService extends BaseService
         if (isset($validatedData['back_base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
         }
+        if (isset($validatedData['template_image_id']))
+        {
+            Media::where('id', $validatedData['template_image_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id'   => $model->id,
+                    'collection_name' => 'template_model_image',
+                ]);
+        }
         return $model->load($relationsToLoad);
     }
 

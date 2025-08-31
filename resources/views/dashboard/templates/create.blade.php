@@ -21,6 +21,21 @@
                         @csrf
                         <div class="flex-grow-1">
                             <div class="">
+                                <div class="form-group mb-2">
+                                    <label class="label-text mb-1">Template Model Image</label>
+
+                                    <!-- Dropzone Container -->
+                                    <div id="template-dropzone" class="dropzone border rounded p-3"
+                                         style="cursor:pointer; min-height:150px;">
+                                        <div class="dz-message" data-dz-message>
+                                            <span>Drop image here or click to upload</span>
+                                        </div>       <!-- Hidden input for uploaded file ID -->
+                                        <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
+                                    </div>
+
+
+
+                                </div>
 
                                 <div class="form-group mb-2">
                                     <label class="label-text mb-1">Template Type</label>
@@ -213,7 +228,51 @@
 @endsection
 
 @section('page-script')
-<script>
+    <script>
+        Dropzone.autoDiscover = false;
+
+        const templateDropzone = new Dropzone("#template-dropzone", {
+            url: "{{ route('media.store') }}", // your Laravel media upload route
+            paramName: "file",
+            maxFiles: 1,
+            maxFilesize: 1, // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop image here or click to upload",
+            init: function () {
+                this.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedTemplateImage").value = response.data.id;
+                    }
+                });
+
+                this.on("removedfile", function (file) {
+                    document.getElementById("uploadedTemplateImage").value = "";
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        // Manual remove button
+        document.getElementById("remove-template-image").addEventListener("click", function () {
+            templateDropzone.removeAllFiles(true);
+            document.getElementById("uploadedTemplateImage").value = "";
+            document.getElementById("uploaded-template-preview").classList.add("d-none");
+        });
+    </script>
+
+    <script>
     document.addEventListener('DOMContentLoaded', function () {
             const checkboxes = document.querySelectorAll('.type-checkbox');
 
