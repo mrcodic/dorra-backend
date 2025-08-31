@@ -48,6 +48,13 @@ Route::prefix('login')->controller(LoginController::class)->group(function () {
     Route::get('/apple/callback', 'appleCallback');
 });
 
+Route::controller(PaymentController::class)->group(function () {
+    Route::get('payment-methods', 'paymentMethods');
+    Route::post('buy-order-again', 'buyOrderAgain');
+    Route::post('payment/callback', 'handleCallback');
+    Route::get('payment/redirect', 'handleRedirect');
+});
+
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::post('contact-us', [MainController::class, 'contactUs'])->name('contact-us');
     Route::get('country-codes', [MainController::class, 'countryCodes']);
@@ -154,12 +161,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('templates', [TemplateController::class, 'index']);
     Route::get('templates/{template}', [TemplateController::class, 'show']);
 
-    Route::controller(PaymentController::class)->group(function () {
-        Route::get('payment-methods', 'paymentMethods');
-        Route::post('buy-order-again', 'buyOrderAgain');
-        Route::post('payment/callback', 'handleCallback');
-        Route::get('payment/redirect', 'handleRedirect');
-    });
+
 
     Route::prefix('invitations/')->controller(InvitationController::class)->group(function () {
         Route::post('send', 'send')->name('invitation.send');
