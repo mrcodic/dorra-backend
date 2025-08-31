@@ -41,6 +41,10 @@ class AuthService
         if (!empty($validatedData['image'])) {
             handleMediaUploads($validatedData['image'], $user);
         }
+        $socialAccount = $this->socialAccountRepository->query()->whereEmail($validatedData['email'])->first();
+        if (!empty($socialAccount)) {
+            $socialAccount->update(['user_id' => $user->id]);
+        }
         $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
         $user->token = $plainTextToken;
         return $user;

@@ -28,7 +28,7 @@ return new class extends Migration
         Schema::table('social_accounts', function (Blueprint $table) {
             $table->dropColumn('first_name');
             $table->dropColumn('last_name');
-//            $table->dropColumn('email');
+            $table->dropColumn('email');
         });
     }
 };
