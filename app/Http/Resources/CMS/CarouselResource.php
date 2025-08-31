@@ -17,13 +17,18 @@ class CarouselResource extends JsonResource
     {
         return [
             'id' => $this->when(isset($this->id), $this->id),
-            'title' => $this->when($this->getTranslation('title') !== null, $this->getTranslation('title')),
-            'subtitle' => $this->when($this->getTranslation('subtitle') !== null, $this->getTranslation('subtitle')),
-            'site_image' =>  $this->getFirstMediaUrl("carousels"),
-            'mobile_image' =>  $this->getFirstMediaUrl("mobile_carousels"),
-//            'mobile_image' =>  $this->getFirstMediaUrl("mobile_carousels"),
+            'title' => $this->when(
+                $this->getTranslation('title', app()->getLocale()) !== null,
+                $this->getTranslation('title', app()->getLocale())
+            ),
+            'subtitle' => $this->when(
+                $this->getTranslation('subtitle', app()->getLocale()) !== null,
+                $this->getTranslation('subtitle', app()->getLocale())
+            ),
+            'site_image' => $this->getFirstMediaUrl("carousels"),
+            'mobile_image' => $this->getFirstMediaUrl("mobile_carousels"),
             'product' => ProductResource::make($this->whenLoaded('product')),
-
         ];
+
     }
 }
