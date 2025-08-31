@@ -19,7 +19,6 @@ class OtpController extends Controller
 
     public function sendRegistrationOtp(Request $request, SocialAccountRepositoryInterface $socialAccountRepository)
     {
-
         $validatedData = $request->validate([
             'email' => [
                 'required',

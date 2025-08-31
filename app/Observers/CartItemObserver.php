@@ -25,11 +25,15 @@ class CartItemObserver
     {
 //        if ($cartItem->wasChanged('quantity')) {
             if ($cartItem->product->has_custom_prices) {
-                $subTotal = $cartItem->product_price + $cartItem->specs_price;
+                $subTotal = ($cartItem->productPrice?->price ?? $cartItem->product_price) +( $cartItem->specs->each(function ($item) {
+                    return $item->productSpecificationOption->price;
+                })->sum() ?? $cartItem->specs_price);
                 $cartItem->sub_total = $subTotal;
                 $cartItem->saveQuietly();
             } else {
-                $subTotal = ($cartItem->product_price + $cartItem->specs_price )* $cartItem->quantity;
+                $subTotal = (($cartItem->product->base_price ?? $cartItem->product_price )+ ($cartItem->specs->each(function ($item) {
+                            return $item->productSpecificationOption->price;
+                        })->sum() ?? $cartItem->specs_price) )* $cartItem->quantity;
                 $cartItem->sub_total = $subTotal;
                 $cartItem->saveQuietly();
             }

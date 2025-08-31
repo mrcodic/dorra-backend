@@ -66,8 +66,9 @@ class CartService extends BaseService
                 Arr::get($priceDetails, 'quantity'),
                 $priceDetails['specs_sum'],
                 $priceDetails['product_price'],
+                $priceDetails['product_price_id'],
                 $priceDetails['sub_total'],
-                $product
+                $product,
             );
 
             $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
@@ -289,6 +290,7 @@ class CartService extends BaseService
             'product_price' => $basePrice,
             'specs_sum' => $specsSum,
             'sub_total' => $subTotal,
+            'product_price_id' => $productPrice?->id,
         ];
         $quantity = $productPrice?->quantity;
         if ($quantity) {

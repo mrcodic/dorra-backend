@@ -21,6 +21,7 @@ class CartItem extends Model
         'specs_price',
         'sub_total',
         'product_price',
+        'product_price_id',
         'quantity'
     ];
     protected $table = 'cart_items';
@@ -38,6 +39,10 @@ class CartItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+    public function productPrice(): BelongsTo
+    {
+        return $this->belongsTo(ProductPrice::class);
     }
 
     public function specs(): HasMany
