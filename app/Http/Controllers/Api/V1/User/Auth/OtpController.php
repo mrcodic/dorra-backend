@@ -7,6 +7,7 @@ use App\Enums\HttpEnum;
 use App\Enums\OtpTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Repositories\Interfaces\SocialAccountRepositoryInterface;
 use App\Traits\OtpTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -15,10 +16,14 @@ class OtpController extends Controller
 {
     use OtpTrait;
 
-    public function sendRegistrationOtp(Request $request)
+    public function sendRegistrationOtp(Request $request, SocialAccountRepositoryInterface $socialAccountRepository)
     {
-       $validatedData= $request->validate(['email' => 'required|email|exists:users,email',
-        ]);
+       $validatedData= $request->validate(['email' => ['required','email',function ($attribute, $value, $fail,) use ($socialAccountRepository) {
+           $socialUser = $socialAccountRepository->query()->where('email', $value)->first();
+           if (!empty($socialUser)) {
+               $fail("This email is already registered");
+           }
+       }]]);
         return $this->sendOtpResponse($validatedData['email'], OtpTypeEnum::REGISTRATION);
     }
 
