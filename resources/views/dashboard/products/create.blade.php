@@ -770,12 +770,6 @@
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedImageMain").value = response.data.id;
 
-                        // show preview
-                        const preview = document.querySelector("#uploaded-image-main");
-                        preview.classList.remove("d-none");
-                        preview.querySelector("img").src = response.data.url;
-                        preview.querySelector(".file-name").innerText = file.name;
-                        preview.querySelector(".file-size").innerText = (file.size / 1024).toFixed(1) + " KB";
                     }
                 });
 
