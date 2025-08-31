@@ -23,34 +23,29 @@ class CartItemObserver
      */
     public function updated(CartItem $cartItem): void
     {
-//        if ($cartItem->wasChanged('quantity')) {
-            if ($cartItem->product->has_custom_prices) {
-                $subTotal = ($cartItem->productPrice?->price ?? $cartItem->product_price) +( $cartItem->specs->each(function ($item) {
-                    return $item->productSpecificationOption->price;
-                })->sum() ?? $cartItem->specs_price);
-                $cartItem->sub_total = $subTotal;
-                $cartItem->saveQuietly();
-            } else {
-                $subTotal = (($cartItem->product->base_price ?? $cartItem->product_price )+ ($cartItem->specs->each(function ($item) {
-                            return $item->productSpecificationOption->price;
-                        })->sum() ?? $cartItem->specs_price) )* $cartItem->quantity;
-                $cartItem->sub_total = $subTotal;
-                $cartItem->saveQuietly();
-            }
+        $specsPrice = $cartItem->specs->sum(
+            fn($item) => $item->productSpecificationOption?->price ?? 0
+        );
 
-//        }
+        if ($cartItem->product->has_custom_prices) {
+            $subTotal = ($cartItem->productPrice?->price ?? $cartItem->product_price)
+                + ($specsPrice ?: $cartItem->specs_price);
+        } else {
+            $subTotal = (
+                    ($cartItem->product->base_price ?? $cartItem->product_price)
+                    + ($specsPrice ?: $cartItem->specs_price)
+                ) * $cartItem->quantity;
+        }
+
+        $cartItem->sub_total = $subTotal;
+        $cartItem->saveQuietly();
 
         $cart = $cartItem->cart;
 
         if ($cartItem->wasChanged('sub_total')) {
-
-            $total = $cart->items()->sum('sub_total');
-
-            $cart->price = $total;
+            $cart->price = $cart->items()->sum('sub_total');
             $cart->saveQuietly();
-
         }
-
     }
 
 
