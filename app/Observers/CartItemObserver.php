@@ -16,6 +16,7 @@ class CartItemObserver
         $cart->update([
             'price' => $total
         ]);
+
     }
 
     /**

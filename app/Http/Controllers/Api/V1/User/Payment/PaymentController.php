@@ -51,7 +51,17 @@ class PaymentController extends Controller
                     ->where('product_id', $orderItem->product_id)
                     ->first();
                 if (!$existingCartItem) {
-                    $cartItem = $cart->items()->create($orderItem->toArray());
+                    if ($orderItem->product->has_custom_prices) {
+                        $subTotal = ($orderItem->productPrice?->price ?? $orderItem->product_price)
+                            + ($orderItem->specs_prices ?: $orderItem->specs_prices);
+                    } else {
+                        $subTotal = (
+                                ($orderItem->product->base_price ?? $orderItem->product_price)
+                                + ($orderItem->specs_prices ?: $orderItem->specs_prices)
+                            ) * $orderItem->quantity;
+                    }
+
+                    $cartItem = $cart->items()->create(array_merge( ['sub_total' => $subTotal] ,...$orderItem->toArray()));
                     $cartItem->specs()->createMany($orderItem->specs->toArray());
                 }
             });
