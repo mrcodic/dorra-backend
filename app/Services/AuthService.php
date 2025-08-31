@@ -57,10 +57,11 @@ class AuthService
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
             $user = $this->userRepository->findByEmail($googleUser->getEmail());
-            if (!$user) {
+
                 $nameParts = explode(' ', $googleUser->getName());
                 $firstName = $nameParts[0] ?? '';
                 $lastName = $nameParts[1] ?? '';
+                if (!$user) {
                 $user = $this->userRepository->create([
                     'first_name' => $firstName,
                     'last_name' => $lastName,
