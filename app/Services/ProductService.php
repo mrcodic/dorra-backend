@@ -208,138 +208,142 @@ class ProductService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-      return  $this->handleTransaction(function () use ($id, $validatedData) {
+        return $this->handleTransaction(function () use ($id, $validatedData) {
 
-        $product = $this->repository->update($validatedData, $id);
-        $product->load($this->relations);
-        $product->tags()->sync($validatedData['tags'] ?? []);
-        if (!empty($validatedData['dimensions'])) {
-            $product->dimensions()->sync($validatedData['dimensions']);
-        }
-        if (!empty($validatedData['custom_dimensions'])) {
-            collect($validatedData['custom_dimensions'])->each(function ($dimension) use ($product) {
-                $dimension = $this->dimensionRepository->create($dimension);
-                $product->dimensions()->sync($dimension->id);
-            });
-        }
-        if (request()->has('deleted_old_images')) {
-            collect(request()->deleted_old_images)->each(function ($id) {
-                Media::find($id)?->delete();
-            });
-        }
+            $product = $this->repository->update($validatedData, $id);
+            $product->load($this->relations);
 
-        if (isset($validatedData['base_price'])) {
-            $product->prices()->delete();
-        }
-        if (isset($validatedData['prices'])) {
+            // Sync tags
+            $product->tags()->sync($validatedData['tags'] ?? []);
+
+            // Sync existing dimensions
+            if (!empty($validatedData['dimensions'])) {
+                $product->dimensions()->sync($validatedData['dimensions']);
+            }
+
+            // Attach new custom dimensions
+            if (!empty($validatedData['custom_dimensions'])) {
+                collect($validatedData['custom_dimensions'])->each(function ($dimension) use ($product) {
+                    $dimension = $this->dimensionRepository->create($dimension);
+                    $product->dimensions()->attach($dimension->id);
+                });
+            }
+
+            // Delete old images if requested
+            if (request()->filled('deleted_old_images')) {
+                Media::whereIn('id', request()->deleted_old_images)->delete();
+            }
+
+            // Handle prices
+            if (isset($validatedData['prices'])) {
                 $product->update(['base_price' => null]);
                 $product->prices()->delete();
-                if ($validatedData['has_custom_prices']  && $product->has_custom_prices !== 1) {
+
+                // Update cart items if custom pricing changed
+                if (!empty($validatedData['has_custom_prices']) && $product->has_custom_prices !== 1) {
                     CartItem::where('product_id', $product->id)->get()
-                        ->each(function ($item) use ($product, $validatedData) {
-                            $item->update([
-                                'quantity' => $validatedData['prices'][0]['quantity'],
-                                'product_price' => $validatedData['prices'][0]['price'],
-                                'sub_total'  => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity']) + $item->specs_price - $item->cart->discount_amount,
-                            ]);
+                        ->each(function ($item) use ($validatedData) {
+                            $firstPrice = $validatedData['prices'][0] ?? null;
+                            if ($firstPrice) {
+                                $item->update([
+                                    'quantity'      => $firstPrice['quantity'],
+                                    'product_price' => $firstPrice['price'],
+                                    'sub_total'     => ($firstPrice['price'] * $firstPrice['quantity']) + $item->specs_price,
+                                ]);
+                            }
                         });
                 }
+
+                // Insert new prices
                 collect($validatedData['prices'])->each(function ($price) use ($product) {
                     $product->prices()->create([
-                        'price' => $price['price'],
+                        'price'    => $price['price'],
                         'quantity' => $price['quantity'],
                     ]);
                 });
+            } elseif (isset($validatedData['base_price'])) {
+                // reset custom prices if only base price is provided
+                $product->prices()->delete();
+            }
 
-
-
-        }
-        if (isset($validatedData['specifications'])) {
-            collect($validatedData['specifications'])->each(function ($specification) use ($product) {
-                $productSpecification = $product->specifications()->updateOrCreate(
-                    [
-                        'name->en' => $specification['name_en'],
-                        'name->ar' => $specification['name_ar'],
-                    ],
-                    [
-                        'name' => [
-                            'en' => $specification['name_en'],
-                            'ar' => $specification['name_ar'],
+            // Handle specifications
+            if (isset($validatedData['specifications'])) {
+                collect($validatedData['specifications'])->each(function ($specification) use ($product) {
+                    $productSpecification = $product->specifications()->updateOrCreate(
+                        [
+                            'name->en' => $specification['name_en'],
+                            'name->ar' => $specification['name_ar'],
                         ],
-                    ]
-                );
-
-                if (isset($specification['specification_options'])) {
-                    collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
-                        $productOption = $productSpecification->options()->updateOrCreate(
-                            [
-                                'value->en' => $option['value_en'],
-                                'value->ar' => $option['value_ar'],
+                        [
+                            'name' => [
+                                'en' => $specification['name_en'],
+                                'ar' => $specification['name_ar'],
                             ],
-                            [
-                                'value' => [
-                                    'en' => $option['value_en'],
-                                    'ar' => $option['value_ar'],
+                        ]
+                    );
+
+                    if (!empty($specification['specification_options'])) {
+                        collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
+                            $productOption = $productSpecification->options()->updateOrCreate(
+                                [
+                                    'value->en' => $option['value_en'],
+                                    'value->ar' => $option['value_ar'],
                                 ],
-                                'price' => $option['price'] ?? 0,
-                            ]
-                        );
-                        if (isset($option['option_image'])) {
-                            Media::where('id', $option['option_image'])
-                                ->update([
-                                    'model_type' => get_class($productOption),
-                                    'model_id'   => $productOption->id,
-                                    'collection_name' => 'productSpecificationOptions',
-                                ]);
-                        }
+                                [
+                                    'value' => [
+                                        'en' => $option['value_en'],
+                                        'ar' => $option['value_ar'],
+                                    ],
+                                    'price' => $option['price'] ?? 0,
+                                ]
+                            );
 
-                    });
-                }
-
-            });
-
-        } else {
-            $product->specifications->each(function ($spec) {
-                $spec->options->each(function ($option) {
-                    $option->clearMediaCollection();
-                    $option->delete();
+                            if (!empty($option['option_image'])) {
+                                Media::where('id', $option['option_image'])
+                                    ->update([
+                                        'model_type'      => get_class($productOption),
+                                        'model_id'        => $productOption->id,
+                                        'collection_name' => 'productSpecificationOptions',
+                                    ]);
+                            }
+                        });
+                    }
                 });
-                $spec->delete();
-            });
-        }
+            }
 
-        if (isset($validatedData['image_id'])) {
-            Media::where('id', $validatedData['image_id'])
-                ->update([
-                    'model_type' => get_class($product),
-                    'model_id'   => $product->id,
-                    'collection_name' => 'product_main_image',
-                ]);
-
-        }
-        if (isset($validatedData['images_ids'])) {
-            Media::whereCollectionName('product_extra_images')->delete();
-            collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
-                Media::where('id', $imageId)
+            // Main product image
+            if (!empty($validatedData['image_id'])) {
+                Media::where('id', $validatedData['image_id'])
                     ->update([
-                        'model_type' => get_class($product),
-                        'model_id' => $product->id,
-                        'collection_name' => 'product_extra_images',
+                        'model_type'      => get_class($product),
+                        'model_id'        => $product->id,
+                        'collection_name' => 'product_main_image',
                     ]);
-            });
-        }
-          if (isset($validatedData['image_model_id']))
-          {
-              $product->clearMediaCollection('product_model_image');
+            }
 
-              Media::where('id', $validatedData['image_model_id'])
-                  ->update([
-                      'model_type' => get_class($product),
-                      'model_id'   => $product->id,
-                      'collection_name' => 'product_model_image',
-                  ]);
-          }
-        return $product;
+            // Extra product images
+            if (!empty($validatedData['images_ids'])) {
+                // Instead of deleting all → only reassign provided ones
+                Media::whereIn('id', $validatedData['images_ids'])->update([
+                    'model_type'      => get_class($product),
+                    'model_id'        => $product->id,
+                    'collection_name' => 'product_extra_images',
+                ]);
+            }
+
+            // Product model image
+            if (!empty($validatedData['image_model_id'])) {
+                $product->clearMediaCollection('product_model_image');
+
+                Media::where('id', $validatedData['image_model_id'])
+                    ->update([
+                        'model_type'      => get_class($product),
+                        'model_id'        => $product->id,
+                        'collection_name' => 'product_model_image',
+                    ]);
+            }
+
+            return $product;
         });
     }
 
