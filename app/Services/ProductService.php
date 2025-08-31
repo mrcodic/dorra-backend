@@ -330,6 +330,8 @@ class ProductService extends BaseService
         }
           if (isset($validatedData['image_model_id']))
           {
+              $product->clearMediaCollection('product_model_image');
+
               Media::where('id', $validatedData['image_model_id'])
                   ->update([
                       'model_type' => get_class($product),

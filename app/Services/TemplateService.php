@@ -149,6 +149,16 @@ class TemplateService extends BaseService
             if (!empty($validatedData['tags'])) {
                 $model->tags()->sync($validatedData['tags']);
             }
+            if (isset($validatedData['template_image_id']))
+            {
+                $model->clearMediaCollection('template_model_image');
+                Media::where('id', $validatedData['template_image_id'])
+                    ->update([
+                        'model_type' => get_class($model),
+                        'model_id'   => $model->id,
+                        'collection_name' => 'template_model_image',
+                    ]);
+            }
             return $model;
         });
         if (isset($validatedData['base64_preview_image'])) {

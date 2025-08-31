@@ -47,6 +47,8 @@ class UpdateTemplateRequest extends BaseRequest
             'status' => ["required","integer","in:".StatusEnum::getValuesAsString()],
             'product_ids' => ['required', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
+            'template_image_id' => ['required','exists:media,id'],
+
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],
