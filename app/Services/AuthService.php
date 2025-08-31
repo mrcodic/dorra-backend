@@ -60,11 +60,13 @@ class AuthService
             $nameParts = explode(' ', $googleUser->getName());
             $firstName = $nameParts[0] ?? '';
             $lastName = $nameParts[1] ?? '';
+            $email =  $googleUser->getEmail();
+
             if (!$user) {
                 $user = $this->userRepository->create([
                     'first_name' => $firstName,
                     'last_name' => $lastName,
-                    'email' => $googleUser->getEmail(),
+                    'email' => $email,
                     'password' => str()->random(16),
                     'email_verified_at' => now(),
                 ]);
@@ -73,6 +75,7 @@ class AuthService
                 'provider_id' => $googleUser->getId(),
                 'first_name' => $firstName,
                 'last_name' => $lastName,
+                'email' => $email,
             ]);
 
             $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(10))->plainTextToken;
