@@ -196,6 +196,8 @@
                 size: {{ $media->size ?? 12345 }},
                 _hiddenInputId: "{{ $media->id }}"
             };
+            document.getElementById("uploadedTemplateImage").value = "{{ $media->id }}";
+
 
             dz.emit("addedfile", modelMockFile);
             dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
