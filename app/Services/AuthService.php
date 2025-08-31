@@ -56,19 +56,27 @@ class AuthService
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
-            $user = $this->userRepository->query()->whereEmail($googleUser->getEmail())->first();
+            $user = $this->userRepository->findByEmail($googleUser->getEmail());
             $nameParts = explode(' ', $googleUser->getName());
             $firstName = $nameParts[0] ?? '';
             $lastName = $nameParts[1] ?? '';
             $email = $googleUser->getEmail();
-            $this->socialAccountRepository->updateOrCreate(['email' => $email, 'provider' => 'google',], [
+
+            if (!$user) {
+                $user = $this->userRepository->create([
+                    'first_name' => $firstName,
+                    'last_name'  => $lastName,
+                    'email'      => $email,
+                    'password'   => bcrypt(str()->random(16)),
+                ]);
+            }
+            $this->socialAccountRepository->updateOrCreate(['user_id' => $user->id, 'provider' => 'google',], [
                 'provider_id' => $googleUser->getId(),
                 'first_name' => $firstName,
                 'email' => $email,
                 'user_id' => $user?->id,
                 'last_name' => $lastName,
             ]);
-
             $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(10))->plainTextToken;
             $user->token = $plainTextToken;
 
