@@ -57,11 +57,10 @@ class AuthService
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
             $user = $this->userRepository->findByEmail($googleUser->getEmail());
-
-                $nameParts = explode(' ', $googleUser->getName());
-                $firstName = $nameParts[0] ?? '';
-                $lastName = $nameParts[1] ?? '';
-                if (!$user) {
+            $nameParts = explode(' ', $googleUser->getName());
+            $firstName = $nameParts[0] ?? '';
+            $lastName = $nameParts[1] ?? '';
+            if (!$user) {
                 $user = $this->userRepository->create([
                     'first_name' => $firstName,
                     'last_name' => $lastName,
@@ -75,17 +74,17 @@ class AuthService
                 'first_name' => $firstName,
                 'last_name' => $lastName,
             ]);
-            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
+
+            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(10))->plainTextToken;
             $user->token = $plainTextToken;
+
             return $user;
 
-        }
-         catch (Exception $exception) {
-            Log::error('failed To Login',[$exception->getMessage()]);
+        } catch (Exception $exception) {
+            Log::error($exception->getMessage());
             return false;
         }
     }
-
     public function login($validatedData): ?User
     {
         $user = $this->userRepository->findByEmail($validatedData['email']);
