@@ -11,6 +11,7 @@ use App\Repositories\Interfaces\SocialAccountRepositoryInterface;
 use App\Traits\OtpTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Validation\Rule;
 
 class OtpController extends Controller
 {
@@ -18,7 +19,16 @@ class OtpController extends Controller
 
     public function sendRegistrationOtp(Request $request, SocialAccountRepositoryInterface $socialAccountRepository)
     {
-       $validatedData= $request->validate(['email' => ['required','email','exists:users,email']]);
+
+        $validatedData = $request->validate([
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email'),
+                Rule::unique('social_accounts', 'email'),
+            ],
+        ]);
+
         return $this->sendOtpResponse($validatedData['email'], OtpTypeEnum::REGISTRATION);
     }
 
