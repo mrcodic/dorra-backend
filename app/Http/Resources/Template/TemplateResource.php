@@ -41,7 +41,9 @@ class TemplateResource extends JsonResource
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
             'is_add_to_cart' => $this->canBeAddedToCart(),
-            'colors' => $this->colors
+            'colors' => $this->colors,
+            'template_model_image' => $this->getFirstMediaUrl('template_model_image'),
+
 
         ];
     }
