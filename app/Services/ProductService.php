@@ -328,6 +328,15 @@ class ProductService extends BaseService
                     ]);
             });
         }
+          if (isset($validatedData['image_model_id']))
+          {
+              Media::where('id', $validatedData['image_model_id'])
+                  ->update([
+                      'model_type' => get_class($product),
+                      'model_id'   => $product->id,
+                      'collection_name' => 'product_model_image',
+                  ]);
+          }
         return $product;
         });
     }

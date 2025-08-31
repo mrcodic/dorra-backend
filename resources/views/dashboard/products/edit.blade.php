@@ -94,6 +94,46 @@
                         </span>
                                             </div>
                                         </div>
+                                        <!-- Model Image Upload -->
+                                        <div class="col-md-12">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text" for="product-image-main">
+                                                    Category Model Image (main)*
+                                                </label>
+
+                                                <!-- Dropzone Container -->
+                                                <div id="product-model-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <span>Drop image here or click to upload</span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- ✅ Hidden input outside Dropzone -->
+                                                <input type="hidden" name="image_model_id" id="uploadedImageModel">
+
+                                                <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 512x512 px
+                                            </span>
+
+                                                <!-- Uploaded Image Preview -->
+                                                <div id="uploaded-image-model"
+                                                     class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                                                    <img src="" alt="Uploaded" class="img-fluid rounded"
+                                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                                    <div id="file-details" class="file-details">
+                                                        <div class="file-name fw-bold"></div>
+                                                        <div class="file-size text-muted small"></div>
+                                                    </div>
+                                                    <button type="button" id="remove-image"
+                                                            class="btn btn-sm position-absolute text-danger"
+                                                            style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                        <i data-feather="trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
 
                                         <!-- Multiple Images Upload -->
                                         <div class="col-md-12">
@@ -690,11 +730,11 @@
             }
         });
     </script>
-
     <script>
         Dropzone.autoDiscover = false;
 
-        const categoryDropzone = new Dropzone("#product-main-dropzone", {
+        // --- MAIN IMAGE DROPZONE ---
+        const mainDropzone = new Dropzone("#product-main-dropzone", {
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
@@ -722,7 +762,6 @@
                 dz.files.push(mainMockFile);
                 @endif
 
-                // ✅ On success: update hidden input with new ID
                 dz.on("success", function (file, response) {
                     if (response?.data?.id) {
                         file._hiddenInputId = response.data.id;
@@ -730,7 +769,6 @@
                     }
                 });
 
-                // ✅ On remove: clear hidden input + delete from server
                 dz.on("removedfile", function (file) {
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
@@ -739,8 +777,6 @@
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             }
                         });
-
-                        // Clear hidden input only if it matches the removed file
                         let hiddenInput = document.getElementById("uploadedImage");
                         if (hiddenInput.value == file._hiddenInputId) {
                             hiddenInput.value = "";
@@ -751,7 +787,60 @@
         });
 
 
+        // --- MODEL IMAGE DROPZONE ---
+        const modelDropzone = new Dropzone("#product-model-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            maxFilesize: 1, // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop image here or click to upload",
+            init: function () {
+                let dz = this;
+
+                // ✅ Show existing image if editing
+                @if(!empty($media = $model->getFirstMedia('product_model_image')))
+                let modelMockFile = {
+                    name: "{{ $media->file_name }}",
+                    size: {{ $media->size ?? 12345 }},
+                    _hiddenInputId: "{{ $media->id }}"
+                };
+
+                dz.emit("addedfile", modelMockFile);
+                dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
+                dz.emit("complete", modelMockFile);
+                dz.files.push(modelMockFile);
+                @endif
+
+                dz.on("success", function (file, response) {
+                    if (response?.data?.id) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedImageModel").value = response.data.id;
+                    }
+                });
+
+                dz.on("removedfile", function (file) {
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                        let hiddenInput = document.getElementById("uploadedImageModel");
+                        if (hiddenInput.value == file._hiddenInputId) {
+                            hiddenInput.value = "";
+                        }
+                    }
+                });
+            }
+        });
     </script>
+
 
 
 
