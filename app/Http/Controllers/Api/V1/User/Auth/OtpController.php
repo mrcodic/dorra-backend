@@ -17,7 +17,8 @@ class OtpController extends Controller
 
     public function sendRegistrationOtp(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate(['email' => 'required|email|exists:users,email',
+        ]);
         return $this->sendOtpResponse($request->email, OtpTypeEnum::REGISTRATION);
     }
 
