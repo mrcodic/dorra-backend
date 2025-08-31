@@ -17,8 +17,8 @@ class CarouselResource extends JsonResource
     {
         return [
             'id' => $this->when(isset($this->id), $this->id),
-            'title' => $this->when(isset($this->title), $this->title),
-            'subtitle' => $this->when(isset($this->subtitle), $this->subtitle),
+            'title' => $this->when($this->getTranslation('title') !== null, $this->getTranslation('title')),
+            'subtitle' => $this->when($this->getTranslation('subtitle') !== null, $this->getTranslation('subtitle')),
             'site_image' =>  $this->getFirstMediaUrl("carousels"),
             'mobile_image' =>  $this->getFirstMediaUrl("mobile_carousels"),
 //            'mobile_image' =>  $this->getFirstMediaUrl("mobile_carousels"),
