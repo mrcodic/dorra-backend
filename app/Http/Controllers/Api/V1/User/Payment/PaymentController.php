@@ -52,6 +52,7 @@ class PaymentController extends Controller
                     ->first();
                 if (!$existingCartItem) {
                     if ($orderItem->product->has_custom_prices) {
+                        dd($orderItem->productPrice?->price);
                         $subTotal = ($orderItem->productPrice?->price ?? $orderItem->product_price)
                             + ($orderItem->specs_prices ?: $orderItem->specs_prices);
                     } else {
