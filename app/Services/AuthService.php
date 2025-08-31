@@ -80,7 +80,7 @@ class AuthService
 
         }
          catch (Exception $exception) {
-            Log::error($exception->getMessage());
+            Log::error('failed To Login',[$exception->getMessage()]);
             return false;
         }
     }
