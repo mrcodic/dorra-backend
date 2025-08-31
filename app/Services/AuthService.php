@@ -65,16 +65,7 @@ class AuthService
             $firstName = $nameParts[0] ?? '';
             $lastName = $nameParts[1] ?? '';
             $email = $googleUser->getEmail();
-            if (!$user) {
-                $user = $this->userRepository->create([
-                    'first_name' => $firstName,
-                    'last_name' => $lastName,
-                    'email' => $email,
-                    'password' => str()->random(16),
-                    'email_verified_at' => now(),
-                ]);
-            }
-            $this->socialAccountRepository->updateOrCreate(['user_id' => $user->id, 'provider' => 'google',], [
+            $this->socialAccountRepository->updateOrCreate(['user_id' => $user?->id, 'provider' => 'google',], [
                 'provider_id' => $googleUser->getId(),
                 'first_name' => $firstName,
                 'email' => $email,

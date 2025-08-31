@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('provider');
             $table->string('provider_id');
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
