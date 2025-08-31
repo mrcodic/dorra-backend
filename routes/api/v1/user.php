@@ -31,7 +31,7 @@ use App\Http\Controllers\Shared\General\MainController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
-//Route::middleware(LocalizationMiddleware::class)->group(function () {
+Route::middleware(LocalizationMiddleware::class)->group(function () {
 Route::post('contact-us', [MainController::class, 'contactUs'])->name('contact-us');
 Route::get('country-codes', [MainController::class, 'countryCodes']);
 
@@ -182,6 +182,6 @@ Route::prefix("landing/")->controller(LandingController::class)->group(function 
 Route::get('reviews/{product_id}', [ReviewController::class,'show']);
 Route::get('reviews-statistics/{reviewable_id}', [ReviewController::class,'statistics']);
 
-//});
+});
 
 
