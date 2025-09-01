@@ -21,10 +21,9 @@ class CartItemSpec extends Model
         static::updated(fn ($item) => $item->recalculateCartItem());
     }
 
-    public function recalculateCartItem(): void
+    public function recalculateCartItem()
     {
         $cartItem = $this->cartItem;
-        dd($cartItem);
         if ($cartItem) {
             $newSpecsPrice = $cartItem->specs
                 ->map(fn ($spec) => $spec->productSpecificationOption?->price ?? 0)
