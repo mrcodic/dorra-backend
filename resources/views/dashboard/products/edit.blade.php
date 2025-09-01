@@ -458,7 +458,9 @@
                                                                 </div>
                                                             </div>
                                                         @empty
-                                                    
+                                                            <div data-repeater-item>
+                                                                <!-- empty fields -->
+                                                            </div>
                                                         @endforelse
                                                     </div>
 
