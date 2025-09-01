@@ -22,7 +22,7 @@ class ProductSpecificationOption extends Model implements HasMedia
     protected static function booted()
     {
         $callback = function (ProductSpecificationOption $specificationOption) {
-dd("sadsa");
+
                 CartItemSpec::where('spec_option_id', $specificationOption->id)
                     ->with('cartItem.specs.productSpecificationOption')
                     ->get()
@@ -33,7 +33,7 @@ dd("sadsa");
                             $newSpecsPrice = $cartItem->specs
                                 ->map(fn ($spec) => $spec->productSpecificationOption?->price ?? 0)
                                 ->sum();
-
+dd($newSpecsPrice);
                             $cartItem->update([
                                 'specs_price' => $newSpecsPrice,
                                 'sub_total'   => $cartItem->product->has_custom_prices ?
