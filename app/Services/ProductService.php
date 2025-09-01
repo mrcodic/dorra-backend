@@ -321,7 +321,7 @@ class ProductService extends BaseService
                     ]);
             });
         }
-          if (isset($validatedData['image_model_id']))
+          if (!empty($validatedData['image_model_id']))
           {
               $product->clearMediaCollection('product_model_image');
 

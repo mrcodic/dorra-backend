@@ -14,7 +14,7 @@ class ProductPrice extends Model
     ];
     protected static function booted()
     {
-        static::saved(function (ProductPrice $productPrice) {
+        $callback = function (ProductPrice $productPrice) {
             if ($productPrice->product->carts->isNotEmpty()) {
                 $product = $productPrice->product;
                 CartItem::where('product_id', $product->id)
@@ -22,6 +22,21 @@ class ProductPrice extends Model
                     ->get()
                     ->each(function ($item) use ($productPrice) {
                         $productPriceValue = $productPrice->price;
+                        $specsPrice = $item->specs->sum(
+                            fn($item) => $item->productSpecificationOption?->price ?? 0
+                        );
+                        if ($item->product->has_custom_prices) {
+                            $subTotal = ($item->productPrice?->price ?? $item->product_price)
+                                + ($specsPrice ?: $item->specs_price);
+                        } else {
+                            $subTotal = (
+                                    ($item->product->base_price ?? $item->product_price)
+                                    + ($specsPrice ?: $item->specs_price)
+                                ) * $item->quantity;
+                        }
+
+                        $item->sub_total = $subTotal;
+                        $item->saveQuietly();
 
                         if ((float)$productPriceValue < (float)$item->cart?->discount_amount && (float)$productPriceValue == $item->product_price)
                         {
@@ -33,7 +48,9 @@ class ProductPrice extends Model
                         }
                     });
             }
-        });
+        };
+        static::created($callback);
+        static::updated($callback);
 
 
     }
