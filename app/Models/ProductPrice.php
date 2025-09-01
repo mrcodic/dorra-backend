@@ -50,7 +50,7 @@ class ProductPrice extends Model
             }
         };
         static::created($callback);
-        static::updated($callback);
+        static::updating($callback);
 
 
     }
