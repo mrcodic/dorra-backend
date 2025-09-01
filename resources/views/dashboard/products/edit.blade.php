@@ -1119,8 +1119,10 @@
             const $specList = $('.outer-repeater').find('[data-repeater-list="specifications"]');
 
             $('.outer-repeater').repeater({
+                initEmpty: true,
                 repeaters: [{
                     selector: '.inner-repeater',
+                    initEmpty: true,
                     show: function () {
                         $(this).slideDown();
                         updateDeleteButtons($(this).closest('.outer-repeater'));
