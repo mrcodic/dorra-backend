@@ -346,21 +346,20 @@ class ProductService extends BaseService
                     ]);
             });
         }
-          if (!empty($validatedData['image_model_id']))
-          {
-              dd("SD");
-              $product->clearMediaCollection('product_model_image');
+          if (!empty($validatedData['image_model_id'])) {
+              $product->getMedia('product_model_image')
+                  ->where('id', '!=', $validatedData['image_model_id'])
+                  ->each->delete();
 
-            $media =  Media::where('id', $validatedData['image_model_id'])
+              Media::where('id', $validatedData['image_model_id'])
                   ->update([
-                      'model_type' => get_class($product),
-                      'model_id'   => $product->id,
+                      'model_type'      => get_class($product),
+                      'model_id'        => $product->id,
                       'collection_name' => 'product_model_image',
                   ]);
-            dd($media);
-
           }
-        return $product;
+
+          return $product;
         });
     }
 
