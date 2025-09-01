@@ -22,13 +22,14 @@ class ProductSpecificationOption extends Model implements HasMedia
     protected static function booted()
     {
         $callback = function (ProductSpecificationOption $specificationOption) {
-
+dd( CartItemSpec::where('spec_option_id', $specificationOption->id)
+    ->with('cartItem.specs.productSpecificationOption')
+    ->get());
                 CartItemSpec::where('spec_option_id', $specificationOption->id)
                     ->with('cartItem.specs.productSpecificationOption')
                     ->get()
                     ->each(function ($item) {
                         $cartItem = $item->cartItem;
-dd($cartItem);
                         if ($cartItem) {
                             $newSpecsPrice = $cartItem->specs
                                 ->map(fn ($spec) => $spec->productSpecificationOption?->price ?? 0)
