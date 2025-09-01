@@ -36,6 +36,7 @@ class OrderObserver
             $order->loadMissing(['paymentMethod', 'transactions']);
 
             if ($order->paymentMethod?->code === 'cash_on_delivery') {
+                dd("dsfdsfsd");
                 $order->transactions()
                     ->latest()
                     ->first()
