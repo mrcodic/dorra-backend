@@ -50,7 +50,14 @@ class ProductPrice extends Model
             }
         };
         static::saved($callback);
-//        static::updating($callback);
+        static::deleted(function (ProductPrice $productPrice) {
+            if ($productPrice->product->carts->isNotEmpty()) {
+                $product = $productPrice->product;
+                CartItem::where('product_id', $product->id)
+                    ->delete();
+            }
+
+        });
 
 
     }
