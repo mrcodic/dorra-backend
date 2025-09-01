@@ -315,7 +315,7 @@ class ProductService extends BaseService
                   $spec->delete();
               });
           } else {
-              
+
               $product->specifications->each(function ($spec) {
                   $spec->options->each(function ($option) {
                       $option->clearMediaCollection();
