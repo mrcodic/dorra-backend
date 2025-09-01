@@ -70,7 +70,7 @@ class UpdateProductRequest extends BaseRequest
                 'prohibited_if:has_custom_prices,false',
             ],
                 Rule::unique('product_prices', 'quantity')
-                    ->where(fn ($query) => $query->where('product_id', $id)) 
+                    ->where(fn ($query) => $query->where('product_id', $id))
                     ->ignore($id, 'product_id'),
             'prices.*.price' => ['nullable', 'integer', 'min:1'],
             'specifications' => ['sometimes', 'array'],
