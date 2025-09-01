@@ -36,7 +36,7 @@ class ProductPrice extends Model
                         }
 
                         $item->sub_total = $subTotal;
-                        $item->saveQuietly();
+                        $item->save();
 
                         if ((float)$productPriceValue < (float)$item->cart?->discount_amount && (float)$productPriceValue == $item->product_price)
                         {
