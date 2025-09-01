@@ -24,7 +24,6 @@ class ProductSpecificationOption extends Model implements HasMedia
         $callback = function (ProductSpecificationOption $specificationOption) {
             if ($specificationOption->wasChanged('price'))
             {
-                dd("safsd");
                 CartItemSpec::where('spec_option_id', $specificationOption->id)
                     ->with('cartItem.specs.productSpecificationOption')
                     ->get()

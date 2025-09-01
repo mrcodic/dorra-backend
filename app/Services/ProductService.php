@@ -255,60 +255,78 @@ class ProductService extends BaseService
           }
 
           if (isset($validatedData['specifications'])) {
-            collect($validatedData['specifications'])->each(function ($specification) use ($product) {
-                $productSpecification = $product->specifications()->updateOrCreate(
-                    [
-                        'name->en' => $specification['name_en'],
-                        'name->ar' => $specification['name_ar'],
-                    ],
-                    [
-                        'name' => [
-                            'en' => $specification['name_en'],
-                            'ar' => $specification['name_ar'],
-                        ],
-                    ]
-                );
 
-                if (isset($specification['specification_options'])) {
-                    collect($specification['specification_options'])->each(function ($option) use ($productSpecification) {
-                        $productOption = $productSpecification->options()->updateOrCreate(
-                            [
-                                'value->en' => $option['value_en'],
-                                'value->ar' => $option['value_ar'],
-                            ],
-                            [
-                                'value' => [
-                                    'en' => $option['value_en'],
-                                    'ar' => $option['value_ar'],
-                                ],
-                                'price' => $option['price'] ?? 0,
-                            ]
-                        );
-                        if (isset($option['option_image'])) {
-                            Media::where('id', $option['option_image'])
-                                ->update([
-                                    'model_type' => get_class($productOption),
-                                    'model_id'   => $productOption->id,
-                                    'collection_name' => 'productSpecificationOptions',
-                                ]);
-                        }
+              $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
+                  $productSpecification = $product->specifications()->updateOrCreate(
+                      [
+                          'name->en' => $specification['name_en'],
+                          'name->ar' => $specification['name_ar'],
+                      ],
+                      [
+                          'name' => [
+                              'en' => $specification['name_en'],
+                              'ar' => $specification['name_ar'],
+                          ],
+                      ]
+                  );
 
-                    });
-                }
 
-            });
+                  $submittedOptionIds = collect($specification['specification_options'] ?? [])->map(function ($option) use ($productSpecification) {
+                      $productOption = $productSpecification->options()->updateOrCreate(
+                          [
+                              'value->en' => $option['value_en'],
+                              'value->ar' => $option['value_ar'],
+                          ],
+                          [
+                              'value' => [
+                                  'en' => $option['value_en'],
+                                  'ar' => $option['value_ar'],
+                              ],
+                              'price' => $option['price'] ?? 0,
+                          ]
+                      );
 
-        } else {
-            $product->specifications->each(function ($spec) {
-                $spec->options->each(function ($option) {
-                    $option->clearMediaCollection();
-                    $option->delete();
-                });
-                $spec->delete();
-            });
-        }
+                      if (isset($option['option_image'])) {
+                          Media::where('id', $option['option_image'])->update([
+                              'model_type'      => get_class($productOption),
+                              'model_id'        => $productOption->id,
+                              'collection_name' => 'productSpecificationOptions',
+                          ]);
+                      }
 
-        if (isset($validatedData['image_id'])) {
+                      return $productOption->id;
+                  })->toArray();
+
+
+                  $productSpecification->options()->whereNotIn('id', $submittedOptionIds)->each(function ($option) {
+                      $option->clearMediaCollection();
+                      $option->delete();
+                  });
+
+                  return $productSpecification->id;
+              })->toArray();
+
+
+              $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
+                  $spec->options->each(function ($option) {
+                      $option->clearMediaCollection();
+                      $option->delete();
+                  });
+                  $spec->delete();
+              });
+          } else {
+              
+              $product->specifications->each(function ($spec) {
+                  $spec->options->each(function ($option) {
+                      $option->clearMediaCollection();
+                      $option->delete();
+                  });
+                  $spec->delete();
+              });
+          }
+
+
+          if (isset($validatedData['image_id'])) {
             Media::where('id', $validatedData['image_id'])
                 ->update([
                     'model_type' => get_class($product),
