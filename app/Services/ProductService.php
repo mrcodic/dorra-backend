@@ -208,6 +208,7 @@ class ProductService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+        dd($validatedData);
       return  $this->handleTransaction(function () use ($id, $validatedData) {
 
         $product = $this->repository->update($validatedData, $id);

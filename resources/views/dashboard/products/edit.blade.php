@@ -810,6 +810,7 @@
                     _hiddenInputId: "{{ $media->id }}"
                 };
                 document.getElementById("uploadedImageModel").value = "{{ $media->id }}";
+
                 dz.emit("addedfile", modelMockFile);
                 dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
                 dz.emit("complete", modelMockFile);
