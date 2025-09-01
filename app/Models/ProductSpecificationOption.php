@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -48,6 +49,11 @@ class ProductSpecificationOption extends Model implements HasMedia
         static::deleting(function ($specOption) {
             $specOption->cartItemSpecs()->each->delete();
         });
+    }
+
+    public function cartItemSpecs(): HasMany
+    {
+        return $this->hasMany(CartItemSpec::class,'spec_option_id');
     }
     public function image(): Attribute
     {
