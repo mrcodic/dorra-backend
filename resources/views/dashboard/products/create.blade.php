@@ -1253,8 +1253,10 @@
             }
 
             $('.outer-repeater').repeater({
+                initEmpty: true,
                 repeaters: [{
                     selector: '.inner-repeater',
+                    initEmpty: true,
                     show: function () {
                         $(this).slideDown();
                         updateDeleteButtons($(this).closest('.inner-repeater'));
