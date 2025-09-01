@@ -25,9 +25,11 @@ class ResetPasswordController extends Controller
             ]);
         }
         $user = User::firstWhere('email', $request->email);
+        $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
         $user->update(['password' =>$request->password]);
         $this->deleteResetToken($request->reset_token);
-        return Response::api(message: "Password reset successfully.");
+
+        return Response::api(message: "Password reset successfully.",data:['token'=>$plainTextToken]);
 
     }
 }

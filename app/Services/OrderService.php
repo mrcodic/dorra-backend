@@ -105,7 +105,6 @@ class OrderService extends BaseService
             })->when(request()->filled('status'), function ($query) {
                 $query->where('status', request('status'));
             })
-
             ->latest();
 
         return DataTables::of($orders)
@@ -471,17 +470,17 @@ class OrderService extends BaseService
 
             $addressData = [
                 'shipping_address_id' => $newAddressId,
-                'address_label'       => $shippingAddress->label,
-                'address_line'        => $shippingAddress->line,
-                'state'               => optional($shippingAddress->state)->name,
-                'country'             => optional($shippingAddress->state?->country)->name,
+                'address_label' => $shippingAddress->label,
+                'address_line' => $shippingAddress->line,
+                'state' => optional($shippingAddress->state)->name,
+                'country' => optional($shippingAddress->state?->country)->name,
             ];
 
             $orderAddress
                 ? $orderAddress->update($addressData)
                 : $model->orderAddress()->create([
                 'order_id' => $model->id,
-                'type'     => OrderTypeEnum::SHIPPING,
+                'type' => OrderTypeEnum::SHIPPING,
                 ...$addressData
             ]);
 
@@ -497,28 +496,28 @@ class OrderService extends BaseService
             $pickupAddress = $model->orderAddress()->where('type', OrderTypeEnum::PICKUP)->first();
 
             $pickupAddressData = [
-                'location_id'    => $location->id,
-                'location_name'  => $location->name,
-                'address_label'  => $location->name,
-                'address_line'   => $location->address_line,
-                'state'          => $location->state?->name ?? 'Unknown',
-                'country'        => $location->state?->country?->name ?? $location->country ?? 'Unknown',
+                'location_id' => $location->id,
+                'location_name' => $location->name,
+                'address_label' => $location->name,
+                'address_line' => $location->address_line,
+                'state' => $location->state?->name ?? 'Unknown',
+                'country' => $location->state?->country?->name ?? $location->country ?? 'Unknown',
             ];
 
             $pickupAddress
                 ? $pickupAddress->update($pickupAddressData)
                 : $model->orderAddress()->create([
                 'order_id' => $model->id,
-                'type'     => OrderTypeEnum::PICKUP,
+                'type' => OrderTypeEnum::PICKUP,
                 ...$pickupAddressData
             ]);
 
             // Handle pickup contact
             $pickupContactData = array_filter([
                 'first_name' => $validatedData['pickup_first_name'] ?? null,
-                'last_name'  => $validatedData['pickup_last_name'] ?? null,
-                'email'      => $validatedData['pickup_email'] ?? null,
-                'phone'      => $validatedData['pickup_phone'] ?? null,
+                'last_name' => $validatedData['pickup_last_name'] ?? null,
+                'email' => $validatedData['pickup_email'] ?? null,
+                'phone' => $validatedData['pickup_phone'] ?? null,
             ]);
 
             $pickupContact = $model->pickupContact;
@@ -579,7 +578,7 @@ class OrderService extends BaseService
         $subTotal = $cart->items()->sum('sub_total');
         $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
             $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
-                $orderItems = $order->orderItems()->createMany($cart->items->toArray());
+            $orderItems = $order->orderItems()->createMany($cart->items->toArray());
             $orderItems->each(function ($item) use ($cart) {
                 $cart->items->each(function ($cartItem) use ($item) {
                     $cartItem->specs->each(function ($spec) use ($item) {
@@ -602,28 +601,26 @@ class OrderService extends BaseService
             return $order;
         });
 
-            $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
-            if ($selectedPaymentMethod->code == 'cash_on_delivery')
-            {
-                return [
-                    'order' => ['id' => $order->id, 'number' => $order->order_number],
-                    'paymentDetails' => []
-                ];
-            }
-            $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
-            $dto = PaymentRequestData::fromArray(['order' => $order,
-                'user' => auth('sanctum')->user(),
-                'guest' => $order->orderAddress ?? $order->pickupContact,
-                'method' => $selectedPaymentMethod]);
-            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), [
-                'order' => $order, 'user' => auth('sanctum')->user(),
-                'cart' => $cart, 'discountCode' => $discountCode]);
+        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
+        if ($selectedPaymentMethod->code == 'cash_on_delivery') {
             return [
                 'order' => ['id' => $order->id, 'number' => $order->order_number],
-                'paymentDetails' => $paymentDetails,
+                'paymentDetails' => []
             ];
         }
-
+        $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
+        $dto = PaymentRequestData::fromArray(['order' => $order,
+            'user' => auth('sanctum')->user(),
+            'guest' => $order->orderAddress ?? $order->pickupContact,
+            'method' => $selectedPaymentMethod]);
+        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), [
+            'order' => $order, 'user' => auth('sanctum')->user(),
+            'cart' => $cart, 'discountCode' => $discountCode]);
+        return [
+            'order' => ['id' => $order->id, 'number' => $order->order_number],
+            'paymentDetails' => $paymentDetails,
+        ];
+    }
 
 
     public function trackOrder($id)
@@ -634,6 +631,11 @@ class OrderService extends BaseService
     public function orderStatuses(): array
     {
         return StatusEnum::toArray();
+    }
+
+    public function cancelOrder($orderId)
+    {
+
     }
 
     private function attachDesignsToOrder($order, $designsData)
@@ -673,6 +675,5 @@ class OrderService extends BaseService
             $order->orderItems()->attach($pivotData);
         }
     }
-
 
 }
