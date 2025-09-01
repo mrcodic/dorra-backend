@@ -47,7 +47,7 @@ class ProductSpecificationOption extends Model implements HasMedia
         };
         static::updated($callback);
         static::deleting(function ($specOption) {
-            $specOption->cartItemSpecs()->each->delete();
+            $specOption->cartItemSpecs->each->delete();
         });
     }
 
