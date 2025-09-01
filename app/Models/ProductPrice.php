@@ -14,7 +14,7 @@ class ProductPrice extends Model
     ];
     protected static function booted()
     {
-        static::created(function (ProductPrice $productPrice) {
+        static::saved(function (ProductPrice $productPrice) {
             if ($productPrice->product->carts->isNotEmpty()) {
                 $product = $productPrice->product;
                 CartItem::where('product_id', $product->id)
@@ -34,6 +34,7 @@ class ProductPrice extends Model
                     });
             }
         });
+
 
     }
 

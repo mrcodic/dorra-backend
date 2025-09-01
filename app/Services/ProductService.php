@@ -222,18 +222,11 @@ class ProductService extends BaseService
                 $product->dimensions()->sync($dimension->id);
             });
         }
-        if (request()->has('deleted_old_images')) {
-            collect(request()->deleted_old_images)->each(function ($id) {
-                Media::find($id)?->delete();
-            });
-        }
-
         if (isset($validatedData['base_price'])) {
             $product->prices()->delete();
         }
         if (isset($validatedData['prices'])) {
                 $product->update(['base_price' => null]);
-                $product->prices()->delete();
                 if ($validatedData['has_custom_prices']  && $product->has_custom_prices !== 1) {
                     CartItem::where('product_id', $product->id)->get()
                         ->each(function ($item) use ($product, $validatedData) {
@@ -244,12 +237,12 @@ class ProductService extends BaseService
                             ]);
                         });
                 }
-                collect($validatedData['prices'])->each(function ($price) use ($product) {
-                    $product->prices()->create([
-                        'price' => $price['price'],
-                        'quantity' => $price['quantity'],
-                    ]);
-                });
+            collect($validatedData['prices'])->each(function ($price) use ($product) {
+                $product->prices()->updateOrCreate(
+                    ['quantity' => $price['quantity']],
+                    ['price' => $price['price']]
+                );
+            });
 
 
 

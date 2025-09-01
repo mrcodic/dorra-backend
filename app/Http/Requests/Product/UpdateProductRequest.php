@@ -69,7 +69,7 @@ class UpdateProductRequest extends BaseRequest
                 'required_if:has_custom_prices,true',
                 'prohibited_if:has_custom_prices,false',
             ],
-            'prices.*.quantity' => ['nullable', 'integer', 'min:1'],
+            'prices.*.quantity' => ['nullable', 'integer', 'min:1', 'unique:product_prices,quantity'],
             'prices.*.price' => ['nullable', 'integer', 'min:1'],
             'specifications' => ['sometimes', 'array'],
             'specifications.*.name_en' => 'sometimes|string',
