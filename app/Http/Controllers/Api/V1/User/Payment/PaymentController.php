@@ -64,7 +64,7 @@ class PaymentController extends Controller
                     $cartItem = $cart->items()->create([
                         'product_id'       => $orderItem->product_id,
                         'product_price_id' => $orderItem->product_price_id,
-                        'product_price'    => $orderItem->product_price,  
+                        'product_price'    => $orderItem->product_price,
                         'specs_price'      => $orderItem->specs_price ?? 0,
                         'quantity'         => $orderItem->quantity,
                         'sub_total'        => $subTotal,
