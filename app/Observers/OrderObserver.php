@@ -36,14 +36,8 @@ class OrderObserver
             $order->loadMissing(['paymentMethod', 'transactions']);
 
             if ($order->paymentMethod?->code === 'cash_on_delivery') {
-                dd($order->transactions()
-                    ->latest()
-                    ->first());
-                $order->transactions()
-                    ->latest()
-                    ->first()
-                    ?->update([
-                        'status' => \App\Enums\Payment\StatusEnum::PAID
+                $order->update([
+                        'payment_status' => \App\Enums\Payment\StatusEnum::PAID
                     ]);
             }
 
