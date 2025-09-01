@@ -44,6 +44,7 @@ class CartItemObserver
         $cart = $cartItem->cart;
 
         if ($cartItem->wasChanged('sub_total')) {
+            dd("DSsdasd");
             $cart->price = $cart->items()->sum('sub_total');
             $cart->saveQuietly();
         }
