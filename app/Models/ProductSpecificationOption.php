@@ -22,7 +22,7 @@ class ProductSpecificationOption extends Model implements HasMedia
     protected static function booted()
     {
         $callback = function (ProductSpecificationOption $specificationOption) {
-
+dd("sadsa");
                 CartItemSpec::where('spec_option_id', $specificationOption->id)
                     ->with('cartItem.specs.productSpecificationOption')
                     ->get()
@@ -43,7 +43,7 @@ class ProductSpecificationOption extends Model implements HasMedia
                             ]);
                         }
                     });
-                
+
 
         };
         static::updated($callback);
