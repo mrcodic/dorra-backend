@@ -225,29 +225,36 @@ class ProductService extends BaseService
         if (isset($validatedData['base_price'])) {
             $product->prices()->delete();
         }
-        if (isset($validatedData['prices'])) {
-                $product->update(['base_price' => null]);
-                if ($validatedData['has_custom_prices']  && $product->has_custom_prices !== 1) {
-                    CartItem::where('product_id', $product->id)->get()
-                        ->each(function ($item) use ($product, $validatedData) {
-                            $item->update([
-                                'quantity' => $validatedData['prices'][0]['quantity'],
-                                'product_price' => $validatedData['prices'][0]['price'],
-                                'sub_total'  => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity']) + $item->specs_price - $item->cart->discount_amount,
-                            ]);
-                        });
-                }
-            collect($validatedData['prices'])->each(function ($price) use ($product) {
-                    $product->prices()->updateOrCreate(
-                    ['quantity' => $price['quantity']],
-                    ['price' => $price['price']]
-                );
-            });
+          if (isset($validatedData['prices'])) {
+              $product->update(['base_price' => null]);
 
+              // if admin changed pricing model
+              if (($validatedData['has_custom_prices'] ?? false) && $product->has_custom_prices !== 1) {
+                  CartItem::where('product_id', $product->id)->get()->each(function ($item) use ($validatedData) {
+                      $item->update([
+                          'quantity'      => $validatedData['prices'][0]['quantity'],
+                          'product_price' => $validatedData['prices'][0]['price'],
+                          'sub_total'     => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity'])
+                              + $item->specs_price
+                              - $item->cart->discount_amount,
+                      ]);
+                  });
+              }
 
+              // collect submitted quantities
+              $submittedQuantities = collect($validatedData['prices'])->map(function ($price) use ($product) {
+                  $product->prices()->updateOrCreate(
+                      ['quantity' => $price['quantity']],
+                      ['price' => $price['price']]
+                  );
+                  return $price['quantity'];
+              })->toArray();
 
-        }
-        if (isset($validatedData['specifications'])) {
+              // delete prices that admin removed
+              $product->prices()->whereNotIn('quantity', $submittedQuantities)->delete();
+          }
+
+          if (isset($validatedData['specifications'])) {
             collect($validatedData['specifications'])->each(function ($specification) use ($product) {
                 $productSpecification = $product->specifications()->updateOrCreate(
                     [
