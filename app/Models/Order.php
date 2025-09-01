@@ -31,7 +31,7 @@ class Order extends Model
     protected $casts = [
         'status' => StatusEnum::class,
         'payment_status' => \App\Enums\Payment\StatusEnum::class,
-        
+
     ];
 
     protected $attributes = [
@@ -50,6 +50,7 @@ class Order extends Model
     {
         return $this->belongsTo(User::class);
     }
+
     public function guest(): BelongsTo
     {
         return $this->belongsTo(Guest::class);
@@ -78,8 +79,6 @@ class Order extends Model
     }
 
 
-
-
     public function pickupContact(): HasOne
     {
         return $this->hasOne(PickupContact::class);
@@ -91,5 +90,9 @@ class Order extends Model
         return $this->hasOne(Invoice::class);
     }
 
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
 
 }

@@ -25,33 +25,6 @@ class OrderObserver
         {
             $order->update(["status"=> StatusEnum::CONFIRMED]);
         }
-        if (!property_exists($order, 'isReplication') || !$order->isReplication) {
-            return;
-        }
-
-        $original = $order->originalOrder;
-        foreach ($original->orderItems as $oldItem) {
-            $newItem = $oldItem->replicate(['order_id']);
-            $newItem->order_id = $order->id;
-            $newItem->save();
-
-            foreach ($oldItem->specs as $oldSpec) {
-                $newSpec = $oldSpec->replicate(['order_item_id']);
-                $newSpec->order_item_id = $newItem->id;
-                $newSpec->save();
-            }
-        }
-        if ($original->orderAddress) {
-            $newAddress = $original->orderAddress->replicate(['order_id']);
-            $newAddress->order_id = $order->id;
-            $newAddress->save();
-        }
-
-        if ($original->pickupContact) {
-            $newPickup = $original->pickupContact->replicate(['order_id']);
-            $newPickup->order_id = $order->id;
-            $newPickup->save();
-        }
 
     }
     /**
@@ -60,8 +33,11 @@ class OrderObserver
     public function updated(Order $order): void
     {
          if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
-            CreateInvoiceJob::dispatch($order);
-        }
+             if ($order->paymentMethod->code == 'cash_on_delivery') {
+                 $order->transactions->last()->update(["status" => \App\Enums\Payment\StatusEnum::PAID]);
+             }
+             CreateInvoiceJob::dispatch($order);
+         }
     }
 
     /**
