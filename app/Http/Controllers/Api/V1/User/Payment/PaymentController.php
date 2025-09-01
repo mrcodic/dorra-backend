@@ -61,9 +61,17 @@ class PaymentController extends Controller
                             ) * $orderItem->quantity;
                     }
 
-                    $cartItem = $cart->items()->create(
-                        array_merge(['sub_total' => $subTotal], $orderItem->toArray())
-                    );
+                    $cartItem = $cart->items()->create([
+                        'product_id'       => $orderItem->product_id,
+                        'product_price_id' => $orderItem->product_price_id,
+                        'product_price'    => $orderItem->product_price,  
+                        'specs_price'      => $orderItem->specs_price ?? 0,
+                        'quantity'         => $orderItem->quantity,
+                        'sub_total'        => $subTotal,
+                        'itemable_type'    => $orderItem->itemable_type,
+                        'itemable_id'      => $orderItem->itemable_id,
+                    ]);
+
 
                     $cartItem->specs()->createMany($orderItem->specs->toArray());
                 }
