@@ -69,7 +69,9 @@ class UpdateProductRequest extends BaseRequest
                 'required_if:has_custom_prices,true',
                 'prohibited_if:has_custom_prices,false',
             ],
-            'prices.*.quantity' => ['nullable', 'integer', 'min:1', 'unique:product_prices,quantity'],
+                Rule::unique('product_prices', 'quantity')
+                    ->where(fn ($query) => $query->where('product_id', $id)) 
+                    ->ignore($id, 'product_id'),
             'prices.*.price' => ['nullable', 'integer', 'min:1'],
             'specifications' => ['sometimes', 'array'],
             'specifications.*.name_en' => 'sometimes|string',
