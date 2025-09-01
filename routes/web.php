@@ -200,7 +200,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('api/v1/')->group(function () {
 
     Route::controller(ReviewController::class)->group(function () {
-        Route::delete('reviews/{review}', 'deleteReview')->name('reviews.destroy');
+        Route::delete('reviews/{review}', 'deleteReview')->name('reviews.remove');
         Route::put('reviews/{ review}/reply', 'deleteReply')->name('reviews.reply.destroy');
         Route::put('reviews/{review}', 'replyReview')->name('reviews.reply');
     });
