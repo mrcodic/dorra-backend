@@ -24,6 +24,7 @@ class CartItemSpec extends Model
     public function recalculateCartItem(): void
     {
         $cartItem = $this->cartItem;
+        dd($cartItem);
         if ($cartItem) {
             $newSpecsPrice = $cartItem->specs
                 ->map(fn ($spec) => $spec->productSpecificationOption?->price ?? 0)
