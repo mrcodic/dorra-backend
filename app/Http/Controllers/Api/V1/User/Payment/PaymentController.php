@@ -44,7 +44,7 @@ class PaymentController extends Controller
 
         $this->handleTransaction(function () use ($request) {
             $order = $this->orderRepository->query()->with('orderItems.specs')->find($request->get('order_id'));
-            $cart  = $this->cartService->getCurrentUserOrGuestCart();
+            $cart = $this->cartService->getCurrentUserOrGuestCart();
 
             collect($order->orderItems)->each(function ($orderItem) use ($cart) {
                 $existingCartItem = $cart->items()
@@ -53,23 +53,29 @@ class PaymentController extends Controller
                 if (!$existingCartItem) {
                     if ($orderItem->product->has_custom_prices) {
                         $subTotal = ($orderItem->productPrice?->price ?? $orderItem->product_price)
-                            + ($orderItem->specs_prices ?: $orderItem->specs_prices);
+                            + ($orderItem->specs->sum(function ($spec) {
+                                return $spec->productSpecificationOption->price;
+                            }) ?: $orderItem->specs_price);
                     } else {
                         $subTotal = (
                                 ($orderItem->product->base_price ?? $orderItem->product_price)
-                                + ($orderItem->specs_prices ?: $orderItem->specs_prices)
+                                + ($orderItem->specs->sum(function ($spec) {
+                                    return $spec->productSpecificationOption->price;
+                                }) ?: $orderItem->specs_price)
                             ) * $orderItem->quantity;
                     }
 
                     $cartItem = $cart->items()->create([
-                        'product_id'       => $orderItem->product_id,
+                        'product_id' => $orderItem->product_id,
                         'product_price_id' => $orderItem->product_price_id,
-                        'product_price'    => $orderItem->product_price,
-                        'specs_price'      => $orderItem->specs_price ?? 0,
-                        'quantity'         => $orderItem->quantity,
-                        'sub_total'        => $subTotal,
-                        'itemable_type'    => $orderItem->itemable_type,
-                        'itemable_id'      => $orderItem->itemable_id,
+                        'product_price' => $orderItem->productPrice?->price ?? $orderItem->product_price,
+                        'specs_price' => ($orderItem->specs->sum(function ($spec) {
+                            return $spec->productSpecificationOption->price;
+                        }) ?: $orderItem->specs_price),
+                        'quantity' => $orderItem->quantity,
+                        'sub_total' => $subTotal,
+                        'itemable_type' => $orderItem->itemable_type,
+                        'itemable_id' => $orderItem->itemable_id,
                     ]);
 
 

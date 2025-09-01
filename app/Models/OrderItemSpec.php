@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 class OrderItemSpec extends Model
@@ -17,5 +18,18 @@ class OrderItemSpec extends Model
         'spec_option_id',
         'product_specification_id',
     ];
+    public function productSpecification(): BelongsTo
+    {
+        return $this->belongsTo(ProductSpecification::class);
+    }
 
+    public function productSpecificationOption(): BelongsTo
+    {
+        return $this->belongsTo(ProductSpecificationOption::class, 'spec_option_id');
+    }
+
+    public function orderItem(): BelongsTo
+    {
+        return $this->belongsTo(OrderItem::class);
+    }
 }
