@@ -603,10 +603,22 @@ class OrderService extends BaseService
 
         $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
         if ($selectedPaymentMethod->code == 'cash_on_delivery') {
+            $cart->items()->delete();
+
+            if ($cart->discountCode) {
+                $cart->discountCode->increment('used');
+            }
+
+            $cart->update([
+                'price' => 0,
+                'discount_amount' => 0,
+                'discount_code_id' => null,
+            ]);
             return [
                 'order' => ['id' => $order->id, 'number' => $order->order_number],
                 'paymentDetails' => []
             ];
+
         }
         $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
         $dto = PaymentRequestData::fromArray(['order' => $order,
