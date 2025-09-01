@@ -21,7 +21,7 @@ class ProductSpecificationOption extends Model implements HasMedia
 
     protected static function booted()
     {
-        static::updated(function (ProductSpecificationOption $specificationOption) {
+        $callback = function (ProductSpecificationOption $specificationOption) {
             if ($specificationOption->wasChanged('price'))
             {
                 CartItemSpec::where('spec_option_id', $specificationOption->id)
@@ -38,7 +38,7 @@ class ProductSpecificationOption extends Model implements HasMedia
                             $cartItem->update([
                                 'specs_price' => $newSpecsPrice,
                                 'sub_total'   => $cartItem->product->has_custom_prices ?
-                                      $cartItem->product_price + $newSpecsPrice
+                                    $cartItem->product_price + $newSpecsPrice
                                     : ($cartItem->product_price * $cartItem->quantity) + $newSpecsPrice
                                 ,
                             ]);
@@ -47,7 +47,9 @@ class ProductSpecificationOption extends Model implements HasMedia
 
             }
 
-        });
+        };
+        static::updated($callback);
+        static::deleted($callback);
     }
     public function image(): Attribute
     {
