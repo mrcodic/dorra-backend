@@ -238,7 +238,7 @@ class ProductService extends BaseService
                         });
                 }
             collect($validatedData['prices'])->each(function ($price) use ($product) {
-                $product->prices()->updateOrCreate(
+                    $product->prices()->updateOrCreate(
                     ['quantity' => $price['quantity']],
                     ['price' => $price['price']]
                 );

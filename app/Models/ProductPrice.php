@@ -49,8 +49,8 @@ class ProductPrice extends Model
                     });
             }
         };
-        static::created($callback);
-        static::updating($callback);
+        static::saved($callback);
+//        static::updating($callback);
 
 
     }

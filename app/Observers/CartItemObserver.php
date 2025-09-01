@@ -43,8 +43,8 @@ class CartItemObserver
 
         $cart = $cartItem->cart;
 
-            $cart->price = $cart->items()->sum('sub_total');
-            $cart->saveQuietly();
+        $cart->price = $cart->items()->sum('sub_total');
+        $cart->saveQuietly();
     }
 
 
