@@ -210,11 +210,13 @@ class MainController extends Controller
                     $q->whereIn('name', $tags);
                 });
             })
-            ->when($productName, function ($q) use ($productName, $locale) {
-                $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                    '%' . strtolower($productName) . '%'
-                ]);
+            ->when($productName, function ($q) use ($productName) {
+                $q->whereRaw(
+                    "JSON_SEARCH(LOWER(name), 'one', ?) IS NOT NULL",
+                    [strtolower($productName)]
+                );
             })
+
             ->with(['category', 'tags'])
             ->get();
 
@@ -230,11 +232,13 @@ class MainController extends Controller
                     $q->whereIn('name', $tags);
                 });
             })
-            ->when($templateName, function ($q) use ($templateName, $locale) {
-                $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                    '%' . strtolower($templateName) . '%'
-                ]);
+            ->when($templateName, function ($q) use ($templateName) {
+                $q->whereRaw(
+                    "JSON_SEARCH(LOWER(name), 'one', ?) IS NOT NULL",
+                    [strtolower($templateName)]
+                );
             })
+
             ->with(['products.category', 'tags'])
             ->get();
 
