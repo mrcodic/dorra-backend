@@ -33,7 +33,7 @@ class OrderObserver
     public function updated(Order $order): void
     {
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
-            $order->loadMissing(['paymentMethod', 'transactions']);
+            $order->loadMissing(['paymentMethod']);
 
             if ($order->paymentMethod?->code === 'cash_on_delivery') {
                 $order->update([
@@ -41,6 +41,15 @@ class OrderObserver
                     ]);
             }
 
+            CreateInvoiceJob::dispatch($order);
+        }
+        if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
+            $order->loadMissing(['paymentMethod']);
+            if ($order->paymentMethod?->code === 'cash_on_delivery') {
+                $order->update([
+                        'payment_status' => \App\Enums\Payment\StatusEnum::PENDING
+                    ]);
+            }
             CreateInvoiceJob::dispatch($order);
         }
 
