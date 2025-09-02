@@ -101,14 +101,12 @@
                 </div>
 
 
-                @php
-                use App\Enums\Order\StatusEnum;
-                @endphp
+
 
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Status</label>
                 <select class="form-select mb-4" name="status">
-                    @foreach (StatusEnum::cases() as $status)
-                    <option value="{{ $status->value }}" @selected($model->status?->value == $status->value)>
+                    @foreach (App\Enums\Order\StatusEnum::cases() as $status)
+                    <option value="{{ $status->value }}">
                         {{ $status->label() }}
                     </option>
                     @endforeach
