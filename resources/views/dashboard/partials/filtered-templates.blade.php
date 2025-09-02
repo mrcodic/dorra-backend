@@ -15,7 +15,7 @@
                 <li><a class="dropdown-item" href="{{ route('product-templates.edit',$template->id) }}"><i
                             data-feather="edit-3" class="me-1"></i>Edit</a></li>
                 <li>
-                    <a class="dropdown-item" href="{{ config('services.editor_url') . 'templates/' . $template->id }}"
+                    <a class="dropdown-item show-template" href="{{ config('services.editor_url') . 'templates/' . $template->id }}"
                         target="_blank">
                         <i data-feather="eye" class="me-1"></i>Show
                     </a>
