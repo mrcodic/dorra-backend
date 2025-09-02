@@ -15,7 +15,7 @@
                 <li><a class="dropdown-item" href="{{ route('product-templates.edit',$template->id) }}"><i
                             data-feather="edit-3" class="me-1"></i>Edit</a></li>
                 <li>
-                    <a class="dropdown-item show-template" href="{{ config('services.editor_url') . 'templates/' . $template->id }}"
+                    <a class="dropdown-item" href="{{ config('services.editor_url') . 'templates/' . $template->id }}"
                         target="_blank">
                         <i data-feather="eye" class="me-1"></i>Show
                     </a>
@@ -139,16 +139,15 @@
 @endforelse
 <script !src="">
     document.addEventListener("DOMContentLoaded", function () {
+        // Feather icons refresh
+        if (window.feather) feather.replace();
+
+        // Handle clear localStorage when clicking "Show"
         $(document).on("click", ".show-template", function () {
-            console.log("clicked!");
             localStorage.removeItem("frontCanvas");
             localStorage.removeItem("backCanvas");
-            console.log("Current storage:", {
-                front: localStorage.getItem("frontCanvas"),
-                back: localStorage.getItem("backCanvas")
-            });
+            console.log("✅ Cleared frontCanvas & backCanvas from localStorage");
         });
-
     });
 
     document.addEventListener("DOMContentLoaded", function () {
