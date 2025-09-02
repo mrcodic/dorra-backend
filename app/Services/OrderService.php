@@ -439,6 +439,7 @@ class OrderService extends BaseService
         }
 
         if (isset($validatedData['status'])) {
+            dd($validatedData['status']);
             $model->status = $validatedData['status'];
             $model->save();
         }

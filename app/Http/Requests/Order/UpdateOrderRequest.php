@@ -27,7 +27,6 @@ class UpdateOrderRequest extends BaseRequest
     public function rules($id): array
     {
         return [
-
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
