@@ -77,6 +77,7 @@ const dt_user_table = $(".admin-list-table").DataTable({
            data-bs-toggle="modal"
            data-bs-target="#editAdminModal"
            data-image="${row.image ? row.image : ''}"
+           data-image-id="${row.image_id ? row.image_id : ''}"
            data-id="${data}"
            data-first-name="${row.first_name}"
            data-last-name="${row.last_name}"
@@ -211,8 +212,8 @@ $(document).ready(function () {
         const roleId = $button.data('role-id') || '';
         const status = $button.data('status');
         const image = $button.data('image') || defaultImage;
-        console.log(status)
-        // Populate modal
+
+        // ✅ Populate modal fields
         $("#editAdminModal #first_name").val(firstName);
         $("#editAdminModal #last_name").val(lastName);
         $("#editAdminModal #phone").val(phoneNumber);
@@ -221,8 +222,34 @@ $(document).ready(function () {
         $("#editAdminModal #status").val(status);
         $("#editAdminModal .avatarPreview").attr("src", image);
         $('#editAdminForm').attr('action', `admins/${adminId}`);
-    });
 
+        // ✅ Preload existing image into Dropzone
+        if (image && image !== defaultImage) {
+            const dz = Dropzone.forElement("#editAvatarDropzone");
+
+            dz.removeAllFiles(true); // clear old previews
+
+            let mockFile = { name: "Current Avatar", size: 12345, type: 'image/jpeg' };
+            dz.emit("addedfile", mockFile);
+            dz.emit("thumbnail", mockFile, image);
+            dz.emit("complete", mockFile);
+
+            // ✅ prevent Dropzone from re-uploading this
+            dz.files.push(mockFile);
+
+            // ✅ also add hidden input for existing image_id (if you pass it in data-image-id)
+            const imageId = $button.data('image-id') || '';
+            if (imageId) {
+                $(".edit-avatar-media-ids").html(
+                    `<input type="hidden" name="image_id" value="${imageId}">`
+                );
+            }
+        } else {
+            // reset dropzone if no image
+            Dropzone.forElement("#editAvatarDropzone").removeAllFiles(true);
+            $(".edit-avatar-media-ids").html("");
+        }
+    });
 
     $(document).on("click", ".open-delete-admin-modal", function () {
         const adminId = $(this).data("id");

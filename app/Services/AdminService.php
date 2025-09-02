@@ -41,6 +41,7 @@ class AdminService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+
         if (empty($validatedData['password'])) {
             unset($validatedData['password'], $validatedData['password_confirmation']);
         }
@@ -51,8 +52,12 @@ class AdminService extends BaseService
             ]);
 
         }
-        if (isset($validatedData['image_id'])) {
+        if (empty($validatedData['image_id'])) {
             $model->clearMediaCollection('admins');
+
+        }
+
+        if (isset($validatedData['image_id'])) {
             Media::where('id', $validatedData['image_id'])
                 ->update([
                     'model_type' => get_class($model),
@@ -111,6 +116,8 @@ class AdminService extends BaseService
             })
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('admins') ?: asset("images/default-user.png");
+            })->addColumn('image_id', function ($admin) {
+                return $admin->getFirstMedia('admins')?->id;
             })
             ->addColumn('status_value', function ($admin) {
                 return $admin->status;
