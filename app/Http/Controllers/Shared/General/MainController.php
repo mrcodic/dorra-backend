@@ -216,7 +216,9 @@ class MainController extends Controller
         //Templates
         $templates = $this->templateRepository->query()
             ->when(!empty($categoryIds), function ($q) use ($categoryIds) {
-                $q->whereIn('category_id', $categoryIds);
+                $q->whereHas('products.category', function ($q) use ($categoryIds) {
+                    $q->whereIn('category_id', $categoryIds);
+                });
             })
             ->when(!empty($tags), function ($q) use ($tags) {
                 $q->whereHas('tags', function ($q) use ($tags) {
@@ -228,7 +230,7 @@ class MainController extends Controller
                     '%' . strtolower($templateName) . '%'
                 ]);
             })
-            ->with(['category', 'tags'])
+            ->with(['products.category', 'tags'])
             ->get();
 
         return Response::api(data:[
