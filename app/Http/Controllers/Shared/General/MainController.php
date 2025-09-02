@@ -183,4 +183,9 @@ class MainController extends Controller
         return Response::api();
     }
 
+
+    public function publicSearch()
+    {
+
+    }
 }
