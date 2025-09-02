@@ -76,7 +76,7 @@ const dt_user_table = $(".admin-list-table").DataTable({
          <a href="#" class="edit-details"
            data-bs-toggle="modal"
            data-bs-target="#editAdminModal"
-           data-image="${row.media && row.media.length > 0 ? row.media[0].original_url : ''}"
+           data-image="${row.image ? row.image : ''}"
            data-id="${data}"
            data-first-name="${row.first_name}"
            data-last-name="${row.last_name}"
