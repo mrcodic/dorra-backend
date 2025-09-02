@@ -52,8 +52,8 @@
 
                     <div id="shipSection">
                         <div class="d-flex gap-1 flex-wrap">
-                            @foreach ($model->user->addresses  ?? $model->guest->addresses ?? [] as $address)
-                            <div class="col-12 form-check border rounded-3 p-1 px-3 text-break">
+                            @foreach ($model->user?->addresses ?? $model->guest?->addresses ?? [] as $address)
+                                <div class="col-12 form-check border rounded-3 p-1 px-3 text-break">
                                 <input class="form-check-input" type="radio" name="shipping_address_id"
                                     id="address{{ $address->id }}" value="{{ $address->id }}" {{
                                     $shippingAddressId==$address->id ? 'checked' : '' }}>
