@@ -280,6 +280,7 @@
             $.ajax({
                 url: this.action,
                 data: formData,
+                method: 'POST', // still POST, Laravel reads _method=PUT
                 processData: false,
                 contentType: false,
                 success: function (res) {
