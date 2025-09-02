@@ -16,7 +16,7 @@ class SaveController extends Controller
     {
         $user = auth('sanctum')->user();
         $savedProducts = $user->savedProducts()
-            ->with('category')
+            ->with('category','media')
             ->when(request()->filled('category_id'), function ($query) {
                 $query->whereRelation('category', 'id', request('category_id'));
             })
@@ -26,7 +26,7 @@ class SaveController extends Controller
 
 
         $savedDesigns = $user->savedDesigns()
-            ->with('product.category','owner')
+            ->with('product.category','owner','media')
             ->when(request()->filled('category_id'), function ($query) {
                 $query->whereRelation('product.category', 'id', request('category_id'));
             })
