@@ -139,15 +139,16 @@
 @endforelse
 <script !src="">
     document.addEventListener("DOMContentLoaded", function () {
-        // Feather icons refresh
-        if (window.feather) feather.replace();
-
-        // Handle clear localStorage when clicking "Show"
         $(document).on("click", ".show-template", function () {
+            console.log("clicked!");
             localStorage.removeItem("frontCanvas");
             localStorage.removeItem("backCanvas");
-            console.log("✅ Cleared frontCanvas & backCanvas from localStorage");
+            console.log("Current storage:", {
+                front: localStorage.getItem("frontCanvas"),
+                back: localStorage.getItem("backCanvas")
+            });
         });
+
     });
 
     document.addEventListener("DOMContentLoaded", function () {
