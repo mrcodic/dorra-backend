@@ -155,9 +155,6 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
         Route::post('cancel-order/{order}', [OrderController::class, 'cancelOrder']);
         Route::post('buy-order-again', [PaymentController::class, 'buyOrderAgain']);
-
-        Route::get('tags', [MainController::class, 'tags'])->name('tags');
-
     });
 
     Route::get('templates', [TemplateController::class, 'index']);
@@ -183,6 +180,8 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     });
     Route::get('reviews/{product_id}', [ReviewController::class, 'show']);
     Route::get('reviews-statistics/{reviewable_id}', [ReviewController::class, 'statistics']);
+
+    Route::get('tags', [MainController::class, 'tags'])->name('tags');
 
 });
 

@@ -23,8 +23,9 @@ use App\Models\Type;
 use App\Repositories\Interfaces\{CountryRepositoryInterface,
     DimensionRepositoryInterface,
     MessageRepositoryInterface,
-    StateRepositoryInterface
-};
+    ProductRepositoryInterface,
+    StateRepositoryInterface,
+    TemplateRepositoryInterface};
 use App\Services\CategoryService;
 use App\Services\DesignService;
 use App\Services\FolderService;
@@ -47,6 +48,8 @@ class MainController extends Controller
         public FolderService                $folderService,
         public DimensionRepositoryInterface $dimensionRepository,
         public TeamService                  $teamService,
+        public ProductRepositoryInterface     $productRepository,
+        public TemplateRepositoryInterface $templateRepository,
 
     )
     {
@@ -186,6 +189,51 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
+        $categoryIds   = $request->input('categories', []);
+        $tags          = $request->input('tags', []);
+        $productName   = $request->input('product_name');
+        $templateName  = $request->input('template_name');
+        $locale = app()->getLocale();
 
+        // Products
+        $products = $this->productRepository->query()
+            ->when(!empty($categoryIds), function ($q) use ($categoryIds) {
+                $q->whereIn('category_id', $categoryIds);
+            })
+            ->when(!empty($tags), function ($q) use ($tags) {
+                $q->whereHas('tags', function ($q) use ($tags) {
+                    $q->whereIn('name', $tags);
+                });
+            })
+            ->when($productName, function ($q) use ($productName,$locale) {
+                $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($productName) . '%'
+                ]);
+            })
+            ->with(['category', 'tags'])
+            ->get();
+
+        //Templates
+        $templates = $this->templateRepository->query()
+            ->when(!empty($categoryIds), function ($q) use ($categoryIds) {
+                $q->whereIn('category_id', $categoryIds);
+            })
+            ->when(!empty($tags), function ($q) use ($tags) {
+                $q->whereHas('tags', function ($q) use ($tags) {
+                    $q->whereIn('name', $tags);
+                });
+            })
+            ->when($templateName, function ($q) use ($templateName,$locale) {
+                $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($templateName) . '%'
+                ]);
+            })
+            ->with(['category', 'tags'])
+            ->get();
+
+        return Response::api(data:[
+            'products'  => $products,
+            'templates' => $templates,
+        ]);
     }
 }
