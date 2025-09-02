@@ -108,8 +108,7 @@
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Status</label>
                 <select class="form-select mb-4" name="status">
                     @foreach (StatusEnum::cases() as $status)
-                    <option value="{{ $status->value }}" {{ (old('status', $model->status?->value) == $status->value) ?
-                        'selected' : '' }}>
+                    <option value="{{ $status->value }}" @selected($model->status?->value == $status->value)>
                         {{ $status->label() }}
                     </option>
                     @endforeach
