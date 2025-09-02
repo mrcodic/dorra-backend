@@ -21,6 +21,7 @@ class CategoryService extends BaseService
     {
         $query = $this->repository->query()
             ->with($relations)
+            ->whereNull('parent_id')
             ->when(request()->filled('is_landing'), function ($query) {
             $query->where('is_landing', true);
         });
