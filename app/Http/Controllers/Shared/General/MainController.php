@@ -194,19 +194,23 @@ class MainController extends Controller
         $tags          = $request->input('tags', []);
         $productName   = $request->input('product_name');
         $templateName  = $request->input('template_name');
-        $locale = app()->getLocale();
+        $locale        = app()->getLocale();
 
-        // Products
+
+        $applyCategoryFilter = !(empty($categoryIds) || (count($categoryIds) === 1 && strtolower($categoryIds[0]) === 'all'));
+        $applyTagFilter      = !(empty($tags) || (count($tags) === 1 && strtolower($tags[0]) === 'all'));
+
+        //Products
         $products = $this->productRepository->query()
-            ->when(!empty($categoryIds), function ($q) use ($categoryIds) {
+            ->when($applyCategoryFilter, function ($q) use ($categoryIds) {
                 $q->whereIn('category_id', $categoryIds);
             })
-            ->when(!empty($tags), function ($q) use ($tags) {
+            ->when($applyTagFilter, function ($q) use ($tags) {
                 $q->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('name', $tags);
                 });
             })
-            ->when($productName, function ($q) use ($productName,$locale) {
+            ->when($productName, function ($q) use ($productName, $locale) {
                 $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                     '%' . strtolower($productName) . '%'
                 ]);
@@ -216,17 +220,17 @@ class MainController extends Controller
 
         //Templates
         $templates = $this->templateRepository->query()
-            ->when(!empty($categoryIds), function ($q) use ($categoryIds) {
+            ->when($applyCategoryFilter, function ($q) use ($categoryIds) {
                 $q->whereHas('products.category', function ($q) use ($categoryIds) {
                     $q->whereIn('category_id', $categoryIds);
                 });
             })
-            ->when(!empty($tags), function ($q) use ($tags) {
+            ->when($applyTagFilter, function ($q) use ($tags) {
                 $q->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('name', $tags);
                 });
             })
-            ->when($templateName, function ($q) use ($templateName,$locale) {
+            ->when($templateName, function ($q) use ($templateName, $locale) {
                 $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                     '%' . strtolower($templateName) . '%'
                 ]);
@@ -234,7 +238,7 @@ class MainController extends Controller
             ->with(['products.category', 'tags'])
             ->get();
 
-        return Response::api(data:[
+        return Response::api(data: [
             'products'  => ProductResource::collection($products),
             'templates' => TemplateResource::collection($templates),
         ]);
