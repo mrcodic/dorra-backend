@@ -1192,11 +1192,24 @@
                             success: function (file, response) {
                                 let hidden = document.createElement('input');
                                 hidden.type = "hidden";
-                                hidden.name = $item.find('input[name*="[id]"]').attr('name')
-                                    .replace('[id]', '[website_media_ids][]');
+
+                                // Find the repeater index (example: carousels[0])
+                                let baseName = $item.find('input[name*="[id]"]').attr('name');
+                                if (baseName) {
+                                    let prefix = baseName.replace(/\[id\]$/, ''); // remove trailing [id]
+                                    hidden.name = prefix + '[website_media_ids][]';
+                                } else {
+                                    // fallback (if not found)
+                                    hidden.name = 'carousels[0][website_media_ids][]';
+                                }
+
                                 hidden.value = response.data.id;
                                 $item.find('.website-media-ids').append(hidden);
+
+                                // Keep reference for removal later
+                                file._hiddenInput = hidden;
                             },
+
                             removedfile: function (file) {
                                 if (file.previewElement != null) {
                                     file.previewElement.parentNode.removeChild(file.previewElement);
@@ -1244,11 +1257,21 @@
                             success: function (file, response) {
                                 let hidden = document.createElement('input');
                                 hidden.type = "hidden";
-                                hidden.name = $item.find('input[name*="[id]"]').attr('name')
-                                    .replace('[id]', '[mobile_media_ids][]');
+
+                                let baseName = $item.find('input[name*="[id]"]').attr('name');
+                                if (baseName) {
+                                    let prefix = baseName.replace(/\[id\]$/, '');
+                                    hidden.name = prefix + '[mobile_media_ids][]';
+                                } else {
+                                    hidden.name = 'carousels[0][mobile_media_ids][]';
+                                }
+
                                 hidden.value = response.data.id;
                                 $item.find('.mobile-media-ids').append(hidden);
+
+                                file._hiddenInput = hidden;
                             },
+
                             removedfile: function (file) {
                                 if (file.previewElement != null) {
                                     file.previewElement.parentNode.removeChild(file.previewElement);
