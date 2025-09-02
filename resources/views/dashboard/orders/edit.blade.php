@@ -276,6 +276,7 @@
         $('#order-form').on('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(this);
+            formData.append('_method', 'PUT');
             $.ajax({
                 url: this.action,
                 data: formData,
