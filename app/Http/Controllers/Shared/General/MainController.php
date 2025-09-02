@@ -12,11 +12,12 @@ use App\Http\Resources\{CategoryResource,
     Design\DesignResource,
     FolderResource,
     MediaResource,
+    Product\ProductResource,
     StateResource,
     TagResource,
     TeamResource,
-    Template\TypeResource
-};
+    Template\TemplateResource,
+    Template\TypeResource};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
@@ -234,8 +235,8 @@ class MainController extends Controller
             ->get();
 
         return Response::api(data:[
-            'products'  => $products,
-            'templates' => $templates,
+            'products'  => ProductResource::collection($products),
+            'templates' => TemplateResource::collection($templates),
         ]);
     }
 }
