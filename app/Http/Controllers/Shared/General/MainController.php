@@ -184,7 +184,7 @@ class MainController extends Controller
     }
 
 
-    public function publicSearch()
+    public function publicSearch(Request $request)
     {
 
     }
