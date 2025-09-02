@@ -210,7 +210,7 @@
                     <div class="d-flex gap-1">
                         <button type="reset" class="btn btn-outline-secondary">Discard Changes</button>
 
-                        <button type="submit" class="btn btn-primary">Save changes</button>
+                        <button class="btn btn-primary">Save changes</button>
                     </div>
                 </div>
             </div>
@@ -273,7 +273,7 @@
         //     });
         // });
 
-        $('#order-form').off('submit').on('submit', function (e) {
+        $('#order-form').on('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(this);
             formData.append('_method', 'PUT');
