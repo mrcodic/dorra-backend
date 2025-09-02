@@ -419,7 +419,6 @@ class OrderService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        dd($validatedData);
         $model = $this->repository->update($validatedData, $id);
 
         if (
