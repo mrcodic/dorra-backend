@@ -219,7 +219,7 @@
                                 </div>
                                 <span class="avatar">
           <img class="round"
-               src="{{ Auth::user()->image ?? asset('images/default-user.png') }}"
+               src="{{ Auth::user()->image->getUrl() ?? asset('images/default-user.png') }}"
                alt="avatar" height="40" width="40">
           <span class="avatar-status-online"></span>
         </span>
