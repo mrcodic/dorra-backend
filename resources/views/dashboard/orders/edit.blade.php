@@ -273,7 +273,7 @@
         //     });
         // });
 
-        $('#order-form').on('submit', function (e) {
+        $('#order-form').off('submit').on('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(this);
             formData.append('_method', 'PUT');
