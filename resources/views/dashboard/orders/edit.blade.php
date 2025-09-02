@@ -139,17 +139,17 @@
                             <div class="fw-bold text-black">
                                 {{ number_format($orderItem->sub_total ?? 0, 2) }}
                             </div>
-                            @if ($model->orderItems->count() > 1 && $model->status == StatusEnum::PENDING)
-                            <form class="delete-design-form d-inline" method="POST"
-                                action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $orderItem->id]) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn"
-                                    data-design-id="{{ $orderItem->id }}">
-                                    Delete
-                                </button>
-                            </form>
-                            @endif
+{{--                            @if ($model->orderItems->count() > 1 && $model->status == StatusEnum::PENDING)--}}
+{{--                            <form class="delete-design-form d-inline" method="POST"--}}
+{{--                                action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $orderItem->id]) }}">--}}
+{{--                                @csrf--}}
+{{--                                @method('DELETE')--}}
+{{--                                <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn"--}}
+{{--                                    data-design-id="{{ $orderItem->id }}">--}}
+{{--                                    Delete--}}
+{{--                                </button>--}}
+{{--                            </form>--}}
+{{--                            @endif--}}
                         </div>
                     </div>
                 </div>
@@ -233,6 +233,36 @@
 <script src="https://unpkg.com/feather-icons"></script>
 
 <script>
+    $('#order-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        $.ajax({
+            url: this.action,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res.success) {
+                    sessionStorage.setItem('order_updated', 'true');
+                    window.location.href = '/orders';
+                }
+            },
+            error: function (xhr) {
+                $.each(xhr.responseJSON.errors, (k, msgArr) => {
+                    Toastify({
+                        text: msgArr[0],
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#EA5455",
+                        close: true
+                    }).showToast();
+                });
+            }
+        });
+    });
+
     $(document).ready(function () {
         $(document).on('submit', '.delete-design-form', function (e) {
             e.preventDefault();
@@ -273,35 +303,6 @@
             });
         });
 
-        $('#order-form').on('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            $.ajax({
-                url: this.action,
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (res) {
-                    if (res.success) {
-                        sessionStorage.setItem('order_updated', 'true');
-                        window.location.href = '/orders';
-                    }
-                },
-                error: function (xhr) {
-                    $.each(xhr.responseJSON.errors, (k, msgArr) => {
-                        Toastify({
-                            text: msgArr[0],
-                            duration: 4000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#EA5455",
-                            close: true
-                        }).showToast();
-                    });
-                }
-            });
-        });
     });
 
 
