@@ -116,6 +116,7 @@ class OrderController extends DashboardController
 
        public function store(Request $request)
     {
+        dd("SGf");
             $order = $this->orderService->storeResource([]);
             return Response::api(
                 message: 'Order placed successfully!',
