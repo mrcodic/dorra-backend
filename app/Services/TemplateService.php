@@ -149,7 +149,7 @@ class TemplateService extends BaseService
             if (!empty($validatedData['tags'])) {
                 $model->tags()->sync($validatedData['tags']);
             }
-            if (isset($validatedData['template_image_id']))
+            if (!empty($validatedData['template_image_id'])) 
             {
                 $model->clearMediaCollection('template_model_image');
                 Media::where('id', $validatedData['template_image_id'])
