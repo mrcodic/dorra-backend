@@ -943,71 +943,22 @@
                 <div class="position-relative">
                     <div class="row g-2 mb-1">
                         <div class="col-12">
-                            <form id="createPartner" action="{{ route('partners.create') }}" method="post"
-                                enctype="multipart/form-data">
+                            <form id="createPartner" action="{{ route('partners.create') }}" method="post">
                                 @csrf
-                                <input type="file" name="image" id="partner-image-main" class="form-control d-none"
-                                    accept="image/*">
 
-                                <!-- Custom Upload Card -->
-                                <div id="partner-upload-area" class="upload-card">
-                                    <div id="partner-upload-content">
-                                        <i data-feather="upload" class="mb-1"></i>
-                                        <p>Drag image here to upload</p>
-                                    </div>
+                                <!-- Dropzone area -->
+                                <div class="dropzone" id="partner-dropzone"></div>
+
+                                <!-- Hidden field to store uploaded media ID -->
+                                <input type="hidden" name="media_id" id="media_id">
+
+                                <div class="row d-flex justify-content-end">
+                                    <button type="submit" class="col-5 col-md-3 btn btn-primary mt-1 mb-1">
+                                        Add Partner
+                                    </button>
                                 </div>
-                                <div>
-                                    <!-- Progress Bar -->
-                                    <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
-                                        <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
-                                            style="width: 0%"></div>
-                                    </div>
-
-
-                                    <!-- Uploaded Image Preview -->
-                                    <div id="partner-uploaded-image"
-                                        class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                        <img src="" alt="Uploaded" class="img-fluid rounded"
-                                            style="width: 50px; height: 50px; object-fit: cover;">
-                                        <div id="file-details" class="file-details">
-                                            <div class="file-name fw-bold"></div>
-                                            <div class="file-size text-muted small"></div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <!-- Progress Bar -->
-                                        <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
-                                            <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
-                                                style="width: 0%"></div>
-                                        </div>
-
-
-                                        <!-- Uploaded Image Preview -->
-                                        <div id="partner-uploaded-image"
-                                            class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                            <img src="" alt="Uploaded" class="img-fluid rounded"
-                                                style="width: 50px; height: 50px; object-fit: cover;">
-                                            <div id="file-details" class="file-details">
-                                                <div class="file-name fw-bold"></div>
-                                                <div class="file-size text-muted small"></div>
-                                            </div>
-                                            <button type="button" id="partner-remove-image"
-                                                class="btn btn-sm position-absolute text-danger"
-                                                style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                <i data-feather="trash"></i>
-                                            </button>
-                                        </div>
-
-                                    </div>
-                                    <div class="row d-flex justify-content-end">
-                                        <button type="submit" class="col-5 col-md-3 btn btn-primary mt-1 mb-1">Add
-                                            Partner
-                                        </button>
-                                    </div>
-
-                                </div>
-
                             </form>
+
                             <p class="fw-semibold text-black fs-16">Added Partners</p>
                             <div class="row">
                                 <!-- Product Card -->
@@ -1097,6 +1048,40 @@
     @endsection
 
     @section('page-script')
+        <script>
+            Dropzone.autoDiscover = false;
+
+            let partnerDropzone = new Dropzone("#partner-dropzone", {
+                url: "{{ route('media.store') }}",   // upload endpoint
+                maxFiles: 1,
+                acceptedFiles: "image/*",
+                addRemoveLinks: true,
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                init: function () {
+                    this.on("success", function (file, response) {
+                        // store uploaded media ID in hidden input
+                        document.getElementById("media_id").value = response.data.id;
+                    });
+
+                    this.on("removedfile", function (file) {
+                        // clear hidden input if file is removed
+                        document.getElementById("media_id").value = "";
+
+                        if (file.xhr) {
+                            let response = JSON.parse(file.xhr.response);
+                            fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                method: "DELETE",
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        </script>
     <script>
         Dropzone.autoDiscover = false;
 
