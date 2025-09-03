@@ -39,14 +39,11 @@ const dt_user_table = $(".faq-list-table").DataTable({
          <a href="#" class="edit-details"
            data-bs-toggle="modal"
            data-bs-target="#editQuestionModal"
-           data-image="${row.media && row.media.length > 0 ? row.media[0].original_url : ''}"
-           data-id="${data}"
-           data-first-name="${row.first_name}"
-           data-last-name="${row.last_name}"
-           data-email="${row.email}"
-           data-phone-number="${row.phone_number}"
-           data-role-id="${row.roles && row.roles.length > 0 ? row.roles[0].id : ''}"
-           data-status="${row.status_value}">
+              data-question_ar="${row.question_ar}"
+               data-question_en="${row.question_en}"
+               data-answer_ar="${row.answer_ar}"
+               data-answer_en="${row.answer_en}"
+           data-id="${data}">
 
                 <i data-feather="edit-3"></i>
               </a>
@@ -170,24 +167,18 @@ $(document).ready(function () {
     $(document).on("click", ".edit-details", function (e) {
         const $button = $(this);
 
-        const adminId = $button.data('id') || '';
-        const firstName = $button.data('first-name') || '';
-        const lastName = $button.data('last-name') || '';
-        const phoneNumber = $button.data('phone-number') || '';
-        const email = $button.data('email') || '';
-        const roleId = $button.data('role-id') || '';
-        const status = $button.data('status');
-        const image = $button.data('image') || '{{ asset("images/avatar.png") }}';
-        console.log(status)
+        const faqId = $button.data('id') || '';
+        const questionAr = $button.data('question_ar') || '';
+        const questionEn = $button.data('question_en') || '';
+        const answerAr = $button.data('answer_ar') || '';
+        const answerEn = $button.data('answer_en') || '';
         // Populate modal
-        $("#editAdminModal #first_name").val(firstName);
-        $("#editAdminModal #last_name").val(lastName);
-        $("#editAdminModal #phone").val(phoneNumber);
-        $("#editAdminModal #email").val(email);
-        $("#editAdminModal #role").val(roleId);
-        $("#editAdminModal #status").val(status);
-        $("#editAdminModal .avatarPreview").attr("src", image);
-        $('#editAdminForm').attr('action', `admins/${adminId}`);
+        $("#editFaqModal #question-en").val(questionEn);
+        $("#editFaqModal #question-ar").val(questionAr);
+        $("#editFaqModal #answer-ar").val(answerAr);
+        $("#editFaqModal #answer-en").val(answerEn);
+
+        $('#editFaqForm').attr('action', `admins/${faqId}`);
     });
 
 

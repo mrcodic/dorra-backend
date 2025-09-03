@@ -15,7 +15,7 @@
                         <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Question (EN)</label>
                             <textarea class="form-control auto-resize" id="question-en"
-                                placeholder="Write your question here(En)" name="description[en]">Who are we?</textarea>
+                                placeholder="Write your question here(En)" name="description[en]"></textarea>
                         </div>
                         <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Question (AR)</label>
@@ -28,9 +28,7 @@
                         <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Answer (EN)</label>
                             <textarea class="form-control auto-resize" id="answer-en" placeholder="Enter Answer(En)"
-                                name="description[en]">Based in Cairo, Egypt, with a market presence since 2003. The company specializes in on-demand digital printing
-and custom label production, providing fast, precise, and
-reliable solutions tailored to the unique needs of businesses.</textarea>
+                                name="description[en]"></textarea>
                         </div>
                         <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Answer (AR)</label>
@@ -40,12 +38,12 @@ reliable solutions tailored to the unique needs of businesses.</textarea>
                     </div>
 
                     <!-- Added date input below -->
-                    <div class="row mb-2">
-                        <div class="col-12">
-                            <label class="form-label">Added Date</label>
-                            <input type="date" class="form-control" value="2024-05-26">
-                        </div>
-                    </div>
+{{--                    <div class="row mb-2">--}}
+{{--                        <div class="col-12">--}}
+{{--                            <label class="form-label">Added Date</label>--}}
+{{--                            <input type="date" class="form-control" value="2024-05-26" di>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
 
                 </div>

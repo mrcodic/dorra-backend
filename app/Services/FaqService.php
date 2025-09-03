@@ -36,11 +36,19 @@ class FaqService extends BaseService
             ->orderBy('created_at', request('created_at', 'desc'));
 
         return DataTables::of($faqs)
-            ->editColumn('question', function ($category) {
-                return $category->getTranslation('question', app()->getLocale());
+            ->editColumn('question', function ($faq) {
+                return $faq->getTranslation('question', app()->getLocale());
+            })->addColumn('question_en', function ($faq) {
+                return $faq->getTranslation('question', 'en');
+            })->addColumn('question_ar', function ($faq) {
+                return $faq->getTranslation('question', 'ar');
+            })->addColumn('answer_en', function ($faq) {
+                return $faq->getTranslation('answer', 'en');
+            })->addColumn('answer_ar', function ($faq) {
+                return $faq->getTranslation('question', 'ar');
             })
-            ->editColumn('created_at', function ($admin) {
-                return $admin->created_at->format('d/m/Y') ;
+            ->editColumn('created_at', function ($faq) {
+                return $faq->created_at->format('d/m/Y') ;
             })
             ->make();
     }
