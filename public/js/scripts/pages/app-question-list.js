@@ -36,12 +36,12 @@ const dt_user_table = $(".faq-list-table").DataTable({
             orderable: false,
             searchable: false,
             render: function (data, type, row) {
-                console.log(row)
+
                 return `
 
          <a href="#" class="edit-details"
            data-bs-toggle="modal"
-           data-bs-target="#editAdminModal"
+           data-bs-target="#editQuestionModal"
            data-image="${row.media && row.media.length > 0 ? row.media[0].original_url : ''}"
            data-id="${data}"
            data-first-name="${row.first_name}"
@@ -54,9 +54,9 @@ const dt_user_table = $(".faq-list-table").DataTable({
                 <i data-feather="edit-3"></i>
               </a>
 
-        <a href="#" class=" text-danger open-delete-admin-modal" data-id="${data}"
+        <a href="#" class=" text-danger open-delete-faq-modal" data-id="${data}"
                 data-bs-toggle="modal"
-                data-bs-target="#deleteAdminModal" >
+                data-bs-target="#deleteFaqModal" >
                 <i data-feather="trash-2"></i>
               </a>
 
@@ -190,20 +190,12 @@ $(document).ready(function () {
     });
 
 
-    $(document).on("click", ".open-delete-admin-modal", function () {
+    $(document).on("click", ".open-delete-faq-modal", function () {
         const adminId = $(this).data("id");
 
-        $("#deleteAdminForm").attr('action',`admins/${adminId}`);
+        $("#deleteFaqForm").attr('action',`faqs/${adminId}`);
     });
 
-
-    handleAjaxFormSubmit('#deleteAdminForm', {
-        successMessage: "✅ Admin deleted successfully!",
-        closeModal: '#deleteAdminModal',
-        onSuccess: function (response, $form) {
-            $(".faq-list-table").DataTable().ajax.reload(null, false); // false = stay on current page
-        }
-    });
 
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();

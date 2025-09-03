@@ -96,14 +96,14 @@
         @include('modals/questions/edit-question')
 
         @include('modals.delete',[
-        'id' => 'deleteAdminModal',
-        'formId' => 'deleteAdminForm',
-        'title' => 'Delete Admin',
+        'id' => 'deleteFaqModal',
+        'formId' => 'deleteFaqForm',
+        'title' => 'Delete Faq',
         ])
         @include('modals.delete',[
-        'id' => 'deleteAdminsModal',
+        'id' => 'deleteFaqsModal',
         'formId' => 'bulk-delete-form',
-        'title' => 'Delete Admins',
+        'title' => 'Delete Faqs',
         'confirmText' => 'Are you sure you want to delete this items?',
         ])
 
@@ -143,7 +143,15 @@
 
 </script>
 <script src="{{ asset('js/scripts/pages/app-question-list.js') }}?v={{ time() }}"></script>
-
+<script !src="">
+    handleAjaxFormSubmit("#deleteFaqForm",{
+        successMessage: "Faq deleted Successfully",
+        onSuccess:function () {
+            $("#deleteFaqModal").modal("hide");
+            location.reload()
+        }
+    })
+</script>
 <script>
     $(document).ready(function () {
             // Select all toggle
@@ -183,7 +191,7 @@
                 const count = selectedCheckboxes.length;
 
                 if (count > 0) {
-                    $('#selected-count-text').text(`${count} Admin${count > 1 ? 's are' : ' is'} selected`);
+                    $('#selected-count-text').text(`${count} Faq${count > 1 ? 's are' : ' is'} selected`);
                     $('#bulk-delete-container').show();
                 } else {
                     $('#bulk-delete-container').hide();
