@@ -159,6 +159,7 @@
                 <div class="col-12 col-md-2">
                     <select name="role_id" class="form-select filter-role" id="roleSelect">
                         <option value="" selected disabled>Role</option>
+                        <option value="">All</option>
                         @foreach($associatedData['roles'] as $role)
                         <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale())}}</option>
                         @endforeach
@@ -167,6 +168,7 @@
                 <div class="col-12 col-md-2">
                     <select name="status" class="form-select filter-status">
                         <option value="" selected disabled>Status</option>
+                        <option value="">All</option>
                         <option value="0">Blocked</option>
                         <option value="1">Active</option>
                     </select>
