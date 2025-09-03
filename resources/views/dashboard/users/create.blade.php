@@ -73,9 +73,7 @@
                 <div class="mb-2 text-center">
                     <div id="avatar-dropzone" class="dropzone" style="cursor:pointer;">
                         <div class="dz-message" data-dz-message>
-                            <button type="button" class="btn btn-outline-primary" data-bs-target="#avatar-dropzone">
-                                Upload Photo
-                            </button>
+                            <span>Drop image here or click to upload</span>
                         </div>
                     </div>
                 </div>
@@ -356,7 +354,7 @@
     // Don't initialize stepper manually - let the existing code handle it
     // Just get reference to the existing stepper instance
     let stepper;
-    
+
     // Wait for the existing stepper to be initialized
     setTimeout(function() {
         const stepperElement = document.querySelector('.bs-stepper');
@@ -364,7 +362,7 @@
             stepper = new Stepper(stepperElement);
         }
     }, 100);
-    
+
     // Initialize the validator
     const validator = $("#checkout-form").validate({
         rules: {
@@ -458,18 +456,18 @@
     function validateStep(stepId) {
         let isValid = true;
         const stepElement = document.getElementById(stepId);
-        
+
         if (!stepElement) return false;
-        
+
         // Find all required inputs in this step
         const inputs = stepElement.querySelectorAll('input[required], select[required], textarea[required], input[name], select[name], textarea[name]');
-        
+
         inputs.forEach(function(input) {
             // Skip certain hidden inputs
             if (input.type === 'hidden' && !['status', 'full_phone_number'].includes(input.name)) {
                 return;
             }
-            
+
             // Only validate if field has validation rules
             if (validator.settings.rules[input.name]) {
                 if (!validator.element(input)) {
@@ -477,7 +475,7 @@
                 }
             }
         });
-        
+
         return isValid;
     }
 
@@ -485,25 +483,25 @@
     $(document).off('click', '.btn-next').on('click', '.btn-next', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         // Determine current step based on which Next button was clicked
         let currentStepId;
         const parentStep = $(this).closest('.content');
         if (parentStep.length) {
             currentStepId = parentStep.attr('id');
         }
-        
+
         console.log('Next clicked, current step:', currentStepId);
-        
+
         if (!currentStepId) {
             console.error('Could not determine current step');
             return;
         }
-        
+
         // Validate current step
         const isStepValid = validateStep(currentStepId);
         console.log('Step validation result:', isStepValid);
-        
+
         if (isStepValid) {
             if (stepper) {
                 stepper.next();
@@ -522,13 +520,13 @@
         }
     });
 
-    // Override the Previous button click behavior  
+    // Override the Previous button click behavior
     $(document).off('click', '.btn-prev').on('click', '.btn-prev', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         console.log('Previous clicked');
-        
+
         if (stepper) {
             stepper.previous();
         } else {
@@ -539,14 +537,14 @@
     // Form submission handler
     $(".add-new-user").off('submit').on("submit", function (event) {
         event.preventDefault();
-        
+
         console.log('Form submitted');
-        
+
         // Validate all steps before submission
         const steps = ['step-info', 'step-password', 'step-address'];
         let allValid = true;
         let firstInvalidStep = null;
-        
+
         steps.forEach((stepId, index) => {
             const isValid = validateStep(stepId);
             if (!isValid && !firstInvalidStep) {
@@ -554,7 +552,7 @@
                 allValid = false;
             }
         });
-        
+
         if (!allValid) {
             console.log('Form validation failed, navigating to step:', firstInvalidStep + 1);
             if (stepper) {
@@ -566,7 +564,7 @@
         const saveButton = $('.saveChangesButton');
         const saveLoader = $('.saveLoader');
         const saveButtonText = $('.saveChangesButton .btn-text');
-        
+
         saveButton.prop('disabled', true);
         saveLoader.removeClass('d-none');
         saveButtonText.addClass('d-none');
@@ -593,7 +591,7 @@
                     localStorage.setItem('UserAdded', 1);
                     window.location.href = "/users";
                 }
-                
+
                 saveButton.prop('disabled', false);
                 saveLoader.addClass('d-none');
                 saveButtonText.removeClass('d-none');
@@ -601,11 +599,11 @@
             error: function (xhr) {
                 console.error('AJAX Error:', xhr);
                 const errors = xhr.responseJSON?.errors || {};
-                
+
                 for (const key in errors) {
                     if (errors.hasOwnProperty(key)) {
                         const errorMessage = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
-                        
+
                         if (typeof Toastify !== 'undefined') {
                             Toastify({
                                 text: errorMessage,
@@ -622,7 +620,7 @@
                         }
                     }
                 }
-                
+
                 saveButton.prop('disabled', false);
                 saveLoader.addClass('d-none');
                 saveButtonText.removeClass('d-none');
@@ -655,7 +653,7 @@
     $(document).on("change", ".country-select", function () {
         const countryId = $(this).val();
         const stateSelect = $(".state-select");
-        
+
         if (countryId) {
             $.ajax({
                 url: window.location.origin + "/api/states", // Adjust this URL as needed
@@ -667,7 +665,7 @@
                     stateSelect
                         .empty()
                         .append('<option value="">Select State</option>');
-                    
+
                     if (response.data && Array.isArray(response.data)) {
                         $.each(response.data, function (index, state) {
                             stateSelect.append(
@@ -689,7 +687,7 @@
                 .append('<option value="">Select State</option>');
         }
     });
-    
+
     console.log('Validation system initialized');
 });
 </script>
