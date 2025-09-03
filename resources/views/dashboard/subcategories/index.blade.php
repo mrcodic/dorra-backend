@@ -140,13 +140,13 @@
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
 
                 {{-- Search Input --}}
-                <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5">
+                <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                         id="search-sub-category-form" placeholder="Search subcategory..." style="height: 38px;">
-                    <button type="button" id="clearSubCategorySearchInput" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                             background: transparent; border: none; font-weight: bold;
-                            color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
+                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                         &times;
                     </button>
                 </form>
@@ -164,7 +164,7 @@
                     <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
                         data-bs-target="#addSubCategoryModal">
                         <i data-feather="plus"></i>
-                        Add New Subproducts
+                        Add New Subproduct
                     </a>
                 </div>
             </div>
@@ -279,14 +279,14 @@
     // Simple accordion toggle function
     function toggleAccordion($row) {
         if ($(window).width() > 768) return; // Only on mobile
-        
+
         const $detailsRow = $row.next('.details-row');
         const $icon = $row.find('.expand-icon');
-        
+
         // Close all other details
         $('.details-row.show').removeClass('show');
         $('.expand-icon.expanded').removeClass('expanded');
-        
+
         // If this row has details and they're not currently shown
         if ($detailsRow.length && !$detailsRow.hasClass('show')) {
             $detailsRow.addClass('show');
@@ -297,11 +297,11 @@
     // Accordion click handler with event delegation
     $(document).on('click.accordion', '.sub-category-list-table tbody tr:not(.details-row)', function(e) {
         // Prevent accordion when clicking interactive elements
-        if ($(e.target).is('input, button, a, .btn') || 
+        if ($(e.target).is('input, button, a, .btn') ||
             $(e.target).closest('input, button, a, .btn').length > 0) {
             return;
         }
-        
+
         e.stopPropagation();
         toggleAccordion($(this));
     });
@@ -311,18 +311,18 @@
         if ($(window).width() <= 768) {
             $('.sub-category-list-table tbody tr:not(.details-row)').each(function() {
                 const $row = $(this);
-                
+
                 // Remove existing details and icons first
                 $row.find('.expand-icon').remove();
                 $row.next('.details-row').remove();
-                
+
                 // Add expand icon to role column
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
-                
+
                 // Get data for details
                 const addedDate = $row.find('td:nth-child(4)').html() || '';
                 const actions = $row.find('td:nth-child(5)').html() || '';
-                
+
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
@@ -340,7 +340,7 @@
                         </td>
                     </tr>
                 `;
-                
+
                 $row.after(detailsHtml);
             });
         } else {
@@ -359,7 +359,7 @@
     $(document).on('draw.dt', '.sub-category-list-table', function () {
         $('#bulk-delete-container').hide();
         $('#select-all-checkbox').prop('checked', false);
-        
+
         // Reinitialize accordion after DataTable operations
         setTimeout(initAccordion, 100);
     });
@@ -400,17 +400,17 @@ $(document).ready(function() {
     // Alternative click handler
     $(document).off('click.accordion').on('click.accordion', '.sub-category-list-table tbody tr:not(.details-row)', function(e) {
         console.log('Accordion clicked'); // Debug log
-        
+
         if ($(window).width() <= 768) {
             // Skip if clicking on interactive elements
             if ($(e.target).is('input, button, a') || $(e.target).closest('input, button, a').length) {
                 return;
             }
-            
+
             const $currentRow = $(this);
             const $detailsRow = $currentRow.next('.details-row');
             const $icon = $currentRow.find('.expand-icon');
-            
+
             // Toggle logic
             if ($detailsRow.hasClass('show')) {
                 // Close this one
@@ -420,7 +420,7 @@ $(document).ready(function() {
                 // Close all others first
                 $('.details-row.show').removeClass('show');
                 $('.expand-icon.expanded').removeClass('expanded');
-                
+
                 // Open this one
                 $detailsRow.addClass('show');
                 $icon.addClass('expanded');

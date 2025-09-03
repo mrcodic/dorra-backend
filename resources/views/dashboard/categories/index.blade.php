@@ -147,13 +147,14 @@
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
 
                 {{-- Search Input --}}
-                <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5">
+                <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                         id="search-category-form" placeholder="Search product..." style="height: 38px;">
-                    <button type="button" id="clearCategorySearchInput" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                             background: transparent; border: none; font-weight: bold;
-                            color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
+                    <!-- Clear button -->
+                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                         &times;
                     </button>
                 </form>

@@ -95,6 +95,11 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
         },
     },
 });
+
+$('#clear-search').on('click', function () {
+    $('#search-sub-category-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 let searchTimeout;
 $('#search-sub-category-form').on('keyup', function () {
     clearTimeout(searchTimeout);

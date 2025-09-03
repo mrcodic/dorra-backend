@@ -68,7 +68,7 @@
                     <!-- Role -->
                     <div class="mb-2">
                         <label for="role" class="form-label">Role</label>
-                        <select class="form-select" name="role" id="role">
+                        <select class="form-select" name="role_id" id="role">
                             <option selected disabled>Select Role</option>
                             @foreach($associatedData['roles'] as $role)
                             <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale()) }}

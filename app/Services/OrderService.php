@@ -68,7 +68,7 @@ class OrderService extends BaseService
                 $query->where('status', request('status'));
             })
             ->when(request('search'), function ($query) {
-                $query->whereOrderNumber(request('search'));
+                $query->where('order_number', 'LIKE', '%' . request('search') . '%');
             })
             ->with(['orderItems.product', 'paymentMethod'])
             ->latest()

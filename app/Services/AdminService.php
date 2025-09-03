@@ -41,17 +41,14 @@ class AdminService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-
         if (empty($validatedData['password'])) {
             unset($validatedData['password'], $validatedData['password_confirmation']);
         }
         $model = $this->repository->update($validatedData, $id);
         if (Arr::get($validatedData, 'role_id')) {
-            $model->roles()->attach($validatedData['role_id'], [
-                'model_type' => get_class($model)
-            ]);
-
+            $model->roles()->sync([$validatedData['role_id']]);
         }
+
         if (empty($validatedData['image_id'])) {
             $model->clearMediaCollection('admins');
 

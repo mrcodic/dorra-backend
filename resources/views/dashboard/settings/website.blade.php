@@ -681,162 +681,181 @@
                     </form>
                 </div>
                 <div class="card mb-1">
-                    <div class="card-body border rounded">
-                        <p class="fs-4 text-black ">Reviews With Images</p>
-                        <!-- Header with toggle -->
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-1"
-                            style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show Reviews With Images Section</span>
-                            <!-- Toggle Switch -->
-                            <form id="reviewsWithImagesSectionForm" action="{{ route('landing-sections.update') }}"
-                                method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="reviews_with_images_section">
-                                <input type="hidden" name="value"
-                                    value="{{ setting('reviews_with_images_section') ? 1 : 0 }}"
-                                    id="reviewsWithImagesSectionValue">
+                    {{-- <div class="card-body border rounded">--}}
+                        {{-- <p class="fs-4 text-black ">Reviews With Images</p>--}}
+                        {{--
+                        <!-- Header with toggle -->--}}
+                        {{-- <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-1" --}}
+                            {{-- style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">--}}
+                            {{-- <span class="fw-semibold text-black fs-4">Show Reviews With Images Section</span>--}}
+                            {{--
+                            <!-- Toggle Switch -->--}}
+                            {{-- <form id="reviewsWithImagesSectionForm" action="{{ route('landing-sections.update') }}"
+                                --}} {{-- method="POST">--}}
+                                {{-- @csrf--}}
+                                {{-- @method('PUT')--}}
+                                {{-- <input type="hidden" name="key" value="reviews_with_images_section">--}}
+                                {{-- <input type="hidden" name="value" --}} {{--
+                                    value="{{ setting('reviews_with_images_section') ? 1 : 0 }}" --}} {{--
+                                    id="reviewsWithImagesSectionValue">--}}
 
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input toggle-switch" type="checkbox"
-                                        id="reviewsWithImagesSectionToggle" {{ setting('reviews_with_images_section')
-                                        ? 'checked' : '' }}>
-                                </div>
-                            </form>
+                                {{-- <div class="form-check form-switch">--}}
+                                    {{-- <input class="form-check-input toggle-switch" type="checkbox" --}} {{--
+                                        id="reviewsWithImagesSectionToggle" {{
+                                        setting('reviews_with_images_section')--}} {{-- ? 'checked' : '' }}>--}}
+                                    {{-- </div>--}}
+                                {{-- </form>--}}
 
-                        </div>
+                            {{--
+                        </div>--}}
 
 
-                        <!-- Review Form -->
-                        <form id="reviews-images" action="{{ route('reviews-images.create') }}" method="post"
-                            enctype="multipart/form-data">
-                            @csrf
-                            <div class="row mb-1">
-                                <div class="col-md-4">
-                                    <label>Customer</label>
-                                    <input type="text" class="form-control" name="customer" placeholder="Enter name">
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Rate</label>
-                                    <select name="rate" class="form-select">
-                                        <option value="" selected disabled>Select rate</option>
-                                        @for($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }} ★</option>
-                                            @endfor
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Date</label>
-                                    <input type="date" name="date" class="form-control">
-                                </div>
-                            </div>
+                        {{--
+                        <!-- Review Form -->--}}
+                        {{-- <form id="reviews-images" action="{{ route('reviews-images.create') }}" method="post" --}}
+                            {{-- enctype="multipart/form-data">--}}
+                            {{-- @csrf--}}
+                            {{-- <div class="row mb-1">--}}
+                                {{-- <div class="col-md-4">--}}
+                                    {{-- <label>Customer</label>--}}
+                                    {{-- <input type="text" class="form-control" name="customer"
+                                        placeholder="Enter name">--}}
+                                    {{-- </div>--}}
+                                {{-- <div class="col-md-4">--}}
+                                    {{-- <label>Rate</label>--}}
+                                    {{-- <select name="rate" class="form-select">--}}
+                                        {{-- <option value="" selected disabled>Select rate</option>--}}
+                                        {{-- @for($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }} ★</option>
+                                            --}}
+                                            {{-- @endfor--}}
+                                            {{-- </select>--}}
+                                    {{-- </div>--}}
+                                {{-- <div class="col-md-4">--}}
+                                    {{-- <label>Date</label>--}}
+                                    {{-- <input type="date" name="date" class="form-control">--}}
+                                    {{-- </div>--}}
+                                {{-- </div>--}}
 
-                            <div class="mb-1">
-                                <label>Review</label>
-                                <textarea name="review" class="form-control" placeholder="Add review"></textarea>
-                            </div>
+                            {{-- <div class="mb-1">--}}
+                                {{-- <label>Review</label>--}}
+                                {{-- <textarea name="review" class="form-control"
+                                    placeholder="Add review"></textarea>--}}
+                                {{-- </div>--}}
 
-                            <!-- Upload Photo (Drag and Drop Area) -->
-                            <div class="mb-1">
-                                <label>Photo</label>
+                            {{--
+                            <!-- Upload Photo (Drag and Drop Area) -->--}}
+                            {{-- <div class="mb-1">--}}
+                                {{-- <label>Photo</label>--}}
 
-                                <!-- Dropzone Container -->
-                                <div id="review-image-dropzone"
+                                {{--
+                                <!-- Dropzone Container -->--}}
+                                {{-- <div id="review-image-dropzone" --}} {{--
                                     class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center col-12 mb-1"
-                                    style="border: 2px dashed rgba(0, 0, 0, 0.3);">
-                                    <div class="dz-message" data-dz-message>
-                                        <i data-feather="upload" class="mb-2"></i>
-                                        <p>Drag image here or click to upload</p>
-                                    </div>
-                                </div>
+                                    --}} {{-- style="border: 2px dashed rgba(0, 0, 0, 0.3);">--}}
+                                    {{-- <div class="dz-message" data-dz-message>--}}
+                                        {{-- <i data-feather="upload" class="mb-2"></i>--}}
+                                        {{-- <p>Drag image here or click to upload</p>--}}
+                                        {{-- </div>--}}
+                                    {{-- </div>--}}
 
-                                <!-- Hidden input to store uploaded media id -->
-                                <input type="hidden" name="image_id" id="uploadedImage">
+                                {{--
+                                <!-- Hidden input to store uploaded media id -->--}}
+                                {{-- <input type="hidden" name="image_id" id="uploadedImage">--}}
 
-                                <div>
-
-
-
-                                    <input type="hidden" name="type" value="with_image">
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-primary mt-2">Add Review</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-
-                        <!-- Added Products List -->
-                        <div class="mt-2">
-                            <h5 class="text-black fs-16">Added Reviews</h5>
-                            <div class="row">
-                                @foreach($reviewsWithImages as $review)
-                                <div class="col-md-6 mb-1"
-                                    style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">
-                                    <div class="p-1 d-flex">
-                                        <img src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
-                                            class="rounded me-1" style="width: 60px; height: 60px; object-fit: cover;">
-                                        <div>
-                                            <strong>{{ $review->customer }}</strong>
-                                            <div class="text-warning">
-
-                                                @for ($i = 1; $i <= 5; $i++) @if ($i <=$review->rate)
-                                                    <i class="fas fa-star text-warning"></i> {{-- filled --}}
-                                                    @else
-                                                    <i class="far fa-star text-muted"></i> {{-- empty --}}
-                                                    @endif
-                                                    @endfor
+                                {{-- <div>--}}
 
 
 
+                                    {{-- <input type="hidden" name="type" value="with_image">--}}
+                                    {{-- <div class="text-end">--}}
+                                        {{-- <button type="submit" class="btn btn-primary mt-2">Add Review</button>--}}
+                                        {{-- </div>--}}
+                                    {{-- </div>--}}
+                                {{--
+                            </div>--}}
+                            {{--
+                        </form>--}}
+
+                        {{--
+                        <!-- Added Products List -->--}}
+                        {{-- <div class="mt-2">--}}
+                            {{-- <h5 class="text-black fs-16">Added Reviews</h5>--}}
+                            {{-- <div class="row">--}}
+                                {{-- @foreach($reviewsWithImages as $review)--}}
+                                {{-- <div class="col-md-6 mb-1" --}} {{--
+                                    style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">--}}
+                                    {{-- <div class="p-1 d-flex">--}}
+                                        {{-- <img src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
+                                            --}} {{-- class="rounded me-1"
+                                            style="width: 60px; height: 60px; object-fit: cover;">--}}
+                                        {{-- <div>--}}
+                                            {{-- <strong>{{ $review->customer }}</strong>--}}
+                                            {{-- <div class="text-warning">--}}
+
+                                                {{-- @for ($i = 1; $i <= 5; $i++) @if ($i <=$review->rate)--}}
+                                                    {{-- <i class="fas fa-star text-warning"></i> --}}{{-- filled --}}
+                                                    {{-- @else--}}
+                                                    {{-- <i class="far fa-star text-muted"></i> --}}{{-- empty --}}
+                                                    {{-- @endif--}}
+                                                    {{-- @endfor--}}
 
 
-                                            </div>
-                                            <small class="text-muted">{{
-                                                \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
-                                            <p class="mb-1 text-break">{{ $review->review }}</p>
-                                            <form class="remove-review" action="{{route('reviews.remove',$review->id)}}"
-                                                method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                    Remove
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
 
 
-                    </div>
+
+                                                    {{-- </div>--}}
+                                            {{-- <small class="text-muted">{{--}}
+                                                {{-- \Carbon\Carbon::parse($review->date)->format('d/m/Y')
+                                                }}</small>--}}
+                                            {{-- <p class="mb-1 text-break">{{ $review->review }}</p>--}}
+                                            {{-- <form class="remove-review"
+                                                action="{{route('reviews.remove',$review->id)}}" method="POST">--}}
+                                                {{-- @csrf--}}
+                                                {{-- @method('DELETE')--}}
+                                                {{-- <button type="submit" class="btn btn-sm btn-outline-danger">--}}
+                                                    {{-- Remove--}}
+                                                    {{-- </button>--}}
+                                                {{-- </form>--}}
+                                            {{-- </div>--}}
+                                        {{-- </div>--}}
+                                    {{-- </div>--}}
+                                {{-- @endforeach--}}
+                                {{-- </div>--}}
+                            {{-- </div>--}}
+
+
+                        {{--
+                    </div>--}}
 
                     <div class="card mt-2 border rounded">
 
                         <div class="card-body">
                             <p class="fs-4 text-black">Words of Praise</p>
                             <!-- Header with toggle -->
-                            <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
-                                style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                                <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>
-                                <!-- Toggle Switch -->
-                                <form id="reviewsWithoutImagesSectionForm"
-                                    action="{{ route('landing-sections.update') }}" method="POST">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="key" value="reviews_without_images_section">
-                                    <input type="hidden" name="value"
-                                        value="{{ setting('reviews_without_images_section') ? 1 : 0 }}"
-                                        id="reviewsWithoutImagesSectionValue">
+                            {{-- <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                                --}} {{--
+                                style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">--}}
+                                {{-- <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>--}}
+                                {{--
+                                <!-- Toggle Switch -->--}}
+                                {{-- <form id="reviewsWithoutImagesSectionForm" --}} {{--
+                                    action="{{ route('landing-sections.update') }}" method="POST">--}}
+                                    {{-- @csrf--}}
+                                    {{-- @method('PUT')--}}
+                                    {{-- <input type="hidden" name="key" value="reviews_without_images_section">--}}
+                                    {{-- <input type="hidden" name="value" --}} {{--
+                                        value="{{ setting('reviews_without_images_section') ? 1 : 0 }}" --}} {{--
+                                        id="reviewsWithoutImagesSectionValue">--}}
 
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input toggle-switch" type="checkbox"
-                                            id="reviewsWithoutImagesSectionToggle" {{
-                                            setting('reviews_without_images_section') ? 'checked' : '' }}>
-                                    </div>
-                                </form>
+                                    {{-- <div class="form-check form-switch">--}}
+                                        {{-- <input class="form-check-input toggle-switch" type="checkbox" --}} {{--
+                                            id="reviewsWithoutImagesSectionToggle" {{--}} {{--
+                                            setting('reviews_without_images_section') ? 'checked' : '' }}>--}}
+                                        {{-- </div>--}}
+                                    {{-- </form>--}}
 
-                            </div>
+                                {{--
+                            </div>--}}
 
                             <!-- Review Form -->
                             <form id="reviews" action="{{ route('reviews.create') }}" method="POST"
@@ -944,71 +963,22 @@
                 <div class="position-relative">
                     <div class="row g-2 mb-1">
                         <div class="col-12">
-                            <form id="createPartner" action="{{ route('partners.create') }}" method="post"
-                                enctype="multipart/form-data">
+                            <form id="createPartner" action="{{ route('partners.create') }}" method="post">
                                 @csrf
-                                <input type="file" name="image" id="partner-image-main" class="form-control d-none"
-                                    accept="image/*">
 
-                                <!-- Custom Upload Card -->
-                                <div id="partner-upload-area" class="upload-card">
-                                    <div id="partner-upload-content">
-                                        <i data-feather="upload" class="mb-1"></i>
-                                        <p>Drag image here to upload</p>
-                                    </div>
+                                <!-- Dropzone area -->
+                                <div class="dropzone" id="partner-dropzone"></div>
+
+                                <!-- Hidden field to store uploaded media ID -->
+                                <input type="hidden" name="media_id" id="media_id">
+
+                                <div class="row d-flex justify-content-end">
+                                    <button type="submit" class="col-5 col-md-3 btn btn-primary mt-1 mb-1">
+                                        Add Partner
+                                    </button>
                                 </div>
-                                <div>
-                                    <!-- Progress Bar -->
-                                    <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
-                                        <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
-                                            style="width: 0%"></div>
-                                    </div>
-
-
-                                    <!-- Uploaded Image Preview -->
-                                    <div id="partner-uploaded-image"
-                                        class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                        <img src="" alt="Uploaded" class="img-fluid rounded"
-                                            style="width: 50px; height: 50px; object-fit: cover;">
-                                        <div id="file-details" class="file-details">
-                                            <div class="file-name fw-bold"></div>
-                                            <div class="file-size text-muted small"></div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <!-- Progress Bar -->
-                                        <div id="partner-upload-progress" class="progress mt-2 d-none w-50">
-                                            <div class="partner-progress-bar progress-bar-striped progress-bar-animated"
-                                                style="width: 0%"></div>
-                                        </div>
-
-
-                                        <!-- Uploaded Image Preview -->
-                                        <div id="partner-uploaded-image"
-                                            class="partner-uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                                            <img src="" alt="Uploaded" class="img-fluid rounded"
-                                                style="width: 50px; height: 50px; object-fit: cover;">
-                                            <div id="file-details" class="file-details">
-                                                <div class="file-name fw-bold"></div>
-                                                <div class="file-size text-muted small"></div>
-                                            </div>
-                                            <button type="button" id="partner-remove-image"
-                                                class="btn btn-sm position-absolute text-danger"
-                                                style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                <i data-feather="trash"></i>
-                                            </button>
-                                        </div>
-
-                                    </div>
-                                    <div class="row d-flex justify-content-end">
-                                        <button type="submit" class="col-5 col-md-3 btn btn-primary mt-1 mb-1">Add
-                                            Partner
-                                        </button>
-                                    </div>
-
-                                </div>
-
                             </form>
+
                             <p class="fw-semibold text-black fs-16">Added Partners</p>
                             <div class="row">
                                 <!-- Product Card -->
@@ -1098,6 +1068,40 @@
     @endsection
 
     @section('page-script')
+    <script>
+        Dropzone.autoDiscover = false;
+
+            let partnerDropzone = new Dropzone("#partner-dropzone", {
+                url: "{{ route('media.store') }}",   // upload endpoint
+                maxFiles: 1,
+                acceptedFiles: "image/*",
+                addRemoveLinks: true,
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                init: function () {
+                    this.on("success", function (file, response) {
+                        // store uploaded media ID in hidden input
+                        document.getElementById("media_id").value = response.data.id;
+                    });
+
+                    this.on("removedfile", function (file) {
+                        // clear hidden input if file is removed
+                        document.getElementById("media_id").value = "";
+
+                        if (file.xhr) {
+                            let response = JSON.parse(file.xhr.response);
+                            fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                method: "DELETE",
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+    </script>
     <script>
         Dropzone.autoDiscover = false;
 

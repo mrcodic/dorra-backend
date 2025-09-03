@@ -145,13 +145,14 @@
         <div class="card-datatable table-responsive pt-0">
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
                 <form action="" method="get"
-                    class="position-relative position-relative flex-grow-1 me-1 col-12 col-md-4">
+                    class="position-relative position-relative flex-grow-1 me-1 col-12 col-md-4 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                         id="search-product-form" placeholder="Search category..." style="height: 38px;">
-                    <button type="button" id="clearSearchInput" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                background: transparent; border: none; font-weight: bold;
-                     color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
+                    <!-- Clear button -->
+                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                         &times;
                     </button>
                 </form>
@@ -159,16 +160,12 @@
                 <div class="col-12 col-md-2" style="position: relative;">
                     <select id="categorySelect" name="category_id" class="form-select category-select pe-5">
                         <option value="" selected disabled>Product</option>
+                        <option value="">All</option>
                         @foreach($associatedData['categories'] as $category)
-                        <option value="{{ $category->id }}">{{ $category->name}}</option>
+                            <option value="{{ $category->id }}">{{ $category->name}}</option>
                         @endforeach
                     </select>
 
-                    <button type="button" id="clearCategoryFilter" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-        background: transparent; border: none; font-weight: bold;
-        color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear search">
-                        &times;
-                    </button>
                 </div>
 
 
@@ -177,16 +174,11 @@
                     <div style="position: relative;">
                         <select name="tag_id" class="tag-select form-select pe-5" id="tagSelect">
                             <option value="" selected disabled>Tag</option>
-                            @foreach($associatedData['tags'] as $tag)
+                            <option value="">All</option>
+                        @foreach($associatedData['tags'] as $tag)
                             <option value="{{ $tag->id }}">{{ $tag->name }}</option>
                             @endforeach
                         </select>
-                        <button type="button" id="clearTagFilter" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                background: transparent; border: none; font-weight: bold;
-                     color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
-                            &times;
-                        </button>
-
                     </div>
                 </div>
 
@@ -323,14 +315,14 @@
     // Simple accordion toggle function
     function toggleAccordion($row) {
         if ($(window).width() > 768) return; // Only on mobile
-        
+
         const $detailsRow = $row.next('.details-row');
         const $icon = $row.find('.expand-icon');
-        
+
         // Close all other details
         $('.details-row.show').removeClass('show');
         $('.expand-icon.expanded').removeClass('expanded');
-        
+
         // If this row has details and they're not currently shown
         if ($detailsRow.length && !$detailsRow.hasClass('show')) {
             $detailsRow.addClass('show');
@@ -341,11 +333,11 @@
     // Accordion click handler with event delegation
     $(document).on('click.accordion', '.product-list-table tbody tr:not(.details-row)', function(e) {
         // Prevent accordion when clicking interactive elements
-        if ($(e.target).is('input, button, a, .btn') || 
+        if ($(e.target).is('input, button, a, .btn') ||
             $(e.target).closest('input, button, a, .btn').length > 0) {
             return;
         }
-        
+
         e.stopPropagation();
         toggleAccordion($(this));
     });
@@ -355,21 +347,21 @@
         if ($(window).width() <= 768) {
             $('.product-list-table tbody tr:not(.details-row)').each(function() {
                 const $row = $(this);
-                
+
                 // Remove existing details and icons first
                 $row.find('.expand-icon').remove();
                 $row.next('.details-row').remove();
-                
+
                 // Add expand icon to role column
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
-                
+
                 // Get data for details
                 const tags = $row.find('td:nth-child(4)').html() || '';
                 const noOfPuchas = $row.find('td:nth-child(5)').html() || '';
                 const addedDate = $row.find('td:nth-child(6)').html() || '';
                 const rating = $row.find('td:nth-child(7)').html() || '';
                 const actions = $row.find('td:nth-child(8)').html() || '';
-                
+
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
@@ -399,7 +391,7 @@
                         </td>
                     </tr>
                 `;
-                
+
                 $row.after(detailsHtml);
             });
         } else {
@@ -418,7 +410,7 @@
     $(document).on('draw.dt', '.product-list-table', function () {
         $('#bulk-delete-container').hide();
         $('#select-all-checkbox').prop('checked', false);
-        
+
         // Reinitialize accordion after DataTable operations
         setTimeout(initAccordion, 100);
     });
@@ -460,17 +452,17 @@ $(document).ready(function() {
     // Alternative click handler
     $(document).off('click.accordion').on('click.accordion', '.product-list-table tbody tr:not(.details-row)', function(e) {
         console.log('Accordion clicked'); // Debug log
-        
+
         if ($(window).width() <= 768) {
             // Skip if clicking on interactive elements
             if ($(e.target).is('input, button, a') || $(e.target).closest('input, button, a').length) {
                 return;
             }
-            
+
             const $currentRow = $(this);
             const $detailsRow = $currentRow.next('.details-row');
             const $icon = $currentRow.find('.expand-icon');
-            
+
             // Toggle logic
             if ($detailsRow.hasClass('show')) {
                 // Close this one
@@ -480,7 +472,7 @@ $(document).ready(function() {
                 // Close all others first
                 $('.details-row.show').removeClass('show');
                 $('.expand-icon.expanded').removeClass('expanded');
-                
+
                 // Open this one
                 $detailsRow.addClass('show');
                 $icon.addClass('expanded');

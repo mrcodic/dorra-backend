@@ -88,23 +88,23 @@ class SettingController extends Controller
             );
 
             // Attach website media
-            if (Arr::get($carouselData,'website_media_ids')) {
+            if (Arr::get($carouselData, 'website_media_ids')) {
                 $carousel->clearMediaCollection('carousels');
                 Media::whereIn('id', $carouselData['website_media_ids'])
                     ->update([
                         'model_type' => Carousel::class,
-                        'model_id'   => $carousel->id,
+                        'model_id' => $carousel->id,
                         'collection_name' => 'carousels',
                     ]);
             }
 
             // Attach mobile media
-            if (Arr::get($carouselData,'mobile_media_ids')) {
+            if (Arr::get($carouselData, 'mobile_media_ids')) {
                 $carousel->clearMediaCollection('mobile_carousels');
                 Media::whereIn('id', $carouselData['mobile_media_ids'])
                     ->update([
                         'model_type' => Carousel::class,
-                        'model_id'   => $carousel->id,
+                        'model_id' => $carousel->id,
                         'collection_name' => 'mobile_carousels',
                     ]);
             }
@@ -112,6 +112,7 @@ class SettingController extends Controller
 
         return Response::api();
     }
+
     public function removeCarousel($id, CarouselRepositoryInterface $carouselRepository)
     {
         $carousel = $carouselRepository->find($id);
@@ -122,6 +123,7 @@ class SettingController extends Controller
         $carousel->delete();
         return Response::api();
     }
+
     public function landingSections(Request $request, SettingRepositoryInterface $settingRepository)
     {
         $setting = $settingRepository->query()->where('key', $request->input('key'))->firstOrFail();
@@ -152,12 +154,20 @@ class SettingController extends Controller
 
     public function uploadPartners(Request $request)
     {
-        $request->validate(['image' => ['required', 'file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048']]);
         $asset = GlobalAsset::create([
             'title' => 'Partner Upload',
             'type' => 'partner_upload'
         ]);
-        handleMediaUploads($request->image, $asset, collectionName: "partners");
+        if ($request->media_id) {
+            Media::where('id', $request->media_id)
+                ->update([
+                    'model_type' => get_class($asset),
+                    'model_id' => $asset->id,
+                    'collection_name' => 'partners',
+                ]);
+
+        }
+
         return Response::api();
 
     }
@@ -187,12 +197,13 @@ class SettingController extends Controller
         Media::where('id', $validatedData['image_id'])
             ->update([
                 'model_type' => get_class($review),
-                'model_id'   => $review->id,
+                'model_id' => $review->id,
                 'collection_name' => 'reviews_landing_images',
             ]);
         return Response::api();
 
     }
+
     public function removeReview($id, LandingReviewRepositoryInterface $reviewRepository)
     {
         $review = $reviewRepository->find($id);

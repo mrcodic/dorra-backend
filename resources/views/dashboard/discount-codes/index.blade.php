@@ -133,14 +133,13 @@
         </div>
         <div class="card-datatable table-responsive pt-0">
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                <form method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5">
+                <form method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" id="search-code-form"
                         placeholder="Search here" style="height: 38px;">
-                    <button type="button" id="clearRoleFilter"
-                        class="position-absolute top-50 translate-middle-y text-muted"
-                        style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                        title="Clear search">
+                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                         &times;
                     </button>
                 </form>
@@ -148,8 +147,8 @@
                 <div class="col-12 col-md-2">
                     <select class="form-select filter-date">
                         <option value="" selected disabled>Date</option>
-                        <option value="asc">asc</option>
-                        <option value="desc">desc</option>
+                        <option value="asc">Oldest</option>
+                        <option value="desc">Newest</option>
                     </select>
                 </div>
                 <button id="export-excel" type="button" class="btn btn-secondary fs-16 px-2">

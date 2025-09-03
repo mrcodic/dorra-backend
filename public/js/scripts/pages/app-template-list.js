@@ -102,7 +102,6 @@ const dt_user_table = $(".template-list-table").DataTable({
         }
     }
 });
-
 // Custom search with debounce
 // let searchTimeout;
 // $('#search-category-form').on('keyup', function () {
@@ -120,6 +119,10 @@ const dt_user_table = $(".template-list-table").DataTable({
 $(document).ready(function () {
     fetchTemplates();
 
+    $('#clear-search').on('click', function () {
+        $('#search-category-form').val('');  // clear input
+        fetchTemplates();
+    });
     $('.filter-status, .filter-product, #search-category-form, .filter-paginate-number').on('change keyup', function () {
         fetchTemplates();
     });

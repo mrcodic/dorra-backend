@@ -144,14 +144,14 @@
         </div>
         <div class="card-datatable table-responsive pt-0">
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                <form action="" method="get" class="d-flex me-1 position-relative col-12 col-md-6">
+                <form action="" method="get" class="d-flex me-1 position-relative col-12 col-md-6 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                         id="search-category-form" placeholder="Search here" style="height: 38px;">
-                    <button type="button" id="clearRoleFilter"
-                        class="position-absolute top-50 translate-middle-y text-muted"
-                        style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                        title="Clear search">
+                    <!-- Clear button -->
+                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                         &times;
                     </button>
                 </form>
@@ -159,6 +159,7 @@
                 <div class="col-12 col-md-2">
                     <select name="role_id" class="form-select filter-role" id="roleSelect">
                         <option value="" selected disabled>Role</option>
+                        <option value="">All</option>
                         @foreach($associatedData['roles'] as $role)
                         <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale())}}</option>
                         @endforeach
@@ -167,6 +168,7 @@
                 <div class="col-12 col-md-2">
                     <select name="status" class="form-select filter-status">
                         <option value="" selected disabled>Status</option>
+                        <option value="">All</option>
                         <option value="0">Blocked</option>
                         <option value="1">Active</option>
                     </select>

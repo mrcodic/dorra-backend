@@ -1,4 +1,8 @@
 $(document).ready(function () {
+    $('#clear-search').on('click', function () {
+        $('#search-category-form').val('');  // clear input
+        fetchMockups();
+    });
     fetchMockups();
 
     $('.filter-type, .filter-product, #search-category-form, .filter-paginate-number').on('change keyup', function () {

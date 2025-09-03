@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,6 +18,7 @@ class Category extends Model implements HasMedia
 
     public $translatable = ['name', 'description'];
     protected $fillable = ['name', 'description', 'parent_id', 'is_landing'];
+
 
     public function scopeIsLanding(Builder $builder): Builder
     {

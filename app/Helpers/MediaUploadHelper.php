@@ -29,6 +29,11 @@ if (!function_exists('handleMediaUploads')) {
 
         $files = is_array($files) ? Arr::flatten($files) : [$files];
 
+        if ($clearExisting && $modelData) {
+            // remove existing media in this collection before uploading new
+            $modelData->clearMediaCollection($collectionName);
+        }
+
         $uploaded = collect($files)->map(function ($file) use ($modelData, $collectionName, $customProperties) {
             if ($modelData) {
                 $mediaAdder = $modelData->addMedia($file);

@@ -115,6 +115,10 @@ var dt_user_table = $(".product-list-table").DataTable({
     },
 });
 
+$('#clear-search').on('click', function () {
+    $('#search-product-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 // Search input with timeout (for better performance)
 let searchTimeout;
 $('#search-product-form').on('keyup', function () {

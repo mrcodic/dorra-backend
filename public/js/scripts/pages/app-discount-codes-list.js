@@ -107,7 +107,10 @@ const dt_user_table = $(".code-list-table").DataTable({
         },
     },
 });
-
+$('#clear-search').on('click', function () {
+    $('#search-code-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 // Debounced search input
 let searchTimeout;
 $("#search-code-form").on("keyup", function () {

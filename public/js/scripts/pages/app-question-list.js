@@ -3,18 +3,16 @@ $.ajaxSetup({
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
 });
-const dt_user_table = $(".admin-list-table").DataTable({
+const dt_user_table = $(".faq-list-table").DataTable({
     processing: true,
     serverSide: true,
     searching: false, // using custom search
     ajax: {
-        url: adminsDataUrl,
+        url: faqsDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $('#search-category-form').val(); // get from input
-            d.role_id = $('.filter-role').val();
-            d.status = $('.filter-status').val();
-            console.log(d.status)
+            d.search_value = $('#search-faq-form').val(); // get from input
+            d.created_at = $('.filter-date').val();
             return d;
         }
     },
@@ -27,61 +25,32 @@ const dt_user_table = $(".admin-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
-        {data: "id"},
-        {data: "name"},
-        {data: "email"},
-        // {data: "role"},
-        {
-            data: "status",
-            render: function (data, type, row, meta) {
-                let textColor = "";
-                let bgColor = "";
 
-                switch (data) {
-                    case "active":
-                        textColor = "text-success";
-                        bgColor = "#D7EEDD"; // light green
-                        break;
-                    case "blocked":
-                        textColor = "text-secondary";
-                        bgColor = "#F0F0F0"; // light gray
-                        break;
-                    default:
-                        textColor = "text-muted";
-                        bgColor = "#E9ECEF"; // default gray
-                }
-
-                return `<span class="badge rounded-pill ${textColor} px-1" style="background-color: ${bgColor};">${data}</span>`;
-            },
-        },
-
+        {data: "question"},
         {data: "created_at"},
         {
             data: "id",
             orderable: false,
             searchable: false,
             render: function (data, type, row) {
-                console.log(row)
+
                 return `
 
          <a href="#" class="edit-details"
            data-bs-toggle="modal"
-           data-bs-target="#editAdminModal"
-           data-image="${row.media && row.media.length > 0 ? row.media[0].original_url : ''}"
-           data-id="${data}"
-           data-first-name="${row.first_name}"
-           data-last-name="${row.last_name}"
-           data-email="${row.email}"
-           data-phone-number="${row.phone_number}"
-           data-role-id="${row.roles && row.roles.length > 0 ? row.roles[0].id : ''}"
-           data-status="${row.status_value}">
+           data-bs-target="#editQuestionModal"
+              data-question_ar="${row.question_ar}"
+               data-question_en="${row.question_en}"
+               data-answer_ar="${row.answer_ar}"
+               data-answer_en="${row.answer_en}"
+           data-id="${data}">
 
                 <i data-feather="edit-3"></i>
               </a>
 
-        <a href="#" class=" text-danger open-delete-admin-modal" data-id="${data}"
+        <a href="#" class=" text-danger open-delete-faq-modal" data-id="${data}"
                 data-bs-toggle="modal"
-                data-bs-target="#deleteAdminModal" >
+                data-bs-target="#deleteFaqModal" >
                 <i data-feather="trash-2"></i>
               </a>
 
@@ -115,9 +84,13 @@ const dt_user_table = $(".admin-list-table").DataTable({
     }
 });
 
+$('#clear-search').on('click', function () {
+    $('#search-faq-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 // Custom search with debounce
 let searchTimeout;
-$('#search-category-form').on('keyup', function () {
+$('#search-faq-form').on('keyup', function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
@@ -126,7 +99,7 @@ $('#search-category-form').on('keyup', function () {
 
 // Custom search with debounce
 
-$('.filter-role, .filter-status').on('change', function () {
+$('.filter-date').on('change', function () {
     dt_user_table.ajax.reload();
 });
 
@@ -194,41 +167,27 @@ $(document).ready(function () {
     $(document).on("click", ".edit-details", function (e) {
         const $button = $(this);
 
-        const adminId = $button.data('id') || '';
-        const firstName = $button.data('first-name') || '';
-        const lastName = $button.data('last-name') || '';
-        const phoneNumber = $button.data('phone-number') || '';
-        const email = $button.data('email') || '';
-        const roleId = $button.data('role-id') || '';
-        const status = $button.data('status');
-        const image = $button.data('image') || '{{ asset("images/avatar.png") }}';
-        console.log(status)
+        const faqId = $button.data('id') || '';
+        const questionAr = $button.data('question_ar') || '';
+        const questionEn = $button.data('question_en') || '';
+        const answerAr = $button.data('answer_ar') || '';
+        const answerEn = $button.data('answer_en') || '';
         // Populate modal
-        $("#editAdminModal #first_name").val(firstName);
-        $("#editAdminModal #last_name").val(lastName);
-        $("#editAdminModal #phone").val(phoneNumber);
-        $("#editAdminModal #email").val(email);
-        $("#editAdminModal #role").val(roleId);
-        $("#editAdminModal #status").val(status);
-        $("#editAdminModal .avatarPreview").attr("src", image);
-        $('#editAdminForm').attr('action', `admins/${adminId}`);
+        $("#editFaqModal #question-en").val(questionEn);
+        $("#editFaqModal #question-ar").val(questionAr);
+        $("#editFaqModal #answer-ar").val(answerAr);
+        $("#editFaqModal #answer-en").val(answerEn);
+
+        $('#editFaqForm').attr('action', `admins/${faqId}`);
     });
 
 
-    $(document).on("click", ".open-delete-admin-modal", function () {
+    $(document).on("click", ".open-delete-faq-modal", function () {
         const adminId = $(this).data("id");
 
-        $("#deleteAdminForm").attr('action',`admins/${adminId}`);
+        $("#deleteFaqForm").attr('action',`faqs/${adminId}`);
     });
 
-
-    handleAjaxFormSubmit('#deleteAdminForm', {
-        successMessage: "✅ Admin deleted successfully!",
-        closeModal: '#deleteAdminModal',
-        onSuccess: function (response, $form) {
-            $(".admin-list-table").DataTable().ajax.reload(null, false); // false = stay on current page
-        }
-    });
 
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();
@@ -261,7 +220,7 @@ $(document).ready(function () {
                 $('#bulk-delete-container').hide();
                 $('.category-checkbox').prop('checked', false);
                 $('#select-all-checkbox').prop('checked', false);
-                $(".admin-list-table").DataTable().ajax.reload(null, false);
+                $(".faq-list-table").DataTable().ajax.reload(null, false);
 
             },
             error: function () {
@@ -280,7 +239,7 @@ $(document).ready(function () {
                 $('#bulk-delete-container').hide();
                 $('.product-checkbox').prop('checked', false);
                 $('#select-all-checkbox').prop('checked', false);
-                $(".admin-list-table").DataTable().ajax.reload(null, false);
+                $(".faq-list-table").DataTable().ajax.reload(null, false);
 
             },
         });
