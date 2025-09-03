@@ -112,10 +112,8 @@
                                         class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center col-12 mb-1"
                                         style="border: 2px dashed rgba(0, 0, 0, 0.3);">
                                         <div class="dz-message" data-dz-message>
-                                            <button type="button" class="btn btn-outline-primary"
-                                                data-bs-target="#edit-user-dropzone">
-                                                Upload Photo
-                                            </button>
+                                            <span>Drop image here or click to upload</span>
+                                          
                                             {{-- <button type="button" class="btn btn-outline" style="color: #E74943"
                                                 --}} {{-- data-bs-target="#avatar-dropzone">Remove--}}
                                                 {{-- Photo</button>--}}

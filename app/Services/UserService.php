@@ -34,17 +34,19 @@ class UserService extends BaseService
     }
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-
         $model = $this->repository->update($validatedData, $id);
-
         if (isset($validatedData['image_id'])) {
-            $model->clearMediaCollection('users');
+            $model->getMedia('users')
+                ->where('id', '!=', $validatedData['image_id'])
+                ->each->delete();
+
             Media::where('id', $validatedData['image_id'])
                 ->update([
-                    'model_type' => get_class($model),
-                    'model_id'   => $model->id,
+                    'model_type'      => get_class($model),
+                    'model_id'        => $model->id,
                     'collection_name' => 'users',
                 ]);
+
         }
 
         return $model;
