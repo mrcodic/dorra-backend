@@ -815,27 +815,27 @@
                         <div class="card-body">
                             <p class="fs-4 text-black">Words of Praise</p>
                             <!-- Header with toggle -->
-{{--                            <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"--}}
-{{--                                style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">--}}
-{{--                                <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>--}}
-{{--                                <!-- Toggle Switch -->--}}
-{{--                                <form id="reviewsWithoutImagesSectionForm"--}}
-{{--                                    action="{{ route('landing-sections.update') }}" method="POST">--}}
-{{--                                    @csrf--}}
-{{--                                    @method('PUT')--}}
-{{--                                    <input type="hidden" name="key" value="reviews_without_images_section">--}}
-{{--                                    <input type="hidden" name="value"--}}
-{{--                                        value="{{ setting('reviews_without_images_section') ? 1 : 0 }}"--}}
-{{--                                        id="reviewsWithoutImagesSectionValue">--}}
+                            <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                                style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                                <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>
+                                <!-- Toggle Switch -->
+                                <form id="reviewsWithoutImagesSectionForm"
+                                    action="{{ route('landing-sections.update') }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="key" value="reviews_without_images_section">
+                                    <input type="hidden" name="value"
+                                        value="{{ setting('reviews_without_images_section') ? 1 : 0 }}"
+                                        id="reviewsWithoutImagesSectionValue">
 
-{{--                                    <div class="form-check form-switch">--}}
-{{--                                        <input class="form-check-input toggle-switch" type="checkbox"--}}
-{{--                                            id="reviewsWithoutImagesSectionToggle" {{--}}
-{{--                                            setting('reviews_without_images_section') ? 'checked' : '' }}>--}}
-{{--                                    </div>--}}
-{{--                                </form>--}}
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input toggle-switch" type="checkbox"
+                                            id="reviewsWithoutImagesSectionToggle" {{
+                                            setting('reviews_without_images_section') ? 'checked' : '' }}>
+                                    </div>
+                                </form>
 
-{{--                            </div>--}}
+                            </div>
 
                             <!-- Review Form -->
                             <form id="reviews" action="{{ route('reviews.create') }}" method="POST"
