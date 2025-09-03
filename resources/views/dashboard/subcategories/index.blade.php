@@ -164,7 +164,7 @@
                     <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
                         data-bs-target="#addSubCategoryModal">
                         <i data-feather="plus"></i>
-                        Add New Subproducts
+                        Add New Subproduct
                     </a>
                 </div>
             </div>
