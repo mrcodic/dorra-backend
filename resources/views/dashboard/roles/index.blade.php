@@ -47,7 +47,7 @@
               @foreach($role->users as $user)
               <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Jimmy Ressula"
                 class="avatar avatar-sm pull-up">
-                <img class="rounded-circle" src="{{$user->getFirstMediaUrl('admins') ?? asset('images/default-user.png')}}"
+                <img class="rounded-circle" src="{{$user->getFirstMediaUrl('admins') ?: asset('images/default-user.png')}}"
                   alt="Avatar" />
               </li>
               @endforeach
