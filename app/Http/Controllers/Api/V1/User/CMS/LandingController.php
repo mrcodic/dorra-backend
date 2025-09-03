@@ -60,7 +60,7 @@ class LandingController extends Controller
 
     public function faqs(FaqRepositoryInterface $faqRepository)
     {
-        $faqs = $faqRepository->all(columns: ['id','question', 'answer']);
+        $faqs = $faqRepository->all(columns: ['id','question', 'answer'],direction: 'desc');
         return Response::api(data: FaqResource::collection($faqs));
 
     }
