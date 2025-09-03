@@ -680,7 +680,7 @@
                         </div>
                     </form>
                 </div>
-{{--                <div class="card mb-1">--}}
+                <div class="card mb-1">
 {{--                    <div class="card-body border rounded">--}}
 {{--                        <p class="fs-4 text-black ">Reviews With Images</p>--}}
 {{--                        <!-- Header with toggle -->--}}
@@ -810,109 +810,109 @@
 
 {{--                    </div>--}}
 
-{{--                    <div class="card mt-2 border rounded">--}}
+                    <div class="card mt-2 border rounded">
 
-{{--                        <div class="card-body">--}}
-{{--                            <p class="fs-4 text-black">Words of Praise</p>--}}
-{{--                            <!-- Header with toggle -->--}}
-{{--                            <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"--}}
-{{--                                style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">--}}
-{{--                                <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>--}}
-{{--                                <!-- Toggle Switch -->--}}
-{{--                                <form id="reviewsWithoutImagesSectionForm"--}}
-{{--                                    action="{{ route('landing-sections.update') }}" method="POST">--}}
-{{--                                    @csrf--}}
-{{--                                    @method('PUT')--}}
-{{--                                    <input type="hidden" name="key" value="reviews_without_images_section">--}}
-{{--                                    <input type="hidden" name="value"--}}
-{{--                                        value="{{ setting('reviews_without_images_section') ? 1 : 0 }}"--}}
-{{--                                        id="reviewsWithoutImagesSectionValue">--}}
+                        <div class="card-body">
+                            <p class="fs-4 text-black">Words of Praise</p>
+                            <!-- Header with toggle -->
+                            <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                                style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                                <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>
+                                <!-- Toggle Switch -->
+                                <form id="reviewsWithoutImagesSectionForm"
+                                    action="{{ route('landing-sections.update') }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="key" value="reviews_without_images_section">
+                                    <input type="hidden" name="value"
+                                        value="{{ setting('reviews_without_images_section') ? 1 : 0 }}"
+                                        id="reviewsWithoutImagesSectionValue">
 
-{{--                                    <div class="form-check form-switch">--}}
-{{--                                        <input class="form-check-input toggle-switch" type="checkbox"--}}
-{{--                                            id="reviewsWithoutImagesSectionToggle" {{--}}
-{{--                                            setting('reviews_without_images_section') ? 'checked' : '' }}>--}}
-{{--                                    </div>--}}
-{{--                                </form>--}}
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input toggle-switch" type="checkbox"
+                                            id="reviewsWithoutImagesSectionToggle" {{
+                                            setting('reviews_without_images_section') ? 'checked' : '' }}>
+                                    </div>
+                                </form>
 
-{{--                            </div>--}}
+                            </div>
 
-{{--                            <!-- Review Form -->--}}
-{{--                            <form id="reviews" action="{{ route('reviews.create') }}" method="POST"--}}
-{{--                                enctype="multipart/form-data">--}}
-{{--                                @csrf--}}
-{{--                                <div class="row mb-3">--}}
-{{--                                    <div class="col-md-4">--}}
-{{--                                        <label>Customer</label>--}}
-{{--                                        <input type="text" class="form-control" name="customer"--}}
-{{--                                            placeholder="Enter name">--}}
-{{--                                    </div>--}}
-{{--                                    <div class="col-md-4">--}}
-{{--                                        <label>Rate</label>--}}
-{{--                                        <select name="rate" class="form-select">--}}
-{{--                                            <option value="">Select rate</option>--}}
-{{--                                            @for($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }} ★</option>--}}
-{{--                                                @endfor--}}
-{{--                                        </select>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="col-md-4">--}}
-{{--                                        <label>Date</label>--}}
-{{--                                        <input type="date" name="date" class="form-control">--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
+                            <!-- Review Form -->
+                            <form id="reviews" action="{{ route('reviews.create') }}" method="POST"
+                                enctype="multipart/form-data">
+                                @csrf
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label>Customer</label>
+                                        <input type="text" class="form-control" name="customer"
+                                            placeholder="Enter name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Rate</label>
+                                        <select name="rate" class="form-select">
+                                            <option value="">Select rate</option>
+                                            @for($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }} ★</option>
+                                                @endfor
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Date</label>
+                                        <input type="date" name="date" class="form-control">
+                                    </div>
+                                </div>
 
-{{--                                <div class="mb-1">--}}
-{{--                                    <label>Review</label>--}}
-{{--                                    <textarea name="review" class="form-control" placeholder="Add review"></textarea>--}}
-{{--                                </div>--}}
-{{--                                <input type="hidden" name="type" value="without_image">--}}
+                                <div class="mb-1">
+                                    <label>Review</label>
+                                    <textarea name="review" class="form-control" placeholder="Add review"></textarea>
+                                </div>
+                                <input type="hidden" name="type" value="without_image">
 
-{{--                                <div class="text-end">--}}
-{{--                                    <button type="submit" class="btn btn-primary ">Add Review</button>--}}
-{{--                                </div>--}}
-{{--                            </form>--}}
-{{--                            <!-- Added Products List -->--}}
-{{--                            <div class="mt-2">--}}
-{{--                                <h5 class="text-black fs-16">Added Reviews</h5>--}}
-{{--                                <div class="row">--}}
-{{--                                    @foreach($reviewsWithoutImages as $review)--}}
-{{--                                    <div class="col-md-6 mb-2"--}}
-{{--                                        style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">--}}
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary ">Add Review</button>
+                                </div>
+                            </form>
+                            <!-- Added Products List -->
+                            <div class="mt-2">
+                                <h5 class="text-black fs-16">Added Reviews</h5>
+                                <div class="row">
+                                    @foreach($reviewsWithoutImages as $review)
+                                    <div class="col-md-6 mb-2"
+                                        style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">
 
-{{--                                        <div class="p-1 d-flex">--}}
-{{--                                            <div>--}}
-{{--                                                <strong>{{ $review->customer }}</strong>--}}
-{{--                                                <div class="text-warning">--}}
-{{--                                                    @for($i = 1; $i <= 5; $i++) <i--}}
-{{--                                                        class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>--}}
-{{--                                                        @endfor--}}
-{{--                                                </div>--}}
-{{--                                                <small class="text-muted">{{--}}
-{{--                                                    \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>--}}
-{{--                                                <p class="mb-1 text-break">{{ $review->review }}</p>--}}
-{{--                                                <form class="remove-review"--}}
-{{--                                                    action="{{ route('reviews.remove',$review->id) }}" method="POST">--}}
-{{--                                                    @csrf--}}
-{{--                                                    @method('DELETE')--}}
-{{--                                                    <button type="submit" class="btn btn-sm btn-outline-danger">--}}
-{{--                                                        Remove--}}
-{{--                                                    </button>--}}
-{{--                                                </form>--}}
-{{--                                            </div>--}}
-{{--                                            --}}{{-- <small class="text-muted">{{--}}
-{{--                                                \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>--}}
-{{--                                            <p class="mb-1">{{ $review->review }}</p> --}}
+                                        <div class="p-1 d-flex">
+                                            <div>
+                                                <strong>{{ $review->customer }}</strong>
+                                                <div class="text-warning">
+                                                    @for($i = 1; $i <= 5; $i++) <i
+                                                        class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
+                                                        @endfor
+                                                </div>
+                                                <small class="text-muted">{{
+                                                    \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                <p class="mb-1 text-break">{{ $review->review }}</p>
+                                                <form class="remove-review"
+                                                    action="{{ route('reviews.remove',$review->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        Remove
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            {{-- <small class="text-muted">{{
+                                                \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                            <p class="mb-1">{{ $review->review }}</p> --}}
 
-{{--                                        </div>--}}
+                                        </div>
 
-{{--                                    </div>--}}
-{{--                                    @endforeach--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
 
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
+                        </div>
+                    </div>
+                </div>
 
 
             </div>
