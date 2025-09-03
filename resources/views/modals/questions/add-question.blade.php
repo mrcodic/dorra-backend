@@ -14,12 +14,12 @@
                         <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Question (EN)</label>
                             <textarea class="form-control" id="add-category-description-en"
-                                placeholder="Write your question here(En)" name="description[en]" rows="2"></textarea>
+                                placeholder="Write your question here(En)" name="question[en]" rows="2"></textarea>
                         </div>
                         <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Question (AR)</label>
                             <textarea class="form-control" id="add-category-description-ar"
-                                placeholder="Write your question here(Ar)" name="description[ar]" rows="2"></textarea>
+                                placeholder="Write your question here(Ar)" name="question[ar]" rows="2"></textarea>
                         </div>
                     </div>
                     <!-- Answer in Arabic and English -->
@@ -27,12 +27,12 @@
                         <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Answer (EN)</label>
                             <textarea class="form-control" id="add-category-description-en"
-                                placeholder="Enter Answer(En)" name="description[en]" rows="2"></textarea>
+                                placeholder="Enter Answer(En)" name="answer[en]" rows="2"></textarea>
                         </div>
                         <div class="col-md-6 mb-1">
                             <label class="form-label label-text">Answer (AR)</label>
                             <textarea class="form-control" id="add-category-description-ar"
-                                placeholder="Enter Answer(Ar)" name="description[ar]" rows="2"></textarea>
+                                placeholder="Enter Answer(Ar)" name="answer[ar]" rows="2"></textarea>
                         </div>
                     </div>
 

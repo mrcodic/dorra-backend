@@ -106,7 +106,7 @@
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Status</label>
                 <select class="form-select mb-4" name="status">
                     @foreach (App\Enums\Order\StatusEnum::cases() as $status)
-                    <option value="{{ $status->value }}">
+                    <option value="{{ $status->value }}" @selected($status == $model->status)>
                         {{ $status->label() }}
                     </option>
                     @endforeach
@@ -136,7 +136,7 @@
                             <div class="fw-bold text-black">
                                 {{ number_format($orderItem->sub_total ?? 0, 2) }}
                             </div>
-                            @if ($model->orderItems->count() > 1 && $model->status == StatusEnum::PENDING)
+                            @if ($model->orderItems->count() > 1 && $model->status == \App\Enums\Order\StatusEnum::PENDING)
                             <form class="delete-design-form d-inline" method="POST"
                                 action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $orderItem->id]) }}">
                                 @csrf

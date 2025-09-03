@@ -58,7 +58,7 @@
                     </select>
                 </div>
                 <button type="button" class="btn btn-outline-primary col-12 col-md-2" data-bs-toggle="modal"
-                    data-bs-target="#showQuestionModal">
+                    data-bs-target="#addQuestionModal">
                     Add New Question
                 </button>
             </div>
