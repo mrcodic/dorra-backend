@@ -17,9 +17,8 @@ use Spatie\Translatable\HasTranslations;
 #[ObservedBy(DesignObserver::class)]
 class Design extends Model implements HasMedia
 {
-    use HasUuids, InteractsWithMedia, softDeletes;
-//    public $translatable = ['name', 'description'];
-
+    use HasUuids, InteractsWithMedia, HasTranslations, softDeletes;
+    public $translatable = ['name', 'description'];
 
     protected $fillable = [
         'cookie_id',
