@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="addQuestionModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="addCategoryForm" enctype="multipart/form-data" action="">
+            <form id="addFaqForm" enctype="multipart/form-data" action="{{ route("faqs.store") }}">
                 @csrf
 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
@@ -51,3 +51,11 @@
         </div>
     </div>
 </div>
+<script !src="">
+    handleAjaxFormSubmit("#addFaqForm",{
+        successMessage: "Question Added Successfully",
+        onSuccess: function () {
+            location.reload()
+        }
+    })
+</script>

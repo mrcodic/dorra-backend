@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Requests\Folder;
+namespace App\Http\Requests\Faq;
 
 use App\Http\Requests\Base\BaseRequest;
-use App\Models\Design;
+
 
 class UpdateFaqRequest extends BaseRequest
 {
@@ -14,24 +14,33 @@ class UpdateFaqRequest extends BaseRequest
 
     public function rules(): array
     {
-        return [
-            'name' => ['sometimes', 'string', 'max:255'],
-            'description' => ['nullable','string','max:1000'],
-            'designs' => ['nullable', 'array'],
-            'designs.*' => ['nullable', 'string', 'exists:designs,id',function ($attribute, $value, $fail) {
-             $design = Design::find($value);
-             if ($design && !$design->users()->pluck('id')->contains(auth('sanctum')->id())) {
-                 $fail("The selected design does not belong to you or you are not a member of this design.");
-             }
-            }],
-        ];
-    }
+        return
+            [
+                'question.en' => [
+                    'required',
+                    'string',
+                    'max:255',
 
-    protected function passedValidation()
-    {
-        $this->merge([
-           'user_id' => auth('sanctum')->id(),
-        ]);
+                ], 'question.ar' => [
+                'nullable',
+                'string',
+                'max:255',
+
+            ],
+                'answer.en' => [
+                    'required',
+                    'string',
+                    'max:255',
+
+                ],
+                'answer.ar' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+
+                ],
+
+            ];
     }
 
 

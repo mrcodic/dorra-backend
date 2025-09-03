@@ -3,30 +3,25 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
-use App\Http\Requests\Admin\{StoreAdminRequest, UpdateAdminRequest};
+use App\Services\FaqService;
+use App\Http\Requests\Faq\{StoreFaqRequest, UpdateFaqRequest};
 use App\Repositories\Interfaces\RoleRepositoryInterface;
-use App\Services\AdminService;
 
 
 class FaqController extends DashboardController
 {
-   public function __construct(public AdminService $adminService, public RoleRepositoryInterface $roleRepository)
+   public function __construct(public FaqService $faqService, public RoleRepositoryInterface $roleRepository)
    {
-       parent::__construct($adminService);
-       $this->storeRequestClass = new StoreAdminRequest();
-       $this->updateRequestClass = new UpdateAdminRequest();
+       parent::__construct($faqService);
+       $this->storeRequestClass = new StoreFaqRequest();
+       $this->updateRequestClass = new UpdateFaqRequest();
        $this->indexView = 'faqs.index';
        $this->usePagination = true;
-       $this->assoiciatedData = [
-           'index' => [
-               'roles' => $this->roleRepository->all(),
-           ]
-       ];
        $this->resourceTable = 'faqs';
    }
 
     public function getData()
     {
-        return $this->adminService->getData();
+        return $this->faqService->getData();
    }
 }

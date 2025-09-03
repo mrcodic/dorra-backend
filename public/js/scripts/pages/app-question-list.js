@@ -1,14 +1,15 @@
+console.log("Sdads")
 $.ajaxSetup({
     headers: {
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
 });
-const dt_user_table = $(".admin-list-table").DataTable({
+const dt_user_table = $(".faq-list-table").DataTable({
     processing: true,
     serverSide: true,
     searching: false, // using custom search
     ajax: {
-        url: adminsDataUrl,
+        url: faqsDataUrl,
         type: "GET",
         data: function (d) {
             d.search_value = $('#search-category-form').val(); // get from input
@@ -27,34 +28,8 @@ const dt_user_table = $(".admin-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
-        {data: "id"},
-        {data: "name"},
-        {data: "email"},
-        // {data: "role"},
-        {
-            data: "status",
-            render: function (data, type, row, meta) {
-                let textColor = "";
-                let bgColor = "";
 
-                switch (data) {
-                    case "active":
-                        textColor = "text-success";
-                        bgColor = "#D7EEDD"; // light green
-                        break;
-                    case "blocked":
-                        textColor = "text-secondary";
-                        bgColor = "#F0F0F0"; // light gray
-                        break;
-                    default:
-                        textColor = "text-muted";
-                        bgColor = "#E9ECEF"; // default gray
-                }
-
-                return `<span class="badge rounded-pill ${textColor} px-1" style="background-color: ${bgColor};">${data}</span>`;
-            },
-        },
-
+        {data: "question"},
         {data: "created_at"},
         {
             data: "id",
@@ -226,7 +201,7 @@ $(document).ready(function () {
         successMessage: "✅ Admin deleted successfully!",
         closeModal: '#deleteAdminModal',
         onSuccess: function (response, $form) {
-            $(".admin-list-table").DataTable().ajax.reload(null, false); // false = stay on current page
+            $(".faq-list-table").DataTable().ajax.reload(null, false); // false = stay on current page
         }
     });
 
@@ -261,7 +236,7 @@ $(document).ready(function () {
                 $('#bulk-delete-container').hide();
                 $('.category-checkbox').prop('checked', false);
                 $('#select-all-checkbox').prop('checked', false);
-                $(".admin-list-table").DataTable().ajax.reload(null, false);
+                $(".faq-list-table").DataTable().ajax.reload(null, false);
 
             },
             error: function () {
@@ -280,7 +255,7 @@ $(document).ready(function () {
                 $('#bulk-delete-container').hide();
                 $('.product-checkbox').prop('checked', false);
                 $('#select-all-checkbox').prop('checked', false);
-                $(".admin-list-table").DataTable().ajax.reload(null, false);
+                $(".faq-list-table").DataTable().ajax.reload(null, false);
 
             },
         });

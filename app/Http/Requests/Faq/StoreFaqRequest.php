@@ -4,7 +4,7 @@ namespace App\Http\Requests\Faq;
 
 
 use App\Http\Requests\Base\BaseRequest;
-use App\Models\Design;
+
 
 class StoreFaqRequest extends BaseRequest
 {
@@ -18,27 +18,34 @@ class StoreFaqRequest extends BaseRequest
         return
             [
                 'question.en' => [
-                'required',
+                    'required',
+                    'string',
+                    'max:255',
+
+                ], 'question.ar' => [
+                'nullable',
                 'string',
                 'max:255',
 
             ],
-                'question.ar' => [
+                'answer.en' => [
+                    'required',
+                    'string',
+                    'max:255',
+
+                ],
+                'answer.ar' => [
                     'nullable',
                     'string',
                     'max:255',
 
-                ]];
+                ],
+
+            ];
 
 
     }
 
-    protected function passedValidation()
-    {
-        $this->merge([
-            'user_id' => auth('sanctum')->id(),
-        ]);
-    }
 
 
 }

@@ -63,7 +63,7 @@
                 </button>
             </div>
 
-            <table class="admin-list-table table">
+            <table class="faq-list-table table">
                 <thead class="table-light">
                     <tr>
                         <th>
@@ -137,10 +137,12 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
-    const adminsDataUrl = "{{ route('admins.data') }}";
+    const faqsDataUrl = "{{ route('faqs.data') }}";
         const adminsCreateUrl = "{{ route('admins.create') }}";
         const locale = "{{ app()->getLocale() }}";
+
 </script>
+<script src="{{ asset('js/scripts/pages/app-question-list.js') }}?v={{ time() }}"></script>
 
 <script>
     $(document).ready(function () {
@@ -193,5 +195,4 @@
 </script>
 
 {{-- Page js files --}}
-<script src="{{ asset('js/scripts/pages/app-question-list.js') }}?v={{ time() }}"></script>
 @endsection
