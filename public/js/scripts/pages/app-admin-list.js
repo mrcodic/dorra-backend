@@ -124,7 +124,10 @@ const dt_user_table = $(".admin-list-table").DataTable({
         }
     }
 });
-
+$('#clear-search').on('click', function () {
+    $('#search-category-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 // Custom search with debounce
 let searchTimeout;
 $('#search-category-form').on('keyup', function () {

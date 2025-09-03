@@ -195,7 +195,7 @@
                                 </div>
                                 <!-- Buttons -->
                                 <div class="d-flex gap-1 justify-content-end mt-2">
-                                    <button type="button" class="btn btn-outline-secondary  place-order fs-16">
+                                    <button type="reset" class="btn btn-outline-secondary  place-order fs-16">
                                         Cancel
                                     </button>
                                     <button type="submit" class="btn btn-primary  place-order fs-16 saveChangesButton"
