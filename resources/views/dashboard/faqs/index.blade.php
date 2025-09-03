@@ -39,22 +39,23 @@
         </div>
         <div class="card-datatable table-responsive pt-0">
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                <form action="" method="get" class="flex-grow-1 me-1 col-12 col-md-5 position-relative">
+                <form action="" method="get" class="flex-grow-1 me-1 col-12 col-md-5 position-relative search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                        id="search-category-form" placeholder="Search here" style="height: 38px;">
-                    <button type="button" id="clearRoleFilter"
-                        class="position-absolute top-50 translate-middle-y text-muted"
-                        style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                        title="Clear search">
+                        id="search-faq-form" placeholder="Search here" style="height: 38px;">
+                    <button type="button" id="clear-search"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
+                            title="Clear filter">
                         &times;
                     </button>
                 </form>
                 <div class="col-12 col-md-2">
-                    <select name="status" class="form-select filter-status">
+                    <select name="created_at" class="form-select filter-date">
                         <option value="" selected disabled>Date</option>
-                        <option value="0">Blocked</option>
-                        <option value="1">Active</option>
+                        <option value="asc">Oldest</option>
+                        <option value="desc">Newest</option>
                     </select>
                 </div>
                 <button type="button" class="btn btn-outline-primary col-12 col-md-2" data-bs-toggle="modal"

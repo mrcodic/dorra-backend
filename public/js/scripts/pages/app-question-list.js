@@ -1,4 +1,3 @@
-console.log("Sdads")
 $.ajaxSetup({
     headers: {
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -12,10 +11,8 @@ const dt_user_table = $(".faq-list-table").DataTable({
         url: faqsDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $('#search-category-form').val(); // get from input
-            d.role_id = $('.filter-role').val();
-            d.status = $('.filter-status').val();
-            console.log(d.status)
+            d.search_value = $('#search-faq-form').val(); // get from input
+            d.created_at = $('.filter-date').val();
             return d;
         }
     },
@@ -90,9 +87,13 @@ const dt_user_table = $(".faq-list-table").DataTable({
     }
 });
 
+$('#clear-search').on('click', function () {
+    $('#search-faq-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 // Custom search with debounce
 let searchTimeout;
-$('#search-category-form').on('keyup', function () {
+$('#search-faq-form').on('keyup', function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
@@ -101,7 +102,7 @@ $('#search-category-form').on('keyup', function () {
 
 // Custom search with debounce
 
-$('.filter-role, .filter-status').on('change', function () {
+$('.filter-date').on('change', function () {
     dt_user_table.ajax.reload();
 });
 
