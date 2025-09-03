@@ -184,6 +184,7 @@ $(document).ready(function () {
     });
 
 
+
     $(document).on("click", ".open-delete-faq-modal", function () {
         const adminId = $(this).data("id");
 
