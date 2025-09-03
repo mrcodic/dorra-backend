@@ -1,6 +1,6 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Settings - Notifications')
+@section('title', 'Settings-Notifications')
 @section('main-page', 'Notifications')
 
 @section('vendor-style')

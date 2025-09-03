@@ -1,6 +1,6 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Settings Details')
+@section('title', 'Settings-Details')
 @section('main-page', 'Details')
 
 @section('vendor-style')
