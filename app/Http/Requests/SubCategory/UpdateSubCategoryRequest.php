@@ -31,13 +31,13 @@ class UpdateSubCategoryRequest extends BaseRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('categories', 'name->en')->ignore($id),
+//                Rule::unique('categories', 'name->en')->ignore($id),
             ],
             'name.ar' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
-                Rule::unique('categories', 'name->ar')->ignore($id),
+//                Rule::unique('categories', 'name->ar')->ignore($id),
             ],
             'parent_id' => ['sometimes', 'integer', 'exists:categories,id'],
         ];

@@ -29,13 +29,13 @@ class StoreSubCategoryRequest extends BaseRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('categories', 'name->en'),
+//                Rule::unique('categories', 'name->en'),
             ],
             'name.ar' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
-                Rule::unique('categories', 'name->ar'),
+//                Rule::unique('categories', 'name->ar'),
             ],
             'parent_id' => ['required', 'integer', 'exists:categories,id'],
         ];

@@ -29,13 +29,13 @@ class StoreTagRequest extends BaseRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('tags', 'name->en'),
+//                Rule::unique('tags', 'name->en'),
             ],
             'name.ar' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
-                Rule::unique('categories', 'name->ar'),
+//                Rule::unique('categories', 'name->ar'),
             ],
         ];
 
