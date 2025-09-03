@@ -165,20 +165,22 @@ dt_user_table.on("draw", function () {
 
 $(document).ready(function () {
     $(document).on("click", ".edit-details", function (e) {
+        console.log("Dsfs")
         const $button = $(this);
 
         const faqId = $button.data('id') || '';
         const questionAr = $button.data('question_ar') || '';
         const questionEn = $button.data('question_en') || '';
+
         const answerAr = $button.data('answer_ar') || '';
         const answerEn = $button.data('answer_en') || '';
         // Populate modal
-        $("#editFaqModal #question-en").val(questionEn);
-        $("#editFaqModal #question-ar").val(questionAr);
-        $("#editFaqModal #answer-ar").val(answerAr);
-        $("#editFaqModal #answer-en").val(answerEn);
+        $("#editQuestionModal #question-en").val(questionEn);
+        $("#editQuestionModal #question-ar").val(questionAr);
+        $("#editQuestionModal #answer-ar").val(answerAr);
+        $("#editQuestionModal #answer-en").val(answerEn);
 
-        $('#editFaqForm').attr('action', `admins/${faqId}`);
+        $('#editFaqForm').attr('action', `faqs/${faqId}`);
     });
 
 
