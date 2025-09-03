@@ -94,6 +94,10 @@ var dt_user_table = $('.tag-list-table').DataTable({
         }
     }
 });
+    $('#clear-search').on('click', function () {
+        $('#search-tag-form').val('');  // clear input
+        dt_user_table.search('').draw();  // reset DataTable search
+    });
     let searchTimeout;
     $('#search-tag-form').on('keyup', function () {
         clearTimeout(searchTimeout);
