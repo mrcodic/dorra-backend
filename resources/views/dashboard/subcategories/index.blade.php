@@ -144,9 +144,9 @@
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                         id="search-sub-category-form" placeholder="Search subcategory..." style="height: 38px;">
-                    <button type="button" id="clearSubCategorySearchInput" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                             background: transparent; border: none; font-weight: bold;
-                            color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
+                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                         &times;
                     </button>
                 </form>
