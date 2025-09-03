@@ -109,7 +109,7 @@
                                     </select>--}}
                                     {{-- </div>--}}
                                 <div class="form-group mb-2">
-                                    <label for="productsSelect" class="label-text mb-1">Products</label>
+                                    <label for="productsSelect" class="label-text mb-1">Categories</label>
                                     <select id="productsSelect" class="form-select select2" name="product_ids[]"
                                         multiple>
                                         @foreach($associatedData['products'] as $product)

@@ -28,7 +28,7 @@
                         </div>
                         <div class="col-12">
                             <div class="form-group mb-2">
-                                <label for="subCategorySelect" class="label-text mb-1">SubCategories</label>
+                                <label for="subCategorySelect" class="label-text mb-1">SubProducts</label>
                                 <select id="subCategorySelect" class="form-select select2 category-sub-category-select" data-sub-category-url="{{ route('sub-categories')}}" name="sub_categories[]" multiple>
 
                                 </select>
