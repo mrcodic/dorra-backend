@@ -208,7 +208,7 @@ $(document).ready(function () {
                 _token: $('meta[name="csrf-token"]').attr("content"),
             },
             success: function (response) {
-                $("#deleteAdminsModal").modal("hide");
+                $("#deleteFaqsModal").modal("hide");
                 Toastify({
                     text: "Selected admins deleted successfully!",
                     duration: 1500,
