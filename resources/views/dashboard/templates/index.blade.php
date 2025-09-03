@@ -36,15 +36,14 @@
                 {{-- Filters Row --}}
                 <div class="px-1 d-flex flex-wrap align-items-center gap-1">
                     {{-- Search Input --}}
-                    <form action="" method="get" class="position-relative col-12 col-md-4 col-lg-6">
+                    <form action="" method="get" class="position-relative col-12 col-md-4 col-lg-6 search-form">
                         <i data-feather="search"
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                             id="search-category-form" placeholder="Search template..." style="height: 38px;">
-                        <button type="button" id="clearRoleFilter"
-                            class="position-absolute top-50 translate-middle-y text-muted"
-                            style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                            title="Clear search">
+                        <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                       background: transparent; border: none; font-weight: bold;
+                       color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                             &times;
                         </button>
                     </form>
@@ -52,7 +51,7 @@
                     {{-- Product Filter --}}
                     <div class="col-12 col-md-2 col-lg-1">
                         <select name="product" class="form-select filter-product select2" data-placeholder="Product">
-                            <option value="">Product</option>
+                            <option value="" disabled selected>Product</option>
                             @foreach($associatedData['products'] as $product)
                             <option value="{{ $product->id }}">{{ $product->getTranslation('name', app()->getLocale())
                                 }}</option>

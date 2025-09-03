@@ -168,6 +168,8 @@
                     <div class="col-12 col-md-3">
                         <select name="created_at" class="form-select filter-status">
                             <option value="" disabled selected>Status</option>
+                            <option value="">All</option>
+
                             @foreach (\App\Enums\Order\StatusEnum::cases() as $status)
                             <option value="{{$status}}">
                                 {{ $status->label() }}
