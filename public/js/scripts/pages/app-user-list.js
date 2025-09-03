@@ -119,6 +119,10 @@ var dt_user_table = $(".user-list-table").DataTable({
     },
 });
 
+$('#clear-search').on('click', function () {
+    $('#search-user-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 // Custom search with debounce
 let searchTimeout;
 $("#search-user-form").on("keyup", function () {

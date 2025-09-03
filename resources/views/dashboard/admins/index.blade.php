@@ -144,7 +144,7 @@
         </div>
         <div class="card-datatable table-responsive pt-0">
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                <form action="" method="get" class="d-flex me-1 position-relative col-12 col-md-6">
+                <form action="" method="get" class="d-flex me-1 position-relative col-12 col-md-6 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                         id="search-category-form" placeholder="Search here" style="height: 38px;">

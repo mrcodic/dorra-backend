@@ -58,8 +58,8 @@ $configData = Helper::applClasses();
 <script src="https://unpkg.com/feather-icons"></script>
 <script !src="">
     $(document).on('submit','.search-form',function (e) {
-        console.log("SD")
         e.preventDefault();
+        dt_user_table.draw();
     })
     function handleAjaxFormSubmit(formSelector, options = {}) {
         $(document).on('submit', formSelector, function (e) {
