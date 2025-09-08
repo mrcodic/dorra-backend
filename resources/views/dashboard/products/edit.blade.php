@@ -1178,73 +1178,102 @@
                 });
             }
 
-            $(document).ready(function () {
-                initializeImageUploaders($('.outer-repeater')); // This ensures the first one is bound properly
-            });
-            const $specList = $('.outer-repeater').find('[data-repeater-list="specifications"]');
+                $(document).ready(function () {
+                // Initialize the outer repeater for specifications
+                $('.outer-repeater').repeater({
+                    repeaters: [{
+                        selector: '.inner-repeater',
+                        show: function () {
+                            $(this).slideDown();
+                            updateDeleteButtons($(this).closest('.outer-repeater'));
+                            feather.replace();
 
-            $('.outer-repeater').repeater({
-                // initEmpty: true,
-                repeaters: [{
-                    selector: '.inner-repeater',
-                    // initEmpty: true,
+                            // Initialize dropzone for new option
+                            let dzElement = $(this).find(".option-dropzone")[0];
+                            if (dzElement) {
+                                initOptionDropzone(dzElement);
+                            }
+                        },
+                        hide: function (deleteElement) {
+                            $(this).slideUp(deleteElement);
+                            updateDeleteButtons($(this).closest('.outer-repeater'));
+                        }
+                    }],
                     show: function () {
-                        $(this).slideDown();
-                        updateDeleteButtons($(this).closest('.outer-repeater'));
+                        // Remove d-none class from the specifications list container when adding new items
+                        const $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                        if ($specList.hasClass('d-none')) {
+                            $specList.removeClass('d-none');
+                        }
 
-                        // initialize Dropzone for new option
-                        let dzElement = this.querySelector(".option-dropzone");
+                        $(this).slideDown();
+                        updateDeleteButtons($('.outer-repeater'));
+                        feather.replace();
+
+                        // Initialize dropzone for new specification
+                        let dzElement = $(this).find(".option-dropzone")[0];
                         if (dzElement) {
                             initOptionDropzone(dzElement);
                         }
 
-                        feather.replace();
+                        $(this).find('.uploadedImage').val('');
                     },
                     hide: function (deleteElement) {
                         $(this).slideUp(deleteElement);
-                        updateDeleteButtons($(this).closest('.outer-repeater'));
-                    },
-                    nestedInputName: 'specification_options'
-                }],
+
+                        // Check if we need to hide the container again if no items left
+                        const $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                        const $items = $specList.find('[data-repeater-item]');
+
+                        if ($items.length <= 1) { // Account for the template item
+                            $specList.addClass('d-none');
+                        }
+
+                        updateDeleteButtons($('.outer-repeater'));
+                    }
+                });
+
+                // Initialize inner repeaters for existing items
+                $('.inner-repeater').repeater({
                 show: function () {
-                    if ($specList.hasClass('d-none')) {
-                        $specList.removeClass('d-none');
-                    }
-                    $(this).slideDown();
-                    updateDeleteButtons($('.outer-repeater'));
-                    feather.replace();
+                $(this).slideDown();
+                feather.replace();
 
-                    // ✅ Initialize Dropzone for new outer repeater item
-                    let dzElement = this.querySelector(".option-dropzone");
-                    if (dzElement) {
-                        initOptionDropzone(dzElement);
-                    }
-
-                    // reset hidden input for new ones
-                    $(this).find('.uploadedImage').val('');
-                },
-                afterAdd: function () {
-                    updateDeleteButtons($('.outer-repeater'));
-                    feather.replace();
-
-                    // ✅ Also re-init image uploaders inside newly added block
-                    $(this).find('.option-dropzone').each(function () {
-                        initOptionDropzone(this);
-                    });
-                },
+                // Initialize dropzone for new option
+                let dzElement = $(this).find(".option-dropzone")[0];
+                if (dzElement) {
+                initOptionDropzone(dzElement);
+            }
+            },
                 hide: function (deleteElement) {
-                    $(this).slideUp(deleteElement);
-                    updateDeleteButtons($('.outer-repeater'));
-                },
-                afterDelete: function () {
-                    updateDeleteButtons($('.outer-repeater'));
-                }
+                $(this).slideUp(deleteElement);
+            }
             });
 
+                // Function to update delete buttons visibility
+                function updateDeleteButtons(containerSelector) {
+                $(containerSelector).find('[data-repeater-list]').each(function () {
+                var items = $(this).find('[data-repeater-item]');
+                items.each(function () {
+                $(this).find('[data-repeater-delete]').show();
+            });
+            });
+                feather.replace();
+            }
 
-            document.querySelectorAll(".option-dropzone").forEach(el => {
+                // Initialize dropzones for existing option images
+                document.querySelectorAll(".option-dropzone").forEach(el => {
                 let media = el.dataset.existingMedia ? JSON.parse(el.dataset.existingMedia) : null;
                 initOptionDropzone(el, media);
+            });
+
+                // Handle the "Add New Spec" button click to ensure container is visible
+                $('.add-spec-btn').on('click', function() {
+                const $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                if ($specList.hasClass('d-none')) {
+                $specList.removeClass('d-none');
+            }
+            });
             });
             $('.select2').select2();
 
