@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\CategoryResource;
+use App\Repositories\Interfaces\DimensionRepositoryInterface;
+use App\Repositories\Interfaces\TagRepositoryInterface;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,15 +14,28 @@ use App\Http\Requests\Category\{StoreCategoryRequest, UpdateCategoryRequest};
 
 class CategoryController extends DashboardController
 {
-    public function __construct(public CategoryService $categoryService)
+    public function __construct(
+        public CategoryService              $categoryService,
+        public TagRepositoryInterface       $tagRepository,
+        public DimensionRepositoryInterface $dimensionRepository,
+    )
     {
         parent::__construct($categoryService);
         $this->storeRequestClass = new StoreCategoryRequest();
         $this->updateRequestClass = new UpdateCategoryRequest();
         $this->indexView = 'categories.index';
+        $this->createView = 'categories.create';
         $this->usePagination = true;
         $this->resourceClass = CategoryResource::class;
         $this->resourceTable = 'categories';
+        $this->assoiciatedData = [
+            'create' => [
+                'tags' => $this->tagRepository->all(columns: ['id', 'name']),
+                'dimensions' => $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
+
+            ],
+
+        ];
     }
 
     public function getData(): JsonResponse
@@ -42,7 +57,7 @@ class CategoryController extends DashboardController
             'sub_categories.*' => ['sometimes', 'exists:categories,id'],
             'products' => ['sometimes', 'array'],
             'products.*' => ['sometimes', 'exists:products,id'],
-        ],[
+        ], [
             'category_id.required' => 'Please select a product.',
             'category_id.exists' => 'Selected product does not exist.',
         ]);
