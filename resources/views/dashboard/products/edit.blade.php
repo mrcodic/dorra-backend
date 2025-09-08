@@ -604,8 +604,8 @@
                 }],
                 show: function () {
                     // Make sure the container is visible when adding new items
-                    var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
-                    $specList.removeClass('d-none');
+                    // var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                    // $specList.removeClass('d-none');
 
                     $(this).slideDown();
                     feather.replace();
@@ -650,7 +650,7 @@
                 }
             });
 
-         
+
 
             // Initialize dropzones for existing option images
             if (typeof initOptionDropzone === 'function') {
