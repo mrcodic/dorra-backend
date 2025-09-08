@@ -458,7 +458,7 @@
                                                                 </div>
                                                             </div>
                                                         @empty
-                                                            <div data-repeater-item class="d-none">
+                                                            <div data-repeater-item>
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
@@ -1178,102 +1178,102 @@
                 });
             }
 
-                $(document).ready(function () {
+            $(document).ready(function () {
                 // Initialize the outer repeater for specifications
-                $('.outer-repeater').repeater({
+                var $outerRepeater = $('.outer-repeater');
+
+                // First, check if we have any existing specifications
+                var hasExistingSpecs = $outerRepeater.find('[data-repeater-item]').length > 0;
+
+                if (!hasExistingSpecs) {
+                    // If no existing specs, hide the container initially
+                    $outerRepeater.find('[data-repeater-list="specifications"]').addClass('d-none');
+                }
+
+                // Initialize the outer repeater
+                $outerRepeater.repeater({
                     repeaters: [{
                         selector: '.inner-repeater',
                         show: function () {
                             $(this).slideDown();
-                            updateDeleteButtons($(this).closest('.outer-repeater'));
                             feather.replace();
 
                             // Initialize dropzone for new option
                             let dzElement = $(this).find(".option-dropzone")[0];
-                            if (dzElement) {
+                            if (dzElement && typeof initOptionDropzone === 'function') {
                                 initOptionDropzone(dzElement);
                             }
                         },
                         hide: function (deleteElement) {
                             $(this).slideUp(deleteElement);
-                            updateDeleteButtons($(this).closest('.outer-repeater'));
                         }
                     }],
                     show: function () {
-                        // Remove d-none class from the specifications list container when adding new items
-                        const $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
-                        if ($specList.hasClass('d-none')) {
-                            $specList.removeClass('d-none');
-                        }
+                        // Make sure the container is visible when adding new items
+                        var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                        $specList.removeClass('d-none');
 
                         $(this).slideDown();
-                        updateDeleteButtons($('.outer-repeater'));
                         feather.replace();
 
                         // Initialize dropzone for new specification
                         let dzElement = $(this).find(".option-dropzone")[0];
-                        if (dzElement) {
+                        if (dzElement && typeof initOptionDropzone === 'function') {
                             initOptionDropzone(dzElement);
                         }
 
                         $(this).find('.uploadedImage').val('');
                     },
                     hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
+                        var $item = $(this);
+                        $item.slideUp(deleteElement, function() {
+                            // After hiding, check if we need to hide the container
+                            var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                            var $items = $specList.find('[data-repeater-item]').not(':hidden');
 
-                        // Check if we need to hide the container again if no items left
-                        const $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
-                        const $items = $specList.find('[data-repeater-item]');
-
-                        if ($items.length <= 1) { // Account for the template item
-                            $specList.addClass('d-none');
-                        }
-
-                        updateDeleteButtons($('.outer-repeater'));
-                    }
+                            if ($items.length === 0) {
+                                $specList.addClass('d-none');
+                            }
+                        });
+                    },
+                    isFirstItemUndeletable: true
                 });
 
                 // Initialize inner repeaters for existing items
                 $('.inner-repeater').repeater({
-                show: function () {
-                $(this).slideDown();
-                feather.replace();
+                    show: function () {
+                        $(this).slideDown();
+                        feather.replace();
 
-                // Initialize dropzone for new option
-                let dzElement = $(this).find(".option-dropzone")[0];
-                if (dzElement) {
-                initOptionDropzone(dzElement);
-            }
-            },
-                hide: function (deleteElement) {
-                $(this).slideUp(deleteElement);
-            }
-            });
-
-                // Function to update delete buttons visibility
-                function updateDeleteButtons(containerSelector) {
-                $(containerSelector).find('[data-repeater-list]').each(function () {
-                var items = $(this).find('[data-repeater-item]');
-                items.each(function () {
-                $(this).find('[data-repeater-delete]').show();
-            });
-            });
-                feather.replace();
-            }
-
-                // Initialize dropzones for existing option images
-                document.querySelectorAll(".option-dropzone").forEach(el => {
-                let media = el.dataset.existingMedia ? JSON.parse(el.dataset.existingMedia) : null;
-                initOptionDropzone(el, media);
-            });
+                        // Initialize dropzone for new option
+                        let dzElement = $(this).find(".option-dropzone")[0];
+                        if (dzElement && typeof initOptionDropzone === 'function') {
+                            initOptionDropzone(dzElement);
+                        }
+                    },
+                    hide: function (deleteElement) {
+                        $(this).slideUp(deleteElement);
+                    }
+                });
 
                 // Handle the "Add New Spec" button click to ensure container is visible
-                $('.add-spec-btn').on('click', function() {
-                const $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
-                if ($specList.hasClass('d-none')) {
-                $specList.removeClass('d-none');
-            }
-            });
+                $(document).on('click', '[data-repeater-create]', function() {
+                    var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                    if ($specList.hasClass('d-none')) {
+                        $specList.removeClass('d-none');
+                    }
+                });
+
+                // Initialize dropzones for existing option images
+                if (typeof initOptionDropzone === 'function') {
+                    document.querySelectorAll(".option-dropzone").forEach(el => {
+                        let media = el.dataset.existingMedia ? JSON.parse(el.dataset.existingMedia) : null;
+                        initOptionDropzone(el, media);
+                    });
+                }
+
+                // Initialize feather icons
+                feather.replace();
             });
             $('.select2').select2();
 
