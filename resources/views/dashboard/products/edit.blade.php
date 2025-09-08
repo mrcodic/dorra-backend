@@ -498,30 +498,10 @@
                                                                                 <div class="row d-flex align-items-end mt-2">
                                                                                     <div class="col-md-12">
                                                                                         <label class="form-label label-text">Option Image</label>
-                                                                                        <input type="file" name="image" class="form-control d-none option-image-input" accept="image/*">
-                                                                                        <div class="upload-card option-upload-area">
-                                                                                            <div class="d-flex justify-content-center align-items-center gap-1">
-                                                                                                <i data-feather="upload" class="mb-2"></i>
-                                                                                                <p>Drag image here to upload</p>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="progress mt-2 d-none w-50 option-upload-progress">
-                                                                                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                                                                                        </div>
-                                                                                        <div class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2 option-uploaded-image">
-                                                                                            <img src="" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
-                                                                                            <div class="file-details">
-                                                                                                <div class="file-name fw-bold option-file-name"></div>
-                                                                                                <div class="file-size text-muted small option-file-size">0 KB</div>
-                                                                                            </div>
+                                                                                        <div class="dropzone option-dropzone">
                                                                                         </div>
 
-                                                                                        <div class="col-12 text-end mt-1 mb-2">
-                                                                                            <button type="button" class="btn btn-outline-danger" data-repeater-delete>
-                                                                                                <i data-feather="x" class="me-25"></i>
-                                                                                                Delete Value
-                                                                                            </button>
-                                                                                        </div>
+                                                                                        <input type="hidden" name="option_image" class="uploadedImage" value="{{ $option->image?->id }}">
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
