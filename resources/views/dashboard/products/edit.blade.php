@@ -458,7 +458,7 @@
                                                                 </div>
                                                             </div>
                                                         @empty
-                                                            <div data-repeater-item>
+                                                            <div data-repeater-item class="d-none">
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
