@@ -1207,19 +1207,18 @@
             $(document).ready(function () {
                 initializeImageUploaders($('.outer-repeater')); // This ensures the first one is bound properly
             });
+
             const $specList = $('.outer-repeater').find('[data-repeater-list="specifications"]');
 
             $('.outer-repeater').repeater({
-                initEmpty: true,
                 repeaters: [{
                     selector: '.inner-repeater',
-                    initEmpty: true,
                     show: function () {
                         $(this).slideDown();
                         updateDeleteButtons($(this).closest('.outer-repeater'));
 
                         // initialize Dropzone for new option
-                        let dzElement = this.querySelector(".option-dropzone");
+                        let dzElement = $(this).find(".option-dropzone")[0];
                         if (dzElement) {
                             initOptionDropzone(dzElement);
                         }
@@ -1229,19 +1228,19 @@
                     hide: function (deleteElement) {
                         $(this).slideUp(deleteElement);
                         updateDeleteButtons($(this).closest('.outer-repeater'));
-                    },
-                    nestedInputName: 'specification_options'
+                    }
                 }],
                 show: function () {
                     if ($specList.hasClass('d-none')) {
                         $specList.removeClass('d-none');
                     }
+
                     $(this).slideDown();
                     updateDeleteButtons($('.outer-repeater'));
                     feather.replace();
 
                     // ✅ Initialize Dropzone for new outer repeater item
-                    let dzElement = this.querySelector(".option-dropzone");
+                    let dzElement = $(this).find(".option-dropzone")[0];
                     if (dzElement) {
                         initOptionDropzone(dzElement);
                     }
@@ -1253,7 +1252,7 @@
                     updateDeleteButtons($('.outer-repeater'));
                     feather.replace();
 
-                    // ✅ Also re-init image uploaders inside newly added block
+                    // ✅ Re-init image uploaders inside newly added block
                     $(this).find('.option-dropzone').each(function () {
                         initOptionDropzone(this);
                     });
