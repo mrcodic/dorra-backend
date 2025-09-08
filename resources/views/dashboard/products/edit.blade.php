@@ -501,7 +501,7 @@
                                                                                         <div class="dropzone option-dropzone">
                                                                                         </div>
 
-                                                                                        <input type="hidden" name="option_image" class="uploadedImage" value="{{ $option->image?->id }}">
+                                                                                        <input type="hidden" name="option_image" class="uploadedImage">
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
