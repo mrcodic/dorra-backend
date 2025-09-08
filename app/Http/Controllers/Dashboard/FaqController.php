@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Services\FaqService;
 use App\Http\Requests\Faq\{StoreFaqRequest, UpdateFaqRequest};
-use App\Repositories\Interfaces\RoleRepositoryInterface;
+
 
 
 class FaqController extends DashboardController
 {
-   public function __construct(public FaqService $faqService, public RoleRepositoryInterface $roleRepository)
+   public function __construct(public FaqService $faqService)
    {
        parent::__construct($faqService);
        $this->storeRequestClass = new StoreFaqRequest();

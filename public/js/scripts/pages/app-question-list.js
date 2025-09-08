@@ -130,7 +130,7 @@ dt_user_table.on('draw', function () {
 function updateBulkDeleteVisibility() {
     const selected = $('.category-checkbox:checked').length;
     if (selected > 0) {
-        $('#selected-count-text').text(`${selected} Category${selected > 1 ? 'ies' : 'y'} are selected`);
+        $('#selected-count-text').text(`${selected} Faq${selected > 1 ? 's' : ''} are selected`);
         $('#bulk-delete-container').show();
     } else {
         $('#bulk-delete-container').hide();
@@ -201,16 +201,16 @@ $(document).ready(function () {
         if (selectedIds.length === 0) return;
 
         $.ajax({
-            url: "admins/bulk-delete",
+            url:"/faqs/bulk-delete",
             method: "POST",
             data: {
                 ids: selectedIds,
                 _token: $('meta[name="csrf-token"]').attr("content"),
             },
-            success: function (response) {
+            success: function () {
                 $("#deleteFaqsModal").modal("hide");
                 Toastify({
-                    text: "Selected admins deleted successfully!",
+                    text: "Selected FAQs deleted successfully!",
                     duration: 1500,
                     gravity: "top",
                     position: "right",
@@ -218,37 +218,12 @@ $(document).ready(function () {
                     close: true,
                 }).showToast();
 
-                // Reload DataTable
-
                 $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
                 $('#select-all-checkbox').prop('checked', false);
                 $(".faq-list-table").DataTable().ajax.reload(null, false);
-
-            },
-            error: function () {
-                $("#deleteCategoriesModal").modal("hide");
-                Toastify({
-                    text: "Something Went Wrong!",
-                    duration: 1500,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#28a745",
-                    close: true,
-                }).showToast();
-
-                // Reload DataTable
-
-                $('#bulk-delete-container').hide();
-                $('.product-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
-                $(".faq-list-table").DataTable().ajax.reload(null, false);
-
-            },
+            }
         });
-
     });
-
 
 
 

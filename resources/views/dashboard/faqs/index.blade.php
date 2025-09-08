@@ -78,19 +78,29 @@
             </table>
             <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                 <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                    style="z-index: 10;">
-                    <p id="selected-count-text">0 admins are selected</p>
-                    <form id="bulk-delete-form" method="POST" action="">
+                     style="z-index: 10;">
+                    <p id="selected-count-text">0 Faqs are selected</p>
+                    <!-- Trigger button -->
+                    <button type="button"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteFaqsModal">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
+
+                    <!-- Hidden bulk delete form -->
+                    <form style="display:none;" id="bulk-delete-form" method="POST"
+                          action="{{ route('faqs.bulk-delete') }}">
                         @csrf
-                        <button type="submit" id="delete-selected-btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#deleteFaqsModal"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                            <i data-feather="trash-2"></i> Delete Selected
-                        </button>
                     </form>
+
+                    <!-- Bulk delete modal -->
+
+
+
                 </div>
             </div>
+
 
 
         </div>
@@ -98,18 +108,17 @@
         @include('modals/questions/show-question')
         @include('modals/questions/edit-question')
 
+        @include('modals.delete', [
+                              'id' => 'deleteFaqsModal',
+                              'formId' => 'bulk-delete-form',
+                              'title' => 'Delete Faqs',
+                              'confirmText' => 'Are you sure you want to delete these items?'
+                           ])
         @include('modals.delete',[
-        'id' => 'deleteFaqModal',
-        'formId' => 'deleteFaqForm',
-        'title' => 'Delete Faq',
-        ])
-        @include('modals.delete',[
-        'id' => 'deleteFaqsModal',
-        'formId' => 'bulk-delete-form',
-        'title' => 'Delete Faqs',
-        'confirmText' => 'Are you sure you want to delete this items?',
-        ])
-
+              'id' => 'deleteFaqModal',
+              'formId' => 'deleteFaqForm',
+              'title' => 'Delete Faq',
+              ])
     </div>
     <!-- list and filter end -->
 </section>
@@ -141,7 +150,6 @@
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
     const faqsDataUrl = "{{ route('faqs.data') }}";
-        const adminsCreateUrl = "{{ route('admins.create') }}";
         const locale = "{{ app()->getLocale() }}";
 
 </script>
@@ -154,55 +162,6 @@
             location.reload()
         }
     })
-</script>
-<script>
-    $(document).ready(function () {
-            // Select all toggle
-            $('#select-all-checkbox').on('change', function () {
-                $('.category-checkbox').prop('checked', this.checked);
-                updateBulkDeleteVisibility();
-            });
-
-            // When individual checkbox changes
-            $(document).on('change', '.category-checkbox', function () {
-                // If any is unchecked, uncheck "Select All"
-                if (!this.checked) {
-                    $('#select-all-checkbox').prop('checked', false);
-                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
-                    $('#select-all-checkbox').prop('checked', true);
-                }
-                updateBulkDeleteVisibility();
-            });
-
-
-            // On table redraw (e.g. pagination, search)
-            $(document).on('draw.dt', function () {
-                $('#bulk-delete-container').hide();
-                $('#select-all-checkbox').prop('checked', false);
-            });
-
-            // Close bulk delete container
-            $(document).on('click', '#close-bulk-delete', function () {
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
-            });
-
-            // Update the bulk delete container visibility
-            function updateBulkDeleteVisibility() {
-                const selectedCheckboxes = $('.category-checkbox:checked');
-                const count = selectedCheckboxes.length;
-
-                if (count > 0) {
-                    $('#selected-count-text').text(`${count} Faq${count > 1 ? 's are' : ' is'} selected`);
-                    $('#bulk-delete-container').show();
-                } else {
-                    $('#bulk-delete-container').hide();
-                }
-            }
-
-
-        });
 </script>
 
 {{-- Page js files --}}
