@@ -370,6 +370,7 @@
                                                     <div class="{{ $hasSpecs ? '' :'d-none' }}" data-repeater-list="specifications">
                                                         @forelse($model->specifications as $specification)
                                                             <div data-repeater-item>
+                                                                <input type="hidden" name="id" value="{{ $specification->id }}">
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
@@ -460,6 +461,8 @@
                                                         @empty
                                                             <div data-repeater-item>
                                                                 <div class="row mt-1">
+                                                                    <input type="hidden" name="id">
+
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Name (EN)</label>
@@ -659,7 +662,7 @@
         Dropzone.autoDiscover = false;
 
         const multiDropzone = new Dropzone("#multi-dropzone", {
-            url: "{{ route('media.store') }}",   // backend route for image upload
+            url: "{{ route('media.store') }}",   // backend upload route
             paramName: "file",
             maxFiles: 10,
             maxFilesize: 1, // MB
@@ -669,26 +672,28 @@
             },
             addRemoveLinks: true,
             dictDefaultMessage: "Drag images here or click to upload",
+
             init: function () {
                 let dz = this;
 
-                // ✅ Show existing images if editing
+                // ✅ Preload existing images
                     @if($model->getMedia('product_extra_images')->isNotEmpty())
                     @foreach($model->getMedia('product_extra_images') as $media)
                 {
-                    const multiMockFile = {
+                    const mockFile = {
                         name: "{{ $media->file_name }}",
                         size: {{ $media->size ?? 12345 }},
                         _hiddenInputId: "{{ $media->id }}"
                     };
 
-                    dz.emit("addedfile", multiMockFile);
-                    dz.emit("thumbnail", multiMockFile, "{{ $media->getUrl() }}");
-                    dz.emit("success", multiMockFile);
-                    dz.emit("complete", multiMockFile);
-                    dz.files.push(multiMockFile);
+                    dz.emit("addedfile", mockFile);
+                    dz.emit("thumbnail", mockFile, "{{ $media->getUrl() }}");
+                    dz.emit("success", mockFile);
+                    dz.emit("complete", mockFile);
+                    dz.files.push(mockFile);
 
-                    const input = document.createElement("input");
+                    // Hidden input for old image
+                    let input = document.createElement("input");
                     input.type = "hidden";
                     input.name = "images_ids[]";
                     input.value = "{{ $media->id }}";
@@ -698,8 +703,7 @@
                 @endforeach
                 @endif
 
-
-                // ✅ On upload success
+                // ✅ On successful upload
                 dz.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
@@ -713,12 +717,13 @@
                     }
                 });
 
-                // ✅ On remove
+                // ✅ On file removal
                 dz.on("removedfile", function (file) {
                     if (file._hiddenInputId) {
                         let hiddenInput = document.getElementById("hidden-image-" + file._hiddenInputId);
                         if (hiddenInput) hiddenInput.remove();
 
+                        // Optional: delete file from server
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
                             headers: {
@@ -730,6 +735,7 @@
             }
         });
     </script>
+
     <script>
         Dropzone.autoDiscover = false;
 
