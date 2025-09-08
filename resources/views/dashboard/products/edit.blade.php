@@ -571,6 +571,99 @@
 @endsection
 
 @section('page-script')
+    <script>
+        $(document).ready(function () {
+            // Initialize the outer repeater for specifications
+            var $outerRepeater = $('.outer-repeater');
+
+            // First, check if we have any existing specifications
+            var hasExistingSpecs = $outerRepeater.find('[data-repeater-item]').length > 0;
+
+            if (!hasExistingSpecs) {
+                // If no existing specs, hide the container initially
+                $outerRepeater.find('[data-repeater-list="specifications"]').addClass('d-none');
+            }
+
+            // Initialize the outer repeater
+            $outerRepeater.repeater({
+                repeaters: [{
+                    selector: '.inner-repeater',
+                    show: function () {
+                        $(this).slideDown();
+                        feather.replace();
+
+                        // Initialize dropzone for new option
+                        let dzElement = $(this).find(".option-dropzone")[0];
+                        if (dzElement && typeof initOptionDropzone === 'function') {
+                            initOptionDropzone(dzElement);
+                        }
+                    },
+                    hide: function (deleteElement) {
+                        $(this).slideUp(deleteElement);
+                    }
+                }],
+                show: function () {
+                    // Make sure the container is visible when adding new items
+                    var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                    $specList.removeClass('d-none');
+
+                    $(this).slideDown();
+                    feather.replace();
+
+                    // Initialize dropzone for new specification
+                    let dzElement = $(this).find(".option-dropzone")[0];
+                    if (dzElement && typeof initOptionDropzone === 'function') {
+                        initOptionDropzone(dzElement);
+                    }
+
+                    $(this).find('.uploadedImage').val('');
+                },
+                hide: function (deleteElement) {
+                    var $item = $(this);
+                    $item.slideUp(deleteElement, function() {
+                        // After hiding, check if we need to hide the container
+                        var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                        var $items = $specList.find('[data-repeater-item]').not(':hidden');
+
+                        if ($items.length === 0) {
+                            $specList.addClass('d-none');
+                        }
+                    });
+                },
+                isFirstItemUndeletable: true
+            });
+
+            // Initialize inner repeaters for existing items
+            $('.inner-repeater').repeater({
+                show: function () {
+                    $(this).slideDown();
+                    feather.replace();
+
+                    // Initialize dropzone for new option
+                    let dzElement = $(this).find(".option-dropzone")[0];
+                    if (dzElement && typeof initOptionDropzone === 'function') {
+                        initOptionDropzone(dzElement);
+                    }
+                },
+                hide: function (deleteElement) {
+                    $(this).slideUp(deleteElement);
+                }
+            });
+
+         
+
+            // Initialize dropzones for existing option images
+            if (typeof initOptionDropzone === 'function') {
+                document.querySelectorAll(".option-dropzone").forEach(el => {
+                    let media = el.dataset.existingMedia ? JSON.parse(el.dataset.existingMedia) : null;
+                    initOptionDropzone(el, media);
+                });
+            }
+
+            // Initialize feather icons
+            feather.replace();
+        });
+    </script>
     <script !src="">
         Dropzone.autoDiscover = false;
 
@@ -1178,103 +1271,7 @@
                 });
             }
 
-            $(document).ready(function () {
-                // Initialize the outer repeater for specifications
-                var $outerRepeater = $('.outer-repeater');
 
-                // First, check if we have any existing specifications
-                var hasExistingSpecs = $outerRepeater.find('[data-repeater-item]').length > 0;
-
-                if (!hasExistingSpecs) {
-                    // If no existing specs, hide the container initially
-                    $outerRepeater.find('[data-repeater-list="specifications"]').addClass('d-none');
-                }
-
-                // Initialize the outer repeater
-                $outerRepeater.repeater({
-                    repeaters: [{
-                        selector: '.inner-repeater',
-                        show: function () {
-                            $(this).slideDown();
-                            feather.replace();
-
-                            // Initialize dropzone for new option
-                            let dzElement = $(this).find(".option-dropzone")[0];
-                            if (dzElement && typeof initOptionDropzone === 'function') {
-                                initOptionDropzone(dzElement);
-                            }
-                        },
-                        hide: function (deleteElement) {
-                            $(this).slideUp(deleteElement);
-                        }
-                    }],
-                    show: function () {
-                        // Make sure the container is visible when adding new items
-                        var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
-                        $specList.removeClass('d-none');
-
-                        $(this).slideDown();
-                        feather.replace();
-
-                        // Initialize dropzone for new specification
-                        let dzElement = $(this).find(".option-dropzone")[0];
-                        if (dzElement && typeof initOptionDropzone === 'function') {
-                            initOptionDropzone(dzElement);
-                        }
-
-                        $(this).find('.uploadedImage').val('');
-                    },
-                    hide: function (deleteElement) {
-                        var $item = $(this);
-                        $item.slideUp(deleteElement, function() {
-                            // After hiding, check if we need to hide the container
-                            var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
-                            var $items = $specList.find('[data-repeater-item]').not(':hidden');
-
-                            if ($items.length === 0) {
-                                $specList.addClass('d-none');
-                            }
-                        });
-                    },
-                    isFirstItemUndeletable: true
-                });
-
-                // Initialize inner repeaters for existing items
-                $('.inner-repeater').repeater({
-                    show: function () {
-                        $(this).slideDown();
-                        feather.replace();
-
-                        // Initialize dropzone for new option
-                        let dzElement = $(this).find(".option-dropzone")[0];
-                        if (dzElement && typeof initOptionDropzone === 'function') {
-                            initOptionDropzone(dzElement);
-                        }
-                    },
-                    hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
-                    }
-                });
-
-                // Handle the "Add New Spec" button click to ensure container is visible
-                $(document).on('click', '[data-repeater-create]', function() {
-                    var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
-                    if ($specList.hasClass('d-none')) {
-                        $specList.removeClass('d-none');
-                    }
-                });
-
-                // Initialize dropzones for existing option images
-                if (typeof initOptionDropzone === 'function') {
-                    document.querySelectorAll(".option-dropzone").forEach(el => {
-                        let media = el.dataset.existingMedia ? JSON.parse(el.dataset.existingMedia) : null;
-                        initOptionDropzone(el, media);
-                    });
-                }
-
-                // Initialize feather icons
-                feather.replace();
-            });
             $('.select2').select2();
 
             // Category -> Subcategory
