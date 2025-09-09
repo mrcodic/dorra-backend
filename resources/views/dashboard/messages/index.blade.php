@@ -27,12 +27,14 @@
     @media (max-width: 768px) {
 
         /* Hide the last 4 columns on mobile */
+        .message-list-table th:nth-child(3),
         .message-list-table th:nth-child(4),
         .message-list-table th:nth-child(5),
         .message-list-table th:nth-child(6) {
             display: none !important;
         }
 
+        .message-list-table tbody tr:not(.details-row) td:nth-child(3),
         .message-list-table tbody tr:not(.details-row) td:nth-child(4),
         .message-list-table tbody tr:not(.details-row) td:nth-child(5),
         .message-list-table tbody tr:not(.details-row) td:nth-child(6) {
@@ -314,6 +316,7 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                 // Get data for details
+                const phoneNumber = $row.find('td:nth-child(3)').html() || '';
                 const content = $row.find('td:nth-child(4)').html() || '';
                 const date = $row.find('td:nth-child(5)').html() || '';
                 const actions = $row.find('td:nth-child(6)').html() || '';
@@ -321,8 +324,12 @@
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="3">
+                        <td colspan="4">
                             <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Phone Number:</span>
+                                    <span class="detail-value">${phoneNumber}</span>
+                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Content:</span>
                                     <span class="detail-value">${content}</span>
