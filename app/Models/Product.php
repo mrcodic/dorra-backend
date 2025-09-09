@@ -145,8 +145,9 @@ class Product extends Model implements HasMedia
 
     public function prices(): MorphMany
     {
-        return $this->morphMany(ProductPrice::class,'pricable');
+        return $this->morphMany(ProductPrice::class, 'pricable');
     }
+
 
     public function reviews(): MorphMany
     {
