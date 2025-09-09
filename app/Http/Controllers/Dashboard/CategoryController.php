@@ -10,7 +10,7 @@ use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use App\Http\Requests\Category\{StoreCategoryRequest, UpdateCategoryRequest};
+use App\Http\Requests\Category\{StoreCategoryRequest, StoreProductWithoutCategoryRequest, UpdateCategoryRequest};
 
 
 class CategoryController extends DashboardController
@@ -75,7 +75,7 @@ class CategoryController extends DashboardController
 
     }
 
-    public  function storeProductWithoutCategories(Request $request)
+    public  function storeProductWithoutCategories(StoreProductWithoutCategoryRequest $request)
     {
         $this->categoryService->storeProductWithoutCategories($request->all());
     }

@@ -12,11 +12,11 @@ use App\Http\Requests\Template\{StoreTemplateRequest,
     UpdateTemplateRequest
 };
 use App\Http\Resources\{MediaResource, Template\TemplateResource};
-use App\Repositories\Interfaces\{ProductRepositoryInterface,
+use App\Repositories\Interfaces\{CategoryRepositoryInterface,
+    ProductRepositoryInterface,
     ProductSpecificationRepositoryInterface,
     TagRepositoryInterface,
-    TemplateRepositoryInterface
-};
+    TemplateRepositoryInterface};
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Cache, Response};
@@ -31,6 +31,7 @@ class TemplateController extends DashboardController
         public TagRepositoryInterface                  $tagRepository,
         public ProductSpecificationRepositoryInterface $productSpecificationRepository,
         public ProductRepositoryInterface              $productRepositoryInterface,
+        public CategoryRepositoryInterface              $categoryRepository,
 
     )
     {
@@ -47,6 +48,7 @@ class TemplateController extends DashboardController
         $this->assoiciatedData = [
             'create' => [
                 'products' => $this->productRepository->query()->get(['id', 'name']),
+                'categories' => $this->categoryRepository->query()->get(['id', 'name']),
                 'tags' => $this->tagRepository->query()->get(['id', 'name']),
 
             ],

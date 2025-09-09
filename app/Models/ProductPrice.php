@@ -15,7 +15,7 @@ class ProductPrice extends Model
     protected static function booted()
     {
         $callback = function (ProductPrice $productPrice) {
-            if ($productPrice->product->carts->isNotEmpty()) {
+            if ($productPrice->priceable?->carts->isNotEmpty()) {
                 $product = $productPrice->product;
                 CartItem::where('product_id', $product->id)
                     ->with('cart')
@@ -52,8 +52,8 @@ class ProductPrice extends Model
         static::saved($callback);
     }
 
-    public function product(): BelongsTo
+    public function priceable()
     {
-        return $this->belongsTo(Product::class);
+        return $this->morphTo();
     }
 }

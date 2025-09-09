@@ -109,6 +109,18 @@
                                     </select>--}}
                                     {{-- </div>--}}
                                 <div class="form-group mb-2">
+                                    <label for="categoriesSelect" class="label-text mb-1">Products</label>
+                                    <select id="categoriesSelect" class="form-select select2" name="product_ids[]"
+                                            multiple>
+                                        @foreach($associatedData['categories'] as $category)
+                                            <option value="{{ $category->id }}">
+                                                {{ $category->getTranslation('name', app()->getLocale()) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="form-group mb-2">
                                     <label for="productsSelect" class="label-text mb-1">Categories</label>
                                     <select id="productsSelect" class="form-select select2" name="product_ids[]"
                                         multiple>
@@ -314,6 +326,10 @@
     $(document).ready(function () {
             $('#productsSelect').select2({
                 placeholder: "Choose Categories",
+                allowClear: true
+            });
+            $('#categoriesSelect').select2({
+                placeholder: "Choose Products",
                 allowClear: true
             });
             $('#tagsSelect').select2({
