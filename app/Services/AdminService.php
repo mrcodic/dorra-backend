@@ -45,9 +45,10 @@ class AdminService extends BaseService
             unset($validatedData['password'], $validatedData['password_confirmation']);
         }
         $model = $this->repository->update($validatedData, $id);
-        if (Arr::get($validatedData, 'role_id')) {
-            $model->roles()->sync([$validatedData['role_id']]);
+        if (!empty($validatedData['role_id'])) {
+            $model->syncRoles([$validatedData['role_id']]);
         }
+
 
         if (empty($validatedData['image_id'])) {
             $model->clearMediaCollection('admins');
