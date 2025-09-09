@@ -27,26 +27,26 @@
     @media (max-width: 768px) {
 
         /* Hide the last 4 columns on mobile */
-        .admin-list-table th:nth-child(5),
-        .admin-list-table th:nth-child(6),
-        .admin-list-table th:nth-child(7) {
+        .message-list-table th:nth-child(4),
+        .message-list-table th:nth-child(5),
+        .message-list-table th:nth-child(6) {
             display: none !important;
         }
 
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(5),
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(6),
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(7) {
+        .message-list-table tbody tr:not(.details-row) td:nth-child(4),
+        .message-list-table tbody tr:not(.details-row) td:nth-child(5),
+        .message-list-table tbody tr:not(.details-row) td:nth-child(6) {
             display: none !important;
         }
 
         /* Style for clickable rows */
-        .admin-list-table tbody tr:not(.details-row) {
+        .message-list-table tbody tr:not(.details-row) {
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
 
         /* Add expand indicator to the role column */
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(1) {
+        .message-list-table tbody tr:not(.details-row) td:nth-child(1) {
             position: relative;
             padding-left: 20px !important;
         }
@@ -169,7 +169,7 @@
                         </th>
 
                         <th>Email Address</th>
-                         <th>Phone Number</th>
+                        <th>Phone Number</th>
                         <th>Content</th>
                         <th>Date</th>
                         <th>Actions</th>
@@ -178,19 +178,18 @@
             </table>
             <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                 <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                     style="z-index: 10;">
+                    style="z-index: 10;">
                     <p id="selected-count-text">0 Messages are selected</p>
                     <!-- Trigger button -->
                     <button type="button"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteMessagesModal">
+                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1"
+                        data-bs-toggle="modal" data-bs-target="#deleteMessagesModal">
                         <i data-feather="trash-2"></i> Delete Selected
                     </button>
 
                     <!-- Hidden bulk delete form -->
                     <form style="display:none;" id="bulk-delete-form" method="POST"
-                          action="{{ route('messages.bulk-delete') }}">
+                        action="{{ route('messages.bulk-delete') }}">
                         @csrf
                     </form>
 
@@ -290,7 +289,7 @@
     }
 
     // Accordion click handler with event delegation
-    $(document).on('click.accordion', '.admin-list-table tbody tr:not(.details-row)', function(e) {
+    $(document).on('click.accordion', '.message-list-table tbody tr:not(.details-row)', function(e) {
         // Prevent accordion when clicking interactive elements
         if ($(e.target).is('input, button, a, .btn') ||
             $(e.target).closest('input, button, a, .btn').length > 0) {
@@ -304,7 +303,7 @@
     // Initialize accordion after DataTable draw
     function initAccordion() {
         if ($(window).width() <= 768) {
-            $('.admin-list-table tbody tr:not(.details-row)').each(function() {
+            $('.message-list-table tbody tr:not(.details-row)').each(function() {
                 const $row = $(this);
 
                 // Remove existing details and icons first
@@ -315,22 +314,22 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                 // Get data for details
-                const status = $row.find('td:nth-child(5)').html() || '';
-                const joinDate = $row.find('td:nth-child(6)').html() || '';
-                const actions = $row.find('td:nth-child(7)').html() || '';
+                const content = $row.find('td:nth-child(4)').html() || '';
+                const date = $row.find('td:nth-child(5)').html() || '';
+                const actions = $row.find('td:nth-child(6)').html() || '';
 
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
-                        <td colspan="4">
+                        <td colspan="3">
                             <div class="details-content">
                                 <div class="detail-row">
-                                    <span class="detail-label">Status:</span>
-                                    <span class="detail-value">${status}</span>
+                                    <span class="detail-label">Content:</span>
+                                    <span class="detail-value">${content}</span>
                                 </div>
                                 <div class="detail-row">
-                                    <span class="detail-label">Join Date:</span>
-                                    <span class="detail-value">${joinDate}</span>
+                                    <span class="detail-label">Date:</span>
+                                    <span class="detail-value">${date}</span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Actions:</span>
@@ -356,7 +355,7 @@
     });
 
     // On DataTable events
-    $(document).on('draw.dt', '.code-list-table', function () {
+    $(document).on('draw.dt', '.message-list-table', function () {
         $('#bulk-delete-container').hide();
         $('#select-all-checkbox').prop('checked', false);
 
@@ -398,7 +397,7 @@
     // Backup accordion handler in case the main one doesn't work
 $(document).ready(function() {
     // Alternative click handler
-    $(document).off('click.accordion').on('click.accordion', '.admin-list-table tbody tr:not(.details-row)', function(e) {
+    $(document).off('click.accordion').on('click.accordion', '.message-list-table tbody tr:not(.details-row)', function(e) {
         console.log('Accordion clicked'); // Debug log
 
         if ($(window).width() <= 768) {
