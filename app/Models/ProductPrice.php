@@ -55,4 +55,8 @@ class ProductPrice extends Model
     {
         return $this->morphTo();
     }
+    public function product()
+    {
+        return $this->morphTo(__FUNCTION__, 'pricable_type', 'pricable_id');
+    }
 }
