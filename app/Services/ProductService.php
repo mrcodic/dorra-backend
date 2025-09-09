@@ -226,9 +226,10 @@ class ProductService extends BaseService
             $product->prices()->delete();
         }
           if (isset($validatedData['prices'])) {
+              // reset base price since we’re using custom prices
               $product->update(['base_price' => null]);
 
-              // if admin changed pricing model
+              // if admin switched pricing model
               if (($validatedData['has_custom_prices'] ?? false) && $product->has_custom_prices !== 1) {
                   CartItem::where('product_id', $product->id)->get()->each(function ($item) use ($validatedData) {
                       $item->update([
@@ -244,14 +245,22 @@ class ProductService extends BaseService
               // collect submitted quantities
               $submittedQuantities = collect($validatedData['prices'])->map(function ($price) use ($product) {
                   $product->prices()->updateOrCreate(
-                      ['quantity' => $price['quantity']],
-                      ['price' => $price['price']]
+                      [
+                          'quantity'      => $price['quantity'],
+                          'pricable_id'   => $product->id,
+                          'pricable_type' => get_class($product),
+                      ],
+                      [
+                          'price' => $price['price'],
+                      ]
                   );
                   return $price['quantity'];
               })->toArray();
 
               // delete prices that admin removed
-              $product->prices()->whereNotIn('quantity', $submittedQuantities)->delete();
+              $product->prices()
+                  ->whereNotIn('quantity', $submittedQuantities)
+                  ->delete();
           }
 
           if (isset($validatedData['specifications'])) {
