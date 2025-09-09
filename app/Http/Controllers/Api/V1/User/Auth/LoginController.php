@@ -45,8 +45,5 @@ class LoginController extends Controller
             httpOnly: false,
             sameSite: 'Lax'
         ));
-//        return Response::api(message: "You are logged in successfully", data: UserResource::make($user->load('countryCode', 'socialAccounts', 'notificationTypes')));
-
-
     }
 }

@@ -9,6 +9,7 @@ use App\Repositories\Interfaces\TagRepositoryInterface;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Http\Requests\Category\{StoreCategoryRequest, UpdateCategoryRequest};
 
 
@@ -72,6 +73,11 @@ class CategoryController extends DashboardController
         $category = $this->categoryService->removeFromLanding($request->get('category_id'));
         return $this->resourceClass::make($category);
 
+    }
+
+    public  function storeProductWithoutCategories(Request $request)
+    {
+        $this->categoryService->storeProductWithoutCategories($request->all());
     }
 
 }

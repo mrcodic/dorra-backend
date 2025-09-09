@@ -32,7 +32,7 @@
                             </li>
                         </ul>
 
-                        <form id="product-form" class="form" action="{{ route('products.store') }}" method="POST"
+                        <form id="category-form" class="form" action="{{ route('product-without-categories.store') }}" method="POST"
                               enctype="multipart/form-data" novalidate>
                             @csrf
 
@@ -866,268 +866,9 @@
         });
     </script>
 
-    <script>
-        $(document).ready(function () {
-            let input = $('#product-image-main');
-            let uploadArea = $('#upload-area');
-            let progress = $('#upload-progress');
-            let progressBar = $('.progress-bar');
-            let uploadedImage = $('#uploaded-image');
-            let removeButton = $('#remove-image');
-
-            // Click on the upload area triggers the hidden input
-            uploadArea.on('click', function () {
-                input.click();
-            });
-
-            // Handle file selection
-            input.on('change', function (e) {
-                handleFiles(e.target.files);
-            });
-
-            // Handle Drag & Drop
-            uploadArea.on('dragover', function (e) {
-                e.preventDefault();
-                uploadArea.addClass('dragover');
-            });
-
-            uploadArea.on('dragleave', function (e) {
-                e.preventDefault();
-                uploadArea.removeClass('dragover');
-            });
-
-            uploadArea.on('drop', function (e) {
-                e.preventDefault();
-                uploadArea.removeClass('dragover');
-                handleFiles(e.originalEvent.dataTransfer.files);
-            });
-
-            function handleFiles(files) {
-                if (files.length > 0) {
-                    let file = files[0];
-
-                    // 🔽 This is the fix: assign the dropped file to the input element
-                    let dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    input[0].files = dataTransfer.files;
-
-                    console.log('Input files:', input[0].files); // Make sure this logs a FileList with 1 file
-
-                    // Show loader
-                    progress.removeClass('d-none');
-                    progressBar.css('width', '0%');
-
-                    // Fake loading effect
-                    let fakeProgress = 0;
-                    let interval = setInterval(function () {
-                        fakeProgress += 10;
-                        progressBar.css('width', fakeProgress + '%');
-
-                        if (fakeProgress >= 100) {
-                            clearInterval(interval);
-
-                            // Preview image
-                            let reader = new FileReader();
-                            reader.onload = function (e) {
-                                uploadedImage.find('img').attr('src', e.target.result);
-                                uploadedImage.removeClass('d-none');
-                                progress.addClass('d-none');
-
-                                // Show file name and size
-                                $('#file-details .file-name').text(file.name);
-                                $('#file-details .file-size').text((file.size / 1024).toFixed(2) + ' KB');
-                            }
-                            reader.readAsDataURL(file);
-                        }
-                    }, 100);
-                }
-            }
-
-            // Remove image
-            removeButton.on('click', function () {
-                uploadedImage.addClass('d-none');
-                input.val(''); // Clear the input
-            });
-        });
-    </script>
-    <script>
-        $(document).ready(function () {
-            let input = $('#product-images');
-            let uploadArea = $('#multi-upload-area');
-            let uploadedImages = $('#multi-uploaded-images');
-
-            // Click to open file input
-            uploadArea.on('click', function () {
-                input.click();
-            });
-
-            // Handle input change
-            input.on('change', function (e) {
-                handleFiles(e.target.files);
-            });
-
-            // Drag and Drop
-            uploadArea.on('dragover', function (e) {
-                e.preventDefault();
-                uploadArea.addClass('dragover');
-            });
-
-            uploadArea.on('dragleave', function (e) {
-                e.preventDefault();
-                uploadArea.removeClass('dragover');
-            });
-
-            uploadArea.on('drop', function (e) {
-                e.preventDefault();
-                uploadArea.removeClass('dragover');
-                handleFiles(e.originalEvent.dataTransfer.files);
-            });
-
-            function handleFiles(files) {
-                for (let i = 0; i < files.length; i++) {
-                    uploadFile(files[i]);
-                }
-            }
-
-            function uploadFile(file) {
-                if (!file.type.startsWith('image/')) return;
-
-                const fileSizeKB = (file.size / 1024).toFixed(2) + ' KB';
-
-                // Create wrapper with image hidden initially
-                let wrapper = $(`
-            <div class="image-wrapper position-relative mb-3 d-flex align-items-center gap-2">
-                <img src="" alt="Uploading..." style="width: 50px; height: 50px; object-fit: cover; display: none;">
-                <div class="file-info">
-                    <div class="file-name fw-bold">${file.name}</div>
-                    <div class="file-size text-muted small">${fileSizeKB}</div>
-                    <div class="progress mt-2 w-50" style="height: 6px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                    </div>
-                </div>
-                <button type="button" class="remove-btn btn btn-sm text-danger ms-auto" style="background-color:#FFEEED;">
-                    <i data-feather="trash"></i>
-                </button>
-            </div>
-        `);
-
-                uploadedImages.append(wrapper);
-
-                let progressBar = wrapper.find('.progress-bar');
-                let imgTag = wrapper.find('img');
-
-                // Fake upload progress
-                let progress = 0;
-                let interval = setInterval(function () {
-                    progress += 10;
-                    progressBar.css('width', progress + '%');
-
-                    if (progress >= 100) {
-                        clearInterval(interval);
-
-                        // Display the image after "upload" finishes
-                        let reader = new FileReader();
-                        reader.onload = function (e) {
-                            imgTag.attr('src', e.target.result).fadeIn();
-                            wrapper.find('.progress').remove();
-                        }
-                        reader.readAsDataURL(file);
-                    }
-                }, 100);
-
-                // Remove button
-                wrapper.find('.remove-btn').on('click', function () {
-                    wrapper.remove();
-                });
-
-                // Re-render feather icons
-                feather.replace();
-            }
-
-        });
 
 
-    </script>
 
-
-    <script>
-        $(document).ready(function () {
-            let optionInput = $('#option-image-input');
-            let optionUploadArea = $('#option-upload-area');
-            let optionProgress = $('#option-upload-progress');
-            let optionProgressBar = $('#option-upload-progress .progress-bar');
-            let optionUploadedImage = $('#option-uploaded-image');
-            let optionRemoveButton = $('#option-remove-image');
-
-            // Click to open file input
-            optionUploadArea.on('click', function () {
-                optionInput.click();
-            });
-
-            // Handle input change
-            optionInput.on('change', function (e) {
-                handleOptionFiles(e.target.files);
-            });
-
-            // Drag and Drop
-            optionUploadArea.on('dragover', function (e) {
-                e.preventDefault();
-                optionUploadArea.addClass('dragover');
-            });
-
-            optionUploadArea.on('dragleave', function (e) {
-                e.preventDefault();
-                optionUploadArea.removeClass('dragover');
-            });
-
-            optionUploadArea.on('drop', function (e) {
-                e.preventDefault();
-                optionUploadArea.removeClass('dragover');
-                handleOptionFiles(e.originalEvent.dataTransfer.files);
-            });
-
-            function handleOptionFiles(files) {
-                if (files.length > 0) {
-                    let file = files[0];
-
-                    optionProgress.removeClass('d-none');
-                    optionProgressBar.css('width', '0%');
-
-                    let fakeProgress = 0;
-                    let interval = setInterval(function () {
-                        fakeProgress += 10;
-                        optionProgressBar.css('width', fakeProgress + '%');
-
-                        if (fakeProgress >= 100) {
-                            clearInterval(interval);
-
-                            let reader = new FileReader();
-                            reader.onload = function (e) {
-                                optionUploadedImage.find('img').attr('src', e.target.result);
-                                optionUploadedImage.removeClass('d-none');
-                                optionProgress.addClass('d-none');
-
-                                // Show file name and size
-                                $('#option-uploaded-image .file-name').text(file.name);
-                                $('#option-uploaded-image .file-size').text((file.size / 1024).toFixed(2) + ' KB');
-                            }
-                            reader.readAsDataURL(file);
-                        }
-                    }, 100);
-                }
-            }
-
-            // Remove image
-            optionRemoveButton.on('click', function () {
-                optionUploadedImage.addClass('d-none');
-                optionInput.val('');
-
-                // Also clear file name and size
-                $('#option-uploaded-image .file-name').text('');
-                $('#option-uploaded-image .file-size').text('');
-            });
-        });
-    </script>
 
 
     <script>
@@ -1402,5 +1143,13 @@
             showStep(currentStep);
         });
     </script>
+    <script !src="">
+        handleAjaxFormSubmit("#category-form",{
+            successMessage: "Product Created Successfully",
+            onSuccess:function (){
+                window.location.replace("/categories");
 
+            }
+        })
+    </script>
 @endsection

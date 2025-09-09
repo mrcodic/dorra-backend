@@ -105,9 +105,9 @@ class Product extends Model implements HasMedia
             ->withTimestamps();
     }
 
-    public function dimensions(): BelongsToMany
+    public function dimensions()
     {
-        return $this->belongsToMany(Dimension::class)->withTimestamps();
+        return $this->morphToMany(Dimension::class,'dimensionable','dimension_product')->withTimestamps();
     }
 
     public function orders(): BelongsToMany
@@ -121,9 +121,9 @@ class Product extends Model implements HasMedia
     }
 
 
-    public function specifications(): HasMany
+    public function specifications()
     {
-        return $this->hasMany(ProductSpecification::class);
+        return $this->morphMany(ProductSpecification::class,'specifiable');
     }
 
     public function templates(): BelongsToMany
@@ -143,9 +143,9 @@ class Product extends Model implements HasMedia
         );
     }
 
-    public function prices(): HasMany
+    public function prices(): MorphMany
     {
-        return $this->hasMany(ProductPrice::class);
+        return $this->morphMany(ProductPrice::class,'pricable');
     }
 
     public function reviews(): MorphMany

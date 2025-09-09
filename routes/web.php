@@ -58,6 +58,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/landing', 'addToLanding')->name('landing');
         Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
     });
+    Route::post('/without-categories', [CategoryController::class,'storeProductWithoutCategories'])->name('product-without-categories.store');
+
     Route::delete('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
 
     Route::resource('/categories', CategoryController::class);
