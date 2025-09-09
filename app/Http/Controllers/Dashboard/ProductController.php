@@ -34,12 +34,10 @@ class ProductController extends DashboardController
 
         $this->assoiciatedData = [
             'shared' => [
-                'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
+                'categories' => $this->categoryRepository->query()->whereNull('parent_id')->whereIsHasCategory(0)->get(['id', 'name']),
                 'tags' => $this->tagRepository->all(columns: ['id', 'name']),
                 'dimensions' =>  $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
-
             ],
-
         ];
         $this->methodRelations = [
             'index' => ['saves','orders'],

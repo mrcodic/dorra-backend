@@ -16,6 +16,7 @@ return new class extends Migration
                 $table->boolean('has_custom_prices')->default(false);
                 $table->decimal('base_price')->nullable();
                 $table->boolean('has_mockup')->default(false);
+                $table->boolean('is_has_category')->default(false);
             });
 
 
@@ -31,6 +32,7 @@ return new class extends Migration
             $table->dropColumn('has_custom_prices');
             $table->dropColumn('base_price');
             $table->dropColumn('has_mockup');
+//            $table->dropColumn('is_has_category');
         });
     }
 };
