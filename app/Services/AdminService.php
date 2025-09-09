@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Carousel;
+
 use App\Models\Role;
 use App\Repositories\Interfaces\AdminRepositoryInterface;
 use Illuminate\Support\Arr;
