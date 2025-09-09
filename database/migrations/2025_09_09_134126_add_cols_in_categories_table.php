@@ -32,7 +32,7 @@ return new class extends Migration
             $table->dropColumn('has_custom_prices');
             $table->dropColumn('base_price');
             $table->dropColumn('has_mockup');
-//            $table->dropColumn('is_has_category');
+            $table->dropColumn('is_has_category');
         });
     }
 };
