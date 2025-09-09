@@ -3,18 +3,20 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
-use App\Http\Requests\Admin\{StoreAdminRequest, UpdateAdminRequest};
+use App\Services\MessageService;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
+
 use App\Repositories\Interfaces\RoleRepositoryInterface;
-use App\Services\AdminService;
+
 
 
 class MessageController extends DashboardController
 {
-   public function __construct(public AdminService $adminService, public RoleRepositoryInterface $roleRepository)
+   public function __construct(public MessageService $messageService, public RoleRepositoryInterface $roleRepository)
    {
-       parent::__construct($adminService);
-       $this->storeRequestClass = new StoreAdminRequest();
-       $this->updateRequestClass = new UpdateAdminRequest();
+       parent::__construct($messageService);
        $this->indexView = 'messages.index';
        $this->usePagination = true;
        $this->assoiciatedData = [
@@ -27,6 +29,13 @@ class MessageController extends DashboardController
 
     public function getData()
     {
-        return $this->adminService->getData();
+        return $this->messageService->getData();
+   }
+
+    public function reply($id,Request $request)
+    {
+         $this->messageService->reply($id,$request);
+         return Response::api();
+
    }
 }

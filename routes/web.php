@@ -118,6 +118,7 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'messages', 'as' => 'messages.', 'controller' => MessageController::class,], function () {
         Route::get('/data', [MessageController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::post('{id}/reply', 'reply')->name('reply');
     });
     Route::resource('/messages', MessageController::class)->except('show');
 

@@ -141,66 +141,61 @@
         </div>
         <div class="card-datatable table-responsive pt-0">
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                <form action="" method="get" class="flex-grow-1 me-1 col-12 col-md-5 position-relative">
+                <form action="" method="get" class="flex-grow-1 me-1 col-12 col-md-5 position-relative search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                        id="search-category-form" placeholder="Search here" style="height: 38px;">
-                    <button type="button" id="clearRoleFilter"
-                        class="position-absolute top-50 translate-middle-y text-muted"
-                        style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                        title="Clear search">
+                        id="search-message-form" placeholder="Search here" style="height: 38px;">
+                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                         &times;
                     </button>
                 </form>
 
-                <div class="col-12 col-md-2">
-                    <select name="role_id" class="form-select filter-role">
-                        <option value="" selected disabled>Role</option>
-                        @foreach($associatedData['roles'] as $role)
-                        <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale())}}</option>
-                        @endforeach
+                <div class="col-12 col-md-3">
+                    <select name="created_at" class="form-select filter-date">
+                        <option value="" disabled>Date</option>
+                        <option value="desc">Newest</option>
+                        <option value="asc">Oldest</option>
                     </select>
                 </div>
-                <div class="col-12 col-md-2">
-                    <select name="status" class="form-select filter-status">
-                        <option value="" selected disabled>Status</option>
-                        <option value="0">Blocked</option>
-                        <option value="1">Active</option>
-                    </select>
-                </div>
-                <button type="button" class="btn btn-outline-primary col-12 col-md-2" data-bs-toggle="modal"
-                    data-bs-target="#showMessage">
-                    Show message modal
-                </button>
             </div>
 
-            <table class="admin-list-table table">
+            <table class="message-list-table table">
                 <thead class="table-light">
                     <tr>
                         <th>
                             <input type="checkbox" id="select-all-checkbox">
                         </th>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        {{-- <th>Role</th>--}}
-                        <th>Status</th>
-                        <th>Join Date</th>
+
+                        <th>Email Address</th>
+                         <th>Phone Number</th>
+                        <th>Content</th>
+                        <th>Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
             </table>
             <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                 <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                    style="z-index: 10;">
-                    <p id="selected-count-text">0 admins are selected</p>
-                    <form id="bulk-delete-form" method="POST" action="{{ route('admins.bulk-delete') }}">
+                     style="z-index: 10;">
+                    <p id="selected-count-text">0 Messages are selected</p>
+                    <!-- Trigger button -->
+                    <button type="button"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteMessagesModal">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
+
+                    <!-- Hidden bulk delete form -->
+                    <form style="display:none;" id="bulk-delete-form" method="POST"
+                          action="{{ route('messages.bulk-delete') }}">
                         @csrf
-                        <button type="submit" id="delete-selected-btn"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                            <i data-feather="trash-2"></i> Delete Selected
-                        </button>
                     </form>
+
+                    <!-- Bulk delete modal -->
+
 
 
                 </div>
@@ -211,14 +206,14 @@
         @include('modals/messages/show-message')
 
         @include('modals.delete',[
-        'id' => 'deleteAdminModal',
-        'formId' => 'deleteAdminForm',
-        'title' => 'Delete Admin',
+        'id' => 'deleteMessageModal',
+        'formId' => 'deleteMessageForm',
+        'title' => 'Delete Message',
         ])
         @include('modals.delete',[
-        'id' => 'deleteAdminsModal',
+        'id' => 'deleteMessagesModal',
         'formId' => 'bulk-delete-form',
-        'title' => 'Delete Admins',
+        'title' => 'Delete Messages',
         'confirmText' => 'Are you sure you want to delete this items?',
         ])
 
@@ -253,9 +248,7 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
-    const adminsDataUrl = "{{ route('admins.data') }}";
-        const adminsCreateUrl = "{{ route('admins.create') }}";
-        const locale = "{{ app()->getLocale() }}";
+    const messagesDataUrl = "{{ route('messages.data') }}";
 </script>
 
 <script>
@@ -384,7 +377,7 @@
         const count = selectedCheckboxes.length;
 
         if (count > 0) {
-            $('#selected-count-text').text(`${count} User${count > 1 ? 's are' : ' is'} selected`);
+            $('#selected-count-text').text(`${count} Message${count > 1 ? 's are' : ' is'} selected`);
             $('#bulk-delete-container').show();
         } else {
             $('#bulk-delete-container').hide();
@@ -399,7 +392,7 @@
 </script>
 
 {{-- Page js files --}}
-<script src="{{ asset('js/scripts/pages/app-admin-list.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/scripts/pages/app-message-list.js') }}?v={{ time() }}"></script>
 
 <script>
     // Backup accordion handler in case the main one doesn't work
