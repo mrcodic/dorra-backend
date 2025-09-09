@@ -313,7 +313,7 @@
 <script>
     $(document).ready(function () {
             $('#productsSelect').select2({
-                placeholder: "Choose Products",
+                placeholder: "Choose Categories",
                 allowClear: true
             });
             $('#tagsSelect').select2({
