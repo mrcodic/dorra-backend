@@ -40,7 +40,7 @@
 
                 <!-- ✅ Footer must be inside modal-content -->
                 <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-outline fs-5" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary fs-5" id="saveChangesButton">Send Reply</button>
                 </div>
             </form>
