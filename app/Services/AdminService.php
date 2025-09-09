@@ -50,7 +50,7 @@ class AdminService extends BaseService
         if (!empty($validatedData['role_id'])) {
             $role = Role::find($validatedData['role_id']);
             if ($role) {
-                $model->syncRoles([$role->name]);
+                $model->syncRoles([$role]);
             }
         }
 
