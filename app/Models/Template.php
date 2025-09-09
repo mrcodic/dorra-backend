@@ -61,8 +61,9 @@ class Template extends Model implements HasMedia
 
     public function products()
     {
-        return $this->morphToMany(Product::class,'referenceable','product_template')->withTimestamps();
+        return $this->morphToMany(Product::class, 'referenceable', 'product_template')->withTimestamps();
     }
+
     public function categories()
     {
         return $this->morphToMany(Category::class,'referenceable','product_template')->withTimestamps();
