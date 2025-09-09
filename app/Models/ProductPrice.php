@@ -15,7 +15,7 @@ class ProductPrice extends Model
     {
         $callback = function (ProductPrice $productPrice) {
             if ($productPrice->priceable?->carts->isNotEmpty()) {
-                $product = $productPrice->product;
+                $product = $productPrice->priceable;
                 CartItem::where('product_id', $product->id)
                     ->with('cart')
                     ->get()
