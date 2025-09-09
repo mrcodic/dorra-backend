@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Carousel;
+
 use App\Models\Role;
 use App\Repositories\Interfaces\AdminRepositoryInterface;
 use Illuminate\Support\Arr;
@@ -45,9 +45,16 @@ class AdminService extends BaseService
             unset($validatedData['password'], $validatedData['password_confirmation']);
         }
         $model = $this->repository->update($validatedData, $id);
-        if (Arr::get($validatedData, 'role_id')) {
-            $model->roles()->sync([$validatedData['role_id']]);
+
+
+        if (!empty($validatedData['role_id'])) {
+            $role = Role::find($validatedData['role_id']);
+            if ($role) {
+                $model->syncRoles([$role]);
+            }
         }
+
+
 
         if (empty($validatedData['image_id'])) {
             $model->clearMediaCollection('admins');

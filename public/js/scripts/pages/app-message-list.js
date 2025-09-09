@@ -3,16 +3,18 @@ $.ajaxSetup({
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
 });
-const dt_user_table = $(".faq-list-table").DataTable({
+const dt_user_table = $(".message-list-table").DataTable({
     processing: true,
     serverSide: true,
     searching: false, // using custom search
     ajax: {
-        url: faqsDataUrl,
+        url: messagesDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $('#search-faq-form').val(); // get from input
-            d.created_at = $('.filter-date').val();
+            d.search_value = $('#search-message-form').val();
+            d.created_at = $(".filter-date").val();
+
+            console.log(d.status)
             return d;
         }
     },
@@ -25,38 +27,37 @@ const dt_user_table = $(".faq-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
-
-        {data: "question"},
+        {data: "email"},
+        {data: "phone"},
+        {data: "message"},
         {data: "created_at"},
         {
             data: "id",
             orderable: false,
             searchable: false,
             render: function (data, type, row) {
-
                 return `
-
-         <a href="#" class="edit-details"
+        <a href="#" class="show-details"
            data-bs-toggle="modal"
-           data-bs-target="#editQuestionModal"
-              data-question_ar="${row.question_ar}"
-               data-question_en="${row.question_en}"
-               data-answer_ar="${row.answer_ar}"
-               data-answer_en="${row.answer_en}"
-           data-id="${data}">
+           data-bs-target="#showMessageModal"
+           data-id="${data}"
+           data-name="${row.name}"
+           data-phone="${row.phone}"
+           data-email="${row.email}"
+           data-message="${row.message}"
+           data-created_at="${row.created_at}">
+            <i data-feather="eye"></i>
+        </a>
 
-                <i data-feather="edit-3"></i>
-              </a>
-
-        <a href="#" class=" text-danger open-delete-faq-modal" data-id="${data}"
-                data-bs-toggle="modal"
-                data-bs-target="#deleteFaqModal" >
-                <i data-feather="trash-2"></i>
-              </a>
-
-          </div>
-        `;
+        <a href="#" class="text-danger open-delete-admin-modal"
+           data-id="${data}"
+           data-bs-toggle="modal"
+           data-bs-target="#deleteMessageModal">
+            <i data-feather="trash-2"></i>
+        </a>
+    `;
             }
+
         }
     ],
     order: [[1, "asc"]],
@@ -83,14 +84,13 @@ const dt_user_table = $(".faq-list-table").DataTable({
         }
     }
 });
-
 $('#clear-search').on('click', function () {
-    $('#search-faq-form').val('');  // clear input
+    $('#search-message-form').val('');  // clear input
     dt_user_table.search('').draw();  // reset DataTable search
 });
 // Custom search with debounce
 let searchTimeout;
-$('#search-faq-form').on('keyup', function () {
+$('#search-message-form').on('keyup', function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
@@ -130,7 +130,7 @@ dt_user_table.on('draw', function () {
 function updateBulkDeleteVisibility() {
     const selected = $('.category-checkbox:checked').length;
     if (selected > 0) {
-        $('#selected-count-text').text(`${selected} Faq${selected > 1 ? 's' : ''} are selected`);
+        $('#selected-count-text').text(`${selected} Category${selected > 1 ? 'ies' : 'y'} are selected`);
         $('#bulk-delete-container').show();
     } else {
         $('#bulk-delete-container').hide();
@@ -164,33 +164,39 @@ dt_user_table.on("draw", function () {
 });
 
 $(document).ready(function () {
-    $(document).on("click", ".edit-details", function (e) {
-        console.log("Dsfs")
-        const $button = $(this);
+    $(document).on("click", ".show-details", function () {
+        const id = $(this).data("id");
+        const name = $(this).data("name");
+        const email = $(this).data("email");
+        const phone = $(this).data("phone");
+        const message = $(this).data("message");
+        const createdAt = $(this).data("created_at");
 
-        const faqId = $button.data('id') || '';
-        const questionAr = $button.data('question_ar') || '';
-        const questionEn = $button.data('question_en') || '';
-
-        const answerAr = $button.data('answer_ar') || '';
-        const answerEn = $button.data('answer_en') || '';
-        // Populate modal
-        $("#editQuestionModal #question-en").val(questionEn);
-        $("#editQuestionModal #question-ar").val(questionAr);
-        $("#editQuestionModal #answer-ar").val(answerAr);
-        $("#editQuestionModal #answer-en").val(answerEn);
-
-        $('#editFaqForm').attr('action', `faqs/${faqId}`);
+        // Fill modal fields
+        $("#modalName").val(name);
+        $("#modalEmail").val(email);
+        $("#modalPhone").val(phone);
+        $("#modalMessage").val(message);
+        $("#modalCreatedAt").val(createdAt);
+        let actionUrl = `/messages/${id}/reply`;
+        $("#editMessageForm").attr("action", actionUrl);
     });
 
 
+    $(document).on("click", ".open-delete-admin-modal", function () {
+        const messageId = $(this).data("id");
 
-    $(document).on("click", ".open-delete-faq-modal", function () {
-        const adminId = $(this).data("id");
-
-        $("#deleteFaqForm").attr('action',`faqs/${adminId}`);
+        $("#deleteMessageForm").attr('action',`messages/${messageId}`);
     });
 
+
+    handleAjaxFormSubmit('#deleteMessageForm', {
+        successMessage: "✅ Message deleted successfully!",
+        closeModal: '#deleteMessageModal',
+        onSuccess: function (response, $form) {
+            $(".message-list-table").DataTable().ajax.reload(null, false); // false = stay on current page
+        }
+    });
 
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();
@@ -201,16 +207,16 @@ $(document).ready(function () {
         if (selectedIds.length === 0) return;
 
         $.ajax({
-            url:"/faqs/bulk-delete",
+            url: "messages/bulk-delete",
             method: "POST",
             data: {
                 ids: selectedIds,
                 _token: $('meta[name="csrf-token"]').attr("content"),
             },
-            success: function () {
-                $("#deleteFaqsModal").modal("hide");
+            success: function (response) {
+                $("#deleteMessagesModal").modal("hide");
                 Toastify({
-                    text: "Selected FAQs deleted successfully!",
+                    text: "Selected messages deleted successfully!",
                     duration: 1500,
                     gravity: "top",
                     position: "right",
@@ -218,12 +224,37 @@ $(document).ready(function () {
                     close: true,
                 }).showToast();
 
+                // Reload DataTable
+
                 $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
                 $('#select-all-checkbox').prop('checked', false);
-                $(".faq-list-table").DataTable().ajax.reload(null, false);
-            }
+                $(".message-list-table").DataTable().ajax.reload(null, false);
+
+            },
+            error: function () {
+                $("#deleteCategoriesModal").modal("hide");
+                Toastify({
+                    text: "Something Went Wrong!",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
+
+                // Reload DataTable
+
+                $('#bulk-delete-container').hide();
+                $('.product-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+                $(".message-list-table").DataTable().ajax.reload(null, false);
+
+            },
         });
+
     });
+
 
 
 

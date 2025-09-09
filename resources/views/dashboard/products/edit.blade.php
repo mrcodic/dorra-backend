@@ -498,30 +498,10 @@
                                                                                 <div class="row d-flex align-items-end mt-2">
                                                                                     <div class="col-md-12">
                                                                                         <label class="form-label label-text">Option Image</label>
-                                                                                        <input type="file" name="image" class="form-control d-none option-image-input" accept="image/*">
-                                                                                        <div class="upload-card option-upload-area">
-                                                                                            <div class="d-flex justify-content-center align-items-center gap-1">
-                                                                                                <i data-feather="upload" class="mb-2"></i>
-                                                                                                <p>Drag image here to upload</p>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="progress mt-2 d-none w-50 option-upload-progress">
-                                                                                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                                                                                        </div>
-                                                                                        <div class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2 option-uploaded-image">
-                                                                                            <img src="" alt="Uploaded" class="img-fluid rounded option-image-preview" style="width: 50px; height: 50px; object-fit: cover;">
-                                                                                            <div class="file-details">
-                                                                                                <div class="file-name fw-bold option-file-name"></div>
-                                                                                                <div class="file-size text-muted small option-file-size">0 KB</div>
-                                                                                            </div>
+                                                                                        <div class="dropzone option-dropzone">
                                                                                         </div>
 
-                                                                                        <div class="col-12 text-end mt-1 mb-2">
-                                                                                            <button type="button" class="btn btn-outline-danger" data-repeater-delete>
-                                                                                                <i data-feather="x" class="me-25"></i>
-                                                                                                Delete Value
-                                                                                            </button>
-                                                                                        </div>
+                                                                                        <input type="hidden" name="option_image" class="uploadedImage">
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -591,6 +571,99 @@
 @endsection
 
 @section('page-script')
+    <script>
+        $(document).ready(function () {
+            // Initialize the outer repeater for specifications
+            var $outerRepeater = $('.outer-repeater');
+
+            // First, check if we have any existing specifications
+            var hasExistingSpecs = $outerRepeater.find('[data-repeater-item]').length > 0;
+
+            if (!hasExistingSpecs) {
+                // If no existing specs, hide the container initially
+                $outerRepeater.find('[data-repeater-list="specifications"]').addClass('d-none');
+            }
+
+            // Initialize the outer repeater
+            $outerRepeater.repeater({
+                repeaters: [{
+                    selector: '.inner-repeater',
+                    show: function () {
+                        $(this).slideDown();
+                        feather.replace();
+
+                        // Initialize dropzone for new option
+                        let dzElement = $(this).find(".option-dropzone")[0];
+                        if (dzElement && typeof initOptionDropzone === 'function') {
+                            initOptionDropzone(dzElement);
+                        }
+                    },
+                    hide: function (deleteElement) {
+                        $(this).slideUp(deleteElement);
+                    }
+                }],
+                show: function () {
+                    // Make sure the container is visible when adding new items
+                    var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                    $specList.removeClass('d-none');
+
+                    $(this).slideDown();
+                    feather.replace();
+
+                    // Initialize dropzone for new specification
+                    let dzElement = $(this).find(".option-dropzone")[0];
+                    if (dzElement && typeof initOptionDropzone === 'function') {
+                        initOptionDropzone(dzElement);
+                    }
+
+                    $(this).find('.uploadedImage').val('');
+                },
+                hide: function (deleteElement) {
+                    var $item = $(this);
+                    $item.slideUp(deleteElement, function() {
+                        // After hiding, check if we need to hide the container
+                        var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                        var $items = $specList.find('[data-repeater-item]').not(':hidden');
+
+                        if ($items.length === 0) {
+                            $specList.addClass('d-none');
+                        }
+                    });
+                },
+                isFirstItemUndeletable: true
+            });
+
+            // Initialize inner repeaters for existing items
+            $('.inner-repeater').repeater({
+                show: function () {
+                    $(this).slideDown();
+                    feather.replace();
+
+                    // Initialize dropzone for new option
+                    let dzElement = $(this).find(".option-dropzone")[0];
+                    if (dzElement && typeof initOptionDropzone === 'function') {
+                        initOptionDropzone(dzElement);
+                    }
+                },
+                hide: function (deleteElement) {
+                    $(this).slideUp(deleteElement);
+                }
+            });
+
+
+
+            // Initialize dropzones for existing option images
+            if (typeof initOptionDropzone === 'function') {
+                document.querySelectorAll(".option-dropzone").forEach(el => {
+                    let media = el.dataset.existingMedia ? JSON.parse(el.dataset.existingMedia) : null;
+                    initOptionDropzone(el, media);
+                });
+            }
+
+            // Initialize feather icons
+            feather.replace();
+        });
+    </script>
     <script !src="">
         Dropzone.autoDiscover = false;
 
@@ -1198,74 +1271,7 @@
                 });
             }
 
-            $(document).ready(function () {
-                initializeImageUploaders($('.outer-repeater')); // This ensures the first one is bound properly
-            });
-            const $specList = $('.outer-repeater').find('[data-repeater-list="specifications"]');
 
-            $('.outer-repeater').repeater({
-                initEmpty: true,
-                repeaters: [{
-                    selector: '.inner-repeater',
-                    initEmpty: true,
-                    show: function () {
-                        $(this).slideDown();
-                        updateDeleteButtons($(this).closest('.outer-repeater'));
-
-                        // initialize Dropzone for new option
-                        let dzElement = this.querySelector(".option-dropzone");
-                        if (dzElement) {
-                            initOptionDropzone(dzElement);
-                        }
-
-                        feather.replace();
-                    },
-                    hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
-                        updateDeleteButtons($(this).closest('.outer-repeater'));
-                    },
-                    nestedInputName: 'specification_options'
-                }],
-                show: function () {
-                    if ($specList.hasClass('d-none')) {
-                        $specList.removeClass('d-none');
-                    }
-                    $(this).slideDown();
-                    updateDeleteButtons($('.outer-repeater'));
-                    feather.replace();
-
-                    // ✅ Initialize Dropzone for new outer repeater item
-                    let dzElement = this.querySelector(".option-dropzone");
-                    if (dzElement) {
-                        initOptionDropzone(dzElement);
-                    }
-
-                    // reset hidden input for new ones
-                    $(this).find('.uploadedImage').val('');
-                },
-                afterAdd: function () {
-                    updateDeleteButtons($('.outer-repeater'));
-                    feather.replace();
-
-                    // ✅ Also re-init image uploaders inside newly added block
-                    $(this).find('.option-dropzone').each(function () {
-                        initOptionDropzone(this);
-                    });
-                },
-                hide: function (deleteElement) {
-                    $(this).slideUp(deleteElement);
-                    updateDeleteButtons($('.outer-repeater'));
-                },
-                afterDelete: function () {
-                    updateDeleteButtons($('.outer-repeater'));
-                }
-            });
-
-
-            document.querySelectorAll(".option-dropzone").forEach(el => {
-                let media = el.dataset.existingMedia ? JSON.parse(el.dataset.existingMedia) : null;
-                initOptionDropzone(el, media);
-            });
             $('.select2').select2();
 
             // Category -> Subcategory

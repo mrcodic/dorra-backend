@@ -237,7 +237,7 @@
                             <!-- Single Review -->
                             <div class="review-wrapper">
                                 <div class="d-flex align-items-center gap-1 mb-2">
-                                    <img src="{{ $review->user->image ?? asset('images/default-user.png') }}"
+                                    <img src="{{ $review->user->image->getUrl() ?? asset('images/default-user.png') }}"
                                         alt="Avatar" class="rounded-circle" width="50" height="50">
                                     <div>
                                         <div class="fw-bold text-dark fs-4">{{ $review->user->name}}</div>

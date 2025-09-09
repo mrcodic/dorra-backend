@@ -259,8 +259,7 @@ class ProductService extends BaseService
               $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                   $productSpecification = $product->specifications()->updateOrCreate(
                       [
-                          'name->en' => $specification['name_en'],
-                          'name->ar' => $specification['name_ar'],
+                          'id' => $specification['id'] ?? null,
                       ],
                       [
                           'name' => [
@@ -273,10 +272,7 @@ class ProductService extends BaseService
 
                   $submittedOptionIds = collect($specification['specification_options'] ?? [])->map(function ($option) use ($productSpecification) {
                       $productOption = $productSpecification->options()->updateOrCreate(
-                          [
-                              'value->en' => $option['value_en'],
-                              'value->ar' => $option['value_ar'],
-                          ],
+                          ['id' => $option['id'] ?? null],
                           [
                               'value' => [
                                   'en' => $option['value_en'],
@@ -336,7 +332,6 @@ class ProductService extends BaseService
 
         }
         if (isset($validatedData['images_ids'])) {
-            Media::whereCollectionName('product_extra_images')->delete();
             collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
                 Media::where('id', $imageId)
                     ->update([

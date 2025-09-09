@@ -73,8 +73,7 @@
             </ul>
         </div>
         <div style="background-color: #F4F6F6;height:200px;border-radius:12px">
-            <!-- Top Image --> <img src="{{  $template->getFirstMediaUrl('templates') ?: asset("
-                images/default-photo.png") }}" class="mx-auto d-block "
+            <!-- Top Image --> <img src="{{  $template->getFirstMediaUrl('templates') ?: asset("images/default-photo.png") }}" class="mx-auto d-block"
                 style="height:100%; width:auto;max-width: 100%;border-top-left-radius:12px ;border-top-right-radius:12px"
                 alt="Template Image">
         </div> <!-- Template Info -->

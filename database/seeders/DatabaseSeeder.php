@@ -23,7 +23,6 @@ class DatabaseSeeder extends Seeder
            DimensionSeeder::class,
            TemplateTypeSeeder::class,
            SettingSeeder::class,
-           FaqSeeder::class,
        ]);
     }
 }
