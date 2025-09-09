@@ -51,7 +51,7 @@ class ProductPrice extends Model
         static::saved($callback);
     }
 
-    public function priceable()
+    public function pricable()
     {
         return $this->morphTo();
     }
