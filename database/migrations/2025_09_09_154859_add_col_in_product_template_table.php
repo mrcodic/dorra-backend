@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('template_product', function (Blueprint $table) {
-            if (Schema::hasColumn('product_prices', 'product_id')) {
+        Schema::table('product_template', function (Blueprint $table) {
+            if (Schema::hasColumn('product_template', 'product_id')) {
                 $table->dropForeign(['product_id']);
                 $table->dropColumn('product_id');
             }
@@ -27,7 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('template_product', function (Blueprint $table) {
+        Schema::table('product_template', function (Blueprint $table) {
             $table->dropIndex('referenceable_index');
             $table->dropColumn(['referenceable_id', 'referenceable_type']);
             $table->unsignedBigInteger('product_id')->nullable();
