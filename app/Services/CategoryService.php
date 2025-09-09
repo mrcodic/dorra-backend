@@ -73,27 +73,27 @@ class CategoryService extends BaseService
                         ],
                     ]);
 
+                    if (isset($specification['specification_options'])) {
+                        collect($specification['specification_options'])->each(function ($option, $index) use ($productSpecification, $product) {
 
-                    collect($specification['specification_options'])->each(function ($option, $index) use ($productSpecification, $product) {
+                            $productOption = $productSpecification->options()->create([
+                                'value' => [
+                                    'en' => $option['value_en'],
+                                    'ar' => $option['value_ar'],
+                                ],
+                                'price' => $option['price'],
+                            ]);
 
-                        $productOption = $productSpecification->options()->create([
-                            'value' => [
-                                'en' => $option['value_en'],
-                                'ar' => $option['value_ar'],
-                            ],
-                            'price' => $option['price'],
-                        ]);
-
-                        if (isset($option['option_image'])) {
-                            Media::where('id', $option['option_image'])
-                                ->update([
-                                    'model_type' => get_class($productOption),
-                                    'model_id' => $productOption->id,
-                                    'collection_name' => 'categorySpecificationOptions',
-                                ]);
-                        }
-                    });
-
+                            if (isset($option['option_image'])) {
+                                Media::where('id', $option['option_image'])
+                                    ->update([
+                                        'model_type' => get_class($productOption),
+                                        'model_id' => $productOption->id,
+                                        'collection_name' => 'categorySpecificationOptions',
+                                    ]);
+                            }
+                        });
+                    }
 
                 });
             }
