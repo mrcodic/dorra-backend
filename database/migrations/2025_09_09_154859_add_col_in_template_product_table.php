@@ -17,7 +17,7 @@ return new class extends Migration
                 $table->dropColumn('product_id');
             }
             $table->after('template_id', function ($table) {
-                $table->mophs('referenceable');
+                $table->morphs('referenceable');
             });
         });
     }
