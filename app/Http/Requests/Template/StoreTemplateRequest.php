@@ -25,6 +25,8 @@ class StoreTemplateRequest extends BaseRequest
             'type' => ['sometimes', 'in:' . TypeEnum::getValuesAsString()],
             'product_ids' => ['required', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
+            'category_ids' => ['required', 'array'],
+            'category_ids.*' => ['integer', 'exists:categories,id'],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['integer', 'exists:tags,id'],
             'types' => ['required', 'array'],

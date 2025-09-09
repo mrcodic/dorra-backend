@@ -41,7 +41,10 @@ class Category extends Model implements HasMedia
         return $this->hasMany(Product::class);
     }
 
-
+    public function templates()
+    {
+        return $this->morphedByMany(Template::class,'referenceable')->withTimestamps();
+    }
     public function subCategoryProducts(): HasMany
     {
         return $this->hasMany(Product::class, 'sub_category_id');

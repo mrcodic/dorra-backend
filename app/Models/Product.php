@@ -126,9 +126,9 @@ class Product extends Model implements HasMedia
         return $this->morphMany(ProductSpecification::class,'specifiable');
     }
 
-    public function templates(): BelongsToMany
+    public function templates()
     {
-        return $this->belongsToMany(Template::class)->withTimestamps();
+        return $this->morphedByMany(Template::class,'referenceable')->withTimestamps();
     }
 
     public function specificationOptions(): HasManyThrough
