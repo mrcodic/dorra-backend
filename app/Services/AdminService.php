@@ -45,9 +45,15 @@ class AdminService extends BaseService
             unset($validatedData['password'], $validatedData['password_confirmation']);
         }
         $model = $this->repository->update($validatedData, $id);
+
+
         if (!empty($validatedData['role_id'])) {
-            $model->syncRoles([$validatedData['role_id']]);
+            $role = Role::find($validatedData['role_id']);
+            if ($role) {
+                $model->syncRoles([$role->name]);
+            }
         }
+
 
 
         if (empty($validatedData['image_id'])) {
