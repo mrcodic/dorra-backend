@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProductPrice extends Model
 {
     protected $fillable = [
-        'product_id',
         'quantity',
         'price',
     ];
