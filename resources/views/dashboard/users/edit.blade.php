@@ -305,51 +305,40 @@
 
                         </div>
                         <!-- tab 4 content -->
-                        <div class="tab-pane fade" id="tab4">
+                        <div class="tab-pane fade d-flex flex-column align-items-center gap-1" id="tab4">
                             <!-- Total Reviews Section -->
                             @forelse($model->ownerTeams as $team)
-                            <div class="d-flex justify-content-between align-items-end mb-2">
-                                <!-- left: Icon and Info -->
-                                <div
-                                    class=" border rounded-3 p-1  d-flex gap-2 align-items-center justify-content-start w-50">
-                                    <div class="">
-                                        <i data-feather="users" class="text-primary"></i> <!-- User icon -->
-                                    </div>
-                                    <div class=" flex-grow-1">
-
-                                        <h5>{{ $team->owner->name }}’s Team</h5>
-                                        <div class="d-flex align-items-center ">
-                                            <i data-feather="calendar"> </i> Joined {{ $team->created_at->format("j M
-                                            Y") }}
-                                        </div>
+                            <!-- left: Icon and Info -->
+                            <div class="border rounded-3 p-1 d-flex flex-wrap gap-1 align-items-center col-12">
+                                <i data-feather="users" class="text-primary"></i> <!-- User icon -->
+                                <div class="flex-grow-1">
+                                    <h5>{{ $team->owner->name }}’s Team</h5>
+                                    <div class="d-flex gap-1 align-items-center ">
+                                        <i data-feather="calendar"> </i> Joined {{ $team->created_at->format("j M
+                                        Y") }}
                                     </div>
                                 </div>
-
                                 <!-- Buttons -->
-                                <div class="d-flex gap-1 justify-content-end mt-2">
-                                    <button type="button" class="btn bg-white text-danger  place-order fs-16">
+                                <div>
+                                    <button type="button" class="btn bg-white text-danger place-order">
                                         Remove
                                     </button>
-                                    <button type="button" class="btn btn-outline-secondary place-order fs-16"
+                                    <button type="button" class="btn btn-outline-secondary place-order"
                                         data-bs-toggle="modal" data-bs-target="#teamAccessModal"
                                         data-team-id="{{ $team->id }}">
                                         Show
                                     </button>
-
                                 </div>
                             </div>
+
                             @empty
                             <div
                                 style="padding: 50px; background-color: #f9f9f9; border-radius: 8px; border: 1px dashed #ccc; font-size: 1.2rem; color: #6c757d; margin-top: 20px; text-align: center;">
                                 <p style="margin: 0; font-weight: 500; font-size: 1.1rem;">No teams
                                     yet.</p>
                             </div>
-
                             @endforelse
                         </div>
-
-
-
 
                     </div>
                 </div>
@@ -371,8 +360,8 @@
 
 
                 <!-- Invite input -->
-                <div class=" mb-2 d-flex justify-content-between">
-                    <input type="email" class="form-control w-75" placeholder="Add people by their email address">
+                <div class="mb-2 d-flex gap-1 justify-content-center justify-content-md-between">
+                    <input type="email" class="form-control" placeholder="Add people by their email address">
                     <button class="btn btn-primary" type="button">Invite</button>
                 </div>
 
@@ -382,7 +371,7 @@
                 <!-- Members list -->
                 <div>
                     <!-- Owner -->
-                    <div class="d-flex justify-content-between align-items-center  py-2">
+                    <div class="d-flex justify-content-between align-items-center py-2">
                         <div class="d-flex align-items-start gap-2">
                             <img src="{{asset('images/avatar.png')}}" class="rounded-circle" alt="Avatar"
                                 style="width: 40px; height: 40px; object-fit: cover;">
@@ -391,11 +380,11 @@
                                 <small class="">john@example.com</small>
                             </div>
                         </div>
-                        <span class="border rounded-3 px-3 py-1">Creator</span>
+                        <span class="border rounded-3 px-2 py-1">Creator</span>
                     </div>
 
                     <!-- Other Members -->
-                    <div class="d-flex justify-content-between align-items-center  py-2">
+                    <div class="d-flex justify-content-between align-items-center py-2">
                         <div class="d-flex align-items-start gap-2 w-75">
                             <img src="{{asset('images/avatar.png')}}" class="rounded-circle" alt="Avatar"
                                 style="width: 40px; height: 40px; object-fit: cover;">
@@ -404,7 +393,7 @@
                                 <small class="">jane@example.com</small>
                             </div>
                         </div>
-                        <select class="form-select" style="width: 17%">
+                        <select class="form-select w-25">
                             <option value="view">View</option>
                             <option value="edit">Edit</option>
                         </select>

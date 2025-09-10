@@ -18,7 +18,7 @@
                         <img alt="Avatar" src="{{ asset('images/default-user.png') }}"
                             class="rounded-circle border avatarPreview" style="width: 48px; height: 48px;">
 
-                        <div class="ms-2">
+                        <div class="col-12 col-md-8">
                             <div id="editAvatarDropzone"
                                 class="d-flex align-items-center justify-content-center dropzone rounded p-2"
                                 style="border: 2px dashed rgba(0, 0, 0, 0.3);">

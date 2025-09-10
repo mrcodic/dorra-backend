@@ -127,123 +127,117 @@
 @endsection
 
 @section('content')
-<div class="card p-1">
-    {{-- <div class="row mb-1 gap-1">--}}
-        {{-- @php--}}
-        {{-- $stats = [--}}
-        {{-- ['icon' => 'images/users.svg', 'title' => 'Clients', 'count' => 1280, 'label' => 'Clients'],--}}
-        {{-- ['icon' => 'images/file.svg', 'title' => 'Invoices', 'count' => 342, 'label' => 'Invoices'],--}}
-        {{-- ['icon' => 'images/success.svg', 'title' => 'Paid', 'count' => '12,500', 'label' => 'EGP'],--}}
-        {{-- ['icon' => 'images/warning-duo-orange.svg', 'title' => 'Pending', 'count' => 218, 'label' => 'EGP'],--}}
-        {{-- ['icon' => 'images/warning-duo-red.svg', 'title' => 'Unpaid', 'count' => 218, 'label' => 'EGP'],--}}
-        {{-- ];--}}
-        {{-- @endphp--}}
+{{-- <div class="row mb-1 gap-1">--}}
+    {{-- @php--}}
+    {{-- $stats = [--}}
+    {{-- ['icon' => 'images/users.svg', 'title' => 'Clients', 'count' => 1280, 'label' => 'Clients'],--}}
+    {{-- ['icon' => 'images/file.svg', 'title' => 'Invoices', 'count' => 342, 'label' => 'Invoices'],--}}
+    {{-- ['icon' => 'images/success.svg', 'title' => 'Paid', 'count' => '12,500', 'label' => 'EGP'],--}}
+    {{-- ['icon' => 'images/warning-duo-orange.svg', 'title' => 'Pending', 'count' => 218, 'label' => 'EGP'],--}}
+    {{-- ['icon' => 'images/warning-duo-red.svg', 'title' => 'Unpaid', 'count' => 218, 'label' => 'EGP'],--}}
+    {{-- ];--}}
+    {{-- @endphp--}}
 
-        {{-- @foreach ($stats as $stat)--}}
-        {{-- <div class="col border rounded-3 mx-1 ">--}}
-            {{-- <div class="card p-1 shadow-sm text-center h-100 d-flex flex-coloumn justify-content-between ">--}}
-                {{-- <div class="d-flex align-items-center justify-content-start gap-1 mb-1">--}}
-                    {{-- <img src="{{ asset($stat['icon']) }}" alt="{{ $stat['title'] }}" width="28" height="28">--}}
-                    {{-- <h6 class="mb-0">{{ $stat['title'] }}</h6>--}}
-                    {{-- </div>--}}
-                {{-- <div class="d-flex justify-content-start align-items-baseline">--}}
-                    {{-- <p class=" me-1  fs-2 text-black fw-bolder">{{ $stat['count'] }}</p>--}}
-                    {{-- <p class="fs-16 text-black">{{ $stat['label'] }}</p>--}}
-                    {{-- </div>--}}
+    {{-- @foreach ($stats as $stat)--}}
+    {{-- <div class="col border rounded-3 mx-1 ">--}}
+        {{-- <div class="card p-1 shadow-sm text-center h-100 d-flex flex-coloumn justify-content-between ">--}}
+            {{-- <div class="d-flex align-items-center justify-content-start gap-1 mb-1">--}}
+                {{-- <img src="{{ asset($stat['icon']) }}" alt="{{ $stat['title'] }}" width="28" height="28">--}}
+                {{-- <h6 class="mb-0">{{ $stat['title'] }}</h6>--}}
+                {{-- </div>--}}
+            {{-- <div class="d-flex justify-content-start align-items-baseline">--}}
+                {{-- <p class=" me-1  fs-2 text-black fw-bolder">{{ $stat['count'] }}</p>--}}
+                {{-- <p class="fs-16 text-black">{{ $stat['label'] }}</p>--}}
                 {{-- </div>--}}
             {{-- </div>--}}
-        {{-- @endforeach--}}
         {{-- </div>--}}
+    {{-- @endforeach--}}
+    {{-- </div>--}}
 
 
-    <!-- users list start -->
-    <section class="app-user-list">
+<!-- users list start -->
+<section class="app-user-list">
 
-        <!-- list and filter start -->
-        <div class="card">
-            <div class="card-body ">
-                <div class="row">
-                    <div class="col-md-4 user_role"></div>
-                    <div class="col-md-4 user_plan"></div>
-                    <div class="col-md-4 user_status"></div>
-                </div>
-                <div class="card-datatable table-responsive pt-0">
-                    <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                        <form action="" method="get" class="d-flex position-relative col-12 col-md-7 search-form">
-                            <i data-feather="search"
-                                class="position-absolute top-50 translate-middle-y mx-1 text-muted "></i>
-                            <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                                id="search-invoice-form" placeholder="Search here" style="height: 38px;">
-                            <!-- Clear button -->
-                            <button type="button" id="clear-search"
-                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    <!-- list and filter start -->
+    <div class="card">
+        <div class="card-body ">
+            <div class="row">
+                <div class="col-md-4 user_role"></div>
+                <div class="col-md-4 user_plan"></div>
+                <div class="col-md-4 user_status"></div>
+            </div>
+            <div class="card-datatable table-responsive pt-0">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-1">
+                    <form action="" method="get" class="d-flex position-relative col-12 col-md-6 search-form">
+                        <i data-feather="search"
+                            class="position-absolute top-50 translate-middle-y mx-1 text-muted "></i>
+                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                            id="search-invoice-form" placeholder="Search here" style="height: 38px;">
+                        <!-- Clear button -->
+                        <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                    background: transparent; border: none; font-weight: bold;
-                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                                    title="Clear filter">
-                                &times;
-                            </button>
-                        </form>
-                        <div class="col-6 col-md-4">
-                            <select name="created_at" class="form-select filter-date">
-                                <option value="" disabled selected>Date</option>
-                                <option value="asc">Oldest</option>
-                                <option value="desc">Newest</option>
-                            </select>
-                        </div>
-
-                        <a href="{{ route('invoices.export') }}" class="btn btn-outline-primary">
-                            Export
-                        </a>
-                    </div>
-
-                </div>
-
-                <table class="order-list-table table">
-                    <thead class="table-light">
-                        <tr>
-                            <th>
-                                <input type="checkbox" id="select-all-checkbox">
-                            </th>
-                            <th>Invoice Number</th>
-                            <th>Client</th>
-                            <th>Price</th>
-                            <th> Issued
-                                <Datag></Datag>
-                                ate
-                            </th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                </table>
-                <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                    <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                        style="z-index: 10;">
-                        <p id="selected-count-text">0 Invoices are selected</p>
-                        <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteInvoicesModal"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                            <i data-feather="trash-2"></i> Delete Selected
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
+                            &times;
                         </button>
-                        </form>
+                    </form>
+                    <div class="col-6 col-md-4">
+                        <select name="created_at" class="form-select filter-date">
+                            <option value="" disabled selected>Date</option>
+                            <option value="asc">Oldest</option>
+                            <option value="desc">Newest</option>
+                        </select>
                     </div>
+
+                    <a href="{{ route('invoices.export') }}" class="btn btn-outline-primary">
+                        Export
+                    </a>
                 </div>
+
             </div>
 
-
+            <table class="order-list-table table">
+                <thead class="table-light">
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="select-all-checkbox">
+                        </th>
+                        <th>Invoice Number</th>
+                        <th>Client</th>
+                        <th>Price</th>
+                        <th> Issued
+                            <Datag></Datag>
+                            ate
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                    style="z-index: 10;">
+                    <p id="selected-count-text">0 Invoices are selected</p>
+                    <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteInvoicesModal"
+                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
+                    </form>
+                </div>
+            </div>
         </div>
-        @include('modals.delete',[
-        'id' => 'deleteInvoiceModal',
-        'formId' => 'deleteInvoiceForm',
-        'title' => 'Delete Invoice',
-        ])
-        @include('modals.delete',[
-        'id' => 'deleteInvoicesModal',
-        'formId' => 'bulk-delete-form',
-        'title' => 'Delete Invoices',
-        'confirmText' => 'Are you sure you want to delete this items?',
-        ])
+    </div>
+    @include('modals.delete',[
+    'id' => 'deleteInvoiceModal',
+    'formId' => 'deleteInvoiceForm',
+    'title' => 'Delete Invoice',
+    ])
+    @include('modals.delete',[
+    'id' => 'deleteInvoicesModal',
+    'formId' => 'bulk-delete-form',
+    'title' => 'Delete Invoices',
+    'confirmText' => 'Are you sure you want to delete this items?',
+    ])
 
-</div>
-<!-- list and filter end -->
+    <!-- list and filter end -->
 </section>
 <!-- users list ends -->
 </div>
