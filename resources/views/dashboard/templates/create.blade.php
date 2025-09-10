@@ -91,7 +91,7 @@
 
                                 <div class="col-md-6 form-group mb-2">
                                     <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
-                                    <select id="categoriesSelect" class="form-select select2"
+                                    <select id="categoriesSelect" class="form-select select2" name="product_with_category"
                                             multiple>
                                         @foreach($associatedData['product_with_categories'] as $category)
                                             <option value="{{ $category->id }}">

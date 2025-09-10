@@ -101,41 +101,63 @@
                                 </div>
 
 
+                                <div class="row mb-2">
+
+                                    <div class="col-md-6 form-group mb-2">
+                                        <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
+                                        <select id="categoriesSelect" class="form-select select2" name="product_with_category"
+                                                multiple>
+                                            @foreach($associatedData['product_with_categories'] as $category)
+                                                <option value="{{ $category->id }}"
+                                                    @selected($category->products->intersect($model->products)->isNotEmpty())>
+                                                    {{ $category->getTranslation('name', app()->getLocale()) }}
+                                                </option>
+
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 form-group mb-2">
+                                        <label for="productsSelect" class="label-text mb-1">Categories</label>
+                                        <select id="productsSelect" class="form-select select2" name="product_ids[]"
+                                                multiple>
+                                            @foreach($associatedData['products'] as $product)
+                                                <option value="{{ $product->id }}"  @selected($model->products->contains($product))>
+                                                    {{ $product->getTranslation('name', app()->getLocale()) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-2">
+                                    <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products Without Categories</label>
+                                    <select id="productsWithoutCategoriesSelect" class="form-select select2" name="category_ids[]"
+                                            multiple>
+                                        @foreach($associatedData['product_without_categories'] as $category)
+                                            <option value="{{ $category->id }}" @selected($model->categories->contains($category))>
+                                                {{ $category->getTranslation('name', app()->getLocale()) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+
                                 <div class="form-group mb-2">
                                     <label for="tagsSelect" class="label-text mb-1">Tags</label>
                                     <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
                                         @foreach($associatedData['tags'] as $tag)
-                                        <option value="{{ $tag->id }}" @selected($model->tags->contains($tag->id))>
-                                            {{ $tag->getTranslation('name', app()->getLocale()) }}
-                                        </option>
+                                            <option value="{{ $tag->id }}">
+                                                {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
-                                {{--
-                                <!-- Colors -->--}}
-                                {{-- <div class="form-group mb-2">--}}
-                                    {{-- <label for="colorsSelect" class="label-text mb-1">Colors</label>--}}
-                                    {{-- <select id="colorsSelect" name="colors[]" class="form-select select2"
-                                        multiple>--}}
-                                        {{-- <option value="">Choose colors</option>--}}
-                                        {{--
-                                        <!-- Add dynamic options here if needed -->--}}
-                                        {{--
-                                    </select>--}}
-                                    {{-- </div>--}}
-                                <div class="form-group mb-2">
-                                    <label for="productsSelect" class="label-text mb-1">Categories</label>
-                                    <select id="productsSelect" class="form-select select2" name="product_ids[]"
-                                        multiple>
-                                        @foreach($associatedData['products'] as $product)
-                                        <option value="{{ $product->id }}" @selected($product->id ==
-                                            $model->products->contains('id', $product->id))>
-                                            {{ $product->getTranslation('name', app()->getLocale()) }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+
                             </div>
                         </div>
+
+
+
 
 
                         <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
@@ -173,6 +195,45 @@
 
 
 @section('page-script')
+    <script>
+        // Listen for change on "Products With Categories"
+        $('#categoriesSelect').on('change', function () {
+            let selectedIds = $(this).val(); // get selected product IDs
+
+            if (selectedIds && selectedIds.length > 0) {
+                $.ajax({
+                    url: "{{ route('products.categories') }}", // your route
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        category_ids: selectedIds
+                    },
+                    success: function (response) {
+                        // Clear old options
+                        $('#productsSelect').empty();
+
+                        if (response.data && response.data.length > 0) {
+                            // Add new categories from response
+                            response.data.forEach(function (category) {
+                                let option = new Option(category.name, category.id, false, false);
+                                $('#productsSelect').append(option);
+                            });
+                        }
+
+                        // Refresh Select2
+                        $('#productsSelect').trigger('change');
+                    },
+                    error: function (xhr) {
+                        console.error("Error fetching categories:", xhr.responseText);
+                    }
+                });
+            } else {
+                // If nothing selected, clear categories
+                $('#productsSelect').empty().trigger('change');
+            }
+        });
+    </script>
+
 <script>
 
     const modelDropzone = new Dropzone("#template-dropzone", {
@@ -306,20 +367,29 @@
 </script>
 <script>
     $(document).ready(function () {
-            $('#productsSelect').select2({
-                placeholder: "Choose Products",
-                allowClear: true
-            });
-            $('#tagsSelect').select2({
-                placeholder: "Choose Tags",
-                allowClear: true
-            });
-            $('#colorsSelect').select2({
-                placeholder: "Choose Colors",
-                allowClear: true
-            });
-
+        $('#productsSelect').select2({
+            placeholder: "Choose Categories",
+            allowClear: true
         });
+        $('#productsWithoutCategoriesSelect').select2({
+            placeholder: "Choose Products",
+            allowClear: true
+        });
+        $('#categoriesSelect').select2({
+            placeholder: "Choose Products",
+            allowClear: true
+        });
+        $('#tagsSelect').select2({
+            placeholder: "Choose Tags",
+            allowClear: true
+        });
+        $('#colorsSelect').select2({
+            placeholder: "Choose Colors",
+            allowClear: true
+        });
+
+    });
+
 </script>
 <script !src="">
     function updateDeleteButtons(containerSelector) {

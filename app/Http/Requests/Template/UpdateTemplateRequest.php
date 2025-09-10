@@ -45,8 +45,10 @@ class UpdateTemplateRequest extends BaseRequest
             ],
             'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
             'status' => ["required","integer","in:".StatusEnum::getValuesAsString()],
-            'product_ids' => ['required', 'array'],
+            'product_ids' => ['required_without:category_ids','required_with:product_with_category', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
+            'category_ids' => ['required_without:product_ids', 'array'],
+            'category_ids.*' => ['integer', 'exists:categories,id'],
             'template_image_id' => ['required','exists:media,id'],
 
             'design_data' => ['sometimes', 'json'],
