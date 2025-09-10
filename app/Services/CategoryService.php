@@ -341,7 +341,7 @@ class CategoryService extends BaseService
                 return $category->children_count;
             })
             ->addColumn('no_of_products', function ($category) {
-                return $category->products_count;
+                return $category->is_has_category ? $category->products_count: "-";
             })
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('categories') ?: asset("images/default-user.png");
