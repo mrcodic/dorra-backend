@@ -48,7 +48,7 @@ class TemplateController extends DashboardController
         $this->assoiciatedData = [
             'create' => [
                 'products' => $this->productRepository->query()->get(['id', 'name']),
-                'product_with_categories' => $this->categoryRepository->query()->where('is_has_category',1)->get(['id', 'name']),
+                'product_with_categories' => $this->categoryRepository->query()->where('is_has_category',1)->has('products')->get(['id', 'name']),
                 'product_without_categories' => $this->categoryRepository->query()->where('is_has_category',0)->get(['id', 'name']),
                 'tags' => $this->tagRepository->query()->get(['id', 'name']),
 
