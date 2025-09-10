@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'categories', 'as' => 'categories.', 'controller' => CategoryController::class,], function () {
         Route::get('/data', 'getData')->name('data');
+        Route::get('/products', 'products')->name('products');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::get('/search', 'search')->name('search');
         Route::post('/landing', 'addToLanding')->name('landing');

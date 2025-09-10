@@ -77,7 +77,14 @@ class CategoryController extends DashboardController
 
     public  function storeProductWithoutCategories(StoreProductWithoutCategoryRequest $request)
     {
-        $this->categoryService->storeProductWithoutCategories($request->all());
+        $this->categoryService->storeProductWithoutCategories($request->validated()
+        );
+    }
+
+    public function products()
+    {
+        $this->categoryService->getProductsByCategories();
+
     }
 
 }
