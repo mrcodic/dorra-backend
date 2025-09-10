@@ -9,8 +9,12 @@ use App\Repositories\Interfaces\TagRepositoryInterface;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use App\Http\Requests\Category\{StoreCategoryRequest, StoreProductWithoutCategoryRequest, UpdateCategoryRequest};
+use App\Http\Requests\Category\{StoreCategoryRequest,
+    StoreProductWithoutCategoryRequest,
+    UpdateCategoryRequest,
+    UpdateProductWithoutCategoryRequest};
 
 
 class CategoryController extends DashboardController
@@ -26,14 +30,14 @@ class CategoryController extends DashboardController
         $this->updateRequestClass = new UpdateCategoryRequest();
         $this->indexView = 'categories.index';
         $this->createView = 'categories.create';
+        $this->editView = 'categories.edit';
         $this->usePagination = true;
         $this->resourceClass = CategoryResource::class;
         $this->resourceTable = 'categories';
         $this->assoiciatedData = [
-            'create' => [
+            'shared' => [
                 'tags' => $this->tagRepository->all(columns: ['id', 'name']),
                 'dimensions' => $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
-
             ],
 
         ];
@@ -77,8 +81,13 @@ class CategoryController extends DashboardController
 
     public  function storeProductWithoutCategories(StoreProductWithoutCategoryRequest $request)
     {
-        $this->categoryService->storeProductWithoutCategories($request->validated()
-        );
+        $this->categoryService->storeProductWithoutCategories($request->validated());
+    }
+
+    public  function updateProductWithoutCategories($id,UpdateProductWithoutCategoryRequest $request)
+    {
+        $this->categoryService->updateProductWithoutCategories($id,$request->validated());
+        return Response::api();
     }
 
 }

@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
 
     });
     Route::post('/without-categories', [CategoryController::class,'storeProductWithoutCategories'])->name('product-without-categories.store');
+    Route::put('/without-categories/{id}', [CategoryController::class,'updateProductWithoutCategories'])->name('product-without-categories.update');
 
     Route::delete('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
 

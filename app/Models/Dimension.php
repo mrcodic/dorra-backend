@@ -20,6 +20,10 @@ class Dimension extends Model
     {
         return $this->morphedByMany(Product::class,'dimensionable','dimension_product')->withTimestamps();
     }
+    public function categories()
+    {
+        return $this->morphedByMany(Product::class,'dimensionable','dimension_product')->withTimestamps();
+    }
     public function getWidthCmAttribute()
     {
         $value = $this->unit === UnitEnum::PIXEL
