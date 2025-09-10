@@ -81,6 +81,8 @@ class StoreProductRequest extends BaseRequest
             'custom_dimensions.*' =>['sometimes'],
             'is_free_shipping' => ['nullable', 'boolean'],
             'status' => ['nullable', 'in:', StatusEnum::values()],
+            'show_add_cart_btn' => ['required', 'boolean'],
+
         ];
     }
 

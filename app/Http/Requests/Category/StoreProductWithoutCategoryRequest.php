@@ -71,6 +71,7 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             'custom_dimensions'=>['required_without:dimensions', 'array'],
             'custom_dimensions.*' =>['sometimes'],
             'is_has_category' => ['required', 'boolean'],
+            'show_add_cart_btn' => ['required', 'boolean'],
 
         ];
 
