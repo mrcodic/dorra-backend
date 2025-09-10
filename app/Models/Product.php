@@ -128,8 +128,15 @@ class Product extends Model implements HasMedia
 
     public function templates()
     {
-        return $this->morphedByMany(Template::class,'referenceable','product_template')->withTimestamps();
+        return $this->morphToMany(
+            Template::class,
+            'referenceable',
+            'product_template',
+            'referenceable_id',
+            'template_id'
+        )->withTimestamps();
     }
+
 
     public function specificationOptions(): HasManyThrough
     {
