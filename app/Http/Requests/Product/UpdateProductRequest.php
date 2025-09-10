@@ -94,6 +94,8 @@ class UpdateProductRequest extends BaseRequest
             'custom_dimensions'=>['required_without:dimensions', 'array'],
             'custom_dimensions.*' =>['sometimes'],
             'status' => ['nullable', 'in:', StatusEnum::values()],
+            'show_add_cart_btn' => ['required', 'boolean'],
+            
         ];
 
 

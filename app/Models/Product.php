@@ -28,6 +28,7 @@ class Product extends Model implements HasMedia
         'base_price',
         'status',
         'has_mockup',
+        'show_add_cart_btn'
     ];
 
     protected static function booted()

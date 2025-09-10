@@ -26,6 +26,29 @@
                 <div class="card">
 
                     <div class="card-body">
+                        <form id="product-form" class="form" action="{{ route('products.update',$model->id) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method("PUT")
+                        {{-- checkbox added --}}
+                        <div class="d-flex gap-1 rounded p-1 mb-2" style="border: 1px solid #CED5D4">
+                            <div>
+                                <!-- Hidden fallback -->
+                                <input type="hidden" name="show_add_cart_btn" value="0">
+
+                                <!-- Actual checkbox -->
+                                <input class="form-check-input mt-0" type="checkbox"
+                                       name="show_add_cart_btn" value="1"
+                                    @checked(old('show_add_cart_btn', $model->show_add_cart_btn ?? false))>
+                            </div>
+                            <div class="d-flex flex-column gap-1">
+                                <h5 style="color: #121212">Show “Add to Cart” Button</h5>
+                                <p style="color: #424746">
+                                    When the checkbox is selected, the product can be added directly to the cart without customization.
+                                    If it’s not selected, the product must be customized before being added to cart.
+                                </p>
+                            </div>
+                        </div>
+
                         <ul class="nav nav-tabs mb-4 w-100 d-flex justify-content-center" id="formTabs">
                             <li class="nav-item" style="width: 30%;">
                                 <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Category
@@ -38,9 +61,7 @@
                                 <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Category Specs</a>
                             </li>
                         </ul>
-                        <form id="product-form" class="form" action="{{ route('products.update',$model->id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method("PUT")
+
 
                             <div class="tab-content">
                                 <!-- first tab content -->
