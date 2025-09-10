@@ -146,7 +146,7 @@
                                     <label for="tagsSelect" class="label-text mb-1">Tags</label>
                                     <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
                                         @foreach($associatedData['tags'] as $tag)
-                                            <option value="{{ $tag->id }}">
+                                            <option value="{{ $tag->id }}" @selected($model->tags->contains($tag))>
                                                 {{ $tag->getTranslation('name', app()->getLocale()) }}
                                             </option>
                                         @endforeach
