@@ -422,4 +422,9 @@ class ProductService extends BaseService
         return $product->prices->pluck('quantity', 'id')->toArray();
     }
 
+    public function getProductsByCategories($categoryIds)
+    {
+       return $this->repository->query()->whereIn('category_id', $categoryIds)->get();
+    }
+
 }

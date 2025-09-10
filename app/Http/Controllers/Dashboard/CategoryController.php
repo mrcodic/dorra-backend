@@ -81,10 +81,4 @@ class CategoryController extends DashboardController
         );
     }
 
-    public function products()
-    {
-        $this->categoryService->getProductsByCategories();
-
-    }
-
 }

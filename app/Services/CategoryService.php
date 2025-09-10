@@ -297,8 +297,4 @@ class CategoryService extends BaseService
         });
     }
 
-    public function products()
-    {
-        
-    }
 }

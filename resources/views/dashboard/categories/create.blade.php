@@ -40,7 +40,7 @@
                                 <!-- first tab content -->
                                 <div class="tab-pane active" id="step1">
                                     <div class="row">
-                                        <input type="hidden" name="is_has_category" value="1">
+                                        <input type="hidden" name="is_has_category" value="0">
                                         <!-- Product Name EN/AR -->
                                         <div class="col-md-6">
                                             <div class="mb-2">
