@@ -165,7 +165,6 @@
                                         </div>
                                     </div>
 
-
                                     <!-- Multiple Images Upload -->
                                     <div class="col-md-12">
                                         <div class="mb-2">
