@@ -85,7 +85,7 @@ class TemplateService extends BaseService
         }
 
         if (request()->expectsJson()) {
-//            $query = $query->whereNotNull('design_data');
+            $query = $query->whereNotNull('design_data');
 
             return $paginate
                 ? $query->paginate($requested)
