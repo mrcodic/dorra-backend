@@ -24,6 +24,7 @@ class CategoryResource extends JsonResource
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'category_products' => ProductResource::collection($this->whenLoaded('landingProducts')),
             'sub_category_products' => ProductResource::collection($this->whenLoaded('landingSubCategories')),
+            'is_has_category' => $this->is_has_category,
         ];
     }
 }

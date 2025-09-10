@@ -38,6 +38,7 @@ class TemplateService extends BaseService
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
         $productId = request('product_id');
+        $categoryId = request('product_without_category_id');
 
         $query = $this->repository
             ->query()
@@ -56,10 +57,24 @@ class TemplateService extends BaseService
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
                 });
+            })->when(request('product_without_category_id'), function ($q) use ($categoryId) {
+                $q->whereHas('categories', function ($q) use ($categoryId) {
+                    $q->where('categories.id', $categoryId);
+                });
+            })
+            ->when(request('category_id'), function ($q) {
+                $q->whereHas('products', function ($q) {
+                    $q->whereCategoryId(request('category_id'));
+                });
             })
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
             ->when(request()->filled('is_landing'), function ($query) {
                 $query->where('is_landing', true);
+            })->when(request()->has('tags'), function ($q) {
+                $tags = request('tags');
+                $q->whereHas('tags', function ($q) use ($tags) {
+                    $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
+                });
             })
             ->latest();
 
@@ -70,23 +85,7 @@ class TemplateService extends BaseService
         }
 
         if (request()->expectsJson()) {
-            $query = $query->whereNotNull('design_data')
-                ->when(request('category_id'), function ($q) {
-                    $q->whereHas('products', function ($q) {
-                        $q->whereCategoryId(request('category_id'));
-                    });
-                })
-                ->when(request('product_id'), function ($q) use ($productId) {
-                    $q->whereHas('products', function ($q) use ($productId) {
-                        $q->where('products.id', $productId);
-                    });
-                })
-                ->when(request()->has('tags'), function ($q) {
-                    $tags = request('tags');
-                    $q->whereHas('tags', function ($q) use ($tags) {
-                        $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
-                    });
-                });
+//            $query = $query->whereNotNull('design_data');
 
             return $paginate
                 ? $query->paginate($requested)
