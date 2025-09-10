@@ -427,7 +427,7 @@
                                 duration: 3000,
                                 gravity: "top",
                                 position: "right",
-                                backgroundColor: "#dc3545",
+                                backgroundColor: "#28C76F",
                                 close: true,
                                 callback: function () {
                                     window.location.hash = '#tab3';
