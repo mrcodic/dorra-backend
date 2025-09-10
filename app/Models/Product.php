@@ -126,10 +126,17 @@ class Product extends Model implements HasMedia
         return $this->morphMany(ProductSpecification::class,'specifiable');
     }
 
-    public function templates(): BelongsToMany
+    public function templates()
     {
-        return $this->belongsToMany(Template::class)->withTimestamps();
+        return $this->morphToMany(
+            Template::class,
+            'referenceable',
+            'product_template',
+            'referenceable_id',
+            'template_id'
+        )->withTimestamps();
     }
+
 
     public function specificationOptions(): HasManyThrough
     {
@@ -145,8 +152,9 @@ class Product extends Model implements HasMedia
 
     public function prices(): MorphMany
     {
-        return $this->morphMany(ProductPrice::class,'pricable');
+        return $this->morphMany(ProductPrice::class, 'pricable');
     }
+
 
     public function reviews(): MorphMany
     {

@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/search', 'search')->name('search');
         Route::post('/landing', 'addToLanding')->name('landing');
         Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
+
     });
     Route::post('/without-categories', [CategoryController::class,'storeProductWithoutCategories'])->name('product-without-categories.store');
 
@@ -74,6 +75,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [ProductController::class, 'getData'])->name('data');
         Route::get('/search', [ProductController::class, 'search'])->name('search');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::post('/categories', 'categories')->name('categories');
+
     }));
     Route::resource('/products', ProductController::class);
 

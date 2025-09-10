@@ -28,6 +28,7 @@ class DesignResource extends JsonResource
                 $this->design_back_data
             ),
             'design_image' => $this->getFirstMediaUrl('designs'),
+            'source_design_svg' => $this->getFirstMediaUrl('designs'),
             'back_design_image' => $this->getFirstMediaUrl('back_designs'),
             'current_version' => $this->current_version,
             'product' => ProductResource::make($this->whenLoaded('product')),

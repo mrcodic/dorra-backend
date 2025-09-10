@@ -9,6 +9,7 @@ use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\TagRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Product\{StoreProductRequest, UpdateProductRequest};
 use App\Services\ProductService;
 
@@ -34,12 +35,10 @@ class ProductController extends DashboardController
 
         $this->assoiciatedData = [
             'shared' => [
-                'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
+                'categories' => $this->categoryRepository->query()->whereNull('parent_id')->whereIsHasCategory(1)->get(['id', 'name']),
                 'tags' => $this->tagRepository->all(columns: ['id', 'name']),
                 'dimensions' =>  $this->dimensionRepository->query()->whereIsCustom(false)->get(['id', 'name']),
-
             ],
-
         ];
         $this->methodRelations = [
             'index' => ['saves','orders'],
@@ -61,5 +60,13 @@ class ProductController extends DashboardController
     {
         $products = $this->productService->search($request);
         return view("dashboard.partials.filtered-products", compact('products'));
+    }
+
+    public function categories(Request $request)
+    {
+        $validatedData = $request->validate(['category_ids' => 'array', 'category_ids.*' => 'exists:categories,id']);
+        $products = $this->productService->getProductsByCategories($validatedData['category_ids']);
+        return Response::api(data: ProductResource::collection($products));
+
     }
 }

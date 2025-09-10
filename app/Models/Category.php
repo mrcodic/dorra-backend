@@ -18,8 +18,8 @@ class Category extends Model implements HasMedia
     use InteractsWithMedia, HasTranslations;
 
     public $translatable = ['name', 'description'];
-    protected $fillable = ['name', 'description', 'parent_id', 'is_landing','has_mockup','base_price','has_custom_prices'];
-
+    protected $fillable = ['name', 'description', 'parent_id', 'is_landing', 'has_mockup', 'base_price', 'has_custom_prices', 'is_has_category'];
+    protected $attributes = ['is_has_category' => 1];
 
     public function scopeIsLanding(Builder $builder): Builder
     {
@@ -41,6 +41,10 @@ class Category extends Model implements HasMedia
         return $this->hasMany(Product::class);
     }
 
+    public function templates()
+    {
+        return $this->morphedByMany(Template::class, 'referenceable')->withTimestamps();
+    }
 
     public function subCategoryProducts(): HasMany
     {
@@ -77,6 +81,7 @@ class Category extends Model implements HasMedia
     {
         return $this->morphMany(ProductSpecification::class, 'specifiable');
     }
+
     public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, 'taggable')

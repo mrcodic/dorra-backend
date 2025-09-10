@@ -16,9 +16,9 @@ class Dimension extends Model
         'unit' => UnitEnum::class,
     ];
 
-    public function products(): BelongsToMany
+    public function products()
     {
-        return $this->belongsToMany(Product::class)->withTimestamps();
+        return $this->morphedByMany(Product::class,'dimensionable','dimension_product')->withTimestamps();
     }
     public function getWidthCmAttribute()
     {

@@ -228,7 +228,6 @@ class ProductService extends BaseService
           if (isset($validatedData['prices'])) {
               $product->update(['base_price' => null]);
 
-              // if admin changed pricing model
               if (($validatedData['has_custom_prices'] ?? false) && $product->has_custom_prices !== 1) {
                   CartItem::where('product_id', $product->id)->get()->each(function ($item) use ($validatedData) {
                       $item->update([
@@ -241,7 +240,6 @@ class ProductService extends BaseService
                   });
               }
 
-              // collect submitted quantities
               $submittedQuantities = collect($validatedData['prices'])->map(function ($price) use ($product) {
                   $product->prices()->updateOrCreate(
                       ['quantity' => $price['quantity']],
@@ -250,9 +248,9 @@ class ProductService extends BaseService
                   return $price['quantity'];
               })->toArray();
 
-              // delete prices that admin removed
               $product->prices()->whereNotIn('quantity', $submittedQuantities)->delete();
           }
+
 
           if (isset($validatedData['specifications'])) {
 
@@ -422,6 +420,11 @@ class ProductService extends BaseService
     {
         $product = $this->repository->find($productId);
         return $product->prices->pluck('quantity', 'id')->toArray();
+    }
+
+    public function getProductsByCategories($categoryIds)
+    {
+       return $this->repository->query()->whereIn('category_id', $categoryIds)->get();
     }
 
 }
