@@ -198,11 +198,12 @@
     <script>
         // Listen for change on "Products With Categories"
         $('#categoriesSelect').on('change', function () {
-            let selectedIds = $(this).val(); // get selected product IDs
+            let selectedIds = $(this).val(); // selected categories
+            let previouslySelected = $('#productsSelect').val() || []; // save old selections
 
             if (selectedIds && selectedIds.length > 0) {
                 $.ajax({
-                    url: "{{ route('products.categories') }}", // your route
+                    url: "{{ route('products.categories') }}",
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
@@ -213,25 +214,25 @@
                         $('#productsSelect').empty();
 
                         if (response.data && response.data.length > 0) {
-                            // Add new categories from response
-                            response.data.forEach(function (category) {
-                                let option = new Option(category.name, category.id, false, false);
+                            response.data.forEach(function (product) {
+                                // create option
+                                let option = new Option(product.name, product.id, false, false);
                                 $('#productsSelect').append(option);
                             });
                         }
 
-                        // Refresh Select2
-                        $('#productsSelect').trigger('change');
+                        // ✅ restore previous selections (if they still exist in new list)
+                        $('#productsSelect').val(previouslySelected).trigger('change');
                     },
                     error: function (xhr) {
                         console.error("Error fetching categories:", xhr.responseText);
                     }
                 });
             } else {
-                // If nothing selected, clear categories
                 $('#productsSelect').empty().trigger('change');
             }
         });
+
     </script>
 
 <script>
