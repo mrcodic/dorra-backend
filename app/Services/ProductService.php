@@ -87,7 +87,8 @@ class ProductService extends BaseService
                 return $product->getMainImageUrl() ?: asset('images/default-product.png');
             })
             ->addColumn('no_of_purchas', function ($product) {
-                return $product->confirmed_orders_count;
+                return 0;
+//                return $product->confirmed_orders_count;
             })->make();
     }
 
