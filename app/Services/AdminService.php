@@ -48,7 +48,9 @@ class AdminService extends BaseService
 
 
         if (!empty($validatedData['role_id'])) {
-            $model->roles()->sync($validatedData['role_id'], [
+            $model->roles()->detah();
+
+            $model->roles()->attach($validatedData['role_id'], [
                 'model_type' => get_class($model)
             ]);
         }
