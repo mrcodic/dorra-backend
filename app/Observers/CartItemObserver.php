@@ -28,12 +28,12 @@ class CartItemObserver
             fn($item) => $item->productSpecificationOption?->price ?? 0
         );
 
-        if ($cartItem->product->has_custom_prices) {
+        if ($cartItem->cartable->has_custom_prices) {
             $subTotal = ($cartItem->productPrice?->price ?? $cartItem->product_price)
                 + ($specsPrice ?: $cartItem->specs_price);
         } else {
             $subTotal = (
-                    ($cartItem->product->base_price ?? $cartItem->product_price)
+                    ($cartItem->cartable->base_price ?? $cartItem->product_price)
                     + ($specsPrice ?: $cartItem->specs_price)
                 ) * $cartItem->quantity;
         }
