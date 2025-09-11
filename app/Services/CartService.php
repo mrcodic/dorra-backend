@@ -247,7 +247,7 @@ class CartService extends BaseService
     public function priceDetails($itemId)
     {
         return $this->cartItemRepository->query()
-            ->select(['id', 'product_id', 'quantity', 'sub_total','itemable_id', 'itemable_type'])
+            ->select(['id', 'cartable_id','cartable_type', 'quantity', 'sub_total','itemable_id', 'itemable_type'])
             ->findOrFail($itemId)?->load([
                 'itemable:id','itemable.media','product',
                 'product.specifications.options', 'specs',
