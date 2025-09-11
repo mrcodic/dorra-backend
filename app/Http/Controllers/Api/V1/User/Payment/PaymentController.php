@@ -48,8 +48,8 @@ class PaymentController extends Controller
 
             collect($order->orderItems)->each(function ($orderItem) use ($cart) {
                 $existingCartItem = $cart->items()
-                    ->where('orderable_id', $orderItem->orderable_id)
-                    ->where('orderable_type', $orderItem->orderable_type)
+                    ->where('cartable_id', $orderItem->orderable_id)
+                    ->where('cartable_type', $orderItem->orderable_type)
                     ->first();
 
                 if (!$existingCartItem) {
