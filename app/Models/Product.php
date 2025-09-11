@@ -111,9 +111,9 @@ class Product extends Model implements HasMedia
         return $this->morphToMany(Dimension::class,'dimensionable','dimension_product')->withTimestamps();
     }
 
-    public function orders(): BelongsToMany
+    public function orders(): MorphMany
     {
-        return $this->belongsToMany(Order::class, 'order_items');
+        return $this->morphMany(Order::class, 'orderable');
     }
     public function confirmedOrders(): BelongsToMany
     {

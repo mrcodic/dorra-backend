@@ -40,7 +40,10 @@ class Category extends Model implements HasMedia
     {
         return $this->hasMany(Product::class);
     }
-
+    public function orders(): MorphMany
+    {
+        return $this->morphMany(Order::class, 'orderable');
+    }
     public function templates()
     {
         return $this->morphedByMany(Template::class, 'referenceable')->withTimestamps();

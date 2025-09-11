@@ -34,6 +34,11 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Order::class);
     }
+    public function orderable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
