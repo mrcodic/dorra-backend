@@ -51,7 +51,7 @@ class PaymentController extends Controller
                     ->where('cartable_id', $orderItem->orderable_id)
                     ->first();
                 if (!$existingCartItem) {
-                    if ($orderItem->cartable->has_custom_prices) {
+                    if ($orderItem->orderable->has_custom_prices) {
                         $subTotal = ($orderItem->productPrice?->price ?? $orderItem->product_price)
                             + ($orderItem->specs->sum(function ($spec) {
                                 return $spec->productSpecificationOption->price;
