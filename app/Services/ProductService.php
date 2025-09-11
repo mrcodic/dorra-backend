@@ -45,7 +45,7 @@ class ProductService extends BaseService
         $products = $this->repository
             ->query()
             ->with($this->relations)
-            ->withCount(['category', 'tags' ])
+            ->withCount(['category', 'tags', 'confirmedOrders'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $locale = app()->getLocale();
@@ -87,8 +87,7 @@ class ProductService extends BaseService
                 return $product->getMainImageUrl() ?: asset('images/default-product.png');
             })
             ->addColumn('no_of_purchas', function ($product) {
-                return 0;
-//                return $product->confirmed_orders_count;
+                return $product->confirmed_orders_count;
             })->make();
     }
 
