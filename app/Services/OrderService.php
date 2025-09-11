@@ -589,7 +589,7 @@ class OrderService extends BaseService
                         'itemable_type' => $item->itemable_type,
                         'specs_price' => $item->specs_price,
                         'sub_total' => $item->sub_total,
-                        'product_price_id' => $item->product_price_id, ,
+                        'product_price_id' => $item->product_price_id, 
                     ];
                 })->toArray()
             );
