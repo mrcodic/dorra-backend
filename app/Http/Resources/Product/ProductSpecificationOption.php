@@ -18,7 +18,7 @@ class ProductSpecificationOption extends JsonResource
             'id' => $this->id,
             'value' => $this->getTranslation('value', app()->getLocale()),
             'price' => $this->price,
-            'image' => $this->getFirstMediaUrl('productSpecificationOptions') ?? $this->getFirstMediaUrl('categorySpecificationOptions'),
+            'image' => $this->getFirstMediaUrl('productSpecificationOptions') ?: $this->getFirstMediaUrl('categorySpecificationOptions'),
         ];
     }
 }
