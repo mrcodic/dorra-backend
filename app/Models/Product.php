@@ -78,6 +78,7 @@ class Product extends Model implements HasMedia
      */
     public function scopeWithReviewRating(Builder $builder, $rates): Builder
     {
+
         $rates = is_array($rates) ? $rates : explode(',', $rates);
 
         return $builder->whereHas('reviews', function ($query) use ($rates) {

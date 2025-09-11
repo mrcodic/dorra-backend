@@ -113,7 +113,7 @@ class ProductService extends BaseService
             ->allowedFilters([
                 AllowedFilter::partial('category.id'),
                 AllowedFilter::custom('sub_categories', new SubCategoryFilter()),
-                AllowedFilter::scope('with_review_rating'),
+                AllowedFilter::scope('with_review_rating')->default([]),
             ])
             ->latest();
 
