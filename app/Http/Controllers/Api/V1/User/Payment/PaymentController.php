@@ -48,7 +48,7 @@ class PaymentController extends Controller
 
             collect($order->orderItems)->each(function ($orderItem) use ($cart) {
                 $existingCartItem = $cart->items()
-                    ->where('product_id', $orderItem->product_id)
+                    ->where('cartable_id', $orderItem->orderable_id)
                     ->first();
                 if (!$existingCartItem) {
                     if ($orderItem->product->has_custom_prices) {
@@ -66,7 +66,7 @@ class PaymentController extends Controller
                     }
 
                     $cartItem = $cart->items()->create([
-                        'product_id' => $orderItem->product_id,
+                        'cartable_id' => $orderItem->product_id,
                         'product_price_id' => $orderItem->product_price_id,
                         'product_price' => $orderItem->productPrice?->price ?? $orderItem->product_price,
                         'specs_price' => ($orderItem->specs->sum(function ($spec) {
