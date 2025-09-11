@@ -614,11 +614,11 @@
                 initEmpty: {{ $hasSpecs ? 'false' : 'true' }},
                 repeaters: [{
                     selector: '.inner-repeater',
-                    initEmpty: function (rep) {
-                        return $(rep).data('init-empty') === true || $(rep).data('init-empty') === 'true'
-                            ? 'true'
-                            : 'false';
-                    },
+                    // initEmpty: function (rep) {
+                    //     return $(rep).data('init-empty') === true || $(rep).data('init-empty') === 'true'
+                    //         ? 'true'
+                    //         : 'false';
+                    // },
 
                     show: function () {
                         $(this).slideDown();
