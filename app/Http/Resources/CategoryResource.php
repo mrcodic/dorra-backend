@@ -40,6 +40,7 @@ class CategoryResource extends JsonResource
             'sub_category_products' => ProductResource::collection($this->whenLoaded('landingSubCategories')),
             'is_has_category' => $this->is_has_category,
             'show_add_cart_btn' => $this->show_add_cart_btn,
+            'type' => 'category',
         ];
     }
 }
