@@ -30,7 +30,7 @@ class CategoryController extends Controller
 
     public function show($id)
     {
-        return Response::api(data: CategoryResource::make($this->categoryService->showResource($id,['media'])));
+        return Response::api(data: CategoryResource::make($this->categoryService->showResource($id,['media','specifications.options','prices'])));
     }
 
     public function getSubCategories()

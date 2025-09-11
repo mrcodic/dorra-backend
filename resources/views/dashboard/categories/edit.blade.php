@@ -31,38 +31,38 @@
                             @method("PUT")
                             <input type="hidden" name="is_has_category" value="0">
 
-                        {{-- checkbox added --}}
-                        <div class="d-flex gap-1 rounded p-1 mb-2" style="border: 1px solid #CED5D4">
-                            <div>
-                                <!-- Hidden fallback -->
-                                <input type="hidden" name="show_add_cart_btn" value="0">
+                            {{-- checkbox added --}}
+                            <div class="d-flex gap-1 rounded p-1 mb-2" style="border: 1px solid #CED5D4">
+                                <div>
+                                    <!-- Hidden fallback -->
+                                    <input type="hidden" name="show_add_cart_btn" value="0">
 
-                                <!-- Actual checkbox -->
-                                <input class="form-check-input mt-0" type="checkbox"
-                                       name="show_add_cart_btn" value="1"
-                                    @checked(old('show_add_cart_btn', $model->show_add_cart_btn ?? false))>
+                                    <!-- Actual checkbox -->
+                                    <input class="form-check-input mt-0" type="checkbox"
+                                           name="show_add_cart_btn" value="1"
+                                        @checked(old('show_add_cart_btn', $model->show_add_cart_btn ?? false))>
+                                </div>
+                                <div class="d-flex flex-column gap-1">
+                                    <h5 style="color: #121212">Show “Add to Cart” Button</h5>
+                                    <p style="color: #424746">
+                                        When the checkbox is selected, the product can be added directly to the cart without customization.
+                                        If it’s not selected, the product must be customized before being added to cart.
+                                    </p>
+                                </div>
                             </div>
-                            <div class="d-flex flex-column gap-1">
-                                <h5 style="color: #121212">Show “Add to Cart” Button</h5>
-                                <p style="color: #424746">
-                                    When the checkbox is selected, the product can be added directly to the cart without customization.
-                                    If it’s not selected, the product must be customized before being added to cart.
-                                </p>
-                            </div>
-                        </div>
 
-                        <ul class="nav nav-tabs mb-4 w-100 d-flex justify-content-center" id="formTabs">
-                            <li class="nav-item" style="width: 30%;">
-                                <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Category
-                                    Details</a>
-                            </li>
-                            <li class="nav-item" style="width: 30%;">
-                                <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity & Price</a>
-                            </li>
-                            <li class="nav-item" style="width: 30%;">
-                                <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Category Specs</a>
-                            </li>
-                        </ul>
+                            <ul class="nav nav-tabs mb-4 w-100 d-flex justify-content-center" id="formTabs">
+                                <li class="nav-item" style="width: 30%;">
+                                    <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Category
+                                        Details</a>
+                                </li>
+                                <li class="nav-item" style="width: 30%;">
+                                    <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity & Price</a>
+                                </li>
+                                <li class="nav-item" style="width: 30%;">
+                                    <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Category Specs</a>
+                                </li>
+                            </ul>
 
 
                             <div class="tab-content">
@@ -580,7 +580,10 @@
 
             // Initialize the outer repeater
             $outerRepeater.repeater({
+                initEmpty: {{!$hasSpecs}},
                 repeaters: [{
+                    initEmpty: {{!$hasSpecs}},
+
                     selector: '.inner-repeater',
                     show: function () {
                         $(this).slideDown();
