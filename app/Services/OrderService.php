@@ -581,15 +581,15 @@ class OrderService extends BaseService
             $orderItems = $order->orderItems()->createMany(
                 $cart->items->map(function ($item) {
                     return [
-                        'orderable_id' => $item->orderable_id,
-                        'orderable_type' => $item->orderable_type,
+                        'orderable_id' => $item->cartable_id,
+                        'orderable_type' => $item->cartable_type,
                         'quantity' => $item->quantity,
                         'product_price' => $item->product_price,
                         'itemable_id' => $item->itemable_id,
                         'itemable_type' => $item->itemable_type,
                         'specs_price' => $item->specs_price,
                         'sub_total' => $item->sub_total,
-                        'product_price_id' => $item->product_price_id, 
+                        'product_price_id' => $item->product_price_id,
                     ];
                 })->toArray()
             );
