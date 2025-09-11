@@ -81,7 +81,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                         </th>
                         <th>Name</th>
                         <th>SubCategories</th>

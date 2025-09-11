@@ -162,7 +162,7 @@
                         <option value="" selected disabled>Product</option>
                         <option value="">All</option>
                         @foreach($associatedData['categories'] as $category)
-                            <option value="{{ $category->id }}">{{ $category->name}}</option>
+                        <option value="{{ $category->id }}">{{ $category->name}}</option>
                         @endforeach
                     </select>
 
@@ -175,7 +175,7 @@
                         <select name="tag_id" class="tag-select form-select pe-5" id="tagSelect">
                             <option value="" selected disabled>Tag</option>
                             <option value="">All</option>
-                        @foreach($associatedData['tags'] as $tag)
+                            @foreach($associatedData['tags'] as $tag)
                             <option value="{{ $tag->id }}">{{ $tag->name }}</option>
                             @endforeach
                         </select>
@@ -194,7 +194,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                         </th>
                         <th>Image</th>
                         <th>Name</th>
