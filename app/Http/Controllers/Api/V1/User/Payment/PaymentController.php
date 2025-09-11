@@ -58,7 +58,7 @@ class PaymentController extends Controller
                             }) ?: $orderItem->specs_price);
                     } else {
                         $subTotal = (
-                                ($orderItem->product->base_price ?? $orderItem->product_price)
+                                ($orderItem->orderable->base_price ?? $orderItem->product_price)
                                 + ($orderItem->specs->sum(function ($spec) {
                                     return $spec->productSpecificationOption->price;
                                 }) ?: $orderItem->specs_price)
@@ -66,7 +66,7 @@ class PaymentController extends Controller
                     }
 
                     $cartItem = $cart->items()->create([
-                        'cartable_id' => $orderItem->product_id,
+                        'cartable_id' => $orderItem->orderable_id,
                         'product_price_id' => $orderItem->product_price_id,
                         'product_price' => $orderItem->productPrice?->price ?? $orderItem->product_price,
                         'specs_price' => ($orderItem->specs->sum(function ($spec) {
