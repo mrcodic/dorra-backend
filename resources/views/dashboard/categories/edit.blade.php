@@ -580,9 +580,9 @@
 
             // Initialize the outer repeater
             $outerRepeater.repeater({
-                initEmpty: {{!$hasSpecs}},
+            initEmpty: {{ $hasSpecs ? 'false' : 'true' }},
                 repeaters: [{
-                    initEmpty: {{!$hasSpecs}},
+                initEmpty: {{ $hasSpecs ? 'false' : 'true' }},
 
                     selector: '.inner-repeater',
                     show: function () {
