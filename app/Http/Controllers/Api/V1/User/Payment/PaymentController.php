@@ -50,6 +50,7 @@ class PaymentController extends Controller
                 $existingCartItem = $cart->items()
                     ->where('cartable_id', $orderItem->orderable_id)
                     ->first();
+
                 if (!$existingCartItem) {
                     if ($orderItem->orderable->has_custom_prices) {
                         $subTotal = ($orderItem->productPrice?->price ?? $orderItem->product_price)
