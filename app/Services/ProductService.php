@@ -233,7 +233,7 @@ class ProductService extends BaseService
                 $product->update(['base_price' => null]);
 
                 if (($validatedData['has_custom_prices'] ?? false) && $product->has_custom_prices !== 1) {
-                    CartItem::where('product_id', $product->id)->get()->each(function ($item) use ($validatedData) {
+                    CartItem::where('cartable_id', $product->id)->get()->each(function ($item) use ($validatedData) {
                         $item->update([
                             'quantity' => $validatedData['prices'][0]['quantity'],
                             'product_price' => $validatedData['prices'][0]['price'],
