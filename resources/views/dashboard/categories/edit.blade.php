@@ -379,9 +379,8 @@
                                                                             <input type="text" name="name_ar" value="{{ $specification->getTranslation('name','ar') }}" class="form-control" placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
-
                                                                     <!-- Inner Repeater for Specification Options -->
-                                                                    <div class="inner-repeater">
+                                                                    <div class="inner-repeater" data-init-empty="{{ $specification->options->isEmpty() ? 'true' : 'false' }}">
                                                                         <div data-repeater-list="specification_options">
                                                                             @foreach($specification->options as $option)
                                                                                 <div data-repeater-item>
@@ -492,13 +491,20 @@
                                                                                 <div class="row d-flex align-items-end mt-2">
                                                                                     <div class="col-md-12">
                                                                                         <label class="form-label label-text">Option Image</label>
-                                                                                        <div class="dropzone option-dropzone">
-                                                                                        </div>
-
+                                                                                        <div class="dropzone option-dropzone"></div>
                                                                                         <input type="hidden" name="option_image" class="uploadedImage">
                                                                                     </div>
                                                                                 </div>
+
+                                                                                <!-- ✅ Delete Value Button -->
+                                                                                <div class="col-12 text-end mt-1 mb-2">
+                                                                                    <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                                        <i data-feather="x" class="me-25"></i>
+                                                                                        Delete Value
+                                                                                    </button>
+                                                                                </div>
                                                                             </div>
+
                                                                         </div>
 
                                                                         <!-- Add Option Button -->
@@ -567,47 +573,45 @@
 @section('page-script')
     <script>
         $(document).ready(function () {
-            // Initialize the outer repeater for specifications
             var $outerRepeater = $('.outer-repeater');
 
-            // First, check if we have any existing specifications
             var hasExistingSpecs = $outerRepeater.find('[data-repeater-item]').length > 0;
-
             if (!hasExistingSpecs) {
-                // If no existing specs, hide the container initially
                 $outerRepeater.find('[data-repeater-list="specifications"]').addClass('d-none');
             }
 
-            // Initialize the outer repeater
             $outerRepeater.repeater({
-            initEmpty: {{ $hasSpecs ? 'false' : 'true' }},
-                repeaters: [{
                 initEmpty: {{ $hasSpecs ? 'false' : 'true' }},
-
+                repeaters: [{
                     selector: '.inner-repeater',
+                    initEmpty: function (rep) {
+                        return $(rep).data('init-empty') === true || $(rep).data('init-empty') === 'true'
+                            ? 'true'
+                            : 'false';
+                    },
+
                     show: function () {
                         $(this).slideDown();
                         feather.replace();
 
-                        // Initialize dropzone for new option
                         let dzElement = $(this).find(".option-dropzone")[0];
                         if (dzElement && typeof initOptionDropzone === 'function') {
                             initOptionDropzone(dzElement);
                         }
+
+                        $(this).find('.uploadedImage').val('');
                     },
                     hide: function (deleteElement) {
                         $(this).slideUp(deleteElement);
                     }
                 }],
                 show: function () {
-                    // Make sure the container is visible when adding new items
                     var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
                     $specList.removeClass('d-none');
 
                     $(this).slideDown();
                     feather.replace();
 
-                    // Initialize dropzone for new specification
                     let dzElement = $(this).find(".option-dropzone")[0];
                     if (dzElement && typeof initOptionDropzone === 'function') {
                         initOptionDropzone(dzElement);
@@ -618,36 +622,19 @@
                 hide: function (deleteElement) {
                     var $item = $(this);
                     $item.slideUp(deleteElement, function() {
-                        // After hiding, check if we need to hide the container
                         var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
                         var $items = $specList.find('[data-repeater-item]').not(':hidden');
 
-                        if ($items.length === 0) {
-                            $specList.addClass('d-none');
-                        }
+                        // keep visible if needed, comment out if not
+                        // if ($items.length === 0) {
+                        //     $specList.addClass('d-none');
+                        // }
                     });
                 },
-                isFirstItemUndeletable: true
+                isFirstItemUndeletable: false
             });
 
-            // Initialize inner repeaters for existing items
-            $('.inner-repeater').repeater({
-                show: function () {
-                    $(this).slideDown();
-                    feather.replace();
-
-                    // Initialize dropzone for new option
-                    let dzElement = $(this).find(".option-dropzone")[0];
-                    if (dzElement && typeof initOptionDropzone === 'function') {
-                        initOptionDropzone(dzElement);
-                    }
-                },
-                hide: function (deleteElement) {
-                    $(this).slideUp(deleteElement);
-                }
-            });
-
-
+            // ✅ remove the second inner-repeater initializer to avoid double items
 
             // Initialize dropzones for existing option images
             if (typeof initOptionDropzone === 'function') {
@@ -657,7 +644,6 @@
                 });
             }
 
-            // Initialize feather icons
             feather.replace();
         });
     </script>

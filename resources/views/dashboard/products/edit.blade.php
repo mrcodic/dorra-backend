@@ -441,18 +441,19 @@
                                                                         "size" => $option->image->size,
                                                                         "url" => $option->image->getUrl(),
                                                                     ] : null) }}'>
+                                                                                                <div class="col-12 text-end mt-1 mb-2">
+                                                                                                    <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                                                        <i data-feather="x" class="me-25"></i>
+                                                                                                        Delete Value
+                                                                                                    </button>
+                                                                                                </div>
                                                                                             </div>
+                                                                                        </div>
 
                                                                                             <input type="hidden" name="option_image" class="uploadedImage" value="{{ $option->image?->id }}">
                                                                                         </div>
 
-                                                                                        <div class="col-12 text-end mt-1 mb-2">
-                                                                                            <button type="button" class="btn btn-outline-danger" data-repeater-delete>
-                                                                                                <i data-feather="x" class="me-25"></i>
-                                                                                                Delete Value
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </div>
+
                                                                                 </div>
                                                                             @endforeach
                                                                         </div>

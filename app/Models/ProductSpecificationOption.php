@@ -57,7 +57,7 @@ class ProductSpecificationOption extends Model implements HasMedia
     }
     public function image(): Attribute
     {
-        return Attribute::get(fn () => $this->getFirstMedia('productSpecificationOptions'));
+        return Attribute::get(fn () => $this->getFirstMedia('productSpecificationOptions') ?: $this->getFirstMedia('categorySpecificationOptions'));
     }
 
     public function price(): Attribute
