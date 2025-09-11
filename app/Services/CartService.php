@@ -250,7 +250,7 @@ class CartService extends BaseService
             ->select(['id', 'cartable_id','cartable_type', 'quantity', 'sub_total','itemable_id', 'itemable_type'])
             ->findOrFail($itemId)?->load([
                 'itemable:id','itemable.media','product',
-                'product.specifications.options', 'specs',
+                'cartable.specifications.options', 'specs',
                 'itemable','specs.productSpecificationOption',
                 'specs.productSpecification']);
     }
