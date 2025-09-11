@@ -16,7 +16,8 @@ class CartItem extends Model
         'itemable_id',
         'itemable_type',
         'cart_id',
-        'product_id',
+        'cartable_id',
+        'cartable_type',
         'specs_price',
         'sub_total',
         'product_price',
@@ -35,10 +36,16 @@ class CartItem extends Model
         return $this->belongsTo(Cart::class);
     }
 
+    public function cartable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
+
     public function productPrice(): BelongsTo
     {
         return $this->belongsTo(ProductPrice::class);
@@ -46,7 +53,7 @@ class CartItem extends Model
 
     public function specs(): HasMany
     {
-        return $this->hasMany(CartItemSpec::class,'cart_item_id');
+        return $this->hasMany(CartItemSpec::class, 'cart_item_id');
     }
 
 }

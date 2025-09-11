@@ -5,14 +5,15 @@ namespace App\Services;
 use App\Enums\DiscountCode\TypeEnum;
 use App\Models\{Category, Guest, Product, User};
 use App\Repositories\Interfaces\{CartItemRepositoryInterface,
+    CategoryRepositoryInterface,
     DiscountCodeRepositoryInterface,
     CartRepositoryInterface,
     DesignRepositoryInterface,
     GuestRepositoryInterface,
     ProductPriceRepositoryInterface,
+    ProductRepositoryInterface,
     ProductSpecificationOptionRepositoryInterface,
-    ProductSpecificationRepositoryInterface
-};
+    ProductSpecificationRepositoryInterface};
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\{Facades\Response, Arr};
 use Illuminate\Validation\ValidationException;
@@ -30,6 +31,8 @@ class CartService extends BaseService
         public ProductSpecificationOptionRepositoryInterface $optionRepository,
         public ProductSpecificationRepositoryInterface       $specificationRepository,
         public CartItemRepositoryInterface                   $cartItemRepository,
+        public ProductRepositoryInterface                    $productRepository,
+        public CategoryRepositoryInterface                    $categoryRepository,
     )
     {
         parent::__construct($repository);
@@ -55,7 +58,11 @@ class CartService extends BaseService
                 ]);
             }
 
-            $product = $request->getProduct();
+
+            $product =  $request->cartable_type === 'App\\Models\\Product'
+                ? $this->productRepository->find($request->cartable_id)
+                : $this->categoryRepository->find($request->cartable_id);
+
             $template = $request->getTemplate();
             $design = $request->getDesign();
 
@@ -68,7 +75,8 @@ class CartService extends BaseService
                 $priceDetails['product_price'],
                 $priceDetails['product_price_id'],
                 $priceDetails['sub_total'],
-                $product,
+                $request->cartable_id,
+                $request->cartable_type,
             );
 
             $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
@@ -104,7 +112,7 @@ class CartService extends BaseService
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->with([
-                'items.product','items.itemable' => function ($query) {
+                'items.cartable','items.itemable' => function ($query) {
                 $query->select(['id','name']);
             },'items.itemable.products'])
             ->first();
@@ -277,7 +285,6 @@ class CartService extends BaseService
     {
         $productPrice = $this->productPriceRepository->query()
             ->find(Arr::get($validatedData, 'product_price_id'));
-
         $productPriceValue = $productPrice?->price ?? $price;
         $specsSum = collect(Arr::get($validatedData, 'specs'))
             ->map(function ($spec) {

@@ -23,7 +23,19 @@ class StoreCartItemRequest extends BaseRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $map = [
+            'product'  => \App\Models\Product::class,
+            'category' => \App\Models\Category::class,
+        ];
 
+        if (isset($map[$this->cartable_type])) {
+            $this->merge([
+                'cartable_type' => $map[$this->cartable_type],
+            ]);
+        }
+    }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -34,7 +46,8 @@ class StoreCartItemRequest extends BaseRequest
         return [
             'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
             'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
-            'product_id' => ['required', 'exists:products,id'],
+            'cartable_id'   => ['required', 'integer'],
+            'cartable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             "product_price_id" => ["nullable", "exists:product_prices,id"],
             "specs" => ["sometimes", "array"],
             "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
@@ -48,13 +61,13 @@ class StoreCartItemRequest extends BaseRequest
         $this->design = Design::find($this->design_id);
         $this->product = Product::find($this->product_id);
 
-        if ($this->template && !$this->template->products->contains($this->product_id)) {
-            throw new HttpResponseException(
-                Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
-                    'product_id' => 'The selected product is not associated with the selected template.',
-                ])
-            );
-        }
+//        if ($this->template && !$this->template->products->contains($this->product_id)) {
+//            throw new HttpResponseException(
+//                Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
+//                    'product_id' => 'The selected product is not associated with the selected template.',
+//                ])
+//            );
+//        }
 
         if ($this->design && $this->design->product_id !== $this->product_id) {
             throw new HttpResponseException(

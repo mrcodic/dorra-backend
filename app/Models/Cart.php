@@ -20,26 +20,29 @@ class Cart extends Model
 
     public function price(): Attribute
     {
-        return Attribute::get(function ($value){
-           return fmod($value, 1) == 0.0 ? (int)$value : $value;
+        return Attribute::get(function ($value) {
+            return fmod($value, 1) == 0.0 ? (int)$value : $value;
         });
     }
-    public function items(): HasMany
-    {
-        return $this->hasMany(CartItem::class);
-    }
-    public function addItem(Model $itemable,$quantity,$specsSum,$productPrice,$productPriceId,$subTotal, ?Product $product = null,): CartItem
+
+    public function addItem(Model $itemable, $quantity, $specsSum, $productPrice, $productPriceId, $subTotal, $cartable_id, $cartable_type): CartItem
     {
         return $this->items()->create([
             'itemable_id' => $itemable->id,
             'itemable_type' => get_class($itemable),
-            'product_id' => $product?->id,
+            'cartable_id' => $cartable_id,
+            'cartable_type' => $cartable_type,
             'product_price_id' => $productPriceId,
             'sub_total' => $subTotal,
             'specs_price' => $specsSum,
             'product_price' => $productPrice,
             'quantity' => $quantity ?? 1,
         ]);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(CartItem::class);
     }
 
     public function totalItems()

@@ -520,13 +520,20 @@
                                                                                 <div class="row d-flex align-items-end mt-2">
                                                                                     <div class="col-md-12">
                                                                                         <label class="form-label label-text">Option Image</label>
-                                                                                        <div class="dropzone option-dropzone">
-                                                                                        </div>
-
+                                                                                        <div class="dropzone option-dropzone"></div>
                                                                                         <input type="hidden" name="option_image" class="uploadedImage">
                                                                                     </div>
                                                                                 </div>
+
+                                                                                <!-- ✅ Delete Value Button -->
+                                                                                <div class="col-12 text-end mt-1 mb-2">
+                                                                                    <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                                        <i data-feather="x" class="me-25"></i>
+                                                                                        Delete Value
+                                                                                    </button>
+                                                                                </div>
                                                                             </div>
+
                                                                         </div>
 
                                                                         <!-- Add Option Button -->
@@ -548,6 +555,7 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
+
                                                         @endforelse
                                                     </div>
 
@@ -596,83 +604,79 @@
     <script>
         $(document).ready(function () {
             var $outerRepeater = $('.outer-repeater');
-            var $specList = $outerRepeater.find('[data-repeater-list="specifications"]');
 
-            // Hide specs container if no items
-            if ($specList.find('[data-repeater-item]').length === 0) {
-                $specList.addClass('d-none');
+            var hasExistingSpecs = $outerRepeater.find('[data-repeater-item]').length > 0;
+            if (!hasExistingSpecs) {
+                $outerRepeater.find('[data-repeater-list="specifications"]').addClass('d-none');
             }
 
             $outerRepeater.repeater({
-                // This registers the inner repeater for every outer item (including those added later)
+                initEmpty: {{ $hasSpecs ? 'false' : 'true' }},
                 repeaters: [{
                     selector: '.inner-repeater',
+                    initEmpty: function (rep) {
+                        return $(rep).data('init-empty') === true || $(rep).data('init-empty') === 'true'
+                            ? 'true'
+                            : 'false';
+                    },
+
                     show: function () {
-                        var $inner = $(this);
-                        $inner.slideDown();
+                        $(this).slideDown();
                         feather.replace();
 
-                        // initialize Dropzone (or any other per-option init) inside this inner instance
-                        $inner.find('.option-dropzone').each(function () {
-                            var el = this;
-                            var existing = $(el).attr('data-existing-media');
-                            var media = existing ? JSON.parse(existing) : null;
-                            if (typeof initOptionDropzone === 'function') initOptionDropzone(el, media);
-                        });
+                        let dzElement = $(this).find(".option-dropzone")[0];
+                        if (dzElement && typeof initOptionDropzone === 'function') {
+                            initOptionDropzone(dzElement);
+                        }
+
+                        $(this).find('.uploadedImage').val('');
                     },
                     hide: function (deleteElement) {
                         $(this).slideUp(deleteElement);
                     }
                 }],
-
-                // when adding a new specification (outer item)
                 show: function () {
-                    var $item = $(this);
+                    var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
                     $specList.removeClass('d-none');
 
-                    $item.slideDown();
+                    $(this).slideDown();
                     feather.replace();
 
-                    // initialize any dropzones that live directly under the new spec
-                    $item.find('.option-dropzone').each(function () {
-                        var el = this;
-                        var existing = $(el).attr('data-existing-media');
-                        var media = existing ? JSON.parse(existing) : null;
-                        if (typeof initOptionDropzone === 'function') initOptionDropzone(el, media);
-                    });
+                    let dzElement = $(this).find(".option-dropzone")[0];
+                    if (dzElement && typeof initOptionDropzone === 'function') {
+                        initOptionDropzone(dzElement);
+                    }
 
-                    // reset any uploaded hidden inputs in the new spec if needed
-                    $item.find('.uploadedImage').val('');
+                    $(this).find('.uploadedImage').val('');
                 },
-
                 hide: function (deleteElement) {
                     var $item = $(this);
-                    $item.slideUp(deleteElement, function () {
-                        // hide the container if no visible items remain
-                        var $visibleItems = $specList.find('[data-repeater-item]').not(':hidden');
-                        if ($visibleItems.length === 0) {
-                            $specList.addClass('d-none');
-                        }
+                    $item.slideUp(deleteElement, function() {
+                        var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                        var $items = $specList.find('[data-repeater-item]').not(':hidden');
+
+                        // keep visible if needed, comment out if not
+                        // if ($items.length === 0) {
+                        //     $specList.addClass('d-none');
+                        // }
                     });
                 },
-
-                isFirstItemUndeletable: true
+                isFirstItemUndeletable: false
             });
 
-            // Initialize existing option dropzones on page load
+            // ✅ remove the second inner-repeater initializer to avoid double items
+
+            // Initialize dropzones for existing option images
             if (typeof initOptionDropzone === 'function') {
-                document.querySelectorAll(".option-dropzone").forEach(function (el) {
-                    var existing = el.getAttribute('data-existing-media');
-                    var media = existing ? JSON.parse(existing) : null;
+                document.querySelectorAll(".option-dropzone").forEach(el => {
+                    let media = el.dataset.existingMedia ? JSON.parse(el.dataset.existingMedia) : null;
                     initOptionDropzone(el, media);
                 });
             }
 
             feather.replace();
-
-            // Debug helper (run in console if things still fail)
-            // console.log($('.outer-repeater').repeaterVal());
         });
+
     </script>
 
     <script !src="">

@@ -177,9 +177,9 @@ class Product extends Model implements HasMedia
         return $this->morphMany(Save::class, 'savable');
     }
 
-    public function carts(): BelongsToMany
+    public function carts(): MorphMany
     {
-        return $this->belongsToMany(Cart::class, 'cart_items');
+        return $this->morphMany(CartItem::class, 'cartable');
     }
 
     public function getAllProductImages()

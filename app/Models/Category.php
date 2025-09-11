@@ -91,4 +91,8 @@ class Category extends Model implements HasMedia
             ])
             ->withTimestamps();
     }
+    public function carts(): MorphMany
+    {
+        return $this->morphMany(CartItem::class, 'cartable');
+    }
 }
