@@ -68,12 +68,12 @@ class CartController extends Controller
             'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
             'product_price_id' => [
                 Rule::requiredIf(function () use ($cartItem) {
-                    return $cartItem && $cartItem->product->has_custom_prices;
+                    return $cartItem && $cartItem->cartable->has_custom_prices;
                 }),
                 'integer',
                 'exists:product_prices,id',
                 function ($attribute, $value, $fail) use ($cartItem) {
-                    if ($cartItem && !$cartItem->product->prices->pluck('id')->contains($value)) {
+                    if ($cartItem && !$cartItem->cartable->prices->pluck('id')->contains($value)) {
                         $fail('The selected product price is not valid for the current item.');
                     }
                 },

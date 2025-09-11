@@ -36,7 +36,7 @@ class Product extends Model implements HasMedia
 
         static::updating(function (Product $product) {
             if ($product->base_price) {
-                CartItem::where('product_id', $product->id)->get()
+                CartItem::where('cartable_id', $product->id)->get()
                     ->each(function ($item) use ($product) {
                         $data = [
                             'product_price' => $product->base_price,
@@ -111,13 +111,13 @@ class Product extends Model implements HasMedia
         return $this->morphToMany(Dimension::class,'dimensionable','dimension_product')->withTimestamps();
     }
 
-    public function orders(): BelongsToMany
+    public function orders()
     {
-        return $this->belongsToMany(Order::class, 'order_items');
+        return $this->morphToMany(Order::class, 'orderable', 'order_items');
     }
-    public function confirmedOrders(): BelongsToMany
+    public function confirmedOrders()
     {
-        return $this->belongsToMany(Order::class,'order_items')
+        return $this->morphToMany(Order::class,'orderable','order_items')
             ->where('status', \App\Enums\Order\StatusEnum::CONFIRMED);
     }
 

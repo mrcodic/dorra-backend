@@ -228,7 +228,7 @@ class CartService extends BaseService
     {
         $message = "Request completed successfully.";
         $cartItem = $this->cartItemRepository->find($id);
-        if ($cartItem->product->has_custom_prices) {
+        if ($cartItem->cartable->has_custom_prices) {
             $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
             $updated = $cartItem->update(['product_price' => $productPrice->price, 'quantity' => $productPrice->quantity]);
         } else {
@@ -250,7 +250,7 @@ class CartService extends BaseService
             ->select(['id', 'cartable_id','cartable_type', 'quantity', 'sub_total','itemable_id', 'itemable_type'])
             ->findOrFail($itemId)?->load([
                 'itemable:id','itemable.media','product',
-                'product.specifications.options', 'specs',
+                'cartable.specifications.options', 'specs',
                 'itemable','specs.productSpecificationOption',
                 'specs.productSpecification']);
     }
@@ -259,10 +259,11 @@ class CartService extends BaseService
     {
         $message = "Request completed successfully.";
         $cartItem = $this->cartItemRepository->query()
-            ->select(['id', 'product_id', 'quantity', 'sub_total', 'product_price', 'cart_id'])
-            ->find($itemId);
+            ->whereKey($itemId)
+            ->firstOrFail();
 
-        $product = $cartItem->product;
+
+        $product = $cartItem->cartable;
         $priceDetails = $this->calculatePriceDetails($validatedData, $product, $cartItem->product_price);
 
         $cartItem->update([

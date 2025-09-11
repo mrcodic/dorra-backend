@@ -15,13 +15,15 @@ class OrderItem extends Model
         'itemable_id',
         'itemable_type',
         'order_id',
-        'product_id',
+        'orderable_id',
+        'orderable_type',
         'specs_price',
         'sub_total',
         'product_price',
         'product_price_id',
         'quantity'
     ];
+
     public function totalPrice(): Attribute
     {
         return Attribute::get(function ($value) {
@@ -34,6 +36,11 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Order::class);
     }
+    public function orderable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

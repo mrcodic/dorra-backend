@@ -31,7 +31,7 @@ class CartItemSpec extends Model
 
             $cartItem->update([
                 'specs_price' => $newSpecsPrice,
-                'sub_total'   => $cartItem->product->has_custom_prices
+                'sub_total'   => $cartItem->cartable->has_custom_prices
                     ? $cartItem->product_price + $newSpecsPrice
                     : ($cartItem->product_price * $cartItem->quantity) + $newSpecsPrice,
             ]);
