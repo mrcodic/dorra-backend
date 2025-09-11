@@ -53,10 +53,9 @@ class ProductController extends Controller
         return Response::api(data: $types);
     }
 
-    public function getQuantities($productId)
+    public function getQuantities($productId,Request $request)
     {
-
-        $quantities = $this->productService->getQuantities($productId);
+        $quantities = $this->productService->getQuantities($productId,$request);
         $quantities = $quantities ?: (object)[];
         return Response::api(data: $quantities);
 

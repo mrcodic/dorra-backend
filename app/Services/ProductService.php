@@ -6,9 +6,11 @@ use App\Filters\SubCategoryFilter;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
@@ -27,6 +29,7 @@ class ProductService extends BaseService
     public function __construct(ProductRepositoryInterface                     $repository,
                                 public ProductSpecificationRepositoryInterface $specificationRepository,
                                 public DimensionRepositoryInterface            $dimensionRepository,
+                                public CategoryRepositoryInterface             $categoryRepository,
     )
     {
         $this->relations = ['category', 'tags', 'reviews', 'saves' => function ($query) {
@@ -416,9 +419,10 @@ class ProductService extends BaseService
 
     }
 
-    public function getQuantities($productId)
+    public function getQuantities($productId, Request $request)
     {
-        $product = $this->repository->find($productId);
+        $product = $request->type == 'product' ? $this->repository->find($productId) : $this->categoryRepository->find($productId);
+
         return $product->prices->pluck('quantity', 'id')->toArray();
     }
 
