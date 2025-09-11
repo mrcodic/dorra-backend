@@ -111,15 +111,15 @@ class Product extends Model implements HasMedia
         return $this->morphToMany(Dimension::class,'dimensionable','dimension_product')->withTimestamps();
     }
 
-//    public function orders(): BelongsToMany
-//    {
-//        return $this->belongsToMany(Order::class, 'order_items');
-//    }
-//    public function confirmedOrders(): BelongsToMany
-//    {
-//        return $this->belongsToMany(Order::class,'order_items')
-//            ->where('status', \App\Enums\Order\StatusEnum::CONFIRMED);
-//    }
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'order_items');
+    }
+    public function confirmedOrders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class,'order_items')
+            ->where('status', \App\Enums\Order\StatusEnum::CONFIRMED);
+    }
 
 
     public function specifications()
