@@ -228,7 +228,7 @@ class CartService extends BaseService
     {
         $message = "Request completed successfully.";
         $cartItem = $this->cartItemRepository->find($id);
-        if ($cartItem->product->has_custom_prices) {
+        if ($cartItem->cartable->has_custom_prices) {
             $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
             $updated = $cartItem->update(['product_price' => $productPrice->price, 'quantity' => $productPrice->quantity]);
         } else {
