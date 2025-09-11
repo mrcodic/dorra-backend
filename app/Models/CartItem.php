@@ -25,17 +25,7 @@ class CartItem extends Model
         'quantity'
     ];
     protected $table = 'cart_items';
-    protected $hidden = ['cartable_id', 'cartable_type'];
 
-    public function getOrderableIdAttribute()
-    {
-        return $this->cartable_id;
-    }
-
-    public function getOrderableTypeAttribute()
-    {
-        return $this->cartable_type;
-    }
     public function itemable(): MorphTo
     {
         return $this->morphTo();
