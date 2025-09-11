@@ -259,8 +259,9 @@ class CartService extends BaseService
     {
         $message = "Request completed successfully.";
         $cartItem = $this->cartItemRepository->query()
-            ->select(['id', 'cartable_id', 'quantity', 'sub_total', 'product_price', 'cart_id'])
-            ->find($itemId);
+            ->whereKey($itemId)
+            ->firstOrFail();
+
 
         $product = $cartItem->cartable;
         $priceDetails = $this->calculatePriceDetails($validatedData, $product, $cartItem->product_price);
