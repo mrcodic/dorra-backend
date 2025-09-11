@@ -123,12 +123,11 @@ class TemplateService extends BaseService
         if (isset($validatedData['back_base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
         }
-        if (isset($validatedData['template_image_id']))
-        {
+        if (isset($validatedData['template_image_id'])) {
             Media::where('id', $validatedData['template_image_id'])
                 ->update([
                     'model_type' => get_class($model),
-                    'model_id'   => $model->id,
+                    'model_id' => $model->id,
                     'collection_name' => 'template_model_image',
                 ]);
         }
@@ -143,21 +142,24 @@ class TemplateService extends BaseService
             if (!empty($validatedData['types'])) {
                 $model->types()->sync($validatedData['types']);
             }
-            $model->products()->sync($validatedData['product_ids'] ?? []);
-            $model->categories()->sync($validatedData['category_ids'] ?? []);
+            if (!empty($validatedData['product_ids'])) {
+                $model->products()->sync($validatedData['product_ids'] ?? []);
+            }
+            if (!empty($validatedData['category_ids'])) {
+                $model->categories()->sync($validatedData['category_ids'] ?? []);
+            }
             if (!empty($validatedData['tags'])) {
                 $model->tags()->sync($validatedData['tags']);
             }
-            if (!empty($validatedData['template_image_id']))
-            {
+            if (!empty($validatedData['template_image_id'])) {
                 $model->getMedia('template_model_image')
                     ->where('id', '!=', $validatedData['template_image_id'])
                     ->each->delete();
 
                 Media::where('id', $validatedData['template_image_id'])
                     ->update([
-                        'model_type'      => get_class($model),
-                        'model_id'        => $model->id,
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
                         'collection_name' => 'template_model_image',
                     ]);
             }
