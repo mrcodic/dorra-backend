@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\User\Folder;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Validation\Rule;
-use App\Http\Requests\Folder\{StoreFaqRequest, UpdateFaqRequest};
+use App\Http\Requests\Folder\{StoreFaqRequest, StoreFolderRequest, UpdateFaqRequest, UpdateFolderRequest};
 use App\Http\Resources\FolderResource;
 use App\Models\Design;
 use App\Models\Folder;
@@ -26,13 +26,13 @@ class FolderController extends Controller
         return Response::api(data: FolderResource::collection($folders->load(['designs.owner', 'designs.product'])));
     }
 
-    public function store(StoreFaqRequest $request)
+    public function store(StoreFolderRequest $request)
     {
         $this->folderService->storeResource($request->all());
         return Response::api();
     }
 
-    public function update(UpdateFaqRequest $request, $id)
+    public function update(UpdateFolderRequest $request, $id)
     {
         $this->folderService->updateResource($request->validated(),$id);
         return Response::api();
