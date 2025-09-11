@@ -163,7 +163,7 @@
             <table class="code-list-table table">
                 <thead class="table-light">
                     <tr>
-                        <th><input type="checkbox" id="select-all-checkbox"></th>
+                        <th><input type="checkbox" id="select-all-checkbox" class="form-check-input"></th>
                         <th>Code Name</th>
                         <th>Type</th>
                         <th>Restrictions</th>

@@ -159,7 +159,7 @@
             <table class="permissions-list-table table mt-2">
                 <thead class="table-light">
                     <tr>
-                        <th><input type="checkbox" id="select-all-checkbox"></th>
+                        <th><input type="checkbox" id="select-all-checkbox" class="form-check-input"></th>
                         <th>Permission</th>
                         <th>Assigned To</th>
                         <th>Date</th>
