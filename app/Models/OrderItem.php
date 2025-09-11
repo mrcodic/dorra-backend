@@ -23,6 +23,7 @@ class OrderItem extends Model
         'product_price_id',
         'quantity'
     ];
+
     public function totalPrice(): Attribute
     {
         return Attribute::get(function ($value) {
