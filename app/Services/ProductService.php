@@ -45,7 +45,7 @@ class ProductService extends BaseService
         $products = $this->repository
             ->query()
             ->with($this->relations)
-            ->withCount(['category', 'tags'])
+            ->withCount(['category', 'tags' ])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $locale = app()->getLocale();
