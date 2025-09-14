@@ -4,10 +4,12 @@ namespace App\Http\Resources\Design;
 
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\Product\ProductSpecificationResource;
 use App\Http\Resources\Template\TemplateResource;
 use App\Http\Resources\UserResource;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductSpecification;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -40,6 +42,7 @@ class DesignResource extends JsonResource
             'owner' => UserResource::make($this->whenLoaded('owner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
+            'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
             'placed_on' => optional($this->pivot)->created_at?->format('d/m/Y'),
             'price' => $this->total_price,
             'quantity' => $this->productPrice?->quantity ?? $this->quantity,

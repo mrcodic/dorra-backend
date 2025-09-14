@@ -4,35 +4,47 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+
+
+return new class extends Migration {
     public function up(): void
     {
-        Schema::create('design_specifications', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('design_id');
-            $table->foreign('design_id')->references('design_id')->on('designs')->cascadeOnDelete();
+        if (!Schema::hasTable('design_specifications')) {
+            Schema::create('design_specifications', function (Blueprint $table) {
+                $table->id();
 
-            $table->unsignedBigInteger('product_spec_id');
-            $table->foreign('product_spec_id')->references('id')->on('product_specifications')->cascadeOnDelete();
+                // Prefer foreignUuid to match the UUID FK type
+                $table->foreignUuid('design_id')
+                    ->constrained('designs', 'design_id')
+                    ->cascadeOnDelete();
 
-            $table->unsignedBigInteger('option_id')->nullable();
-            $table->foreign('option_id')->references('id')->on('product_specification_options')->nullOnDelete();
+                $table->unsignedBigInteger('product_spec_id');
+                $table->foreign('product_spec_id')
+                    ->references('id')
+                    ->on('product_specifications')
+                    ->cascadeOnDelete();
 
-            $table->timestamps();
+                $table->unsignedBigInteger('option_id')->nullable();
+                $table->foreign('option_id')
+                    ->references('id')
+                    ->on('product_specification_options')
+                    ->nullOnDelete();
 
-            $table->unique(['design_id', 'product_spec_id']);
-        });
+                $table->timestamps();
+
+                $table->index(['design_id', 'product_spec_id']);
+            });
+        } else {
+            Schema::table('design_specifications', function (Blueprint $table) {
+                if (!Schema::hasColumn('design_specifications', 'design_id')) return;
+
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('design_specifications');
     }
 };
+

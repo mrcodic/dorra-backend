@@ -58,16 +58,16 @@ class StoreDesignRequest extends BaseRequest
             'design_back_data' => ['nullable', 'json'],
             'name' => ['required_without:template_id', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
-//            'product_price_id' => [
-//                Rule::requiredIf(function () {
-//                    $product = Product::find($this->product_id) ?? Category::find($this->product_id);
-//                    return $product && $product->prices()->exists();
-//                }),
-//                'exists:product_prices,id',
-//            ],
-//            "specs" => ["sometimes", "array"],
-//            "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
-//            "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
+            'product_price_id' => [
+                Rule::requiredIf(function () {
+                    $product = Product::find($this->product_id) ?? Category::find($this->product_id);
+                    return $product && $product->prices()->exists();
+                }),
+                'exists:product_prices,id',
+            ],
+            "specs" => ["required", "array"],
+            "specs.*.id" => ["required", "exists:product_specifications,id"],
+            "specs.*.option" => ["required", "exists:product_specification_options,id"],
         ];
     }
 

@@ -67,12 +67,13 @@ class DesignService extends BaseService
                     'media',
                     'template:id',
                     'designable.specifications.options',
+                    'specifications.options',
+                    'productPrice'
                 ]);
             });
 
         } else {
             $design = $this->repository->query()->create($validatedData);
-            $design->specifications();
         }
         if ($validatedData['user_id']) {
             $design->users()->attach(
@@ -80,12 +81,19 @@ class DesignService extends BaseService
             );
         }
 
-
+        collect($validatedData['specs'])->each(function ($spec) use ($design) {
+            $design->specifications()->attach([$design->id=> [
+                'product_spec_id' => $spec['id'],
+                'option_id' => $spec['option'],
+            ]]);
+        });
         return $design->load([
             'media',
             'designable.prices',
             'template:id',
             'designable.specifications.options',
+            'specifications.options',
+            'productPrice'
         ]);
     }
 

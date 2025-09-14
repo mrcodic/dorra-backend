@@ -46,7 +46,9 @@ class DesignController extends Controller
             'width',
             'unit',
             'designable_id',
-            'designable_type'
+            'designable_type',
+            'specs',
+            'product_price_id'
         ]));
 
         return Response::api(
@@ -59,7 +61,7 @@ class DesignController extends Controller
 
     public function show($design)
     {
-        $design = $this->designService->showResource($design, ['media', 'designable']);
+        $design = $this->designService->showResource($design, ['media', 'designable','specifications.options','productPrice']);
         return Response::api(data: DesignResource::make($design->refresh()));
     }
 
