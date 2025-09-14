@@ -18,11 +18,12 @@
                                 <select id="productsSelect" class="form-select category-select" name="category_id">
                                     <option value="" disabled selected>Choose product</option>
                                     @foreach($allCategories as $category)
-                                        <option value="{{ $category->id }}">
+                                        <option value="{{ $category->id }}" data-is-has-category="{{ $category->is_has_category }}">
                                             {{ $category->getTranslation('name', app()->getLocale()) }}
                                         </option>
                                     @endforeach
                                 </select>
+
                             </div>
 
                         </div>
@@ -116,22 +117,44 @@
 
 <script !src="">
     $('.category-select').on('change', function() {
-        const categoryId = $(this).val();
+        const $selectedOption = $(this).find(':selected');
+        const categoryId = $selectedOption.val();
+        const isHasCategory = $selectedOption.data('is-has-category'); // comes from Blade
 
         const $subCategorySelect = $('.category-sub-category-select');
+        const $categories = $('#tagsSelect');
 
-        $.ajax({
-            url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
-            method: "GET",
-            success: function(res) {
-                $subCategorySelect.empty().append('<option value="" disabled>Select subProduct</option>');
-                $.each(res.data, (i, s) => $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`));
-            },
-            error: function() {
-                $subCategorySelect.empty().append('<option value="">Error loading Subcategories</option>');
-            }
-        });
+        if (isHasCategory === 0) {
+            // Disable both selects
+            $subCategorySelect.prop('disabled', true).val(null).trigger('change');
+            $categories.prop('disabled', true).val(null).trigger('change');
+
+            // Clear out old options
+            $subCategorySelect.empty().append('<option value="" disabled>SubProducts disabled</option>');
+            $categories.empty().append('<option value="" disabled>Categories disabled</option>');
+
+        } else {
+            // Enable selects
+            $subCategorySelect.prop('disabled', false);
+            $categories.prop('disabled', false);
+
+            // Load subcategories via AJAX
+            $.ajax({
+                url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
+                method: "GET",
+                success: function(res) {
+                    $subCategorySelect.empty().append('<option value="" disabled>Select subProduct</option>');
+                    $.each(res.data, (i, s) =>
+                        $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`)
+                    );
+                },
+                error: function() {
+                    $subCategorySelect.empty().append('<option value="">Error loading Subcategories</option>');
+                }
+            });
+        }
     });
+
 
 </script>
 <script>
