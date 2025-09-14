@@ -322,8 +322,9 @@ class CategoryService extends BaseService
             ->addColumn('description_ar', function ($category) {
                 return $category->getTranslation('description', 'ar');
             })
-            ->addColumn('products', function ($product) {
-                return $product->products?->pluck('name');
+            ->addColumn('products', function ($category) {
+                return $category->products?->pluck('name')->implode(', ');
+
             })
             ->addColumn('imageId', function ($category) {
                 return $category->getFirstMedia('categories')?->id;
