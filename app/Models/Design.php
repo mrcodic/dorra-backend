@@ -92,12 +92,12 @@ class Design extends Model implements HasMedia
     {
         return $this->morphTo();
     }
-    public function product(): BelongsTo
+    public function product()
     {
-        return $this->belongsTo(Product::class, 'designable_id')
-            ->where('designable_type', Product::class);
+        return $this->morphTo()->where(function ($query) {
+            $query->where('designable_type', Product::class);
+        });
     }
-
 
     public function versions(): HasMany
     {
