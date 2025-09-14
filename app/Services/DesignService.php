@@ -126,7 +126,6 @@ class DesignService extends BaseService
         $query = $this->repository->query()
             ->with([
                 'designable:id,name',
-                'designable.saves:id',
                 'saves' => fn($q) => $q->where('user_id', $userId),
                 'owner:id,first_name,last_name',
                 'template:id,name,description',
@@ -217,7 +216,7 @@ class DesignService extends BaseService
     {
         return $this->repository->query()
             ->onlyTrashed()
-            ->with(['designable.category', 'owner'])
+            ->with(['designable', 'owner'])
             ->whereHas('users', function ($query) {
                 $query->where('user_id', auth('sanctum')->id());
             })
