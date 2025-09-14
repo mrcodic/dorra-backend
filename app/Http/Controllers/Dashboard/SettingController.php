@@ -53,7 +53,8 @@ class SettingController extends Controller
                             LandingReviewRepositoryInterface $landingReviewRepository,
     )
     {
-        $categories = $repository->query()->isLanding()->get();
+
+        $categories = $repository->query()->whereNull('parent_id')->isLanding()->get();
         $carousels = $carouselRepository->all();
         $products = $productRepository->all(columns: ['id', 'name']);
         $templates = $templateRepository->query()->isLanding()->get(['id', 'name']);
