@@ -60,7 +60,6 @@ class StoreCartItemRequest extends BaseRequest
             : Category::find($this->cartable_id);
 
         if ($this->product?->is_has_category) {
-
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
                     'product_price_id' => 'You Cannot add product with categories.',

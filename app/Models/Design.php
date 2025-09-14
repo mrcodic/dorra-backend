@@ -87,7 +87,16 @@ class Design extends Model implements HasMedia
         return $this->belongsTo(Template::class);
     }
 
-
+    public function categories()
+    {
+        return $this->morphedByMany(Category::class, 'designable', 'designables')
+            ->withTimestamps();
+    }
+    public function products()
+    {
+        return $this->morphedByMany(Product::class, 'designable', 'designables')
+            ->withTimestamps();
+    }
     public function designable(): MorphTo
     {
         return $this->morphTo();

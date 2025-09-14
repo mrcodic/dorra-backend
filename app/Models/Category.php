@@ -36,6 +36,11 @@ class Category extends Model implements HasMedia
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
+    public function designs()
+    {
+        return $this->morphToMany(Design::class, 'designable', 'designables')
+            ->withTimestamps();
+    }
 
     public function products(): HasMany
     {
