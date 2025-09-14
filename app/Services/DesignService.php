@@ -125,8 +125,8 @@ class DesignService extends BaseService
 
         $query = $this->repository->query()
             ->with([
-                'product.category:id,name',
-                'product.saves:id',
+                'designable:id,name',
+                'designable.saves:id',
                 'saves' => fn($q) => $q->where('user_id', $userId),
                 'owner:id,first_name,last_name',
                 'template:id,name,description',
@@ -136,7 +136,7 @@ class DesignService extends BaseService
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->when(request()->filled('owner_id'), fn($q) => $q->where('user_id', request('owner_id')))
             ->when(request()->filled('category_id'), fn($q) =>
-            $q->whereHas('product.category', fn($cat) =>
+            $q->whereHas('designable', fn($cat) =>
             $cat->where('id', request('category_id'))
             )
             )
