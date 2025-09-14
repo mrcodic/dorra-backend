@@ -23,7 +23,7 @@ class FolderController extends Controller
     public function index()
     {
         $folders = $this->folderService->getUserFolders();
-        return Response::api(data: FolderResource::collection($folders->load(['designs.owner', 'designs.product'])));
+        return Response::api(data: FolderResource::collection($folders->load(['designs.owner', 'designs.designable'])));
     }
 
     public function store(StoreFolderRequest $request)

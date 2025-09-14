@@ -16,7 +16,7 @@ class FolderService extends BaseService
     public function getUserFolders()
     {
         return $this->repository->query()
-//            ->withCount('designs')
+            ->withCount('designs')
             ->when(request()->filled('search'), function ($query) {
                 $search = request('search');
                 $query->where('name', 'like', '%' . $search . '%');
