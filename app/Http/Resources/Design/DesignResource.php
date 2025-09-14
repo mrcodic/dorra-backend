@@ -35,7 +35,7 @@ class DesignResource extends JsonResource
             'back_design_image' => $this->getFirstMediaUrl('back_designs'),
             'current_version' => $this->current_version,
             'product' => $this->when($designable, function () use ($designable) {
-                return  new CategoryResource($designable instanceof Category ? $designable : $designable->product);
+                return  new CategoryResource($designable instanceof Category ? $designable : $designable->category);
             }),
             'owner' => UserResource::make($this->whenLoaded('owner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
