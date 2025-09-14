@@ -48,7 +48,7 @@ class StoreCartItemRequest extends BaseRequest
             'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
             'cartable_id'   => ['required', 'integer'],
             'cartable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
-            "product_price_id" => ["required_with:", "exists:product_prices,id"],
+            "product_price_id" => ["nullable", "exists:product_prices,id"],
             "specs" => ["sometimes", "array"],
             "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
             "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
