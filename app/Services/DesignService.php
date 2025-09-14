@@ -125,7 +125,7 @@ class DesignService extends BaseService
 
         $query = $this->repository->query()
             ->with([
-                'designable:id,name',
+                'designable',
                 'saves' => fn($q) => $q->where('user_id', $userId),
                 'owner:id,first_name,last_name',
                 'template:id,name,description',
