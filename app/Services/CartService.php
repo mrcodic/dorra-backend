@@ -230,7 +230,9 @@ class CartService extends BaseService
         $cartItem = $this->cartItemRepository->find($id);
         if ($cartItem->cartable->has_custom_prices) {
             $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
-            $updated = $cartItem->update(['product_price' => $productPrice->price, 'quantity' => $productPrice->quantity]);
+            $updated = $cartItem->update(['product_price' => $productPrice->price,
+                'product_price_id' => $productPrice->id,
+                'quantity' => $productPrice->quantity]);
         } else {
             $updated = $cartItem->update($request->only(['quantity']));
         }

@@ -129,11 +129,6 @@ class Design extends Model implements HasMedia
         return $this->belongsTo(ProductPrice::class);
     }
 
-    public function specifications(): MorphMany
-    {
-        return $this->morphMany(CustomizableProductSpecification::class, 'customizable');
-    }
-
     public function cartItems(): BelongsToMany
     {
         return $this->belongsToMany(Cart::class, 'cart_items')->withPivot([
@@ -141,6 +136,17 @@ class Design extends Model implements HasMedia
         ]);
     }
 
+
+
+    public function specifications()
+    {
+        return $this->belongsToMany(
+            \App\Models\ProductSpecification::class,
+            'design_specifications',
+            'design_id',
+            'product_spec_id'
+        )->withPivot('option_id')->withTimestamps();
+    }
 
 
     public function invoices()
