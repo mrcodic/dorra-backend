@@ -58,7 +58,7 @@ class SettingController extends Controller
         $carousels = $carouselRepository->all();
         $products = $productRepository->all(columns: ['id', 'name']);
         $templates = $templateRepository->query()->isLanding()->get(['id', 'name']);
-        $allCategories = $repository->query()->get();
+        $allCategories = $repository->query()->whereNull('parent_id')->get();
         $partners = Media::query()->whereCollectionName('partners')->get();
         $reviewsWithImages = $landingReviewRepository->query()->whereType('with_image')->get();
         $reviewsWithoutImages = $landingReviewRepository->query()->whereType('without_image')->get();
