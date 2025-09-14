@@ -6,6 +6,7 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Template\TemplateResource;
 use App\Http\Resources\UserResource;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -34,9 +35,7 @@ class DesignResource extends JsonResource
             'back_design_image' => $this->getFirstMediaUrl('back_designs'),
             'current_version' => $this->current_version,
             'product' => $this->when($designable, function () use ($designable) {
-                return $designable instanceof Product
-                    ? new ProductResource($designable)
-                    : new CategoryResource($designable);
+                return  new CategoryResource($designable instanceof Category ? $designable : $designable->product);
             }),
             'owner' => UserResource::make($this->whenLoaded('owner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
