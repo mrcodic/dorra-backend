@@ -43,8 +43,7 @@ class StoreDesignRequest extends BaseRequest
                 }
                 if ($category->is_has_category)
                 {
-                    return $fail("The selected product  has categories select a category not product itself.");
-
+                    return $fail("You Cannot add product with categories.");
                 }
                 if (!($template->products->pluck('id')->contains($value))&& $this->input('designable_type') == 'product') {
                     return $fail("The selected category is not associated with the selected template.");

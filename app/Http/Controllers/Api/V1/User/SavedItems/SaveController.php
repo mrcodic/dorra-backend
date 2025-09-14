@@ -15,6 +15,7 @@ class SaveController extends Controller
     public function savedItems()
     {
         $user = auth('sanctum')->user();
+
         $savedProducts = $user->savedProducts()
             ->with('category','media')
             ->when(request()->filled('category_id'), function ($query) {
@@ -24,15 +25,16 @@ class SaveController extends Controller
             ->orderBy('created_at', request('date','desc'))
             ->get();
 
-
         $savedDesigns = $user->savedDesigns()
             ->with('product.category','owner','media')
             ->when(request()->filled('category_id'), function ($query) {
+
                 $query->whereRelation('product.category', 'id', request('category_id'));
             })
             ->orderBy('created_at', request('date','desc'))
             ->latest()
             ->get();
+
 
         return Response::api(data: [
             'designs' => $savedDesigns->isNotEmpty() ? DesignResource::collection($savedDesigns) : [],

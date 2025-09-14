@@ -67,21 +67,35 @@ class StoreCartItemRequest extends BaseRequest
                 ])
             );
         }
-        if ($this->template && !$this->template->products->contains($this->cartable_id) && $this->cartable_type == Product::class ) {
+        if ($this->template && !$this->template->products->contains($this->cartable_id) && $this->cartable_type == Product::class) {
+            throw new HttpResponseException(
+                Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
+                    'cartable_id' => 'The selected category is not associated with the selected template.',
+                ])
+            );
+        }
+        if ($this->template && !$this->template->categories()->contains($this->cartable_id) && $this->cartable_type == Category::class) {
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
                     'cartable_id' => 'The selected product is not associated with the selected template.',
                 ])
             );
         }
-
-        if ($this->design && $this->design->designable_id !== $this->cartable_id) {
+        if ($this->design && !$this->design->designable_id && $this->cartable_type == Category::class) {
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
-                    'cartable_id' => 'The selected product is not associated with the selected design.',
+                    'cartable_id' => 'The selected product is not associated with the selected template.',
                 ])
             );
         }
+        if ($this->design && !$this->design->designable_id && $this->cartable_type == Product::class) {
+            throw new HttpResponseException(
+                Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
+                    'cartable_id' => 'The selected category is not associated with the selected template.',
+                ])
+            );
+        }
+
 
         if ($this->cartable && $this->cartable->prices->isNotEmpty() && !$this->product_price_id) {
             throw new HttpResponseException(
