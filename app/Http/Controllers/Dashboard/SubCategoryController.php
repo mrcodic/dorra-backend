@@ -23,7 +23,7 @@ class SubCategoryController extends DashboardController
         $this->indexView = 'subcategories.index';
         $this->assoiciatedData = [
             'index' => [
-                'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
+                'categories' => $this->categoryRepository->query()->whereNull('parent_id')->whereIsHasCategory(1)->get(['id', 'name']),
             ],
         ];
         $this->usePagination = true;
