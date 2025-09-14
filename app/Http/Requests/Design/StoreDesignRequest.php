@@ -41,7 +41,7 @@ class StoreDesignRequest extends BaseRequest
                 } if (!$category) {
                     return;
                 }
-                if ($category->is_has_category)
+                if (!$category->is_has_category)
                 {
                     return $fail("You Cannot add product with categories.");
                 }
