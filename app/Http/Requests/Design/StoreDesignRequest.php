@@ -35,7 +35,7 @@ class StoreDesignRequest extends BaseRequest
             'template_id' => ['bail', 'sometimes', 'exists:templates,id'],
             'product_id'   => ['required', 'integer',function ($attribute, $value, $fail) {
                 $template = Template::find($this->template_id);
-                $category = Category::find($value);
+                $category = Category::find($value) ?? Product::find($value);
                 if (!$template) {
                     return;
                 } if (!$category) {
