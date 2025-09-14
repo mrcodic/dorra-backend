@@ -74,7 +74,7 @@ class StoreCartItemRequest extends BaseRequest
                 ])
             );
         }
-        if ($this->template && !$this->template->categories()->contains($this->cartable_id) && $this->cartable_type == Category::class) {
+        if ($this->template && !$this->template->categories->contains($this->cartable_id) && $this->cartable_type == Category::class) {
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
                     'cartable_id' => 'The selected product is not associated with the selected template.',
