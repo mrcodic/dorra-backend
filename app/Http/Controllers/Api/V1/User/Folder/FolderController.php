@@ -40,7 +40,7 @@ class FolderController extends Controller
 
     public function show($id)
     {
-        $folder = $this->folderService->showResource($id, ['designs','designs.product.category','designs.owner']);
+        $folder = $this->folderService->showResource($id, ['designs','designs.designable','designs.owner']);
         return Response::api(data: FolderResource::make($folder));
     }
 
