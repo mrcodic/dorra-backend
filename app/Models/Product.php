@@ -177,7 +177,11 @@ class Product extends Model implements HasMedia
     {
         return $this->morphMany(Save::class, 'savable');
     }
-
+    public function designs()
+    {
+        return $this->morphToMany(Design::class, 'designable', 'designables')
+            ->withTimestamps();
+    }
     public function carts(): MorphMany
     {
         return $this->morphMany(CartItem::class, 'cartable');
