@@ -45,7 +45,8 @@ class DesignController extends Controller
             'height',
             'width',
             'unit',
-            'product_id'
+            'designable_id',
+            'designable_type'
         ]));
 
         return Response::api(

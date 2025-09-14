@@ -63,10 +63,10 @@ class DesignService extends BaseService
 
 
                 return $design->load([
-                    'product.prices',
+                    'designable.prices',
                     'media',
                     'template:id',
-                    'product.specifications.options',
+                    'designable.specifications.options',
                 ]);
             });
 
@@ -82,9 +82,9 @@ class DesignService extends BaseService
 
         return $design->load([
             'media',
-            'product.prices',
+            'designable.prices',
             'template:id',
-            'product.specifications.options',
+            'designable.specifications.options',
         ]);
     }
 
@@ -185,7 +185,7 @@ class DesignService extends BaseService
             }
 
             $productPrice = optional($design->productPrice)->price;
-            $subTotal = $optionTotal ?? 0 + ($productPrice ?? ($design->product->base_price * $design->quantity));
+            $subTotal = $optionTotal ?? 0 + ($productPrice ?? ($design->designable->base_price * $design->quantity));
             return [
                 'sub_total' => $subTotal,
                 'quantity' => $design->productPrice?->quantity ?? $design->quantity,
@@ -217,7 +217,7 @@ class DesignService extends BaseService
     {
         return $this->repository->query()
             ->onlyTrashed()
-            ->with(['product.category', 'owner'])
+            ->with(['designable.category', 'owner'])
             ->whereHas('users', function ($query) {
                 $query->where('user_id', auth('sanctum')->id());
             })

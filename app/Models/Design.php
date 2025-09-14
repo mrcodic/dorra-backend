@@ -11,7 +11,13 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOneThrough, MorphMany, MorphToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo,
+    BelongsToMany,
+    HasMany,
+    HasOneThrough,
+    MorphMany,
+    MorphTo,
+    MorphToMany};
 use Spatie\Translatable\HasTranslations;
 
 #[ObservedBy(DesignObserver::class)]
@@ -32,7 +38,8 @@ class Design extends Model implements HasMedia
         'quantity',
         'name',
         'description',
-        'product_id'
+        'designable_id',
+        'designable_type'
     ];
     protected $attributes = [
         'quantity' => 1,
@@ -81,11 +88,16 @@ class Design extends Model implements HasMedia
     }
 
 
-    public function product(): BelongsTo
+    public function designable(): MorphTo
     {
-        return $this->belongsTo(Product::class)->withDefault(['name' => '']);
+        return $this->morphTo();
     }
-
+    public function product()
+    {
+        return $this->morphTo()->where(function ($query) {
+            $query->where('designable_type', Product::class);
+        });
+    }
 
     public function versions(): HasMany
     {

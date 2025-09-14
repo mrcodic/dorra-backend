@@ -4,7 +4,7 @@ namespace App\Http\Requests\Design;
 
 use App\Enums\Product\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
-use App\Models\{Guest, Product, Template};
+use App\Models\{Category, Guest, Product, Template};
 use App\Rules\DimensionWithinUnitRange;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -16,20 +16,43 @@ class StoreDesignRequest extends BaseRequest
     {
         return true;
     }
+    protected function prepareForValidation()
+    {
+        $map = [
+            'product'  => \App\Models\Product::class,
+            'category' => \App\Models\Category::class,
+        ];
 
+        if (isset($map[$this->designable_type])) {
+            $this->merge([
+                'designable_type' => $map[$this->designable_type],
+            ]);
+        }
+    }
     public function rules(): array
     {
         return [
             'template_id' => ['bail', 'sometimes', 'exists:templates,id'],
-            'product_id' => ['required', 'exists:products,id',function ($attribute, $value, $fail) {
+            'product_id'   => ['required', 'integer',function ($attribute, $value, $fail) {
                 $template = Template::find($this->template_id);
+                $category = Category::find($value);
                 if (!$template) {
                     return;
+                } if (!$category) {
+                    return;
                 }
-                if (!$template?->products->contains($value)) {
+                if ($category->is_has_category)
+                {
+                    return $fail("The selected product is has categories select a category not product itself.");
+
+                }
+                if (!($template->products->pluck('id')->contains($value))&& $this->input('designable_type') == 'product') {
+                    return $fail("The selected category is not associated with the selected template.");
+                } if (!($template->categories->pluck('id')->contains($value)) && $this->input('designable_type') == 'category') {
                     return $fail("The selected product is not associated with the selected template.");
                 }
             }],
+            'designable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
             'design_data' => ['nullable', 'json'],
@@ -48,15 +71,6 @@ class StoreDesignRequest extends BaseRequest
                 $template = Template::find($templateId);
                 if (!$template || $template->media->isEmpty()) {
                     $validator->errors()->add('template_id', 'The selected template does not have any media attached.');
-                }
-            }
-
-            if ($this->input('product_type') === 'T-shirt') {
-                $product = Product::where('name->en', 'T-shirt')->first();
-                if (!$product) {
-                    $validator->errors()->add('product_id', 'No product named T-shirt exists.');
-                } else {
-                    $this->merge(['product_id' => $product->id]);
                 }
             }
         });
@@ -85,6 +99,7 @@ class StoreDesignRequest extends BaseRequest
         $this->merge([
             'user_id' => $userId,
             'guest_id' => $guestId,
+            'designable_id' => $this->product_id,
             'design_data' => $template?->design_data ?? $this->input('design_data'),
             'design_back_data' => $template?->design_back_data ?? $this->input('design_back_data'),
             'name' => $template?->name ?? $this->input('name'),

@@ -6,6 +6,7 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Template\TemplateResource;
 use App\Http\Resources\UserResource;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,6 +19,7 @@ class DesignResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $designable = $this->designable;
         return [
             'id' => $this->id,
             'name'=> $this->name,
@@ -31,7 +33,11 @@ class DesignResource extends JsonResource
             'source_design_svg' => $this->getFirstMediaUrl('designs'),
             'back_design_image' => $this->getFirstMediaUrl('back_designs'),
             'current_version' => $this->current_version,
-            'product' => ProductResource::make($this->whenLoaded('product')),
+            'product' => $this->when($designable, function () use ($designable) {
+                return $designable instanceof Product
+                    ? new ProductResource($designable)
+                    : new CategoryResource($designable);
+            }),
             'owner' => UserResource::make($this->whenLoaded('owner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
