@@ -94,9 +94,7 @@ class Design extends Model implements HasMedia
     }
     public function product()
     {
-        return $this->morphTo()->where(function ($query) {
-            $query->where('designable_type', Product::class);
-        });
+        return  $this->designable()->where('designable_type', Product::class);
     }
 
     public function versions(): HasMany

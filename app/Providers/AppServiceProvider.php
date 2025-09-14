@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
         Fortify::loginView(fn () => view('dashboard.auth.login'));
 
         Response::macro('api', function (

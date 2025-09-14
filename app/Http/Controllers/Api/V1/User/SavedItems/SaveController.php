@@ -7,7 +7,6 @@ use App\Http\Requests\User\SavedItems\DeleteSaveRequest;
 use App\Http\Requests\User\SavedItems\ToggleSaveRequest;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Product\ProductResource;
-use App\Models\Product;
 use Illuminate\Support\Facades\Response;
 
 class SaveController extends Controller
@@ -27,11 +26,9 @@ class SaveController extends Controller
             ->get();
 
         $savedDesigns = $user->savedDesigns()
-            ->where('designable_type', Product::class)
-            ->with('designable.category','owner','media')
+            ->with('designable','owner','media')
             ->when(request()->filled('category_id'), function ($query) {
-
-                $query->whereRelation('product.category', 'id', request('category_id'));
+                $query->whereRelation('designable', 'id', request('category_id'));
             })
             ->orderBy('created_at', request('date','desc'))
             ->latest()
