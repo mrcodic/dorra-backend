@@ -48,8 +48,12 @@ class TagService extends BaseService
             $relation = $map[$taggableType] ?? null;
             if ($relation) {
 
-                $query->whereHas($relation, function ($q) use ($taggableId, $relation) {
-                    $q->where($relation . ".id", $taggableId);
+                $query->whereHas('templates', function ($q) use ($taggableType,$taggableId, $mapModels) {
+                    $q->whereHas('tags', function ($q)  use ($taggableType, $taggableId,$mapModels){
+                        $q->where('taggable_type', $mapModels[$taggableType])
+                            ->where('taggable_id', $taggableId);
+
+                    });
                 });
             }
         }
