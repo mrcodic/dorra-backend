@@ -15,7 +15,7 @@ return new class extends Migration {
 
                 // Prefer foreignUuid to match the UUID FK type
                 $table->foreignUuid('design_id')
-                    ->constrained('designs', 'design_id')
+                    ->constrained('designs',)
                     ->cascadeOnDelete();
 
                 $table->unsignedBigInteger('product_spec_id');
