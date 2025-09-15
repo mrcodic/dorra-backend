@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\CategoryResource;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\TagRepositoryInterface;
 use App\Services\CategoryService;
@@ -23,6 +24,7 @@ class CategoryController extends DashboardController
         public CategoryService              $categoryService,
         public TagRepositoryInterface       $tagRepository,
         public DimensionRepositoryInterface $dimensionRepository,
+        public CategoryRepositoryInterface $categoryRepository,
     )
     {
         parent::__construct($categoryService);
@@ -57,7 +59,13 @@ class CategoryController extends DashboardController
     public function addToLanding(Request $request)
     {
         $validatedData = $request->validate([
-            'category_id' => 'required', 'exists:categories,id',
+            'category_id' => ['required', 'exists:categories,id',function ($attribute, $value, $fail) {
+                $category =$this->categoryRepository->find($value);
+                if (!$category) {return;}
+                if ($category->is_landing) {
+                    $fail("this product is already  a landing product");
+                }
+            }],
             'sub_categories' => 'sometimes', 'array',
             'sub_categories.*' => ['sometimes', 'exists:categories,id'],
             'products' => ['sometimes', 'array'],
