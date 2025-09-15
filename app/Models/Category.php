@@ -49,12 +49,9 @@ class Category extends Model implements HasMedia
 
     public function templates()
     {
-        return $this->morphToMany(
+        return $this->belongsToMany(
             Template::class,
-            'referenceable',
             'product_template',
-            'referenceable_id',
-            'template_id'
         )->withTimestamps();
     }
 
