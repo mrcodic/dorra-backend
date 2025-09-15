@@ -35,7 +35,7 @@ class UpdateProductRequest extends BaseRequest
 //                Rule::unique('products', 'name->en')->ignore($id),
             ],
             'name.ar' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
 //                Rule::unique('products', 'name->ar')->ignore($id),

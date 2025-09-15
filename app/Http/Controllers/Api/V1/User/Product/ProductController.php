@@ -37,7 +37,7 @@ class ProductController extends Controller
             'templates',
             'media',
             'specifications.options',
-            'prices' => fn($q) => $request->query('all_prices') !== 'true' ? $q->limit(5) : null,
+            'prices' => fn($q) => $request->query('all_prices') !== 'true' ? $q->orderBy('quantity')->limit(5) : null,
         ])));
     }
 
