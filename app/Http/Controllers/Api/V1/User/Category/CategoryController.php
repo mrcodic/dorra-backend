@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\User\Category;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
@@ -28,9 +29,11 @@ class CategoryController extends Controller
         return Response::api(data: $categoryResourceCollection);
     }
 
-    public function show($id)
+    public function show($id, Request $request)
     {
-        return Response::api(data: CategoryResource::make($this->categoryService->showResource($id,['media','specifications.options','prices'])));
+        return Response::api(data: CategoryResource::make($this->categoryService->showResource($id,['media','specifications.options',
+            'prices' => fn($q) => $request->query('all_prices') !== 'true' ? $q->orderBy('quantity')->limit(5) : null,
+        ])));
     }
 
     public function getSubCategories()
