@@ -28,10 +28,7 @@ class DesignResource extends JsonResource
             'name'=> $this->name,
             'description'=> $this->description,
             'design_data' => $this->when(request('design_data') == true, $this->design_data),
-            'design_back_data' => $this->when(
-                request()->boolean('design_data', true),
-                $this->design_back_data
-            ),
+            'design_back_data' => $this->when(request('design_data') == true, $this->design_back_data),
             'design_image' => $this->getFirstMediaUrl('designs'),
             'source_design_svg' => $this->getFirstMediaUrl('designs'),
             'back_design_image' => $this->getFirstMediaUrl('back_designs'),
