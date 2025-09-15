@@ -37,17 +37,13 @@ class CategoryResource extends JsonResource
             'sub_categories' => CategoryResource::collection($this->whenLoaded('children')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'category_products' => ProductResource::collection($this->whenLoaded('landingProducts')),
-            'sub_category_products' => $this->whenLoaded('children', function () {
-                return $this->children->flatMap(function ($child) {
-                    return $child->landingProducts;
-                })->map(fn ($product) => new ProductResource($product));
-            }),
-
+            'sub_category_products' => ProductResource::collection($this->whenLoaded('landingSubCategories')),
             'is_has_category' => $this->is_has_category,
             'show_add_cart_btn' => $this->show_add_cart_btn,
             'type' => 'category',
             'rating' => $this->when(isset($this->rating), $this->rating),
             'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
+
         ];
     }
 }
