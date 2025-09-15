@@ -82,6 +82,8 @@ class StoreProductRequest extends BaseRequest
             'is_free_shipping' => ['nullable', 'boolean'],
             'status' => ['nullable', 'in:', StatusEnum::values()],
             'show_add_cart_btn' => ['required', 'boolean'],
+            'show_customize_design_btn' => ['required', 'boolean'],
+
 
         ];
     }

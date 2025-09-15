@@ -71,6 +71,7 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
             'custom_dimensions.*' =>['sometimes'],
             'is_has_category' => ['required', 'boolean'],
             'show_add_cart_btn' => ['required', 'boolean'],
+            'show_customize_design_btn' => ['required', 'boolean'],
 
         ];
 

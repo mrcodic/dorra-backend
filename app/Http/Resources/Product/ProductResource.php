@@ -43,6 +43,7 @@ class ProductResource extends JsonResource
             'has_mockup' => (boolean) $this->has_mockup,
             'product_model_image' => $this->getFirstMediaUrl('product_model_image'),
             'show_add_cart_btn' => $this->show_add_cart_btn,
+            'show_customize_design_btn' => $this->show_customize_design_btn,
 
 
         ];

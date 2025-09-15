@@ -18,7 +18,7 @@ class Category extends Model implements HasMedia
     use InteractsWithMedia, HasTranslations;
 
     public $translatable = ['name', 'description'];
-    protected $fillable = ['name', 'description', 'parent_id', 'is_landing', 'has_mockup', 'base_price', 'has_custom_prices', 'is_has_category','show_add_cart_btn'];
+    protected $fillable = ['name', 'description', 'parent_id', 'is_landing', 'has_mockup', 'base_price', 'has_custom_prices', 'is_has_category','show_add_cart_btn','show_customize_design_btn'];
     protected $attributes = ['is_has_category' => 1];
 
     public function scopeIsLanding(Builder $builder): Builder

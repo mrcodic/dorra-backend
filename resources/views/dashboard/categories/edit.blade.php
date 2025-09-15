@@ -32,22 +32,42 @@
                             <input type="hidden" name="is_has_category" value="0">
 
                             {{-- checkbox added --}}
-                            <div class="d-flex gap-1 rounded p-1 mb-2" style="border: 1px solid #CED5D4">
-                                <div>
-                                    <!-- Hidden fallback -->
-                                    <input type="hidden" name="show_add_cart_btn" value="0">
+                            <div class="px-2 row gap-2">
 
-                                    <!-- Actual checkbox -->
-                                    <input class="form-check-input mt-0" type="checkbox"
-                                           name="show_add_cart_btn" value="1"
-                                        @checked(old('show_add_cart_btn', $model->show_add_cart_btn ?? false))>
+                                <div class="d-flex gap-1 rounded p-1 mb-2 col" style="border: 1px solid #CED5D4">
+                                    <div>
+                                        <!-- Hidden fallback -->
+                                        <input type="hidden" name="show_add_cart_btn" value="0">
+
+                                        <!-- Actual checkbox -->
+                                        <input class="form-check-input mt-0" type="checkbox"
+                                               name="show_add_cart_btn" value="1"
+                                            @checked(old('show_add_cart_btn', $model->show_add_cart_btn ?? false))>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        <h5 style="color: #121212">Show “Add to Cart” Button</h5>
+                                        <p style="color: #424746">
+                                            When the checkbox is selected, the product can be added directly to the cart without customization.
+                                            If it’s not selected, the product must be customized before being added to cart.
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="d-flex flex-column gap-1">
-                                    <h5 style="color: #121212">Show “Add to Cart” Button</h5>
-                                    <p style="color: #424746">
-                                        When the checkbox is selected, the product can be added directly to the cart without customization.
-                                        If it’s not selected, the product must be customized before being added to cart.
-                                    </p>
+                                <div class="d-flex gap-1 rounded p-1 mb-2 col" style="border: 1px solid #CED5D4">
+                                    <div>
+                                        <!-- Hidden fallback -->
+                                        <input type="hidden" name="show_customize_design_btn" value="0">
+
+                                        <!-- Actual checkbox -->
+                                        <input class="form-check-input mt-0" type="checkbox"
+                                               name="show_customize_design_btn" value="1"
+                                            @checked(old('show_customize_design_btn', $model->show_customize_design_btn ?? false))>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        <h5 style="color: #121212">Show “Customize Design” Button</h5>
+                                        <p style="color: #424746">
+                                            When the checkbox is selected, the product can be customized before being added to cart.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
