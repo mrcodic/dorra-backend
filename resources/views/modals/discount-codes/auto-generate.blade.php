@@ -64,7 +64,7 @@
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="scope" id="applyToCategories" value="1">
-                            <label class="form-check-label text-black fs-16" for="applyToCategories">Categories</label>
+                            <label class="form-check-label text-black fs-16" for="applyToCategories">Products</label>
                         </div>
                     </div>
 
@@ -81,7 +81,7 @@
 
                     <!-- Categories dropdown -->
                     <div class="form-group mb-2 d-none categoriesField" id="categoriesField">
-                        <label for="categoriesSelect" class="label-text mb-1">Products</label>
+                        <label for="categoriesSelect" class="label-text mb-1">Categories</label>
                         <select id="categoriesSelect" name="category_ids[]" class="form-select select2 categoriesSelect"
                             multiple>
                             @foreach($associatedData['categories'] as $category)
