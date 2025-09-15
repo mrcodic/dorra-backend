@@ -71,7 +71,7 @@ class ReviewService extends BaseService
         ];
     }
 
-    public function productReviews($id, Request $request)
+    public function productReviews($request, $id)
     {
         return $this->repository->query()
             ->with(['user', 'media'])

@@ -7,6 +7,7 @@ use App\Http\Requests\Review\StoreReviewRequest;
 use App\Http\Resources\MediaResource;
 use App\Http\Resources\ReviewResource;
 use App\Services\ReviewService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 class ReviewController extends Controller
@@ -22,9 +23,9 @@ class ReviewController extends Controller
         return Response::api();
     }
 
-    public function show($productId)
+    public function show(Request $request,$productId)
     {
-        $reviews = $this->reviewService->productReviews($productId);
+        $reviews = $this->reviewService->productReviews($request, $productId);
         $allMedia = $reviews->flatMap(function ($review) {
             return $review->getMedia('reviews');
         });
