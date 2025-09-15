@@ -70,7 +70,7 @@
 
                     <!-- Products dropdown -->
                     <div class="form-group mb-2 productsField" id="productsField">
-                        <label for="productsSelect" class="label-text mb-1">Products</label>
+                        <label for="productsSelect" class="label-text mb-1">Categories</label>
                         <select id="productsSelect" name="product_ids[]" class="form-select select2 productsSelect"
                             multiple>
                             @foreach($associatedData['products'] as $product)
@@ -81,7 +81,7 @@
 
                     <!-- Categories dropdown -->
                     <div class="form-group mb-2 d-none categoriesField" id="categoriesField">
-                        <label for="categoriesSelect" class="label-text mb-1">Categories</label>
+                        <label for="categoriesSelect" class="label-text mb-1">Products</label>
                         <select id="categoriesSelect" name="category_ids[]" class="form-select select2 categoriesSelect"
                             multiple>
                             @foreach($associatedData['categories'] as $category)

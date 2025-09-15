@@ -49,12 +49,12 @@
                     </div>
 
                     <div class="form-group mb-2">
-                        <label class="label-text mb-1">Product</label>
+                        <label class="label-text mb-1">Category</label>
                         <div id="selectedProducts" class="d-flex flex-wrap gap-1"></div>
                     </div>
 
                     <div class="form-group mb-2">
-                        <label class="label-text mb-1">Category</label>
+                        <label class="label-text mb-1">Product</label>
                         <div id="selectedCategories" class="d-flex flex-wrap gap-1"></div>
                     </div>
 
