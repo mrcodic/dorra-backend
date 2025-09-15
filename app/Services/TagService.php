@@ -25,15 +25,19 @@ class TagService extends BaseService
         $mapModels = [
             'product' => Product::class,
             'category' => Category::class,
-            'template' => Template::class
         ];
+        $mapRelations = [
+            'product' =>'products',
+            'category' =>'categories',
+        ];
+        $relation = $mapRelations[$taggableType];
 
         $query = $this->repository->query()
             ->with($relations)
             ->withCount('templates');
 
 
-        if ($taggableType && $taggableId && isset($mapModels[$taggableType])) {
+        if ($taggableType && $taggableId && isset($mapModels[$taggableType]) && isset($relation)) {
             $model = $mapModels[$taggableType]::with('templates.tags')
                 ->withCount('templates')
                 ->find($taggableId);
@@ -43,9 +47,9 @@ class TagService extends BaseService
                     ->flatMap->tags
                     ->unique('id')
                     ->values()
-                    ->map(function ($tag) use ($model) {
-                        $tag->templates_count = $tag->templates()->whereHas('products', function ($query) use ($model) {
-                            $query->where('products.id', $model->id);
+                    ->map(function ($tag) use ($model,$relation) {
+                        $tag->templates_count = $tag->templates()->whereHas($relation, function ($query) use ($model,$relation) {
+                            $query->where("$relation.id", $model->id);
                         })->count();
 
                         return $tag;
