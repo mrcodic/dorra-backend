@@ -31,7 +31,7 @@ class StoreReviewRequest extends BaseRequest
         return [
             'review' => ['required', 'string', 'min:5'],
             'rating' => ['required', 'between:1,5'],
-            'reviewable_id' => ['required', 'exists:products,id', Rule::unique('reviews', 'reviewable_id')
+            'reviewable_id' => ['required',  Rule::unique('reviews', 'reviewable_id')
                 ->where(fn($q) => $q
                     ->where('reviewable_type', Product::class)
                     ->where('user_id', auth()->id())
