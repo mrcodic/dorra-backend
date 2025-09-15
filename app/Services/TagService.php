@@ -43,7 +43,7 @@ class TagService extends BaseService
                     ->unique('id')
                     ->values()
                     ->map(function ($tag) use ($model) {
-                        $tag->templates_count = $model->templates_count;
+                        $tag->templates_count = $tag->templates()->count();
                         return $tag;
                     })
                 : collect();
