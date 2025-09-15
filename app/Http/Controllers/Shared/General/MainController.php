@@ -96,7 +96,7 @@ class MainController extends Controller
 
     public function tags()
     {
-        return Response::api(data: TagResource::collection($this->tagService->getAll(columns: ['id', 'name'], counts: ['templates'])));
+        return Response::api(data: TagResource::collection($this->tagService->getAll(columns: ['id', 'name'])));
 
     }
 

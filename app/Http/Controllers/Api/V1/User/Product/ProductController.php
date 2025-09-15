@@ -37,7 +37,7 @@ class ProductController extends Controller
             'templates',
             'media',
             'specifications.options',
-            'prices' => fn($q) =>  $q->orderBy('quantity'),
+            'prices' => fn($q) => $q->orderBy('quantity'),
         ])));
     }
 

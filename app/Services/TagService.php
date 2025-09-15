@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\Template;
 use App\Repositories\Interfaces\TagRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Yajra\DataTables\DataTables;
@@ -24,10 +27,21 @@ class TagService extends BaseService
             'category'  => 'categories',
             'template'  => 'templates',
         ];
+        $mapModels = [
+            'product' => Product::class,
+            'category' => Category::class,
+            'template' => Template::class
+        ];
 
         $query = $this->repository->query()
             ->with($relations)
-            ->withCount($counts);
+            ->withCount(['templates' => function ($q) use ($taggableType, $taggableId,$mapModels) {
+                $q->whereHas('tags', function ($q)  use ($taggableType, $taggableId,$mapModels){
+                    $q->where('taggable_type', $mapModels[$taggableType])
+                        ->where('taggable_id', $taggableId);
+
+                });
+            }]);
 
         if ($taggableType && $taggableId) {
 
