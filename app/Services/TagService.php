@@ -44,12 +44,9 @@ class TagService extends BaseService
                     ->unique('id')
                     ->values()
                     ->map(function ($tag) use ($model) {
-                        $tag->templates_count = $tag->templates()
-                            ->whereHas('tags', function ($q) use ($model) {
-                                $q->where('taggable_type', get_class($model))
-                                    ->where('taggable_id', $model->id);
-                            })
-                            ->count();
+                        $tag->templates_count = $tag->templates()->whereHas('products', function ($query) use ($model) {
+                            $query->where('id', $model->id);
+                        })->count();
 
                         return $tag;
                     })
