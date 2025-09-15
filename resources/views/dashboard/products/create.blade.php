@@ -95,7 +95,7 @@
                                         <div class="col-md-6">
                                             <div class="mb-2">
                                                 <label class="form-label label-text" for="product-name-ar">Category Name
-                                                    (AR)*</label>
+                                                    (AR)</label>
                                                 <input type="text" id="product-name-ar" class="form-control"
                                                        name="name[ar]"
                                                        placeholder="Category Name (AR)"/>
