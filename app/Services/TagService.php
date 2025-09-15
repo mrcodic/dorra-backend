@@ -39,11 +39,18 @@ class TagService extends BaseService
                 ->find($taggableId);
 
             return $model
-                ? $model->templates->flatMap->tags
+                ? $model->templates
+                    ->flatMap->tags
                     ->unique('id')
                     ->values()
                     ->map(function ($tag) use ($model) {
-                        $tag->templates_count = $model->templates()->count();
+                        $tag->templates_count = $tag->templates()
+                            ->whereHas('tags', function ($q) use ($model) {
+                                $q->where('taggable_type', get_class($model))
+                                    ->where('taggable_id', $model->id);
+                            })
+                            ->count();
+
                         return $tag;
                     })
                 : collect();
