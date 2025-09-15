@@ -8,6 +8,19 @@ use Illuminate\Validation\Rule;
 
 class StoreReviewRequest extends BaseRequest
 {
+    protected function prepareForValidation()
+    {
+        $map = [
+            'product'  => \App\Models\Product::class,
+            'category' => \App\Models\Category::class,
+        ];
+
+        if (isset($map[$this->reviewable_type])) {
+            $this->merge([
+                'reviewable_type' => $map[$this->reviewable_type],
+            ]);
+        }
+    }
     public function authorize(): bool
     {
         return true;
@@ -24,6 +37,7 @@ class StoreReviewRequest extends BaseRequest
                     ->where('user_id', auth()->id())
                 ),
             ],
+            'reviewable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'images' => ['nullable', 'array'],
             'images.*' => ['nullable', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
         ];
