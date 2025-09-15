@@ -22,11 +22,6 @@ class TagService extends BaseService
         $taggableType = request()->taggable_type;
         $taggableId   = request()->taggable_id;
 
-        $map = [
-            'product'   => 'products',
-            'category'  => 'categories',
-            'template'  => 'templates',
-        ];
         $mapModels = [
             'product' => Product::class,
             'category' => Category::class,
@@ -35,32 +30,30 @@ class TagService extends BaseService
 
         $query = $this->repository->query()
             ->with($relations)
-            ->withCount(['templates' => function ($q) use ($taggableType, $taggableId,$mapModels) {
-                $q->whereHas('tags', function ($q)  use ($taggableType, $taggableId,$mapModels){
-                    $q->where('taggable_type', $mapModels[$taggableType])
-                        ->where('taggable_id', $taggableId);
+            ->withCount('templates');
 
-                });
-            }]);
 
-        if ($taggableType && $taggableId) {
+        if ($taggableType && $taggableId && isset($mapModels[$taggableType])) {
+            $model = $mapModels[$taggableType]::with('templates.tags')
+                ->withCount('templates')
+                ->find($taggableId);
 
-            $relation = $map[$taggableType] ?? null;
-            if ($relation) {
+            return $model
+                ? $model->templates->flatMap->tags
+                    ->unique('id')
+                    ->values()
+                    ->map(function ($tag) use ($model) {
+                        $tag->templates_count = $model->templates_count;
+                        return $tag;
+                    })
+                : collect();
 
-                $query->whereHas('templates', function ($q) use ($taggableType,$taggableId, $mapModels) {
-                    $q->whereHas('tags', function ($q)  use ($taggableType, $taggableId,$mapModels){
-                        $q->where('taggable_type', $mapModels[$taggableType])
-                            ->where('taggable_id', $taggableId);
-
-                    });
-                });
-            }
         }
+
+
         return $paginate
             ? $query->paginate($perPage, $columns)
             : $query->get($columns);
-
     }
 
 
