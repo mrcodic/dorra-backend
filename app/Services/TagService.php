@@ -30,14 +30,15 @@ class TagService extends BaseService
             'product' =>'products',
             'category' =>'categories',
         ];
-        $relation = $mapRelations[$taggableType];
+        $relation = $mapRelations[$taggableType] ?? null;
+
 
         $query = $this->repository->query()
             ->with($relations)
             ->withCount('templates');
 
 
-        if ($taggableType && $taggableId && isset($mapModels[$taggableType]) && isset($relation)) {
+        if ($taggableType && $taggableId && isset($mapModels[$taggableType]) && $relation) {
             $model = $mapModels[$taggableType]::with('templates.tags')
                 ->withCount('templates')
                 ->find($taggableId);
@@ -47,16 +48,18 @@ class TagService extends BaseService
                     ->flatMap->tags
                     ->unique('id')
                     ->values()
-                    ->map(function ($tag) use ($model,$relation) {
-                        $tag->templates_count = $tag->templates()->whereHas($relation, function ($query) use ($model,$relation) {
-                            $query->where("$relation.id", $model->id);
-                        })->count();
+                    ->map(function ($tag) use ($model, $relation) {
+                        $tag->templates_count = $tag->templates()
+                            ->whereHas($relation, function ($query) use ($model, $relation) {
+                                $query->where("$relation.id", $model->id);
+                            })
+                            ->count();
 
                         return $tag;
                     })
                 : collect();
-
         }
+
 
 
         return $paginate
