@@ -77,7 +77,7 @@ class ReviewService extends BaseService
             ->with(['user', 'media'])
             ->orderBy('created_at', request('date', 'desc'))
             ->where('reviewable_id', $id)
-            ->where('reviewable_type', $request->type == 'product' ? Category::class : Product::class)
+            ->where('reviewable_type', $request->type == 'category' ? Category::class : Product::class)
             ->get();
 
     }
