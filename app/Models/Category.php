@@ -49,7 +49,13 @@ class Category extends Model implements HasMedia
 
     public function templates()
     {
-        return $this->morphedByMany(Template::class, 'referenceable')->withTimestamps();
+        return $this->morphToMany(
+            Template::class,
+            'referenceable',
+            'product_template',
+            'referenceable_id',
+            'template_id'
+        )->withTimestamps();
     }
 
     public function subCategoryProducts(): HasMany
