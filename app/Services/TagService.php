@@ -14,17 +14,49 @@ class TagService extends BaseService
 
     }
 
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
+    {
+        $taggableType = request()->taggable_type;
+        $taggableId   = request()->taggable_id;
+
+        $map = [
+            'product'   => 'products',
+            'category'  => 'categories',
+            'template'  => 'templates',
+        ];
+
+        $query = $this->repository->query()
+            ->with($relations)
+            ->withCount($counts);
+
+        if ($taggableType && $taggableId) {
+
+            $relation = $map[$taggableType] ?? null;
+            if ($relation) {
+
+                $query->whereHas($relation, function ($q) use ($taggableId, $relation) {
+                    $q->where($relation . ".id", $taggableId);
+                });
+            }
+        }
+        return $paginate
+            ? $query->paginate($perPage, $columns)
+            : $query->get($columns);
+
+    }
+
+
     public function getData(): JsonResponse
     {
         $locale = app()->getLocale();
         $tags = $this->repository
-            ->query(['id', 'name','created_at'])
+            ->query(['id', 'name', 'created_at'])
             ->withCount(['templates', 'products'])
-            ->when(request()->filled('search_value'), function ($query) use ( $locale) {
+            ->when(request()->filled('search_value'), function ($query) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                    '%' . strtolower(request('search_value')) . '%'
-                ]);
+                        '%' . strtolower(request('search_value')) . '%'
+                    ]);
                 } else {
                     $query->whereRaw('1 = 0');
                 }
@@ -48,7 +80,6 @@ class TagService extends BaseService
             ->addColumn('show_date', function ($tag) {
                 return $tag->created_at?->format('Y-m-d');
             })
-
             ->addColumn('no_of_products', function ($tag) {
                 return $tag->products_count;
 

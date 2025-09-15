@@ -20,11 +20,7 @@ class MockupService extends BaseService
 
 
     public function getAll(
-        $relations = [],
-        bool $paginate = false,
-        $columns = ['*'],
-        $perPage = 16
-    )
+        $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
 
         $requested = request('per_page', $perPage);

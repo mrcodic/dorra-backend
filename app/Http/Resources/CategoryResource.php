@@ -34,15 +34,18 @@ class CategoryResource extends JsonResource
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
             'product_model_image' => $this->getFirstMediaUrl('category_model_image'),
-            'sub_categories' => CategoryResource::collection($this->whenLoaded('landingSubCategories')),
+            'sub_categories' => CategoryResource::collection(
+                $this->whenLoaded('landingSubCategories', function () {
+                    return $this->landingSubCategories->load('products');
+                })
+            ),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'category_products' => ProductResource::collection($this->whenLoaded('landingProducts')),
-            'sub_category_products' => $this->whenLoaded('landingSubCategories', function () {
+            'sub_category_products' => $this->whenLoaded('products', function () {
                 return $this->landingSubCategories->flatMap(function ($subCategory) {
                     return $subCategory->products;
                 })->map(fn ($product) => new ProductResource($product));
             }),
-
             'is_has_category' => $this->is_has_category,
             'show_add_cart_btn' => $this->show_add_cart_btn,
             'type' => 'category',

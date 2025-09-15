@@ -25,11 +25,7 @@ class TemplateService extends BaseService
     }
 
     public function getAll(
-        $relations = [],
-        bool $paginate = false,
-        $columns = ['*'],
-        $perPage = 16
-    )
+        $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
         request('with_design_data', true);
 

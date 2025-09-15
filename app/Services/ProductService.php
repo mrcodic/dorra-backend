@@ -91,7 +91,7 @@ class ProductService extends BaseService
             })->make();
     }
 
-    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 9)
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 9, $counts = [])
     {
         $locale = App::getLocale();
 

@@ -16,6 +16,10 @@ class Tag extends Model
     {
         return $this->morphedByMany(Product::class,'taggable');
     }
+    public function categories(): MorphToMany
+    {
+        return $this->morphedByMany(Category::class,'taggable');
+    }
     public function templates(): MorphToMany
     {
         return $this->morphedByMany(Template::class,'taggable');

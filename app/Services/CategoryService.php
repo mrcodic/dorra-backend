@@ -20,7 +20,7 @@ class CategoryService extends BaseService
         parent::__construct($repository);
     }
 
-    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10)
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
         $query = $this->repository->query()
             ->with($relations)

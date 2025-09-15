@@ -17,9 +17,9 @@ class BaseService
     }
 
 
-    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10)
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10,$counts =[])
     {
-        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters, perPage: $perPage);
+        return $this->repository->all($paginate, $columns, $relations, filters: $this->filters, perPage: $perPage,counts: $counts);
     }
 
     public function showResource($id, $relations = [])
