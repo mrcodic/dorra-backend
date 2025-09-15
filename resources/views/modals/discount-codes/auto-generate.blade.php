@@ -64,13 +64,13 @@
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="scope" id="applyToCategories" value="1">
-                            <label class="form-check-label text-black fs-16" for="applyToCategories">Products</label>
+                            <label class="form-check-label text-black fs-16" for="applyToCategories">Categories</label>
                         </div>
                     </div>
 
                     <!-- Products dropdown -->
                     <div class="form-group mb-2 productsField" id="productsField">
-                        <label for="productsSelect" class="label-text mb-1">Categories</label>
+                        <label for="productsSelect" class="label-text mb-1">Products</label>
                         <select id="productsSelect" name="product_ids[]" class="form-select select2 productsSelect"
                             multiple>
                             @foreach($associatedData['products'] as $product)
