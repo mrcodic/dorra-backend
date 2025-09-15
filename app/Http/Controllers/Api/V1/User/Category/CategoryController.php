@@ -19,6 +19,7 @@ class CategoryController extends Controller
     {
         $categories = $this->categoryService->getAll(relations: ['media',
             'children.landingSubCategories',
+            'landingSubCategories',
             'landingProducts'],
             paginate: request('paginate',false),
             perPage: request('per_page',8));
