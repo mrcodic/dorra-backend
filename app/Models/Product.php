@@ -131,9 +131,12 @@ class Product extends Model implements HasMedia
 
     public function templates()
     {
-        return $this->belongsToMany(
+        return $this->morphToMany(
             Template::class,
+            'referenceable',
             'product_template',
+            'referenceable_id',
+            'template_id'
         )->withTimestamps();
     }
 
