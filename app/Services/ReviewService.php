@@ -3,11 +3,13 @@
 namespace App\Services;
 
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Review;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\ReviewRepositoryInterface;
+use Illuminate\Http\Request;
 
 class ReviewService extends BaseService
 {
@@ -53,7 +55,6 @@ class ReviewService extends BaseService
             ->selectRaw('SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as two_stars')
             ->selectRaw('SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as one_star')
             ->where('reviewable_id', $id)
-            ->where('reviewable_type', Product::class)
             ->first();
 
 
@@ -70,13 +71,13 @@ class ReviewService extends BaseService
         ];
     }
 
-    public function productReviews($id)
+    public function productReviews($id, Request $request)
     {
         return $this->repository->query()
             ->with(['user', 'media'])
             ->orderBy('created_at', request('date', 'desc'))
             ->where('reviewable_id', $id)
-            ->where('reviewable_type', Product::class)
+            ->where('reviewable_type', $request->type == 'product' ? Category::class : Product::class)
             ->get();
 
     }

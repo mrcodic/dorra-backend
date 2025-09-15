@@ -77,6 +77,10 @@ class Category extends Model implements HasMedia
     {
         return $this->morphMany(ProductPrice::class, 'pricable');
     }
+    public function reviews(): MorphMany
+    {
+        return $this->morphMany(Review::class,'reviewable');
+    }
 
     public function dimensions()
     {

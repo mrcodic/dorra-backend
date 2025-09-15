@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Review;
 
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Validation\Rule;
 
@@ -36,6 +37,17 @@ class StoreReviewRequest extends BaseRequest
                     ->where('reviewable_type', Product::class)
                     ->where('user_id', auth()->id())
                 ),
+                function ($attribute, $value, $fail){
+                    $type = $this->input('reviewable_type');
+                    $exists = match ($type) {
+                        Product::class  => Product::whereKey($value)->exists(),
+                        Category::class => Category::whereKey($value)->exists(),
+                        default         => false,
+                    };
+                    if (! $exists) {
+                        $fail("The selected {$attribute} is invalid for {$type}.");
+                    }
+                },
             ],
             'reviewable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'images' => ['nullable', 'array'],
