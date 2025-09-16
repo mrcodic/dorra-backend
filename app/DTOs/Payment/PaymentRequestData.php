@@ -70,7 +70,7 @@ class PaymentRequestData
             'billing' => [
                 'first_name' => $this->requestData->first_name,
                 'last_name' => $this->requestData->last_name,
-                'email' => $this->user->requestData->email,
+                'email' => $this->requestData->email,
                 'phone_number' =>  $this->requestData->full_phone_number,
                 'country' => 'EG',
                 'city' => 'Cairo',
@@ -84,7 +84,7 @@ class PaymentRequestData
             'customer' => [
                 'first_name' =>   $this->requestData->first_name,
                 'last_name' =>  $this->requestData->last_name,
-                'email' => $this->user->requestData->email,
+                'email' => $this->requestData->email,
             ],
                 'items' => $allItems,
 
