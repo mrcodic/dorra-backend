@@ -18,11 +18,11 @@ use App\Http\Controllers\Dashboard\{AdminController,
     RoleController,
     SettingController,
     ShippingAddressController,
+    StatisticsController,
     SubCategoryController,
     TagController,
     TemplateController,
-    UserController
-};
+    UserController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Controllers\Shared\LibraryAssetController;
@@ -34,7 +34,7 @@ Route::view('confirm-password', 'dashboard.auth.confirm-password');
 
 Route::middleware('auth')->group(function () {
     Route::get('states', [MainController::class, 'states'])->name('states');
-    Route::view('/', 'dashboard.index')->name('dashboard');
+    Route::get('/', [StatisticsController::class,'index'])->name('dashboard');
 
     Route::group(['prefix' => 'users', 'as' => 'users.', 'controller' => UserController::class,], function () {
         Route::get('/data', 'getData')->name('data');
