@@ -27,7 +27,11 @@ class CategoryService extends BaseService
             ->whereNull('parent_id')
             ->when(request()->filled('is_landing'), function ($query) {
                 $query->where('is_landing', true);
-            });
+            })
+        ->when(request()->filled('is_has_category'), function ($query) {
+            $query->where('is_has_category', request('is_has_category',0));
+        })
+        ;
 
         return $paginate ? $query->paginate($perPage) : $query->get();
     }
