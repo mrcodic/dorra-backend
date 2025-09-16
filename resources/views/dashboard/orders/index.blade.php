@@ -240,7 +240,7 @@
                 </div>
                 {{-- Search and Select Options --}}
                 <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                    <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
+                    <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-4 search-form">
                         <i data-feather="search"
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
 
@@ -257,7 +257,7 @@
 
 
                     {{-- Filter Select - 10% on md+, half width on sm --}}
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-2">
                         <select name="created_at" class="form-select filter-status">
                             <option value="" disabled selected>Status</option>
                             <option value="">All</option>
@@ -270,7 +270,7 @@
                         </select>
                     </div>
 
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-2">
                         <select name="created_at" class="form-select filter-date">
                             <option value="" disabled selected>Date</option>
                             <option value="asc">Oldest</option>
