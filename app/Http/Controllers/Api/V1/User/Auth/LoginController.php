@@ -45,5 +45,6 @@ class LoginController extends Controller
             httpOnly: false,
             sameSite: 'Lax'
         ));
+
     }
 }

@@ -40,9 +40,9 @@ class OrderController extends Controller
         if (Arr::get($order,'paymentDetails') === false)
         {
             return Response::api(HttpEnum::BAD_REQUEST,
-                message: 'Something went wrong',
+                message: __('orders.payment_failed_message'),
                 errors: [
-                    'error' =>[ 'Failed to payment transaction try again later.'],
+                    'error' => [__('orders.payment_failed_error')],
                 ]
             );
         }
