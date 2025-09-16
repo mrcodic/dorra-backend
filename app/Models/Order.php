@@ -5,6 +5,7 @@ namespace App\Models;
 
 use App\Enums\Order\StatusEnum;
 use App\Observers\OrderObserver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOne};
@@ -46,6 +47,10 @@ class Order extends Model
         });
     }
 
+    public function scopeStatus(Builder $query, $status): Builder
+    {
+        return $query->whereStatus($status);
+}
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
