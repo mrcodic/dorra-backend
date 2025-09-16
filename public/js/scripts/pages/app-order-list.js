@@ -67,7 +67,7 @@ var dt_user_table = $(".order-list-table").DataTable({
                 }
 
                 return `
-            <div class="d-flex align-items-center gap-1">
+            <div class="d-flex align-items-center gap-1 px-1" style="background-color: #FCF8FC">
                 <img src="${icon}" alt="${label}" style="width: 20px; height: 20px;">
                 <span>${label}</span>
             </div>
