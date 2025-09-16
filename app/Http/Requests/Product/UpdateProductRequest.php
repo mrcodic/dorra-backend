@@ -86,6 +86,7 @@ class UpdateProductRequest extends BaseRequest
             'specifications.*.specification_options' => ['sometimes', 'array', 'min:1'],
             'specifications.*.specification_options.*.value_en' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.value_ar' => 'required_with:specifications|string',
+            'specifications.*.specification_options.*.price' => 'nullable|numeric|min:1',
             'specifications.*.specification_options.*.option_image' => ['nullable', 'exists:media,id'],
 //            'is_free_shipping' => ['required', 'boolean'],
             'dimensions'=>['required_without:custom_dimensions', 'array'],
