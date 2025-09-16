@@ -13,6 +13,7 @@ use App\Traits\OtpTrait;
 use Exception;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -53,7 +54,15 @@ class AuthService
 
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->stateless()->redirect();
+        $cookie = request()->cookie('cookie_id') ?? (string) Str::uuid();
+        Cookie::queue(cookie('cookie_id', $cookie, 60*24*30, '/', config('session.domain'), true, false, 'none'));
+
+        return Socialite::driver('google')
+            ->stateless()
+            ->with(['state' => base64_encode($cookie)])
+            ->redirect();
+
+//        return Socialite::driver('google')->stateless()->redirect();
     }
 
     public function handleGoogleCallback(): false|User|null
@@ -90,8 +99,10 @@ class AuthService
             $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(10))->plainTextToken;
             $user->token = $plainTextToken;
 
+            $stateCookie = request('state') ? base64_decode(request('state')) : null;
+            $cookieValue = request()->cookie('cookie_id') ?? $stateCookie;
 
-            $this->migrateGuestDataToUser($user);
+            $this->migrateGuestDataToUser($user, $cookieValue);
 
             return $user;
         } catch (Exception $exception) {
@@ -148,11 +159,11 @@ class AuthService
     }
 
 
-    private function migrateGuestDataToUser(User $user): void
+    private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
         $cookieValue = request()->cookie('cookie_id');
         if (!$cookieValue) {
-            return;
+           $cookieValue = $cookieGoogle;
         }
 
         $guest = $this->guestRepository->query()
