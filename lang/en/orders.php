@@ -7,9 +7,7 @@ return [
         'shipped' => 'Shipped',
         'delivered' => 'Delivered',
         'refunded' => 'Refunded',
-        'payment_failed_message' => 'Something went wrong',
-        'payment_failed_error' => 'Failed to process payment, please try again later.',
-
-
     ],
+    'payment_failed_message' => 'Something went wrong',
+    'payment_failed_error' => 'Failed to process payment, please try again later.',
 ];

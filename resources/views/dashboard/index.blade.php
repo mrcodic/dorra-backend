@@ -40,7 +40,7 @@ $discountTypes = [
                         </div>
                         <p class="text-black fs-4 mb-0">Total Orders</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> EGP</h2>
+                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{$totalOrders}}</span></h2>
                     <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
                                 class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
@@ -59,7 +59,7 @@ $discountTypes = [
                         </div>
                         <p class="text-black fs-4 mb-0">Earnings</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> EGP</h2>
+                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{ (int) round($totalOrdersPries) }}</span> EGP</h2>
                     <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
                                 class="font-medium-5"></i></span> Highest Month</h2>
                 </div>

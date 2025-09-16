@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1\User\Payment;
 
-use App\DTOs\Payment\PaymentRequestData;
-use App\Enums\HttpEnum;
+
 use App\Enums\Payment\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
-use App\Models\Guest;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
