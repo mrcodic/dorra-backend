@@ -32,6 +32,7 @@ class CategoryController extends DashboardController
         $this->updateRequestClass = new UpdateCategoryRequest();
         $this->indexView = 'categories.index';
         $this->createView = 'categories.create';
+        $this->showView = 'categories.show';
         $this->editView = 'categories.edit';
         $this->usePagination = true;
         $this->resourceClass = CategoryResource::class;

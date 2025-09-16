@@ -67,8 +67,8 @@ const dt_user_table = $(".category-list-table").DataTable({
                 return `
         <div class="d-flex gap-1">
                                 <a href="#" class="view-details"
-                                   data-bs-toggle="modal"
-                                   data-bs-target="#modals-slide-in"
+                                       data-action="${row.is_has_category ? 'modal' : 'redirect'}"
+                                    data-url="/categories/${data}"
                                    data-id="${data}"
                                    data-name_ar="${row.name_ar}"
                                    data-name_en="${row.name_en}"
@@ -97,7 +97,8 @@ const dt_user_table = $(".category-list-table").DataTable({
    data-products="${row.no_of_products}"
    data-showdate="${row.show_date}"
     data-action="${row.is_has_category ? 'modal' : 'redirect'}"
-       data-url="/categories/${data}/edit">
+       data-url="/categories/${data}/edit"
+       >
 
    <i data-feather="edit-3"></i>
 </a>
@@ -304,111 +305,94 @@ $(document).ready(function () {
     });
 
 // ================== VIEW DETAILS ==================
-    $(document).on("click", ".view-details", function (e) {
+    // One handler for BOTH view + edit
+    $(document).on("click", ".view-details, .edit-details", function (e) {
+        const $btn = $(this);
+        const action = $btn.data("action") || "modal";
+        const url    = $btn.data("url");
+        const modalId = $btn.data("modal") || ($btn.hasClass("edit-details") ? "#editCategoryModal" : "#showCategoryModal");
+
+        if (action === "redirect" && url) {
+            e.preventDefault();
+            window.location.href = url;
+            return;
+        }
+
+        // Open modal path
         e.preventDefault();
 
-        var $table = $(".category-list-table").DataTable();
-        var $row = $(this).closest("tr");
-        var rowData = $table.row($row).data();
+        // Pull row data (for subcategories)
+        const table  = $(".category-list-table").DataTable();
+        const row    = $btn.closest("tr");
+        const rowData = table.row(row).data() || {};
+        const loc = window.locale || "en";
 
-        // Safely get subcategories
-        let subCategories = [];
-        if (rowData && rowData.children) {
-            subCategories = rowData.children.map(function (child) {
-                return child["name"][locale];
-            });
-        }
+        const subCategories = Array.isArray(rowData.children)
+            ? rowData.children
+                .map(c => (c.name?.[loc] ?? c.name ?? ""))
+                .filter(Boolean)
+            : [];
 
-        // Category details from data attributes
-        const categoryNameAR = $(this).data("name_ar");
-        const categoryNameEn = $(this).data("name_en");
-        const products = $(this).data("products");
-        const addedDate = $(this).data("showdate");
-        const descriptionAr = $(this).data("description_ar");
-        const descriptionEn = $(this).data("description_en");
-        const image = $(this).data("image");
-        const imageId = $(this).data("image_id");
-        const id = $(this).data("id");
+        hydrateCategoryModal(modalId, $btn.data(), subCategories);
 
-        // Populate modal fields
-        $("#showCategoryModal #category-name-ar").val(categoryNameAR);
-        $("#showCategoryModal #category-name-en").val(categoryNameEn);
-        $("#showCategoryModal #category-products").val(products);
-        $("#showCategoryModal #category-date").val(addedDate);
-        $("#showCategoryModal #category-description-ar").val(descriptionAr);
-        $("#showCategoryModal #category-description-en").val(descriptionEn);
-        $("#showCategoryModal #imagePreview").attr("src", image);
-        $("#showCategoryModal #category-id").val(id);
-        $("#showCategoryModal #image-id").val(imageId);
-
-        // Build badges
-        let badgesHtml = subCategories.length
-            ? subCategories.map(s => `<span class="badge bg-light text-dark border">${s}</span>`).join("")
-            : "-";
-        $("#subcategories-container").html(badgesHtml);
-
-        // Show modal
-        new bootstrap.Modal(document.getElementById("showCategoryModal")).show();
+        new bootstrap.Modal(document.querySelector(modalId)).show();
     });
 
-
-// ================== EDIT DETAILS ==================
-    $(document).on("click", ".edit-details", function (e) {
-
-        let action = $(this).data('action');
-        let url = $(this).data('url');
-
-        if (action === 'modal') {
-            e.preventDefault();
-            var $table = $(".category-list-table").DataTable();
-            var $row = $(this).closest("tr");
-            var rowData = $table.row($row).data();
-
-            // Safely get subcategories
-            let subCategories = [];
-            if (rowData && rowData.children) {
-                subCategories = rowData.children.map(function (child) {
-                    return child["name"][locale];
-                });
+// Fill modal fields based on which modal it is
+    function hydrateCategoryModal(modalId, data, subCategories) {
+        // Map selectors per modal
+        const maps = {
+            "#showCategoryModal": {
+                nameAr: "#category-name-ar",
+                nameEn: "#category-name-en",
+                products: "#category-products",
+                date: "#category-date",
+                descAr: "#category-description-ar",
+                descEn: "#category-description-en",
+                img: "#imagePreview",
+                id: "#category-id",
+                imgId: "#image-id",
+                subs: "#subcategories-container",
+                extra: () => {} // nothing special
+            },
+            "#editCategoryModal": {
+                nameAr: "#edit-category-name-ar",
+                nameEn: "#edit-category-name-en",
+                products: "#edit-category-products",
+                date: "#edit-category-date",
+                descAr: "#edit-category-description-ar",
+                descEn: "#edit-category-description-en",
+                img: "#edit-preview-image",
+                id: "#edit-category-id",
+                imgId: null, // not present in your edit modal
+                subs: "#subcategories-container",
+                extra: () => { $("#editCategoryModal #edit-uploaded-image").removeClass("d-none"); }
             }
+        };
 
-            // Category details from data attributes
-            const categoryNameAR = $(this).data("name_ar");
-            const categoryNameEn = $(this).data("name_en");
-            const products = $(this).data("products");
-            const addedDate = $(this).data("showdate");
-            const descriptionAr = $(this).data("description_ar");
-            const descriptionEn = $(this).data("description_en");
-            const image = $(this).data("image");
-            const imageId = $(this).data("image_id");
-            const id = $(this).data("id");
+        const m = maps[modalId] || maps["#showCategoryModal"];
+        const $scope = $(modalId);
 
+        // Fill fields safely (data-* with underscores come through as same keys in jQuery)
+        $scope.find(m.nameAr).val(data.name_ar || "");
+        $scope.find(m.nameEn).val(data.name_en || "");
+        $scope.find(m.products).val(data.products ?? "");
+        $scope.find(m.date).val(data.showdate || "");
+        $scope.find(m.descAr).val(data.description_ar || "");
+        $scope.find(m.descEn).val(data.description_en || "");
+        $scope.find(m.img).attr("src", data.image || "");
+        if (m.imgId) $scope.find(m.imgId).val(data.image_id || "");
+        $scope.find(m.id).val(data.id || "");
 
-            // Populate modal fields
-            $("#editCategoryModal #edit-category-name-ar").val(categoryNameAR);
-            $("#editCategoryModal #edit-category-name-en").val(categoryNameEn);
-            $("#editCategoryModal #edit-category-products").val(products);
-            $("#editCategoryModal #edit-category-date").val(addedDate);
-            $("#editCategoryModal #edit-category-description-ar").val(descriptionAr);
-            $("#editCategoryModal #edit-category-description-en").val(descriptionEn);
-            $("#editCategoryModal #edit-uploaded-image").removeClass("d-none");
-            $("#editCategoryModal #edit-preview-image").attr("src", image);
-            $("#editCategoryModal #edit-category-id").val(id);
+        // Subcategory badges (scope to the current modal!)
+        const badgesHtml = subCategories.length
+            ? subCategories.map(s => `<span class="badge bg-light text-dark border me-1 mb-1">${s}</span>`).join("")
+            : "-";
+        $scope.find(m.subs).html(badgesHtml);
 
-            // Build badges
-            let badgesHtml = subCategories.length
-                ? subCategories.map(s => `<span class="badge bg-light text-dark border">${s}</span>`).join("")
-                : "-";
-            $("#subcategories-container").html(badgesHtml);
-
-            // Show modal
-            new bootstrap.Modal(document.getElementById("editCategoryModal")).show();
-        }else if (action === 'redirect' && url) {
-            // ✅ redirect
-            window.location.href = url;
-        }
-
-    });
+        // Any modal-specific tweaks
+        m.extra();
+    }
 
     $("#editButton").on("click", function () {
         var nameEN = $("#category-name-en").val();

@@ -107,6 +107,18 @@ class Category extends Model implements HasMedia
             ])
             ->withTimestamps();
     }
+    public function confirmedOrders()
+    {
+        return $this->morphToMany(Order::class,'orderable','order_items')
+            ->where('status', \App\Enums\Order\StatusEnum::CONFIRMED);
+    }
+    protected function rating(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->load('reviews')->reviews?->avg('rating')
+        );
+    }
+
     public function carts(): MorphMany
     {
         return $this->morphMany(CartItem::class, 'cartable');
