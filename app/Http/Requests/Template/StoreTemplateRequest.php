@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Template;
 
+use App\Enums\OrientationEnum;
 use App\Enums\Product\UnitEnum;
 use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
@@ -39,6 +40,8 @@ class StoreTemplateRequest extends BaseRequest
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file'],
+            'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
+
 
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Template;
 
+use App\Enums\OrientationEnum;
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
@@ -60,6 +61,8 @@ class UpdateTemplateRequest extends BaseRequest
             'tags.*' => ['integer', 'exists:tags,id'],
             'types' => ['required', 'array'],
             'types.*' => ['integer', 'exists:types,id'],
+            'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
+
         ];
     }
 

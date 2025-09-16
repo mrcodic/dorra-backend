@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Template;
 
+use App\Enums\OrientationEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
@@ -44,7 +45,9 @@ class UpdateTemplateEditorRequest extends BaseRequest
             'base64_preview_image' => ['sometimes', 'string'],
             'back_base64_preview_image' => ['sometimes', 'string'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
-            'colors' => ['sometimes', 'array']
+            'colors' => ['sometimes', 'array'],
+            'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
+
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Enums\OrientationEnum;
 use App\Observers\DesignObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,13 +18,15 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo,
     HasOneThrough,
     MorphMany,
     MorphTo,
-    MorphToMany};
+    MorphToMany
+};
 use Spatie\Translatable\HasTranslations;
 
 #[ObservedBy(DesignObserver::class)]
 class Design extends Model implements HasMedia
 {
     use HasUuids, InteractsWithMedia, HasTranslations, softDeletes;
+
     public $translatable = ['name', 'description'];
 
     protected $fillable = [
@@ -40,16 +43,20 @@ class Design extends Model implements HasMedia
         'description',
         'designable_id',
         'designable_type',
+        'orientation'
     ];
     protected $attributes = [
         'quantity' => 1,
         'current_version' => 0
     ];
+    protected $casts = [
+        'orientation' => OrientationEnum::class,];
 
     public function guest(): BelongsTo
     {
         return $this->belongsTo(Guest::class);
     }
+
     public function users()
     {
         return $this->morphedByMany(User::class, 'designable', 'designables')->withTimestamps();
@@ -64,9 +71,10 @@ class Design extends Model implements HasMedia
     {
         return $this->morphedByMany(Folder::class, 'designable', 'designables')->withTimestamps();
     }
+
     public function teams(): MorphToMany
     {
-        return $this->morphToMany(Team::class,'teamable')->withTimestamps();
+        return $this->morphToMany(Team::class, 'teamable')->withTimestamps();
     }
 
     public function quantity(): Attribute
@@ -79,7 +87,7 @@ class Design extends Model implements HasMedia
 
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class,'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function template(): BelongsTo
@@ -92,18 +100,21 @@ class Design extends Model implements HasMedia
         return $this->morphedByMany(Category::class, 'designable', 'designables')
             ->withTimestamps();
     }
+
     public function products()
     {
         return $this->morphedByMany(Product::class, 'designable', 'designables')
             ->withTimestamps();
     }
+
+    public function product()
+    {
+        return $this->designable()->where('designable_type', Product::class);
+    }
+
     public function designable(): MorphTo
     {
         return $this->morphTo();
-    }
-    public function product()
-    {
-        return  $this->designable()->where('designable_type', Product::class);
     }
 
     public function versions(): HasMany
@@ -129,15 +140,6 @@ class Design extends Model implements HasMedia
         return $this->belongsTo(ProductPrice::class);
     }
 
-    public function cartItems(): BelongsToMany
-    {
-        return $this->belongsToMany(Cart::class, 'cart_items')->withPivot([
-            'sub_total', 'total_price'
-        ]);
-    }
-
-
-
     public function specifications()
     {
         return $this->belongsToMany(
@@ -147,7 +149,6 @@ class Design extends Model implements HasMedia
             'product_spec_id'
         )->withPivot('option_id')->withTimestamps();
     }
-
 
     public function invoices()
     {
@@ -171,6 +172,13 @@ class Design extends Model implements HasMedia
                 }
             })
             ->exists();
+    }
+
+    public function cartItems(): BelongsToMany
+    {
+        return $this->belongsToMany(Cart::class, 'cart_items')->withPivot([
+            'sub_total', 'total_price'
+        ]);
     }
 
 

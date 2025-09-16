@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrientationEnum;
 use App\Enums\Product\UnitEnum;
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
@@ -10,9 +11,6 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -31,13 +29,15 @@ class Template extends Model implements HasMedia
         'design_back_data',
         'description',
         'is_landing',
-        'colors'
+        'colors',
+        'orientation'
     ];
     protected $casts = [
         'status' => StatusEnum::class,
         'type' => TypeEnum::class,
         'unit' => UnitEnum::class,
-        'colors' => 'array'
+        'colors' => 'array',
+        'orientation' => OrientationEnum::class,
     ];
 
     protected $attributes = [

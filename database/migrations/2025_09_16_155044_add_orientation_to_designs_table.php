@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('designs', function (Blueprint $table) {
-            //
+            $table->after('quantity',function (Blueprint $table) {
+                $table->tinyInteger('orientation')->nullable();
+            });
         });
     }
 
@@ -22,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('designs', function (Blueprint $table) {
-            //
+            $table->dropColumn('orientation');
         });
     }
 };

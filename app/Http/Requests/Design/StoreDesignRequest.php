@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Design;
 
+use App\Enums\OrientationEnum;
 use App\Enums\Product\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\{Category, Guest, Product, Template};
@@ -68,6 +69,7 @@ class StoreDesignRequest extends BaseRequest
             "specs" => ["required", "array"],
             "specs.*.id" => ["required", "exists:product_specifications,id"],
             "specs.*.option" => ["required", "exists:product_specification_options,id"],
+            'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
         ];
     }
 

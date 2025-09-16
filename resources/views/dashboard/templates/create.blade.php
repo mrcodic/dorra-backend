@@ -87,12 +87,14 @@
                                 </div>
 
                                 <div class="form-group mb-2">
-                                    <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Orientation</label>
-                                    <select id="productsWithoutCategoriesSelect" class="form-select select2" name="orientation"
-                                            multiple>
-                                        @foreach($associatedData['product_without_categories'] as $category)
-                                            <option value="{{ $category->id }}">
-                                                {{ $category->getTranslation('name', app()->getLocale()) }}
+                                    <label for="orientation" class="label-text mb-1">Orientation</label>
+                                    <select id="orientation" class="form-select" name="orientation">
+                                        <option value="" selected disabled>
+                                            chooese orientation
+                                        </option>
+                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
+                                            <option value="{{ $orientation->value }}">
+                                                {{$orientation->label()}}
                                             </option>
                                         @endforeach
                                     </select>
