@@ -48,7 +48,7 @@ function getCookie($key): array
             domain: null,
             secure: false,
             httpOnly: false,
-            sameSite: 'Lax'
+            sameSite: 'None'
         );
 
         cookie()->queue($cookie);
