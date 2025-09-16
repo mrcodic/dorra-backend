@@ -1,106 +1,106 @@
 <?php
 
-
-
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Country;
+use App\Models\State;
 
 class CountryStateSeeder extends Seeder
 {
     public function run()
     {
-        
-        
         $countries = [
             [
                 'id' => 1,
-                'name' => 'Egypt',
-          
+                'name' => [
+                    'en' => 'Egypt',
+                    'ar' => 'مصر',
+                ],
                 'states' => [
-                    ['name' => 'Alexandria'],
-                    ['name' => 'Aswan'],
-                    ['name' => 'Asyut'],
-                    ['name' => 'Beheira'],
-                    ['name' => 'Beni Suef'],
-                    ['name' => 'Cairo'],
-                    ['name' => 'Dakahlia'],
-                    ['name' => 'Damietta'],
-                    ['name' => 'Faiyum'],
-                    ['name' => 'Gharbia'],
-                    ['name' => 'Giza'],
-                    ['name' => 'Ismailia'],
-                    ['name' => 'Kafr El Sheikh'],
-                    ['name' => 'Luxor'],
-                    ['name' => 'Matrouh'],
-                    ['name' => 'Minya'],
-                    ['name' => 'Monufia'],
-                    ['name' => 'New Valley'],
-                    ['name' => 'North Sinai'],
-                    ['name' => 'Port Said'],
-                    ['name' => 'Qalyubia'],
-                    ['name' => 'Qena'],
-                    ['name' => 'Red Sea'],
-                    ['name' => 'Sharqia'],
-                    ['name' => 'Sohag'],
-                    ['name' => 'South Sinai'],
-                    ['name' => 'Suez'],
-
+                    ['name' => ['en' => 'Alexandria', 'ar' => 'الإسكندرية']],
+                    ['name' => ['en' => 'Aswan', 'ar' => 'أسوان']],
+                    ['name' => ['en' => 'Asyut', 'ar' => 'أسيوط']],
+                    ['name' => ['en' => 'Beheira', 'ar' => 'البحيرة']],
+                    ['name' => ['en' => 'Beni Suef', 'ar' => 'بني سويف']],
+                    ['name' => ['en' => 'Cairo', 'ar' => 'القاهرة']],
+                    ['name' => ['en' => 'Dakahlia', 'ar' => 'الدقهلية']],
+                    ['name' => ['en' => 'Damietta', 'ar' => 'دمياط']],
+                    ['name' => ['en' => 'Faiyum', 'ar' => 'الفيوم']],
+                    ['name' => ['en' => 'Gharbia', 'ar' => 'الغربية']],
+                    ['name' => ['en' => 'Giza', 'ar' => 'الجيزة']],
+                    ['name' => ['en' => 'Ismailia', 'ar' => 'الإسماعيلية']],
+                    ['name' => ['en' => 'Kafr El Sheikh', 'ar' => 'كفر الشيخ']],
+                    ['name' => ['en' => 'Luxor', 'ar' => 'الأقصر']],
+                    ['name' => ['en' => 'Matrouh', 'ar' => 'مطروح']],
+                    ['name' => ['en' => 'Minya', 'ar' => 'المنيا']],
+                    ['name' => ['en' => 'Monufia', 'ar' => 'المنوفية']],
+                    ['name' => ['en' => 'New Valley', 'ar' => 'الوادي الجديد']],
+                    ['name' => ['en' => 'North Sinai', 'ar' => 'شمال سيناء']],
+                    ['name' => ['en' => 'Port Said', 'ar' => 'بورسعيد']],
+                    ['name' => ['en' => 'Qalyubia', 'ar' => 'القليوبية']],
+                    ['name' => ['en' => 'Qena', 'ar' => 'قنا']],
+                    ['name' => ['en' => 'Red Sea', 'ar' => 'البحر الأحمر']],
+                    ['name' => ['en' => 'Sharqia', 'ar' => 'الشرقية']],
+                    ['name' => ['en' => 'Sohag', 'ar' => 'سوهاج']],
+                    ['name' => ['en' => 'South Sinai', 'ar' => 'جنوب سيناء']],
+                    ['name' => ['en' => 'Suez', 'ar' => 'السويس']],
                 ],
             ],
             [
                 'id' => 2,
-                'name' => 'United Arab Emirates',
-               
+                'name' => [
+                    'en' => 'United Arab Emirates',
+                    'ar' => 'الإمارات العربية المتحدة',
+                ],
                 'states' => [
-                    ['name' => 'Abu Dhabi'],
-                    ['name' => 'Dubai'],
-                    ['name' => 'Sharjah'],
-                    ['name' => 'Ajman'],
-                    ['name' => 'Umm Al-Quwain'],
-                    ['name' => 'Fujairah'],
-                    ['name' => 'Ras Al Khaimah'],
-                  
-                   
+                    ['name' => ['en' => 'Abu Dhabi', 'ar' => 'أبوظبي']],
+                    ['name' => ['en' => 'Dubai', 'ar' => 'دبي']],
+                    ['name' => ['en' => 'Sharjah', 'ar' => 'الشارقة']],
+                    ['name' => ['en' => 'Ajman', 'ar' => 'عجمان']],
+                    ['name' => ['en' => 'Umm Al-Quwain', 'ar' => 'أم القيوين']],
+                    ['name' => ['en' => 'Fujairah', 'ar' => 'الفجيرة']],
+                    ['name' => ['en' => 'Ras Al Khaimah', 'ar' => 'رأس الخيمة']],
                 ],
             ],
             [
                 'id' => 3,
-                'name' => 'Saudi Arabia',
-                
+                'name' => [
+                    'en' => 'Saudi Arabia',
+                    'ar' => 'المملكة العربية السعودية',
+                ],
                 'states' => [
-                    ['name' => 'Riyadh'],
-                    ['name' => 'Makkah'],
-                    ['name' => 'Madinah'],
-                    ['name' => 'Qassim'],
-                    ['name' => 'Eastern Province'],
-                    ['name' => 'Asir'],
-                    ['name' => 'Tabuk'],
-                    ['name' => 'Hail'],
-                    ['name' => 'Northern Borders'],
-                    ['name' => 'Jazan'],
-                    ['name' => 'Najran'],
-                    ['name' => 'Bahah'],
-                    ['name' => 'Jawf'],
+                    ['name' => ['en' => 'Riyadh', 'ar' => 'الرياض']],
+                    ['name' => ['en' => 'Makkah', 'ar' => 'مكة المكرمة']],
+                    ['name' => ['en' => 'Madinah', 'ar' => 'المدينة المنورة']],
+                    ['name' => ['en' => 'Qassim', 'ar' => 'القصيم']],
+                    ['name' => ['en' => 'Eastern Province', 'ar' => 'المنطقة الشرقية']],
+                    ['name' => ['en' => 'Asir', 'ar' => 'عسير']],
+                    ['name' => ['en' => 'Tabuk', 'ar' => 'تبوك']],
+                    ['name' => ['en' => 'Hail', 'ar' => 'حائل']],
+                    ['name' => ['en' => 'Northern Borders', 'ar' => 'الحدود الشمالية']],
+                    ['name' => ['en' => 'Jazan', 'ar' => 'جازان']],
+                    ['name' => ['en' => 'Najran', 'ar' => 'نجران']],
+                    ['name' => ['en' => 'Bahah', 'ar' => 'الباحة']],
+                    ['name' => ['en' => 'Jawf', 'ar' => 'الجوف']],
                 ],
             ],
         ];
 
         foreach ($countries as $country) {
-           
-            $countryId = DB::table('countries')->insertGetId([
-                'id' => $country['id'],
-                'name' => $country['name'],
-              
-            ]);
+            $countryModel = Country::updateOrCreate(
+                ['id' => $country['id']], // match by ID
+                ['name' => $country['name']]
+            );
 
-          
             foreach ($country['states'] as $state) {
-                DB::table('states')->insert([
-                    'name' => $state['name'],
-                    'country_id' => $countryId,
-                ]);
+                State::updateOrCreate(
+                    [
+                        'country_id' => $countryModel->id,
+                        'name->en' => $state['name']['en'], // match by English name
+                    ],
+                    ['name' => $state['name']]
+                );
             }
         }
     }
