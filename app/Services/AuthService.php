@@ -54,8 +54,8 @@ class AuthService
 
     public function redirectToGoogle()
     {
-        $cookie = request()->cookie('cookie_id') ?? (string) Str::uuid();
-        Cookie::queue(cookie('cookie_id', $cookie, 60*24*30, '/', config('session.domain'), true, false, 'none'));
+        $cookie = request()->cookie('dorra_auth_cookie_id') ?? (string) Str::uuid();
+        Cookie::queue(cookie('dorra_auth_cookie_id', $cookie, 60*24*30, '/', config('session.domain'), true, false, 'none'));
 
         return Socialite::driver('google')
             ->stateless()
@@ -100,7 +100,7 @@ class AuthService
             $user->token = $plainTextToken;
 
             $stateCookie = request('state') ? base64_decode(request('state')) : null;
-            $cookieValue = request()->cookie('cookie_id') ?? $stateCookie;
+            $cookieValue = request()->cookie('dorra_auth_cookie_id') ?? $stateCookie;
 
             $this->migrateGuestDataToUser($user, $cookieValue);
 
