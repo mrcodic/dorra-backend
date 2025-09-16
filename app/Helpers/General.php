@@ -46,7 +46,7 @@ function getCookie($key): array
             minutes: 60 * 24 * 30,
             path: '/',
             domain: null,
-            secure: false,
+            secure: true,
             httpOnly: false,
             sameSite: 'None'
         );
