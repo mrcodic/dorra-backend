@@ -154,34 +154,6 @@
 @endsection
 
 @section('content')
-{{-- <div class="row mb-1 gap-1">--}}
-    {{-- @php--}}
-    {{-- $stats = [--}}
-    {{-- ['icon' => 'images/users.svg', 'title' => 'Clients', 'count' => 1280, 'label' => 'Clients'],--}}
-    {{-- ['icon' => 'images/file.svg', 'title' => 'Invoices', 'count' => 342, 'label' => 'Invoices'],--}}
-    {{-- ['icon' => 'images/success.svg', 'title' => 'Paid', 'count' => '12,500', 'label' => 'EGP'],--}}
-    {{-- ['icon' => 'images/warning-duo-orange.svg', 'title' => 'Pending', 'count' => 218, 'label' => 'EGP'],--}}
-    {{-- ['icon' => 'images/warning-duo-red.svg', 'title' => 'Unpaid', 'count' => 218, 'label' => 'EGP'],--}}
-    {{-- ];--}}
-    {{-- @endphp--}}
-
-    {{-- @foreach ($stats as $stat)--}}
-    {{-- <div class="col border rounded-3 mx-1 ">--}}
-        {{-- <div class="card p-1 shadow-sm text-center h-100 d-flex flex-coloumn justify-content-between ">--}}
-            {{-- <div class="d-flex align-items-center justify-content-start gap-1 mb-1">--}}
-                {{-- <img src="{{ asset($stat['icon']) }}" alt="{{ $stat['title'] }}" width="28" height="28">--}}
-                {{-- <h6 class="mb-0">{{ $stat['title'] }}</h6>--}}
-                {{-- </div>--}}
-            {{-- <div class="d-flex justify-content-start align-items-baseline">--}}
-                {{-- <p class=" me-1  fs-2 text-black fw-bolder">{{ $stat['count'] }}</p>--}}
-                {{-- <p class="fs-16 text-black">{{ $stat['label'] }}</p>--}}
-                {{-- </div>--}}
-            {{-- </div>--}}
-        {{-- </div>--}}
-    {{-- @endforeach--}}
-    {{-- </div>--}}
-
-
 <!-- users list start -->
 <section class="app-user-list">
 
