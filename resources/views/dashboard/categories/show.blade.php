@@ -203,7 +203,7 @@
                                     <span class="mb-1 fw-bold label-text">Photo</span>
                                     <span class="fw-semibold disabled-field">
                                         @if ($option->media->isNotEmpty())
-                                        <img src="{{ $option->getFirstMediaUrl('productSpecificationOptions') }}"
+                                        <img src="{{ $option->getFirstMediaUrl('categorySpecificationOptions') }}"
                                             width="32px" height="32px" />
                                         @else
                                         -
