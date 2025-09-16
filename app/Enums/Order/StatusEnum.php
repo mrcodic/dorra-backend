@@ -14,17 +14,18 @@ enum StatusEnum : int
     case SHIPPED = 4;
     case DELIVERED = 5;
     case REFUNDED = 6;
-    public function label()
+    public function label(): string
     {
         return match ($this) {
-            self::PENDING => "Pending",
-            self::CONFIRMED => "Confirmed",
-            self::PREPARED => "Prepared",
-            self::SHIPPED => "Shipped",
-            self::DELIVERED => "Delivered",
-            self::REFUNDED => "Refunded",
+            self::PENDING   => __('orders.status.pending'),
+            self::CONFIRMED => __('orders.status.confirmed'),
+            self::PREPARED  => __('orders.status.prepared'),
+            self::SHIPPED   => __('orders.status.shipped'),
+            self::DELIVERED => __('orders.status.delivered'),
+            self::REFUNDED  => __('orders.status.refunded'),
         };
     }
+
     public function icon()
     {
         return match ($this) {
