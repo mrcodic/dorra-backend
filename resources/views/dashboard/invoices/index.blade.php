@@ -24,6 +24,33 @@
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 
 <style>
+    /* Statistics Cards */
+    .card-specs {
+        border: 1.5px solid #CED5D4;
+        border-radius: 20px;
+        width: 166px;
+        flex: 1;
+    }
+
+    .card-specs p {
+        color: #424746;
+        font-size: 14px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .card-specs .number {
+        color: #121212;
+        font-size: 20px;
+        font-weight: bold;
+        padding-right: 5px
+    }
+
+    .card-specs .text {
+        color: #424746;
+        font-size: 16px;
+    }
+
     /* Responsive table accordion styles */
     @media (max-width: 768px) {
 
@@ -167,6 +194,42 @@
                 <div class="col-md-4 user_status"></div>
             </div>
             <div class="card-datatable table-responsive pt-0">
+                {{-- Statistics Cards --}}
+                <div class="mb-3 d-flex flex-wrap gap-1">
+                    <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs">
+                        <div class="d-flex align-items-center gap-1">
+                            <img src="{{asset('/images/users.svg')}}" alt="users" style="width: 28px">
+                            <p>Clients</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="number">300</span>
+                            <span class="text">Clients</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                        <div class="d-flex align-items-center gap-1">
+                            <img src="{{asset('/images/file.svg')}}" alt="file" style="width: 28px">
+                            <p>Invoices</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="number">200</span>
+                            <span class="text">Invoices</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                        <div class="d-flex align-items-center gap-1">
+                            <img src="{{asset('/images/success.svg')}}" alt="success" style="width: 28px">
+                            <p>Paid</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="number">900.00</span>
+                            <span class="text">EGP</span>
+                        </div>
+                    </div>
+                </div>
+                {{-- search and Select options --}}
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-1">
                     <form action="" method="get" class="d-flex position-relative col-12 col-md-6 search-form">
                         <i data-feather="search"

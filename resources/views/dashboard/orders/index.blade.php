@@ -24,6 +24,32 @@
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 
 <style>
+    /* Statistics Cards */
+    .card-specs {
+        border: 1.5px solid #CED5D4;
+        border-radius: 20px;
+        width: 166px;
+        flex: 1;
+    }
+
+    .card-specs p {
+        color: #424746;
+        font-size: 16px;
+        padding-top: 5px;
+    }
+
+    .card-specs .number {
+        color: #121212;
+        font-size: 20px;
+        font-weight: bold;
+        padding-right: 5px
+    }
+
+    .card-specs .order {
+        color: #424746;
+        font-size: 16px;
+    }
+
     /* Responsive table accordion styles */
     @media (max-width: 768px) {
 
@@ -146,8 +172,64 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive pt-0">
-                <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
+                {{-- Statistics Cards --}}
+                <div class="mb-3 d-flex flex-wrap gap-1">
+                    <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                        <img src="{{asset('/images/pendingIcon.svg')}}" alt="pendingIcon" style="width: 32px">
+                        <p>Pending Orders</p>
+                        <div class="d-flex align-items-center">
+                            <span class="number">300</span>
+                            <span class="order">Orders</span>
+                        </div>
+                    </div>
 
+                    <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                        <img src="{{asset('/images/confirmedIcon.svg')}}" alt="confirmedIcon" style="width: 32px">
+                        <p>Confirmd Orders</p>
+                        <div class="d-flex align-items-center">
+                            <span class="number">300</span>
+                            <span class="order">Orders</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                        <img src="{{asset('/images/preparingIcon.svg')}}" alt="preparingIcon" style="width: 32px">
+                        <p>Preparing Orders</p>
+                        <div class="d-flex align-items-center">
+                            <span class="number">300</span>
+                            <span class="order">Orders</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                        <img src="{{asset('/images/deliveryIcon.svg')}}" alt="deliveryIcon" style="width: 32px">
+                        <p>Out for delivery</p>
+                        <div class="d-flex align-items-center">
+                            <span class="number">300</span>
+                            <span class="order">Orders</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                        <img src="{{asset('/images/deliveryIcon.svg')}}" alt="deliveryIcon" style="width: 32px">
+                        <p>Delivered Orders</p>
+                        <div class="d-flex align-items-center">
+                            <span class="number">300</span>
+                            <span class="order">Orders</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                        <img src="{{asset('/images/refundedIcon.svg')}}" alt="refundedIcon" style="width: 32px">
+                        <p>Refunded Orders</p>
+                        <div class="d-flex align-items-center">
+                            <span class="number">300</span>
+                            <span class="order">Orders</span>
+                        </div>
+                    </div>
+                </div>
+                {{-- Search and Select Options --}}
+                <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
                     <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
                         <i data-feather="search"
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
