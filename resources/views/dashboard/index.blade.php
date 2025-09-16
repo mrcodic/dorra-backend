@@ -59,7 +59,7 @@ $discountTypes = [
                         </div>
                         <p class="text-black fs-4 mb-0">Earnings</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{ $totalOrdersPries }}</span> EGP</h2>
+                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{ number_format($totalOrdersPries, 0) }}</span> EGP</h2>
                     <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
                                 class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
