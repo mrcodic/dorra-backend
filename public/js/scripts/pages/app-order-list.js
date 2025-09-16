@@ -30,7 +30,51 @@ var dt_user_table = $(".order-list-table").DataTable({
         { data: "user_name" },
         { data: "items" },
         { data: "total_price" },
-        { data: "status" },
+        {
+            data: "status",
+            render: function (data, type, row) {
+                let icon = "";
+                let label = "";
+
+                switch (data) {
+                    case "Pending":
+                        icon = "/images/pendingIcon.svg";
+                        label = "Pending";
+                        break;
+                    case "Confirmed":
+                        icon = "/images/confirmedIcon.svg";
+                        label = "Confirmed";
+                        break;
+                    case "Prepared":
+                        icon = "/images/preparingIcon.svg";
+                        label = "Prepared";
+                        break;
+                    case "Shipped":
+                        icon = "/images/deliveryIcon.svg";
+                        label = "Out for delivery";
+                        break;
+                    case "Delivered":
+                        icon = "/images/deliveryIcon.svg";
+                        label = "Delivered";
+                        break;
+                    case "Refunded":
+                        icon = "/images/refundedIcon.svg";
+                        label = "Refunded";
+                        break;
+                    default:
+                        icon = "/images/defaultIcon.svg";
+                        label = data;
+                }
+
+                return `
+            <div class="d-flex align-items-center gap-1">
+                <img src="${icon}" alt="${label}" style="width: 20px; height: 20px;">
+                <span>${label}</span>
+            </div>
+        `;
+            }
+        },
+
         { data: "added_date" },
         {
             data: "id",
