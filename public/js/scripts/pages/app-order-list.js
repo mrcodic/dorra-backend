@@ -119,6 +119,15 @@ $(".filter-status").on("change", function () {
     dt_user_table.draw();
 });
 
+$(document).on("click", ".status-card", function () {
+    const status = $(this).data("status");
+
+    // set the dropdown filter for consistency
+    $(".filter-status").val(status);
+
+    // redraw DataTable
+    dt_user_table.draw();
+});
 
 // Category select with timeout
 let categoryFilterTimeout;
