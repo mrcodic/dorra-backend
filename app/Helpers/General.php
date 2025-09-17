@@ -107,32 +107,12 @@ function getPriceAfterTax($tax, $subtotal): float|int
 {
     return round($tax * $subtotal,2) ;
 }
-if (!function_exists('setting')) {
-    function setting(string $key = null, $group = null, $default = null)
-    {
-        static $settings = null;
 
-        if ($settings === null) {
-            $settings = Cache::rememberForever('app_settings', function () {
-                return app(SettingRepository::class)->all();
-            });
-        }
-
-        $collection = collect($settings);
-
-        if ($group) {
-            $collection = $collection->where('group', $group);
-        }
-
-        if ($key === null) {
-            return $collection;
-        }
-
-        return $collection[$key] ?? $default;
-    }
+function setting(string $key = null, $group = null ,$default = null)
+{
+    $repository = app(SettingRepository::class);
+    return $repository->get($key, $default, $group);
 }
-
-
 
 
 function commentableModelClass(string $type): ?string
