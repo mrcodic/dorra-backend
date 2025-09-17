@@ -153,7 +153,7 @@ $discountTypes = [
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $templatesCount }}</span> Templates</span>
-                    <div class="progress progress-bar-primary w-{{$templatesCount}} me-1" style="height: 6px">
+                    <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
                         <div class="progress-bar" role="progressbar" aria-valuenow="{{ $templatesCount }}" aria-valuemin="0"
                             aria-valuemax="100" style="width: 70%"></div>
                     </div>
