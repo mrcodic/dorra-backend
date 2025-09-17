@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="editLandingCategoryModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="editCategoryForm" method="post" enctype="multipart/form-data" action="{{ route("categories.landing.edit") }}" class="landing-category-form">
+            <form id="editCategoryForm" method="post" enctype="multipart/form-data" action="{{ route("categories.landing.edit") }}">
                 @csrf
 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
