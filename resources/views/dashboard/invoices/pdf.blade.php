@@ -22,7 +22,7 @@
     <tbody>
     @foreach ($model->order?->orderItems ?? [] as $item)
         <tr>
-            <td>{{ $item->product->name ?? 'N/A' }}</td>
+            <td>{{ $item->itemable->name ?? 'N/A' }}</td>
             <td>{{ $item->quantity }}</td>
             <td>${{ number_format($item->sub_total, 2) }}</td>
         </tr>
