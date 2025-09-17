@@ -196,7 +196,7 @@
                             <p>Paid</p>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="number">{{ \App\Models\Invoice::sum('total_price') }}</span>
+                            <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
                             <span class="text">EGP</span>
                         </div>
                     </div>
