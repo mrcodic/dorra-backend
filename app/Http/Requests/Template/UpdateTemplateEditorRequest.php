@@ -46,7 +46,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
             'back_base64_preview_image' => ['sometimes', 'string'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
             'colors' => ['sometimes', 'array'],
-            'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
+            'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
 
         ];
     }

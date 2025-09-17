@@ -118,7 +118,7 @@ $discountTypes = [
                     <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $categoriesCount }}</span> Products</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
                         <div class="progress-bar" role="progressbar" aria-valuenow="{{$categoriesCount}}" aria-valuemin="0"
-                            aria-valuemax="100" style="width: 70%"></div>
+                            aria-valuemax="100" style="width: {{$categoriesCount}}%"></div>
                     </div>
                 </div>
             </div>
@@ -155,7 +155,7 @@ $discountTypes = [
                     <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $templatesCount }}</span> Templates</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
                         <div class="progress-bar" role="progressbar" aria-valuenow="{{ $templatesCount }}" aria-valuemin="0"
-                            aria-valuemax="100" style="width: 70%"></div>
+                            aria-valuemax="100" style="width: {{$templatesCount}}%"></div>
                     </div>
                 </div>
             </div>
