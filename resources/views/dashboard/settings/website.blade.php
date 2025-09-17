@@ -134,6 +134,14 @@
                                 <div class="fw-semibold text-black">{{ $category->name }}</div>
                             </div>
                             <!-- Remove Button -->
+                            <button class="btn btn-outline-secondary btn-sm ms-1"
+                                    data-bs-target="#editLandingCategoryModal"
+                                    data-bs-toggle="modal"
+                                data-id="{{ $category->id }}">
+                                Edit
+                            </button>
+                            @include("modals.landing.edit-category",['model' => $category])
+
                             <button class="btn btn-outline-secondary btn-sm ms-1 remove-category"
                                 data-id="{{ $category->id }}">
                                 Remove
