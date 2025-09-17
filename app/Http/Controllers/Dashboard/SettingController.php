@@ -54,7 +54,7 @@ class SettingController extends Controller
     )
     {
 
-        $categories = $repository->query()->whereNull('parent_id')->isLanding()->get();
+        $categories = $repository->query()->with(['children','landingProducts'])->whereNull('parent_id')->isLanding()->get();
         $carousels = $carouselRepository->all();
         $products = $productRepository->all(columns: ['id', 'name']);
         $templates = $templateRepository->query()->isLanding()->get(['id', 'name']);
