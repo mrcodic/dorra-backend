@@ -240,7 +240,7 @@
         </div>
 
 
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDx7_example_REAL_KEY"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAh-DFJiDiH8_5nojENlUFngHDAeA4stmg"></script>
         <script>
             let map;
     let marker;

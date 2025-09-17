@@ -57,7 +57,7 @@ class StoreDesignRequest extends BaseRequest
             'guest_id' => ['nullable', 'exists:guests,id'],
             'design_data' => ['nullable', 'json'],
             'design_back_data' => ['nullable', 'json'],
-            'name' => ['required_without:template_id', 'string', 'max:255'],
+            'name' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'product_price_id' => [
                 Rule::requiredIf(function () {
@@ -69,7 +69,7 @@ class StoreDesignRequest extends BaseRequest
             "specs" => ["required", "array"],
             "specs.*.id" => ["required", "exists:product_specifications,id"],
             "specs.*.option" => ["required", "exists:product_specification_options,id"],
-            'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
+            'orientation' => ['required_without:template_id', 'in:' . OrientationEnum::getValuesAsString()],
         ];
     }
 
