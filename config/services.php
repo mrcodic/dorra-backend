@@ -64,6 +64,9 @@ return [
         'hmac' => env('PAYMOB_HMAC'),
         'currency' => 'EGP',
     ],
+    'google_maps' => [
+        'key' => env('GOOGLE_MAPS_KEY'),
+    ],
 
 
 ];

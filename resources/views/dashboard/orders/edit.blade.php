@@ -115,7 +115,7 @@
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
                 @foreach ($model->orderItems as $orderItem)
                 @php
-                $product = $orderItem->product;
+                $product = $orderItem->itemable ;
                 @endphp
                 <div class="mb-1">
                     <div class="d-flex align-items-start justify-content-between">

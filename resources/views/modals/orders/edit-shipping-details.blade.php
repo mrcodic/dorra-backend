@@ -240,70 +240,82 @@
         </div>
 
 
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAh-DFJiDiH8_5nojENlUFngHDAeA4stmg"></script>
+
+        <!-- Load Google Maps JS with callback -->
+        <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initMap">
+        </script>
+
         <script>
             let map;
-    let marker;
+            let marker;
 
-    function initMap(lat = 30.0444, lng = 31.2357) {
-        const defaultLocation = {lat: parseFloat(lat), lng: parseFloat(lng)};
-        map = new google.maps.Map(document.getElementById('googleMap'), {
-            zoom: 10,
-            center: defaultLocation,
-        });
-        marker = new google.maps.Marker({
-            position: defaultLocation,
-            map: map,
-        });
-    }
+            // Google Maps init function
+            function initMap(lat = 30.0444, lng = 31.2357) {
+                const defaultLocation = { lat: parseFloat(lat), lng: parseFloat(lng) };
 
-    $(document).ready(function () {
-        $('#selectLocationModal').on('shown.bs.modal', function () {
-            setTimeout(function () {
-                if (!map) {
-                    initMap();
-                } else {
-                    google.maps.event.trigger(map, 'resize');
-                }
-            }, 300);
-        });
+                map = new google.maps.Map(document.getElementById('googleMap'), {
+                    zoom: 10,
+                    center: defaultLocation,
+                });
 
-        $('#locationSearch').on('input', function () {
-            const query = $(this).val();
-            if (query.length >= 2) {
-                $.ajax({
-                    url: "{{ route('locations.search') }}",
-                    method: 'GET',
-                    data: {search: query},
-                    success: function (response) {
-                        $('#locationList').html(response);
+                marker = new google.maps.Marker({
+                    position: defaultLocation,
+                    map: map,
+                });
+            }
+
+            $(document).ready(function () {
+                // Re-initialize map inside modal after it's shown
+                $('#selectLocationModal').on('shown.bs.modal', function () {
+                    setTimeout(function () {
+                        if (!map) {
+                            initMap();
+                        } else {
+                            google.maps.event.trigger(map, 'resize');
+                            map.setCenter(marker.getPosition());
+                        }
+                    }, 300);
+                });
+
+                // Handle search input
+                $('#locationSearch').on('input', function () {
+                    const query = $(this).val();
+                    if (query.length >= 2) {
+                        $.ajax({
+                            url: "{{ route('locations.search') }}",
+                            method: 'GET',
+                            data: { search: query },
+                            success: function (response) {
+                                $('#locationList').html(response);
+                            }
+                        });
+                    } else {
+                        $('#locationList').html('');
                     }
                 });
-            } else {
-                $('#locationList').html('');
-            }
-        });
 
-        $(document).on('click', '.location-item', function () {
-            const lat = parseFloat($(this).data('lat'));
-            const lng = parseFloat($(this).data('lng'));
-            const name = $(this).data('name');
-            const id = $(this).data('id');
+                // Handle location item click
+                $(document).on('click', '.location-item', function () {
+                    const lat = parseFloat($(this).data('lat'));
+                    const lng = parseFloat($(this).data('lng'));
+                    const name = $(this).data('name');
+                    const id = $(this).data('id');
 
-            if (marker) marker.setMap(null);
+                    if (marker) marker.setMap(null);
 
-            const newLocation = {lat: lat, lng: lng};
-            map.setCenter(newLocation);
-            marker = new google.maps.Marker({
-                position: newLocation,
-                map: map,
+                    const newLocation = { lat, lng };
+                    map.setCenter(newLocation);
+                    marker = new google.maps.Marker({
+                        position: newLocation,
+                        map: map,
+                    });
+
+                    $('#locationSearch').val(name);
+                    $('#selectedLocationId').val(id);
+                    $('#locationList').html('');
+                });
             });
-
-            $('#locationSearch').val(name);
-            $('#selectedLocationId').val(id);
-            $('#locationList').html('');
-        });
-    });
         </script>
 
 
