@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Enums\OrientationEnum;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -71,6 +72,9 @@ class TemplateService extends BaseService
                 $q->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
                 });
+            })
+            ->when(request()->filled('orientation'),function ($q){
+                $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
             })
             ->latest();
 
