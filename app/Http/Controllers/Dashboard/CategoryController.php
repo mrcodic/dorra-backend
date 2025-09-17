@@ -82,13 +82,7 @@ class CategoryController extends DashboardController
    public function editCategoryOnLanding(Request $request)
     {
         $validatedData = $request->validate([
-            'category_id' => ['required', 'exists:categories,id',function ($attribute, $value, $fail) {
-                $category =$this->categoryRepository->find($value);
-                if (!$category) {return;}
-                if ($category->is_landing) {
-                    $fail("this product is already  a landing product");
-                }
-            }],
+            'category_id' => ['required', 'exists:categories,id'],
             'sub_categories' => 'sometimes', 'array',
             'sub_categories.*' => ['sometimes', 'exists:categories,id'],
             'products' => ['sometimes', 'array'],
