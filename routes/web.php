@@ -156,6 +156,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/search', 'search')->name('search');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::post('/landing', 'addToLanding')->name('landing');
+        Route::post('/landing/edit-category', 'editCategoryOnLanding')->name('landing.edit');
         Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
     });
     Route::post('/store-templates', [TemplateController::class, 'storeAndRedirect'])->name('templates.redirect.store');

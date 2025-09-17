@@ -79,6 +79,28 @@ class CategoryController extends DashboardController
         return $this->resourceClass::make($category);
 
     }
+   public function editCategoryOnLanding(Request $request)
+    {
+        $validatedData = $request->validate([
+            'category_id' => ['required', 'exists:categories,id',function ($attribute, $value, $fail) {
+                $category =$this->categoryRepository->find($value);
+                if (!$category) {return;}
+                if ($category->is_landing) {
+                    $fail("this product is already  a landing product");
+                }
+            }],
+            'sub_categories' => 'sometimes', 'array',
+            'sub_categories.*' => ['sometimes', 'exists:categories,id'],
+            'products' => ['sometimes', 'array'],
+            'products.*' => ['sometimes', 'exists:products,id'],
+        ], [
+            'category_id.required' => 'Please select a product.',
+            'category_id.exists' => 'Selected product does not exist.',
+        ]);
+        $category = $this->categoryService->editCategoryOnLanding($validatedData, $request->get('category_id'));
+        return $this->resourceClass::make($category);
+
+    }
 
     public function removeFromLanding(Request $request)
     {

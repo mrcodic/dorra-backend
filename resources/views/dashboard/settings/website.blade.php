@@ -134,13 +134,17 @@
                                 <div class="fw-semibold text-black">{{ $category->name }}</div>
                             </div>
                             <!-- Remove Button -->
-                            <button class="btn btn-outline-secondary btn-sm ms-1"
-                                    data-bs-target="#editLandingCategoryModal"
+                            <button class="btn btn-outline-secondary btn-sm ms-1 edit-category"
                                     data-bs-toggle="modal"
-                                data-id="{{ $category->id }}">
+                                    data-bs-target="#editLandingCategoryModal"
+                                    data-id="{{ $category->id }}"
+                                    data-name="{{ $category->name }}"
+                                    data-image="{{ $category->getFirstMediaUrl('categories') }}"
+                                    data-subcategories='@json($category->children->pluck("id"))'
+                                    data-products='@json($category->landingProducts->pluck("id"))'>
                                 Edit
                             </button>
-                            @include("modals.landing.edit-category",['model' => $category])
+
 
                             <button class="btn btn-outline-secondary btn-sm ms-1 remove-category"
                                 data-id="{{ $category->id }}">
@@ -1051,6 +1055,7 @@
 
     </div>
     @include("modals.landing.add-category")
+    @include("modals.landing.edit-category")
 
     @endsection
 
@@ -1076,6 +1081,33 @@
     @endsection
 
     @section('page-script')
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const editButtons = document.querySelectorAll(".edit-category");
+
+                editButtons.forEach(btn => {
+                    btn.addEventListener("click", function () {
+                        // Get values from data attributes
+                        const id = this.dataset.id;
+                        const name = this.dataset.name;
+                        const image = this.dataset.image;
+                        const subcategories = JSON.parse(this.dataset.subcategories || "[]");
+                        const products = JSON.parse(this.dataset.products || "[]");
+
+                        // Fill modal fields
+                        $('#editProductsSelect').val(id).trigger('change'); // category select
+                        $('#editSubCategorySelect').val(subcategories).trigger('change'); // subcategories
+                        $('#editTagsSelect').val(products).trigger('change'); // products
+
+                        // Optional: preview image
+                        if (image) {
+                            $('#editCategoryImagePreview').attr('src', image).removeClass('d-none');
+                        }
+                    });
+                });
+            });
+
+        </script>
     <script>
         Dropzone.autoDiscover = false;
 

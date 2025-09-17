@@ -423,6 +423,24 @@ class CategoryService extends BaseService
             return $category;
         });
     }
+    public function editCategoryOnLanding($validatedData, $categoryId)
+    {
+        if ($this->repository->query()->isLanding()->count() == 7) {
+            throw ValidationException::withMessages([
+                'category_id' => ['you can\'t add more than 7 items.']
+            ]);
+        }
+        $category = $this->repository->find($categoryId);
+        return $this->handleTransaction(function () use ($category, $validatedData) {
+            $category = tap($category, function ($category) use($validatedData) {
+                $category->update($validatedData);
+            });
+            $category->landingProducts()->syncWithoutDetaching(Arr::get($validatedData, 'products') ?? []);
+            $category->landingSubCategories()->syncWithoutDetaching(Arr::get($validatedData, 'sub_categories') ?? []);
+
+            return $category;
+        });
+    }
 
     public function removeFromLanding($categoryId)
     {

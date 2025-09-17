@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="editLandingCategoryModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="addCategoryForm" method="post" enctype="multipart/form-data" action="{{ route("categories.landing") }}" class="landing-category-form">
+            <form id="editCategoryForm" method="post" enctype="multipart/form-data" action="{{ route("categories.landing.edit") }}" class="landing-category-form">
                 @csrf
 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
@@ -18,10 +18,7 @@
                                 <select id="editProductsSelect" class="form-select category-select" name="category_id">
                                     <option value="" disabled selected>Choose product</option>
                                     @foreach($allCategories as $category)
-                                        <option value="{{ $category->id }}" data-is-has-category="{{ $category->is_has_category }}"
-                                        @selected($model->id == $category->id)
-                                            @disabled(!$category->is_has_category)
-                                        >
+                                        <option value="{{ $category->id }}" data-is-has-category="{{ $category->is_has_category }}">
                                             {{ $category->getTranslation('name', app()->getLocale()) }}
                                         </option>
                                     @endforeach
@@ -33,17 +30,8 @@
                         <div class="col-12">
                             <div class="form-group mb-2">
                                 <label for="editSubCategorySelect" class="label-text mb-1">SubProducts</label>
-                                <select id="editSubCategorySelect" class="form-select select2 category-sub-category-select"
-                                        data-sub-category-url="{{ route('sub-categories')}}" name="sub_categories[]"
+                                <select id="editSubCategorySelect" class="form-select select2 category-sub-category-select" data-sub-category-url="{{ route('sub-categories')}}" name="sub_categories[]" multiple>
 
-                                        multiple>
-                                    @foreach($model->children as $product)
-                                        <option value="{{ $product->id }}"
-                                            @selected($model->landingSubCategories->contains($product->id))
-                                        >
-                                            {{ $product->getTranslation('name', app()->getLocale()) }}
-                                        </option>
-                                    @endforeach
                                 </select>
                             </div>
 
@@ -53,7 +41,7 @@
                                 <label for="editTagsSelect" class="label-text mb-1">Category</label>
                                 <select id="editTagsSelect" class="form-select select2 sub-category-select" name="products[]" multiple>
                                     @foreach($products as $product)
-                                        <option value="{{ $product->id }}" @selected($model->landingProducts->contains($product->id))>
+                                        <option value="{{ $product->id }}">
                                             {{ $product->getTranslation('name', app()->getLocale()) }}
                                         </option>
                                     @endforeach
@@ -78,6 +66,14 @@
         </div>
     </div>
 </div>
+<script !src="">
+    handleAjaxFormSubmit("#editCategoryForm",{
+        successMessage: "Product updated successfully",
+        onSuccess:function () {
+            location.reload()
+        }
+    })
+</script>
 <script !src="">
     $(document).ready(function () {
         $('#editSubCategorySelect').select2();
