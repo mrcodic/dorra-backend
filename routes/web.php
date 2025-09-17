@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/landing', 'addToLanding')->name('landing');
         Route::post('/landing/edit-category', 'editCategoryOnLanding')->name('landing.edit');
         Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
+
     });
     Route::post('/without-categories', [CategoryController::class,'storeProductWithoutCategories'])->name('product-without-categories.store');
     Route::put('/without-categories/{id}', [CategoryController::class,'updateProductWithoutCategories'])->name('product-without-categories.update');
@@ -155,6 +156,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [TemplateController::class, 'getData'])->name('data');
         Route::get('/search', 'search')->name('search');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        Route::post('/landing', 'addToLanding')->name('landing');
+        Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
     });
     Route::post('/store-templates', [TemplateController::class, 'storeAndRedirect'])->name('templates.redirect.store');
 
