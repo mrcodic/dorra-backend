@@ -4,6 +4,7 @@ namespace App\Services;
 
 
 use App\Enums\OrientationEnum;
+use App\Enums\Template\StatusEnum;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -85,7 +86,7 @@ class TemplateService extends BaseService
         }
 
         if (request()->expectsJson()) {
-            $query = $query->whereNotNull('design_data');
+            $query = $query->whereStatus(StatusEnum::LIVE);
 
             return $paginate
                 ? $query->paginate($requested)

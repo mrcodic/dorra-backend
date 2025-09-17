@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Template\StatusEnum;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Template;
@@ -50,6 +51,7 @@ class TagService extends BaseService
                     ->values()
                     ->map(function ($tag) use ($model, $relation) {
                         $tag->templates_count = $tag->templates()
+                            ->whereStatus(StatusEnum::LIVE)
                             ->whereHas($relation, function ($query) use ($model, $relation) {
                                 $query->where("$relation.id", $model->id);
                             })
