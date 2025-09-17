@@ -138,23 +138,23 @@ $discountTypes = [
                                     style="width: 24px; height: 6px;background-color:#24B094"></span>
                                 <span class="me-auto">Published</span>
                             </div>
-                            <span class="">65 Templates</span>
+                            <span class="">{{ \App\Models\Template::status(\App\Enums\Template\StatusEnum::PUBLISHED)->count() }} Templates</span>
                         </div>
 
                         <div class="d-flex flex-column ">
                             <div class="d-flex align-items-center ">
                                 <span class=" rounded-1 me-1"
                                     style="width: 24px; height: 6px;background-color:#B3E3D8"></span>
-                                <span class="me-auto">Published</span>
+                                <span class="me-auto">Draft</span>
                             </div>
-                            <span class="">65 Templates</span>
+                            <span class="">{{ \App\Models\Template::status(\App\Enums\Template\StatusEnum::DRAFTED)->count() }} Templates</span>
                         </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">75</span> Templates</span>
-                    <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0"
+                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $templatesCount }}</span> Templates</span>
+                    <div class="progress progress-bar-primary w-{{$templatesCount}} me-1" style="height: 6px">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ $templatesCount }}" aria-valuemin="0"
                             aria-valuemax="100" style="width: 70%"></div>
                     </div>
                 </div>

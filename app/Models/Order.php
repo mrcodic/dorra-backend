@@ -50,7 +50,8 @@ class Order extends Model
     public function scopeStatus(Builder $query, $status): Builder
     {
         return $query->whereStatus($status);
-}
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

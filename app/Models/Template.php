@@ -47,7 +47,10 @@ class Template extends Model implements HasMedia
     {
         return $builder->where('is_landing', true);
     }
-
+    public function scopeStatus(Builder $query, $status): Builder
+    {
+        return $query->whereStatus($status);
+    }
     public function getImageAttribute(): string
     {
         return $this->getFirstMediaUrl('templates') ?: "";
