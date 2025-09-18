@@ -145,16 +145,16 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="form-group mb-2">
-                                    <label for="flagsSelect" class="label-text mb-1">Flags</label>
-                                    <select id="flagsSelect" class="form-select select2" name="flags[]" multiple>
-                                        @foreach($associatedData['flags'] as $flag)
-                                            <option value="{{ $flag->id }}">
-                                                {{ $flag->getTranslation('name', app()->getLocale()) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+{{--                                <div class="form-group mb-2">--}}
+{{--                                    <label for="flagsSelect" class="label-text mb-1">Flags</label>--}}
+{{--                                    <select id="flagsSelect" class="form-select select2" name="flags[]" multiple>--}}
+{{--                                        @foreach($associatedData['flags'] as $flag)--}}
+{{--                                            <option value="{{ $flag->id }}">--}}
+{{--                                                {{ $flag->getTranslation('name', app()->getLocale()) }}--}}
+{{--                                            </option>--}}
+{{--                                        @endforeach--}}
+{{--                                    </select>--}}
+{{--                                </div>--}}
 
                             </div>
                         </div>
