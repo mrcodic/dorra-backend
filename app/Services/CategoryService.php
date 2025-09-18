@@ -28,10 +28,9 @@ class CategoryService extends BaseService
             ->when(request()->filled('is_landing'), function ($query) {
                 $query->where('is_landing', true);
             })
-        ->when(request()->filled('is_has_category'), function ($query) {
-            $query->where('is_has_category', request('is_has_category',0));
-        })
-        ;
+            ->when(request()->filled('is_has_category'), function ($query) {
+                $query->where('is_has_category', request('is_has_category', 0));
+            });
 
         return $paginate ? $query->paginate($perPage) : $query->get();
     }
@@ -130,9 +129,10 @@ class CategoryService extends BaseService
         });
 
     }
-    public function updateProductWithoutCategories($id,$validatedData)
+
+    public function updateProductWithoutCategories($id, $validatedData)
     {
-        return  $this->handleTransaction(function () use ($id, $validatedData) {
+        return $this->handleTransaction(function () use ($id, $validatedData) {
 
             $product = $this->repository->update($validatedData, $id);
             $product->tags()->sync($validatedData['tags'] ?? []);
@@ -193,8 +193,8 @@ class CategoryService extends BaseService
 
                         if (isset($option['option_image'])) {
                             Media::where('id', $option['option_image'])->update([
-                                'model_type'      => get_class($productOption),
-                                'model_id'        => $productOption->id,
+                                'model_type' => get_class($productOption),
+                                'model_id' => $productOption->id,
                                 'collection_name' => 'categorySpecificationOptions',
                             ]);
                         }
@@ -235,7 +235,7 @@ class CategoryService extends BaseService
                 Media::where('id', $validatedData['image_id'])
                     ->update([
                         'model_type' => get_class($product),
-                        'model_id'   => $product->id,
+                        'model_id' => $product->id,
                         'collection_name' => 'categories',
                     ]);
 
@@ -257,8 +257,8 @@ class CategoryService extends BaseService
 
                 Media::where('id', $validatedData['image_model_id'])
                     ->update([
-                        'model_type'      => get_class($product),
-                        'model_id'        => $product->id,
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
                         'collection_name' => 'category_model_image',
                     ]);
             }
@@ -293,7 +293,7 @@ class CategoryService extends BaseService
     {
         $locale = app()->getLocale();
         $categories = $this->repository
-            ->query(['id', 'name', 'description', 'created_at','is_has_category'])
+            ->query(['id', 'name', 'description', 'created_at', 'is_has_category'])
             ->with(['products', 'children'])
             ->withCount(['children', 'products'])
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
@@ -331,7 +331,6 @@ class CategoryService extends BaseService
                     ? $category->products->pluck('name')
                     : [];
             })
-
             ->addColumn('imageId', function ($category) {
                 return $category->getFirstMedia('categories')?->id;
             })
@@ -345,7 +344,7 @@ class CategoryService extends BaseService
                 return $category->children_count;
             })
             ->addColumn('no_of_products', function ($category) {
-                return $category->is_has_category ? $category->products_count: "-";
+                return $category->is_has_category ? $category->products_count : "-";
             })
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('categories') ?: asset("images/default-user.png");
@@ -423,6 +422,7 @@ class CategoryService extends BaseService
             return $category;
         });
     }
+
     public function editCategoryOnLanding($validatedData, $categoryId)
     {
         if ($this->repository->query()->isLanding()->count() == 7) {

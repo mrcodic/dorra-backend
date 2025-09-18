@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
@@ -28,7 +29,7 @@ class FlagController extends DashboardController
 
            'index' => [
                'products' => $this->productRepository->query()->get(),
-               'templates' => $this->templateRepository->query()->get(),
+               'templates' => $this->templateRepository->query()->whereStatus(StatusEnum::LIVE)->get(),
            ],
 
        ];
