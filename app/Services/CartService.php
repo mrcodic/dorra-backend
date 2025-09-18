@@ -334,6 +334,10 @@ class CartService extends BaseService
 
     public function checkItem($request)
     {
+        $request->validate([
+            'cartable_type' => 'in:product,category',
+            'itemable_type' => 'in:template,design',
+        ]);
         $cartId = auth('sanctum')->user()->cart->id ?? null;
         $mapItemTypes = [
             'template' => Template::class,
