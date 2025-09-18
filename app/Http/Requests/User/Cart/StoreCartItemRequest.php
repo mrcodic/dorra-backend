@@ -4,6 +4,7 @@ namespace App\Http\Requests\User\Cart;
 
 use App\Enums\HttpEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Design;
 use App\Models\Product;
@@ -125,19 +126,16 @@ class StoreCartItemRequest extends BaseRequest
             }
         }
 
-        $exists = \App\Models\CartItem::where('user_id', auth('sanctum')->id())
+        $cartId = auth()->user()->cart->id ?? null;
+
+        $exists = CartItem::where('cart_id', $cartId)
             ->where('cartable_id', $this->cartable_id)
             ->where('cartable_type', $this->cartable_type)
-            ->when($this->product_price_id, function ($q) {
-                $q->where('product_price_id', $this->product_price_id);
-            })
-            ->when($this->template_id, function ($q) {
-                $q->where('template_id', $this->template_id);
-            })
-            ->when($this->design_id, function ($q) {
-                $q->where('design_id', $this->design_id);
-            })
+            ->when($this->product_price_id, fn($q) => $q->where('product_price_id', $this->product_price_id))
+            ->when($this->template_id, fn($q) => $q->where('template_id', $this->template_id))
+            ->when($this->design_id, fn($q) => $q->where('design_id', $this->design_id))
             ->exists();
+
 
         if ($exists) {
             throw new HttpResponseException(
