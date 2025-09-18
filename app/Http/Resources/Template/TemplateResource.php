@@ -40,7 +40,6 @@ class TemplateResource extends JsonResource
             'back_base64_preview_image' => $this->getFirstMediaUrl('back_templates'),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
-            'is_add_to_cart' => $this->canBeAddedToCart(),
             'colors' => $this->colors,
             'template_model_image' => $this->getFirstMediaUrl('template_model_image'),
             'orientation' =>  [
@@ -51,20 +50,7 @@ class TemplateResource extends JsonResource
         ];
     }
 
-    protected function canBeAddedToCart()
-    {
-        $user = auth('sanctum')->user();
-        $guest = Guest::whereCookieValue(request()->cookie('cookie_id'))->first();
 
-        if ($user) {
-            return $user->cartItems?->contains(fn($cartItem) => $cartItem->itemable_id == $this->id) ;
-        }
-
-        if ($guest) {
-            return $guest->cartItems?->contains(fn($cartItem) => $cartItem->itemable_id == $this->id) ;
-        }
-
-    }
 
 
 }
