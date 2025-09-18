@@ -88,20 +88,24 @@ class StoreProductRequest extends BaseRequest
             $pairs = [];
 
             foreach ($prices as $index => $price) {
-                $key = $price['quantity'] . '-' . $price['price'];
+                $quantity = $price['quantity'] ?? null;
+                $value    = $price['price'] ?? null;
 
-                if (in_array($key, $pairs)) {
-                    $validator->errors()->add(
-                        "prices.$index",
-                        "Duplicate quantity/price combination found."
-                    );
+                if ($quantity !== null && $value !== null) {
+                    $key = $quantity . '-' . $value;
+
+                    if (in_array($key, $pairs, true)) {
+                        $validator->errors()->add(
+                            "prices.$index",
+                            "Duplicate quantity/price combination found."
+                        );
+                    }
+
+                    $pairs[] = $key;
                 }
-
-                $pairs[] = $key;
             }
         });
     }
-
     public function messages(): array
     {
         return [
