@@ -1,4 +1,4 @@
-    $.ajaxSetup({
+$.ajaxSetup({
     headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
@@ -7,7 +7,7 @@ var dt_user_table = $('.flag-list-table').DataTable({
     processing: true,
     serverSide: true,
     searching: false,
-    orderable:false,
+    orderable: false,
     ajax: {
         url: flagsDataUrl,
         type: 'GET',
@@ -19,9 +19,11 @@ var dt_user_table = $('.flag-list-table').DataTable({
         }
     },
     columns: [
-        { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
+        {
+            data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            } },
+            }
+        },
         {data: 'name', orderable: false},
         {data: 'no_of_products', orderable: false},
         {data: 'no_of_templates', orderable: false},
@@ -51,8 +53,9 @@ var dt_user_table = $('.flag-list-table').DataTable({
                              data-id="${data}"
                              data-name_ar="${row.name_ar}"
                              data-name_en="${row.name_en}"
-                             data-products="${row.no_of_products}"
-                             data-showdate="${row.show_date}">
+                              data-products='${JSON.stringify(row.product_ids)}'
+               data-templates='${JSON.stringify(row.template_ids)}'
+               >
                             <i data-feather="edit-3"></i>
                        </a>
 
@@ -72,14 +75,14 @@ var dt_user_table = $('.flag-list-table').DataTable({
     ],
     order: [[1, 'asc']],
     dom:
-    '<"d-flex align-items-center header-actions mx-2 row mb-2"' +
-    '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-    ">" +
-    ">t" +
-    '<"d-flex  mx-2 row mb-1"' +
-    '<"col-sm-12 col-md-6"i>' +
-    '<"col-sm-12 col-md-6"p>' +
-    ">",
+        '<"d-flex align-items-center header-actions mx-2 row mb-2"' +
+        '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
+        ">" +
+        ">t" +
+        '<"d-flex  mx-2 row mb-1"' +
+        '<"col-sm-12 col-md-6"i>' +
+        '<"col-sm-12 col-md-6"p>' +
+        ">",
 
     drawCallback: function () {
         feather.replace();
@@ -94,21 +97,21 @@ var dt_user_table = $('.flag-list-table').DataTable({
         }
     }
 });
-    $('#clear-search').on('click', function () {
-        $('#search-tag-form').val('');  // clear input
-        dt_user_table.search('').draw();  // reset DataTable search
-    });
-    let searchTimeout;
-    $('#search-tag-form').on('keyup', function () {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            dt_user_table.draw();
-        }, 300);
-    });
-
-    $('.filter-date').on('change', function () {
+$('#clear-search').on('click', function () {
+    $('#search-tag-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
+let searchTimeout;
+$('#search-tag-form').on('keyup', function () {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
         dt_user_table.draw();
-    });
+    }, 300);
+});
+
+$('.filter-date').on('change', function () {
+    dt_user_table.draw();
+});
 $(document).ready(function () {
     const saveButton = $('.saveChangesButton');
     const saveLoader = $('.saveLoader');
@@ -141,7 +144,7 @@ $(document).ready(function () {
                 saveButtonText.removeClass('d-none');
                 $('#addFlagForm')[0].reset();
                 $('#addFlagModal').modal('hide');
-
+                location.reload();
 
                 $('.flag-list-table').DataTable().ajax.reload(); // reload your table
             },
@@ -187,20 +190,27 @@ $(document).ready(function () {
 
     });
 
-        $(document).on('click', '.edit-details', function (e) {
-        const tagNameAR = $(this).data('name_ar');
-        const tagNameEn = $(this).data('name_en');
+    $(document).on('click', '.edit-details', function (e) {
+        e.preventDefault();
+
         const tagId = $(this).data('id');
+        const tagNameAr = $(this).data('name_ar');
+        const tagNameEn = $(this).data('name_en');
+        const products = $(this).data('products');   // array of IDs
+        const templates = $(this).data('templates');  // array of IDs
 
-        // Populate modal
-        $('#editFlagModal #edit-tag-name-ar').val(tagNameAR);
-        $('#editFlagModal #edit-tag-name-en').val(tagNameEn);
+        // Populate fields
         $('#editFlagModal #edit-tag-id').val(tagId);
+        $('#editFlagModal #edit-tag-name-ar').val(tagNameAr);
+        $('#editFlagModal #edit-tag-name-en').val(tagNameEn);
 
-        // Show modal
+        // Set multi-selects
+        $('#editProductsSelect').val(products).trigger('change');
+        $('#editTemplatesSelect').val(templates).trigger('change');
+
         $('#editFlagModal').modal('show');
-
     });
+
 
     $('#editButton').on('click', function () {
         var nameEN = $('#tag-name-en').val();
@@ -243,8 +253,7 @@ $(document).ready(function () {
                 // Close modal
                 $('#editFlagModal').modal('hide');
                 $('#showFlagModal').modal('hide');
-                $('.flag-list-table').DataTable().ajax.reload(null,false);
-
+                $('.flag-list-table').DataTable().ajax.reload(null, false);
 
 
             },
@@ -268,8 +277,6 @@ $(document).ready(function () {
             }
         });
     });
-
-
 
 
     $(document).on("click", ".open-delete-tag-modal", function () {

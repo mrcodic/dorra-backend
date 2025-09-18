@@ -5,7 +5,7 @@
                 @csrf
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
-                    <h5 class="modal-title" id="exampleModalLabel">Add New Tag</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add New Flag</h5>
                 </div>
                 <div class="modal-body flex-grow-1">
                     <!-- Name in Arabic and English -->
@@ -19,6 +19,26 @@
                             <label class="form-label">Name (AR)</label>
                             <input type="text" class="form-control" placeholder="Enter Tag Name(Ar)"
                                 id="add-tag-name-ar" name="name[ar]" />
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="templatesSelect" class="label-text mb-1">Templates</label>
+                            <select id="templatesSelect" class="form-select select2" name="templates[]" multiple>
+                                @foreach($associatedData['templates'] as $template)
+                                    <option value="{{ $template->id }}">
+                                        {{ $template->getTranslation('name', app()->getLocale()) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="productsSelect" class="label-text mb-1">Categories</label>
+                            <select id="productsSelect" class="form-select select2" name="products[]" multiple>
+                                @foreach($associatedData['products'] as $product)
+                                    <option value="{{ $product->id }}">
+                                        {{ $product->getTranslation('name', app()->getLocale()) }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -34,3 +54,16 @@
         </div>
     </div>
 </div>
+<script !src="">
+    $(document).ready(function () {
+        $('#templatesSelect').select2({
+            placeholder: "Choose Templates",
+            allowClear: true
+        });
+        $('#productsSelect').select2({
+            placeholder: "Choose Products",
+            allowClear: true
+        });
+    });
+
+</script>

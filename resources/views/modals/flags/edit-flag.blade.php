@@ -24,6 +24,27 @@
                             <input type="text" class="form-control" id="edit-tag-name-ar" name="name[ar]" />
                         </div>
                     </div>
+                    <div class="form-group mb-2">
+                        <label for="editTemplatesSelect" class="label-text mb-1">Templates</label>
+                        <select id="editTemplatesSelect" class="form-select select2" name="templates[]" multiple>
+                            @foreach($associatedData['templates'] as $template)
+                                <option value="{{ $template->id }}">
+                                    {{ $template->getTranslation('name', app()->getLocale()) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="editProductsSelect" class="label-text mb-1">Categories</label>
+                        <select id="editProductsSelect" class="form-select select2" name="products[]" multiple>
+                            @foreach($associatedData['products'] as $product)
+                                <option value="{{ $product->id }}">
+                                    {{ $product->getTranslation('name', app()->getLocale()) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                 </div>
 
                 <div class="modal-footer border-top-0">
@@ -38,3 +59,16 @@
         </div>
     </div>
 </div>
+<script !src="">
+    $(document).ready(function () {
+        $('#editTemplatesSelect').select2({
+            placeholder: "Choose Templates",
+            allowClear: true
+        });
+        $('#editProductsSelect').select2({
+            placeholder: "Choose Products",
+            allowClear: true
+        });
+    });
+
+</script>

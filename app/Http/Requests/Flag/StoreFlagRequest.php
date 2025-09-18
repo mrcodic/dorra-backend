@@ -35,6 +35,11 @@ class StoreFlagRequest extends BaseRequest
                 'string',
                 'max:255',
             ],
+            'templates' => ['required', 'array'],
+            'templates.*' => ['required', 'exists:templates,id'],
+            'products' => ['required', 'array'],
+            'products.*' => ['required', 'exists:products,id'],
+
         ];
 
     }

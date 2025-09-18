@@ -24,12 +24,31 @@ class FlagService extends BaseService
             ->get();
     }
 
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    {
+        $model = $this->repository->create($validatedData);
+        $model->templates()->attach($validatedData['templates']);
+        $model->products()->attach($validatedData['products']);
+        return $model->load($relationsToLoad);
+
+    }
+
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->repository->update($validatedData, $id);
+        $model->templates()->sync($validatedData['templates']);
+        $model->products()->sync($validatedData['products']);
+        return $model->load($relationsToLoad);
+
+    }
+
     public function getData(): JsonResponse
     {
         $locale = app()->getLocale();
-        $tags = $this->repository
+        $flags = $this->repository
             ->query(['id', 'name', 'created_at'])
-
+            ->withCount(['products', 'templates'])
+            ->with(['products', 'templates'])
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
@@ -42,25 +61,29 @@ class FlagService extends BaseService
                 $query->orderBy('created_at', request('created_at'));
             })
             ->latest();
-        return \Yajra\DataTables\DataTables::of($tags)
-            ->addColumn('name', function ($tag) {
-                return $tag->getTranslation('name', app()->getLocale());
+        return \Yajra\DataTables\DataTables::of($flags)
+            ->addColumn('name', function ($flags) {
+                return $flags->getTranslation('name', app()->getLocale());
             })
-            ->addColumn('name_en', function ($tag) {
-                return $tag->getTranslation('name', 'en');
+            ->addColumn('name_en', function ($flags) {
+                return $flags->getTranslation('name', 'en');
             })
-            ->addColumn('name_ar', function ($tag) {
-                return $tag->getTranslation('name', 'ar');
+            ->addColumn('name_ar', function ($flags) {
+                return $flags->getTranslation('name', 'ar');
             })
-            ->addColumn('added_date', function ($tag) {
-                return $tag->created_at?->format('d/n/Y');
+            ->addColumn('added_date', function ($flags) {
+                return $flags->created_at?->format('d/n/Y');
             })
-            ->addColumn('show_date', function ($tag) {
-                return $tag->created_at?->format('Y-m-d');
+            ->addColumn('show_date', function ($flags) {
+                return $flags->created_at?->format('Y-m-d');
             })
-            ->addColumn('no_of_products', function ($tag) {
-                return $tag->products_count;
+            ->addColumn('no_of_products', function ($flags) {
+                return $flags->products_count;
 
+            })->addColumn('template_ids', function ($flags) {
+                return $flags->templates->pluck('id')->toArray();
+            })->addColumn('product_ids', function ($flags) {
+                return $flags->products->pluck('id')->toArray();
             })
             ->addColumn('no_of_templates', function ($tag) {
                 return $tag->templates_count;
