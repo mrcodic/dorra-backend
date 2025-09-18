@@ -12,6 +12,7 @@ use App\Models\Template;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class StoreCartItemRequest extends BaseRequest
 {
@@ -138,11 +139,9 @@ class StoreCartItemRequest extends BaseRequest
 
 
         if ($exists) {
-            throw new HttpResponseException(
-                Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
-                    'cart_item' => 'This item is already in your cart.',
-                ])
-            );
+            throw ValidationException::withMessages([
+                'cart_item' => 'This item is already in your cart.',
+            ]);
         }
 
 
