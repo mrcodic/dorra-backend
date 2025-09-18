@@ -423,9 +423,15 @@ class ProductService extends BaseService
     {
         $product = $request->type == 'product' ? $this->repository->find($productId) : $this->categoryRepository->find($productId);
 
-        $product->prices
+        return $product->prices
             ->sortBy('quantity')
-          
+            ->map(function ($price) {
+                return [
+                    'id'       => $price->id,
+                    'quantity' => $price->quantity,
+                ];
+            })
+            ->values()
             ->toArray();
     }
 
