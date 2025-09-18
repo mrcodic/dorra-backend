@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Enums\DiscountCode\TypeEnum;
-use App\Models\{CartItem, Category, Guest, Product, User};
+use App\Models\{CartItem, Category, Design, Guest, Product, Template, User};
 use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     CategoryRepositoryInterface,
     DiscountCodeRepositoryInterface,
@@ -335,13 +335,16 @@ class CartService extends BaseService
     public function checkItem($request)
     {
         $cartId = auth('sanctum')->user()->cart->id ?? null;
-
+        $mapItemTypes = [
+            'template' => Template::class,
+            'design'=> Design::class,
+        ];
         return $this->cartItemRepository->query()->where('cart_id', $cartId)
             ->where('cartable_id', $request->cartable_id)
             ->where('cartable_type', $request->cartable_type)
             ->when($request->product_price_id, fn($q) => $q->where('product_price_id', $request->product_price_id))
             ->when($request->template_id, fn($q) => $q->where('itemable_id', $request->itemable_id)
-                ->where('itemable_type', $request->itemable_type))
+                ->where('itemable_type', $mapItemTypes[$request->itemable_type]))
             ->exists();
     }
 }
