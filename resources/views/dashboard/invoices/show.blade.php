@@ -110,7 +110,7 @@
                 <!-- Items List -->
                 @foreach ($model->order?->orderItems ??[] as $design)
                 @php
-                $product = $design->product;
+                $product = $design->itemable;
                 @endphp
                 <div class="mb-1">
                     <div class="d-flex align-items-start justify-content-between">

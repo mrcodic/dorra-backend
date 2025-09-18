@@ -178,37 +178,28 @@
             </table>
             <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                 <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                    style="z-index: 10;">
-                    <p id="selected-count-text">0 Categories are selected</p>
-                    <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                        data-bs-target="#deleteCategoriesModal"
-                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
-                        <i data-feather="trash-2"></i> Delete Selected
-                    </button>
-                    <form style="display: none;" id="bulk-delete-form" method="POST"
-                        action="{{ route('categories.bulk-delete') }}">
+                     style="z-index: 10;">
+                    <p id="selected-count-text">0 faqs are selected</p>
+                    <form id="bulk-delete-form" method="POST" action="">
                         @csrf
                         <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                            data-bs-target="#deleteCategoriesModal"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
+                                data-bs-target="#deleteFaqsModal"
+                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
                             <i data-feather="trash-2"></i> Delete Selected
                         </button>
                     </form>
-
-
                 </div>
-
-
             </div>
+
             @include('modals.delete',[
-            'id' => 'deleteCategoryModal',
-            'formId' => 'deleteCategoryForm',
-            'title' => 'Delete Category',
+            'id' => 'deleteLocationModal',
+            'formId' => 'deleteLocationForm',
+            'title' => 'Delete Location',
             ])
             @include('modals.delete',[
-            'id' => 'deleteCategoriesModal',
+            'id' => 'deleteLocationsModal',
             'formId' => 'bulk-delete-form',
-            'title' => 'Delete Categories',
+            'title' => 'Delete Locations',
             'confirmText' => 'Are you sure you want to delete this items?',
             ])
             @include('modals.location.edit-location')
@@ -216,21 +207,7 @@
 
 
         </div>
-        @include('modals.location.edit-location')
-        @include('modals.location.add-location')
 
-
-        @include('modals.delete',[
-        'id' => 'deleteCategoryModal',
-        'formId' => 'deleteCategoryForm',
-        'title' => 'Delete Category',
-        ])
-        @include('modals.delete',[
-        'id' => 'deleteCategoriesModal',
-        'formId' => 'bulk-delete-form',
-        'title' => 'Delete Categories',
-        'confirmText' => 'Are you sure you want to delete this items?',
-        ])
 
 
 
@@ -387,7 +364,7 @@
         const count = selectedCheckboxes.length;
 
         if (count > 0) {
-            $('#selected-count-text').text(`${count} User${count > 1 ? 's are' : ' is'} selected`);
+            $('#selected-count-text').text(`${count} Location${count > 1 ? 's are' : ' is'} selected`);
             $('#bulk-delete-container').show();
         } else {
             $('#bulk-delete-container').hide();

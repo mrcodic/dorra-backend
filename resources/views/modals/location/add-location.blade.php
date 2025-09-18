@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="addLocationModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="Locations" method="post" enctype="multipart/form-data" action="{{ route('logistics.store') }}">
+            <form id="locations" method="post" enctype="multipart/form-data" action="{{ route('logistics.store') }}">
                 @csrf
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
@@ -19,7 +19,7 @@
                             <select class="form-select address-country-select" name="country_id">
                                 <option value="">Select Country</option>
                                 @foreach ($associatedData['countries'] as $country)
-                                <option value="{{ $country->id }}" {{ old('country_id')==$country->id ? 'selected' : ''
+                                <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : ''
                                     }}>
                                     {{ $country->name }}
                                 </option>
@@ -83,12 +83,21 @@
                                 role="status" aria-hidden="true"></span>
                         </button>
                     </div>
-            </form>
+
         </div>
+            </form>
+    </div>
+
     </div>
 </div>
-
 <script>
+    handleAjaxFormSubmit("#locations",{
+        successMessage: "Location added Successfully",
+        onSuccess: function (){
+            $('#addLocationModal').modal('hide');
+            location.reload();
+        }
+    });
     $(document).ready(function() {
         $('#start_time_input, #end_time_input').on('change', function() {
             let start = $('#start_time_input').val();
@@ -98,8 +107,42 @@
             }
         });
     });
-    
-    $(document).ready(function() {
-        $('.select2').select2();
-    })
+
+
+</script>
+<script !src="">
+    $(document).ready(function () {
+        $('#Days').select2();
+
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        // Country-State dropdown handling
+        $(document).on("change", ".address-country-select", function () {
+            const countryId = $(this).val();
+            const stateSelect = $(".address-state-select");
+
+            if (countryId) {
+                $.ajax({
+                    url: "{{ route('states') }}",
+                    method: "GET",
+                    data: { "filter[country_id]": countryId },
+                    success: function (response) {
+                        stateSelect.empty().append('<option value="">Select State</option>');
+                        $.each(response.data, function (index, state) {
+                            stateSelect.append(`<option value="${state.id}">${state.name}</option>`);
+                        });
+                    },
+                    error: function () {
+                        stateSelect.empty().append('<option value="">Error loading states</option>');
+                    }
+                });
+            } else {
+                stateSelect.empty().append('<option value="">Select State</option>');
+            }
+        });
+
+    });
+
 </script>

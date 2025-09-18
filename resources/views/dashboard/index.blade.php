@@ -98,7 +98,7 @@ $discountTypes = [
                         </div>
                         <p class="text-black fs-4 mb-0">Refunded</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> EGP</h2>
+                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{$refundedOrders}}</span></h2>
                     <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
                                 class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
@@ -113,33 +113,12 @@ $discountTypes = [
             <div class="card border-2 p-2">
                 <div class="d-flex flex-column flex-lg-row justify-content-between mb-50">
                     <p class="fs-2 text-black">Products</p>
-                    <div class="d-flex align-items-center gap-1 gap-lg-4">
-                        <div class="d-flex flex-column align-items-center">
-                            <div class="d-flex align-items-center ">
-                                <span class=" rounded-1 me-1"
-                                    style="width: 24px; height: 6px;background-color:#24B094"></span>
-                                <span class="me-auto">Published</span>
-                            </div>
-
-                            <span class="">65 Products</span>
-                        </div>
-
-                        <div class="d-flex flex-column ">
-                            <div class="d-flex align-items-center ">
-                                <span class=" rounded-1 me-1"
-                                    style="width: 24px; height: 6px;background-color:#B3E3D8"></span>
-                                <span class="me-auto">Published</span>
-                            </div>
-
-                            <span class="">65 Products</span>
-                        </div>
-                    </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">75</span> Products</span>
+                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $categoriesCount }}</span> Products</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0"
-                            aria-valuemax="100" style="width: 70%"></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{$categoriesCount}}" aria-valuemin="0"
+                            aria-valuemax="100" style="width: {{$categoriesCount}}%"></div>
                     </div>
                 </div>
             </div>
@@ -159,24 +138,24 @@ $discountTypes = [
                                     style="width: 24px; height: 6px;background-color:#24B094"></span>
                                 <span class="me-auto">Published</span>
                             </div>
-                            <span class="">65 Templates</span>
+                            <span class="">{{ \App\Models\Template::status(\App\Enums\Template\StatusEnum::PUBLISHED)->count() }} Templates</span>
                         </div>
 
                         <div class="d-flex flex-column ">
                             <div class="d-flex align-items-center ">
                                 <span class=" rounded-1 me-1"
                                     style="width: 24px; height: 6px;background-color:#B3E3D8"></span>
-                                <span class="me-auto">Published</span>
+                                <span class="me-auto">Draft</span>
                             </div>
-                            <span class="">65 Templates</span>
+                            <span class="">{{ \App\Models\Template::status(\App\Enums\Template\StatusEnum::DRAFTED)->count() }} Templates</span>
                         </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">75</span> Templates</span>
+                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $templatesCount }}</span> Templates</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0"
-                            aria-valuemax="100" style="width: 70%"></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ $templatesCount }}" aria-valuemin="0"
+                            aria-valuemax="100" style="width: {{$templatesCount}}%"></div>
                     </div>
                 </div>
             </div>

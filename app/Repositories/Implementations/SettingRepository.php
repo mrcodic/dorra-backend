@@ -14,15 +14,22 @@ class SettingRepository extends BaseRepository implements SettingRepositoryInter
     }
     public function get(?string $key = null, $default = null, ?string $group = null)
     {
-        $settings = Cache::rememberForever('app_settings', function () {
-            return Setting::query()->select('key', 'value', 'group')->get();
-        });
+        static $settingsCache = null;
+
+        if ($settingsCache === null) {
+            $settingsCache = Cache::rememberForever('app_settings', function () {
+                return Setting::query()->select('key', 'value', 'group')->get();
+            });
+        }
+
+        $settings = $settingsCache;
 
         if ($group) {
             $settings = $settings->where('group', $group)->pluck('value', 'key')->toArray();
         } else {
             $settings = $settings->pluck('value', 'key')->toArray();
         }
+
         return $key ? ($settings[$key] ?? $default) : $settings;
     }
 

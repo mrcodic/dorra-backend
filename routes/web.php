@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         Route::get('/search', 'search')->name('search');
         Route::post('/landing', 'addToLanding')->name('landing');
+        Route::post('/landing/edit-category', 'editCategoryOnLanding')->name('landing.edit');
         Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
 
     });

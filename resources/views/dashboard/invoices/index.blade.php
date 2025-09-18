@@ -174,7 +174,7 @@
                             <p>Clients</p>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="number">300</span>
+                            <span class="number">{{ \App\Models\Invoice::count() }}</span>
                             <span class="text">Clients</span>
                         </div>
                     </div>
@@ -185,7 +185,7 @@
                             <p>Invoices</p>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="number">200</span>
+                            <span class="number">{{ \App\Models\Invoice::count() }}</span>
                             <span class="text">Invoices</span>
                         </div>
                     </div>
@@ -196,7 +196,7 @@
                             <p>Paid</p>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="number">900.00</span>
+                            <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
                             <span class="text">EGP</span>
                         </div>
                     </div>

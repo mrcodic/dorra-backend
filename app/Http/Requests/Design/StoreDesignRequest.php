@@ -57,7 +57,7 @@ class StoreDesignRequest extends BaseRequest
             'guest_id' => ['nullable', 'exists:guests,id'],
             'design_data' => ['nullable', 'json'],
             'design_back_data' => ['nullable', 'json'],
-            'name' => ['required_without:template_id', 'string', 'max:255'],
+            'name' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'product_price_id' => [
                 Rule::requiredIf(function () {

@@ -110,7 +110,6 @@ function getPriceAfterTax($tax, $subtotal): float|int
 
 function setting(string $key = null, $group = null ,$default = null)
 {
-    Cache::forget("app_settings");
     $repository = app(SettingRepository::class);
     return $repository->get($key, $default, $group);
 }
