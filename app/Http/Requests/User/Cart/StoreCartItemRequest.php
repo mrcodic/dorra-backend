@@ -125,7 +125,6 @@ class StoreCartItemRequest extends BaseRequest
             }
         }
 
- 
     }
 
     public function getTemplate(): ?Template
