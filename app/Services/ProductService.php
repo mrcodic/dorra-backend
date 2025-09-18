@@ -425,13 +425,7 @@ class ProductService extends BaseService
 
         $product->prices
             ->sortBy('quantity')
-            ->map(function ($price) {
-                return [
-                    'id'       => $price->id,
-                    'quantity' => $price->quantity,
-                ];
-            })
-            ->values()
+          
             ->toArray();
     }
 
