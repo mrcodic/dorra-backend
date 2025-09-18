@@ -25,7 +25,7 @@ class DesignService extends BaseService
         public ProductSpecificationOptionRepository $optionRepository,
         public UserRepositoryInterface              $userRepository,
         public GuestRepositoryInterface             $guestRepository,
-        public TeamRepositoryInterface                 $teamRepository,
+        public TeamRepositoryInterface              $teamRepository,
 
     )
     {
@@ -55,7 +55,7 @@ class DesignService extends BaseService
                     ->last()
                     ?->copy($design, 'designs');
 
-                     $this->templateRepository
+                $this->templateRepository
                     ->find($validatedData['template_id'])
                     ->getMedia('back_templates')
                     ->last()
@@ -80,13 +80,15 @@ class DesignService extends BaseService
                 $this->userRepository->find($validatedData['user_id'])
             );
         }
+        if (isset($validatedData['specs'])) {
+            collect($validatedData['specs'])->each(function ($spec) use ($design) {
+                $design->specifications()->attach([$design->id => [
+                    'product_spec_id' => $spec['id'],
+                    'option_id' => $spec['option'],
+                ]]);
+            });
+        }
 
-        collect($validatedData['specs'])->each(function ($spec) use ($design) {
-            $design->specifications()->attach([$design->id=> [
-                'product_spec_id' => $spec['id'],
-                'option_id' => $spec['option'],
-            ]]);
-        });
         return $design->load([
             'media',
             'designable.prices',
@@ -104,7 +106,7 @@ class DesignService extends BaseService
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'designs');
         }
         if (isset($validatedData['back_base64_preview_image'])) {
-            ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model,'back_designs');
+            ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_designs');
         }
         return $model->load($relationsToLoad);
     }
@@ -143,9 +145,7 @@ class DesignService extends BaseService
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->when(request()->filled('owner_id'), fn($q) => $q->where('user_id', request('owner_id')))
-            ->when(request()->filled('category_id'), fn($q) =>
-            $q->whereHas('designable', fn($cat) =>
-            $cat->where('id', request('category_id'))
+            ->when(request()->filled('category_id'), fn($q) => $q->whereHas('designable', fn($cat) => $cat->where('id', request('category_id'))
             )
             )
             ->orderBy('created_at', request('date', 'desc'));
@@ -163,6 +163,7 @@ class DesignService extends BaseService
         $design = $this->repository->find($designId);
         $design->teams()->syncWithoutDetaching(request()->teams);
     }
+
     public function getDesignVersions($designId)
     {
         return $this->repository->find($designId)->versions()->paginate();
