@@ -158,8 +158,9 @@
                 <div class="col-12 col-md-3">
                     <select name="created_at" class="form-select filter-date">
                         <option value="" disabled>Date</option>
-                        <option value="asc">Oldest</option>
                         <option value="desc">Newest</option>
+                        <option value="asc">Oldest</option>
+                        
                     </select>
                 </div>
 
