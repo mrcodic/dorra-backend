@@ -84,6 +84,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
     Route::controller(CartController::class)->group(function () {
         Route::get('/cart-info', 'cartInfo');
+        Route::get('/cart-items/check', 'checkItem');
         Route::post('/carts/apply-discount', 'applyDiscount');
         Route::get('/carts/remove-discount', 'removeDiscount');
         Route::delete('/carts', 'destroy');

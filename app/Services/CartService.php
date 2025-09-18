@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Enums\DiscountCode\TypeEnum;
-use App\Models\{Category, Guest, Product, User};
+use App\Models\{CartItem, Category, Guest, Product, User};
 use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     CategoryRepositoryInterface,
     DiscountCodeRepositoryInterface,
@@ -13,7 +13,8 @@ use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     ProductPriceRepositoryInterface,
     ProductRepositoryInterface,
     ProductSpecificationOptionRepositoryInterface,
-    ProductSpecificationRepositoryInterface};
+    ProductSpecificationRepositoryInterface
+};
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\{Facades\Response, Arr};
 use Illuminate\Validation\ValidationException;
@@ -32,7 +33,7 @@ class CartService extends BaseService
         public ProductSpecificationRepositoryInterface       $specificationRepository,
         public CartItemRepositoryInterface                   $cartItemRepository,
         public ProductRepositoryInterface                    $productRepository,
-        public CategoryRepositoryInterface                    $categoryRepository,
+        public CategoryRepositoryInterface                   $categoryRepository,
     )
     {
         parent::__construct($repository);
@@ -59,7 +60,7 @@ class CartService extends BaseService
             }
 
 
-            $product =  $request->cartable_type === 'App\\Models\\Product'
+            $product = $request->cartable_type === 'App\\Models\\Product'
                 ? $this->productRepository->find($request->cartable_id)
                 : $this->categoryRepository->find($request->cartable_id);
 
@@ -83,205 +84,6 @@ class CartService extends BaseService
 
             return $cart;
         });
-    }
-
-    /**
-     * @throws ValidationException
-     */
-    public function getCurrentUserOrGuestCart()
-    {
-        return $this->resolveUserCart() ?? null;
-    }
-
-    private function resolveUserCart()
-    {
-        $userId = auth('sanctum')->id();
-        $cookieValue = request()->cookie('cookie_id');
-        $guestId = null;
-        if ($cookieValue && !$userId) {
-            $guest = $this->guestRepository->query()
-                ->where('cookie_value', $cookieValue)
-                ->first();
-            $guestId = $guest?->id;
-        }
-        if (!$userId && !$guestId) {
-            return null;
-        }
-
-        return $this->repository->query()
-            ->when($userId, fn($q) => $q->where('user_id', $userId))
-            ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
-            ->with([
-                'items.cartable','items.itemable' => function ($query) {
-                $query->select(['id','name']);
-            },'items.itemable.products'])
-            ->first();
-    }
-
-    public function deleteItemFromCart($itemId)
-    {
-        $message = "Item removed from cart successfully.";
-        $cart = $this->resolveUserCart();
-        if (!$cart) {
-            throw ValidationException::withMessages([
-                'cart' => ['Cart not found for this user.'],
-            ]);
-        }
-        $item = $cart->items()->whereKey($itemId)->first();
-
-        if (!$item) {
-            throw ValidationException::withMessages([
-                'cart' => ['Item not found in cart.'],
-            ]);
-        }
-        $message =  $this->handleTransaction(function () use ($item, $cart) {
-            if ($cart->items()->count() == 1)
-            {
-                $cart->update([
-                    'discount_code_id' => null,
-                    'discount_amount' => 0,
-                ]);
-            }
-            if ($cart->price - $item->sub_total < $cart->discount_amount) {
-                $cart->update([
-                    'discount_code_id' => null,
-                    'discount_amount' => 0,
-                    'price' => $cart->items()->sum('sub_total'),
-                ]);
-               return "The item has been removed from your cart. Since the cart total is now lower, the discount code is no longer valid.";
-
-            }
-            $item->delete();
-            $cart->update([
-                'discount_code_id' => null,
-                'discount_amount' => 0,
-                'price' => $cart->items()->sum('sub_total'),
-            ]);
-
-        });
-        return $message;
-    }
-
-
-    public function applyDiscount($request)
-    {
-        $cart = $this->resolveUserCart();
-        if(!$cart)
-        {
-            throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
-        }
-        $items = $cart->load('items.product.category')->items;
-        $products = $items->pluck('product.id')->filter()->unique();
-        $categories = $items->pluck('product.category.id')->filter()->unique();
-        $allSameProduct = $products->count() === 1;
-        $allSameCategory = $categories->count() === 1;
-        $product = $allSameProduct ? $items->first()->product : null;
-        $category = $allSameCategory ? $items->first()->product->category : null;
-        $request->validate([
-            'code' => ['required', new ValidDiscountCode($product, $category, $cart)],
-        ]);
-        $discountCode = $this->discountCodeRepository->query()
-            ->whereCode($request->code)
-            ->firstOrFail();
-
-        $cart->update([
-            'discount_code_id' => $discountCode->id,
-            'discount_amount' => getDiscountAmount($discountCode, $cart->price),
-        ]);
-
-        return [
-            'code' => $discountCode?->code,
-            'ratio' => $cart->price
-                ? (
-                    ($discountCode?->type === TypeEnum::PERCENTAGE
-                        ? $discountCode?->value * 100
-                        : ($discountCode?->value / $cart->price) * 100
-                    ) . '%'
-                )
-                : '0%',
-            'value' => getDiscountAmount($discountCode, $cart->price) ?? 0,
-        ];
-    }
-   public function removeDiscount(): void
-   {
-        $cart = $this->resolveUserCart();
-        if(!$cart)
-        {
-            throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
-        }
-        $cart->update([
-            'discount_code_id' => null,
-            'discount_amount' => 0,
-        ]);
-    }
-
-    public function cartInfo(): array
-    {
-        $cart = $this->resolveUserCart();
-        return [
-            'price' => $cart?->price ?? 0,
-            'items_count' => $cart?->totalItems() ?? 0,
-        ];
-    }
-
-    public function addQuantity($request, $id)
-    {
-        $message = "Request completed successfully.";
-        $cartItem = $this->cartItemRepository->find($id);
-        if ($cartItem->cartable->has_custom_prices) {
-            $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
-            $updated = $cartItem->update(['product_price' => $productPrice->price,
-                'product_price_id' => $productPrice->id,
-                'quantity' => $productPrice->quantity]);
-        } else {
-            $updated = $cartItem->update($request->only(['quantity']));
-        }
-        if ($cartItem->cart->price <= $cartItem->cart->discount_amount) {
-            $cartItem->cart->update([
-                'discount_code_id' => null,
-                'discount_amount' => 0,
-            ]);
-            $message = "Since the cart total is now lower, the discount code is no longer valid.";
-        }
-        return $message;
-    }
-
-    public function priceDetails($itemId)
-    {
-        return $this->cartItemRepository->query()
-            ->select(['id', 'cartable_id','cartable_type', 'quantity', 'sub_total','itemable_id', 'itemable_type'])
-            ->findOrFail($itemId)?->load([
-                'itemable:id','itemable.media','product',
-                'cartable.specifications.options', 'specs',
-                'itemable','specs.productSpecificationOption',
-                'specs.productSpecification']);
-    }
-
-    public function updatePriceDetails($validatedData, $itemId)
-    {
-        $message = "Request completed successfully.";
-        $cartItem = $this->cartItemRepository->query()
-            ->whereKey($itemId)
-            ->firstOrFail();
-
-
-        $product = $cartItem->cartable;
-        $priceDetails = $this->calculatePriceDetails($validatedData, $product, $cartItem->product_price);
-
-        $cartItem->update([
-            'sub_total' => $priceDetails['sub_total'],
-            'specs_price' => $priceDetails['specs_sum'],
-            'product_price' => $priceDetails['product_price'],
-        ]);
-        if ($cartItem->cart->price <= $cartItem->cart->discount_amount) {
-            $cartItem->cart->update([
-                'discount_code_id' => null,
-                'discount_amount' => 0,
-            ]);
-            $message = "Since the cart total is now lower, the discount code is no longer valid.";
-        }
-        $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
-        return [$message, $cartItem];
     }
 
     private function calculatePriceDetails(array $validatedData, $product, $price = null): array
@@ -334,5 +136,212 @@ class CartService extends BaseService
         $cartItem->specs()->insert($syncData->toArray());
     }
 
+    /**
+     * @throws ValidationException
+     */
+    public function getCurrentUserOrGuestCart()
+    {
+        return $this->resolveUserCart() ?? null;
+    }
 
+    private function resolveUserCart()
+    {
+        $userId = auth('sanctum')->id();
+        $cookieValue = request()->cookie('cookie_id');
+        $guestId = null;
+        if ($cookieValue && !$userId) {
+            $guest = $this->guestRepository->query()
+                ->where('cookie_value', $cookieValue)
+                ->first();
+            $guestId = $guest?->id;
+        }
+        if (!$userId && !$guestId) {
+            return null;
+        }
+
+        return $this->repository->query()
+            ->when($userId, fn($q) => $q->where('user_id', $userId))
+            ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
+            ->with([
+                'items.cartable', 'items.itemable' => function ($query) {
+                    $query->select(['id', 'name']);
+                }, 'items.itemable.products'])
+            ->first();
+    }
+
+    public function deleteItemFromCart($itemId)
+    {
+        $message = "Item removed from cart successfully.";
+        $cart = $this->resolveUserCart();
+        if (!$cart) {
+            throw ValidationException::withMessages([
+                'cart' => ['Cart not found for this user.'],
+            ]);
+        }
+        $item = $cart->items()->whereKey($itemId)->first();
+
+        if (!$item) {
+            throw ValidationException::withMessages([
+                'cart' => ['Item not found in cart.'],
+            ]);
+        }
+        $message = $this->handleTransaction(function () use ($item, $cart) {
+            if ($cart->items()->count() == 1) {
+                $cart->update([
+                    'discount_code_id' => null,
+                    'discount_amount' => 0,
+                ]);
+            }
+            if ($cart->price - $item->sub_total < $cart->discount_amount) {
+                $cart->update([
+                    'discount_code_id' => null,
+                    'discount_amount' => 0,
+                    'price' => $cart->items()->sum('sub_total'),
+                ]);
+                return "The item has been removed from your cart. Since the cart total is now lower, the discount code is no longer valid.";
+
+            }
+            $item->delete();
+            $cart->update([
+                'discount_code_id' => null,
+                'discount_amount' => 0,
+                'price' => $cart->items()->sum('sub_total'),
+            ]);
+
+        });
+        return $message;
+    }
+
+    public function applyDiscount($request)
+    {
+        $cart = $this->resolveUserCart();
+        if (!$cart) {
+            throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
+        }
+        $items = $cart->load('items.product.category')->items;
+        $products = $items->pluck('product.id')->filter()->unique();
+        $categories = $items->pluck('product.category.id')->filter()->unique();
+        $allSameProduct = $products->count() === 1;
+        $allSameCategory = $categories->count() === 1;
+        $product = $allSameProduct ? $items->first()->product : null;
+        $category = $allSameCategory ? $items->first()->product->category : null;
+        $request->validate([
+            'code' => ['required', new ValidDiscountCode($product, $category, $cart)],
+        ]);
+        $discountCode = $this->discountCodeRepository->query()
+            ->whereCode($request->code)
+            ->firstOrFail();
+
+        $cart->update([
+            'discount_code_id' => $discountCode->id,
+            'discount_amount' => getDiscountAmount($discountCode, $cart->price),
+        ]);
+
+        return [
+            'code' => $discountCode?->code,
+            'ratio' => $cart->price
+                ? (
+                    ($discountCode?->type === TypeEnum::PERCENTAGE
+                        ? $discountCode?->value * 100
+                        : ($discountCode?->value / $cart->price) * 100
+                    ) . '%'
+                )
+                : '0%',
+            'value' => getDiscountAmount($discountCode, $cart->price) ?? 0,
+        ];
+    }
+
+    public function removeDiscount(): void
+    {
+        $cart = $this->resolveUserCart();
+        if (!$cart) {
+            throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
+        }
+        $cart->update([
+            'discount_code_id' => null,
+            'discount_amount' => 0,
+        ]);
+    }
+
+    public function cartInfo(): array
+    {
+        $cart = $this->resolveUserCart();
+        return [
+            'price' => $cart?->price ?? 0,
+            'items_count' => $cart?->totalItems() ?? 0,
+        ];
+    }
+
+    public function addQuantity($request, $id)
+    {
+        $message = "Request completed successfully.";
+        $cartItem = $this->cartItemRepository->find($id);
+        if ($cartItem->cartable->has_custom_prices) {
+            $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
+            $updated = $cartItem->update(['product_price' => $productPrice->price,
+                'product_price_id' => $productPrice->id,
+                'quantity' => $productPrice->quantity]);
+        } else {
+            $updated = $cartItem->update($request->only(['quantity']));
+        }
+        if ($cartItem->cart->price <= $cartItem->cart->discount_amount) {
+            $cartItem->cart->update([
+                'discount_code_id' => null,
+                'discount_amount' => 0,
+            ]);
+            $message = "Since the cart total is now lower, the discount code is no longer valid.";
+        }
+        return $message;
+    }
+
+    public function priceDetails($itemId)
+    {
+        return $this->cartItemRepository->query()
+            ->select(['id', 'cartable_id', 'cartable_type', 'quantity', 'sub_total', 'itemable_id', 'itemable_type'])
+            ->findOrFail($itemId)?->load([
+                'itemable:id', 'itemable.media', 'product',
+                'cartable.specifications.options', 'specs',
+                'itemable', 'specs.productSpecificationOption',
+                'specs.productSpecification']);
+    }
+
+    public function updatePriceDetails($validatedData, $itemId)
+    {
+        $message = "Request completed successfully.";
+        $cartItem = $this->cartItemRepository->query()
+            ->whereKey($itemId)
+            ->firstOrFail();
+
+
+        $product = $cartItem->cartable;
+        $priceDetails = $this->calculatePriceDetails($validatedData, $product, $cartItem->product_price);
+
+        $cartItem->update([
+            'sub_total' => $priceDetails['sub_total'],
+            'specs_price' => $priceDetails['specs_sum'],
+            'product_price' => $priceDetails['product_price'],
+        ]);
+        if ($cartItem->cart->price <= $cartItem->cart->discount_amount) {
+            $cartItem->cart->update([
+                'discount_code_id' => null,
+                'discount_amount' => 0,
+            ]);
+            $message = "Since the cart total is now lower, the discount code is no longer valid.";
+        }
+        $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
+        return [$message, $cartItem];
+    }
+
+    public function checkItem($request)
+    {
+        $cartId = auth('sanctum')->user()->cart->id ?? null;
+
+        return $this->cartItemRepository->query()->where('cart_id', $cartId)
+            ->where('cartable_id', $request->cartable_id)
+            ->where('cartable_type', $request->cartable_type)
+            ->when($request->product_price_id, fn($q) => $q->where('product_price_id', $request->product_price_id))
+            ->when($request->template_id, fn($q) => $q->where('itemable_id', $request->itemable_id)
+                ->where('itemable_type', $request->itemable_type))
+            ->exists();
+    }
 }

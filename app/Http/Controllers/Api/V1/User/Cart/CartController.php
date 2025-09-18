@@ -96,4 +96,11 @@ class CartController extends Controller
         return Response::api(message: $result[0],data: new CartItemResource($result[1]));
     }
 
+    public function checkItem(Request $request)
+    {
+        $result = $this->cartService->checkItem($request);
+        return Response::api(data: ['is_add_to_cart' => $result]);
+
+    }
+
 }
