@@ -431,7 +431,6 @@ class ProductService extends BaseService
                     'quantity' => $price->quantity,
                 ];
             })
-            ->values()
             ->toArray();
     }
 
