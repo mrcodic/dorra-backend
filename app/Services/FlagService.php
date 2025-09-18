@@ -14,6 +14,16 @@ class FlagService extends BaseService
         parent::__construct($repository);
 
     }
+
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
+    {
+        $relations = request('type') == 'templates' ? ['templates.products'] : ['products'];
+        return $this->repository->query()
+            ->select($columns)
+            ->with($relations)
+            ->get();
+    }
+
     public function getData(): JsonResponse
     {
         $locale = app()->getLocale();

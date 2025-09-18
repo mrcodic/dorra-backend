@@ -6,10 +6,12 @@ namespace App\Http\Controllers\Shared\General;
 use App\Enums\Product\UnitEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dimension\StoreDimensionRequest;
+use App\Services\FlagService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
     CountryResource,
     Design\DesignResource,
+    FlagResource,
     FolderResource,
     MediaResource,
     Product\ProductResource,
@@ -26,7 +28,8 @@ use App\Repositories\Interfaces\{CountryRepositoryInterface,
     MessageRepositoryInterface,
     ProductRepositoryInterface,
     StateRepositoryInterface,
-    TemplateRepositoryInterface};
+    TemplateRepositoryInterface
+};
 use App\Services\CategoryService;
 use App\Services\DesignService;
 use App\Services\FolderService;
@@ -45,12 +48,13 @@ class MainController extends Controller
         public StateRepositoryInterface     $stateRepository,
         public CategoryService              $categoryService,
         public TagService                   $tagService,
+        public FlagService                  $flagService,
         public DesignService                $designService,
         public FolderService                $folderService,
         public DimensionRepositoryInterface $dimensionRepository,
         public TeamService                  $teamService,
-        public ProductRepositoryInterface     $productRepository,
-        public TemplateRepositoryInterface $templateRepository,
+        public ProductRepositoryInterface   $productRepository,
+        public TemplateRepositoryInterface  $templateRepository,
 
     )
     {
@@ -97,6 +101,12 @@ class MainController extends Controller
     public function tags()
     {
         return Response::api(data: TagResource::collection($this->tagService->getAll(columns: ['id', 'name'])));
+
+    }
+
+    public function flags()
+    {
+        return Response::api(data: FlagResource::collection($this->flagService->getAll(columns: ['id', 'name'])));
 
     }
 
@@ -190,15 +200,15 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $categoryIds   = $request->input('categories', []);
-        $tags          = $request->input('tags', []);
-        $productName   = $request->input('product_name');
-        $templateName  = $request->input('template_name');
-        $locale        = app()->getLocale();
+        $categoryIds = $request->input('categories', []);
+        $tags = $request->input('tags', []);
+        $productName = $request->input('product_name');
+        $templateName = $request->input('template_name');
+        $locale = app()->getLocale();
 
 
         $applyCategoryFilter = !(empty($categoryIds) || (count($categoryIds) === 1 && strtolower($categoryIds[0]) === 'all'));
-        $applyTagFilter      = !(empty($tags) || (count($tags) === 1 && strtolower($tags[0]) === 'all'));
+        $applyTagFilter = !(empty($tags) || (count($tags) === 1 && strtolower($tags[0]) === 'all'));
 
         //Products
         $products = $this->productRepository->query()
@@ -216,7 +226,6 @@ class MainController extends Controller
                     [strtolower($productName)]
                 );
             })
-
             ->with(['category', 'tags'])
             ->get();
 
@@ -238,12 +247,11 @@ class MainController extends Controller
                     [strtolower($templateName)]
                 );
             })
-
             ->with(['products.category', 'tags'])
             ->get();
 
         return Response::api(data: [
-            'products'  => ProductResource::collection($products),
+            'products' => ProductResource::collection($products),
             'templates' => TemplateResource::collection($templates),
         ]);
     }

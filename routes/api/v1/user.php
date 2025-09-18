@@ -182,6 +182,9 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('reviews-statistics/{reviewable_id}', [ReviewController::class, 'statistics']);
 
     Route::get('tags', [MainController::class, 'tags'])->name('tags');
+    Route::get('flags', [MainController::class, 'flags'])->name('flags');
+
+
 
 });
 
