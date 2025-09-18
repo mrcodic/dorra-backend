@@ -30,6 +30,8 @@ class StoreTemplateRequest extends BaseRequest
             'category_ids.*' => ['integer', 'exists:categories,id'],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['integer', 'exists:tags,id'],
+            'flags' => ['sometimes', 'array'],
+            'flags.*' => ['integer', 'exists:flags,id'],
             'types' => ['required', 'array'],
             'types.*' => ['integer', 'exists:types,id'],
             'template_image_id' => ['required','exists:media,id'],

@@ -89,6 +89,10 @@ class Template extends Model implements HasMedia
     {
         return $this->morphToMany(Tag::class, 'taggable')->withTimestamps();
     }
+    public function flags()
+    {
+        return $this->morphToMany(Flag::class, 'flaggable')->withTimestamps();
+    }
 
     public function types()
     {

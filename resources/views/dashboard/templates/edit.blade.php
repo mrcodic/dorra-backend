@@ -121,7 +121,7 @@
                                                 multiple>
                                             @foreach($associatedData['product_with_categories'] as $category)
                                                 <option value="{{ $category->id }}"
-                                                    @selected($category->products->intersect($model->products)->isNotEmpty())>
+                                                    @selected($category->load('products')->products->intersect($model->products)->isNotEmpty())>
                                                     {{ $category->getTranslation('name', app()->getLocale()) }}
                                                 </option>
 
@@ -160,6 +160,16 @@
                                         @foreach($associatedData['tags'] as $tag)
                                             <option value="{{ $tag->id }}" @selected($model->tags->contains($tag))>
                                                 {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label for="flagsSelect" class="label-text mb-1">Flags</label>
+                                    <select id="flagsSelect" class="form-select select2" name="flags[]" multiple>
+                                        @foreach($associatedData['flags'] as $flag)
+                                            <option value="{{ $flag->id }}" @selected($model->flags->contains($flag))>
+                                                {{ $flag->getTranslation('name', app()->getLocale()) }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -394,6 +404,10 @@
         });
         $('#tagsSelect').select2({
             placeholder: "Choose Tags",
+            allowClear: true
+        });
+        $('#flagsSelect').select2({
+            placeholder: "Choose Flags",
             allowClear: true
         });
         $('#colorsSelect').select2({

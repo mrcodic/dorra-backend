@@ -15,7 +15,8 @@ return new class extends Migration
         Schema::create('flaggables', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Flag::class)->constrained()->cascadeOnDelete();
-            $table->morphs('flaggable');
+            $table->string('flaggable_id');
+            $table->string('flaggable_type');
             $table->timestamps();
         });
     }
