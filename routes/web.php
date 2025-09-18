@@ -157,6 +157,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [FlagController::class, 'getData'])->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
+    Route::resource('/flags', FlagController::class);
+
+
     Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
         Route::get('/data', [TemplateController::class, 'getData'])->name('data');
         Route::get('/search', 'search')->name('search');

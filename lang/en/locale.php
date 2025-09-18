@@ -5,6 +5,7 @@ return [
     "User Interface" => "User Interface",
     "Dashboards" => "Dashboards",
     "Website" => "Website",
+    "Flags" => "Flags",
     "All" => "All",
     "Analytics" => "Analytics",
     "eCommerce" => "eCommerce",

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Services\TagService;
-use App\Http\Requests\Tag\{StoreTagRequest, UpdateFlagRequest};
+use App\Http\Requests\Tag\{StoreTagRequest, UpdateTagRequest};
 use Illuminate\Http\JsonResponse;
 
 
@@ -15,7 +15,7 @@ class TagController extends DashboardController
 
         parent::__construct($tagService);
         $this->storeRequestClass = new StoreTagRequest();
-        $this->updateRequestClass = new UpdateFlagRequest();
+        $this->updateRequestClass = new UpdateTagRequest();
         $this->indexView = 'tags.index';
         $this->usePagination = true;
         $this->resourceTable = 'tags';
