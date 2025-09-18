@@ -17,6 +17,7 @@ use App\Repositories\Interfaces\{CartItemRepositoryInterface,
 };
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\{Facades\Response, Arr};
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 
@@ -335,8 +336,26 @@ class CartService extends BaseService
     public function checkItem($request)
     {
         $request->validate([
-            'cartable_type' => 'in:product,category',
-            'itemable_type' => 'in:template,design',
+            'cartable_id' => [
+                'required',
+                Rule::when($this->cartable_type === 'product',
+                    Rule::exists('products', 'id')
+                ),
+                Rule::when($this->cartable_type === 'category',
+                    Rule::exists('categories', 'id')
+                ),
+            ],
+            'itemable_id' => [
+                'required',
+                Rule::when($this->itemable_type === 'template',
+                    Rule::exists('templates', 'id')
+                ),
+                Rule::when($this->itemable_type === 'design',
+                    Rule::exists('designs', 'id')
+                ),
+            ],
+            'cartable_type' => ['required', 'in:product,category'],
+            'itemable_type' => ['required', 'in:template,design'],
         ]);
         $cartId = auth('sanctum')->user()->cart->id ?? null;
         $mapItemTypes = [
