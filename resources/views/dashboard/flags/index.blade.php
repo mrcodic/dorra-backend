@@ -27,26 +27,26 @@
     @media (max-width: 768px) {
 
         /* Hide the last 2 columns on mobile */
-        .tag-list-table th:nth-child(4),
-        .tag-list-table th:nth-child(5),
-        .tag-list-table th:nth-child(6) {
+        .flag-list-table th:nth-child(4),
+        .flag-list-table th:nth-child(5),
+        .flag-list-table th:nth-child(6) {
             display: none !important;
         }
 
-        .tag-list-table tbody tr:not(.details-row) td:nth-child(4),
-        .tag-list-table tbody tr:not(.details-row) td:nth-child(5),
-        .tag-list-table tbody tr:not(.details-row) td:nth-child(6) {
+        .flag-list-table tbody tr:not(.details-row) td:nth-child(4),
+        .flag-list-table tbody tr:not(.details-row) td:nth-child(5),
+        .flag-list-table tbody tr:not(.details-row) td:nth-child(6) {
             display: none !important;
         }
 
         /* Style for clickable rows */
-        .tag-list-table tbody tr:not(.details-row) {
+        .flag-list-table tbody tr:not(.details-row) {
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
 
         /* Add expand indicator to the role column */
-        .tag-list-table tbody tr:not(.details-row) td:nth-child(1) {
+        .flag-list-table tbody tr:not(.details-row) td:nth-child(1) {
             position: relative;
             padding-left: 20px !important;
         }
@@ -145,7 +145,7 @@
                 <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                        id="search-tag-form" placeholder="Search tag..." style="height: 38px;">
+                        id="search-tag-form" placeholder="Search flag..." style="height: 38px;">
                     <!-- Clear button -->
                     <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                    background: transparent; border: none; font-weight: bold;
@@ -166,23 +166,23 @@
                 {{-- Add Button --}}
                 <div class="col-12 col-md-3 text-md-end">
                     <a class="btn btn-outline-primary w-100 w-md-auto d-flex align-items-center justify-content-center "
-                        data-bs-toggle="modal" data-bs-target="#addTagModal">
+                        data-bs-toggle="modal" data-bs-target="#addFlagModal">
                         <i data-feather="plus"></i>
-                        Add New Tag
+                        Add New Flag
                     </a>
                 </div>
 
             </div>
 
 
-            <table class="tag-list-table table">
+            <table class="flag-list-table table">
                 <thead class="table-light">
                     <tr>
                         <th>
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                         </th>
                         <th>Name</th>
-                        <th>NO.of Products</th>
+                        <th>NO.of Categories</th>
                         <th>NO.of Templates</th>
                         <th>Added Date</th>
                         <th>Actions</th>
@@ -193,17 +193,17 @@
 
                 <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
                     style="z-index: 10;">
-                    <p id="selected-count-text">0 Tags are selected</p>
+                    <p id="selected-count-text">0 Flags are selected</p>
                     <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                        data-bs-target="#deleteTagsModal"
+                        data-bs-target="#deleteFlagsModal"
                         class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                         <i data-feather="trash-2"></i> Delete Selected
                     </button>
                     <form style="display: none;" id="bulk-delete-form" method="POST"
-                        action="{{ route('tags.bulk-delete') }}">
+                        action="{{ route('flags.bulk-delete') }}">
                         @csrf
                         <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                            data-bs-target="#deleteTagsModal"
+                            data-bs-target="#deleteFlagsModal"
                             class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                             <i data-feather="trash-2"></i> Delete Selected
                         </button>
@@ -214,19 +214,19 @@
             </div>
 
             @include('modals.delete',[
-            'id' => 'deleteTagModal',
-            'formId' => 'deleteTagForm',
-            'title' => 'Delete Tag',
+            'id' => 'deleteFlagModal',
+            'formId' => 'deleteFlagForm',
+            'title' => 'Delete Flag',
             ])
             @include('modals.delete',[
-            'id' => 'deleteTagsModal',
+            'id' => 'deleteFlagsModal',
             'formId' => 'bulk-delete-form',
-            'title' => 'Delete Tags',
+            'title' => 'Delete Flags',
             'confirmText' => 'Are you sure you want to delete this items?',
             ])
-            @include('modals.tags.add-tag')
-            @include('modals.tags.show-tag')
-            @include('modals.tags.edit-tag')
+            @include('modals.flags.add-flag')
+            @include('modals.flags.show-flag')
+            @include('modals.flags.edit-flag')
 
 
         </div>
@@ -260,7 +260,7 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 <script>
-    const tagsDataUrl = "{{ route('tags.data') }}";
+    const flagsDataUrl = "{{ route('flags.data') }}";
     const locale = "{{ app()->getLocale() }}";
 </script>
 
@@ -303,7 +303,7 @@
     }
 
     // Accordion click handler with event delegation
-    $(document).on('click.accordion', '.tag-list-table tbody tr:not(.details-row)', function(e) {
+    $(document).on('click.accordion', '.flag-list-table tbody tr:not(.details-row)', function(e) {
         // Prevent accordion when clicking interactive elements
         if ($(e.target).is('input, button, a, .btn') ||
             $(e.target).closest('input, button, a, .btn').length > 0) {
@@ -317,7 +317,7 @@
     // Initialize accordion after DataTable draw
     function initAccordion() {
         if ($(window).width() <= 768) {
-            $('.tag-list-table tbody tr:not(.details-row)').each(function() {
+            $('.flag-list-table tbody tr:not(.details-row)').each(function() {
                 const $row = $(this);
 
                 // Remove existing details and icons first
@@ -369,7 +369,7 @@
     });
 
     // On DataTable events
-    $(document).on('draw.dt', '.tag-list-table', function () {
+    $(document).on('draw.dt', '.flag-list-table', function () {
         $('#bulk-delete-container').hide();
         $('#select-all-checkbox').prop('checked', false);
 
@@ -390,7 +390,7 @@
         const count = selectedCheckboxes.length;
 
         if (count > 0) {
-            $('#selected-count-text').text(`${count} User${count > 1 ? 's are' : ' is'} selected`);
+            $('#selected-count-text').text(`${count} Flag${count > 1 ? 's are' : ' is'} selected`);
             $('#bulk-delete-container').show();
         } else {
             $('#bulk-delete-container').hide();
@@ -404,13 +404,13 @@
 });
 </script>
 {{-- Page js files --}}
-<script src="{{ asset('js/scripts/pages/app-tag-list.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/scripts/pages/app-flag-list.js') }}?v={{ time() }}"></script>
 
 <script>
     // Backup accordion handler in case the main one doesn't work
 $(document).ready(function() {
     // Alternative click handler
-    $(document).off('click.accordion').on('click.accordion', '.tag-list-table tbody tr:not(.details-row)', function(e) {
+    $(document).off('click.accordion').on('click.accordion', '.flag-list-table tbody tr:not(.details-row)', function(e) {
         console.log('Accordion clicked'); // Debug log
 
         if ($(window).width() <= 768) {

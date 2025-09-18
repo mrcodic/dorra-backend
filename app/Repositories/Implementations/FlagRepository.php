@@ -2,16 +2,15 @@
 
 namespace App\Repositories\Implementations;
 
-
-use App\Models\Faq;
+use App\Models\Flag;
 use App\Repositories\Base\BaseRepository;
 use App\Repositories\Interfaces\FlagRepositoryInterface;
 
 class FlagRepository extends BaseRepository implements FlagRepositoryInterface
 {
-    public function __construct(Faq $fqa)
+    public function __construct(Flag $flag)
     {
-        parent::__construct($fqa);
+        parent::__construct($flag);
     }
 
 }
