@@ -66,9 +66,9 @@ class StoreDesignRequest extends BaseRequest
                 }),
                 'exists:product_prices,id',
             ],
-            "specs" => ["required", "array"],
-            "specs.*.id" => ["required", "exists:product_specifications,id"],
-            "specs.*.option" => ["required", "exists:product_specification_options,id"],
+            "specs" => ["sometimes", "array"],
+            "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
+            "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
         ];
     }

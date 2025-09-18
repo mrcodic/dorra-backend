@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Tag;
+namespace App\Http\Requests\Flag;
 
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Propaganistas\LaravelPhone\Rules\Phone;
 
-class UpdateTagRequest extends BaseRequest
+class UpdateFlagRequest extends BaseRequest
 {
     /**
      * Determine if the v1 is authorized to make this request.
@@ -31,13 +31,11 @@ class UpdateTagRequest extends BaseRequest
                 'required',
                 'string',
                 'max:255',
-//                Rule::unique('tags', 'name->en')->ignore($id),
             ],
             'name.ar' => [
                 'required',
                 'string',
                 'max:255',
-//                Rule::unique('tags', 'name->ar')->ignore($id),
             ],
         ];
     }

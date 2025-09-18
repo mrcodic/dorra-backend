@@ -36,7 +36,7 @@ class DesignResource extends JsonResource
             'product' => $this->when($designable, function () use ($designable) {
                 return  new CategoryResource($designable instanceof Category ? $designable : $designable->category);
             }),
-            'owner' => UserResource::make($this->whenLoaded('owner')),
+            'owner' => UserResource::make($this->whenLoaded('owCner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),

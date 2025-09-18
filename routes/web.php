@@ -4,6 +4,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     CategoryController,
     DiscountCodeController,
     FaqController,
+    FlagController,
     InvoiceController,
     LocationController,
     MessageController,
@@ -151,6 +152,10 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/discount-codes', DiscountCodeController::class)->except('show');
 
+    Route::group(['prefix' => 'flags', 'as' => 'flags.', 'controller' => FlagController::class,], function () {
+        Route::get('/data', [FlagController::class, 'getData'])->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
     Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
         Route::get('/data', [TemplateController::class, 'getData'])->name('data');
         Route::get('/search', 'search')->name('search');

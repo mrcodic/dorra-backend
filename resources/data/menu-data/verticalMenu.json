@@ -65,6 +65,13 @@
             "modalTarget": ""
         },
         {
+            "name": "Flags",
+            "icon": "Templates.svg",
+            "slug": "",
+            "url": "/flags",
+            "modalTarget": ""
+        },
+        {
             "name": "Mockups",
             "icon": "mockup1.svg",
             "slug": "",
