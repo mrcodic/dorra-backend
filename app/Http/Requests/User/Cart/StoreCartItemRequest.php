@@ -127,8 +127,7 @@ class StoreCartItemRequest extends BaseRequest
         }
 
         $cartId = auth('sanctum')->user()->cart->id ?? null;
-        dd($cartId);
-
+        
         $exists = CartItem::where('cart_id', $cartId)
             ->where('cartable_id', $this->cartable_id)
             ->where('cartable_type', $this->cartable_type)
