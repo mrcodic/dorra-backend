@@ -346,7 +346,7 @@ class CartService extends BaseService
         return $this->cartItemRepository->query()->where('cart_id', $cartId)
             ->where('cartable_id', $request->cartable_id)
             ->where('cartable_type', $mapCartItem[$request->cartable_type])
-            ->when($request->template_id, fn($q) => $q->where('itemable_id', $request->itemable_id)
+            ->when($request->itemable_id, fn($q) => $q->where('itemable_id', $request->itemable_id)
                 ->where('itemable_type', $mapItemTypes[$request->itemable_type]))
             ->exists();
     }
