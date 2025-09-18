@@ -125,28 +125,7 @@ class StoreCartItemRequest extends BaseRequest
             }
         }
 
-        $exists = \App\Models\CartItem::where('user_id', auth()->id())
-            ->where('cartable_id', $this->cartable_id)
-            ->where('cartable_type', $this->cartable_type)
-            ->when($this->product_price_id, function ($q) {
-                $q->where('product_price_id', $this->product_price_id);
-            })
-            ->when($this->template_id, function ($q) {
-                $q->where('template_id', $this->template_id);
-            })
-            ->when($this->design_id, function ($q) {
-                $q->where('design_id', $this->design_id);
-            })
-            ->exists();
-
-        if ($exists) {
-            throw new HttpResponseException(
-                Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
-                    'cart_item' => 'This item is already in your cart.',
-                ])
-            );
-        }
-
+ 
     }
 
     public function getTemplate(): ?Template
