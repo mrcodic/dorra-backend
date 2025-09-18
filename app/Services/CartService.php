@@ -338,19 +338,19 @@ class CartService extends BaseService
         $request->validate([
             'cartable_id' => [
                 'required',
-                Rule::when($this->cartable_type === 'product',
+                Rule::when($request->cartable_type === 'product',
                     Rule::exists('products', 'id')
                 ),
-                Rule::when($this->cartable_type === 'category',
+                Rule::when($request->cartable_type === 'category',
                     Rule::exists('categories', 'id')
                 ),
             ],
             'itemable_id' => [
                 'required',
-                Rule::when($this->itemable_type === 'template',
+                Rule::when($request->itemable_type === 'template',
                     Rule::exists('templates', 'id')
                 ),
-                Rule::when($this->itemable_type === 'design',
+                Rule::when($request->itemable_type === 'design',
                     Rule::exists('designs', 'id')
                 ),
             ],
