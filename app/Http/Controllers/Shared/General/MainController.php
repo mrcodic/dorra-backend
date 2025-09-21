@@ -6,11 +6,14 @@ namespace App\Http\Controllers\Shared\General;
 use App\Enums\Product\UnitEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dimension\StoreDimensionRequest;
+use App\Models\Category;
+use App\Models\Product;
 use App\Services\FlagService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
     CountryResource,
     Design\DesignResource,
+    DimensionResource,
     FlagResource,
     FolderResource,
     MediaResource,
@@ -38,6 +41,7 @@ use App\Services\TeamService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Validation\Rule;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 
@@ -255,4 +259,22 @@ class MainController extends Controller
             'templates' => TemplateResource::collection($templates),
         ]);
     }
+
+    public function dimensions(Request $request)
+    {
+       $validatedData = $request->validate([
+               'resource_id' => ['required', Rule::when($request->resource_type == 'product',function (){
+               Rule::exists('products', 'resource_id');
+           },Rule::exists('categories', 'id'))],
+           'resource_type' => ['required', 'in:product,category'],
+       ]);
+        $allowedTypes = [
+            'product'  => Product::class,
+            'category' =>Category::class,
+        ];
+        $modelClass = $allowedTypes[$validatedData['resource_type']];
+        $model = $modelClass::findOrFail($validatedData['resource_id']);
+        return DimensionResource::collection($model->dimensions);
+    }
+
 }

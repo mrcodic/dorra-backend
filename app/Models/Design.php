@@ -34,6 +34,7 @@ class Design extends Model implements HasMedia
         'user_id',
         'guest_id',
         'template_id',
+        'dimension_id',
         'design_data',
         'design_back_data',
         'current_version',

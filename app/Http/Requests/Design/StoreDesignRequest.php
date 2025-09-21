@@ -5,7 +5,7 @@ namespace App\Http\Requests\Design;
 use App\Enums\OrientationEnum;
 use App\Enums\Product\UnitEnum;
 use App\Http\Requests\Base\BaseRequest;
-use App\Models\{Category, Guest, Product, Template};
+use App\Models\{Category, Dimension, Guest, Product, Template};
 use App\Rules\DimensionWithinUnitRange;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -55,6 +55,23 @@ class StoreDesignRequest extends BaseRequest
             'designable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
+            'dimension_id' => [
+                'nullable',
+                'exists:dimensions,id',
+                function ($attribute, $value, $fail) {
+                    if (!$value) {
+                        return;
+                    }
+                    $dimension = Dimension::find($value);
+                    if ($this->designable_type === Product::class && !$dimension?->products()->exists()) {
+                        return $fail("This dimension is not linked to any product.");
+                    }
+
+                    if ($this->designable_type === Category::class && !$dimension?->categories()->exists()) {
+                        return $fail("This dimension is not linked to any category.");
+                    }
+                },
+            ],
             'design_data' => ['nullable', 'json'],
             'design_back_data' => ['nullable', 'json'],
             'name' => ['sometimes', 'string', 'max:255'],
