@@ -57,22 +57,24 @@ class Design extends Model implements HasMedia
         return Attribute::make(
             set: function ($value) {
                 if (is_string($value)) {
-                    return [
+                    return json_encode([
                         'en' => $value,
                         'ar' => $value,
-                    ];
+                    ]);
                 }
+
                 if (is_array($value)) {
-                    return [
+                    return json_encode([
                         'en' => $value['en'] ?? null,
                         'ar' => $value['ar'] ?? null,
-                    ];
+                    ]);
                 }
 
                 return $value;
             }
         );
     }
+
     public function guest(): BelongsTo
     {
         return $this->belongsTo(Guest::class);
