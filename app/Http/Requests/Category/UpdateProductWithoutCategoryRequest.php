@@ -56,8 +56,30 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
                 'required_if:has_custom_prices,true',
                 'prohibited_if:has_custom_prices,false',
             ],
-            'prices.*.quantity' => ['required', 'integer', 'min:1'],
-            'prices.*.price' => ['required', 'integer', 'min:1'],
+            'prices.*.quantity' => [
+                'required',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) {
+                    $index = explode('.', $attribute)[1];
+                    $price = request()->input("prices.$index.price");
+
+                    $pairs = request()->attributes->get('price_pairs', []);
+                    $key = $value . '-' . $price;
+
+                    if (in_array($key, $pairs, true)) {
+                        $fail("Duplicate quantity/price combination found.");
+                    }
+
+                    $pairs[] = $key;
+                    request()->attributes->set('price_pairs', $pairs);
+                }
+            ],
+            'prices.*.price' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
             'specifications' => ['sometimes', 'array'],
             'specifications.*.name_en' => 'sometimes|string',
             'specifications.*.name_ar' => 'sometimes|string',

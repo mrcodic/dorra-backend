@@ -56,7 +56,7 @@ class StoreDesignRequest extends BaseRequest
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
             'dimension_id' => [
-                'nullable',
+                'required',
                 'exists:dimensions,id',
                 function ($attribute, $value, $fail) {
                     if (!$value) {

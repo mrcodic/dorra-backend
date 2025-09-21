@@ -5,6 +5,7 @@ namespace App\Http\Requests\Product;
 use App\Enums\Product\StatusEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\Category;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 
 class StoreProductRequest extends BaseRequest
@@ -13,6 +14,7 @@ class StoreProductRequest extends BaseRequest
     {
         return true;
     }
+
 
     public function rules(): array
     {
@@ -60,8 +62,31 @@ class StoreProductRequest extends BaseRequest
                 'required_if:has_custom_prices,true',
                 'prohibited_if:has_custom_prices,false',
             ],
-            'prices.*.quantity' => ['required', 'integer', 'min:1'],
-            'prices.*.price' => ['required', 'integer', 'min:1'],
+            'prices.*.quantity' => [
+                'required',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) {
+                    $index = explode('.', $attribute)[1];
+                    $price = request()->input("prices.$index.price");
+
+                    $pairs = request()->attributes->get('price_pairs', []);
+                    $key = $value . '-' . $price;
+
+                    if (in_array($key, $pairs, true)) {
+                        $fail("Duplicate quantity/price combination found.");
+                    }
+
+                    $pairs[] = $key;
+                    request()->attributes->set('price_pairs', $pairs);
+                }
+            ],
+            'prices.*.price' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+
             'specifications' => ['sometimes', 'array'],
             'specifications.*.name_en' => 'sometimes|string',
             'specifications.*.name_ar' => 'sometimes|string',
@@ -81,7 +106,26 @@ class StoreProductRequest extends BaseRequest
         ];
     }
 
-    public function withValidator(Validator $validator): void
+    public function messages(): array
+    {
+        return [
+            'prices.*.quantity.required' => 'Quantity is required.',
+            'prices.*.quantity.integer'  => 'Quantity must be a number.',
+            'prices.*.quantity.min'      => 'Quantity must be at least 1.',
+            'prices.*.price.required'    => 'Price is required.',
+            'prices.*.price.integer'     => 'Price must be a number.',
+            'prices.*.price.min'         => 'Price must be at least 1.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'prices.*.quantity' => 'Quantity',
+            'prices.*.price'    => 'Price',
+        ];
+    }
+    public function withValidator($validator)
     {
         $validator->after(function ($validator) {
             $prices = $this->input('prices', []);
@@ -106,23 +150,6 @@ class StoreProductRequest extends BaseRequest
             }
         });
     }
-    public function messages(): array
-    {
-        return [
-            'prices.*.quantity.required' => 'Quantity is required.',
-            'prices.*.quantity.integer'  => 'Quantity must be a number.',
-            'prices.*.quantity.min'      => 'Quantity must be at least 1.',
-            'prices.*.price.required'    => 'Price is required.',
-            'prices.*.price.integer'     => 'Price must be a number.',
-            'prices.*.price.min'         => 'Price must be at least 1.',
-        ];
-    }
 
-    public function attributes(): array
-    {
-        return [
-            'prices.*.quantity' => 'Quantity',
-            'prices.*.price'    => 'Price',
-        ];
-    }
+
 }

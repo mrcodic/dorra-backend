@@ -73,13 +73,32 @@ class UpdateProductRequest extends BaseRequest
                 'nullable',
                 'integer',
                 'min:1',
+                function ($attribute, $value, $fail) {
+                    $index = explode('.', $attribute)[1];
+                    $price = request()->input("prices.$index.price");
+
+                    $pairs = request()->attributes->get('price_pairs', []);
+                    $key = $value . '-' . $price;
+
+                    if (in_array($key, $pairs, true)) {
+                        $fail("Duplicate quantity/price combination found.");
+                    }
+
+                    $pairs[] = $key;
+                    request()->attributes->set('price_pairs', $pairs);
+                },
                 Rule::unique('product_prices', 'quantity')
                     ->where(fn ($query) => $query
                         ->where('pricable_id', $id)
                         ->where('pricable_type', Product::class)
                     )->ignore($id,'pricable_id'),
             ],
-            'prices.*.price' => ['nullable', 'integer', 'min:1'],
+            'prices.*.price' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+
             'specifications' => ['sometimes', 'array'],
             'specifications.*.name_en' => 'sometimes|string',
             'specifications.*.name_ar' => 'sometimes|string',
