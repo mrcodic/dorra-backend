@@ -65,15 +65,19 @@ class Design extends Model implements HasMedia
 
                 if (is_array($value)) {
                     return [
-                        'en' => $value['en'] ?? null,
-                        'ar' => $value['ar'] ?? null,
+                        'en' => $value['en'] ?? '',
+                        'ar' => $value['ar'] ?? '',
                     ];
                 }
 
-                return $value;
+                return [
+                    'en' => '',
+                    'ar' => '',
+                ];
             }
         );
     }
+
 
 
     public function guest(): BelongsTo
