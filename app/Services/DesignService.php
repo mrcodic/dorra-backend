@@ -148,7 +148,7 @@ class DesignService extends BaseService
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->when(request()->filled('owner_id'), fn($q) => $q->where('user_id', request('owner_id')))
-            ->when(request()->filled('category_id'), fn($q) => $q->whereHas('designable', fn($cat) => $cat->where('id', request('category_id'))
+            ->when(request()->filled('category_id'), fn($q) => $q->whereHas('designable', fn($cat) => $cat->where('designable_id', request('category_id'))
             )
             )
             ->orderBy('created_at', request('date', 'desc'));
