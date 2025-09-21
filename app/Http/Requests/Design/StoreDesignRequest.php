@@ -35,7 +35,7 @@ class StoreDesignRequest extends BaseRequest
     {
         return [
             'template_id' => ['bail', 'sometimes', 'exists:templates,id'],
-            'product_id'   => ['required', 'integer',function ($attribute, $value, $fail) {
+            'product_id'   => ['nullable', 'integer',function ($attribute, $value, $fail) {
                 $template = Template::find($this->template_id);
                 $category = Category::find($value) ?? Product::find($value);
                 if (!$template) {
@@ -53,7 +53,7 @@ class StoreDesignRequest extends BaseRequest
                     return $fail("The selected product is not associated with the selected template.");
                 }
             }],
-            'designable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
+            'designable_type' => ['nullable', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
             'dimension_id' => [
