@@ -9,9 +9,8 @@
                     <h5 class="modal-title fs-3" id="exampleModalLabel">Add Product</h5>
                 </div>
                 <div class="modal-body flex-grow-1">
-
-                    <!-- Name in Arabic and English -->
                     <div class="row my-3">
+                        <!-- Product -->
                         <div class="col-12">
                             <div class="form-group mb-2">
                                 <label for="productsSelect" class="label-text mb-1">Products</label>
@@ -23,35 +22,32 @@
                                         </option>
                                     @endforeach
                                 </select>
-
                             </div>
-
                         </div>
+
+                        <!-- SubProducts -->
                         <div class="col-12">
                             <div class="form-group mb-2">
                                 <label for="subCategorySelect" class="label-text mb-1">SubProducts</label>
-                                <select id="subCategorySelect" class="form-select select2 category-sub-category-select" data-sub-category-url="{{ route('sub-categories')}}" name="sub_categories[]" multiple>
-
+                                <select id="subCategorySelect"
+                                        class="form-select select2 category-sub-category-select"
+                                        data-sub-category-url="{{ route('sub-categories')}}"
+                                        name="sub_categories[]"
+                                        multiple>
                                 </select>
                             </div>
-
                         </div>
+
+                        <!-- Categories -->
                         <div class="col-12">
                             <div class="form-group mb-2">
                                 <label for="tagsSelect" class="label-text mb-1">Category</label>
                                 <select id="tagsSelect" class="form-select select2 sub-category-select" name="products[]" multiple>
-                                    @foreach($products as $product)
-                                        <option value="{{ $product->id }}">
-                                            {{ $product->getTranslation('name', app()->getLocale()) }}
-                                        </option>
-                                    @endforeach
+                                    <!-- سيتم تحميلها ديناميك -->
                                 </select>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
 
                 <div class="modal-footer border-top-0">
@@ -60,90 +56,56 @@
                         <span class="btn-text">Save</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
                     </button>
-
                 </div>
             </form>
         </div>
     </div>
 </div>
-<script !src="">
-    $(document).ready(function () {
-        $('#subCategorySelect').select2();
-        $('#tagsSelect').select2();
 
-    });
-</script>
 <script>
     $(document).ready(function () {
-        const $subProducts = $('#subCategorySelect');
-        const $categories = $('#tagsSelect');
+        const $productsSelect   = $('#productsSelect');
+        const $subCategorySelect = $('#subCategorySelect');
+        const $categoriesSelect = $('#tagsSelect');
         const limit = 12;
 
-        function showError($target) {
-            const errorMsg = `
-            <div class="text-danger mt-1 select-limit-error" style="font-size: 0.875em;">
-                You can select a maximum of ${limit} items total (SubProducts + Category).
-            </div>`;
+        // init select2
+        $subCategorySelect.select2();
+        $categoriesSelect.select2();
 
-            // Remove existing error messages
-            $('.select-limit-error').remove();
-
-            // Insert message after the select2 container
-            $target.next('.select2-container').after(errorMsg);
-
-            // Auto-hide after 5 seconds
-            setTimeout(() => $('.select-limit-error').fadeOut(300, function () { $(this).remove(); }), 5000);
-        }
-
+        // enforce total limit (subProducts + categories)
         function enforceLimit(e) {
-            const totalSelected = $subProducts.select2('data').length + $categories.select2('data').length;
-
+            const totalSelected = $subCategorySelect.select2('data').length + $categoriesSelect.select2('data').length;
             if (totalSelected > limit) {
                 const $targetSelect = $(e.target);
                 const selectedId = e.params.data.id;
-
-                // Revert the last selected option
                 const newSelection = $targetSelect.val().filter(val => val !== selectedId);
                 $targetSelect.val(newSelection).trigger('change');
 
-                showError($targetSelect);
+                // show error
+                $('.select-limit-error').remove();
+                $targetSelect.next('.select2-container').after(`
+                <div class="text-danger mt-1 select-limit-error" style="font-size: 0.875em;">
+                    You can select a maximum of ${limit} items total (SubProducts + Category).
+                </div>
+            `);
+                setTimeout(() => $('.select-limit-error').fadeOut(300, function () { $(this).remove(); }), 5000);
             }
         }
+        $subCategorySelect.on('select2:select', enforceLimit);
+        $categoriesSelect.on('select2:select', enforceLimit);
 
-        $subProducts.on('select2:select', enforceLimit);
-        $categories.on('select2:select', enforceLimit);
-    });
-</script>
-
-<script !src="">
-    $('.category-select').on('change', function() {
-        const $selectedOption = $(this).find(':selected');
-        const categoryId = $selectedOption.val();
-        const isHasCategory = $selectedOption.data('is-has-category'); // comes from Blade
-
-        const $subCategorySelect = $('.category-sub-category-select');
-        const $categories = $('#tagsSelect');
-
-        if (isHasCategory === 0) {
-            // Disable both selects
-            $subCategorySelect.prop('disabled', true).val(null).trigger('change');
-            $categories.prop('disabled', true).val(null).trigger('change');
-
-            // Clear out old options
-            $subCategorySelect.empty().append('<option value="" disabled>SubProducts disabled</option>');
-            $categories.empty().append('<option value="" disabled>Categories disabled</option>');
-
-        } else {
-            // Enable selects
-            $subCategorySelect.prop('disabled', false);
-            $categories.prop('disabled', false);
-
-            // Load subcategories via AJAX
+        // 🟢 load subProducts + categories
+        function loadSubProductsAndCategories(productId) {
+            // SubProducts
             $.ajax({
-                url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
+                url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${productId}`,
                 method: "GET",
+                beforeSend: function() {
+                    $subCategorySelect.empty().append('<option disabled>Loading SubProducts...</option>');
+                },
                 success: function(res) {
-                    $subCategorySelect.empty().append('<option value="" disabled>Select subProduct</option>');
+                    $subCategorySelect.empty();
                     $.each(res.data, (i, s) =>
                         $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`)
                     );
@@ -152,88 +114,43 @@
                     $subCategorySelect.empty().append('<option value="">Error loading Subcategories</option>');
                 }
             });
-        }
-    });
 
-
-</script>
-<script>
-    $(document).ready(function () {
-        const input = $('#add-category-image');
-        const uploadArea = $('#add-upload-area');
-        const progressBar = $('#add-upload-progress .progress-bar');
-        const progressContainer = $('#add-upload-progress');
-        const uploadedImage = $('#add-uploaded-image');
-        const imgPreview = $('#add-uploaded-image img');
-        const fileNameDisplay = $('#add-file-details .file-name');
-        const fileSizeDisplay = $('#add-file-details .file-size');
-        const removeBtn = $('#add-remove-image');
-
-        // Click upload area to open file input
-        uploadArea.on('click', function () {
-            input.click();
-        });
-
-        // Drag over style
-        uploadArea.on('dragover', function (e) {
-            e.preventDefault();
-            uploadArea.addClass('dragover');
-        });
-
-        uploadArea.on('dragleave', function (e) {
-            e.preventDefault();
-            uploadArea.removeClass('dragover');
-        });
-
-        uploadArea.on('drop', function (e) {
-            e.preventDefault();
-            uploadArea.removeClass('dragover');
-            const files = e.originalEvent.dataTransfer.files;
-            if (files.length > 0) handleFile(files[0]);
-        });
-
-        // File input change
-        input.on('change', function (e) {
-            if (e.target.files.length > 0) handleFile(e.target.files[0]);
-        });
-
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) return;
-
-            const fileSizeKB = (file.size / 1024).toFixed(2) + ' KB';
-            progressContainer.removeClass('d-none');
-            progressBar.css('width', '0%');
-
-            let progress = 0;
-            const interval = setInterval(function () {
-                progress += 10;
-                progressBar.css('width', progress + '%');
-                if (progress >= 100) {
-                    clearInterval(interval);
-
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        imgPreview.attr('src', e.target.result);
-                        fileNameDisplay.text(file.name);
-                        fileSizeDisplay.text(fileSizeKB);
-                        uploadedImage.removeClass('d-none');
-                        progressContainer.addClass('d-none');
-                    };
-                    reader.readAsDataURL(file);
+            // Categories (⚠️ غيّر الـ API هنا على حسب عندك)
+            $.ajax({
+                url: `/products?filter[category.id]=${productId}`,
+                method: "GET",
+                beforeSend: function() {
+                    $categoriesSelect.empty().append('<option disabled>Loading Categories...</option>');
+                },
+                success: function(res) {
+                    $categoriesSelect.empty();
+                    $.each(res.data, (i, c) =>
+                        $categoriesSelect.append(`<option value="${c.id}">${c.name}</option>`)
+                    );
+                },
+                error: function() {
+                    $categoriesSelect.empty().append('<option value="">Error loading Categories</option>');
                 }
-            }, 100);
+            });
         }
 
-        // Remove image
-        removeBtn.on('click', function () {
-            imgPreview.attr('src', '');
-            fileNameDisplay.text('');
-            fileSizeDisplay.text('');
-            uploadedImage.addClass('d-none');
-            input.val('');
-        });
+        // 🟢 handle product change
+        $productsSelect.on('change', function() {
+            const productId = $(this).val();
+            const isHasCategory = $(this).find(':selected').data('is-has-category');
 
-        // Replace icons if needed
-        feather.replace();
+            if (isHasCategory === 0) {
+                $subCategorySelect.prop('disabled', true).val(null).trigger('change');
+                $categoriesSelect.prop('disabled', true).val(null).trigger('change');
+
+                $subCategorySelect.empty().append('<option disabled>SubProducts disabled</option>');
+                $categoriesSelect.empty().append('<option disabled>Categories disabled</option>');
+            } else {
+                $subCategorySelect.prop('disabled', false);
+                $categoriesSelect.prop('disabled', false);
+
+                loadSubProductsAndCategories(productId);
+            }
+        });
     });
 </script>
