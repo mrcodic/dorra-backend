@@ -57,7 +57,7 @@ use Illuminate\Support\Arr;
     public function assignToDesign($teamId): void
     {
         $team = $this->repository->find($teamId);
-        $team->update(['updated_at' => now()]);
+        $team->touch();
         $team->designs()->syncWithoutDetaching(request()->designs);
     }
 
