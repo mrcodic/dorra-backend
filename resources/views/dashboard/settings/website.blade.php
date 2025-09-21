@@ -1081,33 +1081,7 @@
     @endsection
 
     @section('page-script')
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const editButtons = document.querySelectorAll(".edit-category");
 
-                editButtons.forEach(btn => {
-                    btn.addEventListener("click", function () {
-                        // Get values from data attributes
-                        const id = this.dataset.id;
-                        const name = this.dataset.name;
-                        const image = this.dataset.image;
-                        const subcategories = JSON.parse(this.dataset.subcategories || "[]");
-                        const products = JSON.parse(this.dataset.products || "[]");
-
-                        // Fill modal fields
-                        $('#editProductsSelect').val(id).trigger('change'); // category select
-                        $('#editSubCategorySelect').val(subcategories).trigger('change'); // subcategories
-                        $('#editTagsSelect').val(products).trigger('change'); // products
-
-                        // Optional: preview image
-                        if (image) {
-                            $('#editCategoryImagePreview').attr('src', image).removeClass('d-none');
-                        }
-                    });
-                });
-            });
-
-        </script>
     <script>
         Dropzone.autoDiscover = false;
 

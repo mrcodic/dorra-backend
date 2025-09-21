@@ -81,7 +81,7 @@
 
     });
 </script>
-<script>
+<script !src="">
     $(document).ready(function () {
         const $subProducts = $('#editSubCategorySelect');
         const $categories = $('#editTagsSelect');
@@ -122,126 +122,87 @@
         $categories.on('select2:select', enforceLimit);
     });
 </script>
-
-<script !src="">
-    $('.category-select').on('change', function() {
-        const $selectedOption = $(this).find(':selected');
-        const categoryId = $selectedOption.val();
-        const isHasCategory = $selectedOption.data('is-has-category'); // comes from Blade
-
-        const $editSubCategorySelect = $('.category-sub-category-select');
+<script>
+    $(document).ready(function () {
+        const $editProductsSelect = $('#editProductsSelect');
+        const $editSubCategorySelect = $('#editSubCategorySelect');
         const $categories = $('#editTagsSelect');
 
-        if (isHasCategory === 0) {
-            // Disable both selects
-            $editSubCategorySelect.prop('disabled', true).val(null).trigger('change');
-            $categories.prop('disabled', true).val(null).trigger('change');
-
-            // Clear out old options
-            $editSubCategorySelect.empty().append('<option value="" disabled>SubProducts disabled</option>');
-            $categories.empty().append('<option value="" disabled>Categories disabled</option>');
-
-        } else {
-            // Enable selects
-            $editSubCategorySelect.prop('disabled', false);
-            $categories.prop('disabled', false);
-
-            // Load subcategories via AJAX
+        // 🟢 دالة مساعدة لتحميل SubProducts و Categories
+        function loadSubProductsAndCategories(productId, selectedSubs = [], selectedCats = []) {
+            // SubProducts
             $.ajax({
-                url: `${$editSubCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
+                url: `${$editSubCategorySelect.data('sub-category-url')}?filter[parent_id]=${productId}`,
                 method: "GET",
+                beforeSend: function() {
+                    $editSubCategorySelect.empty().append('<option disabled>Loading SubProducts...</option>');
+                },
                 success: function(res) {
-                    $editSubCategorySelect.empty().append('<option value="" disabled>Select subProduct</option>');
+                    $editSubCategorySelect.empty();
                     $.each(res.data, (i, s) =>
                         $editSubCategorySelect.append(`<option value="${s.id}">${s.name}</option>`)
                     );
+                    if (selectedSubs.length > 0) {
+                        $editSubCategorySelect.val(selectedSubs).trigger('change');
+                    }
                 },
                 error: function() {
-                    $editSubCategorySelect.empty().append('<option value="">Error loading Subcategories</option>');
+                    $editSubCategorySelect.empty().append('<option value="">Error loading SubProducts</option>');
+                }
+            });
+
+            // Categories (غير الـ URL حسب API عندك)
+            $.ajax({
+                url: `/products?filter[category.id]=${productId}`,
+                method: "GET",
+                beforeSend: function() {
+                    $categories.empty().append('<option disabled>Loading Categories...</option>');
+                },
+                success: function(res) {
+                    $categories.empty();
+                    $.each(res.data, (i, c) =>
+                        $categories.append(`<option value="${c.id}">${c.name}</option>`)
+                    );
+                    if (selectedCats.length > 0) {
+                        $categories.val(selectedCats).trigger('change');
+                    }
+                },
+                error: function() {
+                    $categories.empty().append('<option value="">Error loading Categories</option>');
                 }
             });
         }
-    });
 
+        // 🟢 عند الضغط على Edit (من غير trigger('change'))
+        document.querySelectorAll(".edit-category").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const id = this.dataset.id;
+                const image = this.dataset.image;
+                const subcategories = JSON.parse(this.dataset.subcategories || "[]");
+                const products = JSON.parse(this.dataset.products || "[]");
 
-</script>
-<script>
-    $(document).ready(function () {
-        const input = $('#add-category-image');
-        const uploadArea = $('#add-upload-area');
-        const progressBar = $('#add-upload-progress .progress-bar');
-        const progressContainer = $('#add-upload-progress');
-        const uploadedImage = $('#add-uploaded-image');
-        const imgPreview = $('#add-uploaded-image img');
-        const fileNameDisplay = $('#add-file-details .file-name');
-        const fileSizeDisplay = $('#add-file-details .file-size');
-        const removeBtn = $('#add-remove-image');
+                // set product value فقط
+                $editProductsSelect.val(id);
 
-        // Click upload area to open file input
-        uploadArea.on('click', function () {
-            input.click();
-        });
+                // نادينا مرة واحدة
+                loadSubProductsAndCategories(id, subcategories, products);
 
-        // Drag over style
-        uploadArea.on('dragover', function (e) {
-            e.preventDefault();
-            uploadArea.addClass('dragover');
-        });
-
-        uploadArea.on('dragleave', function (e) {
-            e.preventDefault();
-            uploadArea.removeClass('dragover');
-        });
-
-        uploadArea.on('drop', function (e) {
-            e.preventDefault();
-            uploadArea.removeClass('dragover');
-            const files = e.originalEvent.dataTransfer.files;
-            if (files.length > 0) handleFile(files[0]);
-        });
-
-        // File input change
-        input.on('change', function (e) {
-            if (e.target.files.length > 0) handleFile(e.target.files[0]);
-        });
-
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) return;
-
-            const fileSizeKB = (file.size / 1024).toFixed(2) + ' KB';
-            progressContainer.removeClass('d-none');
-            progressBar.css('width', '0%');
-
-            let progress = 0;
-            const interval = setInterval(function () {
-                progress += 10;
-                progressBar.css('width', progress + '%');
-                if (progress >= 100) {
-                    clearInterval(interval);
-
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        imgPreview.attr('src', e.target.result);
-                        fileNameDisplay.text(file.name);
-                        fileSizeDisplay.text(fileSizeKB);
-                        uploadedImage.removeClass('d-none');
-                        progressContainer.addClass('d-none');
-                    };
-                    reader.readAsDataURL(file);
+                if (image) {
+                    $('#editCategoryImagePreview').attr('src', image).removeClass('d-none');
                 }
-            }, 100);
-        }
-
-        // Remove image
-        removeBtn.on('click', function () {
-            imgPreview.attr('src', '');
-            fileNameDisplay.text('');
-            fileSizeDisplay.text('');
-            uploadedImage.addClass('d-none');
-            input.val('');
+            });
         });
 
-        // Replace icons if needed
-        feather.replace();
+        // 🟢 عند تغيير المنتج يدويًا
+        $editProductsSelect.on('change', function() {
+            const productId = $(this).val();
+            loadSubProductsAndCategories(productId);
+        });
     });
 </script>
+
+
+
+
+
+

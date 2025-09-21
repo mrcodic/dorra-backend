@@ -425,11 +425,6 @@ class CategoryService extends BaseService
 
     public function editCategoryOnLanding($validatedData, $categoryId)
     {
-        if ($this->repository->query()->isLanding()->count() == 7) {
-            throw ValidationException::withMessages([
-                'category_id' => ['you can\'t add more than 7 items.']
-            ]);
-        }
         $category = $this->repository->find($categoryId);
         return $this->handleTransaction(function () use ($category, $validatedData) {
             $category->landingProducts()->sync(Arr::get($validatedData, 'products') ?? []);

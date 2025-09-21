@@ -63,6 +63,7 @@ class StoreDesignRequest extends BaseRequest
                         return;
                     }
                     $dimension = Dimension::find($value);
+
                     if ($this->designable_type === Product::class && !$dimension?->products()->exists()) {
                         return $fail("This dimension is not linked to any product.");
                     }

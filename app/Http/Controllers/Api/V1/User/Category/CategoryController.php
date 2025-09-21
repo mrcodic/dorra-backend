@@ -34,6 +34,7 @@ class CategoryController extends Controller
     {
         return Response::api(data: CategoryResource::make($this->categoryService->showResource($id,['media','specifications.options',
             'prices' => fn($q) => $request->query('all_prices') !== 'true' ? $q->orderBy('quantity')->limit(5) : null,
+            'dimensions'
         ])));
     }
 
