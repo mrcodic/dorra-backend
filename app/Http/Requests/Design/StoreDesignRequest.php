@@ -10,6 +10,7 @@ use App\Rules\DimensionWithinUnitRange;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 class StoreDesignRequest extends BaseRequest
 {
@@ -135,5 +136,12 @@ class StoreDesignRequest extends BaseRequest
             'description' => $template?->description ?? $this->input('description'),
             'cookie' => $cookieValue,
         ]);
+    }
+
+    public function attributes(): array
+    {
+        return [
+         'dimension_id' => 'dimension'
+        ];
     }
 }
