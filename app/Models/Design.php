@@ -52,7 +52,27 @@ class Design extends Model implements HasMedia
     ];
     protected $casts = [
         'orientation' => OrientationEnum::class,];
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            set: function ($value) {
+                if (is_string($value)) {
+                    return [
+                        'en' => $value,
+                        'ar' => $value,
+                    ];
+                }
+                if (is_array($value)) {
+                    return [
+                        'en' => $value['en'] ?? null,
+                        'ar' => $value['ar'] ?? null,
+                    ];
+                }
 
+                return $value;
+            }
+        );
+    }
     public function guest(): BelongsTo
     {
         return $this->belongsTo(Guest::class);
@@ -155,6 +175,7 @@ class Design extends Model implements HasMedia
     {
         return $this->belongsTo(Dimension::class);
     }
+
     public function invoices()
     {
         return $this->morphedByMany(Invoice::class, 'designable', 'designables')->withTimestamps();
