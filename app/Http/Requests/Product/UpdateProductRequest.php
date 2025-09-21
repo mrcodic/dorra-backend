@@ -70,7 +70,7 @@ class UpdateProductRequest extends BaseRequest
                 'prohibited_if:has_custom_prices,false',
             ],
             'prices.*.quantity' => [
-                'nullable',
+                'required',
                 'integer',
                 'min:1',
                 function ($attribute, $value, $fail) {
@@ -78,20 +78,23 @@ class UpdateProductRequest extends BaseRequest
                     $price = request()->input("prices.$index.price");
 
                     $pairs = request()->attributes->get('price_pairs', []);
-                    $key = $value . '-' . $price;
+                    $quantities = request()->attributes->get('price_quantities', []);
 
+                    $key = $value . '-' . $price;
                     if (in_array($key, $pairs, true)) {
-                        $fail("Duplicate quantity/price combination found.");
+                        $fail("Duplicate quantity/price combination found (Row " . ($index + 1) . ").");
+                    }
+
+                    if (in_array($value, $quantities, true)) {
+                        $fail("Duplicate quantity found: $value (Row " . ($index + 1) . ").");
                     }
 
                     $pairs[] = $key;
+                    $quantities[] = $value;
+
                     request()->attributes->set('price_pairs', $pairs);
-                },
-                Rule::unique('product_prices', 'quantity')
-                    ->where(fn ($query) => $query
-                        ->where('pricable_id', $id)
-                        ->where('pricable_type', Product::class)
-                    )->ignore($id,'pricable_id'),
+                    request()->attributes->set('price_quantities', $quantities);
+                }
             ],
             'prices.*.price' => [
                 'required',

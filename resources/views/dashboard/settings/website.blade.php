@@ -140,8 +140,8 @@
                                     data-id="{{ $category->id }}"
                                     data-name="{{ $category->name }}"
                                     data-image="{{ $category->getFirstMediaUrl('categories') }}"
-                                    data-subcategories='@json($category->landingSubCategories->pluck("id"))'
-                                    data-products='@json($category->landingProducts->pluck("id"))'>
+                                    data-subcategories='@json($category->load('landingSubCategories')->landingSubCategories->pluck("id"))'
+                                    data-products='@json($category->load('landingProducts')->landingProducts->pluck("id"))'>
                                 Edit
                             </button>
 

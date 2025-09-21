@@ -65,14 +65,22 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
                     $price = request()->input("prices.$index.price");
 
                     $pairs = request()->attributes->get('price_pairs', []);
-                    $key = $value . '-' . $price;
+                    $quantities = request()->attributes->get('price_quantities', []);
 
+                    $key = $value . '-' . $price;
                     if (in_array($key, $pairs, true)) {
-                        $fail("Duplicate quantity/price combination found.");
+                        $fail("Duplicate quantity/price combination found (Row " . ($index + 1) . ").");
+                    }
+
+                    if (in_array($value, $quantities, true)) {
+                        $fail("Duplicate quantity found: $value (Row " . ($index + 1) . ").");
                     }
 
                     $pairs[] = $key;
+                    $quantities[] = $value;
+
                     request()->attributes->set('price_pairs', $pairs);
+                    request()->attributes->set('price_quantities', $quantities);
                 }
             ],
             'prices.*.price' => [
