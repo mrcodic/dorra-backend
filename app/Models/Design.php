@@ -151,6 +151,10 @@ class Design extends Model implements HasMedia
         )->withPivot('option_id')->withTimestamps();
     }
 
+    public function dimension(): BelongsTo
+    {
+        return $this->belongsTo(Dimension::class);
+    }
     public function invoices()
     {
         return $this->morphedByMany(Invoice::class, 'designable', 'designables')->withTimestamps();
