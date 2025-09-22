@@ -135,14 +135,14 @@ class CategoryService extends BaseService
         return $this->handleTransaction(function () use ($id, $validatedData) {
 
             $product = $this->repository->update($validatedData, $id);
-            $product->tags()->syncWithoutDetaching($validatedData['tags'] ?? []);
+            $product->tags()->sync($validatedData['tags'] ?? []);
             if (!empty($validatedData['dimensions'])) {
                 $product->dimensions()->syncWithoutDetaching($validatedData['dimensions']);
             }
             if (!empty($validatedData['custom_dimensions'])) {
                 collect($validatedData['custom_dimensions'])->each(function ($dimension) use ($product) {
                     $dimension = $this->dimensionRepository->create($dimension);
-                    $product->dimensions()->sync($dimension->id);
+                    $product->dimensions()->syncWithoutDetaching($dimension->id);
                 });
             }
             if (isset($validatedData['base_price'])) {
