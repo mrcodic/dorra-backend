@@ -5,8 +5,11 @@ namespace App\Services;
 
 use App\Jobs\ProcessBase64Image;
 
+use App\Models\Category;
+use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\GuestRepositoryInterface;
 use App\Repositories\Interfaces\TeamRepositoryInterface;
@@ -26,6 +29,7 @@ class DesignService extends BaseService
         public UserRepositoryInterface              $userRepository,
         public GuestRepositoryInterface             $guestRepository,
         public TeamRepositoryInterface              $teamRepository,
+        public  CategoryRepositoryInterface          $categoryRepository,
 
     )
     {
@@ -133,7 +137,7 @@ class DesignService extends BaseService
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
         }
-
+$category = $this->categoryRepository->find(request('category_id'));
         $query = $this->repository->query()
             ->with([
                 'designable',
@@ -148,9 +152,10 @@ class DesignService extends BaseService
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->when(request()->filled('owner_id'), fn($q) => $q->where('user_id', request('owner_id')))
-            ->when(request()->filled('category_id'), fn($q) => $q->whereHas('designable', fn($cat) => $cat->where('id', request('category_id'))
-            )
-            )
+            ->when(request()->filled('category_id'), fn($q) => $q->whereIn('designable_id', $category->is_has_category ?
+                $category->products->pluck('id'):
+                [request('category_id')])
+                ->where('designable_type', $category->is_has_category ? Product::class : Category::class))
             ->orderBy('created_at', request('date', 'desc'));
 
         $shouldPaginate = filter_var(request('paginate', true), FILTER_VALIDATE_BOOLEAN);
