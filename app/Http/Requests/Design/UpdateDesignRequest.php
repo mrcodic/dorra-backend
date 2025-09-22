@@ -44,11 +44,6 @@ class UpdateDesignRequest extends BaseRequest
             ]);
         }
 
-        if ($this->has('product_id')) {
-            $this->merge([
-                'designable_id' => $this->input('product_id'),
-            ]);
-        }
     }
 
     /**
@@ -118,8 +113,15 @@ class UpdateDesignRequest extends BaseRequest
             "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
             "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
+            'designable_id' => ['nullable'],
         ];
     }
+protected function passedValidation()
+{
+    $this->merge([
+        'designable_id' => $this->input('product_id'),
+    ]);
+}
 
 
 }
