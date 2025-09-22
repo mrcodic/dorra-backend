@@ -38,20 +38,16 @@ class DesignService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        
+
         if (!empty($validatedData['template_id'])) {
             $design = $this->handleTransaction(function () use ($validatedData) {
                 if (!empty($validatedData['user_id'])) {
                     $design = $this->repository->query()->create(
-                        ['template_id' => $validatedData['template_id'],
-                            'user_id' => $validatedData['user_id']]
-                        , $validatedData);
+                        $validatedData);
                 }
                 if (!empty($validatedData['guest_id'])) {
                     $design = $this->repository->query()->create(
-                        ['template_id' => $validatedData['template_id'],
-                            'guest_id' => $validatedData['guest_id']]
-                        , $validatedData);
+                        $validatedData);
                 }
 
                 $this->templateRepository
