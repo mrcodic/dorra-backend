@@ -30,15 +30,15 @@ class StoreDesignRequest extends BaseRequest
                 'designable_type' => $map[$this->designable_type],
             ]);
         }
-        if ($this->has('name')) {
-            $name = $this->input('name');
+        if ($this->has('name') && is_string($this->input('name'))) {
             $this->merge([
                 'name' => [
-                    'en' => $name,
-                    'ar' => $name,
+                    'en' => $this->input('name'),
+                    'ar' => $this->input('name'),
                 ],
             ]);
         }
+
     }
     public function rules(): array
     {
