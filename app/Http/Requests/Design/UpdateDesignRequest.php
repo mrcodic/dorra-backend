@@ -43,7 +43,11 @@ class UpdateDesignRequest extends BaseRequest
                 ],
             ]);
         }
-
+        if ($this->has('product_id')) {
+            $this->merge([
+                'designable_id' => $this->input('product_id'),
+            ]);
+        }
     }
 
     /**
@@ -68,7 +72,7 @@ class UpdateDesignRequest extends BaseRequest
                 }),
                 'exists:product_prices,id',
             ],
-            'product_id'   => ['nullable', 'integer',function ($attribute, $value, $fail) {
+            'designable_id'   => ['nullable', 'integer',function ($attribute, $value, $fail) {
                 $design = Design::find($this->route('design'))?->template;
                 $template = $design?->template;
                 $category = Category::find($value) ?? Product::find($value);
@@ -122,6 +126,11 @@ protected function passedValidation()
         'designable_id' => $this->input('product_id'),
     ]);
 }
-
+    public function attributes(): array
+    {
+        return [
+            'dimension_id' => 'dimension',
+        ];
+    }
 
 }
