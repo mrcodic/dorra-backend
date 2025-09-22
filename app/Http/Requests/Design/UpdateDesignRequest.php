@@ -24,7 +24,28 @@ class UpdateDesignRequest extends BaseRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $map = [
+            'product'  => \App\Models\Product::class,
+            'category' => \App\Models\Category::class,
+        ];
 
+        if (isset($map[$this->designable_type])) {
+            $this->merge([
+                'designable_type' => $map[$this->designable_type],
+            ]);
+        }
+        if ($this->has('name')) {
+            $name = $this->input('name');
+            $this->merge([
+                'name' => [
+                    'en' => $name,
+                    'ar' => $name,
+                ],
+            ]);
+        }
+    }
     /**
      * Get the validation rules that apply to the request.
      *
