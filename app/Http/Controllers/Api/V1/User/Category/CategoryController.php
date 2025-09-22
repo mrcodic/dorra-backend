@@ -21,7 +21,9 @@ class CategoryController extends Controller
         $categories = $this->categoryService->getAll(relations: ['media',
             'landingSubCategories',
             'landingSubCategories.subCategoryProducts',
-            'landingProducts'],
+            'landingProducts',
+            'products'
+            ],
             paginate: request('paginate',false),
             perPage: request('per_page',8));
         $categoryResourceCollection = $categories instanceof LengthAwarePaginator ?
