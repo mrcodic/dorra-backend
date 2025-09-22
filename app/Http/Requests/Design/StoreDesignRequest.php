@@ -147,6 +147,7 @@ class StoreDesignRequest extends BaseRequest
     protected function passedValidation()
     {
         $template = Template::find($this->template_id);
+        dd($template, $template->getTranslation('name', 'en'));
         $cookieValue = getCookie('cookie_id')['value'];
         $activeGuard = getActiveGuard();
 
