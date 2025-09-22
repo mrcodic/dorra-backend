@@ -141,7 +141,7 @@ class StoreDesignRequest extends BaseRequest
             'designable_id' => $this->product_id,
             'design_data' => $template?->design_data ?? $this->input('design_data'),
             'design_back_data' => $template?->design_back_data ?? $this->input('design_back_data'),
-            'name' => $template?->name ?? $this->input('name'),
+            'name' => $template?->getTranslations('name') ?? $this->input('name'),
             'description' => $template?->description ?? $this->input('description'),
             'cookie' => $cookieValue,
         ]);
