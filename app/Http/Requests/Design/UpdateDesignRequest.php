@@ -59,7 +59,7 @@ class UpdateDesignRequest extends BaseRequest
             'base64_preview_image' => ['sometimes', 'string', 'required_without:design_image'],
             'back_base64_preview_image' => ['sometimes', 'string'],
             'design_image' => ['sometimes', 'file', 'mimetypes:image/svg+xml', 'max:2048', 'required_without:base64_preview_image'],
-            'name' => ['sometimes','string','max:255'],
+            'name' => ['sometimes'],
             'description' => ['sometimes','string','max:1000'],
             'product_price_id' => [
                 Rule::requiredIf(function () {
