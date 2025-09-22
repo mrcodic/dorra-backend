@@ -48,6 +48,24 @@ class StoreDesignRequest extends BaseRequest
                     ],
                 ]);
             }
+        }  if ($this->has('description')) {
+            $description = $this->input('description');
+
+            if (is_string($description)) {
+                $this->merge([
+                    'description' => [
+                        'en' => $description,
+                        'ar' => $description,
+                    ],
+                ]);
+            } elseif (is_array($description)) {
+                $this->merge([
+                    'description' => [
+                        'en' => $description['en'] ?? null,
+                        'ar' => $description['ar'] ?? null,
+                    ],
+                ]);
+            }
         }
 
     }
@@ -152,7 +170,11 @@ class StoreDesignRequest extends BaseRequest
             'designable_id' => $this->product_id,
             'design_data' => $template?->design_data ?? $this->input('design_data'),
             'design_back_data' => $template?->design_back_data ?? $this->input('design_back_data'),
-            'name' => $template?->getTranslations('name') ?? $this->input('name'),
+            'name' =>$template
+                ? [
+                'en' => $template->getTranslation('name', 'en'),
+                'ar' => $template->getTranslation('name', 'ar'),
+            ] : $this->input('name'),
             'description' => $template?->description ?? $this->input('description'),
             'cookie' => $cookieValue,
         ]);
