@@ -17,10 +17,10 @@
 
 @php
 $discountTypes = [
-['label' => 'Percentage', 'color' => '#24B094', 'width' => '85%'],
-['label' => 'Fixed', 'color' => '#4E2775', 'width' => '75%'],
-['label' => 'Category', 'color' => '#F8AB1B', 'width' => '55%'],
-['label' => 'Product', 'color' => '#222245', 'width' => '35%'],
+['label' => 'Percentage', 'color' => '#24B094', 'width' => \App\Models\DiscountCode::whereType(\App\Enums\DiscountCode\TypeEnum::PERCENTAGE)->count()],
+['label' => 'Fixed', 'color' => '#4E2775', 'width' => \App\Models\DiscountCode::whereType(\App\Enums\DiscountCode\TypeEnum::FIXED)->count()],
+//['label' => 'Category', 'color' => '#F8AB1B', 'width' => '55%'],
+//['label' => 'Product', 'color' => '#222245', 'width' => '35%'],
 ];
 @endphp
 
@@ -78,7 +78,7 @@ $discountTypes = [
                         </div>
                         <p class="text-black fs-4 mb-0">Visits</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> EGP</h2>
+{{--                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{ Spatie\Analytics\Facades\Analytics::fetchTotalVisitorsAndPageViews( Spatie\Analytics\Period::days(30)) }}</span></h2>--}}
                     <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
                                 class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
@@ -320,7 +320,7 @@ $discountTypes = [
                                 style="width: 100%; background-color: {{ $type['color'] }}"></div>
                         </div>
                     </div>
-                    <span class="text-black" style="font-size: 12px;"><span>200</span> Discount Code</span>
+                    <span class="text-black" style="font-size: 12px;"><span>{{ $type['width'] }}</span> Discount Code</span>
                 </div>
                 @endforeach
             </div>
@@ -342,7 +342,7 @@ $discountTypes = [
                         <p>Total earnings from orders used discount codes.</p>
 
                         <div class="d-flex justify-content-between align-items-center w-100">
-                            <h2 class="text-black"><span class="fw-bolder">20k</span> EGP</h2>
+                            <h2 class="text-black"><span class="fw-bolder"></span> EGP</h2>
                             <span>in 2025</span>
                         </div>
 
