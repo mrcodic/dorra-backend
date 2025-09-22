@@ -5,14 +5,11 @@ namespace App\Http\Requests\Design;
 use App\Enums\OrientationEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\Category;
-use App\Models\CountryCode;
 use App\Models\Design;
 use App\Models\Dimension;
 use App\Models\Product;
-use App\Models\Template;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
-use Propaganistas\LaravelPhone\Rules\Phone;
+
 
 class UpdateDesignRequest extends BaseRequest
 {
@@ -36,6 +33,7 @@ class UpdateDesignRequest extends BaseRequest
                 'designable_type' => $map[$this->designable_type],
             ]);
         }
+
         if ($this->has('name')) {
             $name = $this->input('name');
             $this->merge([
@@ -45,7 +43,14 @@ class UpdateDesignRequest extends BaseRequest
                 ],
             ]);
         }
+
+        if ($this->has('product_id')) {
+            $this->merge([
+                'designable_id' => $this->input('product_id'),
+            ]);
+        }
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -69,9 +74,12 @@ class UpdateDesignRequest extends BaseRequest
                 'exists:product_prices,id',
             ],
             'product_id'   => ['nullable', 'integer',function ($attribute, $value, $fail) {
-                $template = Design::find($this->route('design'))?->template;
+                $design = Design::find($this->route('design'))?->template;
+                $template = $design?->template;
                 $category = Category::find($value) ?? Product::find($value);
-                if (!$template) {
+                if (!$design) {
+                    return;
+                } if (!$template) {
                     return;
                 } if (!$category) {
                     return;
@@ -113,11 +121,5 @@ class UpdateDesignRequest extends BaseRequest
         ];
     }
 
-    public function passedValidation()
-    {
-        $this->merge([
-            'designable_id' => $this->product_id,
 
-        ]);
-}
 }
