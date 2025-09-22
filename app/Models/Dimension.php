@@ -22,7 +22,7 @@ class Dimension extends Model
     }
     public function categories()
     {
-        return $this->morphedByMany(Product::class,'dimensionable','dimension_product')->withTimestamps();
+        return $this->morphedByMany(Category::class,'dimensionable','dimension_product')->withTimestamps();
     }
     public function getWidthCmAttribute()
     {
