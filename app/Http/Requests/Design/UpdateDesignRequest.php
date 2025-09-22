@@ -45,6 +45,12 @@ class UpdateDesignRequest extends BaseRequest
                 ],
             ]);
         }
+        if ($this->has('product_id')) {
+            $this->merge([
+                'designable_id' => $this->product_id,
+
+            ]);
+        }
     }
     /**
      * Get the validation rules that apply to the request.
