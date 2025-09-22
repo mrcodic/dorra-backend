@@ -75,7 +75,7 @@ class UpdateDesignRequest extends BaseRequest
                 'exists:product_prices,id',
             ],
             'product_id'   => ['nullable', 'integer',function ($attribute, $value, $fail) {
-                $template = Design::find($this->route('design'))->template;
+                $template = Design::find($this->route('design'))?->template;
                 $category = Category::find($value) ?? Product::find($value);
                 if (!$template) {
                     return;
