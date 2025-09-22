@@ -137,7 +137,7 @@ class DesignService extends BaseService
                 ['path' => LengthAwarePaginator::resolveCurrentPath()]
             );
         }
-        $category = $this->categoryRepository->find(request('category_id'));
+        $category = $this->categoryRepository->query()->find(request('category_id'));
         $query = $this->repository->query()
             ->with([
                 'designable',
@@ -152,10 +152,10 @@ class DesignService extends BaseService
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->when(request()->filled('owner_id'), fn($q) => $q->where('user_id', request('owner_id')))
-            ->when(request()->filled('category_id'), fn($q) => $q->whereIn('designable_id', $category->is_has_category ?
+            ->when(request()->filled('category_id'), fn($q) => $q->whereIn('designable_id', $category?->is_has_category ?
                 $category?->products->pluck('id') :
                 [request('category_id')])
-                ->where('designable_type', $category->is_has_category ? Product::class : Category::class))
+                ->where('designable_type', $category?->is_has_category ? Product::class : Category::class))
             ->orderBy('created_at', request('date', 'desc'));
 
         $shouldPaginate = filter_var(request('paginate', true), FILTER_VALIDATE_BOOLEAN);
