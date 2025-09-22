@@ -36,13 +36,41 @@ class UpdateDesignRequest extends BaseRequest
 
         if ($this->has('name')) {
             $name = $this->input('name');
+
+            if (is_string($name)) {
+                $this->merge([
+                    'name' => [
+                        'en' => $name,
+                        'ar' => $name,
+                    ],
+                ]);
+            } elseif (is_array($name)) {
+                $this->merge([
+                    'name' => [
+                        'en' => $name['en'] ?? null,
+                        'ar' => $name['ar'] ?? null,
+                    ],
+                ]);
+            }
+        }  if ($this->has('description')) {
+        $description = $this->input('description');
+
+        if (is_string($description)) {
             $this->merge([
-                'name' => [
-                    'en' => $name,
-                    'ar' => $name,
+                'description' => [
+                    'en' => $description,
+                    'ar' => $description,
+                ],
+            ]);
+        } elseif (is_array($description)) {
+            $this->merge([
+                'description' => [
+                    'en' => $description['en'] ?? null,
+                    'ar' => $description['ar'] ?? null,
                 ],
             ]);
         }
+    }
         if ($this->has('product_id')) {
             $this->merge([
                 'designable_id' => $this->input('product_id'),
@@ -64,7 +92,7 @@ class UpdateDesignRequest extends BaseRequest
             'back_base64_preview_image' => ['sometimes', 'string'],
             'design_image' => ['sometimes', 'file', 'mimetypes:image/svg+xml', 'max:2048', 'required_without:base64_preview_image'],
             'name' => ['sometimes'],
-            'description' => ['sometimes','string','max:1000'],
+            'description' => ['sometimes'],
             'product_price_id' => [
                 Rule::requiredIf(function () {
                     $product = Product::find($this->product_id) ?? Category::find($this->product_id);
@@ -117,7 +145,7 @@ class UpdateDesignRequest extends BaseRequest
             "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
             "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
-            'designable_id' => ['nullable'],
+
         ];
     }
 protected function passedValidation()
