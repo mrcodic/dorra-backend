@@ -115,7 +115,7 @@ class StoreDesignRequest extends BaseRequest
             'design_data' => ['nullable', 'json'],
             'design_back_data' => ['nullable', 'json'],
             'name' => ['sometimes'],
-            'description' => ['nullable', 'string', 'max:1000'],
+            'description' => ['nullable'],
             'product_price_id' => [
                 Rule::requiredIf(function () {
                     $product = Product::find($this->product_id) ?? Category::find($this->product_id);
