@@ -108,7 +108,7 @@ class DesignService extends BaseService
         $model = $this->repository->update($validatedData, $id);
         if (isset($validatedData['specs'])) {
             collect($validatedData['specs'])->each(function ($spec) use ($model) {
-                $model->specifications()->sync([$model->id => [
+                $model->specifications()->syncWithoutDetaching([$model->id => [
                     'product_spec_id' => $spec['id'],
                     'option_id' => $spec['option'],
                 ]]);
