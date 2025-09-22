@@ -106,6 +106,14 @@ class DesignService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
+        if (isset($validatedData['specs'])) {
+            collect($validatedData['specs'])->each(function ($spec) use ($model) {
+                $model->specifications()->sync([$model->id => [
+                    'product_spec_id' => $spec['id'],
+                    'option_id' => $spec['option'],
+                ]]);
+            });
+        }
         if (isset($validatedData['base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'designs');
         }
