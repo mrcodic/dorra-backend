@@ -123,6 +123,10 @@ class Design extends Model implements HasMedia
         return $this->hasMany(DesignVersion::class);
     }
 
+    public function option()
+    {
+
+    }
 
     public function orders(): BelongsToMany
     {
@@ -148,13 +152,17 @@ class Design extends Model implements HasMedia
             'design_specifications',
             'design_id',
             'product_spec_id'
-        )->withPivot('option_id')->withTimestamps();
+        )
+            ->withPivot('option_id')
+            ->using(DesignSpecification::class)
+            ->withTimestamps();
     }
 
     public function dimension(): BelongsTo
     {
         return $this->belongsTo(Dimension::class);
     }
+
     public function invoices()
     {
         return $this->morphedByMany(Invoice::class, 'designable', 'designables')->withTimestamps();

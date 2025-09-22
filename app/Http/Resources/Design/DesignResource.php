@@ -6,6 +6,7 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DimensionResource;
 use App\Http\Resources\Product\ProductPriceResource;
 use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\Product\ProductSpecificationOption;
 use App\Http\Resources\Product\ProductSpecificationResource;
 use App\Http\Resources\Template\TemplateResource;
 use App\Http\Resources\UserResource;
@@ -43,7 +44,17 @@ class DesignResource extends JsonResource
             'template' => TemplateResource::make($this->whenLoaded('template')),
             'dimension' => DimensionResource::make($this->whenLoaded('dimension')),
             'productPrice' => ProductPriceResource::make($this->whenLoaded('productPrice')),
-            'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
+            'specs' => $this->whenLoaded('specifications', function () {
+                return $this->specifications->map(function ($spec) {
+                    return [
+                        'id'     => $spec->id,
+                        'name'   => $spec->name,
+                        'option' => ProductSpecificationOption::make($spec->pivot->option),
+                        'options' => ProductSpecificationOption::collection($spec->options),
+                    ];
+                });
+            }),
+
             'placed_on' => optional($this->pivot)->created_at?->format('d/m/Y'),
             'price' => $this->total_price,
             'quantity' => $this->productPrice?->quantity ?? $this->quantity,
