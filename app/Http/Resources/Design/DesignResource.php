@@ -41,7 +41,7 @@ class DesignResource extends JsonResource
             }),
             'selected_category' => $this->when(
                 $designable instanceof Product,
-                fn() => CategoryResource::make($designable->category)
+                fn() => CategoryResource::make($designable)
             ),
 
             'owner' => UserResource::make($this->whenLoaded('owner')),
