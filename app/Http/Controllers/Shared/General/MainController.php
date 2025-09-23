@@ -225,7 +225,7 @@ class MainController extends Controller
             return Response::api(data: CategoryResource::collection($categories));
         }
 
-,
+
     public function dimensions(Request $request)
     {
         $validatedData = $request->validate([
