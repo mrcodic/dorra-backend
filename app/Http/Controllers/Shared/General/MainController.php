@@ -208,14 +208,13 @@ class MainController extends Controller
     public function publicSearch(Request $request)
     {
         $locale = app()->getLocale();
-        $categories = $this->categoryRepository->query()->with('products')->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+        $categories = $this->categoryRepository->query()->with(['products.media', 'media'])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
             '%' . strtolower($request->search) . '%'
-        ])->get();
-        return Response::api(data: $categories->each(function (Category $category) use ($request) {
-            return $category->is_has_category
-                ? ProductResource::collection($category->products()->when($request->take, fn($q) => $q->take($request->take))->get())
-                : CategoryResource::make($category);
-        }));
+        ])->when($request->take, function ($query, $take) {
+                $query->take($take);
+            })
+            ->get();
+        return Response::api(data: CategoryResource::collection($categories));
     }
 
     public function dimensions(Request $request)
