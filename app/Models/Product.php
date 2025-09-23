@@ -70,7 +70,10 @@ class Product extends Model implements HasMedia
     protected function rating(): Attribute
     {
         return Attribute::make(
-            get: fn () => round($this->load('reviews')->reviews?->avg('rating'))
+            get: function () {
+                $avg = $this->reviews_avg_rating ?? $this->reviews()->avg('rating'); 
+                return is_numeric($avg) ? (int) round($avg) : null;
+            }
         );
     }
 
