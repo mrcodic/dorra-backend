@@ -54,13 +54,13 @@ class PaymentController extends Controller
                     if ($orderItem->orderable->has_custom_prices) {
                         $subTotal = ($orderItem->productPrice?->price ?? $orderItem->product_price)
                             + ($orderItem->specs->sum(function ($spec) {
-                                return $spec->productSpecificationOption->price;
+                                return $spec->productSpecificationOption?->price;
                             }) ?: $orderItem->specs_price);
                     } else {
                         $subTotal = (
                                 ($orderItem->orderable->base_price ?? $orderItem->product_price)
                                 + ($orderItem->specs->sum(function ($spec) {
-                                    return $spec->productSpecificationOption->price;
+                                    return $spec->productSpecificationOption?->price;
                                 }) ?: $orderItem->specs_price)
                             ) * $orderItem->quantity;
                     }
