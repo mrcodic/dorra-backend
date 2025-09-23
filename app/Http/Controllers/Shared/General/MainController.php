@@ -22,11 +22,13 @@ use App\Http\Resources\{CategoryResource,
     TagResource,
     TeamResource,
     Template\TemplateResource,
-    Template\TypeResource};
+    Template\TypeResource
+};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
-use App\Repositories\Interfaces\{CountryRepositoryInterface,
+use App\Repositories\Interfaces\{CategoryRepositoryInterface,
+    CountryRepositoryInterface,
     DimensionRepositoryInterface,
     MessageRepositoryInterface,
     ProductRepositoryInterface,
@@ -59,6 +61,7 @@ class MainController extends Controller
         public TeamService                  $teamService,
         public ProductRepositoryInterface   $productRepository,
         public TemplateRepositoryInterface  $templateRepository,
+        public CategoryRepositoryInterface  $categoryRepository,
 
     )
     {
@@ -204,73 +207,28 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $categoryIds = $request->input('categories', []);
-        $tags = $request->input('tags', []);
-        $productName = $request->input('product_name');
-        $templateName = $request->input('template_name');
         $locale = app()->getLocale();
-
-
-        $applyCategoryFilter = !(empty($categoryIds) || (count($categoryIds) === 1 && strtolower($categoryIds[0]) === 'all'));
-        $applyTagFilter = !(empty($tags) || (count($tags) === 1 && strtolower($tags[0]) === 'all'));
-
-        //Products
-        $products = $this->productRepository->query()
-            ->when($applyCategoryFilter, function ($q) use ($categoryIds) {
-                $q->whereIn('category_id', $categoryIds);
-            })
-            ->when($applyTagFilter, function ($q) use ($tags) {
-                $q->whereHas('tags', function ($q) use ($tags) {
-                    $q->whereIn('name', $tags);
-                });
-            })
-            ->when($productName, function ($q) use ($productName) {
-                $q->whereRaw(
-                    "JSON_SEARCH(LOWER(name), 'one', ?) IS NOT NULL",
-                    [strtolower($productName)]
-                );
-            })
-            ->with(['category', 'tags'])
-            ->get();
-
-        //Templates
-        $templates = $this->templateRepository->query()
-            ->when($applyCategoryFilter, function ($q) use ($categoryIds) {
-                $q->whereHas('products.category', function ($q) use ($categoryIds) {
-                    $q->whereIn('category_id', $categoryIds);
-                });
-            })
-            ->when($applyTagFilter, function ($q) use ($tags) {
-                $q->whereHas('tags', function ($q) use ($tags) {
-                    $q->whereIn('name', $tags);
-                });
-            })
-            ->when($templateName, function ($q) use ($templateName) {
-                $q->whereRaw(
-                    "JSON_SEARCH(LOWER(name), 'one', ?) IS NOT NULL",
-                    [strtolower($templateName)]
-                );
-            })
-            ->with(['products.category', 'tags'])
-            ->get();
-
-        return Response::api(data: [
-            'products' => ProductResource::collection($products),
-            'templates' => TemplateResource::collection($templates),
-        ]);
+        $categories = $this->categoryRepository->query()->with('products')->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+            '%' . strtolower($request->search) . '%'
+        ])->get();
+        return Response::api(data: $categories->each(function (Category $category) {
+            return $category->is_has_category
+                ? ProductResource::collection($category->products()->take(5)->get())
+                : CategoryResource::make($category);
+        }));
     }
 
     public function dimensions(Request $request)
     {
-       $validatedData = $request->validate([
-               'resource_id' => ['required', Rule::when($request->resource_type == 'product',function (){
-               Rule::exists('products', 'resource_id');
-           },Rule::exists('categories', 'id'))],
-           'resource_type' => ['required', 'in:product,category'],
-       ]);
+        $validatedData = $request->validate([
+            'resource_id' => ['required', Rule::when($request->resource_type == 'product', function () {
+                Rule::exists('products', 'resource_id');
+            }, Rule::exists('categories', 'id'))],
+            'resource_type' => ['required', 'in:product,category'],
+        ]);
         $allowedTypes = [
-            'product'  => Product::class,
-            'category' =>Category::class,
+            'product' => Product::class,
+            'category' => Category::class,
         ];
         $modelClass = $allowedTypes[$validatedData['resource_type']];
         $model = $modelClass::findOrFail($validatedData['resource_id']);
