@@ -124,7 +124,7 @@ class Category extends Model implements HasMedia
     protected function rating(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->load('reviews')->reviews?->avg('rating')
+            get: fn () => round($this->load('reviews')->reviews?->avg('rating'))
         );
     }
 
