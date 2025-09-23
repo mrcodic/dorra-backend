@@ -34,7 +34,12 @@ class Category extends Model implements HasMedia
             $query->whereIn('rating', $rates);
         });
     }
-
+    protected function rating(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->load('reviews')->reviews?->avg('rating')
+        );
+    }
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class);
