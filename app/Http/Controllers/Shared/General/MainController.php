@@ -209,6 +209,8 @@ class MainController extends Controller
         {
             $locale = app()->getLocale();
             $categories = $this->categoryRepository->query()->with([
+                'products' => function ($query) use ($request) {
+                    $query->when($request->rates,fn($q) => $q->withReviewRating($request->rates));},
               'products.media', 'media'])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                 '%' . strtolower($request->search) . '%'
             ])->when($request->take, function ($query, $take) {
@@ -223,6 +225,7 @@ class MainController extends Controller
             return Response::api(data: CategoryResource::collection($categories));
         }
 
+,
     public function dimensions(Request $request)
     {
         $validatedData = $request->validate([
