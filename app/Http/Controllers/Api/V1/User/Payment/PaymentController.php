@@ -80,7 +80,15 @@ class PaymentController extends Controller
                     ]);
 
 
-                    $cartItem->specs()->createMany($orderItem->specs->toArray());
+                    $specs = $orderItem->specs->toArray();
+
+
+                    $filtered = array_filter($specs, function ($spec) {
+                        return !in_array(null, $spec, true);
+                    });
+                    if (!empty($filtered)) {
+                        $cartItem->specs()->createMany($filtered);
+                    }
                 }
             });
         });
