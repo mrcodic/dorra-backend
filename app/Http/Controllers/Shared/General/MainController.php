@@ -215,6 +215,8 @@ class MainController extends Controller
                     $query->take($take);
                 })
                 ->when($request->filled('rates'), function ($q) use ($request) {
+                    $q->whereHas('products', fn ($p) => $p->withReviewRating($request->rates));
+                }, function ($q) use ($request) {
                     $q->withReviewRating($request->rates);
                 })
                 ->get();
