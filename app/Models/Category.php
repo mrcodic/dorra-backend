@@ -25,6 +25,15 @@ class Category extends Model implements HasMedia
     {
         return $builder->where('is_landing', true);
     }
+    public function scopeWithReviewRating(Builder $builder,  $rates): Builder
+    {
+
+        $rates = is_array($rates) ? $rates : explode(',', $rates);
+
+        return $builder->whereHas('reviews', function ($query) use ($rates) {
+            $query->whereIn('rating', $rates);
+        });
+    }
 
     public function parent(): BelongsTo
     {
