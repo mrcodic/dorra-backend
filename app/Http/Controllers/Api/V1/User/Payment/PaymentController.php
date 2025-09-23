@@ -71,7 +71,7 @@ class PaymentController extends Controller
                         'product_price_id' => $orderItem->product_price_id,
                         'product_price' => $orderItem->productPrice?->price ?? $orderItem->product_price,
                         'specs_price' => ($orderItem->specs->sum(function ($spec) {
-                            return $spec->productSpecificationOption->price;
+                            return $spec->productSpecificationOption?->price;
                         }) ?: $orderItem->specs_price),
                         'quantity' => $orderItem->quantity,
                         'sub_total' => $subTotal,
