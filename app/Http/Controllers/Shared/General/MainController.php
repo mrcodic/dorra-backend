@@ -209,6 +209,8 @@ class MainController extends Controller
         {
             $locale = app()->getLocale();
             $categories = $this->categoryRepository->query()->with([
+                'reviews',
+                'products.reviews',
                 'products' => function ($query) use ($request) {
                 $query->when($request->rates,fn($q) => $q->withReviewRating($request->rates));}
                 ,'products.media', 'media'])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
