@@ -34,7 +34,7 @@ class Category extends Model implements HasMedia
             $query->whereIn('rating', $rates);
         });
     }
- 
+
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class);
