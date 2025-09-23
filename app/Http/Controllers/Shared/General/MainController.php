@@ -208,7 +208,7 @@ class MainController extends Controller
         public function publicSearch(Request $request)
         {
             $locale = app()->getLocale();
-            $rates = $request->filled('rates');
+            $rates = $request->rates;
             $categories = $this->categoryRepository->query()->with([
                 'products' => function ($query) use ($request) {
                     $query->when($request->rates,fn($q) => $q->withReviewRating($request->rates));},
