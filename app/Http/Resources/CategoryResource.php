@@ -44,6 +44,8 @@ class CategoryResource extends JsonResource
             ),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'category_products' => ProductResource::collection($this->whenLoaded('landingProducts')),
+            'template_tags' => TagResource::collection($this->whenLoaded('templates.tags')),
+
 
             'is_has_category' => $this->is_has_category,
             'show_add_cart_btn' => $this->show_add_cart_btn,
