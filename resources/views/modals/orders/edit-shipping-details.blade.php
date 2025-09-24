@@ -83,12 +83,7 @@
                         </div>
                     </div>
 
-                    <!-- Footer with Save button -->
-                    <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-primary" id="saveLocationBtn">
-                            Save Location
-                        </button>
-                    </div>
+
                 </div>
             </form> <!-- Divider -->
             <div class="text-center my-1 fw-bold">OR</div>
@@ -231,7 +226,12 @@
                                 <div class="fw-bold mb-1">Near Pick up Locations</div>
                                 <div id="nearbyLocations" class="list-group"></div>
                             </div>
-
+                            <!-- Footer with Save button -->
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-primary" id="saveLocationBtn">
+                                    Save Location
+                                </button>
+                            </div>
 
                         </div>
                     </div>
