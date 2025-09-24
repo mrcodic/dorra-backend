@@ -365,6 +365,7 @@
     }
 
     function renderNearby(items) {
+        console.log(items)
         const $wrap = $('#nearbyLocations').empty();
         if (!items?.length) {
             $wrap.html('<div class="text-muted p-2">No nearby locations.</div>');
