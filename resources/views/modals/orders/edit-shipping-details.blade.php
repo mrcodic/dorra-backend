@@ -364,7 +364,7 @@
     // ------- Nearby locations ----------
     function fetchNearby(originLat, originLng) {
         // Your endpoint that returns: { status, success, message, data: [...] }
-        const url = `{{ url('api/v1/user/locations') }}?lat=${encodeURIComponent(originLat)}&lng=${encodeURIComponent(originLng)}`;
+        const url = `{{ url('api/v1/user/locations') }}?latitude=${encodeURIComponent(originLat)}&longitude=${encodeURIComponent(originLng)}`;
         $('#nearbyLocations').html('<div class="text-muted p-2">Loading…</div>');
 
         $.getJSON(url)
