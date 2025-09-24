@@ -221,7 +221,7 @@ class MainController extends Controller
                     $q->where(function ($qq) use ($rates) {
                         $qq->whereHas('products', fn ($p) => $p->withReviewRating($rates))
                             ->orWhereHas('reviews', fn ($r) => $r ->withAvg('reviews as avg_rating', 'rating')
-                                ->havingRaw('ROUND(avg_rating) IN ('.implode(',', $rates).')');
+                                ->havingRaw('ROUND(avg_rating) IN ('.implode(',', $rates).')'));
                     });
                 })
                 ->get();
