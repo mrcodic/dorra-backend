@@ -306,7 +306,9 @@ return [
         'state_id' => [
             "required" => "The selected state is required.",
             "integer" => "The selected state is invalid.",
-        ]
+        ],
+        'link.regex' => 'Please provide a valid Google Maps link.',
+
     ],
 
 

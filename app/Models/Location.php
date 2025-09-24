@@ -12,7 +12,8 @@ class Location extends Model
 {
     protected $fillable = [
         'name',
-        'state_id',
+        'state',
+        'country',
         'address_line',
         'link',
         'latitude',

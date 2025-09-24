@@ -22,13 +22,26 @@ class StoreLocationRequest extends BaseRequest
      */
     public function rules(): array
     {
+
         return [
             'name' => ['required', 'string', 'max:255'],
-            'state_id' => ['required', 'exists:states,id'],
+            'country' => ['nullable','string','max:255'],
+            'state'   => ['nullable','string','max:255'],
             'address_line' => ['required', 'string', 'max:255'],
-            'link' => ['required', 'string', 'max:255'],
+            'link' => [
+                'required',
+                'string',
+                'max:2048',
+                'url',
+                'link' => [
+                    'required', 'string', 'max:2048', 'url',
+                    'regex:~^https?://(?:(?:www\.)?google\.[^/]+/maps(?:[/?#]|$)|maps\.google\.[^/]+/|goo\.gl/maps/|maps\.app\.goo\.gl/|g\.page/)~i',
+                ],
+
+            ],
+
             'days' => ['required', 'array', 'min:1'],
-            'days.*' => ['integer', 'min:1', 'max:7'],
+            'days.*' => ['string'],
             'available_time' => ['required', 'regex:/^\d{2}:\d{2}\s?-\s?\d{2}:\d{2}$/'],
         ];
     }

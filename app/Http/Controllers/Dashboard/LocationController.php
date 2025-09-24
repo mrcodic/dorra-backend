@@ -51,16 +51,7 @@ class LocationController extends DashboardController
 
 public function store(Request $request)
 {
-    $validatedData = $request->validate([
-        'name' => ['required', 'string', 'max:255'],
-        'country_id' => ['required', 'exists:countries,id'], // Added this validation
-        'state_id' => ['required', 'exists:states,id'],
-        'address_line' => ['required', 'string', 'max:255'],
-        'link' => ['required', 'string', 'max:255'],
-        'days' => ['required', 'array', 'min:1'],
-        'days.*' => ['string'],
-        'available_time' => ['required', 'regex:/^\d{2}:\d{2}\s?-\s?\d{2}:\d{2}$/'],
-    ]);
+    $validatedData = $request->validate($this->storeRequestClass->rules(), $this->storeRequestClass->messages());
 
     $location = $this->locationService->storeResource($validatedData);
 
