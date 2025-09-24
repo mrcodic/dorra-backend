@@ -9,6 +9,8 @@
                 <input type="hidden" name="pickup_lng" id="pickup_lng">
                 <input type="hidden" name="pickup_location_name" id="pickup_location_name">
                 <input type="hidden" name="pickup_place_id" id="pickup_place_id"> <!-- optional -->
+                <input type="hidden" name="pickup_country" id="pickup_country">
+                <input type="hidden" name="pickup_state" id="pickup_state">
 
                 <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
@@ -251,19 +253,7 @@
                 src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places&callback=initMap">
         </script>
         <script>
-            let map, marker, geocoder, autocomplete;
-
-            // Initialize / re-center when modal opens
-            $('#selectLocationModal').on('shown.bs.modal', function () {
-                setTimeout(function () {
-                    if (!map) {
-                        initMap();
-                    } else {
-                        google.maps.event.trigger(map, 'resize');
-                        if (marker?.getPosition()) map.setCenter(marker.getPosition());
-                    }
-                }, 300);
-            });
+            let map, marker, geocoder, autocomplete, places;
 
             function initMap(lat = 30.0444, lng = 31.2357) {
                 const center = { lat: parseFloat(lat), lng: parseFloat(lng) };
@@ -273,53 +263,60 @@
                     center
                 });
 
-                marker = new google.maps.Marker({
-                    position: center,
-                    map,
-                    draggable: true
-                });
-
+                marker = new google.maps.Marker({ position: center, map, draggable: true });
                 geocoder = new google.maps.Geocoder();
+                places   = new google.maps.places.PlacesService(map);
 
                 // Fill hidden inputs initially
-                updateFields(center.lat, center.lng, '', '');
+                updateFields(center.lat, center.lng, '', '', '', '');
 
-                // 1) Click on map to move marker + reverse geocode
-                map.addListener('click', (e) => {
-                    setMarkerPosition(e.latLng);
-                });
+                // Map click & marker drag
+                map.addListener('click', (e) => setMarkerPosition(e.latLng));
+                marker.addListener('dragend', () => setMarkerPosition(marker.getPosition()));
 
-                // 2) Drag marker to choose precise spot
-                marker.addListener('dragend', () => {
-                    setMarkerPosition(marker.getPosition());
-                });
-
-                // 3) Google Places Autocomplete on the search input
+                // ✅ Google Places Autocomplete
                 const input = document.getElementById('locationSearch');
                 if (input) {
                     autocomplete = new google.maps.places.Autocomplete(input, {
-                        fields: ['geometry', 'formatted_address', 'name', 'place_id'],
-                        // Optional: restrict to certain countries (EG shown as example)
+                        // Add address_components so we can read country/state directly
+                        fields: ['geometry', 'formatted_address', 'name', 'place_id', 'address_components'],
+                        // Optional: restrict to specific countries
                         // componentRestrictions: { country: ['eg'] }
                     });
 
                     autocomplete.addListener('place_changed', () => {
                         const place = autocomplete.getPlace();
-                        if (!place.geometry || !place.geometry.location) return;
+                        if (!place || !place.geometry || !place.geometry.location) return;
 
-                        map.setCenter(place.geometry.location);
+                        const loc = place.geometry.location;
+                        map.setCenter(loc);
                         map.setZoom(15);
-                        marker.setPosition(place.geometry.location);
+                        marker.setPosition(loc);
 
-                        const name = place.formatted_address || place.name || '';
+                        const addr   = place.formatted_address || place.name || '';
+                        const { country, state } = extractCountryState(place.address_components || []);
+
+                        // Update all hidden fields
                         updateFields(
-                            place.geometry.location.lat(),
-                            place.geometry.location.lng(),
-                            name,
-                            place.place_id || ''
+                            loc.lat(),
+                            loc.lng(),
+                            addr,
+                            place.place_id || '',
+                            country,
+                            state
                         );
                     });
                 }
+            }
+
+            function extractCountryState(components) {
+                let country = '', state = '';
+                for (const c of components) {
+                    if (!c || !c.types) continue;
+                    if (c.types.includes('country')) country = c.long_name;
+                    if (c.types.includes('administrative_area_level_1')) state = c.long_name;
+                }
+                return { country, state };
             }
 
             function setMarkerPosition(latLng) {
@@ -331,44 +328,55 @@
             function reverseGeocode(latLng) {
                 geocoder.geocode({ location: latLng }, (results, status) => {
                     if (status === 'OK' && results[0]) {
-                        const addr = results[0].formatted_address;
+                        const r = results[0];
+                        const addr = r.formatted_address || '';
+                        const { country, state } = extractCountryState(r.address_components || []);
                         $('#locationSearch').val(addr);
-                        updateFields(latLng.lat(), latLng.lng(), addr, results[0].place_id || '');
+                        updateFields(latLng.lat(), latLng.lng(), addr, r.place_id || '', country, state);
                     } else {
-                        // Fallback: just store lat/lng if no address found
-                        updateFields(latLng.lat(), latLng.lng(), '', '');
+                        updateFields(latLng.lat(), latLng.lng(), '', '', '', '');
                     }
                 });
             }
 
-            function updateFields(lat, lng, name, placeId) {
+            function updateFields(lat, lng, name, placeId, country, state) {
                 $('#pickup_lat').val(lat);
                 $('#pickup_lng').val(lng);
                 $('#pickup_location_name').val(name);
                 $('#pickup_place_id').val(placeId || '');
+                $('#pickup_country').val(country || '');
+                $('#pickup_state').val(state || '');
             }
+
+            // Keep your existing modal shown handler (resizes the map)
+            $('#selectLocationModal').on('shown.bs.modal', function () {
+                setTimeout(function () {
+                    if (!map) {
+                        initMap();
+                    } else {
+                        google.maps.event.trigger(map, 'resize');
+                        if (marker?.getPosition()) map.setCenter(marker.getPosition());
+                    }
+                }, 300);
+            });
 
             // Save button inside the map modal
             $(document).on('click', '#saveLocationBtn', function () {
                 const lat = $('#pickup_lat').val();
                 const lng = $('#pickup_lng').val();
                 const name = $('#pickup_location_name').val();
-
                 if (!lat || !lng) {
                     alert('Please select a location on the map first.');
                     return;
                 }
-
-                // Reflect back into your main UI (optional)
+                // Optionally reflect in UI
                 $('#selectedLocationName').text(name || `${lat}, ${lng}`);
-
-                // If you also store a custom "mainLocationIdInput", clear it (since this is a Google-picked point)
-                $('#mainLocationIdInput').val(''); // optional
-                $('#selectedLocationId').val('');  // optional: clear your DB location if you use Google point
-
+                // Clear any internal location id (if you treat Google pick as external)
+                $('#selectedLocationId').val('');
                 $('#selectLocationModal').modal('hide');
             });
         </script>
+
 
 
         <script>
