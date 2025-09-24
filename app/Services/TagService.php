@@ -20,55 +20,45 @@ class TagService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
-        $taggableType = request()->taggable_type;
-        $taggableId   = request()->taggable_id;
+        $taggableType = request('taggable_type');
+        $taggableId   = request('taggable_id');
+        $locale       = app()->getLocale();
+        $search       = trim(strtolower((string) request('search')));
 
         $mapModels = [
-            'product' => Product::class,
+            'product'  => Product::class,
             'category' => Category::class,
         ];
         $mapRelations = [
-            'product' =>'products',
-            'category' =>'categories',
+            'product'  => 'products',
+            'category' => 'categories',
         ];
         $relation = $mapRelations[$taggableType] ?? null;
 
-
         $query = $this->repository->query()
             ->with($relations)
-            ->when(request('search'), function ($q) {
-                $locale = app()->getLocale();
-                $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                    '%' . strtolower(request('search')) . '%'
-                ]);
-            })
-            ->withCount('templates');
-
+            ->when($search !== '', function ($q) use ($locale, $search) {
+                $q->whereRaw(
+                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
+                    ["%{$search}%"]
+                );
+            });
 
         if ($taggableType && $taggableId && isset($mapModels[$taggableType]) && $relation) {
-            $model = $mapModels[$taggableType]::with('templates.tags')
-                ->withCount('templates')
-                ->find($taggableId);
+            $query->whereHas('templates', function ($t) use ($relation, $taggableId) {
+                $t->whereStatus(StatusEnum::LIVE)
+                    ->whereHas($relation, fn ($r) => $r->where("{$relation}.id", $taggableId));
+            });
 
-            return $model
-                ? $model->templates
-                    ->flatMap->tags
-                    ->unique('id')
-                    ->values()
-                    ->map(function ($tag) use ($model, $relation) {
-                        $tag->templates_count = $tag->templates()
-                            ->whereStatus(StatusEnum::LIVE)
-                            ->whereHas($relation, function ($query) use ($model, $relation) {
-                                $query->where("$relation.id", $model->id);
-                            })
-                            ->count();
-
-                        return $tag;
-                    })
-                : collect();
+            $query->withCount([
+                'templates as templates_count' => function ($t) use ($relation, $taggableId) {
+                    $t->whereStatus(StatusEnum::LIVE)
+                        ->whereHas($relation, fn ($r) => $r->where("{$relation}.id", $taggableId));
+                },
+            ]);
+        } else {
+            $query->withCount('templates');
         }
-
-
 
         return $paginate
             ? $query->paginate($perPage, $columns)
