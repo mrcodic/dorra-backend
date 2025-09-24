@@ -55,7 +55,10 @@ $configData = Helper::applClasses();
 @extends((( $configData["mainLayoutType"] === 'horizontal') ? 'layouts.horizontalLayoutMaster' :
 'layouts.verticalLayoutMaster' ))
 @endisset
-
+<!-- Load Google Maps JS with callback -->
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places&callback=initMap">
+</script>
 <script src="https://unpkg.com/feather-icons"></script>
 <script !src="">
     $(document).on('submit','.search-form',function (e) {
