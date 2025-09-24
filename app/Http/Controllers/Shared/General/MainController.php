@@ -248,7 +248,7 @@ class MainController extends Controller
 
                 $q->where(function ($qq) use ($rates, $placeholders) {
                     // 1) أي كاتيجوري عنده منتجات متوسط تقييمها يقع ضمن القيم المطلوبة
-                    $qq->whereHas('products', fn ($p) => $p->withAvgRatingIn($rates))
+                    $qq->whereHas('products', fn ($p) => $p->withReviewRating($rates))
 
                         // 2) (اختياري) لو عندك relation reviews على الكاتيجوري نفسه
                         ->orWhereHas('reviews', function ($rq) use ($rates, $placeholders) {
