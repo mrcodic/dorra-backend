@@ -205,28 +205,38 @@ class MainController extends Controller
     }
 
 
-        public function publicSearch(Request $request)
-        {
-            $locale = app()->getLocale();
-            $rates = $request->rates;
-            $categories = $this->categoryRepository->query()->with([
-                'products' => function ($query) use ($request) {
-                    $query->when($request->rates,fn($q) => $q->withReviewRating($request->rates));},
-              'products.media', 'media'])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                '%' . strtolower($request->search) . '%'
-            ])->when($request->take, function ($query, $take) {
-                    $query->take($take);
-                })
-                ->when($rates, function ($q) use ($rates) {
-                    $q->where(function ($qq) use ($rates) {
-                        $qq->whereHas('products', fn ($p) => $p->withReviewRating($rates))
-                            ->orWhereHas('reviews', fn ($r) => $r ->withAvg('reviews as avg_rating', 'rating')
-                                ->havingRaw('ROUND(avg_rating) IN ('.implode(',', $rates).')'));
-                    });
-                })
-                ->get();
-            return Response::api(data: CategoryResource::collection($categories));
-        }
+    public function publicSearch(Request $request)
+    {
+        $locale = app()->getLocale();
+        $rates  = $request->rates;
+
+        $categories = $this->categoryRepository->query()
+            ->with([
+                'products' => function ($q) use ($request) {
+                    if ($request->filled('rates')) {
+                        $q->whereRoundedAvgRatingIn($request->rates); // ✅ filter returned products by rounded avg
+                    }
+                },
+                'products.media',
+                'media',
+            ])
+            ->whereRaw(
+                "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
+                ['%' . strtolower((string) $request->input('search', '')) . '%']
+            )
+            ->when($request->filled('take'), fn ($q) => $q->limit((int) $request->take))
+            ->when($rates, function ($q) use ($rates) {
+                $q->where(function ($qq) use ($rates) {
+                    // Categories having ANY product with avg(round) in $rates
+                    $qq->whereHas('products', fn ($p) => $p->whereRoundedAvgRatingIn($rates))
+                        // OR category's OWN avg(round) in $rates
+                        ->orWhere(fn ($c) => $c->whereRoundedAvgRatingIn($rates));
+                });
+            })
+            ->get();
+
+        return Response::api(data: CategoryResource::collection($categories));
+    }
 
 
     public function dimensions(Request $request)
