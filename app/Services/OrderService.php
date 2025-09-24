@@ -451,7 +451,7 @@ class OrderService extends BaseService
     {
 
         $model = $this->repository->find($id);
-
+dd($model);
         if (!$model) {
             throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Order not found');
         }
