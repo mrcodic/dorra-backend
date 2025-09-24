@@ -459,7 +459,7 @@ class OrderService extends BaseService
         $type = $validatedData['type'] instanceof OrderTypeEnum
             ? $validatedData['type']
             : OrderTypeEnum::from((int)$validatedData['type']); // ensures 1 => SHIPPING, 2 => PICKUP
-dd($type);
+dd($type,$validatedData['location_id']);
         /** -------------------- SHIPPING -------------------- */
         if ($type === OrderTypeEnum::SHIPPING && !empty($validatedData['shipping_address_id'])) {
             $newAddressId = $validatedData['shipping_address_id'];
