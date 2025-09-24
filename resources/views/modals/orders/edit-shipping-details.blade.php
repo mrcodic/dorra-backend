@@ -194,53 +194,55 @@
                                     role="status" aria-hidden="true"></span>
                             </button>
                         </div>
+                        <!-- Footer with Save button -->
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-primary" id="saveLocationBtn">
+                                Save Location
+                            </button>
+                        </div>
+                        <div class="modal fade" id="selectLocationModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content rounded-4 shadow">
+
+                                    <!-- Header -->
+                                    <div class="modal-header border-0 pb-0">
+                                        <h5 class="modal-title fs-4 fw-bold text-dark">Change Pick up Location</h5>
+                                    </div>
+
+                                    <!-- Body -->
+                                    <div class="modal-body">
+                                        @php
+                                            $locationId = $model->OrderAddress?->firstWhere('location_id', '!=',
+                                            null)?->location_id;
+                                        @endphp
+
+
+
+                                        <div id="locationList" class="mb-3"></div>
+
+                                        <div style="background-color: #f0f0f0; border-radius: 8px;">
+                                            <div id="googleMap" style="width: 100%; height: 400px;"></div>
+                                        </div>
+
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="fw-bold mb-1">Near Pick up Locations</div>
+                                        <div id="nearbyLocations" class="list-group"></div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0">
+                            <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary fs-5" id="saveChangesButton">Save</button>
+                        </div>
                     </form>
 
                 </div>
-                <div class="modal fade" id="selectLocationModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-lg modal-dialog-centered">
-                        <div class="modal-content rounded-4 shadow">
 
-                            <!-- Header -->
-                            <div class="modal-header border-0 pb-0">
-                                <h5 class="modal-title fs-4 fw-bold text-dark">Change Pick up Location</h5>
-                            </div>
-
-                            <!-- Body -->
-                            <div class="modal-body">
-                                @php
-                                $locationId = $model->OrderAddress?->firstWhere('location_id', '!=',
-                                null)?->location_id;
-                                @endphp
-
-
-
-                                <div id="locationList" class="mb-3"></div>
-
-                                <div style="background-color: #f0f0f0; border-radius: 8px;">
-                                    <div id="googleMap" style="width: 100%; height: 400px;"></div>
-                                </div>
-
-                            </div>
-                            <div class="mt-2">
-                                <div class="fw-bold mb-1">Near Pick up Locations</div>
-                                <div id="nearbyLocations" class="list-group"></div>
-                            </div>
-                            <!-- Footer with Save button -->
-                            <div class="modal-footer border-0">
-                                <button type="button" class="btn btn-primary" id="saveLocationBtn">
-                                    Save Location
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel
-                    </button>
-                    <button type="submit" class="btn btn-primary fs-5" id="saveChangesButton">Save</button>
-                </div>
 
 
 
