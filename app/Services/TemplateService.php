@@ -38,10 +38,24 @@ class TemplateService extends BaseService
         $productId = request('product_id');
         $categoryId = request('product_without_category_id');
         $locale = app()->getLocale();
+        $search =request('search');
         $query = $this->repository
-            ->query()
-            ->with(['products:id,name','tags', 'types'])
-            ->when(request()->filled('search_value'), function ($q)use ($locale) {
+            ->query()->with([
+            'products:id,name',
+            'tags' => function ($q) use ($locale, $search) {
+                // keep columns lean if you like
+                $q->select('id', 'name');
+
+                // apply filter only when searching
+                if ($search !== '') {
+                    $q->whereRaw(
+                        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
+                        ["%{$search}%"]
+                    );
+                }
+            },
+            'types:id,name',
+        ])->when(request()->filled('search_value'), function ($q)use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
 
                     $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
