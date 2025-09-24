@@ -34,17 +34,18 @@ class Category extends Model implements HasMedia
 //            $query->whereIn('rating', $rates);
 //        });
 //    }
-    public function scopeWithAvgRating(Builder $query, $ratings): Builder
+    public function scopeWithReviewRating(Builder $query, $ratings): Builder
     {
         $ratings = is_array($ratings) ? $ratings : explode(',', (string) $ratings);
+        $ratings = array_values(array_filter(array_map('intval', $ratings)));
+
+        if (empty($ratings)) {
+            return $query;
+        }
 
         return $query
-            // adds a subselect column `avg_rating`
             ->withAvg('reviews as avg_rating', 'rating')
-            // filter by the rounded average
-            ->when(!empty($ratings), function (Builder $q) use ($ratings) {
-                $q->whereIn(DB::raw('ROUND(avg_rating)'), $ratings);
-            });
+            ->havingRaw('ROUND(avg_rating) IN ('.implode(',', $ratings).')');
     }
     public function parent(): BelongsTo
     {
