@@ -356,7 +356,7 @@
 
     // ------- Nearby locations ----------
     function fetchNearby(originLat, originLng) {
-        const url = `{{ url('/user/locations') }}?lat=${encodeURIComponent(originLat)}&lng=${encodeURIComponent(originLng)}`;
+        const url = `{{ route('locations.nearby') }}?lat=${encodeURIComponent(originLat)}&lng=${encodeURIComponent(originLng)}`;
         $('#nearbyLocations').html('<div class="text-muted p-2">Loading…</div>');
 
         $.getJSON(url)
