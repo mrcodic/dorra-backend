@@ -493,7 +493,6 @@ class OrderService extends BaseService
             $location = Location::with(['state', 'state.country'])->findOrFail($validatedData['location_id']);
 
             $pickupAddress = $model->orderAddress()->where('type', OrderTypeEnum::PICKUP)->first();
-dd($pickupAddress);
             $pickupAddressData = [
                 'location_id' => $location->id,
                 'location_name' => $location->name,
