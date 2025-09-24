@@ -65,13 +65,13 @@ class TemplateService extends BaseService
                     $q->whereCategoryId(request('category_id'));
                 });
             })
-            ->when(request('search'), function ($q) use ($locale) {
-                $q->whereHas('tags', function ($q) use ($locale){
-                    $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                        '%' . strtolower(request('search')) . '%'
-                    ]);
-                });
-            })
+//            ->when(request('search'), function ($q) use ($locale) {
+//                $q->whereHas('tags', function ($q) use ($locale){
+//                    $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+//                        '%' . strtolower(request('search')) . '%'
+//                    ]);
+//                });
+//            })
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
             ->when(request()->filled('is_landing'), function ($query) {
                 $query->where('is_landing', true);
