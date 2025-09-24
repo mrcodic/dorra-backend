@@ -459,7 +459,7 @@ class OrderService extends BaseService
         $type = $validatedData['type'] instanceof OrderTypeEnum
             ? $validatedData['type']
             : OrderTypeEnum::from((int)$validatedData['type']); // ensures 1 => SHIPPING, 2 => PICKUP
-dd($type,$validatedData['location_id']);
+
         /** -------------------- SHIPPING -------------------- */
         if ($type === OrderTypeEnum::SHIPPING && !empty($validatedData['shipping_address_id'])) {
             $newAddressId = $validatedData['shipping_address_id'];
@@ -493,7 +493,7 @@ dd($type,$validatedData['location_id']);
             $location = Location::with(['state', 'state.country'])->findOrFail($validatedData['location_id']);
 
             $pickupAddress = $model->orderAddress()->where('type', OrderTypeEnum::PICKUP)->first();
-
+dd($pickupAddress);
             $pickupAddressData = [
                 'location_id' => $location->id,
                 'location_name' => $location->name,
