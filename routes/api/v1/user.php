@@ -186,8 +186,8 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('dimensions', [MainController::class, 'dimensions'])->name('dimensions');
 
 
-    Route::get('locations', [OrderController::class,'searchLocations'])->name('locations.nearby');
 
 });
 
 
+Route::get('locations', [OrderController::class,'searchLocations'])->name('locations.nearby');
