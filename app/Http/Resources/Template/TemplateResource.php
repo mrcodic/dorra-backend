@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Template;
 
 use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\TagResource;
 use App\Models\Guest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -35,6 +36,7 @@ class TemplateResource extends JsonResource
                 'label' => $this->status?->label(),
             ]),
             'types' => TypeResource::collection($this->whenLoaded('types')),
+            'tags' => TagResource::collection($this->whenLoaded('tags')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'back_base64_preview_image' => $this->getFirstMediaUrl('back_templates'),

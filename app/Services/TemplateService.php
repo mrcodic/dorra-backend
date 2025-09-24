@@ -40,7 +40,7 @@ class TemplateService extends BaseService
         $locale = app()->getLocale();
         $query = $this->repository
             ->query()
-            ->with(['products:id,name', 'tags', 'types'])
+            ->with(['products:id,name','tags', 'types'])
             ->when(request()->filled('search_value'), function ($q)use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
 
