@@ -36,6 +36,12 @@ class TagService extends BaseService
 
         $query = $this->repository->query()
             ->with($relations)
+            ->when(request('search'), function ($q) {
+                $locale = app()->getLocale();
+                $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower(request('search')) . '%'
+                ]);
+            })
             ->withCount('templates');
 
 
