@@ -43,7 +43,7 @@ class TemplateService extends BaseService
             ->query()->with([
             'products:id,name',
             'tags' => function ($q) use ($locale, $search) {
- 
+
                 if ($search !== '') {
                     $q->whereRaw(
                         "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
@@ -51,7 +51,7 @@ class TemplateService extends BaseService
                     );
                 }
             },
-            'types:id,name',
+            'types',
         ])->when(request()->filled('search_value'), function ($q)use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
 
