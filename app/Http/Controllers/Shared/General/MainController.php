@@ -41,7 +41,6 @@ use App\Services\FolderService;
 use App\Services\TagService;
 use App\Services\TeamService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
@@ -219,33 +218,9 @@ class MainController extends Controller
                     $query->take($take);
                 })
                 ->when($rates, function ($q) use ($rates) {
-                    // normalize: "4,5" -> [4,5]
-                    $rates = is_array($rates) ? $rates : explode(',', (string) $rates);
-                    $rates = array_values(array_filter(array_map('intval', $rates)));
-                    if (empty($rates)) return;
-
-                    // build safe placeholders for bindings
-                    $placeholders = implode(',', array_fill(0, count($rates), '?'));
-
-                    $q->where(function ($qq) use ($rates, $placeholders) {
-                        // 1) Categories that have PRODUCTS whose AVG(reviews.rating) rounds into $rates
-                        $qq->whereHas('products', function ($p) use ($rates, $placeholders) {
-                            $p->whereIn('products.id', function ($sub) use ($rates, $placeholders) {
-                                $sub->from('reviews')
-                                    ->select('product_id')
-                                    ->groupBy('product_id')
-                                    ->havingRaw("ROUND(AVG(rating)) IN ($placeholders)", $rates);
-                            });
-                        })
-
-                            // 2) OR categories that themselves have REVIEWS whose AVG rounds into $rates
-                            ->orWhereHas('reviews', function ($r) use ($rates, $placeholders) {
-                                // The whereHas already constrains reviewable_type/id to Category
-                                // We just need the HAVING on the grouped AVG.
-                                $r->select(DB::raw('1')) // EXISTS(...) doesn’t care what we select
-                                ->groupBy('reviewable_id', 'reviewable_type')
-                                    ->havingRaw("ROUND(AVG(rating)) IN ($placeholders)", $rates);
-                            });
+                    $q->where(function ($qq) use ($rates) {
+                        $qq->whereHas('products', fn ($p) => $p->withReviewRating($rates))
+                            ->orWhereHas('reviews', fn ($r) => $r->whereIn('rating', $rates));
                     });
                 })
                 ->get();
