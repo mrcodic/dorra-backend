@@ -245,14 +245,9 @@ class MainController extends Controller
             })
             ->when($rates, function ($q) use ($rates) {
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
-
                 $q->where(function ($qq) use ($rates, $placeholders) {
-                    // 1) أي كاتيجوري عنده منتجات متوسط تقييمها يقع ضمن القيم المطلوبة
                     $qq->whereHas('products', fn ($p) => $p->withReviewRating($rates))
-
-                        // 2) (اختياري) لو عندك relation reviews على الكاتيجوري نفسه
                         ->orWhereHas('reviews', function ($rq) use ($rates, $placeholders) {
-                            // هنستخدم HAVING على AVG(rating) بعد تجميع على الكاتيجوري
                             $rq->select('reviewable_id')
                                 ->groupBy('reviewable_id', 'reviewable_type')
                                 ->havingRaw("ROUND(AVG(rating)) IN ($placeholders)", $rates);
