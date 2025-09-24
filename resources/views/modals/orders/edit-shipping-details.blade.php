@@ -1,17 +1,4 @@
-<style>
-    .pac-container { z-index: 2000; }          /* above Bootstrap modal */
-    .map-search {
-        box-sizing: border-box;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        height: 40px;
-        padding: 0 12px;
-        outline: none;
-        width: 320px;
-        font-size: 14px;
-        background: #fff;
-    }
-</style>
+
 
 <div class="modal modal-slide-in new-user-modal fade" id="editOrderShippingModal">
     <div class="modal-dialog">
@@ -226,7 +213,7 @@
                                 null)?->location_id;
                                 @endphp
 
-                           
+
 
                                 <div id="locationList" class="mb-3"></div>
 
@@ -266,41 +253,52 @@
                 src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places&callback=initMap">
         </script>
 <script>
-    let map, marker, geocoder, searchBox;
+    let map, marker, geocoder, searchBox, gmapsLoaded = false, gmapsLoading = false;
 
-    // Make callback global for the script loader
-    window.initMap = function initMap(lat = 30.0444, lng = 31.2357) {
-        const center = { lat: parseFloat(lat), lng: parseFloat(lng) };
+    function loadGoogleMaps(cb) {
+        if (gmapsLoaded) return cb();
+        if (gmapsLoading) { document.addEventListener('gmaps:ready', cb, { once: true }); return; }
+        gmapsLoading = true;
 
+        const s = document.createElement('script');
+        s.async = true; s.defer = true;
+        // ✅ NO callback in URL; we control init timing
+        s.src = "https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places";
+        s.onload = () => {
+            gmapsLoaded = true; gmapsLoading = false;
+            document.dispatchEvent(new Event('gmaps:ready'));
+            cb();
+        };
+        s.onerror = () => {
+            gmapsLoading = false;
+            console.error('Google Maps JS failed to load. Check your browser API key + referrer restrictions.');
+        };
+        document.head.appendChild(s);
+    }
+
+    function initMap(lat = 30.0444, lng = 31.2357) {
         const mapEl = document.getElementById('googleMap');
         if (!mapEl) return;
 
+        const center = { lat: parseFloat(lat), lng: parseFloat(lng) };
         map = new google.maps.Map(mapEl, { zoom: 12, center });
         marker = new google.maps.Marker({ position: center, map, draggable: true });
         geocoder = new google.maps.Geocoder();
 
-        // 1) Create the search input dynamically and add to map controls
+        // Create the search control IN the map
         const input = document.createElement('input');
         input.type = 'text';
         input.placeholder = 'Search Google Maps...';
         input.className = 'map-search';
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
-        // 2) Wire the SearchBox
         searchBox = new google.maps.places.SearchBox(input);
-
-        // Bias results towards current map viewport
-        map.addListener('bounds_changed', () => {
-            searchBox.setBounds(map.getBounds());
-        });
-
-        // When the user selects a prediction:
+        map.addListener('bounds_changed', () => searchBox.setBounds(map.getBounds()));
         searchBox.addListener('places_changed', () => {
             const places = searchBox.getPlaces();
             if (!places || !places.length) return;
-
             const place = places[0];
-            if (!place.geometry || !place.geometry.location) return;
+            if (!place.geometry?.location) return;
 
             const loc = place.geometry.location;
             map.setCenter(loc);
@@ -309,28 +307,20 @@
 
             const addr = place.formatted_address || place.name || '';
             const { country, state } = extractCountryState(place.address_components || []);
-
-            updateFields(
-                loc.lat(),
-                loc.lng(),
-                addr,
-                place.place_id || '',
-                country,
-                state
-            );
+            updateFields(loc.lat(), loc.lng(), addr, place.place_id || '', country, state);
         });
 
-        // Initial hidden inputs
+        // initial hidden inputs
         updateFields(center.lat, center.lng, '', '', '', '');
 
-        // Map click & drag to pick point
+        // click / drag
         map.addListener('click', (e) => setMarkerPosition(e.latLng));
         marker.addListener('dragend', () => setMarkerPosition(marker.getPosition()));
-    };
+    }
 
     function extractCountryState(components) {
         let country = '', state = '';
-        for (const c of components || []) {
+        for (const c of (components || [])) {
             if (!c.types) continue;
             if (c.types.includes('country')) country = c.long_name;
             if (c.types.includes('administrative_area_level_1')) state = c.long_name;
@@ -341,12 +331,8 @@
     function setMarkerPosition(latLng) {
         marker.setPosition(latLng);
         map.panTo(latLng);
-        reverseGeocode(latLng);
-    }
-
-    function reverseGeocode(latLng) {
         geocoder.geocode({ location: latLng }, (results, status) => {
-            if (status === 'OK' && results && results[0]) {
+            if (status === 'OK' && results?.[0]) {
                 const r = results[0];
                 const addr = r.formatted_address || '';
                 const { country, state } = extractCountryState(r.address_components || []);
@@ -366,27 +352,53 @@
         $('#pickup_state').val(state || '');
     }
 
-    // Initialize/resize when the modal opens
+    // Load script and init ONLY when modal becomes visible (container has size)
     $('#selectLocationModal').on('shown.bs.modal', function () {
-        setTimeout(function () {
+        loadGoogleMaps(() => {
+            // If first time, build map; if already built, just resize
             if (!map) {
                 initMap();
             } else {
                 google.maps.event.trigger(map, 'resize');
                 if (marker?.getPosition()) map.setCenter(marker.getPosition());
             }
-        }, 250);
+        });
     });
 
     // Save button
     $(document).on('click', '#saveLocationBtn', function () {
-        const lat = $('#pickup_lat').val();
-        const lng = $('#pickup_lng').val();
+        const lat = $('#pickup_lat').val(), lng = $('#pickup_lng').val();
         if (!lat || !lng) return alert('Please select a location on the map first.');
-        $('#selectedLocationId').val(''); // clear internal location id if any
+        $('#selectedLocationId').val(''); // clear internal id if you use Google-picked point
         $('#selectLocationModal').modal('hide');
     });
+
+    // Basic ship/pickup toggle (guard nulls)
+    document.addEventListener('DOMContentLoaded', function () {
+        const shipRadio = document.getElementById('shipToCustomer');
+        const pickupRadio = document.getElementById('pickUp');
+        const shipSection = document.getElementById('shipSection');
+        const pickupSection = document.getElementById('pickupSection');
+        const addAddressSection = document.getElementById('addAddressSection');
+
+        function toggleSections() {
+            const ship = !!shipRadio?.checked;
+            if (ship) {
+                shipSection && (shipSection.style.display = 'block');
+                pickupSection && (pickupSection.style.display = 'none');
+                addAddressSection && (addAddressSection.style.display = 'block');
+            } else {
+                shipSection && (shipSection.style.display = 'none');
+                pickupSection && (pickupSection.style.display = 'block');
+                addAddressSection && (addAddressSection.style.display = 'none');
+            }
+        }
+        shipRadio?.addEventListener('change', toggleSections);
+        pickupRadio?.addEventListener('change', toggleSections);
+        toggleSections();
+    });
 </script>
+
 
 
 

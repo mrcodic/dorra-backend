@@ -7,6 +7,20 @@
 @section('vendor-style')
 <!-- Vendor CSS Files -->
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+<style>
+    .pac-container { z-index: 2000; }          /* above Bootstrap modal */
+    .map-search {
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        height: 40px;
+        padding: 0 12px;
+        outline: none;
+        width: 320px;
+        font-size: 14px;
+        background: #fff;
+    }
+</style>
 @endsection
 
 @section('content')
