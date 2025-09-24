@@ -253,72 +253,134 @@
         <script async defer
                 src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places&callback=initMap">
         </script>
-<script>
-    let map, marker, autocomplete;
+        <script>
+            let map, marker, geocoder, autocomplete, places;
 
-    function initMap() {
-        // Default center (you can change to your region)
-        const defaultLocation = { lat: 40.7128, lng: -74.0060 }; // New York
+            function initMap(lat = 30.0444, lng = 31.2357) {
+                const center = { lat: parseFloat(lat), lng: parseFloat(lng) };
 
-        // Initialize Map
-        map = new google.maps.Map(document.getElementById("googleMap"), {
-            center: defaultLocation,
-            zoom: 10,
-        });
+                map = new google.maps.Map(document.getElementById('googleMap'), {
+                    zoom: 12,
+                    center
+                });
 
-        // Marker (hidden initially)
-        marker = new google.maps.Marker({
-            map,
-            draggable: false,
-            visible: false,
-        });
+                marker = new google.maps.Marker({ position: center, map, draggable: true });
+                geocoder = new google.maps.Geocoder();
+                places   = new google.maps.places.PlacesService(map);
 
-        // Initialize Autocomplete
-        const input = document.getElementById("locationSearch");
-        autocomplete = new google.maps.places.Autocomplete(input);
+                // Fill hidden inputs initially
+                updateFields(center.lat, center.lng, '', '', '', '');
 
-        // Bias autocomplete results towards the current map bounds
-        autocomplete.bindTo("bounds", map);
+                // Map click & marker drag
+                map.addListener('click', (e) => setMarkerPosition(e.latLng));
+                marker.addListener('dragend', () => setMarkerPosition(marker.getPosition()));
 
-        // When a place is selected
-        autocomplete.addListener("place_changed", () => {
-            const place = autocomplete.getPlace();
-            if (!place.geometry || !place.geometry.location) {
-                alert("No details available for this location");
-                return;
+                // ✅ Google Places Autocomplete
+                const input = document.getElementById('locationSearch');
+                if (input) {
+                    autocomplete = new google.maps.places.Autocomplete(input, {
+                        // Add address_components so we can read country/state directly
+                        fields: ['geometry', 'formatted_address', 'name', 'place_id', 'address_components'],
+                        // Optional: restrict to specific countries
+                        // componentRestrictions: { country: ['eg'] }
+                    });
+
+                    autocomplete.addListener('place_changed', () => {
+                        const place = autocomplete.getPlace();
+                        if (!place || !place.geometry || !place.geometry.location) return;
+
+                        const loc = place.geometry.location;
+                        map.setCenter(loc);
+                        map.setZoom(15);
+                        marker.setPosition(loc);
+
+                        const addr   = place.formatted_address || place.name || '';
+                        const { country, state } = extractCountryState(place.address_components || []);
+
+                        // Update all hidden fields
+                        updateFields(
+                            loc.lat(),
+                            loc.lng(),
+                            addr,
+                            place.place_id || '',
+                            country,
+                            state
+                        );
+                    });
+                }
             }
 
-            // Move map & marker
-            map.setCenter(place.geometry.location);
-            map.setZoom(15);
-            marker.setPosition(place.geometry.location);
-            marker.setVisible(true);
+            function extractCountryState(components) {
+                let country = '', state = '';
+                for (const c of components) {
+                    if (!c || !c.types) continue;
+                    if (c.types.includes('country')) country = c.long_name;
+                    if (c.types.includes('administrative_area_level_1')) state = c.long_name;
+                }
+                return { country, state };
+            }
 
-            // Update hidden inputs (you already have them in your form)
-            document.getElementById("pickup_lat").value = place.geometry.location.lat();
-            document.getElementById("pickup_lng").value = place.geometry.location.lng();
-            document.getElementById("pickup_location_name").value = place.name || "";
-            document.getElementById("pickup_place_id").value = place.place_id || "";
+            function setMarkerPosition(latLng) {
+                marker.setPosition(latLng);
+                map.panTo(latLng);
+                reverseGeocode(latLng);
+            }
 
-            // Extract country/state if available
-            let country = "", state = "";
-            place.address_components.forEach(component => {
-                if (component.types.includes("country")) country = component.long_name;
-                if (component.types.includes("administrative_area_level_1")) state = component.long_name;
+            function reverseGeocode(latLng) {
+                geocoder.geocode({ location: latLng }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        const r = results[0];
+                        const addr = r.formatted_address || '';
+                        const { country, state } = extractCountryState(r.address_components || []);
+                        $('#locationSearch').val(addr);
+                        updateFields(latLng.lat(), latLng.lng(), addr, r.place_id || '', country, state);
+                    } else {
+                        updateFields(latLng.lat(), latLng.lng(), '', '', '', '');
+                    }
+                });
+            }
+
+            function updateFields(lat, lng, name, placeId, country, state) {
+                $('#pickup_lat').val(lat);
+                $('#pickup_lng').val(lng);
+                $('#pickup_location_name').val(name);
+                $('#pickup_place_id').val(placeId || '');
+                $('#pickup_country').val(country || '');
+                $('#pickup_state').val(state || '');
+            }
+
+            // Keep your existing modal shown handler (resizes the map)
+            $('#selectLocationModal').on('shown.bs.modal', function () {
+                setTimeout(function () {
+                    if (!map) {
+                        initMap();
+                    } else {
+                        google.maps.event.trigger(map, 'resize');
+                        if (marker?.getPosition()) map.setCenter(marker.getPosition());
+                    }
+                }, 300);
             });
-            document.getElementById("pickup_country").value = country;
-            document.getElementById("pickup_state").value = state;
-        });
-    }
 
-    // Run initMap once Google script loads
-    window.initMap = initMap;
-</script>
+            // Save button inside the map modal
+            $(document).on('click', '#saveLocationBtn', function () {
+                const lat = $('#pickup_lat').val();
+                const lng = $('#pickup_lng').val();
+                const name = $('#pickup_location_name').val();
+                if (!lat || !lng) {
+                    alert('Please select a location on the map first.');
+                    return;
+                }
+                // Optionally reflect in UI
+                $('#selectedLocationName').text(name || `${lat}, ${lng}`);
+                // Clear any internal location id (if you treat Google pick as external)
+                $('#selectedLocationId').val('');
+                $('#selectLocationModal').modal('hide');
+            });
+        </script>
 
 
 
-
-<script>
+        <script>
             document.addEventListener("DOMContentLoaded", function () {
         const shipRadio = document.getElementById("shipToCustomer");
         const pickupRadio = document.getElementById("pickUp");
