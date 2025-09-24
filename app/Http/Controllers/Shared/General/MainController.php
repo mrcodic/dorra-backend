@@ -246,7 +246,9 @@ class MainController extends Controller
             ->when($rates, function ($q) use ($rates) {
                 $q->where(function ($qq) use ($rates) {
                     $qq->whereHas('products', fn($p) => $p->withReviewRating($rates))
-                        ->orWhereHas('reviews', fn($r) => $r->whereIn('rating', $rates));
+                        ->orWhere(function ($qq) use ($rates) {
+                            $qq->withReviewRating($rates);
+                        });
                 });
             })
             ->get();
