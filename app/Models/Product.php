@@ -93,7 +93,6 @@ class Product extends Model implements HasMedia
     public function scopeWithAvgRating(Builder $query, $ratings): Builder
     {
         $ratings = is_array($ratings) ? $ratings : explode(',', (string) $ratings);
-        $ratings = array_values(array_filter(array_map('intval', $ratings)));
 
         return $query
             // adds a subselect column `avg_rating`
