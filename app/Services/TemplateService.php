@@ -43,10 +43,7 @@ class TemplateService extends BaseService
             ->query()->with([
             'products:id,name',
             'tags' => function ($q) use ($locale, $search) {
-                // keep columns lean if you like
-                $q->select('id', 'name');
-
-                // apply filter only when searching
+ 
                 if ($search !== '') {
                     $q->whereRaw(
                         "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
