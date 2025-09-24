@@ -37,13 +37,13 @@ class TemplateService extends BaseService
 
         $productId = request('product_id');
         $categoryId = request('product_without_category_id');
-
+        $locale = app()->getLocale();
         $query = $this->repository
             ->query()
             ->with(['products:id,name', 'tags', 'types'])
-            ->when(request()->filled('search_value'), function ($q) {
+            ->when(request()->filled('search_value'), function ($q)use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
-                    $locale = app()->getLocale();
+
                     $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                         '%' . strtolower(request('search_value')) . '%'
                     ]);
@@ -63,6 +63,13 @@ class TemplateService extends BaseService
             ->when(request('category_id'), function ($q) {
                 $q->whereHas('products', function ($q) {
                     $q->whereCategoryId(request('category_id'));
+                });
+            })
+            ->when(request('search'), function ($q) use ($locale) {
+                $q->whereHas('tags', function ($q) use ($locale){
+                    $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                        '%' . strtolower(request('search')) . '%'
+                    ]);
                 });
             })
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
