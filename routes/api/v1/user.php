@@ -97,7 +97,6 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
     Route::controller(OrderController::class)->group(function () {
         Route::post('checkout', 'checkout');
-        Route::get('locations', 'searchLocations')->name('locations.nearby');
         Route::get('track-order/{order}', 'trackOrder');
         Route::get('order-statuses', 'orderStatuses');
     });
@@ -187,6 +186,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('dimensions', [MainController::class, 'dimensions'])->name('dimensions');
 
 
+    Route::get('locations', [OrderController::class,'searchLocations'])->name('locations.nearby');
 
 });
 
