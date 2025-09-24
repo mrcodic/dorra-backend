@@ -80,15 +80,7 @@ class Product extends Model implements HasMedia
     /**
      * Scope to filter products by review ratings
      */
-//    public function scopeWithReviewRating(Builder $builder,  $rates): Builder
-//    {
-//
-//        $rates = is_array($rates) ? $rates : explode(',', $rates);
-//
-//        return $builder->whereHas('reviews', function ($query) use ($rates) {
-//            $query->whereIn('rating', $rates);
-//        });
-//    }
+
     public function scopeWithReviewRating(Builder $query, $ratings): Builder
     {
         $ratings = is_array($ratings) ? $ratings : explode(',', (string) $ratings);
