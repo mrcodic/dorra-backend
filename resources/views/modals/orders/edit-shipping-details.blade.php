@@ -355,38 +355,67 @@
     }
 
     // ------- Nearby locations ----------
-    function fetchNearby(lat, lng) {
-        const url = `{{ route('locations.nearby') }}?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lng)}&radius=15&take=10`;
+    function fetchNearby(originLat, originLng) {
+        const url = `{{ url('/user/locations') }}?lat=${encodeURIComponent(originLat)}&lng=${encodeURIComponent(originLng)}`;
         $('#nearbyLocations').html('<div class="text-muted p-2">Loading…</div>');
 
         $.getJSON(url)
-            .done(({items}) => renderNearby(items))
-            .fail(() => $('#nearbyLocations').html('<div class="text-danger p-2">Failed to load nearby locations</div>'));
+            .done((resp) => {
+                const list = Array.isArray(resp?.data) ? resp.data : [];
+                // map into a normalized shape + compute client-side distance
+                const items = list.map(loc => {
+                    const lat = parseFloat(loc.latitude);
+                    const lng = parseFloat(loc.longitude);
+                    const distance_km = (isFinite(lat) && isFinite(lng))
+                        ? Math.round(haversineKm(originLat, originLng, lat, lng) * 10) / 10
+                        : null;
+
+                    return {
+                        id: loc.id,
+                        name: loc.name || 'Location',
+                        subtitle: esc([loc?.state?.name, loc?.state?.country?.name].filter(Boolean).join(', ')),
+                        lat,
+                        lng,
+                        distance_km
+                    };
+                })
+                    // keep only those with coords
+                    .filter(it => isFinite(it.lat) && isFinite(it.lng))
+                    // nearest first
+                    .sort((a,b) => (a.distance_km ?? 1e9) - (b.distance_km ?? 1e9));
+
+                renderNearby(items);
+            })
+            .fail(() => {
+                $('#nearbyLocations').html('<div class="text-danger p-2">Failed to load nearby locations.</div>');
+            });
     }
 
+    // Render list
     function renderNearby(items) {
-        console.log(items)
         const $wrap = $('#nearbyLocations').empty();
         if (!items?.length) {
             $wrap.html('<div class="text-muted p-2">No nearby locations.</div>');
             return;
         }
+
         items.forEach(it => {
             $wrap.append(`
-        <button type="button"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center nearby-item"
-          data-id="${it.id}" data-lat="${it.lat}" data-lng="${it.lng}" data-name="${esc(it.name)}">
-          <div class="d-flex align-items-start gap-2">
-            <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
-              <i class="bi bi-geo-alt"></i>
-            </div>
-            <div class="text-start">
-              <div class="fw-bold">${esc(it.name)}</div>
-              <div class="text-muted small">${esc(it.subtitle || '')}</div>
-            </div>
+      <button type="button"
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center nearby-item"
+        data-id="${it.id}" data-lat="${it.lat}" data-lng="${it.lng}" data-name="${esc(it.name)}">
+        <div class="d-flex align-items-start gap-2">
+          <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+            <i class="bi bi-geo-alt"></i>
           </div>
-          <div class="text-success small">${it.distance_km} km from you</div>
-        </button>`);
+          <div class="text-start">
+            <div class="fw-bold">${esc(it.name)}</div>
+            <div class="text-muted small">${it.subtitle || ''}</div>
+          </div>
+        </div>
+        <div class="text-success small">${isFinite(it.distance_km) ? it.distance_km + ' km from you' : ''}</div>
+      </button>
+    `);
         });
     }
 
