@@ -153,10 +153,17 @@ class LocationService extends BaseService
     }
 
 
+
+
     public function search($request)
     {
-        $queryString = $request->search;
-        return $this->repository->query()
+        $queryString = (string) $request->search;
+        $lat   = $request->float('latitude');
+        $lng   = $request->float('longitude');
+        $radiusKm = (int) $request->input('radius', 10); // default 10km
+
+        // base query
+        $q = $this->repository->query()
             ->when($request->filled('search'), function ($query) use ($queryString) {
                 $query->where(function ($q) use ($queryString) {
                     $q->where('name', 'like', '%' . $queryString . '%')
@@ -168,14 +175,34 @@ class LocationService extends BaseService
                                 });
                         });
                 });
-            })
-            ->when($request->filled('latitude'), function ($query) use ($request) {
-                $query->whereLatitude($request->latitude);
-            })->when($request->filled('longitude'), function ($query) use ($request) {
-                $query->whereLongitude($request->longitude);
-            })
-            ->get();
+            });
 
+        // If lat/lng provided, compute distance and filter/order by nearest
+        if ($request->filled('latitude') && $request->filled('longitude')) {
+            // Haversine (Earth radius 6371 km). LEAST(1, ...) guards tiny FP >1 errors in acos()
+            $haversine = '6371 * acos(LEAST(1,
+            cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?))
+          + sin(radians(?)) * sin(radians(latitude))
+        ))';
+
+            // Optional bounding box optimization to speed up (rough pre-filter)
+            $latDelta = $radiusKm / 111.32; // ~km per degree latitude
+            $lngDelta = $radiusKm / (111.32 * max(cos(deg2rad(max(min($lat, 89.9), -89.9))), 0.0001));
+
+            $q->whereBetween('latitude',  [$lat - $latDelta, $lat + $latDelta])
+                ->whereBetween('longitude', [$lng - $lngDelta, $lng + $lngDelta])
+                ->select('*')
+                ->selectRaw("$haversine AS distance_km", [$lat, $lng, $lat])
+                ->when($radiusKm > 0, fn ($qq) => $qq->having('distance_km', '<=', $radiusKm))
+                ->orderBy('distance_km');
+        }
+
+        // Optional: allow limiting results
+        if ($request->filled('take')) {
+            $q->limit((int) $request->input('take'));
+        }
+
+        return $q->get();
     }
 }
 
