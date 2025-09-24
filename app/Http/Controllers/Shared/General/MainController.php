@@ -213,7 +213,18 @@ class MainController extends Controller
             'products' => function ($query) use ($request) {
                 $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
             },
-            'products.media', 'media'])
+            'products.media', 'media',
+            'templates.tags' => function ($query) use ($locale,$request) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($request->search) . '%'
+                ]);
+            },
+            'products.templates.tags' => function ($query) use ($locale, $request) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($request->search) . '%'
+                ]);
+            },
+            ])
             ->where(function ($query) use ($locale, $request) {
                 $query->whereHas('templates.tags', function ($query) use ($locale, $request) {
                     $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
@@ -228,7 +239,8 @@ class MainController extends Controller
             })
             ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                 '%' . strtolower($request->search) . '%'
-            ])->when($request->take, function ($query, $take) {
+            ])
+            ->when($request->take, function ($query, $take) {
                 $query->take($take);
             })
             ->when($rates, function ($q) use ($rates) {
