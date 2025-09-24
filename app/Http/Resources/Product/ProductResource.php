@@ -35,8 +35,17 @@ class ProductResource extends JsonResource
             'all_product_images' => $this->whenLoaded('media', function () {
                 return MediaResource::collection($this->getAllProductImages());
             }),
-            'template_tags' => TagResource::collection($this->whenLoaded('templates.tags')),
+            'template_tags' => $this->whenLoaded('templates', function () {
+                $this->templates->loadMissing('tags');
 
+                $tags = $this->templates
+                    ->pluck('tags')
+                    ->flatten()
+                    ->unique('id')
+                    ->values();
+
+                return TagResource::collection($tags);
+            }),
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
             'is_saved' => $this->when(

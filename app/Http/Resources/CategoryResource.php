@@ -44,7 +44,17 @@ class CategoryResource extends JsonResource
             ),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'category_products' => ProductResource::collection($this->whenLoaded('landingProducts')),
-            'template_tags' => TagResource::collection($this->whenLoaded('templates.tags')),
+            'template_tags' => $this->whenLoaded('templates', function () {
+                $this->templates->loadMissing('tags');
+
+                $tags = $this->templates
+                    ->pluck('tags')
+                    ->flatten()
+                    ->unique('id')
+                    ->values();
+
+                return TagResource::collection($tags);
+            }),
 
 
             'is_has_category' => $this->is_has_category,
