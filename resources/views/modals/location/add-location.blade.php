@@ -13,29 +13,29 @@
                         <input type="text" class="form-control" id="locationName" name="name" placeholder="Enter name">
                     </div>
 
-{{--                    <div class="row mb-2">--}}
-{{--                        <div class="col-12 col-md-6">--}}
-{{--                            <label class="form-label">Country</label>--}}
-{{--                            <select class="form-select address-country-select" name="country_id">--}}
-{{--                                <option value="">Select Country</option>--}}
-{{--                                @foreach ($associatedData['countries'] as $country)--}}
-{{--                                <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : ''--}}
-{{--                                    }}>--}}
-{{--                                    {{ $country->name }}--}}
-{{--                                </option>--}}
-{{--                                @endforeach--}}
-{{--                            </select>--}}
-{{--                        </div>--}}
+                    <div class="row mb-2">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Country</label>
+                            <select class="form-select address-country-select" name="country_id">
+                                <option value="">Select Country</option>
+                                @foreach ($associatedData['countries'] as $country)
+                                <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : ''
+                                    }}>
+                                    {{ $country->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-{{--                        <div class="col-12 col-md-6">--}}
-{{--                            <label class="form-label label-text">State</label>--}}
-{{--                            <select id="modalAddressState" name="state_id" class="form-select address-state-select">--}}
-{{--                                <option value="">Select a State</option>--}}
-{{--                            </select>--}}
-{{--                            <div class="invalid-feedback" id="state_id-error"></div>--}}
-{{--                            <div id="state-url" data-url="{{ route('states') }}"></div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
+                        <div class="col-12 col-md-6">
+                            <label class="form-label label-text">State</label>
+                            <select id="modalAddressState" name="state_id" class="form-select address-state-select">
+                                <option value="">Select a State</option>
+                            </select>
+                            <div class="invalid-feedback" id="state_id-error"></div>
+                            <div id="state-url" data-url="{{ route('states') }}"></div>
+                        </div>
+                    </div>
 
                     <div class="mb-1">
                         <label for="addressLine" class="form-label">Address Line</label>

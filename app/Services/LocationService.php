@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\Location\DayEnum;
-use Illuminate\Support\Facades\Http;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Requests\Location\StoreLocationRequest;
 use App\Repositories\Interfaces\LocationRepositoryInterface;
@@ -57,52 +56,38 @@ class LocationService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        // days handling (unchanged)
         if (isset($validatedData['days']) && is_array($validatedData['days'])) {
             $dayValues = [];
+
             foreach ($validatedData['days'] as $day) {
                 if (is_string($day)) {
+                    // Convert string day name to enum case
                     $enumCase = collect(DayEnum::cases())->firstWhere('name', strtoupper($day));
-                    if ($enumCase) $dayValues[] = $enumCase->value;
+                    if ($enumCase) {
+                        $dayValues[] = $enumCase->value;
+                    }
                 } elseif (is_int($day)) {
+                    // Validate integer is a valid enum value
                     $enumCase = DayEnum::tryFrom($day);
-                    if ($enumCase) $dayValues[] = $day;
+                    if ($enumCase) {
+                        $dayValues[] = $day;
+                    }
                 }
             }
+
             $validatedData['days'] = json_encode($dayValues);
         }
 
-        // If link provided, extract coordinates
-        if (!empty($validatedData['link'])) {
+        if (isset($validatedData['link'])) {
             $coordinates = $this->extractCoordinatesFromLink($validatedData['link']);
             if ($coordinates) {
-                $validatedData['latitude']  = $coordinates['latitude'];
+                $validatedData['latitude'] = $coordinates['latitude'];
                 $validatedData['longitude'] = $coordinates['longitude'];
-
-                // Only auto-fill if not manually provided
-                $needsCountry = empty($validatedData['country']);
-                $needsState   = empty($validatedData['state']);
-
-                if ($needsCountry || $needsState) {
-                    $lang = app()->getLocale(); // 'ar' or 'en'
-                    $geo  = $this->reverseGeocode($coordinates['latitude'], $coordinates['longitude'], $lang);
-
-                    if ($needsCountry && $geo['country']) {
-                        $validatedData['country'] = $geo['country'];
-                        // If you also added country_code:
-                        // $validatedData['country_code'] = $geo['country_code'];
-                    }
-                    if ($needsState && $geo['state']) {
-                        $validatedData['state'] = $geo['state'];
-                    }
-                }
             }
         }
 
-        // Create with country/state strings
         $location = $this->repository->create($validatedData);
 
-        // Relations (unchanged)
         if (!empty($relationsToStore)) {
             foreach ($relationsToStore as $relation => $data) {
                 if (method_exists($location, $relation)) {
@@ -111,53 +96,13 @@ class LocationService extends BaseService
             }
         }
 
-        // Load (you can drop 'state' relation if you no longer use FK)
         if (!empty($relationsToLoad)) {
             $location->load($relationsToLoad);
         } else {
-            // If you removed state FK, adjust/remove these:
-            // $location->load($this->relations);
+            $location->load($this->relations);
         }
 
         return $location;
-    }
-
-
-    private function reverseGeocode(float $lat, float $lng, string $lang = 'en'): array
-    {
-        $key = config('services.google_maps.key');
-        if (!$key) {
-            return ['country' => null, 'state' => null, 'country_code' => null];
-        }
-
-        $res = Http::get('https://maps.googleapis.com/maps/api/geocode/json', [
-            'latlng'   => "{$lat},{$lng}",
-            'key'      => $key,
-            'language' => $lang,
-        ])->json();
-dd($res);
-        if (($res['status'] ?? '') !== 'OK') {
-            return ['country' => null, 'state' => null, 'country_code' => null];
-        }
-
-        $components = $res['results'][0]['address_components'] ?? [];
-        $pick = function (string $type) use ($components) {
-            foreach ($components as $c) {
-                if (in_array($type, $c['types'], true)) {
-                    return $c;
-                }
-            }
-            return null;
-        };
-
-        $country = $pick('country');
-        $state   = $pick('administrative_area_level_1');
-
-        return [
-            'country'      => $country['long_name']  ?? null,
-            'country_code' => $country['short_name'] ?? null,
-            'state'        => $state['long_name']    ?? null,
-        ];
     }
 
     /**
@@ -223,6 +168,11 @@ dd($res);
                                 });
                         });
                 });
+            })
+            ->when($request->filled('latitude'), function ($query) use ($request) {
+                $query->whereLatitude($request->latitude);
+            })->when($request->filled('longitude'), function ($query) use ($request) {
+                $query->whereLongitude($request->longitude);
             })
             ->get();
 
