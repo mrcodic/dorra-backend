@@ -222,7 +222,10 @@
                                 </div>
 
                             </div>
-
+                            <div class="mt-2">
+                                <div class="fw-bold mb-1">Near Pick up Locations</div>
+                                <div id="nearbyLocations" class="list-group"></div>
+                            </div>
                             <!-- Footer with Save button -->
                             <div class="modal-footer border-0">
                                 <button type="button" class="btn btn-primary" id="saveLocationBtn">
@@ -246,10 +249,7 @@
         </div>
 
     </div>
-    <div class="mt-2">
-        <div class="fw-bold mb-1">Near Pick up Locations</div>
-        <div id="nearbyLocations" class="list-group"></div>
-    </div>
+
 
 </div>
 
@@ -259,24 +259,22 @@
         </script>
 <script>
     let map, marker, geocoder, searchBox;
-    let gmapsLoaded = false, gmapsLoading = false;
 
-    function loadGoogleMaps(cb) {
-        if (gmapsLoaded) return cb();
-        if (gmapsLoading) { document.addEventListener('gmaps:ready', cb, { once: true }); return; }
-        gmapsLoading = true;
-
-        const s = document.createElement('script');
-        s.async = true; s.defer = true;
-        s.src = "https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places";
-        s.onload = () => { gmapsLoaded = true; gmapsLoading = false; document.dispatchEvent(new Event('gmaps:ready')); cb(); };
-        s.onerror = () => { gmapsLoading = false; console.error('Google Maps failed to load. Check key & referrer.'); };
-        document.head.appendChild(s);
+    // --- helpers ---
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const toRad = d => d * Math.PI / 180;
+        const dLat = toRad(lat2 - lat1);
+        const dLon = toRad(lon2 - lon1);
+        const a = Math.sin(dLat/2)**2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
-
-    // simple HTML escape (no lodash needed)
     function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+    function debounce(fn, ms=400){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
 
+    // --- init map (called via &callback=initMap) ---
     function initMap(lat = 30.0444, lng = 31.2357) {
         const mapEl = document.getElementById('googleMap');
         if (!mapEl) return;
@@ -290,7 +288,9 @@
         const input = document.createElement('input');
         input.type = 'text';
         input.placeholder = 'Search Google Maps...';
-        input.className = 'map-search';
+        input.className = 'map-search form-control';
+        input.style.margin = '10px';
+        input.style.maxWidth = '360px';
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
         searchBox = new google.maps.places.SearchBox(input);
@@ -315,12 +315,19 @@
 
         // init fields & nearby list
         updateFields(center.lat, center.lng, '', '', '', '');
-        fetchNearby(center.lat, center.lng());
+        fetchNearby(center.lat, center.lng);
 
         // interactions
         map.addListener('click', (e) => setMarkerPosition(e.latLng));
-        marker.addEventListener?.('dragend', () => setMarkerPosition(marker.getPosition())); // Safari guard
-        marker.addListener?.('dragend', () => setMarkerPosition(marker.getPosition()));
+        marker.addListener('dragend', () => setMarkerPosition(marker.getPosition()));
+
+        // if modal opens after map is created, force a resize so tiles render correctly
+        $('#selectLocationModal').on('shown.bs.modal', function () {
+            if (map) {
+                google.maps.event.trigger(map, 'resize');
+                if (marker?.getPosition()) map.setCenter(marker.getPosition());
+            }
+        });
     }
 
     function extractCountryState(components) {
@@ -356,32 +363,29 @@
 
     // ------- Nearby locations ----------
     function fetchNearby(originLat, originLng) {
-        const url = `{{ route('locations.nearby') }}?lat=${encodeURIComponent(originLat)}&lng=${encodeURIComponent(originLng)}`;
+        // Your endpoint that returns: { status, success, message, data: [...] }
+        const url = `{{ url('/user/locations') }}?lat=${encodeURIComponent(originLat)}&lng=${encodeURIComponent(originLng)}`;
         $('#nearbyLocations').html('<div class="text-muted p-2">Loading…</div>');
 
         $.getJSON(url)
             .done((resp) => {
                 const list = Array.isArray(resp?.data) ? resp.data : [];
-                // map into a normalized shape + compute client-side distance
-                const items = list.map(loc => {
-                    const lat = parseFloat(loc.latitude);
-                    const lng = parseFloat(loc.longitude);
-                    const distance_km = (isFinite(lat) && isFinite(lng))
-                        ? Math.round(haversineKm(originLat, originLng, lat, lng) * 10) / 10
-                        : null;
+                const items = list
+                    .map(loc => {
+                        const lat = parseFloat(loc.latitude);
+                        const lng = parseFloat(loc.longitude);
+                        const distance_km = (isFinite(lat) && isFinite(lng))
+                            ? Math.round(haversineKm(originLat, originLng, lat, lng) * 10) / 10
+                            : null;
 
-                    return {
-                        id: loc.id,
-                        name: loc.name || 'Location',
-                        subtitle: esc([loc?.state?.name, loc?.state?.country?.name].filter(Boolean).join(', ')),
-                        lat,
-                        lng,
-                        distance_km
-                    };
-                })
-                    // keep only those with coords
+                        return {
+                            id: loc.id,
+                            name: loc.name || 'Location',
+                            subtitle: esc([loc?.state?.name, loc?.state?.country?.name].filter(Boolean).join(', ')),
+                            lat, lng, distance_km
+                        };
+                    })
                     .filter(it => isFinite(it.lat) && isFinite(it.lng))
-                    // nearest first
                     .sort((a,b) => (a.distance_km ?? 1e9) - (b.distance_km ?? 1e9));
 
                 renderNearby(items);
@@ -391,42 +395,39 @@
             });
     }
 
-    // Render list
     function renderNearby(items) {
         const $wrap = $('#nearbyLocations').empty();
         if (!items?.length) {
             $wrap.html('<div class="text-muted p-2">No nearby locations.</div>');
             return;
         }
-
         items.forEach(it => {
             $wrap.append(`
-      <button type="button"
-        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center nearby-item"
-        data-id="${it.id}" data-lat="${it.lat}" data-lng="${it.lng}" data-name="${esc(it.name)}">
-        <div class="d-flex align-items-start gap-2">
-          <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
-            <i class="bi bi-geo-alt"></i>
+        <button type="button"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center nearby-item"
+          data-id="${it.id}" data-lat="${it.lat}" data-lng="${it.lng}" data-name="${esc(it.name)}">
+          <div class="d-flex align-items-start gap-2">
+            <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+              <i class="bi bi-geo-alt"></i>
+            </div>
+            <div class="text-start">
+              <div class="fw-bold">${esc(it.name)}</div>
+              <div class="text-muted small">${it.subtitle || ''}</div>
+            </div>
           </div>
-          <div class="text-start">
-            <div class="fw-bold">${esc(it.name)}</div>
-            <div class="text-muted small">${it.subtitle || ''}</div>
-          </div>
-        </div>
-        <div class="text-success small">${isFinite(it.distance_km) ? it.distance_km + ' km from you' : ''}</div>
-      </button>
-    `);
+          <div class="text-success small">${isFinite(it.distance_km) ? it.distance_km + ' km from you' : ''}</div>
+        </button>
+      `);
         });
     }
 
-    function debounce(fn, ms=400){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
     const debounceFetchNearby = debounce(() => {
         const lat = parseFloat($('#pickup_lat').val());
         const lng = parseFloat($('#pickup_lng').val());
-        if (lat && lng) fetchNearby(lat, lng);
+        if (isFinite(lat) && isFinite(lng)) fetchNearby(lat, lng);
     }, 500);
 
-    // pick from nearby list
+    // Choose from nearby list
     $(document).on('click', '.nearby-item', function () {
         const id  = $(this).data('id');
         const lat = parseFloat($(this).data('lat'));
@@ -444,27 +445,17 @@
         $('#pickup_lat').val(lat);
         $('#pickup_lng').val(lng);
         $('#pickup_location_name').val(name);
-        $('#selectedLocationId').val(id); // persist chosen pickup location id into your order form
+        $('#selectedLocationId').val(id);
     });
 
-    // open picker => load maps & init
-    $('#selectLocationModal').on('shown.bs.modal', function () {
-        loadGoogleMaps(() => {
-            if (!map) initMap();
-            else {
-                google.maps.event.trigger(map, 'resize');
-                if (marker?.getPosition()) map.setCenter(marker.getPosition());
-            }
-        });
-    });
-
-    // close picker, do NOT submit yet (just keep fields ready)
+    // Save button in modal
     $(document).on('click', '#saveLocationBtn', function () {
         const lat = $('#pickup_lat').val(), lng = $('#pickup_lng').val();
         if (!lat || !lng) return alert('Please select a location on the map first.');
         $('#selectLocationModal').modal('hide');
     });
 </script>
+
 
 
 
