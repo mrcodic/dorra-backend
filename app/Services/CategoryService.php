@@ -30,6 +30,8 @@ class CategoryService extends BaseService
             })
             ->when(request()->filled('is_has_category'), function ($query) {
                 $query->where('is_has_category', request('is_has_category', 0));
+            })->when(request()->boolean('has_categories',0), function ($query) {
+                $query->whereHas('products');
             });
 
         return $paginate ? $query->paginate($perPage) : $query->get();
