@@ -482,7 +482,7 @@
     $(document).on('click', '#saveLocationBtn', function () {
         const $btn  = $(this);
         const $form = $('#editTagForm');
-        const actionUrl = "{{ route("orders.update",$model->id) }}";
+        const actionUrl = "{{ route("orders.edit-shipping-addresses",$model->id) }}";
 
         // Read current selection
         const locationId = $('#selectedLocationId').val();
