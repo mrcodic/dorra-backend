@@ -228,7 +228,7 @@
         </div>
     </form>
 </div>
-@include("modals.orders.edit-shipping-details")
+@include("modals.orders.edit-shipping-details",['model' => $model])
 
 @endsection
 

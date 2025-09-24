@@ -448,15 +448,114 @@
         $('#selectedLocationId').val(id);
     });
 
-    // Save button in modal
-    $(document).on('click', '#saveLocationBtn', function () {
-        const lat = $('#pickup_lat').val(), lng = $('#pickup_lng').val();
-        if (!lat || !lng) return alert('Please select a location on the map first.');
-        $('#selectLocationModal').modal('hide');
-    });
+
 </script>
 
 
+<script>
+    // When a nearby location is clicked, we mark it "selected" and store its id.
+    $(document).on('click', '.nearby-item', function () {
+        $('.nearby-item').removeClass('active');
+        $(this).addClass('active');
+
+        const id  = $(this).data('id');
+        const lat = parseFloat($(this).data('lat'));
+        const lng = parseFloat($(this).data('lng'));
+        const name= $(this).data('name');
+
+        // center map and set marker (nice UX)
+        if (window.google && window.map && window.marker) {
+            const pos = new google.maps.LatLng(lat, lng);
+            marker.setPosition(pos);
+            map.panTo(pos);
+            map.setZoom(15);
+        }
+
+        // update hidden fields
+        $('#selectedLocationId').val(id);
+        $('#pickup_lat').val(lat);
+        $('#pickup_lng').val(lng);
+        $('#pickup_location_name').val(name);
+    });
+
+    // Click: Save Location
+    $(document).on('click', '#saveLocationBtn', function () {
+        const $btn  = $(this);
+        const $form = $('#editTagForm');
+        const actionUrl = "{{ route("orders.update",$model->id) }}";
+
+        // Read current selection
+        const locationId = $('#selectedLocationId').val();
+        const lat = $('#pickup_lat').val();
+        const lng = $('#pickup_lng').val();
+        const placeId = $('#pickup_place_id').val();
+        const locationName = $('#pickup_location_name').val();
+        const country = $('#pickup_country').val();
+        const state = $('#pickup_state').val();
+
+        // Determine payload:
+        // - If user chose a predefined location => send location_id
+        // - Else => send coordinates (and no location_id)
+        const payload = {
+            _token: $('input[name="_token"]').val(),
+            _method: 'PUT',
+            type: $('input[name="type"]:checked').val(),  // keep whatever radio is selected
+        };
+
+        if (locationId) {
+            payload.location_id = locationId;
+        } else {
+            if (!lat || !lng) {
+                alert('Please select a location on the map first.');
+                return;
+            }
+            payload.pickup_lat = lat;
+            payload.pickup_lng = lng;
+            payload.pickup_place_id = placeId || '';
+            payload.pickup_location_name = locationName || '';
+            payload.pickup_country = country || '';
+            payload.pickup_state = state || '';
+        }
+
+        // UX: disable while saving
+        $btn.prop('disabled', true).text('Saving...');
+
+        $.ajax({
+            url: actionUrl,
+            type: 'POST',
+            data: payload,
+        })
+            .done(function (resp) {
+                // success UI (close just the location modal, or both if you like)
+                $('#selectLocationModal').modal('hide');
+
+                // Optionally reflect selected name somewhere in your UI:
+                if (locationId) {
+                    // find the active list item text
+                    const activeText = $('.nearby-item.active .fw-bold').text() || locationName || (lat + ', ' + lng);
+                    $('#selectedLocationName').text(activeText);
+                } else {
+                    $('#selectedLocationName').text(locationName || (lat + ', ' + lng));
+                }
+
+                // If you need to refresh page/section, do it here
+                // location.reload();
+                // or show a toast:
+                // toastr.success('Location updated');
+            })
+            .fail(function (xhr) {
+                console.error('Save failed', xhr);
+                alert('Failed to save location. Please try again.');
+            })
+            .always(function () {
+                $btn.prop('disabled', false).text('Save Location');
+            });
+    });
+
+    // If user drags/clicks map (free point), clear selected predefined location
+    // Call this from your map code right after you update fields on drag/click:
+    // $('#selectedLocationId').val('');
+</script>
 
 
 
