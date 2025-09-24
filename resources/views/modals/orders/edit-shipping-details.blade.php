@@ -246,7 +246,8 @@
             </div>
         </div>
 
-
+    </div>
+</div>
 
         <!-- Load Google Maps JS with callback -->
         <script async defer
