@@ -205,27 +205,41 @@ class MainController extends Controller
     }
 
 
-        public function publicSearch(Request $request)
-        {
-            $locale = app()->getLocale();
-            $rates = $request->rates;
-            $categories = $this->categoryRepository->query()->with([
-                'products' => function ($query) use ($request) {
-                    $query->when($request->rates,fn($q) => $q->withReviewRating($request->rates));},
-              'products.media', 'media'])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+    public function publicSearch(Request $request)
+    {
+        $locale = app()->getLocale();
+        $rates = $request->rates;
+        $categories = $this->categoryRepository->query()->with([
+            'products' => function ($query) use ($request) {
+                $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
+            },
+            'products.media', 'media'])
+            ->where(function ($query) use ($locale, $request) {
+                $query->whereHas('templates.tags', function ($query) use ($locale, $request) {
+                    $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                        '%' . strtolower($request->search) . '%'
+                    ]);
+                })
+                    ->orWhereHas('products.templates.tags', function ($query) use ($locale, $request) {
+                        $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                            '%' . strtolower($request->search) . '%'
+                        ]);
+                    });
+            })
+            ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                 '%' . strtolower($request->search) . '%'
             ])->when($request->take, function ($query, $take) {
-                    $query->take($take);
-                })
-                ->when($rates, function ($q) use ($rates) {
-                    $q->where(function ($qq) use ($rates) {
-                        $qq->whereHas('products', fn ($p) => $p->withReviewRating($rates))
-                            ->orWhereHas('reviews', fn ($r) => $r->whereIn('rating', $rates));
-                    });
-                })
-                ->get();
-            return Response::api(data: CategoryResource::collection($categories));
-        }
+                $query->take($take);
+            })
+            ->when($rates, function ($q) use ($rates) {
+                $q->where(function ($qq) use ($rates) {
+                    $qq->whereHas('products', fn($p) => $p->withReviewRating($rates))
+                        ->orWhereHas('reviews', fn($r) => $r->whereIn('rating', $rates));
+                });
+            })
+            ->get();
+        return Response::api(data: CategoryResource::collection($categories));
+    }
 
 
     public function dimensions(Request $request)
