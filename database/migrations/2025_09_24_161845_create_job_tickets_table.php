@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\OrderItem;
+use App\Models\Station;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->foreignIdFor(OrderItem::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Station::class)->constrained()->cascadeOnDelete();
             $table->json('specs')->nullable();
             $table->tinyInteger('priority');
             $table->timestamp('due_at');

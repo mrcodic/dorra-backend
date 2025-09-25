@@ -3,9 +3,11 @@
 namespace App\Observers;
 
 use App\Models\Admin;
+use App\Models\JobTicket;
 use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
+use App\Models\OrderItem;
 
 class OrderObserver
 {
@@ -34,7 +36,6 @@ class OrderObserver
     {
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
             $order->loadMissing(['paymentMethod']);
-
             if ($order->paymentMethod?->code === 'cash_on_delivery') {
                 $order->update([
                         'payment_status' => \App\Enums\Payment\StatusEnum::PAID
@@ -42,6 +43,24 @@ class OrderObserver
             }
 
             CreateInvoiceJob::dispatch($order);
+            $order->orderItems->each(function (OrderItem $orderItem) use ($order) {
+                $sequence = JobTicket::whereBelongsTo($orderItem->id)->count() + 1;
+                JobTicket::create([
+                    'code' => sprintf(
+                        "JT-%s-%d-%02d",
+                        now()->format('Ymd'),
+                        $orderItem->id,
+                        $sequence
+                    ),
+                    'order_item_id' => $orderItem->id,
+                    'station_id'    => $orderItem->station_id,
+                    'priority'      => 1,
+                    'due_at'        => now()->addDay(),
+                    'status'        => 0,
+                ]);
+            });
+
+
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
             $order->loadMissing(['paymentMethod']);

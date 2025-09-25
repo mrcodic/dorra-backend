@@ -4,12 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Station extends Model
+class Operator extends Model
 {
     protected $fillable = [
-        'code',
-        'name',
-        'requires_operator',
+        'username',
+        'password',
     ];
-
 }

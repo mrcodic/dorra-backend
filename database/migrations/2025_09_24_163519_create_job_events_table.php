@@ -2,6 +2,7 @@
 
 use App\Models\Admin;
 use App\Models\JobTicket;
+use App\Models\Operator;
 use App\Models\Station;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -18,9 +19,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Station::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(JobTicket::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Admin::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(Operator::class)->nullable()->constrained()->nullOnDelete();
             $table->string('action');
-            $table->json('meta')->nullable();
+            $table->json('meta_data')->nullable();
             $table->timestamps();
         });
     }
