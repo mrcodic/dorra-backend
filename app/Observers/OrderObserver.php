@@ -48,7 +48,7 @@ class OrderObserver
                     'code' => sprintf(
                         "JT-%s-%d-%d-%02d",
                         now()->format('Ymd'),
-                        $order,
+                        $order->id,
                         $orderItem->id,
                         $sequence
                     ),
