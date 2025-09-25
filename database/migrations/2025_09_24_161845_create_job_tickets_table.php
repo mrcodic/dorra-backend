@@ -20,8 +20,8 @@ return new class extends Migration
             $table->foreignIdFor(Station::class)->nullable()->constrained()->cascadeOnDelete();
             $table->json('specs')->nullable();
             $table->string('hold_reason')->nullable();
-            $table->tinyInteger('priority');
-            $table->timestamp('due_at');
+            $table->tinyInteger('priority')->nullable();
+            $table->timestamp('due_at')->nullable();
             $table->tinyInteger('status');
             $table->timestamps();
         });
