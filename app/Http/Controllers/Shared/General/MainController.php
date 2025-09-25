@@ -227,17 +227,17 @@ class MainController extends Controller
                 ]);
             },
             ])
-            ->where(function ($query) use ($locale, $request) {
-                $query->whereHas('templates.tags', function ($query) use ($locale, $request) {
-                    $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                        '%' . strtolower($request->search) . '%'
-                    ]);
-                })->orWhereHas('products.templates.tags', function ($query) use ($locale, $request) {
-                        $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                            '%' . strtolower($request->search) . '%'
-                        ]);
-                    });
-            })
+//            ->where(function ($query) use ($locale, $request) {
+//                $query->whereHas('templates.tags', function ($query) use ($locale, $request) {
+//                    $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+//                        '%' . strtolower($request->search) . '%'
+//                    ]);
+//                })->orWhereHas('products.templates.tags', function ($query) use ($locale, $request) {
+//                        $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+//                            '%' . strtolower($request->search) . '%'
+//                        ]);
+//                    });
+//            })
             ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                 '%' . strtolower($request->search) . '%'
             ])
