@@ -55,11 +55,11 @@ Route::controller(PaymentController::class)->group(function () {
     Route::get('payment/redirect', 'handleRedirect');
 });
 
-Route::get('/public-search',[MainController::class,'publicSearch']);
 
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::post('contact-us', [MainController::class, 'contactUs'])->name('contact-us');
     Route::get('country-codes', [MainController::class, 'countryCodes']);
+    Route::get('/public-search',[MainController::class,'publicSearch']);
 
 
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
