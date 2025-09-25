@@ -211,9 +211,7 @@ class MainController extends Controller
         $rates = $request->rates;
         $categories = $this->categoryRepository->query()->with([
             'products' => function ($query) use ($request, $locale) {
-                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                    '%' . strtolower($request->search) . '%'
-                ])->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
+                $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
             },
             'products.media', 'media',
             'templates.tags' => function ($query) use ($locale,$request) {
