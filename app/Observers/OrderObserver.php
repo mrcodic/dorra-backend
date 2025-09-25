@@ -44,15 +44,9 @@ class OrderObserver
             }
             $order->orderItems->each(function (OrderItem $orderItem) use ($order) {
                 $sequence = JobTicket::whereBelongsTo($orderItem)->count() + 1;
-                $code = sprintf(
-                    'JT-%s-%d-%d-%02d',
-                    now()->format('Ymd'),
-                    $order->id,
-                    $orderItem->id,
-                    $sequence
-                );
+
                 JobTicket::firstOrCreate( [
-                    'code' => $code,
+                    'order_item_id' => $orderItem->id,
                 ],[
                     'code' => sprintf(
                         "JT-%s-%d-%d-%02d",
