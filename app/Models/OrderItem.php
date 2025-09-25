@@ -36,6 +36,10 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Order::class);
     }
+    public function jobTickets(): HasMany
+    {
+        return $this->hasMany(JobTicket::class);
+    }
     public function orderable(): MorphTo
     {
         return $this->morphTo();

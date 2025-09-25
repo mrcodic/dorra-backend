@@ -44,7 +44,7 @@ class OrderObserver
             }
             $order->orderItems->each(function (OrderItem $orderItem) use ($order) {
                 $sequence = JobTicket::whereBelongsTo($orderItem)->count() + 1;
-                JobTicket::create([
+                $orderItem->jobTickets()->create([
                     'code' => sprintf(
                         "JT-%s-%d-%d-%02d",
                         now()->format('Ymd'),
@@ -52,11 +52,6 @@ class OrderObserver
                         $orderItem->id,
                         $sequence
                     ),
-                    'order_item_id' => $orderItem->id,
-                    'station_id'    => Station::query()->whereCode('prepress')->first()->id,
-                    'priority'      => 1,
-                    'due_at'        => now()->addDay(),
-                    'status'        => 0,
                 ]);
             });
             CreateInvoiceJob::dispatch($order);
