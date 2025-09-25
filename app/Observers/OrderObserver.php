@@ -41,8 +41,6 @@ class OrderObserver
                         'payment_status' => \App\Enums\Payment\StatusEnum::PAID
                     ]);
             }
-
-            CreateInvoiceJob::dispatch($order);
             $order->orderItems->each(function (OrderItem $orderItem) use ($order) {
                 $sequence = JobTicket::whereBelongsTo($orderItem)->count() + 1;
                 JobTicket::create([
@@ -59,7 +57,7 @@ class OrderObserver
                     'status'        => 0,
                 ]);
             });
-
+            CreateInvoiceJob::dispatch($order);
 
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
