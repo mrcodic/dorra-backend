@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('address_line');
             $table->string('country');
             $table->string('state');
-            $table->string('location_link')->nullable();
+            $table->longText('location_link')->nullable();
             $table->timestamps();
         });
     }

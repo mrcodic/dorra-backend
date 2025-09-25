@@ -36,8 +36,8 @@ class StoreShippingAddressRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'label' => ['required', 'string','min:4', 'max:255'],
-            'line' => ['required', 'string','min:4', 'max:500'],
+            'label' => ['required', 'string','min:3', 'max:255'],
+            'line' => ['required', 'string','min:3', 'max:500'],
             'state_id' => ['required', 'exists:states,id'],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
