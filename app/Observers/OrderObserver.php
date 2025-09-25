@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
 use App\Models\OrderItem;
+use App\Models\Station;
 
 class OrderObserver
 {
@@ -51,7 +52,7 @@ class OrderObserver
                         $sequence
                     ),
                     'order_item_id' => $orderItem->id,
-                    'station_id'    => $orderItem->station_id,
+                    'station_id'    => Station::query()->whereCode('prepress')->first()->id,
                     'priority'      => 1,
                     'due_at'        => now()->addDay(),
                     'status'        => 0,
