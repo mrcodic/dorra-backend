@@ -210,20 +210,13 @@ class MainController extends Controller
         $locale = app()->getLocale();
         $term   = trim((string)$request->search ?? '');
 
-        // Split to words (spaces, comma, semicolon) + lowercase + uniq + drop empties
         $terms = collect(preg_split('/[\s,;]+/u', $term))
             ->map(fn($t) => mb_strtolower($t))
             ->filter()
             ->unique()
             ->values();
-
-        // If no terms, you can return early or skip search filters
-        // if ($terms->isEmpty()) { ... }
-
-        // JSON name expression for the current locale
         $nameExpr = "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')))";
 
-        // Reusable closure: apply OR-LIKE for ANY word
         $applyNameContainsAny = function ($q) use ($terms, $nameExpr) {
             $q->where(function ($qq) use ($terms, $nameExpr) {
                 foreach ($terms as $w) {
@@ -242,25 +235,21 @@ class MainController extends Controller
                 'products.media',
                 'media',
 
-                // templates.tags: any word
                 'templates.tags' => function ($query) use ($applyNameContainsAny) {
                     $applyNameContainsAny($query);
                 },
 
-                // products.templates.tags: any word
                 'products.templates.tags' => function ($query) use ($applyNameContainsAny) {
                     $applyNameContainsAny($query);
                 },
             ])
 
-            // categories name OR any product name matches (ANY word)
             ->where(function ($query) use ($applyNameContainsAny) {
                 $applyNameContainsAny($query);
                 $query->orWhereHas('products', function ($q) use ($applyNameContainsAny) {
                     $applyNameContainsAny($q);
                 });
             })
-
             ->when($request->take, fn($q, $take) => $q->take($take))
 
             ->when($rates, function ($q) use ($rates) {
