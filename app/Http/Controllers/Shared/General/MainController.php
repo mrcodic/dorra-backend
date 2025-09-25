@@ -208,34 +208,61 @@ class MainController extends Controller
     public function publicSearch(Request $request)
     {
         $locale = app()->getLocale();
-        $rates = $request->rates;
-        $categories = $this->categoryRepository->query()->with([
-            'products' => function ($query) use ($request, $locale) {
-                $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
-            },
-            'products.media', 'media',
-            'templates.tags' => function ($query) use ($locale,$request) {
-                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                    '%' . strtolower($request->search) . '%'
-                ]);
-            },
-            'products.templates.tags' => function ($query) use ($locale, $request) {
-                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                    '%' . strtolower($request->search) . '%'
-                ]);
-            },
-            ])->where(function ($query) use ($locale,$request) {
-            $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                '%' . strtolower($request->search) . '%'
-            ])->orWhereHas('products', function ($query) use ($request,$locale) {
-                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                    '%' . strtolower($request->search) . '%'
-                ]);
+        $term   = trim((string)$request->search ?? '');
+
+        // Split to words (spaces, comma, semicolon) + lowercase + uniq + drop empties
+        $terms = collect(preg_split('/[\s,;]+/u', $term))
+            ->map(fn($t) => mb_strtolower($t))
+            ->filter()
+            ->unique()
+            ->values();
+
+        // If no terms, you can return early or skip search filters
+        // if ($terms->isEmpty()) { ... }
+
+        // JSON name expression for the current locale
+        $nameExpr = "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')))";
+
+        // Reusable closure: apply OR-LIKE for ANY word
+        $applyNameContainsAny = function ($q) use ($terms, $nameExpr) {
+            $q->where(function ($qq) use ($terms, $nameExpr) {
+                foreach ($terms as $w) {
+                    $qq->orWhereRaw("{$nameExpr} LIKE ?", ['%'.$w.'%']);
+                }
             });
-        })
-            ->when($request->take, function ($query, $take) {
-                $query->take($take);
+        };
+
+        $rates = $request->rates;
+
+        $categories = $this->categoryRepository->query()
+            ->with([
+                'products' => function ($query) use ($request) {
+                    $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
+                },
+                'products.media',
+                'media',
+
+                // templates.tags: any word
+                'templates.tags' => function ($query) use ($applyNameContainsAny) {
+                    $applyNameContainsAny($query);
+                },
+
+                // products.templates.tags: any word
+                'products.templates.tags' => function ($query) use ($applyNameContainsAny) {
+                    $applyNameContainsAny($query);
+                },
+            ])
+
+            // categories name OR any product name matches (ANY word)
+            ->where(function ($query) use ($applyNameContainsAny) {
+                $applyNameContainsAny($query);
+                $query->orWhereHas('products', function ($q) use ($applyNameContainsAny) {
+                    $applyNameContainsAny($q);
+                });
             })
+
+            ->when($request->take, fn($q, $take) => $q->take($take))
+
             ->when($rates, function ($q) use ($rates) {
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
                 $q->where(function ($qq) use ($rates, $placeholders) {
@@ -248,8 +275,10 @@ class MainController extends Controller
                 });
             })
             ->get();
+
         return Response::api(data: CategoryResource::collection($categories));
     }
+
 
 
     public function dimensions(Request $request)
