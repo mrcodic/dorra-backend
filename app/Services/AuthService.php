@@ -12,6 +12,7 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -159,12 +160,10 @@ class AuthService
     }
 
 
+
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        $cookieValue = request()->cookie('cookie_id');
-        if (!$cookieValue) {
-           $cookieValue = $cookieGoogle;
-        }
+        $cookieValue = request()->cookie('cookie_id') ?: $cookieGoogle;
 
         $guest = $this->guestRepository->query()
             ->where('cookie_value', $cookieValue)
@@ -174,26 +173,50 @@ class AuthService
             return;
         }
 
-        if ($user->cart) {
-            $guestCartItems = $guest->cart?->items?->toArray() ?? [];
-            $user->cart?->items()->createMany($guestCartItems);
-            $guest->cart?->items()->delete();
-            $guest->cart?->delete();
-        } else {
-            $this->cartRepository->query()
+        DB::transaction(function () use ($guest, $user) {
+            $guestCart      = $guest->cart()->first();
+            $guestCartItems = $guestCart
+                ? $guestCart->items()->with(['specs'])->get()
+                : collect();
+
+            if ($user->cart) {
+                $userCart = $user->cart;
+                collect($guestCartItems)->each(function ($gItem) use ($userCart) {
+                    $newItem = $gItem->replicate();
+                    $newItem->cart_id = $userCart->id;
+                    $newItem->save();
+
+                    collect($gItem->specs)->each(function ($spec) use ($newItem) {
+                        $newSpec = $spec->replicate();
+                        $newSpec->cart_item_id = $newItem->id;
+                        $newSpec->save();
+                    });
+                });
+
+
+                if ($guestCart) {
+                    $guestCart->items()->delete();
+                    $guestCart->delete();
+                }
+            } else {
+
+                $this->cartRepository->query()
+                    ->whereNull('user_id')
+                    ->where('guest_id', $guest->id)
+                    ->update(['user_id' => $user->id]);
+            }
+
+
+            $this->designRepository->query()
                 ->whereNull('user_id')
                 ->where('guest_id', $guest->id)
                 ->update(['user_id' => $user->id]);
-        }
 
-        $this->designRepository->query()
-            ->whereNull('user_id')
-            ->where('guest_id', $guest->id)
-            ->update(['user_id' => $user->id]);
 
-        $this->shippingAddressRepository->query()
-            ->whereNull('user_id')
-            ->where('guest_id', $guest->id)
-            ->update(['user_id' => $user->id]);
+            $this->shippingAddressRepository->query()
+                ->whereNull('user_id')
+                ->where('guest_id', $guest->id)
+                ->update(['user_id' => $user->id]);
+        });
     }
 }
