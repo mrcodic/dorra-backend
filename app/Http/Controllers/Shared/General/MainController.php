@@ -210,8 +210,10 @@ class MainController extends Controller
         $locale = app()->getLocale();
         $rates = $request->rates;
         $categories = $this->categoryRepository->query()->with([
-            'products' => function ($query) use ($request) {
-                $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
+            'products' => function ($query) use ($request, $locale) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($request->search) . '%'
+                ])->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
             },
             'products.media', 'media',
             'templates.tags' => function ($query) use ($locale,$request) {
@@ -230,8 +232,7 @@ class MainController extends Controller
                     $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                         '%' . strtolower($request->search) . '%'
                     ]);
-                })
-                    ->orWhereHas('products.templates.tags', function ($query) use ($locale, $request) {
+                })->orWhereHas('products.templates.tags', function ($query) use ($locale, $request) {
                         $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                             '%' . strtolower($request->search) . '%'
                         ]);
