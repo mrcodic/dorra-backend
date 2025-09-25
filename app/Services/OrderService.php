@@ -591,21 +591,24 @@ class OrderService extends BaseService
                     ];
                 })->toArray()
             );
-            $orderItems->each(function ($item) use ($cart) {
-                $cart->items->each(function ($cartItem) use ($item) {
-                    $cartItem->specs->each(function ($spec) use ($item) {
-                        $item->specs()->create([
-                            'spec_name' => $spec->productSpecification?->name,
-                            'option_name' => $spec->productSpecificationOption?->value,
-                            'option_price' => $spec->productSpecificationOption?->price,
-                            'product_specification_id' => $spec->productSpecification->id,
-                            'spec_option_id' => $spec->productSpecificationOption->id,
-                        ]);
-                    });
+            $cartItems  = $cart->items->values();
+            $orderItems = $orderItems->values();
 
+            $orderItems->each(function ($orderItem, $i) use ($cartItems) {
+                $cartItem = $cartItems[$i] ?? null;
+                if (!$cartItem) return;
+                $cartItem->loadMissing(['specs.productSpecification', 'specs.productSpecificationOption']);
+                $cartItem->specs->each(function ($spec) use ($orderItem) {
+                    $orderItem->specs()->create([
+                        'spec_name'                 => $spec->productSpecification?->name,
+                        'option_name'               => $spec->productSpecificationOption?->value,
+                        'option_price'              => $spec->productSpecificationOption?->price,
+                        'product_specification_id'  => $spec->productSpecification?->id,
+                        'spec_option_id'            => $spec->productSpecificationOption?->id,
+                    ]);
                 });
-
             });
+
             $order->orderAddress()->create(OrderAddressData::fromRequest($request));
             if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
                 $order->pickupContact()->create(PickupContactData::fromRequest($request));
