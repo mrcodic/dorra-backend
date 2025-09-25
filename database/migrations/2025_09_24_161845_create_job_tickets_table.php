@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(OrderItem::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Station::class)->constrained()->cascadeOnDelete();
             $table->json('specs')->nullable();
+            $table->string('hold_reason')->nullable();
             $table->tinyInteger('priority');
             $table->timestamp('due_at');
             $table->tinyInteger('status');
