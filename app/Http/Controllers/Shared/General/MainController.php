@@ -226,9 +226,15 @@ class MainController extends Controller
                     '%' . strtolower($request->search) . '%'
                 ]);
             },
-            ])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+            ])->where(function ($query) use ($locale,$request) {
+            $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                 '%' . strtolower($request->search) . '%'
-            ])
+            ])->orWhereHas('products', function ($query) use ($request,$locale) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($request->search) . '%'
+                ]);
+            });
+        })
             ->when($request->take, function ($query, $take) {
                 $query->take($take);
             })

@@ -59,7 +59,6 @@ class OrderObserver
                     'specs' => $orderItem->specs->map(fn($item) => [
                         'spec_name' => $item->spec_name,
                         'option_name' => $item->option_name,
-                        'option_price' => $item->option_price,
                     ])->toArray(),
                 ]);
             });
