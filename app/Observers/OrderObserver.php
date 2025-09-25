@@ -44,7 +44,7 @@ class OrderObserver
 
             CreateInvoiceJob::dispatch($order);
             $order->orderItems->each(function (OrderItem $orderItem) use ($order) {
-                $sequence = JobTicket::whereBelongsTo($orderItem->id)->count() + 1;
+                $sequence = JobTicket::whereBelongsTo($orderItem)->count() + 1;
                 JobTicket::create([
                     'code' => sprintf(
                         "JT-%s-%d-%02d",
