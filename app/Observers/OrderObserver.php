@@ -46,8 +46,9 @@ class OrderObserver
                 $sequence = JobTicket::whereBelongsTo($orderItem)->count() + 1;
                 JobTicket::create([
                     'code' => sprintf(
-                        "JT-%s-%d-%02d",
+                        "JT-%s-%d-%d-%02d",
                         now()->format('Ymd'),
+                        $order,
                         $orderItem->id,
                         $sequence
                     ),
