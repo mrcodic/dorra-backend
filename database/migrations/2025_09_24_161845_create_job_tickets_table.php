@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\JobTicket\StatusEnum;
 use App\Models\OrderItem;
 use App\Models\Station;
 use Illuminate\Database\Migrations\Migration;
@@ -22,7 +23,7 @@ return new class extends Migration
             $table->string('hold_reason')->nullable();
             $table->tinyInteger('priority')->nullable();
             $table->timestamp('due_at')->nullable();
-            $table->tinyInteger('status');
+            $table->tinyInteger('status')->default(StatusEnum::PENDING->value);
             $table->timestamps();
         });
     }
