@@ -207,49 +207,43 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $locale   = app()->getLocale();
-        $search   = trim((string) $request->search);
-        $needle   = '%'.mb_strtolower($search, 'UTF-8').'%';
-        $coll     = $locale === 'ar' ? 'utf8mb4_ar_0900_ai_ci' : 'utf8mb4_0900_ai_ci';
-
+        $locale = app()->getLocale();
+        $rates = $request->rates;
         $categories = $this->categoryRepository->query()->with([
             'products' => function ($query) use ($request) {
                 $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
             },
             'products.media', 'media',
-            'templates.tags' => function ($q) use ($locale, $needle, $coll) {
-                $q->whereRaw(
-                    "JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')) COLLATE {$coll} LIKE ?",
-                    [$needle]
-                );
+            'templates.tags' => function ($query) use ($locale,$request) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($request->search) . '%'
+                ]);
             },
-            'products.templates.tags' => function ($q) use ($locale, $needle, $coll) {
-                $q->whereRaw(
-                    "JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')) COLLATE {$coll} LIKE ?",
-                    [$needle]
-                );
+            'products.templates.tags' => function ($query) use ($locale, $request) {
+                $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                    '%' . strtolower($request->search) . '%'
+                ]);
             },
-        ])
-            ->where(function ($q) use ($locale, $needle, $coll) {
-                $q->whereHas('templates.tags', function ($qq) use ($locale, $needle, $coll) {
-                    $qq->whereRaw(
-                        "JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')) COLLATE {$coll} LIKE ?",
-                        [$needle]
-                    );
-                })->orWhereHas('products.templates.tags', function ($qq) use ($locale, $needle, $coll) {
-                    $qq->whereRaw(
-                        "JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')) COLLATE {$coll} LIKE ?",
-                        [$needle]
-                    );
-                });
+            ])
+            ->where(function ($query) use ($locale, $request) {
+                $query->whereHas('templates.tags', function ($query) use ($locale, $request) {
+                    $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                        '%' . strtolower($request->search) . '%'
+                    ]);
+                })
+                    ->orWhereHas('products.templates.tags', function ($query) use ($locale, $request) {
+                        $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                            '%' . strtolower($request->search) . '%'
+                        ]);
+                    });
             })
-            ->whereRaw(
-                "JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')) COLLATE {$coll} LIKE ?",
-                [$needle]
-            )
-            ->when($request->take, fn ($q, $take) => $q->take($take))
-            ->when($request->rates, function ($q) use ($request) {
-                $rates = (array) $request->rates;
+            ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
+                '%' . strtolower($request->search) . '%'
+            ])
+            ->when($request->take, function ($query, $take) {
+                $query->take($take);
+            })
+            ->when($rates, function ($q) use ($rates) {
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
                 $q->where(function ($qq) use ($rates, $placeholders) {
                     $qq->whereHas('products', fn ($p) => $p->withReviewRating($rates))
@@ -261,7 +255,6 @@ class MainController extends Controller
                 });
             })
             ->get();
-
         return Response::api(data: CategoryResource::collection($categories));
     }
 
