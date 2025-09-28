@@ -81,7 +81,7 @@ class ProductService extends BaseService
                 return $product->tags?->pluck('name') ?? "-";
             })
             ->addColumn('rating', function ($product) {
-                return $product->reviews?->pluck('rating')->avg() ?? 0;
+                return $product->rating;
             })
             ->addColumn('image', function ($product) {
                 return $product->getMainImageUrl() ?: asset('images/default-product.png');
