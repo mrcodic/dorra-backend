@@ -26,9 +26,9 @@ class SaveController extends Controller
             ->get();
 
         $savedDesigns = $user->savedDesigns()
-            ->with('designable','owner','media')
+            ->with('saves','owner','media')
             ->when(request()->filled('category_id'), function ($query) {
-                $query->whereRelation('designable', 'id', request('category_id'));
+                $query->whereRelation('saves', 'id', request('category_id'));
             })
             ->orderBy('created_at', request('date','desc'))
             ->latest()
