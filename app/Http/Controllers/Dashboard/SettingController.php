@@ -155,6 +155,9 @@ class SettingController extends Controller
 
     public function uploadPartners(Request $request)
     {
+        $request->validate([
+            'media_id' => 'required|integer|exists:media,id',
+        ]);
         $asset = GlobalAsset::create([
             'title' => 'Partner Upload',
             'type' => 'partner_upload'
