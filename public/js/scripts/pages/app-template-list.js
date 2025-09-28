@@ -32,41 +32,25 @@ $(document).ready(function () {
 
 
 function fetchTemplates(page = 1) {
-    const search  = ($('#search-category-form').val() || '').trim();
-    const product = $('.filter-product').val() || null;
-    const status  = $('.filter-status').val() || null;
-    const perPage = $('.filter-paginate-number').val() || null;
-
-    let tags = $('.filter-tags').val();
-    if (!Array.isArray(tags)) tags = [];
-    tags = tags.filter(Boolean); // remove "", null
-
-    // build params: include ONLY non-empty
-    const params = { page };
-    if (search)  params.search_value = search;
-    if (product) params.product_id   = product;
-    if (status)  params.status       = status;
-    if (perPage) params.per_page     = perPage;
-    if (tags.length) params.tags     = tags; // jQuery -> tags[]=1&tags[]=2
-
     $.ajax({
         url: '/product-templates',
         type: 'GET',
-        data: params,
-        success: (res) => {
-            // be defensive about payload shape
-            const cards      = res?.data?.cards ?? res?.cards ?? '';
-            const pagination = res?.data?.pagination ?? res?.pagination ?? '';
-
-            $('#templates-container').html(cards || '<div class="p-3 text-muted">No templates found.</div>');
-            $('#pagination-container').html(pagination || '');
+        data: {
+            page,
+            search_value: $('#search-category-form').val(),
+            product_id  : $('.filter-product').val(),
+            tags  : $('.filter-tags').val(),
+            status      : $('.filter-status').val(),
+            per_page    : $('.filter-paginate-number').val()
         },
-        error: (xhr) => {
-            console.error('Failed to fetch templates:', xhr);
-            $('#templates-container').html('<div class="p-3 text-danger">Error loading templates.</div>');
-            $('#pagination-container').empty();
-        }
+        success: res => {
+            $('#templates-container').html(res.data.cards);
+            $('#pagination-container').html(res.data.pagination);
+        },
+        error: xhr => console.error('Failed to fetch templates:', xhr)
     });
+}
+
 /* 3-A  — page-size selector */
 $('.filter-paginate-number').on('change', () => fetchTemplates(1));
 

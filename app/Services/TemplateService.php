@@ -86,7 +86,7 @@ class TemplateService extends BaseService
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
             ->when(request()->filled('is_landing'), function ($query) {
                 $query->where('is_landing', true);
-            })->when(request()->has('tags'), function ($q) {
+            })->when(request()->filled('tags'), function ($q) {
                 $tags = request('tags');
                 $q->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
