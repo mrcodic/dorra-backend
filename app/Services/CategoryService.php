@@ -331,9 +331,9 @@ class CategoryService extends BaseService
                 return $category->getTranslation('description', 'ar');
             })
             ->addColumn('products', function ($category) {
-                return !empty($category->products)
+                return $category->is_has_category ? !empty($category->products)
                     ? $category->products->pluck('name')
-                    : [];
+                    : [] : "-";
             })
             ->addColumn('imageId', function ($category) {
                 return $category->getFirstMedia('categories')?->id;
@@ -345,7 +345,7 @@ class CategoryService extends BaseService
                 return $category->created_at?->format('Y-m-d');
             })
             ->addColumn('sub_categories', function ($category) {
-                return $category->children_count;
+                return $category->is_has_category ? $category->children_count : "-";
             })
             ->addColumn('no_of_products', function ($category) {
                 return $category->is_has_category ? $category->products_count : "-";
