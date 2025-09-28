@@ -2,41 +2,48 @@
     "menu": [
         {
             "name": "Dashboards",
-            "icon": "home",
+            "icon": "Home.svg",
             "slug": "",
-            "url": "/"
+            "url": "/",
+            "modalTarget": ""
+
         },
         {
             "name": "Admins",
-            "icon": "users",
-            "url": "/admins"
+            "icon": "user.svg",
+            "url": "/admins",
+            "modalTarget": ""
+
         },
         {
             "name": "Users",
-            "icon": "users",
+            "icon": "Teams.svg",
             "slug": "",
-            "url": "/users"
+            "url": "/users",
+            "modalTarget": ""
+
         },
+
         {
             "name": "Products",
-            "icon": "box",
-            "slug": "",
-            "url": "/products"
-        },
-        {
-            "name": "Categories",
-            "icon": "grid",
+            "icon": "Projects.svg",
             "slug": "",
             "submenu": [
                 {
                     "url": "/categories",
-                    "name": "Categories",
+                    "name": "All",
                     "icon": "circle",
                     "slug": "app-user-list"
                 },
                 {
                     "url": "/sub-categories",
-                    "name": "Subcategories",
+                    "name": "SubProducts",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/products",
+                    "name": "Categories",
                     "icon": "circle",
                     "slug": "app-user-list"
                 },
@@ -46,17 +53,90 @@
                     "icon": "circle",
                     "slug": "app-user-list"
                 }
-            ]
+            ],
+            "modalTarget": ""
+
+        },
+        {
+            "name": "Templates",
+            "icon": "Templates.svg",
+            "slug": "",
+            "url": "/product-templates",
+            "modalTarget": ""
+        },
+        {
+            "name": "Flags",
+            "icon": "Templates.svg",
+            "slug": "",
+            "url": "/flags",
+            "modalTarget": ""
+        },
+        {
+            "name": "Mockups",
+            "icon": "mockup1.svg",
+            "slug": "",
+            "url": "/mockups",
+            "modalTarget": ""
+
         },
         {
             "name": "Orders",
-            "icon": "file-text",
+            "icon": "orders.svg",
             "slug": "",
             "url": "/orders"
         },
+
+        {
+            "name": "Marketing",
+            "icon": "Marketing.svg",
+            "slug": "",
+            "submenu": [
+                {
+                    "name": "DiscountCodes",
+                    "icon": "circle",
+                    "slug": "",
+                    "url": "/discount-codes"
+                },
+                {
+                    "name": "Offers",
+                    "icon": "circle",
+                    "slug": "",
+                    "url": "/offers"
+                }
+            ],
+            "modalTarget": ""
+
+        },
+        {
+            "name": "Invoices",
+            "icon": "Invoice.svg",
+            "slug": "",
+            "url": "/invoices"
+        },
+        {
+            "name": "Logistics",
+            "icon": "Home.svg",
+            "slug": "",
+            "submenu": [
+                {
+                    "url": "/logistics/dashboard",
+                    "name": "Dashboard",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/logistics",
+                    "name": "Locations",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                }
+            ],
+            "modalTarget": ""
+
+        },
         {
             "name": "Roles",
-            "icon": "shield",
+            "icon": "Roles.svg",
             "slug": "",
             "submenu": [
                 {
@@ -71,34 +151,68 @@
                     "icon": "circle",
                     "slug": "app-user-list"
                 }
-            ]
+            ],
+            "modalTarget": ""
+
         },
         {
-            "name": "Invoices",
-            "icon": "dollar-sign",
-            "slug": "",
-            "url": "/invoices"
-        },
-        {
-            "name": "Discount",
-            "icon": "percent",
+            "name": "FAQs & Help",
+            "icon": "Info.svg",
             "slug": "",
             "submenu": [
                 {
-                    "name": "DiscountCodes",
+                    "url": "/faqs",
+                    "name": "FAQs",
                     "icon": "circle",
-                    "slug": "",
-                    "url": "/discount-codes"
+                    "slug": ""
+                },
+                {
+                    "url": "/messages",
+                    "name": "Messages",
+                    "icon": "circle",
+                    "slug": ""
                 }
             ]
         },
         {
-            "name": "Templates",
-            "icon": "percent",
+            "name": "Settings",
+            "icon": "Settings.svg",
             "slug": "",
-            "url": "/templates"
+            "submenu": [
+                {
+                    "url": "/settings/details",
+                    "name": "Details",
+                    "icon": "circle",
+                    "slug": ""
+                },
+                {
+                    "url": "/settings/payments",
+                    "name": "Payments",
+                    "icon": "circle",
+                    "slug": ""
+                },
+                {
+                    "url": "/settings/notifications",
+                    "name": "Notifications",
+                    "icon": "circle",
+                    "slug": ""
+                } ,
+                {
+                    "url": "/settings/website",
+                    "name": "Website",
+                    "icon": "circle",
+                    "slug": ""
+                }
+            ],
+            "modalTarget": ""
+
+        },
+        {
+            "url": "/board",
+            "name": "Board",
+            "icon": "Settings.svg"
+
 
         }
-
     ]
 }

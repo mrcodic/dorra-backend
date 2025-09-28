@@ -206,13 +206,6 @@
             ],
             "modalTarget": ""
 
-        },
-        {
-            "url": "/board",
-            "name": "Board",
-            "icon": "Settings.svg"
-
-
         }
     ]
 }
