@@ -25,7 +25,6 @@ class SaveController extends Controller
             ->when(request()->filled('category_id'), function ($query) {
                 $query->whereRelation('category', 'id', request('category_id'));
             })
-
             ->orderBy('created_at', request('date','desc'))
             ->get();
 

@@ -207,50 +207,61 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $locale = app()->getLocale();
-        $term   = trim((string)$request->search ?? '');
+        $term    = trim((string) ($request->search ?? ''));
+        $rates   = $request->rates;
 
-        $terms = collect(preg_split('/[\s,;]+/u', $term))
-            ->map(fn($t) => mb_strtolower($t))
+        $locales   = config('app.locales',[]);
+        $terms     = collect(preg_split('/[\s,;]+/u', $term))
+            ->map(fn ($t) => mb_strtolower($t))
             ->filter()
             ->unique()
             ->values();
-        $nameExpr = "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"')))";
 
-        $applyNameContainsAny = function ($q) use ($terms, $nameExpr) {
-            $q->where(function ($qq) use ($terms, $nameExpr) {
-                foreach ($terms as $w) {
-                    $qq->orWhereRaw("{$nameExpr} LIKE ?", ['%'.$w.'%']);
+
+        $nameExprs = collect($locales)->map(
+            fn ($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$loc}\"')))"
+        );
+
+
+        $applyContainsAnyLocale = function ($q) use ($terms, $nameExprs) {
+            if ($terms->isEmpty()) return; // no search terms -> don't add filters
+            $q->where(function ($qq) use ($terms, $nameExprs) {
+                foreach ($nameExprs as $expr) {
+                    foreach ($terms as $w) {
+                        $qq->orWhereRaw("$expr LIKE ?", ['%'.$w.'%']);
+                    }
                 }
             });
         };
 
-        $rates = $request->rates;
-
         $categories = $this->categoryRepository->query()
             ->with([
                 'products' => function ($query) use ($request) {
-                    $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
+                    $query->when($request->rates, fn ($q) => $q->withReviewRating($request->rates));
                 },
                 'products.media',
                 'media',
 
-                'templates.tags' => function ($query) use ($applyNameContainsAny) {
-                    $applyNameContainsAny($query);
+
+                'templates.tags' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
                 },
 
-                'products.templates.tags' => function ($query) use ($applyNameContainsAny) {
-                    $applyNameContainsAny($query);
+
+                'products.templates.tags' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
                 },
             ])
 
-            ->where(function ($query) use ($applyNameContainsAny) {
-                $applyNameContainsAny($query);
-                $query->orWhereHas('products', function ($q) use ($applyNameContainsAny) {
-                    $applyNameContainsAny($q);
+
+            ->where(function ($query) use ($applyContainsAnyLocale) {
+                $applyContainsAnyLocale($query);
+                $query->orWhereHas('products', function ($q) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($q);
                 });
             })
-            ->when($request->take, fn($q, $take) => $q->take($take))
+
+            ->when($request->take, fn ($q, $take) => $q->take($take))
 
             ->when($rates, function ($q) use ($rates) {
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));

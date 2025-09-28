@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dashboard\{AdminController,
+    BoardController,
     CategoryController,
     DiscountCodeController,
     FaqController,
@@ -207,7 +208,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('/mockups', MockupController::class);
 
     Route::apiResource('/products', ProductController::class)->only(['show', 'index']);
-
+    Route::get('board', BoardController::class)->name('board');
 
 });
 Route::prefix('api/v1/')->group(function () {
