@@ -7,15 +7,19 @@ use App\Http\Requests\User\SavedItems\DeleteSaveRequest;
 use App\Http\Requests\User\SavedItems\ToggleSaveRequest;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Product\ProductResource;
+use App\Models\Category;
+use App\Models\Product;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
 use Illuminate\Support\Facades\Response;
 
 class SaveController extends Controller
 {
 
-    public function savedItems()
+    public function savedItems(CategoryRepositoryInterface $categoryRepository)
     {
         $user = auth('sanctum')->user();
-
+        $category = $categoryRepository->query()->find(request('category_id'));
         $savedProducts = $user->savedProducts()
             ->with('category','media')
             ->when(request()->filled('category_id'), function ($query) {
@@ -26,10 +30,11 @@ class SaveController extends Controller
             ->get();
 
         $savedDesigns = $user->savedDesigns()
-            ->with('saves','owner','media')
-            ->when(request()->filled('category_id'), function ($query) {
-                $query->whereRelation('saves', 'id', request('category_id'));
-            })
+            ->with('designable','owner','media')
+            ->when(request()->filled('category_id'), fn($q) => $q->whereIn('designable_id', $category?->is_has_category ?
+                $category?->products->pluck('id') :
+                [request('category_id')])
+                ->where('designable_type', $category?->is_has_category ? Product::class : Category::class))
             ->orderBy('created_at', request('date','desc'))
             ->latest()
             ->get();
