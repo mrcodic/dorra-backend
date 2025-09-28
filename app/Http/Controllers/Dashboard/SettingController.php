@@ -56,7 +56,7 @@ class SettingController extends Controller
 
         $categories = $repository->query()->with(['children','landingProducts'])->whereNull('parent_id')->isLanding()->get();
         $carousels = $carouselRepository->all();
-        $products = $productRepository->query()->select(['id', 'name'])->whereNull('sub_category_id')->get();
+        $products = $productRepository->all(columns: ['id', 'name']);
         $templates = $templateRepository->query()->isLanding()->get(['id', 'name']);
         $allCategories = $repository->query()->whereNull('parent_id')->get();
         $partners = Media::query()->whereCollectionName('partners')->get();
