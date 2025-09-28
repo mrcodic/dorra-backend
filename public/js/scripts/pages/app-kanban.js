@@ -200,7 +200,7 @@ $(function () {
             addItemButton: true,
             itemAddOptions: {
                 enabled: true,
-                content: '+ Add New Item',
+                content: '+ Add Existing Ticket',
                 class: 'kanban-title-button btn btn-default btn-xs',
                 footer: false
             },
@@ -230,7 +230,6 @@ $(function () {
                     if (!flag) sidebar.modal('show');
                 }, 50);
 
-                // prepare sidebar fields (no duplicate submit handlers)
                 var $form = sidebar.find('.update-item-form');
                 $form.off('submit').on('submit', function (e) { e.preventDefault(); sidebar.modal('hide'); });
 
@@ -245,36 +244,85 @@ $(function () {
                 );
             },
 
+            // *** SELECT EXISTING TICKETS INSTEAD OF CREATING ***
             buttonClick: function (el, boardId) {
-                var addNew = document.createElement('form');
-                addNew.setAttribute('class', 'new-item-form');
-                addNew.innerHTML =
+                var form = document.createElement('form');
+                form.setAttribute('class', 'new-item-form');
+                form.innerHTML =
                     '<div class="mb-1">' +
-                    '<textarea class="form-control add-new-item" rows="2" placeholder="Add Content" required></textarea>' +
+                    '<select class="form-control ticket-picker" multiple style="width:100%"></select>' +
                     '</div>' +
                     '<div class="mb-2">' +
-                    '<button type="submit" class="btn btn-primary btn-sm me-1">Add</button>' +
+                    '<button type="submit" class="btn btn-primary btn-sm me-1">Add selected</button>' +
                     '<button type="button" class="btn btn-outline-secondary btn-sm cancel-add-item">Cancel</button>' +
                     '</div>';
 
-                kanban.addForm(boardId, addNew);
-                addNew.querySelector('.add-new-item').focus();
+                kanban.addForm(boardId, form);
 
-                addNew.addEventListener('submit', function (e) {
+                // collect existing item IDs in this board to exclude
+                var existingIds = $(".kanban-board[data-id='" + boardId + "'] .kanban-item")
+                    .map(function(){ return $(this).data('eid')+''; }).get();
+
+                // init Select2 (AJAX)
+                var $picker = $(form).find('.ticket-picker');
+                $picker.select2({
+                    dropdownParent: $(form),
+                    placeholder: 'Select tickets...',
+                    allowClear: true,
+                    width: '100%',
+                    ajax: {
+                        url: '/api/tickets',           // <-- adjust to your endpoint
+                        delay: 250,
+                        dataType: 'json',
+                        data: function (params) {
+                            return {
+                                q: params.term || '',
+                                exclude_ids: existingIds
+                                // board_id: boardId // if you want server to tailor results per station
+                            };
+                        },
+                        processResults: function (data) {
+                            // expected: [{id: "123", text: "JT-123 · Customer X"}, ...]
+                            return { results: data };
+                        }
+                    },
+                    templateResult: function (item) { return item.text || ''; },
+                    templateSelection: function (item) { return item.text || item.id; },
+                    escapeMarkup: function (m) { return m; }
+                });
+
+                setTimeout(function(){ $picker.select2('open'); }, 0);
+
+                form.addEventListener('submit', function (e) {
                     e.preventDefault();
-                    var val = (addNew.querySelector('.add-new-item').value || '').trim();
-                    if (!val) return;
-                    var currentBoard = $(".kanban-board[data-id='" + boardId + "']");
-                    kanban.addElement(boardId, {
-                        title: "<span class='kanban-text'>" + $('<div>').text(val).html() + "</span>",
-                        id: boardId + '-' + (currentBoard.find('.kanban-item').length + 1)
+                    var selected = $picker.select2('data') || [];
+                    if (!selected.length) return;
+
+                    var $board = $(".kanban-board[data-id='" + boardId + "']");
+
+                    selected.forEach(function (opt) {
+                        var ticketId = String(opt.id);
+                        var titleHtml = "<span class='kanban-text'>" + $('<div>').text(opt.text).html() + "</span>";
+
+                        // add to UI if not present
+                        if ($board.find(".kanban-item[data-eid='" + ticketId + "']").length === 0) {
+                            kanban.addElement(boardId, { id: ticketId, title: titleHtml });
+                            $board.find('.kanban-item:last-child .kanban-text').before(renderDropdown());
+                        }
+
+                        // OPTIONAL: persist station change (move) on server
+                        $.ajax({
+                            url: '/api/tickets/' + ticketId,
+                            method: 'PATCH',
+                            data: { station_id: boardId }
+                        });
                     });
-                    currentBoard.find('.kanban-item:last-child .kanban-text').before(renderDropdown());
-                    addNew.remove();
+
+                    $(form).remove();
                 });
 
                 $(document).one('click', '.cancel-add-item', function () {
-                    $(addNew).remove();
+                    $(form).remove();
                 });
             },
 
@@ -303,7 +351,7 @@ $(function () {
         addNewInput.toggle();
     });
 
-    // Create board (client-side add; wire to API later if needed)
+    // Create board (client-side add; wire to API if desired)
     addNewForm.on('submit', function (e) {
         e.preventDefault();
         var value = (addNewForm.find('.form-control').val() || '').trim();
