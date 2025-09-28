@@ -40,21 +40,36 @@ const dt_user_table = $(".category-list-table").DataTable({
         {data: "sub_categories"},
         {
             data: "products",
-            render: function (data, type, row) {
-                if (!Array.isArray(JSON.parse(data))) return "-";
+            render: function (data, type) {
+                // normalize to array
+                let items = [];
+                if (Array.isArray(data)) {
+                    items = data;
+                } else if (typeof data === "string" && data.trim() !== "") {
+                    try { items = JSON.parse(data); } catch { items = []; }
+                }
+
+                // clean & ensure strings
+                items = (items || []).filter(v => v != null && String(v).trim() !== "").map(String);
+
+                // for sort/search, return simple text
+                if (type !== "display") return items.length ? items.join(", ") : "-";
+
+                if (!items.length) return "-";
+
+                const esc = s => String(s).replace(/[&<>"']/g, m => ({
+                    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+                }[m]));
+
                 return `
-                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                        ${JSON.parse(data)
-                    .map(
-                        (product) => `
-                            <span style="background-color: #FCF8FC; color: #000; padding: 6px 12px; border-radius: 12px; font-size: 14px;">
-                                ${product}
-                            </span>`
-                    )
-                    .join("")}
-                    </div>
-                `;
-            },
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${items.map(p => `
+          <span style="background:#FCF8FC;color:#000;padding:6px 12px;border-radius:12px;font-size:14px;">
+            ${esc(p)}
+          </span>
+        `).join("")}
+      </div>`;
+            }
         },
         {data: "no_of_products"},
         {data: "added_date"},
