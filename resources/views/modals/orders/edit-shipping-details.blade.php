@@ -578,9 +578,10 @@
 
     handleAjaxFormSubmit('#editTagForm', {
         successMessage: 'Shipping details updated successfully!',
-        closeModal: '#yourModalId',
+        closeModal: '#editOrderShippingModal',
         onSuccess: function (response, $form) {
-            console.log('Response:', response);
+            location.reload();
+            // console.log('Response:', response);
 
         },
         onError: function (xhr, $form) {

@@ -130,7 +130,6 @@ class OrderController extends DashboardController
 
     public function editShippingAddresses(Request $request, $orderId)
     {
-         \Log::info('📥 Incoming form data:', $request->all());
 
             $validatedData = $request->validate([
                 'shipping_address_id' => 'nullable|integer',
