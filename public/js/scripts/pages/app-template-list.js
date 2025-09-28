@@ -138,7 +138,7 @@ function fetchTemplates(page = 1) {
             page,
             search_value: $('#search-category-form').val(),
             product_id  : $('.filter-product').val(),
-            tags  : $('.filter-tags ').val(),
+            tags  : $('.filter-tags').val(),
             status      : $('.filter-status').val(),
             per_page    : $('.filter-paginate-number').val()
         },
