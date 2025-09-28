@@ -14,6 +14,7 @@ const dt_user_table = $(".template-list-table").DataTable({
         data: function (d) {
             d.search_value = $('#search-category-form').val(); // get from input
             d.product_id = $('.filter-product').val();
+            d.tags = $('.filter-tags').val();
             d.status = $('.filter-status').val();
             return d;
         }

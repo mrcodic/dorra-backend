@@ -71,7 +71,7 @@
 
                     {{-- Tags Filter --}}
                     <div class="col-12 col-md-2 col-lg-1">
-                        <select name="tags" class="form-select filter-status select2" data-placeholder="Tags">
+                        <select name="tags" class="form-select filter-tags select2" data-placeholder="Tags">
                             <option value="">Tags</option>--}}
                             @foreach($associatedData['tags'] as $tag)
                             <option value="{{ $tag->id }}">{{ $tag->getTranslation('name', app()->getLocale())}}
