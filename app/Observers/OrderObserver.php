@@ -43,7 +43,7 @@ class OrderObserver
                     ]);
             }
             $order->orderItems->each(function (OrderItem $orderItem) use ($order) {
-                $sequence = JobTicket::whereBelongsTo($orderItem)->count() + 1;
+                $sequence = JobTicket::where('order_item_id',$orderItem->id)->count() + 1;
 
                 JobTicket::firstOrCreate( [
                     'order_item_id' => $orderItem->id,
