@@ -41,7 +41,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         {
             data: "products",
             render: function (data, type, row) {
-                if (!Array.isArray(JSON.parse(data))) return "";
+                if (!Array.isArray(JSON.parse(data))) return "-";
                 return `
                     <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                         ${JSON.parse(data)
