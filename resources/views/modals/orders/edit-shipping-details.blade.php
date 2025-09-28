@@ -133,70 +133,61 @@
                             class="form-control">
                     </div>
                 </div>
-                <div id="addAddressSection">
-                    <form id="addAddressForm" class="row gy-1 gx-2" method="post"
-                        action="{{ route('shipping-addresses.store') }}">
-                        @csrf
-                        <h5 class="mb-2 text-black fs-4">Add new address</h5>
-                        <input type="hidden" name="user_id" value="{{ $model->user?->id }}">
-                        <input type="hidden" name="guest_id" value="{{ $model->guest?->id }}">
+                <div id="addAddressSection" class="mt-2">
+                    <h5 class="mb-2 text-black fs-4">Add new address</h5>
 
-                        <div class="mb-2">
-                            <label class="form-label label-text">Address Label</label>
-                            <input type="text" class="form-control" placeholder="Choose Address Label"
-                                id="add-category-name-en" name="label" />
-                            <div class="invalid-feedback" id="label-error"></div>
-                            <br>
+                    <!-- note the form="addAddressForm" on all fields -->
+                    <input type="hidden" name="user_id" value="{{ $model->user?->id }}" form="addAddressForm">
+                    <input type="hidden" name="guest_id" value="{{ $model->guest?->id }}" form="addAddressForm">
 
+                    <div class="mb-2">
+                        <label class="form-label label-text">Address Label</label>
+                        <input type="text" class="form-control" name="label" placeholder="Choose Address Label"
+                               form="addAddressForm" />
+                        <div class="invalid-feedback" id="label-error"></div>
+                    </div>
 
-                            <div class="row g-2 mb-1">
-                                <div class="col-md-6">
-                                    <label class="form-label">Country</label>
-                                    <select class="form-select address-country-select" name="country_id">
-                                        <option value="">Select Country</option>
-                                        @foreach ($associatedData['countries'] as $country)
-                                        <option value="{{ $country->id }}" {{ old('country_id')==$country->id ?
-                                            'selected' : '' }}>
-                                            {{ $country->name }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label label-text">State</label>
-                                    <select id="modalAddressState" name="state_id"
-                                        class="form-select address-state-select">
-                                        <option value="">Select a State</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="state_id-error"></div>
-                                    <div id="state-url" data-url="{{ route('states') }}"></div>
-                                </div>
-
-                                <div class="mb-1">
-                                    <label class="form-label">Address Line</label>
-                                    <input type="text" name="line" class="form-control">
-                                </div>
-
-                                <div class="mb-1">
-                                    <label class="form-label">Delivery Instructions</label>
-                                    <textarea class="form-control" rows="2"></textarea>
-                                </div>
-                            </div>
+                    <div class="row g-2 mb-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Country</label>
+                            <select class="form-select address-country-select" name="country_id" form="addAddressForm">
+                                <option value="">Select Country</option>
+                                @foreach ($associatedData['countries'] as $country)
+                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        <div class="modal-footer border-top-0">
-                            <button type="reset" class="btn btn-outline-secondary fs-5"
-                                data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="saveChangesButton">
-                                <span class="btn-text">Add</span>
-                                <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
-                                    role="status" aria-hidden="true"></span>
-                            </button>
+                        <div class="col-md-6">
+                            <label class="form-label label-text">State</label>
+                            <select id="modalAddressState" name="state_id"
+                                    class="form-select address-state-select" form="addAddressForm">
+                                <option value="">Select a State</option>
+                            </select>
+                            <div class="invalid-feedback" id="state_id-error"></div>
+                            <div id="state-url" data-url="{{ route('states') }}"></div>
                         </div>
-                    </form>
 
+                        <div class="mb-1">
+                            <label class="form-label">Address Line</label>
+                            <input type="text" name="line" class="form-control" form="addAddressForm">
+                        </div>
+
+                        <div class="mb-1">
+                            <label class="form-label">Delivery Instructions</label>
+                            <textarea class="form-control" rows="2" name="instructions" form="addAddressForm"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- This button submits the external form (NOT the outer one) -->
+                    <div class="mt-2">
+                        <button type="submit" class="btn btn-primary fs-5" form="addAddressForm">
+                            <span class="btn-text">Add</span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
                 </div>
+
                 <div class="modal fade" id="selectLocationModal" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-lg modal-dialog-centered">
                         <div class="modal-content rounded-4 shadow">
@@ -246,6 +237,11 @@
 
             </div>
         </form> <!-- Divider -->
+            <form id="addAddressForm" method="POST" action="{{ route('shipping-addresses.store') }}">
+                @csrf
+                <!-- Empty on purpose. Inputs above point here via form="addAddressForm" -->
+            </form>
+
         </div>
 
     </div>
