@@ -45,7 +45,7 @@ class FaqService extends BaseService
             })->addColumn('answer_en', function ($faq) {
                 return $faq->getTranslation('answer', 'en');
             })->addColumn('answer_ar', function ($faq) {
-                return $faq->getTranslation('question', 'ar');
+                return $faq->getTranslation('answer', 'ar');
             })
             ->editColumn('created_at', function ($faq) {
                 return $faq->created_at->format('d/m/Y') ;
