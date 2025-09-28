@@ -85,7 +85,7 @@
 
 
                 </div>
-            </form> <!-- Divider -->
+
             <div class="text-center my-1 fw-bold">OR</div>
 
             <div class="p-2">
@@ -244,8 +244,8 @@
 
 
 
-
             </div>
+        </form> <!-- Divider -->
         </div>
 
     </div>
