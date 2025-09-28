@@ -346,97 +346,7 @@
             }
         });
 
-        // Form submission with validation
-        $('#addAddressForm').on('submit', function (e) {
-            e.preventDefault();
-
-            const $form = $(this);
-            const formData = $form.serialize();
-            const actionUrl = $form.attr('action');
-
-            // Reset validation
-            $('.invalid-feedback').text('').hide();
-            $('.form-control, .form-select').removeClass('is-invalid');
-
-            // Show loading state
-            const saveButton = $('#saveChangesButton');
-            const saveLoader = $('#saveLoader');
-            const saveButtonText = $('.btn-text');
-
-            saveButton.prop('disabled', true);
-            saveLoader.removeClass('d-none');
-            saveButtonText.addClass('d-none');
-
-            $.ajax({
-                url: actionUrl,
-                method: 'POST',
-                data: formData,
-                success: function (response) {
-                    // Reset loading state
-                    saveButton.prop('disabled', false);
-                    saveLoader.addClass('d-none');
-                    saveButtonText.removeClass('d-none');
-
-                    // Show success toast
-                    Toastify({
-                        text: "Address added successfully!",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#28a745",
-                        close: true,
-                        callback: function() {
-                            $('#addNewAddressModal').modal('hide');
-                            $form[0].reset();
-                            window.location.hash = '#tab3';
-                            location.reload();
-                        }
-                    }).showToast();
-                },
-                error: function (xhr) {
-                    // Reset loading state
-                    saveButton.prop('disabled', false);
-                    saveLoader.addClass('d-none');
-                    saveButtonText.removeClass('d-none');
-
-                    if (xhr.status === 422) {
-                        // Handle validation errors
-                        const errors = xhr.responseJSON.errors;
-
-                        // Show individual field errors
-                        $.each(errors, function (field, messages) {
-                            const errorField = $(`#${field}-error`);
-                            const inputField = $(`[name="${field}"]`);
-
-                            if (errorField.length && inputField.length) {
-                                inputField.addClass('is-invalid');
-                                errorField.text(messages[0]).show();
-                            }
-                        });
-
-                        // Show general error toast
-                        Toastify({
-                            text: "Please fix the validation errors",
-                            duration: 3000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#dc3545",
-                            close: true
-                        }).showToast();
-                    } else {
-                        // Show general error toast
-                        Toastify({
-                            text: xhr.responseJSON?.message || "An error occurred while saving the address",
-                            duration: 3000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#dc3545",
-                            close: true
-                        }).showToast();
-                    }
-                }
-            });
-        });
+  
 
         // Clear validation when modal is closed
         $('#addNewAddressModal').on('hidden.bs.modal', function () {
@@ -452,7 +362,14 @@
         successMessage: 'design deleted successfully!',
     });
 
-
+handleAjaxFormSubmit("#addAddressForm",
+    {
+        successMessage: "Address added successfully!",
+        onSuccess:function () {
+            location.reload()
+        }
+    }
+)
 
 
 
