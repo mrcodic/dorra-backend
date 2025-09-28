@@ -346,7 +346,7 @@
             }
         });
 
-  
+
 
         // Clear validation when modal is closed
         $('#addNewAddressModal').on('hidden.bs.modal', function () {
