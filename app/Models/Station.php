@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Station extends Model
 {
@@ -12,4 +13,8 @@ class Station extends Model
         'requires_operator',
     ];
 
+    public function jobTickets(): HasMany
+    {
+        return $this->hasMany(JobTicket::class);
+    }
 }

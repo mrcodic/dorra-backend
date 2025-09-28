@@ -270,5 +270,5 @@
 @endsection
 @section('page-script')
     <!-- Page js files -->
-    <script src="{{ asset(mix('js/scripts/pages/app-kanban.js')) }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-kanban.js') }}?v={{ time() }}"></script>
 @endsection
