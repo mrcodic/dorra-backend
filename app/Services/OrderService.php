@@ -498,7 +498,7 @@ class OrderService extends BaseService
                 'location_name' => $location->name,
                 'first_name' => $validatedData['pickup_first_name'],
                 'last_name' => $validatedData['pickup_last_name'],
-                'email' => $validatedData['email'],
+                'email' => $validatedData['pickup_email'],
                 'address_label' => $location->name,
                 'address_line' => $location->address_line,
                 'state' => $location->state?->name ?? 'Unknown',
