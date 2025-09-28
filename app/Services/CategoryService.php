@@ -331,10 +331,8 @@ class CategoryService extends BaseService
                 return $category->getTranslation('description', 'ar');
             })
             ->addColumn('products', function ($category) {
-                if (!$category->is_has_category) return '-';
-                $products = $category->products ?? collect();
-                return $products->isNotEmpty()
-                    ? $products->pluck('name')->values()->all()
+                return !empty($category->products)
+                    ? $category->products->pluck('name')
                     : [];
             })
             ->addColumn('imageId', function ($category) {
