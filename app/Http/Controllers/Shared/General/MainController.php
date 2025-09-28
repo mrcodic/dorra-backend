@@ -248,10 +248,6 @@ class MainController extends Controller
                 $applyNameContainsAny($query);
                 $query->orWhereHas('products', function ($q) use ($applyNameContainsAny) {
                     $applyNameContainsAny($q);
-                })->orWhereHas('templates.tags', function ($q) use ($applyNameContainsAny) {
-                    $applyNameContainsAny($q);
-                })->orWhereHas('products.templates.tags', function ($q) use ($applyNameContainsAny) {
-                    $applyNameContainsAny($q);
                 });
             })
             ->when($request->take, fn($q, $take) => $q->take($take))
