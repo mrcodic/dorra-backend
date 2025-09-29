@@ -50,13 +50,7 @@ var dt_user_table = $(".job-list-table").DataTable({
              <a href="/invoices/${data}" class="">
                 <i data-feather="eye"></i>
             </a>
-            <a href="#" class="text-danger open-delete-order-modal"
-               data-id="${data}"
-               data-action="/invoices/${data}"
-               data-bs-toggle="modal"
-               data-bs-target="#deleteInvoiceModal">
-               <i data-feather="trash-2"></i>
-            </a>
+            
         </div>
     `;
 },
