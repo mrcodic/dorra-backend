@@ -19,6 +19,7 @@ class JobTicketObserver
             ?? Station::whereKey($jobTicket->station_id)->value('code');
 
         $jobTicket->status = $this->statusForStation($stationCode);
+        $jobTicket->save();
     }
 
 
