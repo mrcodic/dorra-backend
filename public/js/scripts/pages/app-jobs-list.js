@@ -40,12 +40,8 @@ var dt_user_table = $(".job-list-table").DataTable({
                 return `
 
         <div class="d-flex gap-1">
-             <a href="#" class="view-details"
-             data-station="${row.station_id}"
-   data-station.code="${row.code}"
-   data-due_at="${row.due_at}"
-   data-status="${row.status}"
-   data-action = "jobs/${data}"
+             <a href="jobs/${data}" class="view-details"
+
              >
                 <i data-feather="eye"></i>
             </a>
@@ -180,6 +176,13 @@ $(document).ready(function () {
 
         // Show modal
         $('#editJobModal').modal('show');
+
+    });
+    $(document).on('click', 'view-details', function (e) {
+
+
+        // Show modal
+        $('#showJobModal').modal('show');
 
     });
 

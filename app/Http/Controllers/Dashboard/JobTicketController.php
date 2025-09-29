@@ -20,6 +20,7 @@ class JobTicketController extends DashboardController
 
         $this->updateRequestClass = new UpdateJobTicketRequest();
         $this->indexView = 'job-tickets.index';
+        $this->showView = 'job-tickets.show';
         $this->usePagination = true;
         $this->resourceTable = 'job_tickets';
         $this->assoiciatedData = [

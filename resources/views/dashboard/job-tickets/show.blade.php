@@ -154,66 +154,88 @@
 @endsection
 
 @section('content')
-<!-- users list start -->
+
 <section class="app-user-list">
 
-    <!-- list and filter start -->
-    <div class="card">
-        <div class="card-body ">
-            <div class="row">
-                <div class="col-md-4 user_role"></div>
-                <div class="col-md-4 user_plan"></div>
-                <div class="col-md-4 user_status"></div>
-            </div>
+    <div class="modal-header mb-1">
+        <h5 class="modal-title">
+            <span class="badge bg-dark me-2">{{ $model->code }}</span>
+            @if($model->orderItem?->order)
+                <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank">
+                    Order #{{ $model->orderItem->order->number ?? $model->orderItem->order_id }}
+                </a>
+            @endif
+            @if($model->orderItem)
+                <span class="text-muted ms-2">— {{ $model->orderItem->name ?? "Item #{$model->order_item_id}" }}</span>
+            @endif
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+    </div>
 
-            <table class="job-list-table table">
-                <thead class="table-light">
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
-                        </th>
-                        <th>Job Number</th>
-                        <th>Priority</th>
-                        <th>Current Station</th>
-                        <th>Status</th>
-                        <th>Due Date</th>
-                        <th>Order Number</th>
-                        <th>Order Item Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-            </table>
-            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                    style="z-index: 10;">
-                    <p id="selected-count-text">0 Jobs are selected</p>
-                    <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteJobsModal"
-                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                        <i data-feather="trash-2"></i> Delete Selected
-                    </button>
-                    </form>
+    <div class="modal-body">
+        {{-- Top row: QR + Code128 + Current State --}}
+        <div class="row g-3 align-items-center mb-2">
+            <div class="col-md-4 text-center">
+                <img src="{{ route('jobtickets.qr', $model) }}" alt="QR" class="img-fluid border rounded p-2">
+                <div class="small text-muted mt-1">QR</div>
+            </div>
+            <div class="col-md-4 text-center">
+                <img src="{{ route('jobtickets.code128', $model) }}" alt="Code128" class="img-fluid border rounded p-2">
+                <div class="small text-muted mt-1">Code128</div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex flex-column gap-2">
+                    <div>
+                        <span class="text-muted me-1">Station:</span>
+                        <span class="fw-bold">{{ $model->station?->name ?? '-' }}</span>
+                    </div>
+                    <div>
+                        <span class="text-muted me-1">Status:</span>
+                        <span class="badge bg-primary">{{ $model->status->label() }}</span>
+                    </div>
+                    <div>
+                        <span class="text-muted me-1">Priority:</span>
+                        <span class="badge {{ $model->priority === 2 ? 'bg-danger' : 'bg-secondary' }}">
+            {{ \App\Enums\JobTicket\PriorityEnum::from($model->priority)->label() }}
+          </span>
+                    </div>
+                    @if($model->due_at)
+                        <div>
+                            <span class="text-muted me-1">Due:</span>
+                            <span class="fw-semibold">{{ $model->due_at->format('Y-m-d H:i') }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
-    </div>
-    @include('modals.delete',[
-    'id' => 'deleteInvoiceModal',
-    'formId' => 'deleteInvoiceForm',
-    'title' => 'Delete Invoice',
-    ])
-    @include('modals.delete',[
-    'id' => 'deleteJobsModal',
-    'formId' => 'bulk-delete-form',
-    'title' => 'Delete Jobs',
-    'confirmText' => 'Are you sure you want to delete this items?',
-    ])
-    @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
+
+        {{-- Specs table --}}
+        @php $specs = is_array($model->specs) ? $model->specs : (json_decode($model->specs ?? '[]', true) ?? []); @endphp
+        @if(!empty($specs))
+            <h6 class="mt-2">Specifications</h6>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered">
+                    <tbody>
+                    @foreach($specs as $k => $v)
+                        <tr>
+                            <th class="w-25">{{ Str::headline($k) }}</th>
+                            <td>
+                                @if(is_array($v) || is_object($v))
+                                    <code class="small">{{ json_encode($v, JSON_UNESCAPED_UNICODE) }}</code>
+                                @else
+                                    {{ $v }}
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+    @endif
 
 
-    <!-- list and filter end -->
+
 </section>
-<!-- users list ends -->
-</div>
 
 @endsection
 
