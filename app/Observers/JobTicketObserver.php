@@ -27,6 +27,7 @@ class JobTicketObserver
         $code = $code ? strtolower($code) : null;
 
         return match ($code) {
+            'prepress' => StatusEnum::PREPRESS_QUEUE,
             'print' => StatusEnum::PRINT_QUEUE,
             'finish' => StatusEnum::FINISH_QUEUE,
             'qc' => StatusEnum::QC_QUEUE,
