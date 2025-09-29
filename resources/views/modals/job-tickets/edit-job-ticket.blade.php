@@ -16,6 +16,10 @@
                     <!-- NEW: Station / Status / Priority -->
                     <div class="row mb-1">
                         <div class="col-md-4">
+                            <label class="form-label label-text">Due Date</label>
+                            <input class="form-control" type="date" name="" id="">
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label label-text">Station</label>
                             <select class="form-select" id="edit-station-id" name="station_id">
                                 <!-- Prefer server-rendered options; fallback is JS (see below) -->
@@ -25,10 +29,7 @@
 
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label label-text">Due Date</label>
-                            <input type="date" name="" id="">
-                        </div>
+
                         <div class="col-md-4">
                             <label class="form-label label-text">Priority</label>
                             <select class="form-select" id="edit-priority" name="priority">
