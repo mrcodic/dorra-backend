@@ -18,8 +18,8 @@ class JobTicketController extends DashboardController
     )
     {
         parent::__construct($jobTicketService);
-//        $this->storeRequestClass = new StoreLocationRequest();
-//        $this->updateRequestClass = new UpdateLocationRequest();
+
+        $this->updateRequestClass = new UpdateJobTicketRequest();
         $this->indexView = 'job-tickets.index';
         $this->usePagination = true;
         $this->resourceTable = 'job_tickets';
