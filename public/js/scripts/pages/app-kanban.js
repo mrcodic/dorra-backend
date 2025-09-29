@@ -316,9 +316,9 @@ $(function () {
 
     // ---------- bindings (once) ----------
     // Toggle add new board input
-    $('.add-new-btn, .cancel-add-new').on('click', function () {
-        addNewInput.toggle();
-    });
+    // $('.add-new-btn, .cancel-add-new').on('click', function () {
+    //     addNewInput.toggle();
+    // });
 
     // Create board (client-side add; wire to API if desired)
     addNewForm.on('submit', function (e) {
