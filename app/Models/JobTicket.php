@@ -25,7 +25,7 @@ class JobTicket extends Model
         'specs' => 'array',
         'status' => StatusEnum::class,
         'priority' => PriorityEnum::class,
-        'due_at' => 'datetime',
+        'due_at' => 'date',
     ];
     protected $attributes = [
         'status' => StatusEnum::PENDING,

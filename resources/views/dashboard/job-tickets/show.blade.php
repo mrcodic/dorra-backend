@@ -1,6 +1,6 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'User View - Account')
+@section('title', 'Jobs')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -31,11 +31,6 @@
                         <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank" class="text-decoration-none">
                             Order #{{ $model->orderItem->order->number ?? $model->orderItem->order_id }}
                         </a>
-                        <button class="btn btn-sm btn-outline-secondary py-0 copy-btn"
-                                data-copy="{{ $model->orderItem->order->number ?? $model->orderItem->order_id }}"
-                                title="Copy order number">
-                            <i data-feather="copy" class="me-25"></i>Copy
-                        </button>
                     @endif
 
                     @if($model->orderItem)
@@ -54,9 +49,7 @@
             </div>
         </div>
 
-        @php
-            use Illuminate\Support\Str;
-            $specs = is_array($model->specs) ? $model->specs : (json_decode($model->specs ?? '[]', true) ?? []);
+        @php        
             $now = now();
             $due = $model->due_at ?? null;
             $dueDiffMins = $due ? $now->diffInMinutes($due, false) : null; // negative if overdue
@@ -83,7 +76,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-2 text-center">
-                        
+
                             <div class="col-6">
                                 {{-- Code128 --}}
                                 <img
@@ -138,38 +131,31 @@
         </div>
 
         {{-- Specifications --}}
+        @php
+            $specsRaw = $model->specs ?? []; // or the JSON you have
+            $specs = is_array($specsRaw) ? $specsRaw : (json_decode($specsRaw ?? '[]', true) ?? []);
+        @endphp
+
         @if(!empty($specs))
-            <div class="card mt-2">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="m-0">Specifications</h6>
-                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#specsCollapse">
-                        <i data-feather="chevron-down" class="me-25"></i> Toggle
-                    </button>
-                </div>
-                <div id="specsCollapse" class="collapse show">
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped table-bordered mb-0">
-                                <tbody>
-                                @foreach($specs as $k => $v)
-                                    <tr>
-                                        <th class="w-25">{{ \Illuminate\Support\Str::headline((string)$k) }}</th>
-                                        <td>
-                                            @if(is_array($v) || is_object($v))
-                                                <pre class="mb-0 small text-wrap">{{ json_encode($v, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) }}</pre>
-                                            @else
-                                                {{ is_bool($v) ? ($v ? 'Yes' : 'No') : ($v === '' || $v === null ? '—' : $v) }}
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered">
+                    <thead>
+                    <tr><th class="w-35">Specification</th><th>Option</th></tr>
+                    </thead>
+                    <tbody>
+                    @foreach($specs as $row)
+                        <tr>
+                            <th>{{ \Illuminate\Support\Str::headline((string)($row['spec_name'] ?? '')) }}</th>
+                            <td>{{ $row['option_name'] ?? '—' }}</td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
             </div>
+        @else
+            <p class="text-muted">No specifications.</p>
         @endif
+
 
     </section>
 @endsection
