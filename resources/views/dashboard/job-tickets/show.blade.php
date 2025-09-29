@@ -83,19 +83,11 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-2 text-center">
-                            <div class="col-6">
-                                {{-- QR Code --}}
-                                <img
-                                    src="{{ route('job-tickets.qr', ['code' => $model->code]) }}"
-                                    alt="QR"
-                                    class="img-fluid border rounded p-2 w-100"
-                                >
-                                <div class="small text-muted mt-50">QR</div>
-                            </div>
+                        
                             <div class="col-6">
                                 {{-- Code128 --}}
                                 <img
-                                    src="{{ route('job-tickets.barcode', ['code' => $model->code, 'type' => 'C128']) }}"
+                                    src=""
                                     alt="Code128"
                                     class="img-fluid border rounded p-2 w-100"
                                 >
