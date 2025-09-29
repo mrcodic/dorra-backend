@@ -33,7 +33,7 @@
                             <label class="form-label label-text">Priority</label>
                             <select class="form-select" id="edit-priority" name="priority">
                                 @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $p)
-                                    <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                                    <option value="{{ $p->value }}">{{ $p->label() }}</option>
 
 
                                 @endforeach
