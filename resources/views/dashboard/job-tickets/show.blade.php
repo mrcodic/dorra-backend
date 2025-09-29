@@ -175,13 +175,10 @@
     <div class="modal-body">
         {{-- Top row: QR + Code128 + Current State --}}
         <div class="row g-3 align-items-center mb-2">
-            <div class="col-md-4 text-center">
-                <img src="{{ route('jobtickets.qr', $model) }}" alt="QR" class="img-fluid border rounded p-2">
-                <div class="small text-muted mt-1">QR</div>
-            </div>
+            
             <div class="col-md-4 text-center">
                 <img src="{{ route('jobtickets.code128', $model) }}" alt="Code128" class="img-fluid border rounded p-2">
-                <div class="small text-muted mt-1">Code128</div>
+                <div class="small text-muted mt-1">BarCode</div>
             </div>
             <div class="col-md-4">
                 <div class="d-flex flex-column gap-2">
