@@ -96,7 +96,7 @@
 
                 @foreach($model->orderItems as $orderItem)
                 @php
-                $product = $orderItem->product;
+                $product = $orderItem->itemable;
                 @endphp
 
                 <!-- Items List -->
