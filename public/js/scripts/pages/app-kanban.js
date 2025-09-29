@@ -88,20 +88,20 @@ $(function () {
         }).join(' ');
     }
 
-    function renderFooter(attachments, comments, assigned, members) {
-        return (
-            "<div class='d-flex justify-content-between align-items-center flex-wrap mt-1'>" +
-            "<div><span class='align-middle me-50'>" +
-            feather.icons['paperclip'].toSvg({ class: 'font-medium-1 align-middle me-25' }) +
-            "<span class='attachments align-middle'>" + (attachments || 0) + "</span>" +
-            "</span><span class='align-middle'>" +
-            feather.icons['message-square'].toSvg({ class: 'font-medium-1 align-middle me-25' }) +
-            "<span>" + (comments || 0) + "</span>" +
-            "</span></div>" +
-            "<ul class='avatar-group mb-0'>" + renderAvatar(assigned, true, 0, members, 28) + "</ul>" +
-            "</div>"
-        );
-    }
+    // function renderFooter(attachments, comments, assigned, members) {
+    //     return (
+    //         "<div class='d-flex justify-content-between align-items-center flex-wrap mt-1'>" +
+    //         "<div><span class='align-middle me-50'>" +
+    //         feather.icons['paperclip'].toSvg({ class: 'font-medium-1 align-middle me-25' }) +
+    //         "<span class='attachments align-middle'>" + (attachments || 0) + "</span>" +
+    //         "</span><span class='align-middle'>" +
+    //         feather.icons['message-square'].toSvg({ class: 'font-medium-1 align-middle me-25' }) +
+    //         "<span>" + (comments || 0) + "</span>" +
+    //         "</span></div>" +
+    //         "<ul class='avatar-group mb-0'>" + renderAvatar(assigned, true, 0, members, 28) + "</ul>" +
+    //         "</div>"
+    //     );
+    // }
 
     function enhanceRenderedItems() {
         $('.kanban-item').each(function () {
