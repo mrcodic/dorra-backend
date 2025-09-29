@@ -192,8 +192,8 @@
                     </div>
                     <div>
                         <span class="text-muted me-1">Priority:</span>
-                        <span class="badge {{ $model->priority === 2 ? 'bg-danger' : 'bg-secondary' }}">
-            {{ \App\Enums\JobTicket\PriorityEnum::from($model->priority)->label() }}
+                        <span class="badge {{ $model->priority === \App\Enums\JobTicket\PriorityEnum::RUSH ? 'bg-danger' : 'bg-secondary' }}">
+            {{ $model->priority?->label() }}
           </span>
                     </div>
                     @if($model->due_at)
