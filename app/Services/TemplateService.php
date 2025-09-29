@@ -67,9 +67,15 @@ class TemplateService extends BaseService
                     $q->where('products.id', $productId);
                 });
             })->when(request('product_without_category_id'), function ($q) use ($categoryId) {
-                $q->whereHas('categories', function ($q) use ($categoryId) {
-                    $q->where('categories.id', $categoryId);
+                $q->where(function ($q) use ($categoryId) {
+                    $q->whereHas('categories', function ($q) use ($categoryId) {
+                        $q->where('categories.id', $categoryId);
+                    })
+                    ->whereHas('products', function ($q) use ($categoryId) {
+                            $q->where('products.id', $categoryId);
+                        });
                 });
+
             })
             ->when(request('category_id'), function ($q) {
                 $q->whereHas('products', function ($q) {
