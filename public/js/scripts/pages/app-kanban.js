@@ -198,12 +198,12 @@ $(function () {
             dragItems: false,
             dragBoards: false,
             addItemButton: false,
-            // itemAddOptions: {
-            //     enabled: true,
-            //     content: '+ Add Existing Ticket',
-            //     class: 'kanban-title-button btn btn-default btn-xs',
-            //     footer: false
-            // },
+            itemAddOptions: {
+                enabled: false,
+                content: '+ Add Existing Ticket',
+                class: 'kanban-title-button btn btn-default btn-xs',
+                footer: false
+            },
             boards: boardsData,
 
             click: function (el) {
@@ -316,9 +316,9 @@ $(function () {
 
     // ---------- bindings (once) ----------
     // Toggle add new board input
-    // $('.add-new-btn, .cancel-add-new').on('click', function () {
-    //     addNewInput.toggle();
-    // });
+    $('.add-new-btn, .cancel-add-new').on('click', function () {
+        addNewInput.toggle();
+    });
 
     // Create board (client-side add; wire to API if desired)
     addNewForm.on('submit', function (e) {
