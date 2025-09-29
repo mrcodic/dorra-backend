@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Dashboard;
 
 
-use App\Enums\JobTicket\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
-use App\Models\Station;
+use App\Http\Requests\JobTicket\UpdateJobTicketRequest;
 use App\Repositories\Interfaces\StationRepositoryInterface;
 use App\Services\JobTicketService;
 use Illuminate\Http\JsonResponse;
