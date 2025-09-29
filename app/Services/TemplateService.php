@@ -71,7 +71,7 @@ class TemplateService extends BaseService
                     $q->whereHas('categories', function ($q) use ($categoryId) {
                         $q->where('categories.id', $categoryId);
                     })
-                    ->whereHas('products.category', function ($q) use ($categoryId) {
+                    ->orwhereHas('products.category', function ($q) use ($categoryId) {
                             $q->where('categories.id', $categoryId);
                         });
                 });
