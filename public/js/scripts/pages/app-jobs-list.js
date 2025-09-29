@@ -43,7 +43,16 @@ var dt_user_table = $(".job-list-table").DataTable({
              <a href="/jobs/${data}" class="">
                 <i data-feather="eye"></i>
             </a>
-          
+            <a href="#" class="edit-details"
+                data-id="${data}"
+  data-station="${row.station_id}"
+   data-priority="${row.priority}"
+   data-status="${row.status}"
+
+     >
+
+   <i data-feather="edit-3"></i>
+</a>
         </div>
     `;
             },
