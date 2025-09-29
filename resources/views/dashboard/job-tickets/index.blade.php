@@ -207,6 +207,8 @@
     'title' => 'Delete Jobs',
     'confirmText' => 'Are you sure you want to delete this items?',
     ])
+    @include("modals.job-tickets.edit-job-ticket")
+    @include("modals.job-tickets.show-job-ticket")
 
     <!-- list and filter end -->
 </section>

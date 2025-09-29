@@ -26,35 +26,31 @@ var dt_user_table = $(".job-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
-        { data: "code" },
-        { data: "priority" },
-        { data: "current_station" },
-        { data: "status" },
-        { data: "due_at" },
-        { data: "order_number" },
-        { data: "order_item_name" },
+        {data: "code"},
+        {data: "priority"},
+        {data: "current_station"},
+        {data: "status"},
+        {data: "due_at"},
+        {data: "order_number"},
+        {data: "order_item_name"},
         {
             data: "id",
             orderable: false,
-           render: function(data, type, row) {
-    return `
+            render: function (data, type, row) {
+                return `
 
         <div class="d-flex gap-1">
-
+             <a href="/jobs/${data}" class="">
+                <i data-feather="eye"></i>
+            </a>
             <a href="#" class="edit-details"
-
-       data-url="/categories/${data}/edit"
-       >
+     >
 
    <i data-feather="edit-3"></i>
 </a>
-             <a href="/invoices/${data}" class="">
-                <i data-feather="eye"></i>
-            </a>
-
         </div>
     `;
-},
+            },
         },
     ],
     order: [[1, "asc"]],
@@ -154,7 +150,6 @@ function toggleBulkDeleteContainer() {
 }
 
 $(document).ready(function () {
-
 
 
     $(document).on("click", ".open-delete-order-modal", function () {
@@ -285,76 +280,73 @@ $(document).on("submit", "#deleteInvoiceForm", function (e) {
     });
 });
 
-    $(document).on("submit", "#bulk-delete-form", function (e) {
-            e.preventDefault();
-            const selectedIds = $(".category-checkbox:checked").map(function () {
-                return $(this).val();
-            }).get();
+$(document).on("submit", "#bulk-delete-form", function (e) {
+    e.preventDefault();
+    const selectedIds = $(".category-checkbox:checked").map(function () {
+        return $(this).val();
+    }).get();
 
-        if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0) return;
 
-        $.ajax({
-            url: "invoices/bulk-delete",
-            method: "POST",
-            data: {
-                ids: selectedIds,
-                _token: $('meta[name="csrf-token"]').attr("content"),
-            },
-            success: function (response) {
-                $("#deleteInvoicesModal").modal("hide");
-                Toastify({
-                    text: "Selected invoices deleted successfully!",
-                    duration: 1500,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#28a745",
-                    close: true,
-                }).showToast();
-
-
-
-                $('#bulk-delete-container').hide();
-                $('.category-checkbox').prop('checked', false);
-                $('#select-all-checkbox').prop('checked', false);
-                $(".category-list-table").DataTable().ajax.reload(null, false);
+    $.ajax({
+        url: "invoices/bulk-delete",
+        method: "POST",
+        data: {
+            ids: selectedIds,
+            _token: $('meta[name="csrf-token"]').attr("content"),
+        },
+        success: function (response) {
+            $("#deleteInvoicesModal").modal("hide");
+            Toastify({
+                text: "Selected invoices deleted successfully!",
+                duration: 1500,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#28a745",
+                close: true,
+            }).showToast();
 
 
-                    resetBulkSelection();
-                    $(".job-list-table").DataTable().ajax.reload(null, false);
-
-                    },
-                    error: function () {
-                        $("#deleteInvoicesModal").modal("hide");
-                        Toastify({
-                            text: "Something Went Wrong!",
-                            duration: 1500,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#28a745",
-                            close: true,
-                        }).showToast();
-
-
-                        $('#bulk-delete-container').hide();
-                        $('.category-checkbox').prop('checked', false);
-                        $('#select-all-checkbox').prop('checked', false);
-                        $(".category-list-table").DataTable().ajax.reload(null, false);
-
-
-
-
-                    },
-                });
-
-            });
-
-        function resetBulkSelection() {
             $('#bulk-delete-container').hide();
             $('.category-checkbox').prop('checked', false);
             $('#select-all-checkbox').prop('checked', false);
-        }
+            $(".category-list-table").DataTable().ajax.reload(null, false);
 
-        $(document).on('change', '.dt-button input[type="date"]', function() {
-            const selectedDate = $(this).val();
-            dt_user_table.draw();
-        });
+
+            resetBulkSelection();
+            $(".job-list-table").DataTable().ajax.reload(null, false);
+
+        },
+        error: function () {
+            $("#deleteInvoicesModal").modal("hide");
+            Toastify({
+                text: "Something Went Wrong!",
+                duration: 1500,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#28a745",
+                close: true,
+            }).showToast();
+
+
+            $('#bulk-delete-container').hide();
+            $('.category-checkbox').prop('checked', false);
+            $('#select-all-checkbox').prop('checked', false);
+            $(".category-list-table").DataTable().ajax.reload(null, false);
+
+
+        },
+    });
+
+});
+
+function resetBulkSelection() {
+    $('#bulk-delete-container').hide();
+    $('.category-checkbox').prop('checked', false);
+    $('#select-all-checkbox').prop('checked', false);
+}
+
+$(document).on('change', '.dt-button input[type="date"]', function () {
+    const selectedDate = $(this).val();
+    dt_user_table.draw();
+});
