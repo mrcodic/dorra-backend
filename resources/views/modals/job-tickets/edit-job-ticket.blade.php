@@ -17,7 +17,7 @@
                     <div class="row mb-1">
                         <div class="col-md-4">
                             <label class="form-label label-text">Due Date</label>
-                            <input class="form-control" type="date" name="" id="">
+                            <input class="form-control" type="date" name="due_at" id="">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label label-text">Station</label>
@@ -38,7 +38,7 @@
                                 <option value="" selected disabled>Select Priority</option>
 
                                 @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $p)
-                                    <option value="{{ $p->value }}">{{ $p->label() }}</option>
+                                    <option value="{{ $p }}">{{ $p->label() }}</option>
 
 
                                 @endforeach

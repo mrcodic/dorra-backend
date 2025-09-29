@@ -48,6 +48,7 @@ var dt_user_table = $(".job-list-table").DataTable({
   data-station="${row.station_id}"
    data-priority="${row.priority}"
    data-status="${row.status}"
+   data-action = "jobs/${data}"
 
      >
 
@@ -159,12 +160,14 @@ $(document).ready(function () {
         const jobStatus = $(this).data('status');
         const jobPriority = $(this).data('priority');
         const jobStationId = $(this).data('station_id');
+        const action = $(this).data('action');
 
 
         // Populate modal
         $('#editJobModal #edit-station-id').val(jobStationId);
         $('#editJobModal #edit-status').val(jobStatus);
         $('#editJobModal #edit-priority').val(jobPriority);
+        $('#editJobModal #editJobForm').attr('action',action);
 
         // Show modal
         $('#editJobModal').modal('show');
@@ -181,7 +184,7 @@ $(document).ready(function () {
     });
 
 });
-
+handleAjaxFormSubmit("#editJobForm")
 // Bulk delete button handler
 $(document).on("click", "#bulk-delete-btn", function (e) {
     e.preventDefault();
