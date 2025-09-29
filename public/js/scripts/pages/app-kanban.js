@@ -195,15 +195,15 @@ $(function () {
             element: '.kanban-wrapper',
             gutter: '15px',
             widthBoard: '250px',
-            dragItems: true,
-            dragBoards: true,
-            addItemButton: true,
-            itemAddOptions: {
-                enabled: true,
-                content: '+ Add Existing Ticket',
-                class: 'kanban-title-button btn btn-default btn-xs',
-                footer: false
-            },
+            dragItems: false,
+            dragBoards: false,
+            addItemButton: false,
+            // itemAddOptions: {
+            //     enabled: true,
+            //     content: '+ Add Existing Ticket',
+            //     class: 'kanban-title-button btn btn-default btn-xs',
+            //     footer: false
+            // },
             boards: boardsData,
 
             click: function (el) {
