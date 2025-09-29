@@ -24,7 +24,10 @@ class JobTicketController extends DashboardController
         $this->usePagination = true;
         $this->resourceTable = 'job_tickets';
         $this->assoiciatedData = [
-          'stations' => $stationRepository->query()->select(['id', 'name'])->get(),
+            'index' => [
+                'stations' => $stationRepository->query()->select(['id', 'name'])->get(),
+            ]
+
         ];
 
     }
