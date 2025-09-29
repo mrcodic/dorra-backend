@@ -29,12 +29,12 @@
 
                     @if($model->orderItem?->order)
                         <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank" class="text-decoration-none">
-                            Order #{{ $model->orderItem->order->number ?? $model->orderItem->order_id }}
+                            Order #{{ $model->orderItem->order->order_number ?? $model->orderItem->order_id }}
                         </a>
                     @endif
 
                     @if($model->orderItem)
-                        <span class="text-muted">— {{ $model->orderItem->name ?? "Item #{$model->order_item_id}" }}</span>
+                        <span class="text-muted">— {{ $model->orderItem->itemable?->name ?? "Item #{$model->order_item_id}" }}</span>
                     @endif
                 </h5>
             </div>
