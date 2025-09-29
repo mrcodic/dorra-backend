@@ -33,7 +33,7 @@ class CategoryService extends BaseService
             })
             ->when(request()->filled('template_id'), function ($query) {
                 $query->whereHas('templates',function ($query){
-                    $query->where('templates.id',request('template_id'));
+                    $query->whereKey(request('template_id'));
                 });
             })
             ->when(request()->filled('has_categories'), function ($query) {
