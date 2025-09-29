@@ -49,18 +49,20 @@
             </div>
         </div>
 
-        @php        
-            $now = now();
-            $due = $model->due_at ?? null;
-            $dueDiffMins = $due ? $now->diffInMinutes($due, false) : null; // negative if overdue
-            $dueBadgeClass = $due
-              ? ($dueDiffMins < 0 ? 'bg-danger' : ($dueDiffMins <= 180 ? 'bg-warning text-dark' : 'bg-success'))
-              : 'bg-secondary';
-            $dueTitle = $due
-              ? ($dueDiffMins < 0
-                  ? 'Overdue by '.$now->diffForHumans($due, ['parts' => 2, 'short'=>true, 'syntax'=>\Carbon\CarbonInterface::DIFF_ABSOLUTE])
-                  : 'Due in '.$due->diffForHumans($now, ['parts' => 2, 'short'=>true]))
-              : 'No due date';
+        @php
+            $specsRaw = $model->specs ?? []; // or the JSON you have
+           $specs = is_array($specsRaw) ? $specsRaw : (json_decode($specsRaw ?? '[]', true) ?? []);
+           $now = now();
+           $due = $model->due_at ?? null;
+           $dueDiffMins = $due ? $now->diffInMinutes($due, false) : null; // negative if overdue
+           $dueBadgeClass = $due
+             ? ($dueDiffMins < 0 ? 'bg-danger' : ($dueDiffMins <= 180 ? 'bg-warning text-dark' : 'bg-success'))
+             : 'bg-secondary';
+           $dueTitle = $due
+             ? ($dueDiffMins < 0
+                 ? 'Overdue by '.$now->diffForHumans($due, ['parts' => 2, 'short'=>true, 'syntax'=>\Carbon\CarbonInterface::DIFF_ABSOLUTE])
+                 : 'Due in '.$due->diffForHumans($now, ['parts' => 2, 'short'=>true]))
+             : 'No due date';
         @endphp
 
         {{-- Top: Codes + Status --}}
