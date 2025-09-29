@@ -26,14 +26,8 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label label-text">Status</label>
-                                <select class="form-select" id="edit-status" name="status">
-
-                                    @foreach(\App\Enums\JobTicket\StatusEnum::cases() as $status)
-                                        <option value="{{ $status->value }}">{{ $status->label() }}</option>
-                                    @endforeach
-
-                            </select>
+                            <label class="form-label label-text">Due Date</label>
+                            <input type="date" name="" id="">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label label-text">Priority</label>

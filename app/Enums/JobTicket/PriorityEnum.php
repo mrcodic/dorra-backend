@@ -14,7 +14,7 @@ enum PriorityEnum : int
     public function label(): string
     {
         return match ($this) {
-            self::STANDARD              => __('jobticket.priority.standard'),
+            self::STANDARD        => __('jobticket.priority.standard'),
             self::RUSH       => __('jobticket.priority.rush'),
 
         };
