@@ -170,7 +170,7 @@ $(document).ready(function () {
         $('#editJobModal #edit-status').val(jobStatus);
         $('#editJobModal #edit-due-at').val(jobDueAt);
         $('#editJobModal #edit-priority').val(jobPriority);
-        $('#editJobModal #editJobForm').attr('action',action);
+        $('#editJobModal #editJobForm').attr('action', action);
 
         // Show modal
         $('#editJobModal').modal('show');
@@ -187,7 +187,13 @@ $(document).ready(function () {
     });
 
 });
-handleAjaxFormSubmit("#editJobForm")
+handleAjaxFormSubmit("#editJobForm", {
+    successMessage: "Job Updated Successfully",
+    onSuccess: function () {
+        location.reload()
+    }
+
+})
 // Bulk delete button handler
 $(document).on("click", "#bulk-delete-btn", function (e) {
     e.preventDefault();
