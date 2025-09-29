@@ -44,7 +44,8 @@ class JobTicketService extends BaseService
             })
             ->addColumn('current_station', function ($job) {
                 return $job->station?->name ?? "-";
-            }) ->addColumn('order_number', function ($job) {
+            })
+            ->addColumn('order_number', function ($job) {
                 return $job->orderItem->order->order_number ?? "-";
             })
             ->addColumn('order_item_name', function ($job) {

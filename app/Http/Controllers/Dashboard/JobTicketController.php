@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Dashboard;
 
 
+use App\Enums\JobTicket\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
+use App\Models\Station;
+use App\Repositories\Interfaces\StationRepositoryInterface;
 use App\Services\JobTicketService;
 use Illuminate\Http\JsonResponse;
 
 class JobTicketController extends DashboardController
 {
     public function __construct(public JobTicketService $jobTicketService,
+    StationRepositoryInterface $stationRepository,
 
     )
     {
@@ -19,6 +23,9 @@ class JobTicketController extends DashboardController
         $this->indexView = 'job-tickets.index';
         $this->usePagination = true;
         $this->resourceTable = 'job_tickets';
+        $this->assoiciatedData = [
+          'stations' => $stationRepository->query()->select(['id', 'name'])->get(),
+        ];
 
     }
     public function getData(): JsonResponse
