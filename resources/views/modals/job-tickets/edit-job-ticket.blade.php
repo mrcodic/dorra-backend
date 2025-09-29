@@ -17,7 +17,7 @@
                     <div class="row mb-1">
                         <div class="col-md-4">
                             <label class="form-label label-text">Due Date</label>
-                            <input class="form-control" type="date" name="due_at" id="">
+                            <input class="form-control" type="date" name="due_at" id="edit-due-at">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label label-text">Station</label>

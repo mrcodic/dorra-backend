@@ -47,6 +47,7 @@ var dt_user_table = $(".job-list-table").DataTable({
                 data-id="${data}"
   data-station="${row.station_id}"
    data-priority="${row.priority}"
+   data-due_at="${row.due_at}"
    data-status="${row.status}"
    data-action = "jobs/${data}"
 
@@ -160,12 +161,14 @@ $(document).ready(function () {
         const jobStatus = $(this).data('status');
         const jobPriority = $(this).data('priority');
         const jobStationId = $(this).data('station');
+        const jobDueAt = $(this).data('due_at');
         const action = $(this).data('action');
 
 
         // Populate modal
         $('#editJobModal #edit-station-id').val(jobStationId);
         $('#editJobModal #edit-status').val(jobStatus);
+        $('#editJobModal #edit-due-at').val(jobDueAt);
         $('#editJobModal #edit-priority').val(jobPriority);
         $('#editJobModal #editJobForm').attr('action',action);
 
