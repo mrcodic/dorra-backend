@@ -40,7 +40,13 @@ var dt_user_table = $(".job-list-table").DataTable({
                 return `
 
         <div class="d-flex gap-1">
-             <a href="/jobs/${data}" class="">
+             <a href="#" class="view-details"
+             data-station="${row.station_id}"
+   data-station.code="${row.station.code}"
+   data-due_at="${row.due_at}"
+   data-status="${row.status}"
+   data-action = "jobs/${data}"
+             >
                 <i data-feather="eye"></i>
             </a>
             <a href="#" class="edit-details"

@@ -17,6 +17,7 @@ class JobTicketService extends BaseService
     {
         $jobs = $this->repository
             ->query()
+            ->with(['station'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
