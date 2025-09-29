@@ -4,8 +4,11 @@ namespace App\Models;
 
 use App\Enums\JobTicket\PriorityEnum;
 use App\Enums\JobTicket\StatusEnum;
+use App\Observers\JobTicketObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+#[ObservedBy(JobTicketObserver::class)]
 
 class JobTicket extends Model
 {
