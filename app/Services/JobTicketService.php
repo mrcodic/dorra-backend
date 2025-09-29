@@ -33,10 +33,10 @@ class JobTicketService extends BaseService
             ->addColumn('code', function ($job) {
                 return $job->code;
             })
-            ->editColumn('priority', function ($job) {
+            ->editColumn('priority_label', function ($job) {
                 return $job->priority?->label() ?? "-";
             })
-            ->editColumn('status', function ($job) {
+            ->editColumn('status_label', function ($job) {
                 return $job->status?->label() ?? "-";
             })
             ->editColumn('due_at', function ($job) {

@@ -27,9 +27,9 @@ var dt_user_table = $(".job-list-table").DataTable({
             }
         },
         {data: "code"},
-        {data: "priority"},
+        {data: "priority_label"},
         {data: "current_station"},
-        {data: "status"},
+        {data: "status_label"},
         {data: "due_at"},
         {data: "order_number"},
         {data: "order_item_name"},
