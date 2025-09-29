@@ -28,6 +28,7 @@ var dt_user_table = $(".job-list-table").DataTable({
         },
         { data: "code" },
         { data: "priority" },
+        { data: "current_station" },
         { data: "status" },
         { data: "due_at" },
         { data: "order_number" },
@@ -50,7 +51,7 @@ var dt_user_table = $(".job-list-table").DataTable({
              <a href="/invoices/${data}" class="">
                 <i data-feather="eye"></i>
             </a>
-            
+
         </div>
     `;
 },

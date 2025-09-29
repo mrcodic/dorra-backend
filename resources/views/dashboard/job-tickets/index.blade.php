@@ -174,6 +174,7 @@
                         </th>
                         <th>Job Number</th>
                         <th>Priority</th>
+                        <th>Current Station</th>
                         <th>Status</th>
                         <th>Due Date</th>
                         <th>Order Number</th>

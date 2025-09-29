@@ -42,7 +42,9 @@ class JobTicketService extends BaseService
             ->editColumn('due_at', function ($job) {
                 return $job->due_at?->format('Y-m-d') ?? "-";
             })
-            ->addColumn('order_number', function ($job) {
+            ->addColumn('current_station', function ($job) {
+                return $job->station?->name ?? "-";
+            }) ->addColumn('order_number', function ($job) {
                 return $job->orderItem->order->order_number ?? "-";
             })
             ->addColumn('order_item_name', function ($job) {
