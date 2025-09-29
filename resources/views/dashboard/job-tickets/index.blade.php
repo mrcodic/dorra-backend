@@ -177,7 +177,7 @@
                         <th>Status</th>
                         <th>Due Date</th>
                         <th>Order Number</th>
-{{--                        <th>Order Item Name</th>--}}
+                        <th>Order Item Name</th>
                         <th>Actions</th>
                     </tr>
                 </thead>

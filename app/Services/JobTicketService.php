@@ -40,14 +40,14 @@ class JobTicketService extends BaseService
                 return $job->status?->label() ?? "-";
             })
             ->editColumn('due_at', function ($job) {
-                return $job->due_at?->format('Y-m-d');
+                return $job->due_at?->format('Y-m-d') ?? "-";
             })
             ->addColumn('order_number', function ($job) {
                 return $job->orderItem->order->order_number ?? "-";
             })
-//            ->addColumn('order_item_name', function ($job) {
-//                return $job->orderItem->order->order_number ?? "-";
-//            })
+            ->addColumn('order_item_name', function ($job) {
+                return $job->orderItem->orderable->name ?? "-";
+            })
             ->make(true);
     }
 
