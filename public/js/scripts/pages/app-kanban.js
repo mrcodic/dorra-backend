@@ -207,42 +207,11 @@ $(function () {
             boards: boardsData,
 
             click: function (el) {
-                var $el = $(el);
-                var flag = false;
-
-                var title = $el.attr('data-eid') ? $el.find('.kanban-text').text() : $el.text();
-                var date = $el.attr('data-due-date');
-                var dateObj = new Date();
-                var year = dateObj.getFullYear();
-                var dateToUse = date
-                    ? (date + ', ' + year)
-                    : (dateObj.getDate() + ' ' + dateObj.toLocaleString('en', { month: 'long' }) + ', ' + year);
-
-                var label = $el.attr('data-badge-text');
-                var avatars = $el.attr('data-assigned');
-
-                if ($el.find('.kanban-item-avatar').length) {
-                    $el.find('.kanban-item-avatar').on('click', function (e) { e.stopPropagation(); });
-                }
-                $(document).one('click', '.item-dropdown', function () { flag = true; });
-
-                setTimeout(function () {
-                    if (!flag) sidebar.modal('show');
-                }, 50);
-
-                var $form = sidebar.find('.update-item-form');
-                $form.off('submit').on('submit', function (e) { e.preventDefault(); sidebar.modal('hide'); });
-
-                sidebar.find('#title').val(title);
-                sidebar.find(datePicker).next('.form-control').val(dateToUse);
-                sidebar.find(select2).val(label).trigger('change');
-                sidebar.find('.assigned').empty().append(
-                    renderAvatar(avatars, false, '50', $el.attr('data-members'), 32) +
-                    "<li class='avatar avatar-add-member ms-50'><span class='avatar-content'>" +
-                    feather.icons['plus'].toSvg({ class: 'avatar-icon' }) +
-                    "</span></li>"
-                );
+                var id = $(el).data('eid') || $(el).attr('data-eid');
+                if (!id) return;
+                window.location.assign('/jobs/' + encodeURIComponent(id));
             },
+
 
             // *** SELECT EXISTING TICKETS INSTEAD OF CREATING ***
             buttonClick: function (el, boardId) {
