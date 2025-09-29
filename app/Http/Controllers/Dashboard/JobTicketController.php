@@ -3,33 +3,26 @@
 namespace App\Http\Controllers\Dashboard;
 
 
-use App\Http\Controllers\Controller;
-use App\Repositories\Interfaces\StationRepositoryInterface;
+use App\Http\Controllers\Base\DashboardController;
+use App\Services\JobTicketService;
+use Illuminate\Http\JsonResponse;
 
-
-class JobTicketController extends Controller
+class JobTicketController extends DashboardController
 {
+    public function __construct(public JobTicketService $jobTicketService,
 
-
-    public function __invoke(StationRepositoryInterface $station)
+    )
     {
-        if (request()->wantsJson() || request()->boolean('json')) {
-            $stations = $station->query()
-                ->with('jobTickets')
-                ->get()
-                ->map(fn ($b) => [
-                    'id'    => (string) $b->id,
-                    'title' => e($b->name),
-                    'item'  => $b->jobTickets->map(fn ($it) => [
-                        'id'    => (string) $it->id,
-                        'title' => "<span class='kanban-text'>".e($it->code)."</span>",
-                    ])->all(),
-                ])->all();
+        parent::__construct($jobTicketService);
+//        $this->storeRequestClass = new StoreLocationRequest();
+//        $this->updateRequestClass = new UpdateLocationRequest();
+        $this->indexView = 'job-tickets.index';
+        $this->usePagination = true;
+        $this->resourceTable = 'job_tickets';
 
-            return response()->json($stations);
-        }
-
-        return view('dashboard.board', get_defined_vars());
     }
-
+    public function getData(): JsonResponse
+    {
+        return $this->jobTicketService->getData();
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\JobTicket\PriorityEnum;
 use App\Enums\JobTicket\StatusEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,9 +21,12 @@ class JobTicket extends Model
     protected $casts = [
         'specs' => 'array',
         'status' => StatusEnum::class,
+        'priority' => PriorityEnum::class,
+        'due_at' => 'datetime',
     ];
     protected $attributes = [
         'status' => StatusEnum::PENDING,
+
     ];
 
     public function orderItem(): BelongsTo

@@ -7,6 +7,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     FaqController,
     FlagController,
     InvoiceController,
+    JobTicketController,
     LocationController,
     MessageController,
     MockupController,
@@ -208,6 +209,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('/mockups', MockupController::class);
 
     Route::apiResource('/products', ProductController::class)->only(['show', 'index']);
+
+    Route::group(['prefix' => 'jobs', 'as' => 'job-tickets.', 'controller' => JobTicketController::class,], function () {
+        Route::get('/data', 'getData')->name('data');
+//        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::apiResource('/jobs', JobTicketController::class);
     Route::get('board', BoardController::class)->name('board');
 
 });

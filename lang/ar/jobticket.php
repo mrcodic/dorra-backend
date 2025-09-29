@@ -22,5 +22,9 @@ return [
         'hold'                 => 'معلق',
         'cancelled'            => 'ملغي',
     ],
+    'priority' => [
+        'standard' => 'عادي',
+        'rush'     => 'مُستعجل',
+    ],
 
 ];

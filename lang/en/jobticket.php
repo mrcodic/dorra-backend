@@ -22,5 +22,8 @@ return [
         'hold'                 => 'On Hold',
         'cancelled'            => 'Cancelled',
     ],
-
+    'priority' => [
+        'standard' => 'Standard',
+        'rush'     => 'Rush',
+    ],
 ];
