@@ -306,10 +306,10 @@ $(function () {
         }
         $('.kanban-container').append(addNewForm);
 
-        $.each($('.kanban-title-button'), function () {
-            $(this).removeClass().addClass('kanban-title-button btn btn-flat-secondary btn-sm ms-50');
-            if (window.Waves) { Waves.init(); Waves.attach("[class*='btn-flat-']"); }
-        });
+        // $.each($('.kanban-title-button'), function () {
+        //     $(this).removeClass().addClass('kanban-title-button btn btn-flat-secondary btn-sm ms-50');
+        //     if (window.Waves) { Waves.init(); Waves.attach("[class*='btn-flat-']"); }
+        // });
 
         enhanceRenderedItems();
     }
@@ -333,10 +333,10 @@ $(function () {
         addNewInput.val('').hide();
         $('.kanban-container').append(addNewForm);
 
-        $.each($('.kanban-title-button'), function () {
-            $(this).removeClass().addClass('kanban-title-button btn btn-flat-secondary btn-sm ms-50');
-            if (window.Waves) { Waves.init(); Waves.attach("[class*='btn-flat-']"); }
-        });
+        // $.each($('.kanban-title-button'), function () {
+        //     $(this).removeClass().addClass('kanban-title-button btn btn-flat-secondary btn-sm ms-50');
+        //     if (window.Waves) { Waves.init(); Waves.attach("[class*='btn-flat-']"); }
+        // });
     });
 
     // Delete board
