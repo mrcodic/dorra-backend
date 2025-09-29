@@ -207,7 +207,7 @@
     'title' => 'Delete Jobs',
     'confirmText' => 'Are you sure you want to delete this items?',
     ])
-    @include("modals.job-tickets.edit-job-ticket",['stations'=>$stations])
+    @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
     @include("modals.job-tickets.show-job-ticket")
 
     <!-- list and filter end -->
