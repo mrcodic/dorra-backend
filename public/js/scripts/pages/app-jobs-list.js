@@ -159,7 +159,7 @@ $(document).ready(function () {
     $(document).on('click', '.edit-details', function (e) {
         const jobStatus = $(this).data('status');
         const jobPriority = $(this).data('priority');
-        const jobStationId = $(this).data('station_id');
+        const jobStationId = $(this).data('station');
         const action = $(this).data('action');
 
 
