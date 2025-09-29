@@ -18,85 +18,170 @@
     <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
 @endsection
-
 @section('content')
     <section class="app-user-view-account">
-        <div class="modal-header mb-1">
-            <h5 class="modal-title">
-                <span class="badge bg-dark me-2">{{ $model->code }}</span>
-                @if($model->orderItem?->order)
-                    <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank">
-                        Order #{{ $model->orderItem->order->number ?? $model->orderItem->order_id }}
-                    </a>
-                @endif
-                @if($model->orderItem)
-                    <span class="text-muted ms-2">— {{ $model->orderItem->name ?? "Item #{$model->order_item_id}" }}</span>
-                @endif
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+
+        {{-- Page header / toolbar --}}
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h5 class="mb-0 d-flex align-items-center gap-2">
+                    <span class="badge bg-dark">{{ $model->code }}</span>
+
+                    @if($model->orderItem?->order)
+                        <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank" class="text-decoration-none">
+                            Order #{{ $model->orderItem->order->number ?? $model->orderItem->order_id }}
+                        </a>
+                        <button class="btn btn-sm btn-outline-secondary py-0 copy-btn"
+                                data-copy="{{ $model->orderItem->order->number ?? $model->orderItem->order_id }}"
+                                title="Copy order number">
+                            <i data-feather="copy" class="me-25"></i>Copy
+                        </button>
+                    @endif
+
+                    @if($model->orderItem)
+                        <span class="text-muted">— {{ $model->orderItem->name ?? "Item #{$model->order_item_id}" }}</span>
+                    @endif
+                </h5>
+            </div>
+
+            <div class="d-flex align-items-center gap-1">
+                <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary">
+                    <i data-feather="arrow-left" class="me-25"></i> Back
+                </a>
+                <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
+                    <i data-feather="printer" class="me-25"></i> Print
+                </button>
+            </div>
         </div>
 
-        <div class="modal-body">
-            {{-- Top row: QR + Code128 + Current State --}}
-            <div class="row g-3 align-items-center mb-2">
+        @php
+            use Illuminate\Support\Str;
+            $specs = is_array($model->specs) ? $model->specs : (json_decode($model->specs ?? '[]', true) ?? []);
+            $now = now();
+            $due = $model->due_at ?? null;
+            $dueDiffMins = $due ? $now->diffInMinutes($due, false) : null; // negative if overdue
+            $dueBadgeClass = $due
+              ? ($dueDiffMins < 0 ? 'bg-danger' : ($dueDiffMins <= 180 ? 'bg-warning text-dark' : 'bg-success'))
+              : 'bg-secondary';
+            $dueTitle = $due
+              ? ($dueDiffMins < 0
+                  ? 'Overdue by '.$now->diffForHumans($due, ['parts' => 2, 'short'=>true, 'syntax'=>\Carbon\CarbonInterface::DIFF_ABSOLUTE])
+                  : 'Due in '.$due->diffForHumans($now, ['parts' => 2, 'short'=>true]))
+              : 'No due date';
+        @endphp
 
-                <div class="col-md-4 text-center">
-                    <img src="" alt="Code128" class="img-fluid border rounded p-2">
-                    <div class="small text-muted mt-1">BarCode</div>
-                </div>
-                <div class="col-md-4">
-                    <div class="d-flex flex-column gap-2">
-                        <div>
-                            <span class="text-muted me-1">Station:</span>
-                            <span class="fw-bold">{{ $model->station?->name ?? '-' }}</span>
-                        </div>
-                        <div>
-                            <span class="text-muted me-1">Status:</span>
-                            <span class="badge bg-primary">{{ $model->status->label() }}</span>
-                        </div>
-                        <div>
-                            <span class="text-muted me-1">Priority:</span>
-                            <span class="badge {{ $model->priority === \App\Enums\JobTicket\PriorityEnum::RUSH ? 'bg-danger' : 'bg-secondary' }}">
-            {{ $model->priority?->label() }}
-          </span>
-                        </div>
-                        @if($model->due_at)
-                            <div>
-                                <span class="text-muted me-1">Due:</span>
-                                <span class="fw-semibold">{{ $model->due_at->format('Y-m-d H:i') }}</span>
+        {{-- Top: Codes + Status --}}
+        <div class="row g-3 align-items-stretch">
+            {{-- Codes card --}}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="m-0">Codes</h6>
+                        <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="{{ $model->code }}">
+                            <i data-feather="copy" class="me-25"></i> Copy Code
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2 text-center">
+                            <div class="col-6">
+                                {{-- QR Code --}}
+                                <img
+                                    src="{{ route('job-tickets.qr', ['code' => $model->code]) }}"
+                                    alt="QR"
+                                    class="img-fluid border rounded p-2 w-100"
+                                >
+                                <div class="small text-muted mt-50">QR</div>
                             </div>
-                        @endif
+                            <div class="col-6">
+                                {{-- Code128 --}}
+                                <img
+                                    src="{{ route('job-tickets.barcode', ['code' => $model->code, 'type' => 'C128']) }}"
+                                    alt="Code128"
+                                    class="img-fluid border rounded p-2 w-100"
+                                >
+                                <div class="small text-muted mt-50">Code128</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Specs table --}}
-            @php $specs = is_array($model->specs) ? $model->specs : (json_decode($model->specs ?? '[]', true) ?? []); @endphp
-            @if(!empty($specs))
-                <h6 class="mt-2">Specifications</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered">
-                        <tbody>
-                        @foreach($specs as $k => $v)
-                            <tr>
-                                <th class="w-25">{{ Str::headline($k) }}</th>
-                                <td>
-                                    @if(is_array($v) || is_object($v))
-                                        <code class="small">{{ json_encode($v, JSON_UNESCAPED_UNICODE) }}</code>
-                                    @else
-                                        {{ $v }}
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
+            {{-- Status card --}}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="m-0">Current State</h6>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-5 col-sm-4 text-muted">Station</dt>
+                            <dd class="col-7 col-sm-8 fw-semibold">{{ $model->station?->name ?? '-' }}</dd>
+
+                            <dt class="col-5 col-sm-4 text-muted">Status</dt>
+                            <dd class="col-7 col-sm-8">
+                                <span class="badge bg-primary">{{ $model->status->label() }}</span>
+                            </dd>
+
+                            <dt class="col-5 col-sm-4 text-muted">Priority</dt>
+                            <dd class="col-7 col-sm-8">
+              <span class="badge {{ $model->priority === \App\Enums\JobTicket\PriorityEnum::RUSH ? 'bg-danger' : 'bg-secondary' }}">
+                {{ $model->priority?->label() }}
+              </span>
+                            </dd>
+
+                            <dt class="col-5 col-sm-4 text-muted">Due</dt>
+                            <dd class="col-7 col-sm-8">
+                                @if($due)
+                                    <span class="badge {{ $dueBadgeClass }}" data-bs-toggle="tooltip" title="{{ $dueTitle }}">
+                  {{ $due->format('Y-m-d H:i') }}
+                </span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </dd>
+                        </dl>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        {{-- Specifications --}}
+        @if(!empty($specs))
+            <div class="card mt-2">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="m-0">Specifications</h6>
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#specsCollapse">
+                        <i data-feather="chevron-down" class="me-25"></i> Toggle
+                    </button>
+                </div>
+                <div id="specsCollapse" class="collapse show">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped table-bordered mb-0">
+                                <tbody>
+                                @foreach($specs as $k => $v)
+                                    <tr>
+                                        <th class="w-25">{{ \Illuminate\Support\Str::headline((string)$k) }}</th>
+                                        <td>
+                                            @if(is_array($v) || is_object($v))
+                                                <pre class="mb-0 small text-wrap">{{ json_encode($v, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) }}</pre>
+                                            @else
+                                                {{ is_bool($v) ? ($v ? 'Yes' : 'No') : ($v === '' || $v === null ? '—' : $v) }}
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         @endif
 
     </section>
-    
 @endsection
+
 
 @section('vendor-script')
     {{-- Vendor js files --}}
