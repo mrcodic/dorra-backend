@@ -23,6 +23,8 @@
                             <label class="form-label label-text">Station</label>
                             <select class="form-select" id="edit-station-id" name="station_id">
                                 <!-- Prefer server-rendered options; fallback is JS (see below) -->
+                                <option value="" selected disabled>Select Station</option>
+
                                     @foreach($stations as $s)
                                         <option value="{{ $s->id }}">{{ $s->name }}</option>
                                     @endforeach
@@ -33,6 +35,8 @@
                         <div class="col-md-4">
                             <label class="form-label label-text">Priority</label>
                             <select class="form-select" id="edit-priority" name="priority">
+                                <option value="" selected disabled>Select Priority</option>
+
                                 @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $p)
                                     <option value="{{ $p->value }}">{{ $p->label() }}</option>
 
