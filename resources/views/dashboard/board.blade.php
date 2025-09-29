@@ -24,25 +24,25 @@
     <!-- Kanban starts -->
     <section class="app-kanban-wrapper">
         <div class="row">
-            <div class="col-12">
-                <form class="add-new-board">
-                    <label class="add-new-btn mb-2" for="add-new-board-input">
-                        <i class="align-middle" data-feather="plus"></i>
-                        <span class="align-middle">Add new</span>
-                    </label>
-                    <input
-                        type="text"
-                        class="form-control add-new-board-input mb-50"
-                        placeholder="Add Board Title"
-                        id="add-new-board-input"
-                        required
-                    />
-                    <div class="mb-1 add-new-board-input">
-                        <button class="btn btn-primary btn-sm me-75">Add</button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm cancel-add-new">Cancel</button>
-                    </div>
-                </form>
-            </div>
+{{--            <div class="col-12">--}}
+{{--                <form class="add-new-board">--}}
+{{--                    <label class="add-new-btn mb-2" for="add-new-board-input">--}}
+{{--                        <i class="align-middle" data-feather="plus"></i>--}}
+{{--                        <span class="align-middle">Add new</span>--}}
+{{--                    </label>--}}
+{{--                    <input--}}
+{{--                        type="text"--}}
+{{--                        class="form-control add-new-board-input mb-50"--}}
+{{--                        placeholder="Add Board Title"--}}
+{{--                        id="add-new-board-input"--}}
+{{--                        required--}}
+{{--                    />--}}
+{{--                    <div class="mb-1 add-new-board-input">--}}
+{{--                        <button class="btn btn-primary btn-sm me-75">Add</button>--}}
+{{--                        <button type="button" class="btn btn-outline-secondary btn-sm cancel-add-new">Cancel</button>--}}
+{{--                    </div>--}}
+{{--                </form>--}}
+{{--            </div>--}}
         </div>
         <!-- Kanban content starts -->
         <div class="kanban-wrapper"></div>
