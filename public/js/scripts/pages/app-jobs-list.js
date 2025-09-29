@@ -43,16 +43,16 @@ var dt_user_table = $(".job-list-table").DataTable({
              <a href="/jobs/${data}" class="">
                 <i data-feather="eye"></i>
             </a>
-            <a href="#" class="edit-details"
-                data-id="${data}"
-  data-station="${row.station_id}"
-   data-priority="${row.priority.value}"
-   data-status="${row.status.value}"
-
-     >
-
-   <i data-feather="edit-3"></i>
-</a>
+//             <a href="#" class="edit-details"
+//                 data-id="${data}"
+//   data-station="${row.station_id}"
+//    data-priority="${row.priority.value}"
+//    data-status="${row.status.value}"
+//
+//      >
+//
+//    <i data-feather="edit-3"></i>
+// </a>
         </div>
     `;
             },
@@ -159,7 +159,7 @@ $(document).ready(function () {
         const jobStatus = $(this).data('status');
         const jobPriority = $(this).data('priority');
         const jobStationId = $(this).data('station_id');
-        const tagId = $(this).data('id');
+
 
         // Populate modal
         $('#editJobModal #edit-station-id').val(jobStationId);

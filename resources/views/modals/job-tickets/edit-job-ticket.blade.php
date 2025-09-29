@@ -19,11 +19,10 @@
                             <label class="form-label label-text">Station</label>
                             <select class="form-select" id="edit-station-id" name="station_id">
                                 <!-- Prefer server-rendered options; fallback is JS (see below) -->
-                                @isset($stations)
                                     @foreach($stations as $s)
                                         <option value="{{ $s->id }}">{{ $s->name }}</option>
                                     @endforeach
-                                @endisset
+
                             </select>
                         </div>
                         <div class="col-md-4">
