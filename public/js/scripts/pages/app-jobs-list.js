@@ -37,17 +37,29 @@ var dt_user_table = $(".job-list-table").DataTable({
             orderable: false,
            render: function(data, type, row) {
     return `
+
         <div class="d-flex gap-1">
+         <a href="#" class="edit-details"
+   data-id="${data}"
+   data-name_ar="${row.name_ar}"
+   data-name_en="${row.name_en}"
+   data-image="${row.image}"
+   data-image_id="${row.imageId}"
+   data-description_en="${row.description_en}"
+   data-description_ar="${row.description_ar}"
+   data-subcategories="${row.children.map(child => child.name)}"
+   data-products="${row.no_of_products}"
+   data-showdate="${row.show_date}"
+    data-action="${row.is_has_category ? 'modal' : 'redirect'}"
+       data-url="/categories/${data}/edit"
+       >
+
+   <i data-feather="edit-3"></i>
+</a>
             <a href="/invoices/${data}" class="">
                 <i data-feather="eye"></i>
             </a>
-            <a href="#" class="text-danger open-delete-order-modal"
-               data-id="${data}"
-               data-action="/invoices/${data}"
-               data-bs-toggle="modal"
-               data-bs-target="#deleteInvoiceModal">
-               <i data-feather="trash-2"></i>
-            </a>
+         
         </div>
     `;
 },
