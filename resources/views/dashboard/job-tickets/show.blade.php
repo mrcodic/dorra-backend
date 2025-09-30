@@ -71,10 +71,7 @@
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6 class="m-0">Codes</h6>
-                        <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="{{ $model->code }}">
-                            <i data-feather="copy" class="me-25"></i> Copy Code
-                        </button>
+                        <h6 class="m-0">BarCode</h6>
                     </div>
                     <div class="card-body">
                         <div class="row g-2 text-center">
@@ -86,7 +83,7 @@
                                     alt="Code128"
                                     class="img-fluid border rounded p-2 w-100"
                                 >
-                                <div class="small text-muted mt-50">Code128</div>
+                                <div class="small text-muted mt-50">BarCode</div>
                             </div>
                         </div>
                     </div>
