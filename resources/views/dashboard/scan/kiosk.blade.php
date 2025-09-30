@@ -35,6 +35,13 @@
                     <small class="text-muted d-block mt-1">
                         Tip: Use HTTPS and allow camera permission. For rear camera on phones, choose “Back” camera.
                     </small>
+                </div>        <div class="col-md-6">
+                    {{-- Scanner viewport --}}
+                    <div id="reader" style="width: 100%; max-width: 520px;"></div>
+                    <div class="d-flex gap-2 mt-2 align-items-center">
+                        <input type="text" class="form-control">
+                    </div>
+
                 </div>
 
                 <div class="col-md-6">
