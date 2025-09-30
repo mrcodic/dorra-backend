@@ -82,7 +82,7 @@
                             <div class="col-6">
                                 {{-- Code128 --}}
                                 <img
-                                    src=""
+                                    src="{{ $model->barcode_svg_url }}"
                                     alt="Code128"
                                     class="img-fluid border rounded p-2 w-100"
                                 >

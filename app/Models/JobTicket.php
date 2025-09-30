@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\JobTicket\PriorityEnum;
 use App\Enums\JobTicket\StatusEnum;
 use App\Observers\JobTicketObserver;
+use App\Services\BarcodeService;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,6 +33,21 @@ class JobTicket extends Model
 
     ];
 
+    protected $appends = [
+        'barcode_png_url', 'barcode_svg_url',
+    ];
+
+    public function getBarcodePngUrlAttribute(): ?string
+    {
+        if (!$this->code) return null;
+        return app(BarcodeService::class)->savePng1D($this->code);
+    }
+
+    public function getBarcodeSvgUrlAttribute(): ?string
+    {
+        if (!$this->code) return null;
+        return app(BarcodeService::class)->saveSvg1D($this->code);
+    }
     public function orderItem(): BelongsTo
     {
         return $this->belongsTo(OrderItem::class);

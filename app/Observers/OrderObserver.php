@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
 use App\Models\OrderItem;
+use App\Services\BarcodeService;
 
 
 class OrderObserver
@@ -42,10 +43,10 @@ class OrderObserver
                         'payment_status' => \App\Enums\Payment\StatusEnum::PAID
                     ]);
             }
-            $order->orderItems->each(function (OrderItem $orderItem) use ($order) {
+            $jobTicket =      $order->orderItems->each(function (OrderItem $orderItem) use ($order) {
                 $sequence = JobTicket::where('order_item_id',$orderItem->id)->count() + 1;
 
-                JobTicket::firstOrCreate( [
+               return  JobTicket::firstOrCreate( [
                     'order_item_id' => $orderItem->id,
                 ],[
                     'code' => sprintf(
@@ -62,6 +63,12 @@ class OrderObserver
                     ])->toArray(),
                 ]);
             });
+            if ($jobTicket->wasRecentlyCreated) {
+                $svc = app(BarcodeService::class);
+
+                $svc->savePng1D($jobTicket->code, 'C128', scale: 3, height: 80);
+                $svc->saveSvg1D($jobTicket->code, 'C128', width: 2, height: 60, withText: true);
+            }
             CreateInvoiceJob::dispatch($order);
 
         }
