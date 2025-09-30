@@ -5,7 +5,6 @@ namespace App\Observers;
 use App\Enums\JobTicket\StatusEnum;
 use App\Models\JobTicket;
 use App\Models\Station;
-use App\Services\BarcodeService;
 
 class JobTicketObserver
 {
@@ -20,11 +19,7 @@ class JobTicketObserver
             ?? Station::whereKey($jobTicket->station_id)->value('code');
 
         $jobTicket->status = $this->statusForStation($stationCode);
-        if (!$jobTicket->station) {
-            $svc = app(BarcodeService::class);
-            $svc->savePng1D($jobTicket->code, 'C128', scale: 3, height: 80);
-            $svc->saveSvg1D($jobTicket->code, 'C128', width: 2, height: 60, withText: true);
-        }
+
     }
 
 
