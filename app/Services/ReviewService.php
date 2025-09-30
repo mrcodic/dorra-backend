@@ -61,7 +61,7 @@ class ReviewService extends BaseService
         return [
             'statistics' => [
                 'total_reviews' => (int)$stats->total_reviews,
-                'rating' => (int) round((float)$stats->rating, 2),
+                'rating' => (int) $stats->rating,
                 '5_stars' => (int)$stats->five_stars,
                 '4_stars' => (int)$stats->four_stars,
                 '3_stars' => (int)$stats->three_stars,

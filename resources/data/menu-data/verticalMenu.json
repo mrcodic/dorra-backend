@@ -96,12 +96,6 @@
                     "icon": "circle",
                     "slug": "",
                     "url": "/discount-codes"
-                },
-                {
-                    "name": "Offers",
-                    "icon": "circle",
-                    "slug": "",
-                    "url": "/offers"
                 }
             ],
             "modalTarget": ""
@@ -118,12 +112,6 @@
             "icon": "Home.svg",
             "slug": "",
             "submenu": [
-                {
-                    "url": "/logistics/dashboard",
-                    "name": "Dashboard",
-                    "icon": "circle",
-                    "slug": "app-user-list"
-                },
                 {
                     "url": "/logistics",
                     "name": "Locations",
