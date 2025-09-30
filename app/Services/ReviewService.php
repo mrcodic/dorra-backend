@@ -54,7 +54,7 @@ class ReviewService extends BaseService
             ->selectRaw('SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as two_stars')
             ->selectRaw('SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as one_star')
             ->where('reviewable_id', $id)
-            ->where('reviewable_type', request()->type == 'category' ? Product::class : Category::class)
+            ->where('reviewable_type', request()->type == 'category' ? Category::class : Product::class)
             ->first();
 
 
