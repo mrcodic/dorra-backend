@@ -35,4 +35,10 @@ class JobTicketController extends DashboardController
     {
         return $this->jobTicketService->getData();
     }
+
+    public function scan()
+    {
+        return $this->jobTicketService->scan();
+
+    }
 }

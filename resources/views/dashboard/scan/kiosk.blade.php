@@ -125,7 +125,7 @@
                 lastSent = code; lastSentAt = now;
 
                 try {
-                    const res = await fetch("", {
+                    const res = await fetch("{{ route('scan.submit') }}", {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\JobTicketRepositoryInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
 class JobTicketService extends BaseService
@@ -55,5 +56,66 @@ class JobTicketService extends BaseService
             ->make(true);
     }
 
+    public function scan(Request $request): JsonResponse
+    {
 
+        $data = $request->validate([
+            'code' => ['required', 'string'],
+        ]);
+
+//        $result = DB::transaction(function () use ($data, $request) {
+//            $ticket = JobTicket::where('code', $data['code'])->lockForUpdate()->first();
+//            if (!$ticket) {
+//                abort(Response::HTTP_NOT_FOUND, __('Barcode not found.'));
+//            }
+//
+//            if ($ticket->scan_count >= 2) {
+//                abort(Response::HTTP_UNPROCESSABLE_ENTITY, __('Scan limit reached for this barcode.'));
+//            }
+//
+//            $currentStation = $ticket->station()->first();
+//            $currentOrder   = $currentStation?->sort_order ?? 0;
+//
+//            $nextStation = Station::where('sort_order', '>', $currentOrder)
+//                ->orderBy('sort_order')
+//                ->first();
+//
+//            if (!$nextStation) {
+//                abort(Response::HTTP_UNPROCESSABLE_ENTITY, __('Already at the final station.'));
+//            }
+//
+//            $fromStationId = $ticket->station_id;
+//            $ticket->station_id = $nextStation->id;
+//            $ticket->scan_count++;
+//            $ticket->save();
+//
+////            JobEvent::create([
+////                'job_ticket_id' => $ticket->id,
+////                'type'          => 'scan',
+////                'from_id'       => $fromStationId,
+////                'to_id'         => $nextStation->id,
+////                'meta'          => [
+////                    'reason'  => 'barcode_scan',
+////                    'scan_no' => $ticket->scan_count,
+////                ],
+////                'performed_by'  => optional($request->user())->id,
+////                'performed_at'  => now(),
+////            ]);
+//
+//            return [
+//                'ticket_id'     => $ticket->id,
+//                'code'          => $ticket->code,
+//                'scan_count'    => $ticket->scan_count, // 1 or 2
+//                'from_station'  => $fromStationId,
+//                'to_station'    => $nextStation->id,
+//                'message'       => $ticket->scan_count >= 2
+//                    ? __('Moved to next station. This barcode cannot be scanned again.')
+//                    : __('Moved to next station. One scan remaining.'),
+//            ];
+//        });
+
+        // Return JSON so our Blade page (fetch) can render it nicely
+        return response()->json("ok");
+
+}
 }
