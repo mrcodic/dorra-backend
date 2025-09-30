@@ -58,10 +58,12 @@ class JobTicketService extends BaseService
 
     public function scan(Request $request): JsonResponse
     {
-
         $data = $request->validate([
-            'code' => ['required', 'string'],
+            'code' => ['required', 'string','exists:job_tickets,code'],
         ]);
+        $this->handleTransaction(function () use ($data) {
+            $ticket = $this->repository->query()->whereCode($data['code'])->lockForUpdate()->first();
+        });
 
 //        $result = DB::transaction(function () use ($data, $request) {
 //            $ticket = JobTicket::where('code', $data['code'])->lockForUpdate()->first();

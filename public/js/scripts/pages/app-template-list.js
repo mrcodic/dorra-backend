@@ -80,10 +80,10 @@ $(document).on('change', '.category-checkbox', function () {
 });
 
 // Redraw table resets checkboxes
-dt_user_table.on('draw', function () {
-    $('#select-all-checkbox').prop('checked', false);
-    $('#bulk-delete-container').hide();
-});
+// dt_user_table.on('draw', function () {
+//     $('#select-all-checkbox').prop('checked', false);
+//     $('#bulk-delete-container').hide();
+// });
 
 // Update bulk delete container
 function updateBulkDeleteVisibility() {
@@ -118,25 +118,19 @@ $(document).on('change', '.category-checkbox', function () {
 
 
 // Optional: Hide button when table is redrawn
-dt_user_table.on("draw", function () {
-    $("#bulk-delete-container").hide();
-});
+// dt_user_table.on("draw", function () {
+//     $("#bulk-delete-container").hide();
+// });
 
 $(document).on("click", ".open-delete-template-modal", function () {
+    console.log("Gfgdf")
     const templateId = $(this).data("id");
+    console.log(templateId)
     $('#deleteTemplateForm input[name="id"]').val(templateId);
     $("#deleteTemplateForm").attr('action',`product-templates/${templateId}`);
 });
 
-handleAjaxFormSubmit('#deleteTemplateForm', {
-    successMessage: "✅ Template deleted successfully!",
-    closeModal: '#deleteTemplateModal',
-    onSuccess: function (response, $form) {
-        const deletedId = response.data.id;
-        const card = $(`button[data-id="${deletedId}"]`).closest('.col-md-6.col-lg-4.col-xxl-4');
-        card.remove();
-    }
-});
+
 
 function removeTemplateCards(ids) {
     if (Array.isArray(ids)) {

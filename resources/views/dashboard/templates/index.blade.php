@@ -156,6 +156,17 @@
 @endsection
 
 @section('vendor-script')
+    <script !src="">
+        handleAjaxFormSubmit('#deleteTemplateForm', {
+            successMessage: "✅ Template deleted successfully!",
+            closeModal: '#deleteTemplateModal',
+            onSuccess: function (response, $form) {
+                const deletedId = response.data.id;
+                const card = $(`button[data-id="${deletedId}"]`).closest('.col-md-6.col-lg-4.col-xxl-4');
+                card.remove();
+            }
+        });
+    </script>
 {{-- Vendor js files --}}
 <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>

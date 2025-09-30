@@ -8,6 +8,7 @@ use App\Http\Requests\JobTicket\UpdateJobTicketRequest;
 use App\Repositories\Interfaces\StationRepositoryInterface;
 use App\Services\JobTicketService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class JobTicketController extends DashboardController
 {
@@ -27,7 +28,6 @@ class JobTicketController extends DashboardController
             'index' => [
                 'stations' => $stationRepository->query()->select(['id', 'name'])->get(),
             ]
-
         ];
 
     }
@@ -36,9 +36,9 @@ class JobTicketController extends DashboardController
         return $this->jobTicketService->getData();
     }
 
-    public function scan()
+    public function scan(Request $request): JsonResponse
     {
-        return $this->jobTicketService->scan();
+        return $this->jobTicketService->scan($request);
 
     }
 }

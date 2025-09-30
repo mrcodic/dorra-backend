@@ -66,7 +66,7 @@
                 </li>
                 <li>
                     <button class="dropdown-item text-danger open-delete-template-modal w-100" data-bs-toggle="modal"
-                        data-bs-target="#deleteTemplateModal" data-id="{{ $template->id }}"><i data-feather="trash-2"
+                        data-bs-target="#deleteTemplateModal" data-id="{{$template->id}}"><i data-feather="trash-2"
                             class="me-1 text-danger"></i>Delete
                     </button>
                 </li>
