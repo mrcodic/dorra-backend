@@ -46,9 +46,8 @@ class ReviewService extends BaseService
     {
         $stats = $this->repository->query()
             ->select([])
-            ->withAvg('rating')
             ->selectRaw('COUNT(*) as total_reviews')
-//            ->selectRaw('AVG(rating) as rating')
+            ->selectRaw('AVG(rating) as rating')
             ->selectRaw('SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) as five_stars')
             ->selectRaw('SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) as four_stars')
             ->selectRaw('SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) as three_stars')
@@ -62,7 +61,7 @@ class ReviewService extends BaseService
         return [
             'statistics' => [
                 'total_reviews' => (int)$stats->total_reviews,
-                'rating' => (int) $stats->rating_avg,
+                'rating' => (int) $stats->rating,
                 '5_stars' => (int)$stats->five_stars,
                 '4_stars' => (int)$stats->four_stars,
                 '3_stars' => (int)$stats->three_stars,
