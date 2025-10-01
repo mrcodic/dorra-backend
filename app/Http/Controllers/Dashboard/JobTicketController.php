@@ -9,6 +9,7 @@ use App\Repositories\Interfaces\StationRepositoryInterface;
 use App\Services\JobTicketService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 
 class JobTicketController extends DashboardController
 {
@@ -38,7 +39,8 @@ class JobTicketController extends DashboardController
 
     public function scan(Request $request): JsonResponse
     {
-        return $this->jobTicketService->scan($request);
+        $this->jobTicketService->scan($request);
+        return Response::api();
 
     }
 }

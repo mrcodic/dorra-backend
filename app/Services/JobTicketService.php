@@ -62,7 +62,7 @@ class JobTicketService extends BaseService
     /**
      * @throws \Exception
      */
-    public function scan(Request $request): JsonResponse
+    public function scan(Request $request)
     {
         $data = $request->validate([
             'code' => ['required', 'string', 'exists:job_tickets,code'],
