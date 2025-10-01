@@ -10,6 +10,8 @@ class Station extends Model
     protected $fillable = [
         'code',
         'name',
+        'workflow_order',
+        'is_terminal',
         'requires_operator',
     ];
 
