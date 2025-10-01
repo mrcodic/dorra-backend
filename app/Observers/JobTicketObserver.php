@@ -11,7 +11,7 @@ class JobTicketObserver
 
     public function updating(JobTicket $jobTicket): void
     {
-      
+
         if ($jobTicket->isDirty('station_id') && $jobTicket->isClean('current_status_id'))
         {
             $station = optional($jobTicket->station)
