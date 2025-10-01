@@ -121,7 +121,7 @@ class JobTicketService extends BaseService
                 })(),
 
                 $nextStation && $firstStatusOfNext => (function () use ($ticket, $nextStation, $firstStatusOfNext) {
-                    dd($nextStation, $firstStatusOfNext);
+                    dd($nextStation, $firstStatusOfNext,$firstStatusOfNext->id);
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
                         'station_id'         => $nextStation->id,
