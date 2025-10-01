@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Enums\JobTicket\StatusEnum;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -83,7 +82,6 @@ class JobTicketService extends BaseService
                 throw new ModelNotFoundException("Station or its statuses not configured.");
             }
 
-            // establish current status index (init if missing/reconfigured)
             $currentIndex = 0;
             if ($ticket->current_status_id) {
                 $found = $statuses->search(fn ($s) => (int)$s->id === (int)$ticket->current_status_id);
@@ -98,7 +96,7 @@ class JobTicketService extends BaseService
                 $ticket->save();
             }
 
-            // candidates
+
             $nextStatusInSame = $statuses->get($currentIndex + 1);
             $nextStation = $this->stationRepository->query()
                 ->where('workflow_order', '>', $station->workflow_order)
@@ -108,16 +106,8 @@ class JobTicketService extends BaseService
                 ? $nextStation->statuses()->orderBy('sequence')->first()
                 : null;
 
-            $queueEnumByStation = [
-                'prepress' => StatusEnum::PREPRESS_QUEUE,
-                'print'    => StatusEnum::PRINT_QUEUE,
-                'finish'   => StatusEnum::FINISH_QUEUE,
-                'qc'       => StatusEnum::QC_QUEUE,
-                'pack'     => StatusEnum::PACK_QUEUE,
-            ];
 
-
-            $result = match (true) {
+          match (true) {
                 (bool) $nextStatusInSame => (function () use ($ticket, $station, $nextStatusInSame) {
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
@@ -131,7 +121,7 @@ class JobTicketService extends BaseService
                     return 'advanced_status';
                 })(),
 
-                $nextStation && $firstStatusOfNext => (function () use ($ticket, $nextStation, $firstStatusOfNext, $queueEnumByStation) {
+                $nextStation && $firstStatusOfNext => (function () use ($ticket, $nextStation, $firstStatusOfNext) {
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
                         'station_id'         => $nextStation->id,
@@ -140,32 +130,26 @@ class JobTicketService extends BaseService
                         'action'             => 'advance',
                         'notes'              => 'Moved to next station',
                     ]);
-
                     $ticket->station_id        = $nextStation->id;
                     $ticket->current_status_id = $firstStatusOfNext->id;
-
-                    $nextCode = $nextStation->code;
-                    if (isset($queueEnumByStation[$nextCode])) {
-                        $ticket->status = $queueEnumByStation[$nextCode];
-                    }
-
                     $ticket->save();
                     return 'advanced_station';
                 })(),
 
-                default => (function () use ($ticket, $statuses) {
-                    $this->eventRepository->create([
-                        'job_ticket_id'      => $ticket->id,
-                        'station_id'         => $ticket->station_id,
-                        'station_status_id'  => $ticket->current_status_id ?? $statuses->last()->id,
-                        'admin_id'           => auth()->id(),
-                        'action'             => 'advance',
-                        'notes'              => 'Completed last station',
-                    ]);
-
-                    return 'completed_workflow';
-                })(),
+//                default => (function () use ($ticket, $statuses) {
+//                    $this->eventRepository->create([
+//                        'job_ticket_id'      => $ticket->id,
+//                        'station_id'         => $ticket->station_id,
+//                        'station_status_id'  => $ticket->current_status_id ?? $statuses->last()->id,
+//                        'admin_id'           => auth()->id(),
+//                        'action'             => 'advance',
+//                        'notes'              => 'Completed last station',
+//                    ]);
+//                    return 'completed_workflow';
+//                })(),
             };
+
+
         });
     }
 
