@@ -105,7 +105,7 @@ class JobTicketService extends BaseService
             $firstStatusOfNext = $nextStation
                 ? $nextStation->statuses()->orderBy('sequence')->first()
                 : null;
-dd($nextStation &&  $firstStatusOfNext);
+dd($nextStation &&  $firstStatusOfNext,(bool)$nextStatusInSame);
 
           match (true) {
                 (bool) $nextStatusInSame => (function () use ($ticket, $station, $nextStatusInSame) {
