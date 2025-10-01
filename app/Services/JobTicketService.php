@@ -94,7 +94,7 @@ class JobTicketService extends BaseService
                 ->orderBy('sequence')->first() : null;
 
            return match (true) {
-                (bool)$nextStatusInSame => function () use ($ticket, $nextStatusInSame, $nextStation) {
+                (bool)$nextStatusInSame => (function () use ($ticket, $nextStatusInSame, $nextStation) {
                     $this->eventRepository->create([
                         'job_ticket_id' => $ticket->id,
                         'station_status_id' => $nextStatusInSame->id,
@@ -104,8 +104,8 @@ class JobTicketService extends BaseService
                     ]);
                     $ticket->current_status_id = $nextStatusInSame->id;
                     $ticket->save();
-                },
-                $nextStation && $firstStatusOfNext => function () use ($ticket, $nextStation, $firstStatusOfNext) {
+                })(),
+                $nextStation && $firstStatusOfNext => (function () use ($ticket, $nextStation, $firstStatusOfNext) {
                     $this->eventRepository->create([
                         'job_ticket_id' => $ticket->id,
                         'station_status_id' => $firstStatusOfNext->id,
@@ -116,8 +116,8 @@ class JobTicketService extends BaseService
                     $ticket->current_status_id = $firstStatusOfNext->id;
                     $ticket->station_id = $nextStation->id;
                     $ticket->save();
-                },
-                default => function () use ($ticket, $statuses) {
+                })(),
+                default => (function () use ($ticket, $statuses) {
                     $this->eventRepository->create([
                         'job_ticket_id' => $ticket->id,
                         'station_id' => $ticket->station_id,
@@ -126,7 +126,7 @@ class JobTicketService extends BaseService
                         'action' => 'advance',
                         'notes' => 'Completed last station',
                     ]);
-                }
+                })()
             };
 
 
