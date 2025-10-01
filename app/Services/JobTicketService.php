@@ -97,7 +97,6 @@ class JobTicketService extends BaseService
 
             }
 
-
             $nextStatusInSame = $statuses->get($currentIndex + 1);
             $nextStation = $this->stationRepository->query()
                 ->where('workflow_order', '>', $station->workflow_order)
@@ -106,9 +105,10 @@ class JobTicketService extends BaseService
             $firstStatusOfNext = $nextStation
                 ? $nextStation->statuses()->orderBy('sequence')->first()
                 : null;
+            dd($nextStatusInSame && !($nextStation && $firstStatusOfNext));
 
           match (true) {
-                (bool) $nextStatusInSame&& !($nextStation && $firstStatusOfNext) => (function () use ($ticket, $station, $nextStatusInSame) {
+                (bool) $nextStatusInSame && !($nextStation && $firstStatusOfNext) => (function () use ($ticket, $station, $nextStatusInSame) {
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
                         'station_id'         => $station->id,
