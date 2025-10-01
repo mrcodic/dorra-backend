@@ -76,7 +76,12 @@ class JobTicketService extends BaseService
             }
             if ($ticket->current_status_id) {
                 $found = $statuses->search(fn($s) => $s->id == $ticket->current_status_id);
-                $currentIndex = (int)$found;
+                if ($found !== false) {
+                    $currentIndex = (int) $found;
+                } else {
+                    $ticket->current_status_id = $statuses->first()->id;
+                    $ticket->save();
+                }
             } else {
                 $ticket->current_status_id = $statuses->first()->id;
                 $ticket->save();
@@ -116,7 +121,7 @@ class JobTicketService extends BaseService
                     $this->eventRepository->create([
                         'job_ticket_id' => $ticket->id,
                         'station_id' => $ticket->station_id,
-                        'station_status_id' => $locked->current_status_id ?? $statuses->last()->id,
+                        'station_status_id' => $ticket->current_status_id ?? $statuses->last()->id,
                         'admin_id' => auth()->id(),
                         'action' => 'advance',
                         'notes' => 'Completed last station',
