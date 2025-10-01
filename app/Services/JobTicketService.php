@@ -70,83 +70,87 @@ class JobTicketService extends BaseService
 
         return $this->handleTransaction(function () use ($data) {
             $ticket = $this->repository->query()
-                ->with(['station.statuses' => fn($q) => $q->orderBy('sequence')])
+                ->with(['station.statuses'])
                 ->whereCode($data['code'])
                 ->lockForUpdate()
                 ->firstOrFail();
 
             $station  = $ticket->station;
-            $statuses = $station?->statuses?->values();
+            $statuses = $station?->statuses?->sortBy('sequence')->values();
 
             if (!$station || !$statuses || $statuses->isEmpty()) {
                 throw new ModelNotFoundException("Station or its statuses not configured.");
             }
 
-            if (!$ticket->current_status_id) {
-                $ticket->current_status_id = $statuses->first()->id;
-                $ticket->save();
-            } else {
-
-                if (!$statuses->firstWhere('id', (int) $ticket->current_status_id)) {
+            $currentIndex = 0;
+            if ($ticket->current_status_id) {
+                $found = $statuses->search(fn ($s) => (int)$s->id === (int)$ticket->current_status_id);
+                if ($found !== false) {
+                    $currentIndex = (int) $found;
+                } else {
                     $ticket->current_status_id = $statuses->first()->id;
                     $ticket->save();
                 }
+            } else {
+                $ticket->current_status_id = $statuses->first()->id;
+                $ticket->save();
+
             }
 
-            $currentIndex = $statuses->search(fn ($s) => (int) $s->id === (int) $ticket->current_status_id);
             $nextStatusInSame = $statuses->get($currentIndex + 1);
-
-
             $nextStation = $this->stationRepository->query()
                 ->where('workflow_order', '>', $station->workflow_order)
                 ->orderBy('workflow_order')
-                ->with(['statuses' => fn($q) => $q->orderBy('sequence')->limit(1)])
                 ->first();
+            $firstStatusOfNext = $nextStation
+                ? $nextStation->statuses()->orderBy('sequence')->first()
+                : null;
+//dd($nextStatusInSame || !($nextStation && $firstStatusOfNext), $nextStation && $firstStatusOfNext);
+          match (true) {
+              $nextStatusInSame || !($nextStation && $firstStatusOfNext) => (function () use ($ticket, $station, $nextStatusInSame) {
+                    $this->eventRepository->create([
+                        'job_ticket_id'      => $ticket->id,
+                        'station_id'         => $station->id,
+                        'station_status_id'  => $nextStatusInSame->id,
+                        'admin_id'           => auth()->id(),
+                        'action'             => 'advance',
+                    ]);
+                    $ticket->current_status_id = $nextStatusInSame->id;
+                    $ticket->save();
+                    return 'advanced_status';
+                })(),
 
-            $firstStatusOfNext = $nextStation?->statuses?->first();
+                $nextStation && $firstStatusOfNext => (function () use ($ticket, $nextStation, $firstStatusOfNext) {
+                    dd($nextStation, $firstStatusOfNext);
+                    $this->eventRepository->create([
+                        'job_ticket_id'      => $ticket->id,
+                        'station_id'         => $nextStation->id,
+                        'station_status_id'  => $firstStatusOfNext->id,
+                        'admin_id'           => auth()->id(),
+                        'action'             => 'advance',
+                        'notes'              => 'Moved to next station',
+                    ]);
+                    $ticket->station_id        = $nextStation->id;
+                    $ticket->current_status_id = $firstStatusOfNext->id;
+                    $ticket->save();
+                    return 'advanced_station';
+                })(),
 
-
-            if ($nextStatusInSame) {
-                $this->eventRepository->create([
-                    'job_ticket_id'     => $ticket->id,
-                    'station_id'        => $station->id,
-                    'station_status_id' => $nextStatusInSame->id,
-                    'admin_id'          => auth()->id(),
-                    'action'            => 'advance',
-                ]);
-
-                $ticket->current_status_id = $nextStatusInSame->id;
-                $ticket->save();
-
-            }
-
-            if ($nextStation && $firstStatusOfNext) {
-
-                $this->eventRepository->create([
-                    'job_ticket_id'     => $ticket->id,
-                    'station_id'        => $station->id,
-                    'station_status_id' => $ticket->current_status_id,
-                    'admin_id'          => auth()->id(),
-                    'action'            => 'handoff',
-                    'notes'             => 'Ready to move to next station',
-                ]);
-                $ticket->current_status_id = $firstStatusOfNext->id;
-                $ticket->station_id = $nextStation->id;
-                $ticket->save();
-
-            }
-            $this->eventRepository->create([
-                'job_ticket_id'     => $ticket->id,
-                'station_id'        => $ticket->station_id,
-                'station_status_id' => $ticket->current_status_id ?? $statuses->last()->id,
-                'admin_id'          => auth()->id(),
-                'action'            => 'complete',
-                'notes'             => 'Completed last station',
-            ]);
+                default => (function () use ($ticket, $statuses) {
+                    $this->eventRepository->create([
+                        'job_ticket_id'      => $ticket->id,
+                        'station_id'         => $ticket->station_id,
+                        'station_status_id'  => $ticket->current_status_id ?? $statuses->last()->id,
+                        'admin_id'           => auth()->id(),
+                        'action'             => 'advance',
+                        'notes'              => 'Completed last station',
+                    ]);
+                    return 'completed_workflow';
+                })(),
+            };
 
 
         });
     }
-
 
 }
