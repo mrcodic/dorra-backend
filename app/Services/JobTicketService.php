@@ -138,7 +138,7 @@ class JobTicketService extends BaseService
                 })(),
 
                 default => (function () use ($ticket, $statuses) {
-                    dd("fds")
+                    dd("fds");
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
                         'station_id'         => $ticket->station_id,
