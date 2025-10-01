@@ -106,9 +106,8 @@ class JobTicketService extends BaseService
                 ? $nextStation->statuses()->orderBy('sequence')->first()
                 : null;
 //dd($nextStatusInSame || !($nextStation && $firstStatusOfNext), $nextStation && $firstStatusOfNext);
-          match (true) {
-              $nextStatusInSame => (function () use ($ticket, $station, $nextStatusInSame) {
-
+            match (true) {
+                $nextStatusInSame || !($nextStation && $firstStatusOfNext) => (function () use ($ticket, $station, $nextStatusInSame) {
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
                         'station_id'         => $station->id,
@@ -116,15 +115,12 @@ class JobTicketService extends BaseService
                         'admin_id'           => auth()->id(),
                         'action'             => 'advance',
                     ]);
-                    $ticket->update([
-                        'current_status_id' => $nextStatusInSame->id,
-                    ]);
-
+                    $ticket->current_status_id = $nextStatusInSame->id;
+                    $ticket->save();
                     return 'advanced_status';
                 })(),
 
                 $nextStation && $firstStatusOfNext => (function () use ($ticket, $nextStation, $firstStatusOfNext) {
-//                    dd($nextStation, $firstStatusOfNext);
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
                         'station_id'         => $nextStation->id,
@@ -133,10 +129,9 @@ class JobTicketService extends BaseService
                         'action'             => 'advance',
                         'notes'              => 'Moved to next station',
                     ]);
-                    $ticket->update([
-                        'current_status_id' => $firstStatusOfNext->id,
-                        'station_id'         => $nextStation->id,
-                    ]);
+                    $ticket->station_id        = $nextStation->id;
+                    $ticket->current_status_id = $firstStatusOfNext->id;
+                    $ticket->save();
                     return 'advanced_station';
                 })(),
 
