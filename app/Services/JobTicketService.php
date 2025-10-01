@@ -87,13 +87,8 @@ class JobTicketService extends BaseService
                 $found = $statuses->search(fn ($s) => (int)$s->id === (int)$ticket->current_status_id);
                 if ($found !== false) {
                     $currentIndex = (int) $found;
-                } 
-            } else {
-                $ticket->current_status_id = $statuses->first()->id;
-                $ticket->save();
-
+                }
             }
-
 
             $nextStatusInSame = $statuses->get($currentIndex + 1);
             $nextStation = $this->stationRepository->query()
