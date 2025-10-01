@@ -118,12 +118,6 @@ class JobTicketService extends BaseService
                 $ticket->current_status_id = $nextStatusInSame->id;
                 $ticket->save();
 
-                return [
-                    'result'            => 'advanced_status',
-                    'station_id'        => $station->id,
-                    'station_name'      => $station->name,
-                    'current_status_id' => $ticket->current_status_id,
-                ];
             }
 
             if ($nextStation && $firstStatusOfNext) {
@@ -135,6 +129,9 @@ class JobTicketService extends BaseService
                     'action'            => 'handoff',
                     'notes'             => 'Ready to move to next station',
                 ]);
+                $ticket->current_status_id = $firstStatusOfNext->id;
+                $ticket->station_id = $nextStation->id;
+                $ticket->save();
 
             }
             $this->eventRepository->create([
