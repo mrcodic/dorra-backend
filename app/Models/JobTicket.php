@@ -9,14 +9,15 @@ use App\Services\BarcodeService;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-#[ObservedBy(JobTicketObserver::class)]
 
+#[ObservedBy(JobTicketObserver::class)]
 class JobTicket extends Model
 {
     protected $fillable = [
         'code',
         'order_item_id',
         'station_id',
+        'current_status_id',
         'specs',
         'priority',
         'due_at',
@@ -48,6 +49,7 @@ class JobTicket extends Model
         if (!$this->code) return null;
         return app(BarcodeService::class)->saveSvg1D($this->code);
     }
+
     public function orderItem(): BelongsTo
     {
         return $this->belongsTo(OrderItem::class);
@@ -56,5 +58,11 @@ class JobTicket extends Model
     public function station(): BelongsTo
     {
         return $this->belongsTo(Station::class);
+    }
+
+    public function currentStatus(): BelongsTo
+    {
+        return $this->belongsTo(StationStatus::class, 'current_status_id')
+            ->withDefault(['name' => StatusEnum::PENDING->label()]);
     }
 }

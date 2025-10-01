@@ -50,7 +50,7 @@ var dt_user_table = $(".job-list-table").DataTable({
   data-station="${row.station_id}"
    data-priority="${row.priority}"
    data-due_at="${row.due_at}"
-   data-status="${row.status}"
+   data-status="${row.currentStatus.name}"
    data-action = "jobs/${data}"
 
      >

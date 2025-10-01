@@ -18,7 +18,7 @@ class JobTicketService extends BaseService
     {
         $jobs = $this->repository
             ->query()
-            ->with(['station','orderItem'])
+            ->with(['station','orderItem','currentStatus'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
@@ -39,7 +39,7 @@ class JobTicketService extends BaseService
                 return $job->priority?->label() ?? "-";
             })
             ->editColumn('status_label', function ($job) {
-                return $job->status?->label() ?? "-";
+                return $job->currentStatus?->name ?? "-";
             })
             ->editColumn('due_at', function ($job) {
                 return $job->due_at?->format('Y-m-d') ?? "-";
