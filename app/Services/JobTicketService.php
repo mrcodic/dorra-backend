@@ -57,7 +57,7 @@ class JobTicketService extends BaseService
                 return $job->orderItem->orderable->name ?? "-";
             })
             ->addColumn('order_item_image', function ($job) {
-                return $job->orderItem->orderable->getMainImageUrl() ?? "-";
+                return $job->orderItem->orderable->getMainImageUrl() ?:  asset('images/default-product.png');
             })
             ->make(true);
     }
