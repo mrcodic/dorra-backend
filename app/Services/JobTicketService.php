@@ -83,15 +83,22 @@ class JobTicketService extends BaseService
             }
 
             $currentIndex = 0;
-            $nextStatusInSame = null;
             if ($ticket->current_status_id) {
                 $found = $statuses->search(fn ($s) => (int)$s->id === (int)$ticket->current_status_id);
                 if ($found !== false) {
                     $currentIndex = (int) $found;
-                    $nextStatusInSame = $statuses->get($currentIndex + 1);
+                } else {
+                    $ticket->current_status_id = $statuses->first()->id;
+                    $ticket->save();
                 }
+            } else {
+                $ticket->current_status_id = $statuses->first()->id;
+                $ticket->save();
+
             }
 
+
+            $nextStatusInSame = $statuses->get($currentIndex + 1);
             $nextStation = $this->stationRepository->query()
                 ->where('workflow_order', '>', $station->workflow_order)
                 ->orderBy('workflow_order')
@@ -101,7 +108,7 @@ class JobTicketService extends BaseService
                 : null;
 
           match (true) {
-                (bool) $nextStatusInSame => (function () use ($ticket, $station, $nextStatusInSame) {
+                (bool) $nextStatusInSame&& !($nextStation && $firstStatusOfNext) => (function () use ($ticket, $station, $nextStatusInSame) {
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
                         'station_id'         => $station->id,
