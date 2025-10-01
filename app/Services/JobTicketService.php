@@ -107,7 +107,6 @@ class JobTicketService extends BaseService
 
 
             if ($nextStatusInSame) {
-                dd("sfdf");
                 $this->eventRepository->create([
                     'job_ticket_id'     => $ticket->id,
                     'station_id'        => $station->id,
@@ -122,6 +121,7 @@ class JobTicketService extends BaseService
             }
 
             if ($nextStation && $firstStatusOfNext) {
+
                 $this->eventRepository->create([
                     'job_ticket_id'     => $ticket->id,
                     'station_id'        => $station->id,
