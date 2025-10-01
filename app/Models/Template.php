@@ -101,6 +101,11 @@ class Template extends Model implements HasMedia
             ->withTimestamps();
     }
 
+    public function getImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('templates') ?:  asset('images/default-product.png');
+    }
+
 
 
 }

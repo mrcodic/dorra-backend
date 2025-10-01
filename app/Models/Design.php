@@ -194,5 +194,8 @@ class Design extends Model implements HasMedia
         ]);
     }
 
-
+    public function getImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('designs') ?:  asset('images/default-product.png');
+    }
 }
