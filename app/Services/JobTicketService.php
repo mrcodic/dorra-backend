@@ -116,8 +116,10 @@ class JobTicketService extends BaseService
                         'admin_id'           => auth()->id(),
                         'action'             => 'advance',
                     ]);
-                    $ticket->current_status_id = $nextStatusInSame->id;
-                    $ticket->save();
+                    $ticket->update([
+                        'current_status_id' => $nextStatusInSame->id,
+                    ]);
+
                     return 'advanced_status';
                 })(),
 
@@ -131,14 +133,14 @@ class JobTicketService extends BaseService
                         'action'             => 'advance',
                         'notes'              => 'Moved to next station',
                     ]);
-                    $ticket->station_id        = $nextStation->id;
-                    $ticket->current_status_id = $firstStatusOfNext->id;
-                    $ticket->save();
+                    $ticket->update([
+                        'current_status_id' => $firstStatusOfNext->id,
+                        'station_id'         => $nextStation->id,
+                    ]);
                     return 'advanced_station';
                 })(),
 
                 default => (function () use ($ticket, $statuses) {
-                    dd("fds");
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
                         'station_id'         => $ticket->station_id,
