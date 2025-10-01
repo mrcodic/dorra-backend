@@ -15,25 +15,11 @@ class JobTicketObserver
             return;
         }
 
-        $stationCode = optional($jobTicket->station)->code
-            ?? Station::whereKey($jobTicket->station_id)->value('code');
+        $station = optional($jobTicket->station)
+            ?? Station::whereKey($jobTicket->station_id)->first();
 
-        $jobTicket->status = $this->statusForStation($stationCode);
+        $jobTicket->current_status_id = $station->statuses->first()->id;
 
     }
-
-
-    private function statusForStation(?string $code): StatusEnum
-    {
-        $code = $code ? strtolower($code) : null;
-
-        return match ($code) {
-            'prepress' => StatusEnum::PREPRESS_QUEUE,
-            'print' => StatusEnum::PRINT_QUEUE,
-            'finish' => StatusEnum::FINISH_QUEUE,
-            'qc' => StatusEnum::QC_QUEUE,
-            'pack' => StatusEnum::PACK_QUEUE,
-            default => StatusEnum::PREPRESS_QUEUE,
-        };
-    }
+    
 }

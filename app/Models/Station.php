@@ -19,4 +19,9 @@ class Station extends Model
     {
         return $this->hasMany(JobTicket::class);
     }
+
+    public function statuses(): HasMany
+    {
+        return $this->hasMany(StationStatus::class);
+    }
 }
