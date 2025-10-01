@@ -2,14 +2,17 @@
 
 namespace App\Services;
 
-use App\Repositories\Interfaces\JobTicketRepositoryInterface;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use Illuminate\Http\{JsonResponse, Request};
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Repositories\Interfaces\{JobEventRepositoryInterface, JobTicketRepositoryInterface, StationRepositoryInterface};
 
 class JobTicketService extends BaseService
 {
-    public function __construct(JobTicketRepositoryInterface $repository)
+    public function __construct(JobTicketRepositoryInterface       $repository,
+                                public StationRepositoryInterface  $stationRepository,
+                                public JobEventRepositoryInterface $eventRepository,
+    )
     {
         parent::__construct($repository);
     }
@@ -18,7 +21,7 @@ class JobTicketService extends BaseService
     {
         $jobs = $this->repository
             ->query()
-            ->with(['station','orderItem','currentStatus'])
+            ->with(['station', 'orderItem', 'currentStatus'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
@@ -56,68 +59,74 @@ class JobTicketService extends BaseService
             ->make(true);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function scan(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'code' => ['required', 'string','exists:job_tickets,code'],
+            'code' => ['required', 'string', 'exists:job_tickets,code'],
         ]);
-        $this->handleTransaction(function () use ($data) {
+        return  $this->handleTransaction(function () use ($data) {
             $ticket = $this->repository->query()->whereCode($data['code'])->lockForUpdate()->first();
+            $statuses = $ticket->station?->statuses->sortBy('sequence')->values();
+            $currentIndex = 0;
+            if (!count($statuses)) {
+                throw new ModelNotFoundException("Station or its statuses not configured.");
+            }
+            if ($ticket->current_status_id) {
+                $found = $statuses->search(fn($s) => $s->id == $ticket->current_status_id);
+                $currentIndex = (int)$found;
+            } else {
+                $ticket->current_status_id = $statuses->first()->id;
+                $ticket->save();
+            }
+
+            $nextStatusInSame = $statuses->get($currentIndex + 1);
+            $nextStation = $this->stationRepository->query()->whereWorkflowOrder('>', $ticket->station->workflow_order)
+                ->orderBy('workflow_order')->first();
+            $firstStatusOfNext = $nextStation ? $nextStation->statuses()
+                ->orderBy('sequence')->first() : null;
+
+           return match (true) {
+                (bool)$nextStatusInSame => function () use ($ticket, $nextStatusInSame, $nextStation) {
+                    $this->eventRepository->create([
+                        'job_ticket_id' => $ticket->id,
+                        'station_status_id' => $nextStatusInSame->id,
+                        'station_id' => $ticket->station_id,
+                        'admin_id' => auth()->id(),
+                        'action' => 'advance',
+                    ]);
+                    $ticket->current_status_id = $nextStatusInSame->id;
+                    $ticket->save();
+                },
+                $nextStation && $firstStatusOfNext => function () use ($ticket, $nextStation, $firstStatusOfNext) {
+                    $this->eventRepository->create([
+                        'job_ticket_id' => $ticket->id,
+                        'station_status_id' => $firstStatusOfNext->id,
+                        'station_id' => $nextStation->status_id,
+                        'admin_id' => auth()->id(),
+                        'action' => 'advance',
+                    ]);
+                    $ticket->current_status_id = $firstStatusOfNext->id;
+                    $ticket->station_id = $nextStation->id;
+                    $ticket->save();
+                },
+                default => function () use ($ticket, $statuses) {
+                    $this->eventRepository->create([
+                        'job_ticket_id' => $ticket->id,
+                        'station_id' => $ticket->station_id,
+                        'station_status_id' => $locked->current_status_id ?? $statuses->last()->id,
+                        'admin_id' => auth()->id(),
+                        'action' => 'advance',
+                        'notes' => 'Completed last station',
+                    ]);
+                }
+            };
+
+
         });
 
-//        $result = DB::transaction(function () use ($data, $request) {
-//            $ticket = JobTicket::where('code', $data['code'])->lockForUpdate()->first();
-//            if (!$ticket) {
-//                abort(Response::HTTP_NOT_FOUND, __('Barcode not found.'));
-//            }
-//
-//            if ($ticket->scan_count >= 2) {
-//                abort(Response::HTTP_UNPROCESSABLE_ENTITY, __('Scan limit reached for this barcode.'));
-//            }
-//
-//            $currentStation = $ticket->station()->first();
-//            $currentOrder   = $currentStation?->sort_order ?? 0;
-//
-//            $nextStation = Station::where('sort_order', '>', $currentOrder)
-//                ->orderBy('sort_order')
-//                ->first();
-//
-//            if (!$nextStation) {
-//                abort(Response::HTTP_UNPROCESSABLE_ENTITY, __('Already at the final station.'));
-//            }
-//
-//            $fromStationId = $ticket->station_id;
-//            $ticket->station_id = $nextStation->id;
-//            $ticket->scan_count++;
-//            $ticket->save();
-//
-////            JobEvent::create([
-////                'job_ticket_id' => $ticket->id,
-////                'type'          => 'scan',
-////                'from_id'       => $fromStationId,
-////                'to_id'         => $nextStation->id,
-////                'meta'          => [
-////                    'reason'  => 'barcode_scan',
-////                    'scan_no' => $ticket->scan_count,
-////                ],
-////                'performed_by'  => optional($request->user())->id,
-////                'performed_at'  => now(),
-////            ]);
-//
-//            return [
-//                'ticket_id'     => $ticket->id,
-//                'code'          => $ticket->code,
-//                'scan_count'    => $ticket->scan_count, // 1 or 2
-//                'from_station'  => $fromStationId,
-//                'to_station'    => $nextStation->id,
-//                'message'       => $ticket->scan_count >= 2
-//                    ? __('Moved to next station. This barcode cannot be scanned again.')
-//                    : __('Moved to next station. One scan remaining.'),
-//            ];
-//        });
 
-        // Return JSON so our Blade page (fetch) can render it nicely
-        return response()->json("ok");
-
-}
+    }
 }

@@ -4,6 +4,7 @@ use App\Models\Admin;
 use App\Models\JobTicket;
 
 use App\Models\Station;
+use App\Models\StationStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,7 @@ return new class extends Migration
         Schema::create('job_events', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Station::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(StationStatus::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(JobTicket::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Admin::class)->nullable()->constrained()->nullOnDelete();
             $table->string('action');

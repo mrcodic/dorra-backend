@@ -23,23 +23,28 @@
             <h2 class="mb-3">Scan Job Ticket (Camera)</h2>
 
             <div class="row g-3">
-                <div class="col-md-6">
+{{--                <div class="col-md-6">--}}
+{{--                    --}}{{-- Scanner viewport --}}
+{{--                    <div id="reader" style="width: 100%; max-width: 520px;"></div>--}}
+{{--                    <div class="d-flex gap-2 mt-2 align-items-center">--}}
+{{--                        <select id="camera-select" class="form-select w-auto"></select>--}}
+{{--                        <button id="start-btn" class="btn btn-primary">Start</button>--}}
+{{--                        <button id="stop-btn" class="btn btn-secondary" disabled>Stop</button>--}}
+{{--                        <button id="torch-btn" class="btn btn-outline-dark" disabled>Torch</button>--}}
+{{--                    </div>--}}
+{{--                    <small class="text-muted d-block mt-1">--}}
+{{--                        Tip: Use HTTPS and allow camera permission. For rear camera on phones, choose “Back” camera.--}}
+{{--                    </small>--}}
+{{--                </div>    --}}
+                <div class="col-md-12">
                     {{-- Scanner viewport --}}
                     <div id="reader" style="width: 100%; max-width: 520px;"></div>
                     <div class="d-flex gap-2 mt-2 align-items-center">
-                        <select id="camera-select" class="form-select w-auto"></select>
-                        <button id="start-btn" class="btn btn-primary">Start</button>
-                        <button id="stop-btn" class="btn btn-secondary" disabled>Stop</button>
-                        <button id="torch-btn" class="btn btn-outline-dark" disabled>Torch</button>
-                    </div>
-                    <small class="text-muted d-block mt-1">
-                        Tip: Use HTTPS and allow camera permission. For rear camera on phones, choose “Back” camera.
-                    </small>
-                </div>        <div class="col-md-6">
-                    {{-- Scanner viewport --}}
-                    <div id="reader" style="width: 100%; max-width: 520px;"></div>
-                    <div class="d-flex gap-2 mt-2 align-items-center">
-                        <input type="text" class="form-control">
+                        <form action="{{ route("scan.submit") }}" method="post" class="form-control">
+                            <input type="text" name="code" class="form-control" placeholder="Enter JT-20251001-83-240-01">
+                            <button class="btn btn-primary mt-2" type="submit">scan</button>
+                        </form>
+
                     </div>
 
                 </div>
@@ -51,7 +56,7 @@
                         <div class="card-body">
                             <h5 class="card-title mb-2">Last Scan</h5>
                             <div><strong>Code:</strong> <span id="last-code">—</span></div>
-                            <div><strong>Message:</strong> <span id="last-msg">—</span></div>
+
                             <div><strong>Scans Used:</strong> <span id="last-count">—</span></div>
                             <div><strong>Station:</strong> <span id="last-station">—</span></div>
                         </div>

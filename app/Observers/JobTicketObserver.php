@@ -19,7 +19,6 @@ class JobTicketObserver
             ?? Station::whereKey($jobTicket->station_id)->first();
 
         $jobTicket->current_status_id = $station->statuses->first()->id;
-
     }
-    
+
 }

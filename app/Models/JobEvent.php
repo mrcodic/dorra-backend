@@ -9,10 +9,12 @@ class JobEvent extends Model
 {
     protected $fillable = [
         'station_id',
+        'station_status_id',
         'job_ticket_id',
         'admin_id',
         'action',
         'meta_data',
+        'started_at',
     ];
     protected $casts = [
         'meta_data' => 'array',
@@ -26,5 +28,10 @@ class JobEvent extends Model
     public function jobTicket(): BelongsTo
     {
         return $this->belongsTo(JobTicket::class);
+    }
+
+    public function stationStatus(): BelongsTo
+    {
+        return $this->belongsTo(StationStatus::class);
     }
 }
