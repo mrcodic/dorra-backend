@@ -41,6 +41,7 @@
                     <div id="reader" style="width: 100%; max-width: 520px;"></div>
                     <div class="d-flex gap-2 mt-2 align-items-center">
                         <form action="{{ route("scan.submit") }}" method="post" class="form-control">
+                            @csrf
                             <input type="text" name="code" class="form-control" placeholder="Enter JT-20251001-83-240-01">
                             <button class="btn btn-primary mt-2" type="submit">scan</button>
                         </form>
