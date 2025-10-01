@@ -21,7 +21,7 @@ class JobTicketService extends BaseService
     {
         $jobs = $this->repository
             ->query()
-            ->with(['station', 'orderItem.orderable.media', 'currentStatus'])
+            ->with(['station', 'orderItem', 'currentStatus'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
@@ -55,6 +55,9 @@ class JobTicketService extends BaseService
             })
             ->addColumn('order_item_name', function ($job) {
                 return $job->orderItem->orderable->name ?? "-";
+            })
+            ->addColumn('order_item_image', function ($job) {
+                return $job->orderItem->orderable->getMainImageUrl() ?? "-";
             })
             ->make(true);
     }

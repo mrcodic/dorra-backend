@@ -172,6 +172,7 @@
                         <th>
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                         </th>
+                        <th>Image</th>
                         <th>Job Number</th>
                         <th>Priority</th>
                         <th>Current Station</th>

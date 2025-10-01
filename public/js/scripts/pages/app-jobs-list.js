@@ -26,6 +26,15 @@ var dt_user_table = $(".job-list-table").DataTable({
                 return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
             }
         },
+        {
+            data: "order_item_image",
+            render: function (data, type, row) {
+                return `
+            <img src="${data}" alt="Product Image"
+                style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #ccc;" />
+        `;
+            }
+        },
         {data: "code"},
         {data: "priority_label"},
         {data: "current_station"},
