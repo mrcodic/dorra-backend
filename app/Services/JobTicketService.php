@@ -87,15 +87,10 @@ class JobTicketService extends BaseService
                 $found = $statuses->search(fn ($s) => (int)$s->id === (int)$ticket->current_status_id);
                 if ($found !== false) {
                     $currentIndex = (int) $found;
-                } else {
-                    $ticket->current_status_id = $statuses->first()->id;
-                    $ticket->save();
-                    $currentIndex = 0;
-                }
+                } 
             } else {
                 $ticket->current_status_id = $statuses->first()->id;
                 $ticket->save();
-                $currentIndex = 0;
 
             }
 
@@ -108,7 +103,6 @@ class JobTicketService extends BaseService
             $firstStatusOfNext = $nextStation
                 ? $nextStation->statuses()->orderBy('sequence')->first()
                 : null;
-//dd($nextStation &&  $firstStatusOfNext,(bool) $nextStatusInSame);
 
           match (true) {
                 (bool) $nextStatusInSame => (function () use ($ticket, $station, $nextStatusInSame) {
