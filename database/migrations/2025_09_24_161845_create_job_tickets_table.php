@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->foreignIdFor(OrderItem::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Station::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('current_status_id')->nullable()->constrained('station_statuses')->cascadeOnDelete();
             $table->json('specs')->nullable();
             $table->string('hold_reason')->nullable();
             $table->tinyInteger('priority')->nullable();

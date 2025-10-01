@@ -10,7 +10,7 @@ class JobEvent extends Model
     protected $fillable = [
         'station_id',
         'job_ticket_id',
-        'operator_id',
+        'admin_id',
         'action',
         'meta_data',
     ];
