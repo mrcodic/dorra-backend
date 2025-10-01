@@ -83,14 +83,15 @@ class JobTicketService extends BaseService
             }
 
             $currentIndex = 0;
+            $nextStatusInSame = null;
             if ($ticket->current_status_id) {
                 $found = $statuses->search(fn ($s) => (int)$s->id === (int)$ticket->current_status_id);
                 if ($found !== false) {
                     $currentIndex = (int) $found;
+                    $nextStatusInSame = $statuses->get($currentIndex + 1);
                 }
             }
 
-            $nextStatusInSame = $statuses->get($currentIndex + 1);
             $nextStation = $this->stationRepository->query()
                 ->where('workflow_order', '>', $station->workflow_order)
                 ->orderBy('workflow_order')
