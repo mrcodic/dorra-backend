@@ -71,7 +71,7 @@ class JobTicketService extends BaseService
             $ticket = $this->repository->query()->whereCode($data['code'])->lockForUpdate()->first();
             $statuses = $ticket->station?->statuses->sortBy('sequence')->values();
             $currentIndex = 0;
-            if (!count($statuses)) {
+            if (!$statuses) {
                 throw new ModelNotFoundException("Station or its statuses not configured.");
             }
             if ($ticket->current_status_id) {
