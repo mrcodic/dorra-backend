@@ -105,7 +105,6 @@ class JobTicketService extends BaseService
             $firstStatusOfNext = $nextStation
                 ? $nextStation->statuses()->orderBy('sequence')->first()
                 : null;
-//dd($nextStatusInSame || !($nextStation && $firstStatusOfNext), $nextStation && $firstStatusOfNext);
             match (true) {
                 $nextStatusInSame || !($nextStation && $firstStatusOfNext) => (function () use ($ticket, $station, $nextStatusInSame) {
                     $this->eventRepository->create([
