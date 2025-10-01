@@ -105,7 +105,7 @@ class JobTicketService extends BaseService
             $firstStatusOfNext = $nextStation
                 ? $nextStation->statuses()->orderBy('sequence')->first()
                 : null;
-dd($nextStatusInSame || !($nextStation && $firstStatusOfNext), $nextStation && $firstStatusOfNext);
+//dd($nextStatusInSame || !($nextStation && $firstStatusOfNext), $nextStation && $firstStatusOfNext);
           match (true) {
               $nextStatusInSame || !($nextStation && $firstStatusOfNext) => (function () use ($ticket, $station, $nextStatusInSame) {
                     $this->eventRepository->create([
@@ -135,17 +135,17 @@ dd($nextStatusInSame || !($nextStation && $firstStatusOfNext), $nextStation && $
                     return 'advanced_station';
                 })(),
 
-//                default => (function () use ($ticket, $statuses) {
-//                    $this->eventRepository->create([
-//                        'job_ticket_id'      => $ticket->id,
-//                        'station_id'         => $ticket->station_id,
-//                        'station_status_id'  => $ticket->current_status_id ?? $statuses->last()->id,
-//                        'admin_id'           => auth()->id(),
-//                        'action'             => 'advance',
-//                        'notes'              => 'Completed last station',
-//                    ]);
-//                    return 'completed_workflow';
-//                })(),
+                default => (function () use ($ticket, $statuses) {
+                    $this->eventRepository->create([
+                        'job_ticket_id'      => $ticket->id,
+                        'station_id'         => $ticket->station_id,
+                        'station_status_id'  => $ticket->current_status_id ?? $statuses->last()->id,
+                        'admin_id'           => auth()->id(),
+                        'action'             => 'advance',
+                        'notes'              => 'Completed last station',
+                    ]);
+                    return 'completed_workflow';
+                })(),
             };
 
 
