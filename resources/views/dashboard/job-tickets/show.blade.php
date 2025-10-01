@@ -103,7 +103,7 @@
 
                             <dt class="col-5 col-sm-4 text-muted">Status</dt>
                             <dd class="col-7 col-sm-8">
-                                <span class="badge bg-primary">{{ $model->status->label() }}</span>
+                                <span class="badge bg-primary">{{ $model->currentStatus->name }}</span>
                             </dd>
 
                             <dt class="col-5 col-sm-4 text-muted">Priority</dt>
