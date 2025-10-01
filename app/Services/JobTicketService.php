@@ -108,6 +108,7 @@ class JobTicketService extends BaseService
 //dd($nextStatusInSame || !($nextStation && $firstStatusOfNext), $nextStation && $firstStatusOfNext);
           match (true) {
               $nextStatusInSame => (function () use ($ticket, $station, $nextStatusInSame) {
+                  dd("asfa");
                     $this->eventRepository->create([
                         'job_ticket_id'      => $ticket->id,
                         'station_id'         => $station->id,
