@@ -85,7 +85,7 @@ class JobTicketService extends BaseService
             $statuses  = $station?->statuses?->sortBy('sequence')->values();
 
             if (!$station || !$statuses || $statuses->isEmpty()) {
-               throw ValidationException::withMessages(["station" => "Station or its statuses not configured."]);
+               throw ValidationException::withMessages(["station" => "Job ticket still pending."]);
             }
 
             $fromStationName = (string) $station->name;
