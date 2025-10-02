@@ -12,7 +12,7 @@ const dt_user_table = $(".job-list-table").DataTable({
         type: "GET",
         data: function (d) {
             d.search_value = $("#search-job-form").val() || "";
-            d.status       = $(".filter-status").val() || "";
+            d.status       = $("#pending").val() || "";
             d.priority     = $(".filter-priority").val() || "";
             d.due_at       = $(".due_date").val() || "";
             d.station_id   = $(".filter-station").val() || "";
@@ -110,6 +110,7 @@ $("#clear-search").on("click", function () {
     $(".filter-priority").val("");
     $(".due_date").val("");
     $("#overdue").prop("checked", false);
+    $("#pending").prop("checked", false);
     dt_user_table.ajax.reload();
 });
 

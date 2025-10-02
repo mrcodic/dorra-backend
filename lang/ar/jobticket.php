@@ -4,7 +4,7 @@ return [
 
     'status' => [
         'pending'              => 'قيد الانتظار',
-        'prepress_queue'       => 'في انتظار قسم ما قبل الطباعة',
+        'prepress_queue'       => 'في انتظار  ما قبل الطباعة',
         'prepress_in_progress' => 'جاري إعداد ما قبل الطباعة',
         'prepress_done'        => 'اكتملت معالجة ما قبل الطباعة',
         'print_queue'          => 'في انتظار الطباعة',
