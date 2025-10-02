@@ -227,60 +227,21 @@
             </div>
             {{-- Statistics Cards --}}
             <div class="mb-3 d-flex flex-wrap gap-1">
-                <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs">
-                    <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/prepress.svg')}}" alt="users" style="width: 28px">
-                        <p>Prepress</p>
+                @foreach($associatedData['stations'] as $station)
+                    <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs">
+                        <div class="d-flex align-items-center gap-1">
+                            <img src="{{asset("/images/".strtolower($station->name).".svg")}}" alt="users" style="width: 28px">
+                            <p>{{ $station->name  }}</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="number">{{ $station->satuses->count() }}</span>
+                            <span class="text">Status</span>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <span class="number">{{ \App\Models\Invoice::count() }}</span>
-                        <span class="text">Status</span>
-                    </div>
-                </div>
+                @endforeach
 
-                <div class="d-flex flex-column justify-content-between p-1 card-specs">
-                    <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/print.svg')}}" alt="file" style="width: 28px">
-                        <p>Print</p>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <span class="number">{{ \App\Models\Invoice::count() }}</span>
-                        <span class="text">Status</span>
-                    </div>
-                </div>
 
-                <div class="d-flex flex-column justify-content-between p-1 card-specs">
-                    <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/finish.svg')}}" alt="success" style="width: 28px">
-                        <p>Finish</p>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
-                        <span class="text">Status</span>
-                    </div>
-                </div>
 
-                <div class="d-flex flex-column justify-content-between p-1 card-specs">
-                    <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/qc.svg')}}" alt="success" style="width: 28px">
-                        <p>QC</p>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
-                        <span class="text">Status</span>
-                    </div>
-                </div>
-
-                <div class="d-flex flex-column justify-content-between p-1 card-specs">
-                    <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/pack.svg')}}" alt="success" style="width: 28px">
-                        <p>Pack</p>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
-                        <span class="text">Status</span>
-                    </div>
-                </div>
             </div>
             {{-- Search Input --}}
             <div class="d-flex flex-column gap-1">
@@ -299,19 +260,19 @@
                     </form>
 
                     {{-- Overdue (checkbox is fine as you wrote it) --}}
-                    <div class=" d-flex gap-1 justify-content-evenly align-items-center col-12 col-md-2">
-                        <div class="form-check m-0">
-                            <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
-                                request('overdue') ? 'checked' : '' }}>
-                            <label class="form-check-label" for="overdue">OverDue</label>
-                        </div>
+                        <div class=" d-flex gap-1 justify-content-evenly align-items-center col-12 col-md-2">
+                            <div class="form-check m-0">
+                                <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
+                                    request('overdue') ? 'checked' : '' }}>
+                                <label class="form-check-label" for="overdue">OverDue</label>
+                            </div>
 
-                        <div class="form-check m-0 ms-3">
-                            <input class="form-check-input" type="checkbox" id="pending" name="pending" value="1" {{
-                                request()->boolean('pending') ? 'checked' : '' }}>
-                            <label class="form-check-label" for="pending">Pending</label>
+                            <div class="form-check m-0 ms-3">
+                                <input class="form-check-input" type="checkbox" id="pending" name="pending" value="1" {{
+                                    request()->boolean('pending') ? 'checked' : '' }}>
+                                <label class="form-check-label" for="pending">Pending</label>
+                            </div>
                         </div>
-                    </div>
 
 
                     {{-- Date --}}
