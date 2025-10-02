@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Dimension\StoreDimensionRequest;
 use App\Models\Category;
 use App\Models\Product;
+use App\Repositories\Implementations\StationStatusRepository;
 use App\Services\FlagService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
@@ -19,11 +20,11 @@ use App\Http\Resources\{CategoryResource,
     MediaResource,
     Product\ProductResource,
     StateResource,
+    StationStatusResource,
     TagResource,
     TeamResource,
     Template\TemplateResource,
-    Template\TypeResource
-};
+    Template\TypeResource};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
@@ -62,6 +63,7 @@ class MainController extends Controller
         public ProductRepositoryInterface   $productRepository,
         public TemplateRepositoryInterface  $templateRepository,
         public CategoryRepositoryInterface  $categoryRepository,
+        public StationStatusRepository      $stationStatusRepository,
 
     )
     {
@@ -207,19 +209,19 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $term    = trim((string) ($request->search ?? ''));
-        $rates   = $request->rates;
+        $term = trim((string)($request->search ?? ''));
+        $rates = $request->rates;
 
-        $locales   = config('app.locales',[]);
-        $terms     = collect(preg_split('/[\s,;]+/u', $term))
-            ->map(fn ($t) => mb_strtolower($t))
+        $locales = config('app.locales', []);
+        $terms = collect(preg_split('/[\s,;]+/u', $term))
+            ->map(fn($t) => mb_strtolower($t))
             ->filter()
             ->unique()
             ->values();
 
 
         $nameExprs = collect($locales)->map(
-            fn ($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$loc}\"')))"
+            fn($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$loc}\"')))"
         );
 
 
@@ -228,7 +230,7 @@ class MainController extends Controller
             $q->where(function ($qq) use ($terms, $nameExprs) {
                 foreach ($nameExprs as $expr) {
                     foreach ($terms as $w) {
-                        $qq->orWhereRaw("$expr LIKE ?", ['%'.$w.'%']);
+                        $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
                     }
                 }
             });
@@ -237,7 +239,7 @@ class MainController extends Controller
         $categories = $this->categoryRepository->query()
             ->with([
                 'products' => function ($query) use ($request) {
-                    $query->when($request->rates, fn ($q) => $q->withReviewRating($request->rates));
+                    $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
                 },
                 'products.media',
                 'media',
@@ -252,21 +254,17 @@ class MainController extends Controller
                     $applyContainsAnyLocale($query);
                 },
             ])
-
-
             ->where(function ($query) use ($applyContainsAnyLocale) {
                 $applyContainsAnyLocale($query);
                 $query->orWhereHas('products', function ($q) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($q);
                 });
             })
-
-            ->when($request->take, fn ($q, $take) => $q->take($take))
-
+            ->when($request->take, fn($q, $take) => $q->take($take))
             ->when($rates, function ($q) use ($rates) {
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
                 $q->where(function ($qq) use ($rates, $placeholders) {
-                    $qq->whereHas('products', fn ($p) => $p->withReviewRating($rates))
+                    $qq->whereHas('products', fn($p) => $p->withReviewRating($rates))
                         ->orWhereHas('reviews', function ($rq) use ($rates, $placeholders) {
                             $rq->select('reviewable_id')
                                 ->groupBy('reviewable_id', 'reviewable_type')
@@ -278,7 +276,6 @@ class MainController extends Controller
 
         return Response::api(data: CategoryResource::collection($categories));
     }
-
 
 
     public function dimensions(Request $request)
@@ -298,4 +295,8 @@ class MainController extends Controller
         return DimensionResource::collection($model->dimensions);
     }
 
+    public function stationStatuses(Request $request)
+    {
+        return Response::api(data: StationStatusResource::);
+    }
 }

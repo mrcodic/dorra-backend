@@ -232,6 +232,7 @@ Route::prefix('api/v1/')->group(function () {
     Route::controller(MainController::class)->group(function () {
         Route::get('states', 'states')->name('states');
         Route::get('sub-categories', 'subCategories')->name('sub-categories');
+        Route::get('station-statuses', 'stationStatuses')->name('station-statuses');
         Route::get('template-types', 'templateTypes')->name('template-types');
         Route::get('tags', 'tags')->name('tags');
         Route::get('units', 'units')->name('units');

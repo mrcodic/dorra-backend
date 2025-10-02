@@ -269,6 +269,19 @@
                     </select>
                 </div>
 
+                {{-- Station --}}
+                <div class="col-12 col-md-3">
+                    <select class="form-select filter-status">
+                        <option value="" disabled selected>Station</option>
+                        <option value="">All</option>
+                        @foreach(\App\Models\Station::all() as $station)
+                        <option value="{{ $station->id }}" {{ (string)request('status')===(string)$station->id ?
+                            'selected' : '' }}>
+                            {{ $station->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
                 {{-- Status --}}
                 <div class="col-12 col-md-3">
                     <select class="form-select filter-status">
