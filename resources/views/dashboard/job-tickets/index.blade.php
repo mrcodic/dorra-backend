@@ -301,19 +301,20 @@
                     {{-- Overdue (checkbox is fine as you wrote it) --}}
                     <div class="col-3 d-flex align-items-center">
                         <div class="form-check m-0">
-                            <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
-                                request('overdue') ? 'checked' : '' }}>
+                            <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1"
+                                {{ request('overdue') ? 'checked' : '' }}>
                             <label class="form-check-label" for="overdue">OverDue</label>
                         </div>
-                        <div class="col-3 d-flex align-items-center">
-                        <div class="form-check m-0">
-                            <input class="form-check-input" type="checkbox" id="pending" value="1" name="status">
+
+                        <div class="form-check m-0 ms-3">
+                            <input class="form-check-input" type="checkbox" id="pending" name="pending" value="1"
+                                {{ request()->boolean('pending') ? 'checked' : '' }}>
                             <label class="form-check-label" for="pending">Pending</label>
                         </div>
                     </div>
-                </div>
 
-                {{-- Date --}}
+
+                    {{-- Date --}}
                 <div class="col-12 col-md-2">
                     <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
                 </div>

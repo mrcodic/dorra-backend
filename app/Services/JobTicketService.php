@@ -22,29 +22,42 @@ class JobTicketService extends BaseService
         $jobs = $this->repository
             ->query()
             ->with(['station', 'orderItem', 'currentStatus'])
+
+
             ->when(request()->filled('search_value'), function ($query) {
-                if (hasMeaningfulSearch(request('search_value'))) {
-                    $search = request('search_value');
+                $search = request('search_value');
+                if (hasMeaningfulSearch($search)) {
                     $query->where('code', 'LIKE', "%{$search}%");
                 } else {
                     $query->whereRaw('1=0');
                 }
             })
+
+
             ->when(request()->boolean('overdue'), function ($query) {
                 $query->whereNotNull('due_at')
-                    ->where('due_at', '<', now());
+                    ->where('due_at', '<=', now());
             })
-            ->when(request()->boolean('overdue'), function ($query) {
-                $query->whereNotNull('due_at')
-                    ->whereDate('due_at', '<=', today());
-            })
-            ->when(request()->filled('status'), function ($query) {
+
+
+            ->when(request()->boolean('pending'), function ($query) {
                 $query->whereNull('current_status_id');
             })
+
+            ->when(!request()->boolean('pending'), function ($query) {
+                $query->where('current_status_id', request('status_id'));
+            })
+             ->when(request()->filled('status') , function ($query) {
+                $query->where('current_status_id', request('status'));
+            })
+
+
             ->when(request()->filled('priority'), function ($query) {
                 $query->where('priority', request('priority'));
             })
+
             ->latest();
+
 
 
         return DataTables::of($jobs)
