@@ -12,9 +12,9 @@ const dt_user_table = $(".job-list-table").DataTable({
         type: "GET",
         data: function (d) {
             d.search_value = $("#search-job-form").val() || "";
-            d.status       = $(".filter-status").val() || "";
-            d.priority     = $(".filter-priority").val() || "";
-            d.due_at       = $(".due_date").val() || "";
+            d.status = $(".filter-status").val() || "";
+            d.priority = $(".filter-priority").val() || "";
+            d.due_at = $(".due_date").val() || "";
 
             // send overdue only when checked
             if ($("#overdue").is(":checked")) {
@@ -42,7 +42,12 @@ const dt_user_table = $(".job-list-table").DataTable({
         },
         { data: "code" },
         { data: "priority_label" },
-        { data: "current_station" },
+        {
+            data: "current_station",
+            render: function (data) {
+                return `<p class="rounded rounded-3 text-center" style = "border: 2px solid #CED5D4;">${data}</p>`;
+            },
+        },
         { data: "status_label" },
         { data: "due_at" },
         { data: "order_number" },
@@ -59,7 +64,7 @@ const dt_user_table = $(".job-list-table").DataTable({
                data-station="${row.station_id}"
                data-priority="${row.priority}"
                data-due_at="${row.due_at}"
-               data-status="${row.current_status?.name || ''}"
+               data-status="${row.current_status?.name || ""}"
                data-action="jobs/${id}">
                <i data-feather="edit-3"></i>
             </a>
@@ -90,9 +95,13 @@ const dt_user_table = $(".job-list-table").DataTable({
 });
 
 // ---- events (reload table) ----
-$(document).on("change", ".filter-status, .filter-priority, .due_date, #overdue", function () {
-    dt_user_table.ajax.reload();
-});
+$(document).on(
+    "change",
+    ".filter-status, .filter-priority, .due_date, #overdue",
+    function () {
+        dt_user_table.ajax.reload();
+    }
+);
 
 $("#search-job-form").on("keyup", function (e) {
     // optional: only reload on Enter to avoid excessive calls
@@ -120,9 +129,9 @@ $("#search-job-form").on("keyup", function () {
         dt_user_table.draw();
     }, 300);
 });
-$('#clear-search').on('click', function () {
-    $('#search-job-form').val('');  // clear input
-    dt_user_table.search('').draw();  // reset DataTable search
+$("#clear-search").on("click", function () {
+    $("#search-job-form").val(""); // clear input
+    dt_user_table.search("").draw(); // reset DataTable search
 });
 $(".filter-status").on("change", function () {
     dt_user_table.draw();
@@ -133,7 +142,7 @@ $(".filter-priority").on("change", function () {
 
 // Category select with timeout
 let categoryFilterTimeout;
-$('.category-select').on('change', function () {
+$(".category-select").on("change", function () {
     clearTimeout(categoryFilterTimeout);
     categoryFilterTimeout = setTimeout(() => {
         dt_user_table.draw();
@@ -142,67 +151,63 @@ $('.category-select').on('change', function () {
 
 // Tag select with timeout
 let tagFilterTimeout;
-$('.tag-select').on('change', function () {
+$(".tag-select").on("change", function () {
     clearTimeout(tagFilterTimeout);
     tagFilterTimeout = setTimeout(() => {
         dt_user_table.draw();
     }, 300);
 });
 
-$(document).on('change', '#select-all-checkbox', function () {
-    const isChecked = $(this).prop('checked');
-    $('.category-checkbox').prop('checked', isChecked);
+$(document).on("change", "#select-all-checkbox", function () {
+    const isChecked = $(this).prop("checked");
+    $(".category-checkbox").prop("checked", isChecked);
     toggleBulkDeleteContainer();
 });
 
-$(document).on('change', '.category-checkbox', function () {
+$(document).on("change", ".category-checkbox", function () {
+    const totalCheckboxes = $(".category-checkbox").length;
 
-    const totalCheckboxes = $('.category-checkbox').length;
+    const checkedCheckboxes = $(".category-checkbox:checked").length;
 
-    const checkedCheckboxes = $('.category-checkbox:checked').length;
-
-    $('#select-all-checkbox').prop('checked', totalCheckboxes === checkedCheckboxes);
+    $("#select-all-checkbox").prop(
+        "checked",
+        totalCheckboxes === checkedCheckboxes
+    );
     toggleBulkDeleteContainer();
 });
 
 function toggleBulkDeleteContainer() {
-    const checkedCount = $('.category-checkbox:checked').length;
+    const checkedCount = $(".category-checkbox:checked").length;
     if (checkedCount > 0) {
-        $('#bulk-delete-container').show();
-        $('#selected-count').text(checkedCount);
+        $("#bulk-delete-container").show();
+        $("#selected-count").text(checkedCount);
     } else {
-        $('#bulk-delete-container').hide();
+        $("#bulk-delete-container").hide();
     }
 }
 
 $(document).ready(function () {
-    $(document).on('click', '.edit-details', function (e) {
-        const jobStatus = $(this).data('status');
-        const jobPriority = $(this).data('priority');
-        const jobStationId = $(this).data('station');
-        const jobDueAt = $(this).data('due_at');
-        const action = $(this).data('action');
-
+    $(document).on("click", ".edit-details", function (e) {
+        const jobStatus = $(this).data("status");
+        const jobPriority = $(this).data("priority");
+        const jobStationId = $(this).data("station");
+        const jobDueAt = $(this).data("due_at");
+        const action = $(this).data("action");
 
         // Populate modal
-        $('#editJobModal #edit-station-id').val(jobStationId);
-        $('#editJobModal #edit-status').val(jobStatus);
-        $('#editJobModal #edit-due-at').val(jobDueAt);
-        $('#editJobModal #edit-priority').val(jobPriority);
-        $('#editJobModal #editJobForm').attr('action', action);
+        $("#editJobModal #edit-station-id").val(jobStationId);
+        $("#editJobModal #edit-status").val(jobStatus);
+        $("#editJobModal #edit-due-at").val(jobDueAt);
+        $("#editJobModal #edit-priority").val(jobPriority);
+        $("#editJobModal #editJobForm").attr("action", action);
 
         // Show modal
-        $('#editJobModal').modal('show');
-
+        $("#editJobModal").modal("show");
     });
-    $(document).on('click', 'view-details', function (e) {
-
-
+    $(document).on("click", "view-details", function (e) {
         // Show modal
-        $('#showJobModal').modal('show');
-
+        $("#showJobModal").modal("show");
     });
-
 
     $(document).on("click", ".open-delete-order-modal", function () {
         const orderId = $(this).data("id");
@@ -211,21 +216,21 @@ $(document).ready(function () {
         let modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal.show();
     });
-
 });
 handleAjaxFormSubmit("#editJobForm", {
     successMessage: "Job Updated Successfully",
     onSuccess: function () {
-        location.reload()
-    }
-
-})
+        location.reload();
+    },
+});
 // Bulk delete button handler
 $(document).on("click", "#bulk-delete-btn", function (e) {
     e.preventDefault();
-    const selectedIds = $(".category-checkbox:checked").map(function () {
-        return $(this).val();
-    }).get();
+    const selectedIds = $(".category-checkbox:checked")
+        .map(function () {
+            return $(this).val();
+        })
+        .get();
 
     if (selectedIds.length === 0) {
         Toastify({
@@ -246,9 +251,11 @@ $(document).on("click", "#bulk-delete-btn", function (e) {
 
 // Confirm bulk delete modal
 $(document).on("click", "#confirm-bulk-delete", function () {
-    const selectedIds = $(".category-checkbox:checked").map(function () {
-        return $(this).val();
-    }).get();
+    const selectedIds = $(".category-checkbox:checked")
+        .map(function () {
+            return $(this).val();
+        })
+        .get();
 
     if (selectedIds.length > 0) {
         bulkDeleteOrders(selectedIds);
@@ -319,8 +326,6 @@ $(document).on("submit", "#deleteInvoiceForm", function (e) {
                 close: true,
             }).showToast();
             $(".job-list-table").DataTable().ajax.reload(null, false);
-
-
         },
         error: function () {
             $("#deleteInvoiceModal").modal("hide");
@@ -333,16 +338,17 @@ $(document).on("submit", "#deleteInvoiceForm", function (e) {
                 close: true,
             }).showToast();
             $(".job-list-table").DataTable().ajax.reload(null, false);
-
         },
     });
 });
 
 $(document).on("submit", "#bulk-delete-form", function (e) {
     e.preventDefault();
-    const selectedIds = $(".category-checkbox:checked").map(function () {
-        return $(this).val();
-    }).get();
+    const selectedIds = $(".category-checkbox:checked")
+        .map(function () {
+            return $(this).val();
+        })
+        .get();
 
     if (selectedIds.length === 0) return;
 
@@ -364,16 +370,13 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
                 close: true,
             }).showToast();
 
-
-            $('#bulk-delete-container').hide();
-            $('.category-checkbox').prop('checked', false);
-            $('#select-all-checkbox').prop('checked', false);
+            $("#bulk-delete-container").hide();
+            $(".category-checkbox").prop("checked", false);
+            $("#select-all-checkbox").prop("checked", false);
             $(".category-list-table").DataTable().ajax.reload(null, false);
-
 
             resetBulkSelection();
             $(".job-list-table").DataTable().ajax.reload(null, false);
-
         },
         error: function () {
             $("#deleteInvoicesModal").modal("hide");
@@ -386,25 +389,21 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
                 close: true,
             }).showToast();
 
-
-            $('#bulk-delete-container').hide();
-            $('.category-checkbox').prop('checked', false);
-            $('#select-all-checkbox').prop('checked', false);
+            $("#bulk-delete-container").hide();
+            $(".category-checkbox").prop("checked", false);
+            $("#select-all-checkbox").prop("checked", false);
             $(".category-list-table").DataTable().ajax.reload(null, false);
-
-
         },
     });
-
 });
 
 function resetBulkSelection() {
-    $('#bulk-delete-container').hide();
-    $('.category-checkbox').prop('checked', false);
-    $('#select-all-checkbox').prop('checked', false);
+    $("#bulk-delete-container").hide();
+    $(".category-checkbox").prop("checked", false);
+    $("#select-all-checkbox").prop("checked", false);
 }
 
-$(document).on('change', '.dt-button input[type="date"]', function () {
+$(document).on("change", '.dt-button input[type="date"]', function () {
     const selectedDate = $(this).val();
     dt_user_table.draw();
 });

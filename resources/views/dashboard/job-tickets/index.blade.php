@@ -229,8 +229,8 @@
             <div class="mb-3 d-flex flex-wrap gap-1">
                 <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs">
                     <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/users.svg')}}" alt="users" style="width: 28px">
-                        <p>Clients</p>
+                        <img src="{{asset('/images/prepress.svg')}}" alt="users" style="width: 28px">
+                        <p>Prepress</p>
                     </div>
                     <div class="d-flex align-items-center">
                         <span class="number">{{ \App\Models\Invoice::count() }}</span>
@@ -240,8 +240,8 @@
 
                 <div class="d-flex flex-column justify-content-between p-1 card-specs">
                     <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/file.svg')}}" alt="file" style="width: 28px">
-                        <p>Invoices</p>
+                        <img src="{{asset('/images/print.svg')}}" alt="file" style="width: 28px">
+                        <p>Print</p>
                     </div>
                     <div class="d-flex align-items-center">
                         <span class="number">{{ \App\Models\Invoice::count() }}</span>
@@ -251,8 +251,8 @@
 
                 <div class="d-flex flex-column justify-content-between p-1 card-specs">
                     <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/success.svg')}}" alt="success" style="width: 28px">
-                        <p>Paid</p>
+                        <img src="{{asset('/images/finish.svg')}}" alt="success" style="width: 28px">
+                        <p>Finish</p>
                     </div>
                     <div class="d-flex align-items-center">
                         <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
@@ -262,8 +262,8 @@
 
                 <div class="d-flex flex-column justify-content-between p-1 card-specs">
                     <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/success.svg')}}" alt="success" style="width: 28px">
-                        <p>Paid</p>
+                        <img src="{{asset('/images/qc.svg')}}" alt="success" style="width: 28px">
+                        <p>QC</p>
                     </div>
                     <div class="d-flex align-items-center">
                         <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
@@ -273,8 +273,8 @@
 
                 <div class="d-flex flex-column justify-content-between p-1 card-specs">
                     <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset('/images/success.svg')}}" alt="success" style="width: 28px">
-                        <p>Paid</p>
+                        <img src="{{asset('/images/pack.svg')}}" alt="success" style="width: 28px">
+                        <p>Pack</p>
                     </div>
                     <div class="d-flex align-items-center">
                         <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
