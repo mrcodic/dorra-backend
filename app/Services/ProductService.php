@@ -255,72 +255,108 @@ class ProductService extends BaseService
             }
 
 
-                if (!empty($validatedData['specifications'])) {
-                $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
-                    $productSpecification = $product->specifications()->updateOrCreate(
-                        [
-                            'id' => $specification['id'] ?? null,
-                        ],
-                        [
+            // ----- Specifications (create / update / delete removed) -----
+            if (!empty($validatedData['specifications'])) {
+                $submittedSpecIds = [];
+
+                foreach ($validatedData['specifications'] as $spec) {
+                    // 1) Upsert SPEC
+                    if (!empty($spec['id'])) {
+                        // Update existing spec that belongs to this product
+                        $productSpecification = $product->specifications()
+                            ->whereKey($spec['id'])
+                            ->firstOrFail();
+
+                        $productSpecification->update([
                             'name' => [
-                                'en' => $specification['name_en'],
-                                'ar' => $specification['name_ar'],
+                                'en' => $spec['name_en'],
+                                'ar' => $spec['name_ar'],
                             ],
-                        ]
-                    );
+                        ]);
+                    } else {
+                        // Create new spec (do NOT use updateOrCreate with id=null)
+                        $productSpecification = $product->specifications()->create([
+                            'name' => [
+                                'en' => $spec['name_en'],
+                                'ar' => $spec['name_ar'],
+                            ],
+                        ]);
+                    }
 
+                    $submittedSpecIds[] = $productSpecification->id;
 
-                    $submittedOptionIds = collect($specification['specification_options'] ?? [])->map(function ($option) use ($productSpecification) {
-                        $productOption = $productSpecification->options()->updateOrCreate(
-                            ['id' => $option['id'] ?? null],
-                            [
+                    // 2) Upsert OPTIONS for this spec
+                    $submittedOptionIds = [];
+
+                    foreach ($spec['specification_options'] ?? [] as $option) {
+                        if (!empty($option['id'])) {
+                            $productOption = $productSpecification->options()
+                                ->whereKey($option['id'])
+                                ->firstOrFail();
+
+                            $productOption->update([
                                 'value' => [
                                     'en' => $option['value_en'],
                                     'ar' => $option['value_ar'],
                                 ],
                                 'price' => $option['price'] ?? 0,
-                            ]
-                        );
+                            ]);
+                        } else {
+                            $productOption = $productSpecification->options()->create([
+                                'value' => [
+                                    'en' => $option['value_en'],
+                                    'ar' => $option['value_ar'],
+                                ],
+                                'price' => $option['price'] ?? 0,
+                            ]);
+                        }
 
-                        if (isset($option['option_image'])) {
+                        // Attach option image if provided (Spatie Media)
+                        if (!empty($option['option_image'])) {
                             Media::where('id', $option['option_image'])->update([
-                                'model_type' => get_class($productOption),
-                                'model_id' => $productOption->id,
+                                'model_type'      => get_class($productOption),
+                                'model_id'        => $productOption->id,
                                 'collection_name' => 'productSpecificationOptions',
                             ]);
                         }
 
-                        return $productOption->id;
-                    })->toArray();
+                        $submittedOptionIds[] = $productOption->id;
+                    }
 
+                    // 3) Delete OPTIONS removed by the user (clear media first)
+                    $productSpecification->options()
+                        ->whereNotIn('id', $submittedOptionIds ?: [0]) // guard empty
+                        ->get()
+                        ->each(function ($opt) {
+                            $opt->clearMediaCollection();
+                            $opt->delete();
+                        });
+                }
 
-                    $productSpecification->options()->whereNotIn('id', $submittedOptionIds)->each(function ($option) {
-                        $option->clearMediaCollection();
-                        $option->delete();
+                // 4) Delete SPECS removed by the user (delete options first)
+                $product->specifications()
+                    ->whereNotIn('id', $submittedSpecIds ?: [0]) // guard empty
+                    ->with('options')
+                    ->get()
+                    ->each(function ($spec) {
+                        $spec->options->each(function ($opt) {
+                            $opt->clearMediaCollection();
+                            $opt->delete();
+                        });
+                        $spec->delete();
                     });
-
-                    return $productSpecification->id;
-                })->toArray();
-
-
-                $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
-                    $spec->options->each(function ($option) {
-                        $option->clearMediaCollection();
-                        $option->delete();
-                    });
-                    $spec->delete();
-                });
             } else {
-
+                // No specs submitted: remove ALL specs + their options
+                $product->load('specifications.options');
                 $product->specifications->each(function ($spec) {
-                    $spec->delete();
-                    $spec->options->each(function ($option) {
-                        $option->clearMediaCollection();
-                        $option->delete();
+                    $spec->options->each(function ($opt) {
+                        $opt->clearMediaCollection();
+                        $opt->delete();
                     });
                     $spec->delete();
                 });
             }
+
 
 
             if (isset($validatedData['image_id'])) {
