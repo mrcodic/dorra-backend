@@ -14,13 +14,12 @@ return [
         'finishing'            => 'Finishing',
         'finished'             => 'Finished',
         'qc_queue'             => 'Waiting for Quality Check',
+        'qc_packing'            => 'QC Packing',
         'qc_passed'            => 'QC Passed',
-        'qc_failed'            => 'QC Failed',
         'pack_queue'           => 'Waiting for Packing',
+        'packing'               => 'Packing',
         'packed'               => 'Packed',
-        'shipped'              => 'Shipped',
-        'hold'                 => 'On Hold',
-        'cancelled'            => 'Cancelled',
+
     ],
     'priority' => [
         'standard' => 'Standard',
