@@ -134,7 +134,7 @@
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Priority:</p>
                                 <span class="rounded-3"
-                                    style="color: white; background-color: {{ $model->priority == \App\Enums\JobTicket\PriorityEnum::STANDARD ? '#F8AB1B' : '#E74943' }}; padding: 7px">{{ $model->priority }}</span>
+                                    style="color: white; background-color: {{ $model->priority == \App\Enums\JobTicket\PriorityEnum::STANDARD ? '#F8AB1B' : '#E74943' }}; padding: 7px">{{ $model->priority->label() }}</span>
                             </div>
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Due Date:</p>
