@@ -54,10 +54,9 @@ const dt_user_table = $(".job-list-table").DataTable({
 
                 // map: name -> styles
                 const map = {
-                    "Waiting":      { bg: "#424746", color: "#FFFFFF" },
-                    "In Progress":  { bg: "#FCF8FC", color: "#121212" },
-                    "Completed":    { bg: "#D7EEDD", color: "#0F5132" },
-                    "Comploted":    { bg: "#D7EEDD", color: "#0F5132" }, 
+                    "Waiting":      { bg: "#CED5D4", color: "#424746" },
+                    "In Progress":  { bg: "#FCF8FC", color: "#30A84D" },
+                    "Completed":    { bg: "#D7EEDD", color: "#30A84D" },
                 };
 
                 const styles = map[name] || { bg: "#F4F6F8", color: "#121212" };
