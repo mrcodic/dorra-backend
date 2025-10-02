@@ -1424,6 +1424,20 @@
                 // });
             }
         });
+        $(document).on('click', '[data-repeater-delete]', function (e) {
+            const $item = $(this).closest('[data-repeater-item]');
+            // mark as deleting (optional)
+            $item.attr('data-deleting', '1');
+
+            // disable & remove name so FormData won’t pick them up
+            $item.find('input, select, textarea').each(function () {
+                $(this).prop('disabled', true);
+                // if it's an input created for uploads, clear it too
+                if (this.type === 'hidden') this.value = '';
+                // remove name to be double-safe
+                if (this.name) this.removeAttribute('name');
+            });
+        });
     </script>
 
     <script>
