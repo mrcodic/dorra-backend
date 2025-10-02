@@ -118,6 +118,7 @@ $("#clear-search").on("click", function () {
     $(".filter-priority").val("");
     $(".due_date").val("");
     $("#overdue").prop("checked", false);
+    $("#pending").prop("checked", false);
     dt_user_table.ajax.reload();
 });
 
@@ -138,6 +139,9 @@ $(".filter-status").on("change", function () {
 });
 $(".filter-priority").on("change", function () {
     dt_user_table.draw();
+});
+$(document).on("change", ".filter-station", function () {
+    dt_user_table.ajax.reload();
 });
 
 // Category select with timeout
