@@ -228,7 +228,7 @@
             {{-- Statistics Cards --}}
             <div class="mb-3 d-flex flex-wrap gap-1">
                 @foreach($associatedData['stations'] as $station)
-                    <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs">
+                    <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs filter-station">
                         <div class="d-flex align-items-center gap-1">
                             <img src="{{asset("/images/".strtolower($station->name).".svg")}}" alt="users" style="width: 28px">
                             <p>{{ $station->name  }}</p>
