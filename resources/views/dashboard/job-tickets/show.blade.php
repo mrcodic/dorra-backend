@@ -68,7 +68,7 @@
         {{-- Top: Details + Codes + Status --}}
         <div class="p-1 d-flex flex-column flex-md-row gap-2 rounded-3" style="background-color: white">
             <div class="d-flex flex-column">
-                <img src="{{ $model->orderItem->itemable->getMainImageUrl() ?: asset('/images/item-photo.png')}}" alt="item photo" class="mb-2" width="320px"
+                <img src="{{ $model->orderItem->orderable->getMainImageUrl() ?: asset('/images/item-photo.png')}}" alt="item photo" class="mb-2" width="320px"
                     height="320px">
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
