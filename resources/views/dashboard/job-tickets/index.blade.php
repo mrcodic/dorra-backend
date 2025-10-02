@@ -317,7 +317,7 @@
                         </select>
 
                 </div>
-                    <div class="col-12 col-md-2">
+                    <div class="col-12 col-md-1">
                         <a href="{{ route("scan.kiosk") }}" class="btn btn-primary">Scan</a>
 
                     </div>
