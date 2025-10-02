@@ -225,37 +225,96 @@
                 <div class="col-md-4 user_plan"></div>
                 <div class="col-md-4 user_status"></div>
             </div>
-            <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
+            {{-- Statistics Cards --}}
+            <div class="mb-3 d-flex flex-wrap gap-1">
+                <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs">
+                    <div class="d-flex align-items-center gap-1">
+                        <img src="{{asset('/images/users.svg')}}" alt="users" style="width: 28px">
+                        <p>Clients</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="number">{{ \App\Models\Invoice::count() }}</span>
+                        <span class="text">Status</span>
+                    </div>
+                </div>
 
+                <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                    <div class="d-flex align-items-center gap-1">
+                        <img src="{{asset('/images/file.svg')}}" alt="file" style="width: 28px">
+                        <p>Invoices</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="number">{{ \App\Models\Invoice::count() }}</span>
+                        <span class="text">Status</span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                    <div class="d-flex align-items-center gap-1">
+                        <img src="{{asset('/images/success.svg')}}" alt="success" style="width: 28px">
+                        <p>Paid</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
+                        <span class="text">Status</span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                    <div class="d-flex align-items-center gap-1">
+                        <img src="{{asset('/images/success.svg')}}" alt="success" style="width: 28px">
+                        <p>Paid</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
+                        <span class="text">Status</span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column justify-content-between p-1 card-specs">
+                    <div class="d-flex align-items-center gap-1">
+                        <img src="{{asset('/images/success.svg')}}" alt="success" style="width: 28px">
+                        <p>Paid</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="number">{{ round(\App\Models\Invoice::sum('total_price')) }}</span>
+                        <span class="text">Status</span>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-1">
                 {{-- Search Input --}}
-                <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
-                    <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
-                    <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                        id="search-job-form" placeholder="Search job code..." style="height: 38px;">
-                    <!-- Clear button -->
-                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                <div class="d-flex flex-wrap gap-1 col-12 col-md-5">
+                    <form action="" method="get" class="d-flex position-relative col-8 search-form">
+                        <i data-feather="search"
+                            class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                            id="search-job-form" placeholder="Search job code..." style="height: 38px;">
+                        <!-- Clear button -->
+                        <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                    background: transparent; border: none; font-weight: bold;
                    color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
-                        &times;
-                    </button>
-                </form>
+                            &times;
+                        </button>
+                    </form>
 
-                {{-- Overdue (checkbox is fine as you wrote it) --}}
-                <div class="col-12 col-md-3 d-flex align-items-center">
-                    <div class="form-check m-0">
-                        <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
-                            request('overdue') ? 'checked' : '' }}>
-                        <label class="form-check-label ms-1" for="overdue">OverDue</label>
+                    {{-- Overdue (checkbox is fine as you wrote it) --}}
+                    <div class="col-3 d-flex align-items-center">
+                        <div class="form-check m-0">
+                            <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
+                                request('overdue') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="overdue">OverDue</label>
+                        </div>
                     </div>
                 </div>
 
                 {{-- Date --}}
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-2">
                     <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
                 </div>
 
                 {{-- Priority (ensure value is the enum value) --}}
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-2">
                     <select class="form-select filter-priority">
                         <option value="" selected disabled>Priority</option>
                         <option value="">All</option>
@@ -270,7 +329,7 @@
                 </div>
 
                 {{-- Status --}}
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-2">
                     <select class="form-select filter-status">
                         <option value="" disabled selected>Status</option>
                         <option value="">All</option>
@@ -282,7 +341,6 @@
                         @endforeach
                     </select>
                 </div>
-
             </div>
 
             <table class="job-list-table table">
