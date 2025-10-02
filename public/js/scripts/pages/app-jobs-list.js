@@ -15,6 +15,7 @@ const dt_user_table = $(".job-list-table").DataTable({
             d.status       = $(".filter-status").val() || "";
             d.priority     = $(".filter-priority").val() || "";
             d.due_at       = $(".due_date").val() || "";
+            d.station_id   = $(".filter-station").val() || "";
 
             // send overdue only when checked
             if ($("#overdue").is(":checked")) {
@@ -129,6 +130,9 @@ $(".filter-status").on("change", function () {
 });
 $(".filter-priority").on("change", function () {
     dt_user_table.draw();
+});
+$(document).on("change", ".filter-station", function () {
+    dt_user_table.ajax.reload();
 });
 
 // Category select with timeout

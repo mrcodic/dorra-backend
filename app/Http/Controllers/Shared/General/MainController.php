@@ -297,6 +297,7 @@ class MainController extends Controller
 
     public function stationStatuses(Request $request)
     {
-        return Response::api(data: StationStatusResource::);
+        $statuses = $this->stationStatusRepository->query()->whereStationId($request->station_id)->get();
+        return Response::api(data: StationStatusResource::collection($statuses));
     }
 }

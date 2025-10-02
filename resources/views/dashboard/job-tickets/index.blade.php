@@ -329,8 +329,8 @@
                 </div>
 
                 {{-- Station --}}
-                <div class="col-12 col-md-3">
-                    <select class="form-select filter-status">
+                <div class="col-12 col-md-2">
+                    <select class="form-select filter-station">
                         <option value="" disabled selected>Station</option>
                         <option value="">All</option>
                         @foreach(\App\Models\Station::all() as $station)
@@ -344,15 +344,9 @@
                 {{-- Status --}}
                 <div class="col-12 col-md-2">
                     <select class="form-select filter-status">
-                        <option value="" disabled selected>Status</option>
-                        <option value="">All</option>
-                        @foreach(\App\Models\StationStatus::all() as $status)
-                        <option value="{{ $status->id }}" {{ (string)request('status')===(string)$status->id ?
-                            'selected' : '' }}>
-                            {{ $status->name }}
-                        </option>
-                        @endforeach
+                        <option value="">All Statuses</option>
                     </select>
+
                 </div>
             </div>
 
@@ -440,6 +434,39 @@
 {{-- Page js files --}}
 <script src="{{ asset('js/scripts/pages/app-jobs-list.js') }}?v={{ time() }}"></script>
 <script src="https://unpkg.com/feather-icons"></script>
+<script>
+    $(document).on("change", ".filter-station", function () {
+        const stationId = $(this).val();
+        const url = $(this).data("statuses-url");
+        const $status = $(".filter-status");
+
+        // reset first
+        $status.empty().append('<option value="">All Statuses</option>');
+
+        if (!stationId) {
+            // no station selected -> keep "All"
+            dt_user_table && dt_user_table.ajax.reload();
+            return;
+        }
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            data: { station_id: stationId },   // << send station id
+            success: function (res) {
+                // expect: { data: [{id: 1, name: "Queued"}, ...] }
+                const items = res.data || res; // support both shapes
+                items.forEach(s => {
+                    $status.append(new Option(s.name, s.id));
+                });
+                dt_user_table && dt_user_table.ajax.reload();
+            },
+            error: function () {
+                // keep just "All Statuses" on error
+            }
+        });
+    });
+</script>
 
 <script>
     $(document).ready(function () {
