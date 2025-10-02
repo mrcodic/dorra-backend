@@ -346,7 +346,7 @@ class ProductService extends BaseService
                         $spec->delete();
                     });
             } else {
-                // No specs submitted: remove ALL specs + their options
+              dd("fdgg");
                 $product->load('specifications.options');
                 $product->specifications->each(function ($spec) {
                     $spec->options->each(function ($opt) {
