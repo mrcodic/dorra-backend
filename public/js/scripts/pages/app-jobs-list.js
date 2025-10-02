@@ -55,7 +55,7 @@ const dt_user_table = $(".job-list-table").DataTable({
                 // map: name -> styles
                 const map = {
                     "Waiting":      { bg: "#CED5D4", color: "#424746" },
-                    "In Progress":  { bg: "#FCF8FC", color: "#30A84D" },
+                    "In Progress":  { bg: "#FCF8FC", color: "#4E2775" },
                     "Completed":    { bg: "#D7EEDD", color: "#30A84D" },
                 };
 
