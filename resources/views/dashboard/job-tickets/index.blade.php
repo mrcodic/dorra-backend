@@ -198,7 +198,9 @@
                     {{-- Priority (ensure value is the enum value) --}}
                     <div class="col-12 col-md-3">
                         <select class="form-select filter-priority">
-                            <option value="">Priority</option>
+                            <option value="" selected disabled>Priority</option>
+                            <option value="" >All</option>
+
                             @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $priority)
                                 <option value="{{ $priority->value }}"
                                     {{ request('priority') === $priority->value ? 'selected' : '' }}>
@@ -211,7 +213,8 @@
                     {{-- Status --}}
                     <div class="col-12 col-md-3">
                         <select class="form-select filter-status">
-                            <option value="">Status</option>
+                            <option value="" disabled selected>Status</option>
+                            <option value="" >All</option>
                             @foreach(\App\Models\StationStatus::all() as $status)
                                 <option value="{{ $status->id }}"
                                     {{ (string)request('status') === (string)$status->id ? 'selected' : '' }}>
