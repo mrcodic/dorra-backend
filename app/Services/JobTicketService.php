@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -84,7 +85,7 @@ class JobTicketService extends BaseService
             $statuses  = $station?->statuses?->sortBy('sequence')->values();
 
             if (!$station || !$statuses || $statuses->isEmpty()) {
-                throw new ModelNotFoundException("Station or its statuses not configured.");
+                ValidationException::withMessages(["station" => "Station or its statuses not configured."]);
             }
 
             $fromStationName = (string) $station->name;
