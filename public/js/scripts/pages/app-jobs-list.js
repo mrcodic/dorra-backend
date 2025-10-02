@@ -125,6 +125,15 @@ const dt_user_table = $(".job-list-table").DataTable({
 });
 
 // ---- events (reload table) ----
+$(document).on("click", ".station-card", function () {
+    const station = $(this).data("station");
+
+    // set the dropdown filter for consistency
+    $(".filter-station").val(station);
+
+    // redraw DataTable
+    dt_user_table.draw();
+});
 $(document).on(
     "change",
     ".filter-status, .filter-priority, .due_date, #overdue",
