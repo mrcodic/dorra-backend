@@ -39,8 +39,8 @@ class JobTicketController extends DashboardController
 
     public function scan(Request $request): JsonResponse
     {
-        $this->jobTicketService->scan($request);
-        return Response::api();
+       $data =  $this->jobTicketService->scan($request);
+        return Response::api(data: $data);
 
     }
 }

@@ -35,13 +35,13 @@ class StationStatusesSeeder extends Seeder
             ],
             'qc' => [
                 StatusEnum::QC_QUEUE,
+                StatusEnum::QC_PASSING,
                 StatusEnum::QC_PASSED,
-                StatusEnum::QC_FAILED,
             ],
             'pack' => [
                 StatusEnum::PACK_QUEUE,
+                StatusEnum::PACKING,
                 StatusEnum::PACKED,
-                StatusEnum::SHIPPED,
             ],
         ];
 

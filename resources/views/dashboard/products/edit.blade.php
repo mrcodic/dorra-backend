@@ -1446,17 +1446,33 @@
                 $(this).slideUp(deleteElement);
 
                 // Recalculate delete button visibility after an item is removed
-                // var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                // items.each(function (index) {
-                //     // Hide delete button for the first item (index 0) and show for others
-                //     if (index === 0) {
-                //         $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
-                //     } else {
+                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                items.each(function (index) {
+                    // Hide delete button for the first item (index 0) and show for others
+                    if (index === 0) {
+                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
+                    } else {
                 $(this).find('[data-repeater-delete]').show(); // Show delete button for others
-                //     }
-                // });
+                    }
+                });
             }
         });
+        // Immediately neutralize deleted items so they won't submit
+        $(document).on('click', '[data-repeater-delete]', function (e) {
+            const $item = $(this).closest('[data-repeater-item]');
+            // mark as deleting (optional)
+            $item.attr('data-deleting', '1');
+
+            // disable & remove name so FormData won’t pick them up
+            $item.find('input, select, textarea').each(function () {
+                $(this).prop('disabled', true);
+                // if it's an input created for uploads, clear it too
+                if (this.type === 'hidden') this.value = '';
+                // remove name to be double-safe
+                if (this.name) this.removeAttribute('name');
+            });
+        });
+
     </script>
 
     <script>

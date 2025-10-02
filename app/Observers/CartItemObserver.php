@@ -28,7 +28,7 @@ class CartItemObserver
             fn($item) => $item->productSpecificationOption?->price ?? 0
         );
 
-        if ($cartItem->cartable->has_custom_prices) {
+        if ($cartItem->cartable?->has_custom_prices) {
             $subTotal = ($cartItem->productPrice?->price ?? $cartItem->product_price)
                 + ($specsPrice ?: $cartItem->specs_price);
         } else {

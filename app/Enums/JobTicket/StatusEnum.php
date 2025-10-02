@@ -19,13 +19,12 @@ enum StatusEnum : int
     case FINISHING            = 9;
     case FINISHED             = 10;
     case QC_QUEUE             = 11;
-    case QC_PASSED            = 12;
-    case QC_FAILED            = 13;
+    case QC_PASSING            = 12;
+    case QC_PASSED           = 13;
     case PACK_QUEUE           = 14;
-    case PACKED               = 15;
-    case SHIPPED              = 16;
-    case HOLD                 = 17;
-    case CANCELLED            = 18;
+    case PACKING               = 15;
+    case PACKED              = 16;
+
 
     public function label(): string
     {
@@ -41,13 +40,11 @@ enum StatusEnum : int
             self::FINISHING            => __('jobticket.status.finishing'),
             self::FINISHED             => __('jobticket.status.finished'),
             self::QC_QUEUE             => __('jobticket.status.qc_queue'),
+            self::QC_PASSING            => __('jobticket.status.qc_passing'),
             self::QC_PASSED            => __('jobticket.status.qc_passed'),
-            self::QC_FAILED            => __('jobticket.status.qc_failed'),
             self::PACK_QUEUE           => __('jobticket.status.pack_queue'),
+            self::PACKING              => __('jobticket.status.packing'),
             self::PACKED               => __('jobticket.status.packed'),
-            self::SHIPPED              => __('jobticket.status.shipped'),
-            self::HOLD                 => __('jobticket.status.hold'),
-            self::CANCELLED            => __('jobticket.status.cancelled'),
         };
     }
 
