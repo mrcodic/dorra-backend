@@ -68,7 +68,7 @@
         {{-- Top: Details + Codes + Status --}}
         <div class="p-1 d-flex flex-column flex-md-row gap-2 rounded-3" style="background-color: white">
             <div class="d-flex flex-column">
-                <img src="{{asset('/images/item-photo.png')}}" alt="item photo" class="mb-2" width="320px"
+                <img src="{{ $model->orderItem->itemable->getMainImageUrl() ?: asset('/images/item-photo.png')}}" alt="item photo" class="mb-2" width="320px"
                     height="320px">
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
@@ -87,8 +87,8 @@
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Order ID:</p>
                         <div class="d-flex align-items-center justify-content-between">
-                            <p style="margin: 0; color: #121212">JT-20251001-83-242-01</p>
-                            <p style="margin: 0; color: #24B094; cursor: pointer">Go to Order</p>
+                            <p style="margin: 0; color: #121212">{{ $model->code }}</p>
+                            <a href="{{ route("orders.show".$model->orderItem->order->id) }}" style="margin: 0; color: #24B094; cursor: pointer">Go to Order</a>
                         </div>
                     </div>
                 </div>
@@ -98,13 +98,13 @@
                         <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
                         <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
                             <div class="d-flex flex-column">
-                                <p style="margin: 0; color: #121212">Front Design</p>
-                                <img src="{{asset('/images/item-photo.png')}}" alt="item photo">
+                                <p style="margin: 0; color: #121212">Design</p>
+                                <img src="{{$model->orderItem->itemable->getImageUrl()}}" alt="item photo">
                             </div>
-                            <div class="d-flex flex-column">
-                                <p style="margin: 0; color: #121212">Back Design</p>
-                                <img src="{{asset('/images/item-photo.png')}}" alt="item photo">
-                            </div>
+{{--                            <div class="d-flex flex-column">--}}
+{{--                                <p style="margin: 0; color: #121212">Back Design</p>--}}
+{{--                                <img src="{{asset('/images/item-photo.png')}}" alt="item photo">--}}
+{{--                            </div>--}}
                         </div>
                     </div>
                 </div>
@@ -112,24 +112,21 @@
             {{-- Details --}}
             <div class="d-flex flex-column">
                 <div>
-                    <p style="color: #424746; margin: 0; font-size: 18px">JT-20251001-83-242-01</p>
+                    <p style="color: #424746; margin: 0; font-size: 18px">{{ $model->code }}</p>
                     <hr>
-                    <h5 style="color: #121212; font-size: 25px">Item Name</h5>
-                    <p style="color: #424746; font-size: 15px">Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                        sed do eiusmod
-                        tempor incididunt ut
-                        labore et dolore magna aliqua.</p>
+                    <h5 style="color: #121212; font-size: 25px">{{ $model->orderItem->orderable?->name }}</h5>
+                    <p style="color: #424746; font-size: 15px">{{$model->orderItem->orderable?->description}}</p>
                     <div class="d-flex flex-column gap-2">
                         <div class="d-flex gap-2 gap-md-4">
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Station:</p>
                                 <span class="rounded-3"
-                                    style="color: #424746; background-color: #FAFBFC; padding: 7px">Prepress</span>
+                                    style="color: #424746; background-color: #FAFBFC; padding: 7px">{{ $model->station?->name }}</span>
                             </div>
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Status:</p>
                                 <span class="rounded-3"
-                                    style="color: #424746; background-color: #CED5D4; padding: 7px">Waiting</span>
+                                    style="color: #424746; background-color: #CED5D4; padding: 7px">{{ $model->currentStatus?->name }}</span>
                             </div>
                         </div>
 
@@ -137,11 +134,11 @@
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Priority:</p>
                                 <span class="rounded-3"
-                                    style="color: white; background-color: #F8AB1B; padding: 7px">Standard</span>
+                                    style="color: white; background-color: {{ $model->priority == \App\Enums\JobTicket\PriorityEnum::STANDARD ? '#F8AB1B' : '#E74943' }}; padding: 7px">{{ $model->priority }}</span>
                             </div>
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Due Date:</p>
-                                <span class="rounded-3" style="color: #424746; padding: 7px">2/10/2025</span>
+                                <span class="rounded-3" style="color: #424746; padding: 7px">{{ $model->due_At->format("d/m/Y") }}</span>
                             </div>
                         </div>
                     </div>
