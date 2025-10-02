@@ -13,7 +13,10 @@ var dt_user_table = $(".job-list-table").DataTable({
 
         data: function (d) {
             d.search_value = $("#search-job-form").val(); // get from input
-            d.created_at = $(".filter-date").val();
+            d.status = $(".filter-status").val();
+            d.priority = $(".filter-priority").val();
+            d.due_at = $(".due_date").val();
+            d.overdue = $("#overdue").val();
             return d;
         },
     },
@@ -119,7 +122,10 @@ $('#clear-search').on('click', function () {
     $('#search-job-form').val('');  // clear input
     dt_user_table.search('').draw();  // reset DataTable search
 });
-$(".filter-date").on("change", function () {
+$(".filter-status").on("change", function () {
+    dt_user_table.draw();
+});
+$(".filter-priority").on("change", function () {
     dt_user_table.draw();
 });
 

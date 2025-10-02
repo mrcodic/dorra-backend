@@ -35,6 +35,10 @@ class JobTicketService extends BaseService
                 $query->where('due_at', '<', now());
             })->when(request()->filled('due_at'), function ($query) {
                 $query->where('due_at', request('due_at'));
+            })->when(request()->filled('status'), function ($query) {
+                $query->where('current_status_id', request('status'));
+            })->when(request()->filled('priority'), function ($query) {
+                $query->where('priority', request('priority'));
             })
             ->latest();
 

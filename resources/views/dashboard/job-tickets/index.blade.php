@@ -198,14 +198,14 @@
 
                     {{-- Filter Select - 10% on md+, half width on sm --}}
                     <div class="col-12 col-md-3">
-                        <input type="date" class="form-control" name="due_at">
+                        <input type="date" class="form-control due_date" name="due_at">
                     </div>
                     {{-- Filter Select - 10% on md+, half width on sm --}}
                     <div class="col-12 col-md-3">
                         <select name="created_at" class="form-select filter-priority">
                             <option value="" disabled>Priority</option>
                             @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $priority)
-                                <option value="{{$priority}}">{{ $priority->label() }}</option>
+                                <option name="priority" value="{{$priority}}">{{ $priority->label() }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -215,7 +215,7 @@
                         <select name="created_at" class="form-select filter-status">
                             <option value="" disabled>Status</option>
                           @foreach(\App\Models\StationStatus::all() as $status)
-                                <option value="{{$status->id}}">{{$status->name }}</option>
+                                <option name="status" value="{{$status->id}}">{{$status->name }}</option>
 
                           @endforeach
                         </select>
