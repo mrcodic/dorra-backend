@@ -3,7 +3,6 @@ $.ajaxSetup({
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
 });
-
 const dt_user_table = $(".job-list-table").DataTable({
     processing: true,
     serverSide: true,
@@ -16,110 +15,26 @@ const dt_user_table = $(".job-list-table").DataTable({
             d.due_at       = $(".due_date").val() || "";
             d.station_id   = $(".filter-station").val() || "";
 
+            // ✅ send flags
+            if ($("#overdue").is(":checked")) d.overdue = 1; else delete d.overdue;
+            if ($("#pending").is(":checked")) d.pending = 1; else delete d.pending;
+
+            // status only when NOT pending
             const statusVal = $(".filter-status").val();
-            if (statusVal && !$("#pending").is(":checked")) {
-                d.status_id = statusVal;
-            } else {
-                delete d.status_id;
-            }
+            if (statusVal && !$("#pending").is(":checked")) d.status_id = statusVal;
+            else delete d.status_id;
+
             return d;
-        },
-
-    },
-    columns: [
-        {
-            data: null,
-            defaultContent: "",
-            orderable: false,
-            render: (data) =>
-                `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`,
-        },
-        {
-            data: "order_item_image",
-            render: (src) =>
-                `<img src="${src}" alt="Product Image" style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid #ccc;" />`,
-        },
-        { data: "code" },
-        { data: "priority_label" },
-        {
-            data: "current_station",
-            render: function (data) {
-                return `<p class="rounded rounded-3 text-center" style = "border: 2px solid #CED5D4;">${data}</p>`;
-            },
-        },
-        {
-            data: "status_label",
-            render: function (data) {
-                const name = (data || "").toString().trim();
-
-                // map: name -> styles
-                const map = {
-                    "Waiting":      { bg: "#CED5D4", color: "#424746" },
-                    "in Progress":  { bg: "#FCF8FC", color: "#4E2775" },
-                    "Completed":    { bg: "#D7EEDD", color: "#30A84D" },
-                };
-
-                const styles = map[name] || { bg: "#F4F6F8", color: "#121212" };
-
-                return `
-      <p class="rounded rounded-3 text-center"
-         style="
-           display:inline-block;
-           margin:0;
-           padding:.35rem .6rem;
-           background:${styles.bg};
-           color:${styles.color};
-
-         ">
-        ${name || "-"}
-      </p>
-    `;
-            },
         }
-        ,
-        { data: "due_at" },
-        { data: "order_number" },
-        { data: "order_item_name" },
-        {
-            data: "id",
-            orderable: false,
-            render: function (id, type, row) {
-                return `
-          <div class="d-flex gap-1">
-            <a href="jobs/${id}" class="view-details"><i data-feather="eye"></i></a>
-            <a href="#" class="edit-details"
-               data-id="${id}"
-               data-station="${row.station_id}"
-               data-priority="${row.priority}"
-               data-due_at="${row.due_at}"
-               data-status="${row.current_status?.name || ""}"
-               data-action="jobs/${id}">
-               <i data-feather="edit-3"></i>
-            </a>
-          </div>
-        `;
-            },
-        },
-    ],
-    order: [[1, "asc"]],
-    dom:
-        '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
-        '<"col-12 d-flex flex-wrap align-items-center justify-content-between">' +
-        ">t" +
-        '<"d-flex mx-2 row mb-1"' +
-        '<"col-sm-12 col-md-6"i>' +
-        '<"col-sm-12 col-md-6"p>' +
-        ">",
-    buttons: [],
-    drawCallback: function () {
-        feather.replace();
     },
-    language: {
-        sLengthMenu: "Show _MENU_",
-        search: "",
-        searchPlaceholder: "Search..",
-        paginate: { previous: "&nbsp;", next: "&nbsp;" },
-    },
+    // ... columns, etc.
+});
+
+// ✅ refresh when toggled
+$("#overdue, #pending").on("change", function () {
+    // if pending, clear status filter to avoid conflicts
+    if (this.id === "pending" && this.checked) $(".filter-status").val("");
+    dt_user_table.ajax.reload();
 });
 
 // ---- events (reload table) ----
