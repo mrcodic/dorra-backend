@@ -69,7 +69,7 @@ const dt_user_table = $(".job-list-table").DataTable({
            padding:.35rem .6rem;
            background:${styles.bg};
            color:${styles.color};
-           border: 2px solid #CED5D4;
+
          ">
         ${name || "-"}
       </p>
