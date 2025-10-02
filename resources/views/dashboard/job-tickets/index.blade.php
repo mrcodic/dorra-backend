@@ -307,7 +307,7 @@
                         </div>
                         <div class="col-3 d-flex align-items-center">
                         <div class="form-check m-0">
-                            <input class="form-check-input" type="checkbox" id="pending" name="status">
+                            <input class="form-check-input" type="checkbox" id="pending" value="1" name="status">
                             <label class="form-check-label" for="pending">Pending</label>
                         </div>
                     </div>
