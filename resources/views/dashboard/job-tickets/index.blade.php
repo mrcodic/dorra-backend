@@ -285,7 +285,7 @@
             <div class="d-flex flex-wrap align-items-center gap-1">
                 {{-- Search Input --}}
                 <div class="d-flex flex-wrap gap-1 col-12 col-md-5">
-                    <form action="" method="get" class="d-flex position-relative col-10 search-form">
+                    <form action="" method="get" class="d-flex position-relative col-8 search-form">
                         <i data-feather="search"
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
@@ -299,7 +299,7 @@
                     </form>
 
                     {{-- Overdue (checkbox is fine as you wrote it) --}}
-                    <div class="col-2 d-flex align-items-center">
+                    <div class="col-3 d-flex align-items-center">
                         <div class="form-check m-0">
                             <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1"
                                 {{ request('overdue') ? 'checked' : '' }}>
@@ -315,12 +315,12 @@
 
 
                     {{-- Date --}}
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-2">
                     <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
                 </div>
 
                 {{-- Priority (ensure value is the enum value) --}}
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-2">
                     <select class="form-select filter-priority">
                         <option value="" selected disabled>Priority</option>
                         <option value="">All</option>
@@ -335,7 +335,7 @@
                 </div>
 
                 {{-- Station --}}
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-2">
                     <select
                         class="form-select filter-station"
                         data-statuses-url="{{ route('station-statuses') }}"
@@ -351,7 +351,7 @@
                 </div>
 
                 {{-- Status --}}
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-2">
                     <select class="form-select filter-status">
                         <option value="">All Statuses</option>
                     </select>
