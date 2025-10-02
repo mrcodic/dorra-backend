@@ -315,6 +315,8 @@
                         <select class="form-select filter-status">
                             <option value="">All Statuses</option>
                         </select>
+                        <div class="col-12 col-md-2">
+                      <a href="{{ route("scan.kiosk") }}" class="btn btn-primary">Scan</a>
 
                     </div>
                 </div>
