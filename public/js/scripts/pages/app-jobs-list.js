@@ -12,17 +12,16 @@ const dt_user_table = $(".job-list-table").DataTable({
         type: "GET",
         data: function (d) {
             d.search_value = $("#search-job-form").val() || "";
-            d.status       = $("#pending").val() || "";
             d.priority     = $(".filter-priority").val() || "";
             d.due_at       = $(".due_date").val() || "";
             d.station_id   = $(".filter-station").val() || "";
 
             // send overdue only when checked
             if ($("#overdue").is(":checked")) d.overdue = 1; else delete d.overdue;
-            if ($("#pending").is(":checked")) d.pending = 1; else delete d.pending;
+            if ($("#pending").is(":checked")) d.status = 1; else delete d.pending;
 
             return d;
-      
+
         },
     },
     columns: [
