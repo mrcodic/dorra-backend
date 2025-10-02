@@ -449,29 +449,19 @@
         const url = $(this).data("statuses-url");
         const $status = $(".filter-status");
 
-        // reset first
+        // reset status options
         $status.empty().append('<option value="">All Statuses</option>');
 
-        if (!stationId) {
-            // no station selected -> keep "All"
-            dt_user_table && dt_user_table.ajax.reload();
-            return;
-        }
+        if (!stationId) { dt_user_table.ajax.reload(); return; }
 
         $.ajax({
-            url: url,
-            method: 'GET',
-            data: { station_id: stationId },   // << send station id
+            url,
+            method: "GET",
+            data: { station_id: stationId },
             success: function (res) {
-                // expect: { data: [{id: 1, name: "Queued"}, ...] }
-                const items = res.data || res; // support both shapes
-                items.forEach(s => {
-                    $status.append(new Option(s.name, s.id));
-                });
-                dt_user_table && dt_user_table.ajax.reload();
-            },
-            error: function () {
-                // keep just "All Statuses" on error
+                const items = res.data || res;
+                items.forEach(s => $status.append(new Option(s.name, s.id)));
+                dt_user_table.ajax.reload();
             }
         });
     });

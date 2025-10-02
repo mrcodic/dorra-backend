@@ -16,11 +16,12 @@ const dt_user_table = $(".job-list-table").DataTable({
             d.due_at       = $(".due_date").val() || "";
             d.station_id   = $(".filter-station").val() || "";
 
-            if ($("#overdue").is(":checked")) d.overdue = 1; else delete d.overdue;
-            if ($("#pending").is(":checked")) d.pending = 1; else delete d.pending;
-
-            d.status_id = $(".filter-status").val() || "";
-
+            const statusVal = $(".filter-status").val();
+            if (statusVal && !$("#pending").is(":checked")) {
+                d.status_id = statusVal;
+            } else {
+                delete d.status_id;
+            }
             return d;
         },
 
