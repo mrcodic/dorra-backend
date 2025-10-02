@@ -34,8 +34,9 @@ class JobTicketService extends BaseService
                 $query->whereNotNull('due_at')
                     ->where('due_at', '<', now());
             })
-            ->when(request()->filled('due_at'), function ($query) {
-                $query->whereDate('due_at', request('due_at'));
+            ->when(request()->boolean('overdue'), function ($query) {
+                $query->whereNotNull('due_at')
+                    ->whereDate('due_at', '<=', today());
             })
             ->when(request()->filled('status'), function ($query) {
                 $query->where('current_status_id', request('status'));
