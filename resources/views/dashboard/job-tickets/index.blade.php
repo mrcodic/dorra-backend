@@ -183,7 +183,6 @@
 
                     <div class="col-12 col-md-3 d-flex align-items-center">
                         <div class="form-check m-0">
-                            <input type="hidden" name="overdue" value="0">
                             <input
                                 class="form-check-input"
                                 type="checkbox"
