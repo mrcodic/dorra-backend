@@ -21,25 +21,25 @@
 @section('content')
 <section class="app-user-view-account">
 
-    {{-- Page header / toolbar --}}
-    <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
-        <div class="d-flex align-items-center gap-1 flex-wrap">
-            <h5 class="mb-0 d-flex align-items-center gap-2">
-                <span class="badge bg-dark">{{ $model->code }}</span>
+{{--    --}}{{-- Page header / toolbar --}}
+{{--    <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">--}}
+{{--        <div class="d-flex align-items-center gap-1 flex-wrap">--}}
+{{--            <h5 class="mb-0 d-flex align-items-center gap-2">--}}
+{{--                <span class="badge bg-dark">{{ $model->code }}</span>--}}
 
-                @if($model->orderItem?->order)
-                <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank"
-                    class="text-decoration-none">
-                    Order #{{ $model->orderItem->order->order_number ?? $model->orderItem->order_id }}
-                </a>
-                @endif
+{{--                @if($model->orderItem?->order)--}}
+{{--                <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank"--}}
+{{--                    class="text-decoration-none">--}}
+{{--                    Order #{{ $model->orderItem->order->order_number ?? $model->orderItem->order_id }}--}}
+{{--                </a>--}}
+{{--                @endif--}}
 
-                @if($model->orderItem)
-                <span class="text-muted">— {{ $model->orderItem->itemable?->name ?? "Item #{$model->order_item_id}"
-                    }}</span>
-                @endif
-            </h5>
-        </div>
+{{--                @if($model->orderItem)--}}
+{{--                <span class="text-muted">— {{ $model->orderItem->itemable?->name ?? "Item #{$model->order_item_id}"--}}
+{{--                    }}</span>--}}
+{{--                @endif--}}
+{{--            </h5>--}}
+{{--        </div>--}}
 
         <div class="d-flex align-items-center gap-1">
             <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary">
