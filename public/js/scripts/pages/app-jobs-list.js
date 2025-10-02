@@ -18,14 +18,11 @@ const dt_user_table = $(".job-list-table").DataTable({
             d.station_id   = $(".filter-station").val() || "";
 
             // send overdue only when checked
-            if ($("#overdue").is(":checked")) {
-                d.overdue = 1;
-            } else {
-                // make sure we don't send it at all when unchecked
-                delete d.overdue;
-            }
+            if ($("#overdue").is(":checked")) d.overdue = 1; else delete d.overdue;
+            if ($("#pending").is(":checked")) d.pending = 1; else delete d.pending;
 
             return d;
+      
         },
     },
     columns: [
