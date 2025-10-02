@@ -95,69 +95,121 @@
             transition: transform 0.3s ease;
             color: #666;
             font-size: 14px;
-            pointer-events: none;
+            margin: 0;
+            padding: 0;
         }
 
-        .expand-icon.expanded {
-            transform: translateY(-50%) rotate(180deg);
+        .card-specs .number {
+            color: #121212;
+            font-size: 20px;
+            font-weight: bold;
+            padding-right: 5px
         }
 
-        /* Details row styling */
-        .details-row {
-            background-color: #F9FDFC !important;
-            display: none;
+        .card-specs .text {
+            color: #424746;
+            font-size: 16px;
         }
 
-        .details-row.show {
-            display: table-row !important;
-            animation: slideDown 0.3s ease;
-        }
+        /* Responsive table accordion styles */
+        @media (max-width: 768px) {
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
+            /* Hide the last 4 columns on mobile */
+            .job-list-table th:nth-child(4),
+            .job-list-table th:nth-child(5),
+            .job-list-table th:nth-child(6) {
+                display: none !important;
             }
 
-            to {
-                opacity: 1;
+            .job-list-table tbody tr:not(.details-row) td:nth-child(4),
+            .job-list-table tbody tr:not(.details-row) td:nth-child(5),
+            .job-list-table tbody tr:not(.details-row) td:nth-child(6) {
+                display: none !important;
+            }
+
+            /* Style for clickable rows */
+            .job-list-table tbody tr:not(.details-row) {
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+
+            /* Add expand indicator to the role column */
+            .job-list-table tbody tr:not(.details-row) td:nth-child(1) {
+                position: relative;
+                padding-left: 20px !important;
+            }
+
+            .expand-icon {
+                position: absolute;
+                left: 70%;
+                top: 50%;
+                transform: translateY(-50%);
+                transition: transform 0.3s ease;
+                color: #666;
+                font-size: 14px;
+                pointer-events: none;
+            }
+
+            .expand-icon.expanded {
+                transform: translateY(-50%) rotate(180deg);
+            }
+
+            /* Details row styling */
+            .details-row {
+                background-color: #F9FDFC !important;
+                display: none;
+            }
+
+            .details-row.show {
+                display: table-row !important;
+                animation: slideDown 0.3s ease;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 5px 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .detail-row:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+                font-size: 14px;
+            }
+
+            .detail-value {
+                color: #212529;
+                font-size: 14px;
             }
         }
 
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
+        /* Ensure normal behavior on desktop */
+        @media (min-width: 769px) {
+            .details-row {
+                display: none !important;
+            }
 
-        .detail-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
+            .expand-icon {
+                display: none !important;
+            }
         }
-
-        .detail-label {
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-        }
-
-        .detail-value {
-            color: #212529;
-            font-size: 14px;
-        }
-    }
-
-    /* Ensure normal behavior on desktop */
-    @media (min-width: 769px) {
-        .details-row {
-            display: none !important;
-        }
-
-        .expand-icon {
-            display: none !important;
-        }
-    }
 </style>
 @endsection
 
@@ -172,6 +224,65 @@
                 <div class="col-md-4 user_role"></div>
                 <div class="col-md-4 user_plan"></div>
                 <div class="col-md-4 user_status"></div>
+            </div>
+            <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
+
+                {{-- Search Input --}}
+                <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
+                    <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                        id="search-job-form" placeholder="Search job code..." style="height: 38px;">
+                    <!-- Clear button -->
+                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
+                        &times;
+                    </button>
+                </form>
+
+                {{-- Overdue (checkbox is fine as you wrote it) --}}
+                <div class="col-12 col-md-3 d-flex align-items-center">
+                    <div class="form-check m-0">
+                        <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
+                            request('overdue') ? 'checked' : '' }}>
+                        <label class="form-check-label ms-1" for="overdue">OverDue</label>
+                    </div>
+                </div>
+
+                {{-- Date --}}
+                <div class="col-12 col-md-3">
+                    <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
+                </div>
+
+                {{-- Priority (ensure value is the enum value) --}}
+                <div class="col-12 col-md-3">
+                    <select class="form-select filter-priority">
+                        <option value="" selected disabled>Priority</option>
+                        <option value="">All</option>
+
+                        @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $priority)
+                        <option value="{{ $priority->value }}" {{ request('priority')===$priority->value ? 'selected' :
+                            '' }}>
+                            {{ $priority->label() }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Status --}}
+                <div class="col-12 col-md-3">
+                    <select class="form-select filter-status">
+                        <option value="" disabled selected>Status</option>
+                        <option value="">All</option>
+                        @foreach(\App\Models\StationStatus::all() as $status)
+                        <option value="{{ $status->id }}" {{ (string)request('status')===(string)$status->id ?
+                            'selected' : '' }}>
+                            {{ $status->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
             </div>
 
             <table class="job-list-table table">

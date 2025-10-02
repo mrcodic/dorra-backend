@@ -25,14 +25,27 @@ class JobTicketService extends BaseService
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
-                    $query->where("code", 'LIKE', "%{$search}%");
+                    $query->where('code', 'LIKE', "%{$search}%");
                 } else {
-                    $query->whereRaw('1 = 0');
+                    $query->whereRaw('1=0');
                 }
-            })->when(request()->filled('created_at'), function ($query) {
-                $query->orderBy('created_at', request('created_at'));
+            })
+            ->when(request()->boolean('overdue'), function ($query) {
+                $query->whereNotNull('due_at')
+                    ->where('due_at', '<', now());
+            })
+            ->when(request()->boolean('overdue'), function ($query) {
+                $query->whereNotNull('due_at')
+                    ->whereDate('due_at', '<=', today());
+            })
+            ->when(request()->filled('status'), function ($query) {
+                $query->where('current_status_id', request('status'));
+            })
+            ->when(request()->filled('priority'), function ($query) {
+                $query->where('priority', request('priority'));
             })
             ->latest();
+
 
         return DataTables::of($jobs)
             ->addColumn('code', function ($job) {
