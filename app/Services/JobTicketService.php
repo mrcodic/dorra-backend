@@ -38,7 +38,7 @@ class JobTicketService extends BaseService
                 $query->where('station_id', request('station_id'));
             })
             ->when(request()->boolean('pending'), function ($query) {
-                $query->whereNull('current_status_id');
+                $query->whereNull('current_status_id')->whereNull('station_id');
             })
             ->when(!request()->boolean('pending') && request()->filled('status_id'), function ($query) {
                 $query->where('current_status_id', request('status_id'));
