@@ -151,50 +151,58 @@
 
             // ---- CORE: post code (parses wrapped `{ data: { ... } }`) ----
             async function postCode(code) {
-                // de-duplicate
                 const now = Date.now();
                 if (code === lastSent && (now - lastSentAt) < dedupeWindowMs) return;
                 lastSent = code; lastSentAt = now;
 
                 try {
-                    const res = await fetch("{{ route('scan.submit') }}", {
+                    const res = await fetch(submitUrl, {
                         method: 'POST',
+                        credentials: 'same-origin', // send session cookie
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': token,
-                            'Accept': 'application/json'
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': token
                         },
                         body: JSON.stringify({ code })
                     });
 
-                    const json = await res.json();
-                    // unwrap payload from { success, message, data: {...} } or fallback
-                    const payload = json?.data ?? json;
-                    const msg = payload?.message ?? json?.message ?? 'OK';
+                    // Try to parse JSON; if server returned HTML (e.g., 419/500 view), avoid JSON parse crash.
+                    const contentType = res.headers.get('content-type') || '';
+                    const body = contentType.includes('application/json') ? await res.json() : { message: await res.text() };
 
-                    if (!res.ok || json?.success === false) {
-                        throw new Error(msg || 'Scan failed');
+                    // Laravel 419 (CSRF) nice message
+                    if (res.status === 419) {
+                        throw new Error('Session expired (419). Refresh the page and try again.');
                     }
+                    if (!res.ok || body?.success === false) {
+                        const msg = (body?.data && body.data.message) || body?.message || 'Scan failed';
+                        throw new Error(msg);
+                    }
+
+                    const payload = body?.data ?? body;  // unwrap { data: {...} }
+                    const msg = payload?.message ?? body?.message ?? 'OK';
 
                     try { document.getElementById('beep-ok').play(); } catch(e){}
                     showAlert(msg, 'success');
 
-                    // Update UI
                     lastCodeEl.textContent = payload?.code ?? code;
                     lastMsgEl.textContent  = msg;
                     lastCntEl.textContent  = payload?.scan_count ?? '—';
                     lastStnEl.textContent  = (payload?.from_station ?? '—') + ' ➜ ' + (payload?.to_station ?? '—');
 
-                    // Optionally branch by result
-                    // switch (payload?.result) { ... }
-
                 } catch (err) {
+                    // Network/mixed-content/CORS shows up as “TypeError: Failed to fetch”
                     try { document.getElementById('beep-ng').play(); } catch(e){}
-                    showAlert(err.message || 'Error', 'danger');
-                    lastMsgEl.textContent = err.message || 'Error';
-                    lastCodeEl.textContent = code;
+                    const friendly = (err?.message === 'Failed to fetch')
+                        ? 'Request blocked or offline (check HTTPS, CORS, or network).'
+                        : err.message || 'Error';
+                    showAlert(friendly, 'danger');
+                    lastMsgEl.textContent = friendly;
                 }
             }
+
 
             // ---------- Hardware scanner: AJAX submit ----------
             document.getElementById('scan').addEventListener('submit', async (e) => {
