@@ -282,79 +282,81 @@
                     </div>
                 </div>
             </div>
-            <div class="d-flex flex-wrap align-items-center gap-1">
-                {{-- Search Input --}}
-                <div class="d-flex flex-wrap gap-1 col-12 col-md-5">
-                    <form action="" method="get" class="d-flex position-relative col-8 search-form">
+            {{-- Search Input --}}
+            <div class="d-flex flex-column gap-1">
+                <div class="d-flex flex-wrap gap-1">
+                    <form action="" method="get" class="d-flex position-relative search-form col-12 col-md-9">
                         <i data-feather="search"
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                             id="search-job-form" placeholder="Search job code..." style="height: 38px;">
                         <!-- Clear button -->
                         <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                   background: transparent; border: none; font-weight: bold;
-                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
+               background: transparent; border: none; font-weight: bold;
+               color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
                             &times;
                         </button>
                     </form>
 
                     {{-- Overdue (checkbox is fine as you wrote it) --}}
-                    <div class="col-3 d-flex align-items-center">
+                    <div class=" d-flex gap-1 justify-content-evenly align-items-center col-12 col-md-2">
                         <div class="form-check m-0">
                             <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
                                 request('overdue') ? 'checked' : '' }}>
                             <label class="form-check-label" for="overdue">OverDue</label>
                         </div>
-                        <div class="col-3 d-flex align-items-center">
-                        <div class="form-check m-0">
-                            <input class="form-check-input" type="checkbox" id="pending" name="status">
-                            <label class="form-check-label" for="pending">Pending</label>
+                        <div class=" d-flex align-items-center">
+                            <div class="form-check m-0">
+                                <input class="form-check-input" type="checkbox" id="pending" name="status">
+                                <label class="form-check-label" for="pending">Pending</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Date --}}
-                <div class="col-12 col-md-2">
-                    <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
-                </div>
+                <div class="d-flex flex-column flex-md-row gap-1">
+                    {{-- Date --}}
+                    <div class="col-12 col-md-3">
+                        <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
+                    </div>
 
-                {{-- Priority (ensure value is the enum value) --}}
-                <div class="col-12 col-md-2">
-                    <select class="form-select filter-priority">
-                        <option value="" selected disabled>Priority</option>
-                        <option value="">All</option>
+                    {{-- Priority (ensure value is the enum value) --}}
+                    <div class="col-12 col-md-3">
+                        <select class="form-select filter-priority">
+                            <option value="" selected disabled>Priority</option>
+                            <option value="">All</option>
 
-                        @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $priority)
-                        <option value="{{ $priority->value }}" {{ request('priority')===$priority->value ? 'selected' :
-                            '' }}>
-                            {{ $priority->label() }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
+                            @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $priority)
+                            <option value="{{ $priority->value }}" {{ request('priority')===$priority->value ?
+                                'selected' :
+                                '' }}>
+                                {{ $priority->label() }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                {{-- Station --}}
-                <div class="col-12 col-md-2">
-                    <select
-                        class="form-select filter-station"
-                        data-statuses-url="{{ route('station-statuses') }}"
-                    >
-                        <option value="" selected>All Stations</option>
-                        @foreach(\App\Models\Station::all() as $station)
-                            <option value="{{ $station->id }}"
-                                {{ (string)request('station_id') === (string)$station->id ? 'selected' : '' }}>
+                    {{-- Station --}}
+                    <div class="col-12 col-md-3">
+                        <select class="form-select filter-station" data-statuses-url="{{ route('station-statuses') }}">
+                            <option value="" selected>All Stations</option>
+                            @foreach(\App\Models\Station::all() as $station)
+                            <option value="{{ $station->id }}" {{ (string)request('station_id')===(string)$station->
+                                id ?
+                                'selected' : '' }}>
                                 {{ $station->name }}
                             </option>
-                        @endforeach
-                    </select>
-                </div>
+                            @endforeach
+                        </select>
+                    </div>
 
-                {{-- Status --}}
-                <div class="col-12 col-md-2">
-                    <select class="form-select filter-status">
-                        <option value="">All Statuses</option>
-                    </select>
+                    {{-- Status --}}
+                    <div class="col-12 col-md-2">
+                        <select class="form-select filter-status">
+                            <option value="">All Statuses</option>
+                        </select>
 
+                    </div>
                 </div>
             </div>
 
@@ -388,22 +390,21 @@
                 </div>
             </div>
         </div>
-    </div>
-    @include('modals.delete',[
-    'id' => 'deleteInvoiceModal',
-    'formId' => 'deleteInvoiceForm',
-    'title' => 'Delete Invoice',
-    ])
-    @include('modals.delete',[
-    'id' => 'deleteJobsModal',
-    'formId' => 'bulk-delete-form',
-    'title' => 'Delete Jobs',
-    'confirmText' => 'Are you sure you want to delete this items?',
-    ])
-    @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
+        @include('modals.delete',[
+        'id' => 'deleteInvoiceModal',
+        'formId' => 'deleteInvoiceForm',
+        'title' => 'Delete Invoice',
+        ])
+        @include('modals.delete',[
+        'id' => 'deleteJobsModal',
+        'formId' => 'bulk-delete-form',
+        'title' => 'Delete Jobs',
+        'confirmText' => 'Are you sure you want to delete this items?',
+        ])
+        @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
 
 
-    <!-- list and filter end -->
+        <!-- list and filter end -->
 </section>
 <!-- users list ends -->
 </div>
