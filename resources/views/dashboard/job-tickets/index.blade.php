@@ -4,36 +4,96 @@
 @section('main-page', 'Jobs')
 
 @section('vendor-style')
-    {{-- Page Css files --}}
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+{{-- Page Css files --}}
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
 
 
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
 
 @section('page-style')
-    {{-- Page Css files --}}
-    <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+{{-- Page Css files --}}
+<link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 
-    <style>
-        /* Statistics Cards */
-        .card-specs {
-            border: 1.5px solid #CED5D4;
-            border-radius: 20px;
-            width: 166px;
-            flex: 1;
+<style>
+    /* Statistics Cards */
+    .card-specs {
+        border: 1.5px solid #CED5D4;
+        border-radius: 20px;
+        width: 166px;
+        flex: 1;
+    }
+
+    .card-specs p {
+        color: #424746;
+        font-size: 14px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .card-specs .number {
+        color: #121212;
+        font-size: 20px;
+        font-weight: bold;
+        padding-right: 5px
+    }
+
+    .card-specs .text {
+        color: #424746;
+        font-size: 16px;
+    }
+
+    /* Responsive table accordion styles */
+    @media (max-width: 768px) {
+
+        /* Hide the last 4 columns on mobile */
+        .job-list-table th:nth-child(4),
+        .job-list-table th:nth-child(5),
+        .job-list-table th:nth-child(6),
+        .job-list-table th:nth-child(7),
+        .job-list-table th:nth-child(8),
+        .job-list-table th:nth-child(9),
+        .job-list-table th:nth-child(10) {
+            display: none !important;
         }
 
-        .card-specs p {
-            color: #424746;
+        .job-list-table tbody tr:not(.details-row) td:nth-child(4),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(5),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(6),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(7),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(8),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(9),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(10) {
+            display: none !important;
+        }
+
+        /* Style for clickable rows */
+        .job-list-table tbody tr:not(.details-row) {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Add expand indicator to the role column */
+        .job-list-table tbody tr:not(.details-row) td:nth-child(1) {
+            position: relative;
+            padding-left: 20px !important;
+        }
+
+        .expand-icon {
+            position: absolute;
+            left: 70%;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: transform 0.3s ease;
+            color: #666;
             font-size: 14px;
             margin: 0;
             padding: 0;
@@ -150,84 +210,83 @@
                 display: none !important;
             }
         }
-    </style>
+</style>
 @endsection
 
 @section('content')
-    <!-- users list start -->
-    <section class="app-user-list">
+<!-- users list start -->
+<section class="app-user-list">
 
-        <!-- list and filter start -->
-        <div class="card">
-            <div class="card-body ">
-                <div class="row">
-                    <div class="col-md-4 user_role"></div>
-                    <div class="col-md-4 user_plan"></div>
-                    <div class="col-md-4 user_status"></div>
-                </div>
-                <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
+    <!-- list and filter start -->
+    <div class="card">
+        <div class="card-body ">
+            <div class="row">
+                <div class="col-md-4 user_role"></div>
+                <div class="col-md-4 user_plan"></div>
+                <div class="col-md-4 user_status"></div>
+            </div>
+            <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
 
-                    {{-- Search Input --}}
-                    <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
-                        <i data-feather="search"
-                           class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
-                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                               id="search-job-form" placeholder="Search job code..." style="height: 38px;">
-                        <!-- Clear button -->
-                        <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                {{-- Search Input --}}
+                <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
+                    <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                        id="search-job-form" placeholder="Search job code..." style="height: 38px;">
+                    <!-- Clear button -->
+                    <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                    background: transparent; border: none; font-weight: bold;
                    color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
-                            &times;
-                        </button>
-                    </form>
+                        &times;
+                    </button>
+                </form>
 
-                    {{-- Overdue (checkbox is fine as you wrote it) --}}
-                    <div class="col-12 col-md-3 d-flex align-items-center">
-                        <div class="form-check m-0">
-                            <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1"
-                                {{ request('overdue') ? 'checked' : '' }}>
-                            <label class="form-check-label ms-1" for="overdue">OverDue</label>
-                        </div>
+                {{-- Overdue (checkbox is fine as you wrote it) --}}
+                <div class="col-12 col-md-3 d-flex align-items-center">
+                    <div class="form-check m-0">
+                        <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
+                            request('overdue') ? 'checked' : '' }}>
+                        <label class="form-check-label ms-1" for="overdue">OverDue</label>
                     </div>
-
-                    {{-- Date --}}
-                    <div class="col-12 col-md-3">
-                        <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
-                    </div>
-
-                    {{-- Priority (ensure value is the enum value) --}}
-                    <div class="col-12 col-md-3">
-                        <select class="form-select filter-priority">
-                            <option value="" selected disabled>Priority</option>
-                            <option value="" >All</option>
-
-                            @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $priority)
-                                <option value="{{ $priority->value }}"
-                                    {{ request('priority') === $priority->value ? 'selected' : '' }}>
-                                    {{ $priority->label() }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- Status --}}
-                    <div class="col-12 col-md-3">
-                        <select class="form-select filter-status">
-                            <option value="" disabled selected>Status</option>
-                            <option value="" >All</option>
-                            @foreach(\App\Models\StationStatus::all() as $status)
-                                <option value="{{ $status->id }}"
-                                    {{ (string)request('status') === (string)$status->id ? 'selected' : '' }}>
-                                    {{ $status->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
                 </div>
 
-                <table class="job-list-table table">
-                    <thead class="table-light">
+                {{-- Date --}}
+                <div class="col-12 col-md-3">
+                    <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
+                </div>
+
+                {{-- Priority (ensure value is the enum value) --}}
+                <div class="col-12 col-md-3">
+                    <select class="form-select filter-priority">
+                        <option value="" selected disabled>Priority</option>
+                        <option value="">All</option>
+
+                        @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $priority)
+                        <option value="{{ $priority->value }}" {{ request('priority')===$priority->value ? 'selected' :
+                            '' }}>
+                            {{ $priority->label() }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Status --}}
+                <div class="col-12 col-md-3">
+                    <select class="form-select filter-status">
+                        <option value="" disabled selected>Status</option>
+                        <option value="">All</option>
+                        @foreach(\App\Models\StationStatus::all() as $status)
+                        <option value="{{ $status->id }}" {{ (string)request('status')===(string)$status->id ?
+                            'selected' : '' }}>
+                            {{ $status->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+            </div>
+
+            <table class="job-list-table table">
+                <thead class="table-light">
                     <tr>
                         <th>
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input">
@@ -242,78 +301,77 @@
                         <th>Order Item Name</th>
                         <th>Actions</th>
                     </tr>
-                    </thead>
-                </table>
-                <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                    <div
-                        class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                        style="z-index: 10;">
-                        <p id="selected-count-text">0 Jobs are selected</p>
-                        <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteJobsModal"
-                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                            <i data-feather="trash-2"></i> Delete Selected
-                        </button>
-                        </form>
-                    </div>
+                </thead>
+            </table>
+            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                    style="z-index: 10;">
+                    <p id="selected-count-text">0 Jobs are selected</p>
+                    <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteJobsModal"
+                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
+                    </form>
                 </div>
             </div>
         </div>
-        @include('modals.delete',[
-        'id' => 'deleteInvoiceModal',
-        'formId' => 'deleteInvoiceForm',
-        'title' => 'Delete Invoice',
-        ])
-        @include('modals.delete',[
-        'id' => 'deleteJobsModal',
-        'formId' => 'bulk-delete-form',
-        'title' => 'Delete Jobs',
-        'confirmText' => 'Are you sure you want to delete this items?',
-        ])
-        @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
-
-
-        <!-- list and filter end -->
-    </section>
-    <!-- users list ends -->
     </div>
+    @include('modals.delete',[
+    'id' => 'deleteInvoiceModal',
+    'formId' => 'deleteInvoiceForm',
+    'title' => 'Delete Invoice',
+    ])
+    @include('modals.delete',[
+    'id' => 'deleteJobsModal',
+    'formId' => 'bulk-delete-form',
+    'title' => 'Delete Jobs',
+    'confirmText' => 'Are you sure you want to delete this items?',
+    ])
+    @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
+
+
+    <!-- list and filter end -->
+</section>
+<!-- users list ends -->
+</div>
 
 @endsection
 
 @section('vendor-script')
-    {{-- Vendor js files --}}
-    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+{{-- Vendor js files --}}
+<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
 @endsection
 
 @section('page-script')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <script>
-        const jobsDataUrl = "{{ route('job-tickets.data') }}";
+<script>
+    const jobsDataUrl = "{{ route('job-tickets.data') }}";
 
-    </script>
+</script>
 
-    {{-- Page js files --}}
-    <script src="{{ asset('js/scripts/pages/app-jobs-list.js') }}?v={{ time() }}"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
+{{-- Page js files --}}
+<script src="{{ asset('js/scripts/pages/app-jobs-list.js') }}?v={{ time() }}"></script>
+<script src="https://unpkg.com/feather-icons"></script>
 
-    <script>
-        $(document).ready(function () {
+<script>
+    $(document).ready(function () {
             setupClearInput('roleSelect', 'clearRoleFilter');
 
             // Select all toggle
@@ -376,9 +434,13 @@
                         $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                         // Get data for details
-                        const price = $row.find('td:nth-child(4)').html() || '';
-                        const issuedAt = $row.find('td:nth-child(5)').html() || '';
-                        const actions = $row.find('td:nth-child(6)').html() || '';
+                        const priority = $row.find('td:nth-child(4)').html() || '';
+                        const currentStation = $row.find('td:nth-child(5)').html() || '';
+                        const status = $row.find('td:nth-child(6)').html() || '';
+                        const dueDate = $row.find('td:nth-child(7)').html() || '';
+                        const orderNumber = $row.find('td:nth-child(8)').html() || '';
+                        const orderItemName = $row.find('td:nth-child(9)').html() || '';
+                        const actions = $row.find('td:nth-child(10)').html() || '';
 
                         // Create details row
                         const detailsHtml = `
@@ -386,12 +448,28 @@
                         <td colspan="3">
                             <div class="details-content">
                                 <div class="detail-row">
-                                    <span class="detail-label">Price:</span>
-                                    <span class="detail-value">${price}</span>
+                                    <span class="detail-label">Priority:</span>
+                                    <span class="detail-value">${priority}</span>
                                 </div>
                                 <div class="detail-row">
-                                    <span class="detail-label">Issued Ate:</span>
-                                    <span class="detail-value">${issuedAt}</span>
+                                    <span class="detail-label">Current Station:</span>
+                                    <span class="detail-value">${currentStation}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Status:</span>
+                                    <span class="detail-value">${status}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Due Date:</span>
+                                    <span class="detail-value">${dueDate}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Order Number:</span>
+                                    <span class="detail-value">${orderNumber}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Order Item Name:</span>
+                                    <span class="detail-value">${orderItemName}</span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Actions:</span>
@@ -450,10 +528,10 @@
                 initAccordion();
             }, 500);
         });
-    </script>
+</script>
 
-    <script>
-        // Backup accordion handler in case the main one doesn't work
+<script>
+    // Backup accordion handler in case the main one doesn't work
         $(document).ready(function () {
             // Alternative click handler
             $(document).off('click.accordion').on('click.accordion', '.job-list-table tbody tr:not(.details-row)', function (e) {
@@ -486,6 +564,6 @@
                 }
             });
         });
-    </script>
+</script>
 
 @endsection
