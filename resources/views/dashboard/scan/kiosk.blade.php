@@ -3,7 +3,7 @@
 @section('title', 'Scan Job')
 
 @section('vendor-style')
-    {{-- Vendor CSS --}}
+    {{-- Page Css files --}}
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/animate/animate.min.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/extensions/sweetalert2.min.css')) }}">
@@ -14,11 +14,10 @@
 @endsection
 
 @section('page-style')
-    {{-- Page CSS --}}
+    {{-- Page Css files --}}
     <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
 @endsection
-
 @section('content')
     <div class="container py-4" dir="ltr">
         <h2 class="mb-3">Scan Job Ticket</h2>
@@ -46,9 +45,7 @@
                         <input type="text" id="code" name="code" class="form-control" placeholder="JT-YYYYMMDD-..." autofocus>
                         <button class="btn btn-primary" type="submit">Submit</button>
                     </div>
-                    <small class="text-muted d-block mt-1">
-                        Tip: connect a USB/BT barcode scanner—most act like a keyboard and press Enter automatically.
-                    </small>
+                    <small class="text-muted d-block mt-1">Tip: connect a USB/BT barcode scanner—most act like a keyboard and press Enter automatically.</small>
                 </form>
             </div>
 
@@ -63,7 +60,7 @@
                 <div id="reader" style="width: 100%; max-width: 520px;"></div>
             </div>
 
-            {{-- Last result --}}
+            {{-- Last result (optional) --}}
             <div class="col-12">
                 <div class="border rounded-3 p-2">
                     <div><strong>Last Code:</strong> <span id="last-code">—</span></div>
@@ -80,13 +77,15 @@
     </div>
 @endsection
 
+
+
 @section('vendor-script')
-    {{-- Vendor JS --}}
+    {{-- Vendor js files --}}
     <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-
+    {{-- data table --}}
     <script src="{{ asset(mix('vendors/js/extensions/moment.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
@@ -104,10 +103,11 @@
 @endsection
 
 @section('page-script')
-    {{-- html5-qrcode --}}
     <script src="https://unpkg.com/html5-qrcode" defer></script>
-
     <script>
+        handleAjaxFormSubmit("#scan",{
+            successMessage: "Scan Submitted Successfully"
+        })
         document.addEventListener('DOMContentLoaded', () => {
             feather.replace();
 
@@ -119,12 +119,12 @@
             const inputCode   = document.getElementById('code');
 
             // -------- Status / result UI --------
-            const status     = document.getElementById('status');
+            const status   = document.getElementById('status');
             const lastCodeEl = document.getElementById('last-code');
             const lastMsgEl  = document.getElementById('last-msg');
             const lastCntEl  = document.getElementById('last-count');
             const lastStnEl  = document.getElementById('last-station');
-            const token      = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const token   = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             // -------- Camera controls --------
             const startBtn = document.getElementById('start-btn');
@@ -149,70 +149,46 @@
                 status.textContent = msg;
             }
 
-            // ---- CORE: post code (parses wrapped `{ data: { ... } }`) ----
             async function postCode(code) {
+                // de-duplicate
                 const now = Date.now();
                 if (code === lastSent && (now - lastSentAt) < dedupeWindowMs) return;
                 lastSent = code; lastSentAt = now;
 
                 try {
-                    const res = await fetch(submitUrl, {
+                    const res = await fetch("{{ route('scan.submit') }}", {
                         method: 'POST',
-                        credentials: 'same-origin', // send session cookie
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': token
-                        },
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
                         body: JSON.stringify({ code })
                     });
-
-                    // Try to parse JSON; if server returned HTML (e.g., 419/500 view), avoid JSON parse crash.
-                    const contentType = res.headers.get('content-type') || '';
-                    const body = contentType.includes('application/json') ? await res.json() : { message: await res.text() };
-
-                    // Laravel 419 (CSRF) nice message
-                    if (res.status === 419) {
-                        throw new Error('Session expired (419). Refresh the page and try again.');
-                    }
-                    if (!res.ok || body?.success === false) {
-                        const msg = (body?.data && body.data.message) || body?.message || 'Scan failed';
-                        throw new Error(msg);
-                    }
-
-                    const payload = body?.data ?? body;  // unwrap { data: {...} }
-                    const msg = payload?.message ?? body?.message ?? 'OK';
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Scan failed');
 
                     try { document.getElementById('beep-ok').play(); } catch(e){}
-                    showAlert(msg, 'success');
-
-                    lastCodeEl.textContent = payload?.code ?? code;
-                    lastMsgEl.textContent  = msg;
-                    lastCntEl.textContent  = payload?.scan_count ?? '—';
-                    lastStnEl.textContent  = (payload?.from_station ?? '—') + ' ➜ ' + (payload?.to_station ?? '—');
-
+                    showAlert(data.message || 'OK', 'success');
+                    lastCodeEl.textContent = data.code ?? code;
+                    lastMsgEl.textContent  = data.message ?? 'OK';
+                    lastCntEl.textContent  = data.scan_count ?? '—';
+                    lastStnEl.textContent  = (data.from_station ?? '—') + ' ➜ ' + (data.to_station ?? '—');
                 } catch (err) {
-                    // Network/mixed-content/CORS shows up as “TypeError: Failed to fetch”
                     try { document.getElementById('beep-ng').play(); } catch(e){}
-                    const friendly = (err?.message === 'Failed to fetch')
-                        ? 'Request blocked or offline (check HTTPS, CORS, or network).'
-                        : err.message || 'Error';
-                    showAlert(friendly, 'danger');
-                    lastMsgEl.textContent = friendly;
+                    showAlert(err.message || 'Error', 'danger');
+                    lastMsgEl.textContent = err.message || 'Error';
+                    lastCodeEl.textContent = code;
                 }
             }
 
-
-            // ---------- Hardware scanner: AJAX submit ----------
-            document.getElementById('scan').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const code = inputCode.value.trim();
-                if (!code) return;
-                await postCode(code);
-                inputCode.value = '';
-                inputCode.focus();
-            });
+            // ---------- Hardware scanner mode (keyboard wedge) ----------
+            // If your scanner sends Enter, the form submits normally.
+            // If you want Ajax instead of form submit, uncomment below:
+            // document.querySelector('#section-hw form').addEventListener('submit', async (e) => {
+            //   e.preventDefault();
+            //   const code = inputCode.value.trim();
+            //   if (!code) return;
+            //   await postCode(code);
+            //   inputCode.value = '';
+            //   inputCode.focus();
+            // });
 
             // ---------- Camera mode (html5-qrcode) ----------
             function onScanSuccess(decodedText) {
@@ -317,7 +293,9 @@
                 btnModeCam.classList.remove('active');
                 secHw.classList.remove('d-none');
                 secCam.classList.add('d-none');
-                await stopScanner(); // stop camera if running
+                // stop camera if running
+                await stopScanner();
+                // focus the input
                 setTimeout(() => inputCode?.focus(), 50);
                 showAlert('Hardware scanner mode. Use your USB/BT scanner or type the code.', 'info');
             }
@@ -339,3 +317,4 @@
         });
     </script>
 @endsection
+
