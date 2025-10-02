@@ -65,97 +65,128 @@
         : 'No due date';
         @endphp
 
-        {{-- Top: Codes + Status --}}
-        <div class="row g-1 align-items-stretch">
-            {{-- Codes card --}}
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6 class="m-0">BarCode</h6>
+        {{-- Top: Details + Codes + Status --}}
+        <div class="p-1 d-flex flex-column flex-md-row gap-2 rounded-3" style="background-color: white">
+            <div class="d-flex flex-column">
+                <img src="{{asset('/images/item-photo.png')}}" alt="item photo" class="mb-2" width="320px"
+                    height="320px">
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-column gap-1">
+                        <p style="color: #424746; margin: 0; font-size: 16px">Operator:</p>
+                        <div class="d-flex align-items-center gap-1">
+                            <img src="{{asset('/images/admin-avatar.png')}}" alt="Admin avatar">
+                            <div class="d-flex flex-column">
+                                <h5 style="color: #121212">John Doe</h5>
+                                <p style="margin: 0; color: #424746">Admin</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row g-2 text-center">
-
-                            <div class="col-6">
-                                {{-- Code128 --}}
-                                <img src="{{ $model->barcode_svg_url }}" alt="Code128"
-                                    class="img-fluid border rounded p-2 w-100">
-                                <div class="small text-muted mt-50">BarCode</div>
+                </div>
+                <hr>
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-column gap-1">
+                        <p style="color: #424746; margin: 0; font-size: 16px">Order ID:</p>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <p style="margin: 0; color: #121212">JT-20251001-83-242-01</p>
+                            <p style="margin: 0; color: #24B094; cursor: pointer">Go to Order</p>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-column gap-1">
+                        <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
+                        <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
+                            <div class="d-flex flex-column">
+                                <p style="margin: 0; color: #121212">Front Design</p>
+                                <img src="{{asset('/images/item-photo.png')}}" alt="item photo">
+                            </div>
+                            <div class="d-flex flex-column">
+                                <p style="margin: 0; color: #121212">Back Design</p>
+                                <img src="{{asset('/images/item-photo.png')}}" alt="item photo">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {{-- Details --}}
+            <div class="d-flex flex-column">
+                <div>
+                    <p style="color: #424746; margin: 0; font-size: 18px">JT-20251001-83-242-01</p>
+                    <hr>
+                    <h5 style="color: #121212; font-size: 25px">Item Name</h5>
+                    <p style="color: #424746; font-size: 15px">Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                        sed do eiusmod
+                        tempor incididunt ut
+                        labore et dolore magna aliqua.</p>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="d-flex gap-2 gap-md-4">
+                            <div class="d-flex gap-1 align-items-center">
+                                <p style="color: #424746; margin:0">Station:</p>
+                                <span class="rounded-3"
+                                    style="color: #424746; background-color: #FAFBFC; padding: 7px">Prepress</span>
+                            </div>
+                            <div class="d-flex gap-1 align-items-center">
+                                <p style="color: #424746; margin:0">Status:</p>
+                                <span class="rounded-3"
+                                    style="color: #424746; background-color: #CED5D4; padding: 7px">Waiting</span>
+                            </div>
+                        </div>
 
-            {{-- Status card --}}
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h6 class="m-0">Current State</h6>
-                    </div>
-                    <div class="card-body">
-                        <dl class="row mb-0">
-                            <dt class="col-5 col-sm-4 text-muted">Station</dt>
-                            <dd class="col-7 col-sm-8 fw-semibold">{{ $model->station?->name ?? '-' }}</dd>
-
-                            <dt class="col-5 col-sm-4 text-muted">Status</dt>
-                            <dd class="col-7 col-sm-8">
-                                <span class="badge bg-primary">{{ $model->currentStatus->name }}</span>
-                            </dd>
-
-                            <dt class="col-5 col-sm-4 text-muted">Priority</dt>
-                            <dd class="col-7 col-sm-8">
-                                <span
-                                    class="badge {{ $model->priority === \App\Enums\JobTicket\PriorityEnum::RUSH ? 'bg-danger' : 'bg-secondary' }}">
-                                    {{ $model->priority?->label() }}
-                                </span>
-                            </dd>
-
-                            <dt class="col-5 col-sm-4 text-muted">Due</dt>
-                            <dd class="col-7 col-sm-8">
-                                @if($due)
-                                <span class="badge {{ $dueBadgeClass }}" data-bs-toggle="tooltip"
-                                    title="{{ $dueTitle }}">
-                                    {{ $due->format('Y-m-d H:i') }}
-                                </span>
-                                @else
-                                <span class="text-muted">—</span>
-                                @endif
-                            </dd>
-                        </dl>
+                        <div class="d-flex gap-2 gap-md-4">
+                            <div class="d-flex gap-1 align-items-center">
+                                <p style="color: #424746; margin:0">Priority:</p>
+                                <span class="rounded-3"
+                                    style="color: white; background-color: #F8AB1B; padding: 7px">Standard</span>
+                            </div>
+                            <div class="d-flex gap-1 align-items-center">
+                                <p style="color: #424746; margin:0">Due Date:</p>
+                                <span class="rounded-3" style="color: #424746; padding: 7px">2/10/2025</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                {{-- Codes card --}}
+                <div class="row g-1 text-center mt-2">
+                    <div class="col-12">
+                        {{-- Code128 --}}
+                        <img src="{{ $model->barcode_svg_url }}" alt="Code128"
+                            class="img-fluid border rounded p-2 w-100">
+                    </div>
+                </div>
+
+                {{-- Specifications --}}
+                @php
+                $specsRaw = $model->specs ?? []; // or the JSON you have
+                $specs = is_array($specsRaw) ? $specsRaw : (json_decode($specsRaw ?? '[]', true) ?? []);
+                @endphp
+
+                @if(!empty($specs))
+                <div class="table-responsive mt-1">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="w-35">Specification</th>
+                                <th>Option</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($specs as $row)
+                            <tr>
+                                <th>{{ \Illuminate\Support\Str::headline((string)($row['spec_name'] ?? '')) }}</th>
+                                <td>{{ $row['option_name'] ?? '—' }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <p class="text-muted mt-1">No specifications.</p>
+                @endif
             </div>
         </div>
 
-        {{-- Specifications --}}
-        @php
-        $specsRaw = $model->specs ?? []; // or the JSON you have
-        $specs = is_array($specsRaw) ? $specsRaw : (json_decode($specsRaw ?? '[]', true) ?? []);
-        @endphp
 
-        @if(!empty($specs))
-        <div class="table-responsive mt-1">
-            <table class="table table-sm table-bordered">
-                <thead>
-                    <tr>
-                        <th class="w-35">Specification</th>
-                        <th>Option</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($specs as $row)
-                    <tr>
-                        <th>{{ \Illuminate\Support\Str::headline((string)($row['spec_name'] ?? '')) }}</th>
-                        <td>{{ $row['option_name'] ?? '—' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @else
-        <p class="text-muted mt-1">No specifications.</p>
-        @endif
 
 
 </section>
