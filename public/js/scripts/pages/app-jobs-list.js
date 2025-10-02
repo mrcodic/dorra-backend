@@ -19,13 +19,11 @@ const dt_user_table = $(".job-list-table").DataTable({
             if ($("#overdue").is(":checked")) d.overdue = 1; else delete d.overdue;
             if ($("#pending").is(":checked")) d.pending = 1; else delete d.pending;
 
-
-            d.status = $(".filter-status").val() || "";
-
+            d.status_id = $(".filter-status").val() || "";
 
             return d;
-
         },
+
     },
     columns: [
         {
@@ -102,6 +100,12 @@ $(document).on(
         dt_user_table.ajax.reload();
     }
 );
+$("#pending").on("change", function () {
+    if ($(this).is(":checked")) {
+        $(".filter-status").val("");
+    }
+    dt_user_table.ajax.reload();
+});
 
 $("#search-job-form").on("keyup", function (e) {
     // optional: only reload on Enter to avoid excessive calls
