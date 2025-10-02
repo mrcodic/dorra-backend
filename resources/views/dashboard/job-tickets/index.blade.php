@@ -57,13 +57,21 @@
         /* Hide the last 4 columns on mobile */
         .job-list-table th:nth-child(4),
         .job-list-table th:nth-child(5),
-        .job-list-table th:nth-child(6) {
+        .job-list-table th:nth-child(6),
+        .job-list-table th:nth-child(7),
+        .job-list-table th:nth-child(8),
+        .job-list-table th:nth-child(9),
+        .job-list-table th:nth-child(10) {
             display: none !important;
         }
 
         .job-list-table tbody tr:not(.details-row) td:nth-child(4),
         .job-list-table tbody tr:not(.details-row) td:nth-child(5),
-        .job-list-table tbody tr:not(.details-row) td:nth-child(6) {
+        .job-list-table tbody tr:not(.details-row) td:nth-child(6),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(7),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(8),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(9),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(10) {
             display: none !important;
         }
 
@@ -315,9 +323,13 @@
                         $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                         // Get data for details
-                        const price = $row.find('td:nth-child(4)').html() || '';
-                        const issuedAt = $row.find('td:nth-child(5)').html() || '';
-                        const actions = $row.find('td:nth-child(6)').html() || '';
+                        const priority = $row.find('td:nth-child(4)').html() || '';
+                        const currentStation = $row.find('td:nth-child(5)').html() || '';
+                        const status = $row.find('td:nth-child(6)').html() || '';
+                        const dueDate = $row.find('td:nth-child(7)').html() || '';
+                        const orderNumber = $row.find('td:nth-child(8)').html() || '';
+                        const orderItemName = $row.find('td:nth-child(9)').html() || '';
+                        const actions = $row.find('td:nth-child(10)').html() || '';
 
                         // Create details row
                         const detailsHtml = `
@@ -325,12 +337,28 @@
                         <td colspan="3">
                             <div class="details-content">
                                 <div class="detail-row">
-                                    <span class="detail-label">Price:</span>
-                                    <span class="detail-value">${price}</span>
+                                    <span class="detail-label">Priority:</span>
+                                    <span class="detail-value">${priority}</span>
                                 </div>
                                 <div class="detail-row">
-                                    <span class="detail-label">Issued Ate:</span>
-                                    <span class="detail-value">${issuedAt}</span>
+                                    <span class="detail-label">Current Station:</span>
+                                    <span class="detail-value">${currentStation}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Status:</span>
+                                    <span class="detail-value">${status}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Due Date:</span>
+                                    <span class="detail-value">${dueDate}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Order Number:</span>
+                                    <span class="detail-value">${orderNumber}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Order Item Name:</span>
+                                    <span class="detail-value">${orderItemName}</span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Actions:</span>
