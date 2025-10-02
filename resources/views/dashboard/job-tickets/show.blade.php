@@ -138,7 +138,7 @@
                             </div>
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Due Date:</p>
-                                <span class="rounded-3" style="color: #424746; padding: 7px">{{ $model->due_At->format("d/m/Y") }}</span>
+                                <span class="rounded-3" style="color: #424746; padding: 7px">{{ $model->due_at?->format("d/m/Y") }}</span>
                             </div>
                         </div>
                     </div>
