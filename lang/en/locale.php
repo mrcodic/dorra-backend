@@ -4,6 +4,7 @@ return [
     "Apps & Pages" => "Apps & Pages",
     "User Interface" => "User Interface",
     "Dashboards" => "Dashboards",
+    "Jobs" => "Jobs",
     "Board" => "Board",
     "Website" => "Website",
     "Flags" => "Flags",
