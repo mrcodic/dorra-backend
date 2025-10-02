@@ -30,7 +30,11 @@ class JobTicketService extends BaseService
                     : $q->whereRaw('1=0');
             })
             ->when(request()->boolean('overdue'), function ($q) {
-                $q->whereNotNull('due_at')->where('due_at', '<', today());
+                $q->whereNotNull('due_at')->where('due_at', '<', today())
+                ->whereHas('station', function ($q) {
+                    $q->whereIsTerminal(false);
+                })
+                ;
             })
 
             ->when(request()->boolean('pending'), function ($q) {
