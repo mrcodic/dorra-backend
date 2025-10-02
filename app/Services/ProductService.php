@@ -304,6 +304,7 @@ class ProductService extends BaseService
 
 
                 $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
+                    $spec->delete();
                     $spec->options->each(function ($option) {
                         $option->clearMediaCollection();
                         $option->delete();
