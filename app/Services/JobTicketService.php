@@ -31,6 +31,10 @@ class JobTicketService extends BaseService
                 }
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
+            })->when(request()->filled('overdue'), function ($query) {
+                $query->where('due_at', '<', now());
+            })->when(request()->filled('due_at'), function ($query) {
+                $query->where('due_at', request('due_at'));
             })
             ->latest();
 

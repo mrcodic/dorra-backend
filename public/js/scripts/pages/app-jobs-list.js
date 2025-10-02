@@ -12,7 +12,7 @@ var dt_user_table = $(".job-list-table").DataTable({
         type: "GET",
 
         data: function (d) {
-            d.search_value = $("#search-invoice-form").val(); // get from input
+            d.search_value = $("#search-job-form").val(); // get from input
             d.created_at = $(".filter-date").val();
             return d;
         },
@@ -109,14 +109,14 @@ var dt_user_table = $(".job-list-table").DataTable({
 
 // Custom search with debounce
 let searchTimeout;
-$("#search-invoice-form").on("keyup", function () {
+$("#search-job-form").on("keyup", function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
     }, 300);
 });
 $('#clear-search').on('click', function () {
-    $('#search-invoice-form').val('');  // clear input
+    $('#search-job-form').val('');  // clear input
     dt_user_table.search('').draw();  // reset DataTable search
 });
 $(".filter-date").on("change", function () {

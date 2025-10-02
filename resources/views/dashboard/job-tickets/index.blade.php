@@ -4,170 +4,228 @@
 @section('main-page', 'Jobs')
 
 @section('vendor-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
 
 
-<!-- SweetAlert2 CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-<!-- SweetAlert2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
 
 @section('page-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 
-<style>
-    /* Statistics Cards */
-    .card-specs {
-        border: 1.5px solid #CED5D4;
-        border-radius: 20px;
-        width: 166px;
-        flex: 1;
-    }
-
-    .card-specs p {
-        color: #424746;
-        font-size: 14px;
-        margin: 0;
-        padding: 0;
-    }
-
-    .card-specs .number {
-        color: #121212;
-        font-size: 20px;
-        font-weight: bold;
-        padding-right: 5px
-    }
-
-    .card-specs .text {
-        color: #424746;
-        font-size: 16px;
-    }
-
-    /* Responsive table accordion styles */
-    @media (max-width: 768px) {
-
-        /* Hide the last 4 columns on mobile */
-        .job-list-table th:nth-child(4),
-        .job-list-table th:nth-child(5),
-        .job-list-table th:nth-child(6) {
-            display: none !important;
+    <style>
+        /* Statistics Cards */
+        .card-specs {
+            border: 1.5px solid #CED5D4;
+            border-radius: 20px;
+            width: 166px;
+            flex: 1;
         }
 
-        .job-list-table tbody tr:not(.details-row) td:nth-child(4),
-        .job-list-table tbody tr:not(.details-row) td:nth-child(5),
-        .job-list-table tbody tr:not(.details-row) td:nth-child(6) {
-            display: none !important;
-        }
-
-        /* Style for clickable rows */
-        .job-list-table tbody tr:not(.details-row) {
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        /* Add expand indicator to the role column */
-        .job-list-table tbody tr:not(.details-row) td:nth-child(1) {
-            position: relative;
-            padding-left: 20px !important;
-        }
-
-        .expand-icon {
-            position: absolute;
-            left: 70%;
-            top: 50%;
-            transform: translateY(-50%);
-            transition: transform 0.3s ease;
-            color: #666;
+        .card-specs p {
+            color: #424746;
             font-size: 14px;
-            pointer-events: none;
+            margin: 0;
+            padding: 0;
         }
 
-        .expand-icon.expanded {
-            transform: translateY(-50%) rotate(180deg);
+        .card-specs .number {
+            color: #121212;
+            font-size: 20px;
+            font-weight: bold;
+            padding-right: 5px
         }
 
-        /* Details row styling */
-        .details-row {
-            background-color: #F9FDFC !important;
-            display: none;
+        .card-specs .text {
+            color: #424746;
+            font-size: 16px;
         }
 
-        .details-row.show {
-            display: table-row !important;
-            animation: slideDown 0.3s ease;
-        }
+        /* Responsive table accordion styles */
+        @media (max-width: 768px) {
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
+            /* Hide the last 4 columns on mobile */
+            .job-list-table th:nth-child(4),
+            .job-list-table th:nth-child(5),
+            .job-list-table th:nth-child(6) {
+                display: none !important;
             }
 
-            to {
-                opacity: 1;
+            .job-list-table tbody tr:not(.details-row) td:nth-child(4),
+            .job-list-table tbody tr:not(.details-row) td:nth-child(5),
+            .job-list-table tbody tr:not(.details-row) td:nth-child(6) {
+                display: none !important;
+            }
+
+            /* Style for clickable rows */
+            .job-list-table tbody tr:not(.details-row) {
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+
+            /* Add expand indicator to the role column */
+            .job-list-table tbody tr:not(.details-row) td:nth-child(1) {
+                position: relative;
+                padding-left: 20px !important;
+            }
+
+            .expand-icon {
+                position: absolute;
+                left: 70%;
+                top: 50%;
+                transform: translateY(-50%);
+                transition: transform 0.3s ease;
+                color: #666;
+                font-size: 14px;
+                pointer-events: none;
+            }
+
+            .expand-icon.expanded {
+                transform: translateY(-50%) rotate(180deg);
+            }
+
+            /* Details row styling */
+            .details-row {
+                background-color: #F9FDFC !important;
+                display: none;
+            }
+
+            .details-row.show {
+                display: table-row !important;
+                animation: slideDown 0.3s ease;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 5px 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .detail-row:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+                font-size: 14px;
+            }
+
+            .detail-value {
+                color: #212529;
+                font-size: 14px;
             }
         }
 
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
+        /* Ensure normal behavior on desktop */
+        @media (min-width: 769px) {
+            .details-row {
+                display: none !important;
+            }
 
-        .detail-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
+            .expand-icon {
+                display: none !important;
+            }
         }
-
-        .detail-label {
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-        }
-
-        .detail-value {
-            color: #212529;
-            font-size: 14px;
-        }
-    }
-
-    /* Ensure normal behavior on desktop */
-    @media (min-width: 769px) {
-        .details-row {
-            display: none !important;
-        }
-
-        .expand-icon {
-            display: none !important;
-        }
-    }
-</style>
+    </style>
 @endsection
 
 @section('content')
-<!-- users list start -->
-<section class="app-user-list">
+    <!-- users list start -->
+    <section class="app-user-list">
 
-    <!-- list and filter start -->
-    <div class="card">
-        <div class="card-body ">
-            <div class="row">
-                <div class="col-md-4 user_role"></div>
-                <div class="col-md-4 user_plan"></div>
-                <div class="col-md-4 user_status"></div>
-            </div>
+        <!-- list and filter start -->
+        <div class="card">
+            <div class="card-body ">
+                <div class="row">
+                    <div class="col-md-4 user_role"></div>
+                    <div class="col-md-4 user_plan"></div>
+                    <div class="col-md-4 user_status"></div>
+                </div>
+                <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
 
-            <table class="job-list-table table">
-                <thead class="table-light">
+                    {{-- Search Input --}}
+                    <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
+                        <i data-feather="search"
+                           class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                               id="search-job-form" placeholder="Search job code..." style="height: 38px;">
+                        <!-- Clear button -->
+                        <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: transparent; border: none; font-weight: bold;
+                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
+                            &times;
+                        </button>
+                    </form>
+
+                    <div class="col-12 col-md-3 d-flex align-items-center">
+                        <div class="form-check m-0">
+                            <input type="hidden" name="overdue" value="0">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="overdue"
+                                name="overdue"
+                                value="1"
+                                {{ request('overdue') ? 'checked' : '' }}
+                            >
+                            <label class="form-check-label ms-1" for="overdue">OverDue</label>
+                        </div>
+                    </div>
+
+                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    <div class="col-12 col-md-3">
+                        <input type="date" class="form-control" name="due_at">
+                    </div>
+                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    <div class="col-12 col-md-3">
+                        <select name="created_at" class="form-select filter-priority">
+                            <option value="" disabled>Priority</option>
+                            @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $priority)
+                                <option value="{{$priority}}">{{ $priority->label() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    <div class="col-12 col-md-3">
+                        <select name="created_at" class="form-select filter-status">
+                            <option value="" disabled>Status</option>
+                          @foreach(\App\Models\StationStatus::all() as $status)
+                                <option value="{{$status->id}}">{{$status->name }}</option>
+
+                          @endforeach
+                        </select>
+                    </div>
+
+
+                </div>
+
+                <table class="job-list-table table">
+                    <thead class="table-light">
                     <tr>
                         <th>
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input">
@@ -182,77 +240,78 @@
                         <th>Order Item Name</th>
                         <th>Actions</th>
                     </tr>
-                </thead>
-            </table>
-            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                    style="z-index: 10;">
-                    <p id="selected-count-text">0 Jobs are selected</p>
-                    <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteJobsModal"
-                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                        <i data-feather="trash-2"></i> Delete Selected
-                    </button>
-                    </form>
+                    </thead>
+                </table>
+                <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                    <div
+                        class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                        style="z-index: 10;">
+                        <p id="selected-count-text">0 Jobs are selected</p>
+                        <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteJobsModal"
+                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                            <i data-feather="trash-2"></i> Delete Selected
+                        </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+        @include('modals.delete',[
+        'id' => 'deleteInvoiceModal',
+        'formId' => 'deleteInvoiceForm',
+        'title' => 'Delete Invoice',
+        ])
+        @include('modals.delete',[
+        'id' => 'deleteJobsModal',
+        'formId' => 'bulk-delete-form',
+        'title' => 'Delete Jobs',
+        'confirmText' => 'Are you sure you want to delete this items?',
+        ])
+        @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
+
+
+        <!-- list and filter end -->
+    </section>
+    <!-- users list ends -->
     </div>
-    @include('modals.delete',[
-    'id' => 'deleteInvoiceModal',
-    'formId' => 'deleteInvoiceForm',
-    'title' => 'Delete Invoice',
-    ])
-    @include('modals.delete',[
-    'id' => 'deleteJobsModal',
-    'formId' => 'bulk-delete-form',
-    'title' => 'Delete Jobs',
-    'confirmText' => 'Are you sure you want to delete this items?',
-    ])
-    @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
-
-
-    <!-- list and filter end -->
-</section>
-<!-- users list ends -->
-</div>
 
 @endsection
 
 @section('vendor-script')
-{{-- Vendor js files --}}
-<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+    {{-- Vendor js files --}}
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
 @endsection
 
 @section('page-script')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-<script>
-    const jobsDataUrl = "{{ route('job-tickets.data') }}";
+    <script>
+        const jobsDataUrl = "{{ route('job-tickets.data') }}";
 
-</script>
+    </script>
 
-{{-- Page js files --}}
-<script src="{{ asset('js/scripts/pages/app-jobs-list.js') }}?v={{ time() }}"></script>
-<script src="https://unpkg.com/feather-icons"></script>
+    {{-- Page js files --}}
+    <script src="{{ asset('js/scripts/pages/app-jobs-list.js') }}?v={{ time() }}"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
 
-<script>
-    $(document).ready(function () {
+    <script>
+        $(document).ready(function () {
             setupClearInput('roleSelect', 'clearRoleFilter');
 
             // Select all toggle
@@ -389,10 +448,10 @@
                 initAccordion();
             }, 500);
         });
-</script>
+    </script>
 
-<script>
-    // Backup accordion handler in case the main one doesn't work
+    <script>
+        // Backup accordion handler in case the main one doesn't work
         $(document).ready(function () {
             // Alternative click handler
             $(document).off('click.accordion').on('click.accordion', '.job-list-table tbody tr:not(.details-row)', function (e) {
@@ -425,6 +484,6 @@
                 }
             });
         });
-</script>
+    </script>
 
 @endsection
