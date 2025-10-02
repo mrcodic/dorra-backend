@@ -4,19 +4,26 @@ $.ajaxSetup({
     },
 });
 
-var dt_user_table = $(".job-list-table").DataTable({
+const dt_user_table = $(".job-list-table").DataTable({
     processing: true,
     serverSide: true,
     ajax: {
         url: jobsDataUrl,
         type: "GET",
-
         data: function (d) {
-            d.search_value = $("#search-job-form").val(); // get from input
-            d.status = $(".filter-status").val();
-            d.priority = $(".filter-priority").val();
-            d.due_at = $(".due_date").val();
-            d.overdue = $("#overdue").val();
+            d.search_value = $("#search-job-form").val() || "";
+            d.status       = $(".filter-status").val() || "";
+            d.priority     = $(".filter-priority").val() || "";
+            d.due_at       = $(".due_date").val() || "";
+
+            // send overdue only when checked
+            if ($("#overdue").is(":checked")) {
+                d.overdue = 1;
+            } else {
+                // make sure we don't send it at all when unchecked
+                delete d.overdue;
+            }
+
             return d;
         },
     },
@@ -25,89 +32,84 @@ var dt_user_table = $(".job-list-table").DataTable({
             data: null,
             defaultContent: "",
             orderable: false,
-            render: function (data, type, row, meta) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            }
+            render: (data) =>
+                `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`,
         },
         {
             data: "order_item_image",
-            render: function (data, type, row) {
-                return `
-            <img src="${data}" alt="Product Image"
-                style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #ccc;" />
-        `;
-            }
+            render: (src) =>
+                `<img src="${src}" alt="Product Image" style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid #ccc;" />`,
         },
-        {data: "code"},
-        {data: "priority_label"},
-        {data: "current_station"},
-        {data: "status_label"},
-        {data: "due_at"},
-        {data: "order_number"},
-        {data: "order_item_name"},
+        { data: "code" },
+        { data: "priority_label" },
+        { data: "current_station" },
+        { data: "status_label" },
+        { data: "due_at" },
+        { data: "order_number" },
+        { data: "order_item_name" },
         {
             data: "id",
             orderable: false,
-            render: function (data, type, row) {
+            render: function (id, type, row) {
                 return `
-
-        <div class="d-flex gap-1">
-             <a href="jobs/${data}" class="view-details"
-
-             >
-                <i data-feather="eye"></i>
-            </a>
+          <div class="d-flex gap-1">
+            <a href="jobs/${id}" class="view-details"><i data-feather="eye"></i></a>
             <a href="#" class="edit-details"
-                data-id="${data}"
-  data-station="${row.station_id}"
-   data-priority="${row.priority}"
-   data-due_at="${row.due_at}"
-   data-status="${row.current_status.name}"
-   data-action = "jobs/${data}"
-
-     >
-
-   <i data-feather="edit-3"></i>
-</a>
-        </div>
-    `;
+               data-id="${id}"
+               data-station="${row.station_id}"
+               data-priority="${row.priority}"
+               data-due_at="${row.due_at}"
+               data-status="${row.current_status?.name || ''}"
+               data-action="jobs/${id}">
+               <i data-feather="edit-3"></i>
+            </a>
+          </div>
+        `;
             },
         },
     ],
     order: [[1, "asc"]],
     dom:
         '<"d-flex align-items-center header-actions mx-2 row mt-75"' +
-        '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        // '<"d-flex align-items-center flex-grow-1 me-2"f>' + // Search input
-        // '<"d-flex align-items-center gap-1"B>' + // Buttons + Date Filter
-        ">" +
+        '<"col-12 d-flex flex-wrap align-items-center justify-content-between">' +
         ">t" +
-        '<"d-flex  mx-2 row mb-1"' +
+        '<"d-flex mx-2 row mb-1"' +
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
         ">",
-    buttons: [
-        {
-            text: '<input type="date" class="form-control" style="width: 120px;" />',
-            className: "btn border-0",
-            action: function (e, dt, node, config) {
-                e.preventDefault();
-            },
-        },
-    ],
+    buttons: [],
     drawCallback: function () {
         feather.replace();
     },
-
     language: {
         sLengthMenu: "Show _MENU_",
         search: "",
         searchPlaceholder: "Search..",
-        paginate: {
-            previous: "&nbsp;",
-            next: "&nbsp;",
-        },
+        paginate: { previous: "&nbsp;", next: "&nbsp;" },
     },
+});
+
+// ---- events (reload table) ----
+$(document).on("change", ".filter-status, .filter-priority, .due_date, #overdue", function () {
+    dt_user_table.ajax.reload();
+});
+
+$("#search-job-form").on("keyup", function (e) {
+    // optional: only reload on Enter to avoid excessive calls
+    if (e.key === "Enter") {
+        e.preventDefault();
+        dt_user_table.ajax.reload();
+    }
+});
+
+// clear button – reset filters and reload
+$("#clear-search").on("click", function () {
+    $("#search-job-form").val("");
+    $(".filter-status").val("");
+    $(".filter-priority").val("");
+    $(".due_date").val("");
+    $("#overdue").prop("checked", false);
+    dt_user_table.ajax.reload();
 });
 
 // Custom search with debounce

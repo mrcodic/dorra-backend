@@ -181,45 +181,45 @@
                         </button>
                     </form>
 
+                    {{-- Overdue (checkbox is fine as you wrote it) --}}
                     <div class="col-12 col-md-3 d-flex align-items-center">
                         <div class="form-check m-0">
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                id="overdue"
-                                name="overdue"
-                                value="1"
-                                {{ request('overdue') ? 'checked' : '' }}
-                            >
+                            <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1"
+                                {{ request('overdue') ? 'checked' : '' }}>
                             <label class="form-check-label ms-1" for="overdue">OverDue</label>
                         </div>
                     </div>
 
-                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    {{-- Date --}}
                     <div class="col-12 col-md-3">
-                        <input type="date" class="form-control due_date" name="due_at">
+                        <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
                     </div>
-                    {{-- Filter Select - 10% on md+, half width on sm --}}
+
+                    {{-- Priority (ensure value is the enum value) --}}
                     <div class="col-12 col-md-3">
-                        <select name="created_at" class="form-select filter-priority">
-                            <option value="" disabled>Priority</option>
+                        <select class="form-select filter-priority">
+                            <option value="">Priority</option>
                             @foreach(\App\Enums\JobTicket\PriorityEnum::cases() as $priority)
-                                <option name="priority" value="{{$priority}}">{{ $priority->label() }}</option>
+                                <option value="{{ $priority->value }}"
+                                    {{ request('priority') === $priority->value ? 'selected' : '' }}>
+                                    {{ $priority->label() }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
 
-                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    {{-- Status --}}
                     <div class="col-12 col-md-3">
-                        <select name="created_at" class="form-select filter-status">
-                            <option value="" disabled>Status</option>
-                          @foreach(\App\Models\StationStatus::all() as $status)
-                                <option name="status" value="{{$status->id}}">{{$status->name }}</option>
-
-                          @endforeach
+                        <select class="form-select filter-status">
+                            <option value="">Status</option>
+                            @foreach(\App\Models\StationStatus::all() as $status)
+                                <option value="{{ $status->id }}"
+                                    {{ (string)request('status') === (string)$status->id ? 'selected' : '' }}>
+                                    {{ $status->name }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
-
 
                 </div>
 
