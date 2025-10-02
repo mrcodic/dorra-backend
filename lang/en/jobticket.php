@@ -14,7 +14,7 @@ return [
         'finishing'            => 'in Progress',
         'finished'             => 'Completed',
         'qc_queue'             => 'Waiting',
-        'qc_packing'            => 'in Progress',
+        'qc_passing'            => 'in Progress',
         'qc_passed'            => 'Completed',
         'pack_queue'           => 'Waiting',
         'packing'               => 'in Progress',
