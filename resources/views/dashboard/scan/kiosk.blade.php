@@ -38,7 +38,7 @@
         <div class="row g-3">
             {{-- Hardware scanner section --}}
             <div class="col-12" id="section-hw">
-                <form action="{{ route('scan.submit') }}" method="post" class="p-3 border rounded-3">
+                <form id="scan" action="{{ route('scan.submit') }}" method="post" class="p-3 border rounded-3">
                     @csrf
                     <label for="code" class="form-label mb-1">Scan / Enter Job Code</label>
                     <div class="input-group">
@@ -105,6 +105,9 @@
 @section('page-script')
     <script src="https://unpkg.com/html5-qrcode" defer></script>
     <script>
+        handleAjaxFormSubmit("#scan",{
+            successMessage: "Scan Submitted Successfully"
+        })
         document.addEventListener('DOMContentLoaded', () => {
             feather.replace();
 
