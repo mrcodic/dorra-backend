@@ -255,7 +255,7 @@ class ProductService extends BaseService
             }
 
 
-            if (!empty($validatedData['specifications'])) {
+                if (!empty($validatedData['specifications'])) {
                 $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                     $productSpecification = $product->specifications()->updateOrCreate(
                         [
@@ -304,7 +304,6 @@ class ProductService extends BaseService
 
 
                 $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
-                    $spec->delete();
                     $spec->options->each(function ($option) {
                         $option->clearMediaCollection();
                         $option->delete();
@@ -314,6 +313,7 @@ class ProductService extends BaseService
             } else {
 
                 $product->specifications->each(function ($spec) {
+                    $spec->delete();
                     $spec->options->each(function ($option) {
                         $option->clearMediaCollection();
                         $option->delete();
