@@ -194,6 +194,16 @@
             ],
             "modalTarget": ""
 
+        },
+        {
+            "url": "/board",
+            "name": "Board",
+            "icon": "Settings.svg"
+        },
+        {
+            "url": "/jobs",
+            "name": "Jobs",
+            "icon": "Settings.svg"
         }
     ]
 }

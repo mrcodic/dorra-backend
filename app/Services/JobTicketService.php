@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -21,33 +22,34 @@ class JobTicketService extends BaseService
     {
         $jobs = $this->repository
             ->query()
-            ->with(['station', 'orderItem', 'currentStatus'])
-            ->when(request()->filled('search_value'), function ($query) {
+            ->with(['station','orderItem','currentStatus'])
+
+            ->when(request()->filled('search_value'), function ($q) {
                 $search = request('search_value');
-                if (hasMeaningfulSearch($search)) {
-                    $query->where('code', 'LIKE', "%{$search}%");
-                } else {
-                    $query->whereRaw('1=0');
-                }
+                hasMeaningfulSearch($search)
+                    ? $q->where('code', 'like', "%{$search}%")
+                    : $q->whereRaw('1=0');
             })
-            ->when(request()->boolean('overdue'), function ($query) {
-                $query->whereNotNull('due_at')
-                    ->whereDate('due_at', '<=', today());
-            })
-            ->when(request()->filled('station_id'), function ($query) {
-                $query->where('station_id', request('station_id'));
-            })
-            ->when(request()->boolean('pending'), function ($query) {
-                $query->whereNull('current_status_id');
-            })
-            ->when(!request()->boolean('pending') && request()->filled('status_id'), function ($query) {
-                $query->where('current_status_id', request('status_id'));
-            })
-            ->when(request()->filled('priority'), function ($query) {
-                $query->where('priority', request('priority'));
+            ->when(request()->boolean('overdue'), function ($q) {
+                $q->whereNotNull('due_at')->where('due_at', '<', today())
+                ->whereHas('station', function ($q) {
+                    $q->whereIsTerminal(false);
+                })
+                ;
             })
 
+            ->when(request()->boolean('pending'), function ($q) {
+                $q->whereNull('current_status_id');
+            })
+
+            ->when(!request()->boolean('pending') && request()->filled('status_id'), function ($q) {
+                $q->where('current_status_id', request('status_id'));
+            })
+            ->when(request()->filled('due_at'), fn($q) => $q->whereDate('due_at', request('due_at')))
+            ->when(request()->filled('station_id'), fn($q) => $q->where('station_id', request('station_id')))
+            ->when(request()->filled('priority'), fn($q) => $q->where('priority', request('priority')))
             ->latest();
+
 
         return DataTables::of($jobs)
             ->addColumn('code', fn($job) => $job->code)
@@ -83,7 +85,7 @@ class JobTicketService extends BaseService
             $statuses  = $station?->statuses?->sortBy('sequence')->values();
 
             if (!$station || !$statuses || $statuses->isEmpty()) {
-                throw new ModelNotFoundException("Station or its statuses not configured.");
+               throw ValidationException::withMessages(["station" => "Job ticket still pending."]);
             }
 
             $fromStationName = (string) $station->name;

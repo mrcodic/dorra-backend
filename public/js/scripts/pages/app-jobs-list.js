@@ -16,24 +16,26 @@ const dt_user_table = $(".job-list-table").DataTable({
             d.due_at       = $(".due_date").val() || "";
             d.station_id   = $(".filter-station").val() || "";
 
-            const statusVal = $(".filter-status").val();
-            if (statusVal && !$("#pending").is(":checked")) {
-                d.status_id = statusVal;
-            } else {
-                delete d.status_id;
-            }
-            return d;
-        },
+            // ✅ send flags
+            if ($("#overdue").is(":checked")) d.overdue = 1; else delete d.overdue;
+            if ($("#pending").is(":checked")) d.pending = 1; else delete d.pending;
 
+            // status only when NOT pending
+            const statusVal = $(".filter-status").val();
+            if (statusVal && !$("#pending").is(":checked")) d.status_id = statusVal;
+            else delete d.status_id;
+
+            return d;
+        }
     },
     columns: [
-        {
-            data: null,
-            defaultContent: "",
-            orderable: false,
-            render: (data) =>
-                `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`,
-        },
+        // {
+        //     data: null,
+        //     defaultContent: "",
+        //     orderable: false,
+        //     render: (data) =>
+        //         `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`,
+        // },
         {
             data: "order_item_image",
             render: (src) =>
@@ -123,6 +125,15 @@ const dt_user_table = $(".job-list-table").DataTable({
 });
 
 // ---- events (reload table) ----
+$(document).on("click", ".station-card", function () {
+    const station = $(this).data("station");
+
+    // set the dropdown filter for consistency
+    $(".filter-station").val(station);
+
+    // redraw DataTable
+    dt_user_table.draw();
+});
 $(document).on(
     "change",
     ".filter-status, .filter-priority, .due_date, #overdue",
