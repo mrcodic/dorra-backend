@@ -12,20 +12,19 @@ const dt_user_table = $(".job-list-table").DataTable({
         type: "GET",
         data: function (d) {
             d.search_value = $("#search-job-form").val() || "";
-            d.status = $(".filter-status").val() || "";
-            d.priority = $(".filter-priority").val() || "";
-            d.due_at = $(".due_date").val() || "";
+            d.priority     = $(".filter-priority").val() || "";
+            d.due_at       = $(".due_date").val() || "";
+            d.station_id   = $(".filter-station").val() || "";
 
-            // send overdue only when checked
-            if ($("#overdue").is(":checked")) {
-                d.overdue = 1;
+            const statusVal = $(".filter-status").val();
+            if (statusVal && !$("#pending").is(":checked")) {
+                d.status_id = statusVal;
             } else {
-                // make sure we don't send it at all when unchecked
-                delete d.overdue;
+                delete d.status_id;
             }
-
             return d;
         },
+
     },
     columns: [
         {
@@ -48,7 +47,36 @@ const dt_user_table = $(".job-list-table").DataTable({
                 return `<p class="rounded rounded-3 text-center" style = "border: 2px solid #CED5D4;">${data}</p>`;
             },
         },
-        { data: "status_label" },
+        {
+            data: "status_label",
+            render: function (data) {
+                const name = (data || "").toString().trim();
+
+                // map: name -> styles
+                const map = {
+                    "Waiting":      { bg: "#CED5D4", color: "#424746" },
+                    "in Progress":  { bg: "#FCF8FC", color: "#4E2775" },
+                    "Completed":    { bg: "#D7EEDD", color: "#30A84D" },
+                };
+
+                const styles = map[name] || { bg: "#F4F6F8", color: "#121212" };
+
+                return `
+      <p class="rounded rounded-3 text-center"
+         style="
+           display:inline-block;
+           margin:0;
+           padding:.35rem .6rem;
+           background:${styles.bg};
+           color:${styles.color};
+
+         ">
+        ${name || "-"}
+      </p>
+    `;
+            },
+        }
+        ,
         { data: "due_at" },
         { data: "order_number" },
         { data: "order_item_name" },
@@ -102,6 +130,12 @@ $(document).on(
         dt_user_table.ajax.reload();
     }
 );
+$("#pending").on("change", function () {
+    if ($(this).is(":checked")) {
+        $(".filter-status").val("");
+    }
+    dt_user_table.ajax.reload();
+});
 
 $("#search-job-form").on("keyup", function (e) {
     // optional: only reload on Enter to avoid excessive calls

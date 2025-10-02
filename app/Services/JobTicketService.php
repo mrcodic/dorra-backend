@@ -23,8 +23,8 @@ class JobTicketService extends BaseService
             ->query()
             ->with(['station', 'orderItem', 'currentStatus'])
             ->when(request()->filled('search_value'), function ($query) {
-                if (hasMeaningfulSearch(request('search_value'))) {
-                    $search = request('search_value');
+                $search = request('search_value');
+                if (hasMeaningfulSearch($search)) {
                     $query->where('code', 'LIKE', "%{$search}%");
                 } else {
                     $query->whereRaw('1=0');
@@ -32,48 +32,35 @@ class JobTicketService extends BaseService
             })
             ->when(request()->boolean('overdue'), function ($query) {
                 $query->whereNotNull('due_at')
-                    ->where('due_at', '<', now());
-            })
-            ->when(request()->boolean('overdue'), function ($query) {
-                $query->whereNotNull('due_at')
                     ->whereDate('due_at', '<=', today());
             })
-            ->when(request()->filled('status'), function ($query) {
+            ->when(request()->filled('station_id'), function ($query) {
+                $query->where('station_id', request('station_id'));
+            })
+            ->when(request()->boolean('pending'), function ($query) {
                 $query->whereNull('current_status_id');
+            })
+            ->when(!request()->boolean('pending') && request()->filled('status_id'), function ($query) {
+                $query->where('current_status_id', request('status_id'));
             })
             ->when(request()->filled('priority'), function ($query) {
                 $query->where('priority', request('priority'));
             })
+
             ->latest();
 
-
         return DataTables::of($jobs)
-            ->addColumn('code', function ($job) {
-                return $job->code;
-            })
-            ->editColumn('priority_label', function ($job) {
-                return $job->priority?->label() ?? "-";
-            })
-            ->editColumn('status_label', function ($job) {
-                return $job->currentStatus?->name ?? "-";
-            })
-            ->editColumn('due_at', function ($job) {
-                return $job->due_at?->format('Y-m-d') ?? "-";
-            })
-            ->addColumn('current_station', function ($job) {
-                return $job->station?->name ?? "-";
-            })
-            ->addColumn('order_number', function ($job) {
-                return $job->orderItem->order->order_number ?? "-";
-            })
-            ->addColumn('order_item_name', function ($job) {
-                return $job->orderItem->orderable->name ?? "-";
-            })
-            ->addColumn('order_item_image', function ($job) {
-                return $job->orderItem->itemable->getImageUrl();
-            })
+            ->addColumn('code', fn($job) => $job->code)
+            ->editColumn('priority_label', fn($job) => $job->priority?->label() ?? '-')
+            ->editColumn('status_label', fn($job) => $job->currentStatus?->name ?? '-')
+            ->editColumn('due_at', fn($job) => $job->due_at?->format('Y-m-d') ?? '-')
+            ->addColumn('current_station', fn($job) => $job->station?->name ?? '-')
+            ->addColumn('order_number', fn($job) => $job->orderItem->order->order_number ?? '-')
+            ->addColumn('order_item_name', fn($job) => $job->orderItem->orderable->name ?? '-')
+            ->addColumn('order_item_image', fn($job) => $job->orderItem->itemable->getImageUrl())
             ->make(true);
     }
+
 
     /**
      * @throws \Exception

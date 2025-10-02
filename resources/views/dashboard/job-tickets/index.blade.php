@@ -305,18 +305,17 @@
                                 request('overdue') ? 'checked' : '' }}>
                             <label class="form-check-label" for="overdue">OverDue</label>
                         </div>
-                        <div class=" d-flex align-items-center">
-                            <div class="form-check m-0">
-                                <input class="form-check-input" type="checkbox" id="pending" name="status">
-                                <label class="form-check-label" for="pending">Pending</label>
-                            </div>
+
+                        <div class="form-check m-0 ms-3">
+                            <input class="form-check-input" type="checkbox" id="pending" name="pending" value="1" {{
+                                request()->boolean('pending') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="pending">Pending</label>
                         </div>
                     </div>
-                </div>
 
-                <div class="d-flex flex-column flex-md-row gap-1">
+
                     {{-- Date --}}
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-2">
                         <input type="date" class="form-control due_date" name="due_at" value="{{ request('due_at') }}">
                     </div>
 
@@ -449,29 +448,19 @@
         const url = $(this).data("statuses-url");
         const $status = $(".filter-status");
 
-        // reset first
+        // reset status options
         $status.empty().append('<option value="">All Statuses</option>');
 
-        if (!stationId) {
-            // no station selected -> keep "All"
-            dt_user_table && dt_user_table.ajax.reload();
-            return;
-        }
+        if (!stationId) { dt_user_table.ajax.reload(); return; }
 
         $.ajax({
-            url: url,
-            method: 'GET',
-            data: { station_id: stationId },   // << send station id
+            url,
+            method: "GET",
+            data: { station_id: stationId },
             success: function (res) {
-                // expect: { data: [{id: 1, name: "Queued"}, ...] }
-                const items = res.data || res; // support both shapes
-                items.forEach(s => {
-                    $status.append(new Option(s.name, s.id));
-                });
-                dt_user_table && dt_user_table.ajax.reload();
-            },
-            error: function () {
-                // keep just "All Statuses" on error
+                const items = res.data || res;
+                items.forEach(s => $status.append(new Option(s.name, s.id)));
+                dt_user_table.ajax.reload();
             }
         });
     });

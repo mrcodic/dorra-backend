@@ -357,7 +357,7 @@ class CartService extends BaseService
             'cartable_type' => ['required', 'in:product,category'],
             'itemable_type' => ['required', 'in:template,design'],
         ]);
-        $cartId = auth('sanctum')->user()?->cart->id ?? Guest::whereCookieValue(request()->cookie('cookie_id'))->first()?->cart->id;
+        $cartId = auth('sanctum')->user()?->cart?->id ?? Guest::whereCookieValue(request()->cookie('cookie_id'))->first()?->cart?->id;
         $mapItemTypes = [
             'template' => Template::class,
             'design'=> Design::class,
