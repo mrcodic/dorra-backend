@@ -1446,15 +1446,15 @@
                 $(this).slideUp(deleteElement);
 
                 // Recalculate delete button visibility after an item is removed
-                // var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                // items.each(function (index) {
-                //     // Hide delete button for the first item (index 0) and show for others
-                //     if (index === 0) {
-                //         $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
-                //     } else {
+                var items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
+                items.each(function (index) {
+                    // Hide delete button for the first item (index 0) and show for others
+                    if (index === 0) {
+                        $(this).find('[data-repeater-delete]').hide(); // Hide the delete button for the first item
+                    } else {
                 $(this).find('[data-repeater-delete]').show(); // Show delete button for others
-                //     }
-                // });
+                    }
+                });
             }
         });
     </script>
