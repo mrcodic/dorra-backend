@@ -191,11 +191,18 @@
             // });
 
             // ---------- Camera mode (html5-qrcode) ----------
-            function onScanSuccess(decodedText) {
+            async function onScanSuccess(decodedText) {
                 const code = (decodedText || '').trim();
                 if (!code) return;
-                postCode(code);
+
+                inputCode.value = code;
+                await postCode(code);
+
+                // stop camera after first scan
+                await stopScanner();
             }
+
+
             function onScanFailure(_) { /* ignore noisy callbacks */ }
 
             async function listCameras() {
