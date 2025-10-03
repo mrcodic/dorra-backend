@@ -192,16 +192,13 @@
 
             // ---------- Camera mode (html5-qrcode) ----------
             async function onScanSuccess(decodedText) {
+                console.log("Scanned:", decodedText); 
                 const code = (decodedText || '').trim();
                 if (!code) return;
-
                 inputCode.value = code;
                 await postCode(code);
-
-                // stop camera after first scan
                 await stopScanner();
             }
-
 
             function onScanFailure(_) { /* ignore noisy callbacks */ }
 
