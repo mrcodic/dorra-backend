@@ -30,7 +30,7 @@
                     <hr>
                     <div class="d-flex flex-column">
                         @foreach($station->jobTickets as $jobTicket)
-                            <a href="{{ route('job-tickets.show', $jobTicket->id) }}" class="text-decoration-none">
+                            <a href="{{ route('jobs.show', $jobTicket->id) }}" class="text-decoration-none">
                                 <div class="card p-1 hover-shadow" style="cursor: pointer;">
                                     <img src="{{ $jobTicket->orderItem->orderable->getMainImageUrl() }}"
                                          alt="Item Photo" width="172px">
