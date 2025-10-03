@@ -140,6 +140,6 @@ class Category extends Model implements HasMedia
     }
     public function getMainImageUrl(): string
     {
-        return $this->getFirstMediaUrl('category_main_image');
+        return $this->getFirstMediaUrl('categories');
     }
 }
