@@ -28,7 +28,7 @@ class JobTicketController extends DashboardController
         $this->assoiciatedData = [
             'index' => [
                 'stations' => $stationRepository->query()->withCount('jobTickets')
-                    ->select(['id', 'name','job_tickets_count'])->get(),
+                    ->get(),
             ]
         ];
 
