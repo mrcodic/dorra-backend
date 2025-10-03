@@ -197,7 +197,7 @@
         },
         {
             "name": "Print command",
-            "icon": "print.svg",
+            "icon": "printer.svg",
             "slug": "",
             "submenu": [
                 {
