@@ -66,7 +66,7 @@
         },
         {
             "name": "Flags",
-            "icon": "Templates.svg",
+            "icon": "flag.svg",
             "slug": "",
             "url": "/flags",
             "modalTarget": ""
@@ -196,14 +196,25 @@
 
         },
         {
-            "url": "/board",
-            "name": "Board",
-            "icon": "Settings.svg"
-        },
-        {
-            "url": "/jobs",
-            "name": "Jobs",
-            "icon": "Settings.svg"
+            "name": "Print command",
+            "icon": "print.svg",
+            "slug": "",
+            "submenu": [
+                {
+                    "url": "/jobs",
+                    "name": "Jobs",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/board",
+                    "name": "Board",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                }
+            ],
+            "modalTarget": ""
+
         }
     ]
 }

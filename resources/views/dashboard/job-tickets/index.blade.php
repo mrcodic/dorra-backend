@@ -234,7 +234,7 @@
                             <p>{{ $station->name  }}</p>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="number">{{ $station->jobTickets->count() }}</span>
+                            <span class="number">{{ $station->job_tickets_count }}</span>
                             <span class="text">Status</span>
                         </div>
                     </div>
