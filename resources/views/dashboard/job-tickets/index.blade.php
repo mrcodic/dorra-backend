@@ -239,7 +239,7 @@
                 <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs station-card"
                     data-station="{{ $station->id }}">
                     <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset(" /images/".strtolower($station->name).".svg")}}" alt="users" style="width:
+                        <img src="{{asset("/images/".strtolower($station->name).".svg")}}" alt="users" style="width:
                         28px">
                         <p>{{ $station->name }}</p>
                     </div>
