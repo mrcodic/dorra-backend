@@ -93,6 +93,7 @@
                     </div>
                 </div>
                 <hr>
+                @if($model->itemable?->types)
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
@@ -106,6 +107,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
             {{-- Details --}}
             <div class="d-flex flex-column">
