@@ -53,20 +53,13 @@
                 <strong>Designs</strong>
                 <div class="row" style="flex-wrap:wrap;">
                     @foreach($model->orderItem->itemable->types as $type)
-                        @php
-                            $typeValue = strtolower(method_exists($type->value, 'value') ? $type->value->value : $type->value);
-                            $img = $model->orderItem->itemable->getImageUrlForType($typeValue);
-                        @endphp
+
                         <div class="col" style="flex:0 0 48%;">
                             <div class="sub">{{ $type->value->label() }} Design</div>
-                            @if(is_array($img))
-                                <div class="row">
-                                    <img class="img" style="max-height:150px" src="{{ $img['front'] }}" alt="front">
-                                    <img class="img" style="max-height:150px" src="{{ $img['back']  }}" alt="back">
-                                </div>
-                            @else
-                                <img class="img" style="max-height:160px" src="{{ $img }}" alt="design">
-                            @endif
+
+
+                                <img class="img" style="max-height:160px" src="{{ $model->orderItem->itemable->getImageUrlForType($type->value->label()) }}" alt="design">
+
                         </div>
                     @endforeach
                 </div>
