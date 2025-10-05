@@ -54,7 +54,7 @@
                 <div class="row" style="flex-wrap:wrap;">
                     @foreach($model->orderItem->itemable->types as $type)
                         @php
-                            $typeValue = strtolower(method_exists($type->value, 'value') ? $type->value->value : (string)$type->value);
+                            $typeValue = strtolower(method_exists($type->value, 'value') ? $type->value->value : $type->value);
                             $img = $model->orderItem->itemable->getImageUrlForType($typeValue);
                         @endphp
                         <div class="col" style="flex:0 0 48%;">
