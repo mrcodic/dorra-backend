@@ -34,8 +34,13 @@
                         </a>
                     @endif
 
+                    @if($model->orderItem)
+                        <span class="text-muted">— {{ $model->orderItem->itemable?->name ?? "Item #{$model->order_item_id}"
+                    }}</span>
+                    @endif
                 </h5>
             </div>
+
             <div class="d-flex align-items-center gap-1">
                 <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary">
                     <i data-feather="arrow-left" class="me-25"></i> Back
