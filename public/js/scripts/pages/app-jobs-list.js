@@ -29,13 +29,13 @@ const dt_user_table = $(".job-list-table").DataTable({
         }
     },
     columns: [
-        // {
-        //     data: null,
-        //     defaultContent: "",
-        //     orderable: false,
-        //     render: (data) =>
-        //         `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`,
-        // },
+        {
+            data: null,
+            defaultContent: "",
+            orderable: false,
+            render: (data) =>
+                `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`,
+        },
         {
             data: "order_item_image",
             render: (src) =>
