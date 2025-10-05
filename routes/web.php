@@ -214,7 +214,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', 'getData')->name('data');
 //        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
+    Route::get('/job-tickets/{jobTicket}/pdf', [JobTicketController::class, 'pdf'])->name('job-tickets.pdf');
     Route::apiResource('/jobs', JobTicketController::class);
+
     Route::get('board', BoardController::class)->name('board');
     Route::view('/scan', 'dashboard.scan.kiosk')->name('scan.kiosk');
     Route::post('/scan', [JobTicketController::class, 'scan'])

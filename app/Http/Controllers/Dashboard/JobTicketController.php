@@ -50,4 +50,9 @@ class JobTicketController extends DashboardController
         return Response::api(data: $data);
 
     }
+
+    public function downloadPdf()
+    {
+        return $this->jobTicketService->downloadPdf();
+    }
 }

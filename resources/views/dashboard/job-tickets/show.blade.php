@@ -46,7 +46,7 @@
                     <i data-feather="arrow-left" class="me-25"></i> Back
                 </a>
                 <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
-                    <i data-feather="printer" class="me-25"></i> Print
+                    <i data-feather="printer" class="me-25"></i> Download
                 </button>
             </div>
         </div>
@@ -244,4 +244,11 @@
     <script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('printTicketBtn')?.addEventListener('click', () => {
+                window.open("{{ route('job-tickets.pdf', $model->id) }}", "_blank");
+            });
+        });
+    </script>
 @endsection
