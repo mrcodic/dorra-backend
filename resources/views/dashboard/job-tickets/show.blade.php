@@ -93,7 +93,6 @@
                     </div>
                 </div>
                 <hr>
-                @dd($model->orderItem->itemable?->types)
                 @if($model->orderItem->itemable?->types)
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
