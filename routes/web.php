@@ -212,9 +212,10 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'jobs', 'as' => 'job-tickets.', 'controller' => JobTicketController::class,], function () {
         Route::get('/data', 'getData')->name('data');
+        Route::get('/{jobTicket}/pdf', 'pdf')->name('pdf');
+
 //        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
-    Route::get('/job-tickets/{jobTicket}/pdf', [JobTicketController::class, 'pdf'])->name('job-tickets.pdf');
     Route::apiResource('/jobs', JobTicketController::class);
 
     Route::get('board', BoardController::class)->name('board');
