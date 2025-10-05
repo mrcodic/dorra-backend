@@ -24,42 +24,18 @@
     {{-- Page header / toolbar --}}
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
         <div class="d-flex align-items-center gap-1 flex-wrap">
-            <h5 class="mb-0 d-flex align-items-center gap-2">
-                <span class="badge bg-dark">{{ $model->code }}</span>
 
-                @if($model->orderItem?->order)
-                <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank"
-                    class="text-decoration-none">
-                    Order {{ $model->orderItem->order->order_number ?? $model->orderItem->order_id }}
-                </a>
-                @endif
-
-                @if($model->orderItem)
-                <span class="text-muted">— {{ $model->orderItem->itemable?->name ?? "Item #{$model->order_item_id}"
-                    }}</span>
-                @endif
-            </h5>
-        </div>
 
         <div class="d-flex align-items-center gap-1">
             <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary">
                 <i data-feather="arrow-left" class="me-25"></i> Back
             </a>
             <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
-                <i data-feather="printer" class="me-25"></i> Download
+                <i data-feather="download" class="me-25"></i> Download
             </button>
         </div>
     </div>
 
-    <div class="d-flex align-items-center gap-1">
-        <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary">
-            <i data-feather="arrow-left" class="me-25"></i> Back
-        </a>
-        <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
-            <i data-feather="printer" class="me-25"></i> Print
-        </button>
-    </div>
-    </div>
 
     @php
     $specsRaw = $model->specs ?? []; // or the JSON you have
