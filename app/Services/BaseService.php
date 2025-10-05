@@ -25,7 +25,7 @@ class BaseService
     public function showResource($id, $relations = [])
     {
         $model = $this->repository->find($id, $relations);
-        return $model->load($relations);
+        return $model;
 
     }
 
