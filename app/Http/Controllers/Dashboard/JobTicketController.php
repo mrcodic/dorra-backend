@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Requests\JobTicket\UpdateJobTicketRequest;
+use App\Models\JobTicket;
 use App\Repositories\Interfaces\StationRepositoryInterface;
 use App\Services\JobTicketService;
 use Illuminate\Http\JsonResponse;
@@ -51,8 +52,8 @@ class JobTicketController extends DashboardController
 
     }
 
-    public function downloadPdf()
+    public function pdf(JobTicket $jobTicket)
     {
-        return $this->jobTicketService->downloadPdf();
+        return $this->jobTicketService->downloadPdf($jobTicket);
     }
 }
