@@ -93,13 +93,12 @@
                     </div>
                 </div>
                 <hr>
-                @dd($model->itemable,$model->itemable?->types)
-                @if($model->itemable?->types)
+                @if($model->orderItem->itemable?->types)
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
                         <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
-                            @foreach($model->itemable?->types as $type)
+                            @foreach($model->orderItem?->types as $type)
                             <div class="d-flex flex-column">
                                 <p style="margin: 0; color: #121212">{{ $type->value->label() }} Design</p>
                                 <img src="{{$model->orderItem->itemable->getImageUrlForType($type->value->label())}}" alt="item photo">
