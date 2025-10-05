@@ -425,12 +425,168 @@
                     updateBulkDeleteVisibility();
                 });
 
-                // When individual checkbox changes
-                $(document).on('change', '.category-checkbox', function () {
-                    if (!this.checked) {
-                        $('#select-all-checkbox').prop('checked', false);
-                    } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
-                        $('#select-all-checkbox').prop('checked', true);
+            // When individual checkbox changes
+            $(document).on('change', '.category-checkbox', function () {
+                if (!this.checked) {
+                    $('#select-all-checkbox').prop('checked', false);
+                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
+                    $('#select-all-checkbox').prop('checked', true);
+                }
+                updateBulkDeleteVisibility();
+            });
+
+            // Simple accordion toggle function
+            function toggleAccordion($row) {
+                if ($(window).width() > 768) return; // Only on mobile
+
+                const $detailsRow = $row.next('.details-row');
+                const $icon = $row.find('.expand-icon');
+
+                // Close all other details
+                $('.details-row.show').removeClass('show');
+                $('.expand-icon.expanded').removeClass('expanded');
+
+                // If this row has details and they're not currently shown
+                if ($detailsRow.length && !$detailsRow.hasClass('show')) {
+                    $detailsRow.addClass('show');
+                    $icon.addClass('expanded');
+                }
+            }
+
+            // Accordion click handler with event delegation
+            $(document).on('click.accordion', '.job-list-table tbody tr:not(.details-row)', function (e) {
+                // Prevent accordion when clicking interactive elements
+                if ($(e.target).is('input, button, a, .btn') ||
+                    $(e.target).closest('input, button, a, .btn').length > 0) {
+                    return;
+                }
+
+                e.stopPropagation();
+                toggleAccordion($(this));
+            });
+
+            // Initialize accordion after DataTable draw
+            function initAccordion() {
+                if ($(window).width() <= 768) {
+                    $('.job-list-table tbody tr:not(.details-row)').each(function () {
+                        const $row = $(this);
+
+                        // Remove existing details and icons first
+                        $row.find('.expand-icon').remove();
+                        $row.next('.details-row').remove();
+
+                        // Add expand icon to role column
+                        $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
+                        // Get data for details
+                        const priority = $row.find('td:nth-child(4)').html() || '';
+                        const currentStation = $row.find('td:nth-child(5)').html() || '';
+                        const status = $row.find('td:nth-child(6)').html() || '';
+                        const dueDate = $row.find('td:nth-child(7)').html() || '';
+                        const orderNumber = $row.find('td:nth-child(8)').html() || '';
+                        const orderItemName = $row.find('td:nth-child(9)').html() || '';
+                        const actions = $row.find('td:nth-child(10)').html() || '';
+
+                        // Create details row
+                        const detailsHtml = `
+                    <tr class="details-row">
+                        <td colspan="3">
+                            <div class="details-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Priority:</span>
+                                    <span class="detail-value">${priority}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Current Station:</span>
+                                    <span class="detail-value">${currentStation}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Status:</span>
+                                    <span class="detail-value">${status}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Due Date:</span>
+                                    <span class="detail-value">${dueDate}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Order Number:</span>
+                                    <span class="detail-value">${orderNumber}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Order Item Name:</span>
+                                    <span class="detail-value">${orderItemName}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Actions:</span>
+                                    <span class="detail-value">${actions}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                        $row.after(detailsHtml);
+                    });
+                } else {
+                    // Remove mobile elements on desktop
+                    $('.details-row').remove();
+                    $('.expand-icon').remove();
+                }
+            }
+
+            // Handle window resize
+            $(window).on('resize', function () {
+                setTimeout(initAccordion, 100);
+            });
+
+            // On DataTable events
+            $(document).on('draw.dt', '.code-list-table', function () {
+                $('#bulk-delete-container').hide();
+                $('#select-all-checkbox').prop('checked', false);
+
+                // Reinitialize accordion after DataTable operations
+                setTimeout(initAccordion, 100);
+            });
+
+            // Close bulk delete container
+            $(document).on('click', '#close-bulk-delete', function () {
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+            });
+
+            // Update the bulk delete container visibility
+            function updateBulkDeleteVisibility() {
+                const selectedCheckboxes = $('.category-checkbox:checked');
+                const count = selectedCheckboxes.length;
+
+                if (count > 0) {
+                    $('#selected-count-text').text(`${count} Invoice${count > 1 ? 's are' : ' is'} selected`);
+                    $('#bulk-delete-container').show();
+                } else {
+                    $('#bulk-delete-container').hide();
+                }
+            }
+
+            // Initialize on page load
+            setTimeout(function () {
+                initAccordion();
+
+            }, 500);
+        });
+</script>
+<script src="https://unpkg.com/feather-icons"></script>
+
+<script>
+    // Backup accordion handler in case the main one doesn't work
+        $(document).ready(function () {
+            // Alternative click handler
+            $(document).off('click.accordion').on('click.accordion', '.job-list-table tbody tr:not(.details-row)', function (e) {
+                console.log('Accordion clicked'); // Debug log
+
+                if ($(window).width() <= 768) {
+                    // Skip if clicking on interactive elements
+                    if ($(e.target).is('input, button, a') || $(e.target).closest('input, button, a').length) {
+                        return;
                     }
                     updateBulkDeleteVisibility();
                 });
