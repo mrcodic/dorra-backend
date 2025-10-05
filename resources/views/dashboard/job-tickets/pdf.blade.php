@@ -84,7 +84,7 @@
 
         <div class="box no-break">
             <strong>Code</strong>
-            <img class="img" src="{{ $model->barcode_for_pdf }}" alt="Code128">
+            <img class="img" src="{{ $model->barcode_png_url }}" alt="Code128">
         </div>
 
         @php

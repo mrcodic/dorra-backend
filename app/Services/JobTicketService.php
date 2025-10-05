@@ -214,7 +214,6 @@ class JobTicketService extends BaseService
             'station','currentStatus',
         ]);
 
-        $ticket->barcode_for_pdf = $ticket->barcode_png_url ?? $ticket->barcode_svg_url ?? '';
         $pdf = Pdf::loadView('dashboard.job-tickets.pdf', [
             'model' => $ticket,
         ])->setPaper('a4');
