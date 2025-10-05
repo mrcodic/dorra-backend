@@ -228,16 +228,18 @@
             {{-- Statistics Cards --}}
             <div class="mb-3 d-flex flex-wrap gap-1">
                 @foreach($associatedData['stations'] as $station)
-                    <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs station-card" data-station="{{ $station->id }}">
-                        <div class="d-flex align-items-center gap-1">
-                            <img src="{{asset("/images/".strtolower($station->name).".svg")}}" alt="users" style="width: 28px">
-                            <p>{{ $station->name  }}</p>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <span class="number">{{ $station->job_tickets_count }}</span>
-                            <span class="text">Status</span>
-                        </div>
+                <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs station-card"
+                    data-station="{{ $station->id }}">
+                    <div class="d-flex align-items-center gap-1">
+                        <img src="{{asset(" /images/".strtolower($station->name).".svg")}}" alt="users" style="width:
+                        28px">
+                        <p>{{ $station->name }}</p>
                     </div>
+                    <div class="d-flex align-items-center">
+                        <span class="number">{{ $station->job_tickets_count }}</span>
+                        <span class="text">Status</span>
+                    </div>
+                </div>
                 @endforeach
 
 
@@ -260,19 +262,19 @@
                     </form>
 
                     {{-- Overdue (checkbox is fine as you wrote it) --}}
-                        <div class=" d-flex gap-1 justify-content-evenly align-items-center col-12 col-md-2">
-                            <div class="form-check m-0">
-                                <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
-                                    request('overdue') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="overdue">OverDue</label>
-                            </div>
-
-                            <div class="form-check m-0 ms-3">
-                                <input class="form-check-input" type="checkbox" id="pending" name="pending" value="1" {{
-                                    request()->boolean('pending') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="pending">Pending</label>
-                            </div>
+                    <div class=" d-flex gap-1 justify-content-evenly align-items-center col-12 col-md-2">
+                        <div class="form-check m-0">
+                            <input class="form-check-input" type="checkbox" id="overdue" name="overdue" value="1" {{
+                                request('overdue') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="overdue">OverDue</label>
                         </div>
+
+                        <div class="form-check m-0">
+                            <input class="form-check-input" type="checkbox" id="pending" name="pending" value="1" {{
+                                request()->boolean('pending') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="pending">Pending</label>
+                        </div>
+                    </div>
 
 
                     {{-- Date --}}
@@ -316,58 +318,58 @@
                             <option value="">All Statuses</option>
                         </select>
 
-                </div>
+                    </div>
                     <div class="col-12 col-md-1">
-                        <a href="{{ route("scan.kiosk") }}" class="btn btn-primary">Scan</a>
+                        <a href="{{ route('scan.kiosk') }}" class="btn btn-primary">Scan</a>
 
                     </div>
-            </div>
+                </div>
 
-            <table class="job-list-table table">
-                <thead class="table-light">
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
-                        </th>
-                        <th>Image</th>
-                        <th>Job Number</th>
-                        <th>Priority</th>
-                        <th>Current Station</th>
-                        <th>Status</th>
-                        <th>Due Date</th>
-                        <th>Order Number</th>
-                        <th>Order Item Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-            </table>
-            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                    style="z-index: 10;">
-                    <p id="selected-count-text">0 Jobs are selected</p>
-                    <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteJobsModal"
-                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                        <i data-feather="trash-2"></i> Delete Selected
-                    </button>
-                    </form>
+                <table class="job-list-table table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                            </th>
+                            <th>Image</th>
+                            <th>Job Number</th>
+                            <th>Priority</th>
+                            <th>Current Station</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Order Number</th>
+                            <th>Order Item Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                    <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                        style="z-index: 10;">
+                        <p id="selected-count-text">0 Jobs are selected</p>
+                        <button type="submit" data-bs-toggle="modal" data-bs-target="#deleteJobsModal"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                            <i data-feather="trash-2"></i> Delete Selected
+                        </button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-        @include('modals.delete',[
-        'id' => 'deleteInvoiceModal',
-        'formId' => 'deleteInvoiceForm',
-        'title' => 'Delete Invoice',
-        ])
-        @include('modals.delete',[
-        'id' => 'deleteJobsModal',
-        'formId' => 'bulk-delete-form',
-        'title' => 'Delete Jobs',
-        'confirmText' => 'Are you sure you want to delete this items?',
-        ])
-        @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
+            @include('modals.delete',[
+            'id' => 'deleteInvoiceModal',
+            'formId' => 'deleteInvoiceForm',
+            'title' => 'Delete Invoice',
+            ])
+            @include('modals.delete',[
+            'id' => 'deleteJobsModal',
+            'formId' => 'bulk-delete-form',
+            'title' => 'Delete Jobs',
+            'confirmText' => 'Are you sure you want to delete this items?',
+            ])
+            @include("modals.job-tickets.edit-job-ticket",['stations'=>$associatedData['stations']])
 
 
-        <!-- list and filter end -->
+            <!-- list and filter end -->
 </section>
 <!-- users list ends -->
 </div>
