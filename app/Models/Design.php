@@ -200,8 +200,30 @@ class Design extends Model implements HasMedia
             ->using(Typeable::class)
             ->withTimestamps();
     }
-    public function getImageUrl(): string
+    public function getFrontImageUrl(): string
     {
         return $this->getFirstMediaUrl('designs') ?:  asset('images/default-product.png');
+    }
+    public function getBackImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('back_designs') ?:  asset('images/default-product.png');
+    }
+    public function getNoneImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('designs') ?:  asset('images/default-product.png');
+    }
+
+    public function getImageUrlForType(string $type): array|string
+    {
+        $type = strtolower($type);
+        return match ($type) {
+            'front' => $this->getFrontImageUrl(),
+            'back'  => $this->getBackImageUrl(),
+            'both'  => [
+                'front' => $this->getFrontImageUrl(),
+                'back'  => $this->getBackImageUrl(),
+            ],
+            default => $this->getNoneImageUrl(),
+        };
     }
 }
