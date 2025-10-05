@@ -92,6 +92,7 @@ class DashboardController extends Controller
      */
     public function show(string $id)
     {
+        dd( $this->getRelations('show'));
         $model = $this->service->showResource($id, $this->getRelations('show'));
         $associatedData = $this->getAssociatedData('show');
         if (request()->ajax()) {
