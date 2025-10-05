@@ -49,19 +49,19 @@ class DesignService extends BaseService
                     $design = $this->repository->query()->create(
                         $validatedData);
                 }
-
-                $template =$this->templateRepository
-                    ->find($validatedData['template_id'])
-                    ->getMedia('templates')
+                $template = $this->templateRepository
+                    ->find($validatedData['template_id']);
+                $template->getMedia('templates')
                     ->last()
                     ?->copy($design, 'designs');
 
-                $this->templateRepository
-                    ->find($validatedData['template_id'])
-                    ->getMedia('back_templates')
+                $template->getMedia('back_templates')
                     ->last()
                     ?->copy($design, 'back_designs');
-                $design->types()->attach($template->types->pluck('id'));
+                dd($template->types);
+                if ($template->types) {
+                    $design->types()->attach($template->types->pluck('id'));
+                }
 
                 return $design->load([
                     'designable.prices',
