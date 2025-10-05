@@ -34,8 +34,9 @@ class JobTicketController extends DashboardController
         $this->methodRelations['show'] = [
             'jobEvents.admin.roles',
             'orderItem.order',
-            'orderItem.itemable',
-            'orderItem.orderable'];
+            'orderItem.itemable.types',
+            'orderItem.orderable'
+        ];
     }
 
     public function getData(): JsonResponse
