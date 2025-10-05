@@ -70,11 +70,12 @@
             <div class="d-flex flex-column">
                 <img src="{{ $model->orderItem->orderable->getMainImageUrl() ?: asset('/images/item-photo.png')}}" alt="item photo" class="mb-2" width="320px"
                     height="320px">
+                @if($model->jobEvents->last()?->admin)
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Last Operator:</p>
                         <div class="d-flex align-items-center gap-1">
-                            <img src="{{asset('/images/admin-avatar.png')}}" alt="Admin avatar">
+                            <img src="{{ $model->jobEvents->last()?->admin?->image->getUrl() ?: asset('/images/admin-avatar.png') }}" alt="Admin avatar">
                             <div class="d-flex flex-column">
                                 <h5 style="color: #121212">{{ $model->jobEvents->last()?->admin?->name }}</h5>
                                 <p style="margin: 0; color: #424746">{{ $model->jobEvents->last()?->admin?->roles->first()?->name }}</p>
@@ -82,6 +83,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
                 <hr>
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
