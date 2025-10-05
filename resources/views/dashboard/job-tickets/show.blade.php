@@ -248,7 +248,6 @@
 <script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
-@endsection
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 {{-- Page js files --}}
@@ -257,9 +256,10 @@
 <script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('printTicketBtn')?.addEventListener('click', () => {
-                window.open("{{ route('job-tickets.pdf', $model->id) }}", "_blank");
-            });
+        document.getElementById('printTicketBtn')?.addEventListener('click', () => {
+            window.open("{{ route('job-tickets.pdf', $model->id) }}", "_blank");
         });
+    });
 </script>
+
 @endsection
