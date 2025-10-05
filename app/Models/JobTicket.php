@@ -8,7 +8,7 @@ use App\Observers\JobTicketObserver;
 use App\Services\BarcodeService;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\{BelongsTo,HasMany};
 
 #[ObservedBy(JobTicketObserver::class)]
 class JobTicket extends Model
@@ -64,5 +64,10 @@ class JobTicket extends Model
     {
         return $this->belongsTo(StationStatus::class, 'current_status_id')
             ->withDefault(['name' => StatusEnum::PENDING->label()]);
+    }
+
+    public function jobEvents(): HasMany
+    {
+        return $this->hasMany(JobEvent::class);
     }
 }

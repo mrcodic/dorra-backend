@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Response;
 
 class JobTicketController extends DashboardController
 {
-    public function __construct(public JobTicketService $jobTicketService,
-    StationRepositoryInterface $stationRepository,
+    public function __construct(public JobTicketService    $jobTicketService,
+                                StationRepositoryInterface $stationRepository,
 
     )
     {
@@ -29,10 +29,13 @@ class JobTicketController extends DashboardController
             'index' => [
                 'stations' => $stationRepository->query()->withCount('jobTickets')
                     ->get(),
-            ]
+            ],
         ];
-
+        $this->methodRelations = [
+            'show' => 'jobEvents.admin'
+        ];
     }
+
     public function getData(): JsonResponse
     {
         return $this->jobTicketService->getData();
@@ -40,7 +43,7 @@ class JobTicketController extends DashboardController
 
     public function scan(Request $request): JsonResponse
     {
-       $data =  $this->jobTicketService->scan($request);
+        $data = $this->jobTicketService->scan($request);
         return Response::api(data: $data);
 
     }

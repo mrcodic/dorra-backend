@@ -34,4 +34,9 @@ class JobEvent extends Model
     {
         return $this->belongsTo(StationStatus::class);
     }
+
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class);
+    }
 }

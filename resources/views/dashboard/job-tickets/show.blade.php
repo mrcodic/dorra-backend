@@ -24,23 +24,7 @@
     {{-- Page header / toolbar --}}
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
         <div class="d-flex align-items-center gap-1 flex-wrap">
-            <h5 class="mb-0 d-flex align-items-center gap-2">
-                <span class="badge bg-dark">{{ $model->code }}</span>
-
-                @if($model->orderItem?->order)
-                <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank"
-                    class="text-decoration-none">
-                    Order {{ $model->orderItem->order->order_number ?? $model->orderItem->order_id }}
-                </a>
-                @endif
-
-                @if($model->orderItem)
-                <span class="text-muted">— {{ $model->orderItem->itemable?->name ?? "Item #{$model->order_item_id}"
-                    }}</span>
-                @endif
-            </h5>
         </div>
-
         <div class="d-flex align-items-center gap-1">
             <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary">
                 <i data-feather="arrow-left" class="me-25"></i> Back
@@ -72,13 +56,12 @@
                     height="320px">
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
-                        <p style="color: #424746; margin: 0; font-size: 16px">Operator:</p>
+                        <p style="color: #424746; margin: 0; font-size: 16px">Last Operator:</p>
                         <div class="d-flex align-items-center gap-1">
                             <img src="{{asset('/images/admin-avatar.png')}}" alt="Admin avatar">
                             <div class="d-flex flex-column">
-                                <h5 style="color: #121212">John Doe</h5>
-                                <p style="margin: 0; color: #424746">Admin</p>
-                            </div>
+                                <h5 style="color: #121212">{{ $model->jobEvents->last()?->admin?->name }}</h5>
+                                <p style="margin: 0; color: #424746">{{ $model->jobEvents->last()?->admin?->roles->first()?->name }}</p>
                         </div>
                     </div>
                 </div>
@@ -87,7 +70,7 @@
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Order ID:</p>
                         <div class="d-flex align-items-center justify-content-between">
-                            <p style="margin: 0; color: #121212">{{ $model->code }}</p>
+                            <p style="margin: 0; color: #121212">{{ $model->orderItem->order->id }}</p>
                             <a href="{{ route("orders.show",$model->orderItem->order->id) }}" style="margin: 0; color: #24B094; cursor: pointer">Go to Order</a>
                         </div>
                     </div>
