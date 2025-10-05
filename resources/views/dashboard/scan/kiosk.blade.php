@@ -204,88 +204,37 @@
 
             async function listCameras() {
                 try {
-                    // 1) Ensure not blocked by iframe sandbox
-                    if (window.top !== window && !/camera/.test(document.documentElement.getAttribute('allow') || '')) {
-                        showAlert('This page is inside an iframe without camera permission. Add allow="camera *" to the iframe.', 'warning');
-                    }
-
-                    // 2) Must be HTTPS for most devices
-                    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-                        showAlert('Camera requires HTTPS (or localhost). Please use a secure URL.', 'warning');
-                    }
-
-                    // 3) Ask for permission once to unlock enumerateDevices + labels (iOS/Chrome)
-                    try {
-                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                        // Close tracks immediately; we only needed the permission
-                        stream.getTracks().forEach(t => t.stop());
-                    } catch (permErr) {
-                        showAlert('Please allow camera access to select a device.', 'warning');
-                        // Don’t return; we’ll try to enumerate anyway (some browsers still list)
-                    }
-
-                    // 4) Enumerate via html5-qrcode helper
-                    let devices = await Html5Qrcode.getCameras();
-
-                    // Some browsers return [] until after a small delay post-permission, try once more
-                    if (!devices || devices.length === 0) {
-                        await new Promise(r => setTimeout(r, 300));
-                        devices = await Html5Qrcode.getCameras();
-                    }
-
+                    const devices = await Html5Qrcode.getCameras();
                     camSel.innerHTML = '';
-
-                    if (!devices || devices.length === 0) {
-                        // Fallback: we’ll start with facingMode in startScanner()
-                        const opt = document.createElement('option');
-                        opt.value = '';
-                        opt.textContent = 'Auto (rear camera)';
-                        camSel.appendChild(opt);
-                        currentCameraId = null;
-                        startBtn.disabled = false; // allow start with facingMode fallback
-                        showAlert('No camera list available. Using auto rear camera.', 'info');
-                        return;
-                    }
-
-                    // Populate options (labels may be empty until permission)
                     devices.forEach((d, i) => {
                         const opt = document.createElement('option');
                         opt.value = d.id;
-                        opt.textContent = d.label || `Camera ${i + 1}`;
+                        opt.textContent = d.label || `Camera ${i+1}`;
                         camSel.appendChild(opt);
                     });
-
                     const back = devices.find(d => /back|rear|environment/i.test(d.label));
-                    camSel.value = back ? back.id : devices[0].id;
-                    currentCameraId = camSel.value;
-                    startBtn.disabled = false;
-
+                    camSel.value = back ? back.id : (devices[0]?.id || '');
+                    currentCameraId = camSel.value || null;
+                    startBtn.disabled = !currentCameraId;
                 } catch (e) {
-                    console.error(e);
-                    // Fallback path: allow start with facingMode
-                    camSel.innerHTML = '';
-                    const opt = document.createElement('option');
-                    opt.value = '';
-                    opt.textContent = 'Auto (rear camera)';
-                    camSel.appendChild(opt);
-
-                    currentCameraId = null;
-                    startBtn.disabled = false;
-                    showAlert('Could not list cameras. Will try rear camera automatically.', 'warning');
+                    showAlert('No cameras found or permission denied. Use HTTPS and allow camera.', 'warning');
                 }
             }
-
             async function startScanner() {
-                if (scanning) return;
+                if (scanning || !currentCameraId) return;
                 if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
                 const config = {
                     fps: 24,
+
+                    // Rectangular box helps a lot for 1D
                     qrbox: (vw, vh) => {
-                        const width = Math.min(vw, 640);
-                        const height = Math.max(100, vw * 0.18);
+                        const width = Math.min(vw, 640);         // cap width to keep it stable
+                        const height = Math.max(100, vw * 0.18); // ~18% of width
                         return { width, height };
                     },
+
+                    // Prefer 1D formats you need
                     formatsToSupport: [
                         Html5QrcodeSupportedFormats.CODE_128,
                         Html5QrcodeSupportedFormats.EAN_13,
@@ -295,25 +244,32 @@
                         Html5QrcodeSupportedFormats.CODE_39,
                         Html5QrcodeSupportedFormats.ITF
                     ],
-                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+
+                    // Use the native BarcodeDetector if the browser supports it (huge win for 1D)
+                    experimentalFeatures: {
+                        useBarCodeDetectorIfSupported: true
+                    },
+
+                    // Optional: keep last camera
                     rememberLastUsedCamera: true
                 };
 
                 try {
-                    // If we have a deviceId from the dropdown, use it; otherwise use facingMode fallback
-                    const cameraSpec = currentCameraId
-                        ? { deviceId: { exact: currentCameraId } }
-                        : { facingMode: { ideal: "environment" } };
+                    await html5QrCode.start(
+                        { deviceId: { exact: currentCameraId } },
+                        config,
+                        onScanSuccess,
+                        onScanFailure
+                    );
 
-                    await html5QrCode.start(cameraSpec, config, onScanSuccess, onScanFailure);
-
-                    // Post-start constraints (focus, resolution, torch probe)
+                    // After start, push video constraints for clarity
                     try {
                         await html5QrCode.applyVideoConstraints({
                             width:  { ideal: 1280 },
                             height: { ideal: 720 },
-                            advanced: [{ focusMode: "continuous" }]
+                            advanced: [{ focusMode: "continuous" }] // helps a lot for 1D
                         });
+                        // Torch enabling attempt (you already have this logic)
                         canToggleTorch = await html5QrCode.applyVideoConstraints({ advanced: [{ torch: false }] })
                             .then(() => true).catch(() => false);
                         torchBtn.disabled = !canToggleTorch;
@@ -322,14 +278,11 @@
                     scanning = true;
                     startBtn.disabled = true;
                     stopBtn.disabled = false;
-                    showAlert('Camera started. Aim at the barcode.', 'info');
-
+                    showAlert('Camera started. Aim at the barcode (keep it horizontal inside the box).', 'info');
                 } catch (e) {
                     showAlert('Failed to start camera: ' + (e?.message || e), 'danger');
                 }
             }
-
-       
 
             async function stopScanner() {
                 if (!scanning || !html5QrCode) return;
