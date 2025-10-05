@@ -83,7 +83,7 @@ class OrderObserver
 
             CreateInvoiceJob::dispatch($order);
         }
-        
+
         if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
             $order->loadMissing(['paymentMethod']);
 
