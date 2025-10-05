@@ -494,7 +494,7 @@
 
                         // Add expand icon to role column
                         $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
-
+                        feather.replace();
                         // Get data for details
                         const priority = $row.find('td:nth-child(4)').html() || '';
                         const currentStation = $row.find('td:nth-child(5)').html() || '';
