@@ -24,16 +24,19 @@
     {{-- Page header / toolbar --}}
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
         <div class="d-flex align-items-center gap-1 flex-wrap">
-
+            <h5 class="mb-0 d-flex align-items-center gap-2">
+                <span class="badge bg-dark">{{ $model->code }}</span>
+            </h5>
+        </div>
 
         <div class="d-flex align-items-center gap-1">
             <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary">
                 <i data-feather="arrow-left" class="me-25"></i> Back
             </a>
             <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
-                <i data-feather="download" class="me-25"></i> Download
+                <i data-feather="dowomload" class="me-25"></i> Download
             </button>
-        
+        </div>
     </div>
 
 
