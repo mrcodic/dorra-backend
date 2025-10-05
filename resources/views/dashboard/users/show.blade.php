@@ -243,7 +243,7 @@
                                     <div class="mb-2 label-text mx-5 reply-comment">
                                         {{ $review->comment }}
                                     </div>
-                                    <div class="mb-2">
+                                    <div class="mb-2 d-flex flex-wrap gap-1">
                                         <img src="{{ $review->getFirstMediaUrl('review_reply') ?? " -"}}"
                                             alt="Review Image" class="img-fluid rounded reply-image"
                                             style="width: 80px;height: 80px">
