@@ -50,7 +50,7 @@ class DesignService extends BaseService
                         $validatedData);
                 }
 
-                $this->templateRepository
+                $template =$this->templateRepository
                     ->find($validatedData['template_id'])
                     ->getMedia('templates')
                     ->last()
@@ -61,7 +61,7 @@ class DesignService extends BaseService
                     ->getMedia('back_templates')
                     ->last()
                     ?->copy($design, 'back_designs');
-
+                $design->types()->attach($template->types->pluck('id'));
 
                 return $design->load([
                     'designable.prices',

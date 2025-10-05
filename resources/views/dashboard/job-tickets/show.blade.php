@@ -87,7 +87,7 @@
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Order ID:</p>
                         <div class="d-flex align-items-center justify-content-between">
-                            <p style="margin: 0; color: #121212">{{ $model->orderItem->order->id }}</p>
+                            <p style="margin: 0; color: #121212">{{ $model->orderItem->order->order_number }}</p>
                             <a href="{{ route("orders.show",$model->orderItem->order->id) }}" style="margin: 0; color: #24B094; cursor: pointer">Go to Order</a>
                         </div>
                     </div>
@@ -97,14 +97,15 @@
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
                         <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
+                            @foreach() @endforeach
                             <div class="d-flex flex-column">
                                 <p style="margin: 0; color: #121212">Design</p>
                                 <img src="{{$model->orderItem->itemable->getImageUrl()}}" alt="item photo">
                             </div>
-{{--                            <div class="d-flex flex-column">--}}
-{{--                                <p style="margin: 0; color: #121212">Back Design</p>--}}
-{{--                                <img src="{{asset('/images/item-photo.png')}}" alt="item photo">--}}
-{{--                            </div>--}}
+                            <div class="d-flex flex-column">
+                                <p style="margin: 0; color: #121212">Back Design</p>
+                                <img src="{{asset('/images/item-photo.png')}}" alt="item photo">
+                            </div>
                         </div>
                     </div>
                 </div>
