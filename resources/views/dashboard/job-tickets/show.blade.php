@@ -72,14 +72,13 @@
                     height="320px">
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
-                        <p style="color: #424746; margin: 0; font-size: 16px">Operator:</p>
+                        <p style="color: #424746; margin: 0; font-size: 16px">Last Operator:</p>
                         <div class="d-flex align-items-center gap-1">
                             <img src="{{asset('/images/admin-avatar.png')}}" alt="Admin avatar">
                             <div class="d-flex flex-column">
-                                <h5 style="color: #121212">John Doe</h5>
-                                <p style="margin: 0; color: #424746">Admin</p>
+                                <h5 style="color: #121212">{{ $model->jobEvents->last()?->admin?->name }}</h5>
+                                <p style="margin: 0; color: #424746">{{ $model->jobEvents->last()?->admin?->roles->first()?->name }}</p>
                             </div>
-                        </div>
                     </div>
                 </div>
                 <hr>
