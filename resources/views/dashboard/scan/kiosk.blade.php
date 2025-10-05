@@ -220,21 +220,17 @@
                     showAlert('No cameras found or permission denied. Use HTTPS and allow camera.', 'warning');
                 }
             }
+
             async function startScanner() {
                 if (scanning || !currentCameraId) return;
                 if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-
                 const config = {
-                    fps: 24,
-
-                    // Rectangular box helps a lot for 1D
+                    fps: 15,
                     qrbox: (vw, vh) => {
-                        const width = Math.min(vw, 640);         // cap width to keep it stable
-                        const height = Math.max(100, vw * 0.18); // ~18% of width
-                        return { width, height };
+                        const size = Math.min(vw, vh) * 0.7;
+                        return { width: size, height: size };
                     },
-
-                    // Prefer 1D formats you need
+                    rememberLastUsedCamera: true,
                     formatsToSupport: [
                         Html5QrcodeSupportedFormats.CODE_128,
                         Html5QrcodeSupportedFormats.EAN_13,
@@ -243,42 +239,17 @@
                         Html5QrcodeSupportedFormats.UPC_E,
                         Html5QrcodeSupportedFormats.CODE_39,
                         Html5QrcodeSupportedFormats.ITF
-                    ],
-
-                    // Use the native BarcodeDetector if the browser supports it (huge win for 1D)
-                    experimentalFeatures: {
-                        useBarCodeDetectorIfSupported: true
-                    },
-
-                    // Optional: keep last camera
-                    rememberLastUsedCamera: true
+                    ]
                 };
-
                 try {
-                    await html5QrCode.start(
-                        { deviceId: { exact: currentCameraId } },
-                        config,
-                        onScanSuccess,
-                        onScanFailure
-                    );
-
-                    // After start, push video constraints for clarity
-                    try {
-                        await html5QrCode.applyVideoConstraints({
-                            width:  { ideal: 1280 },
-                            height: { ideal: 720 },
-                            advanced: [{ focusMode: "continuous" }] // helps a lot for 1D
-                        });
-                        // Torch enabling attempt (you already have this logic)
-                        canToggleTorch = await html5QrCode.applyVideoConstraints({ advanced: [{ torch: false }] })
-                            .then(() => true).catch(() => false);
-                        torchBtn.disabled = !canToggleTorch;
-                    } catch {}
-
+                    await html5QrCode.start({ deviceId: { exact: currentCameraId } }, config, onScanSuccess, onScanFailure);
                     scanning = true;
                     startBtn.disabled = true;
                     stopBtn.disabled = false;
-                    showAlert('Camera started. Aim at the barcode (keep it horizontal inside the box).', 'info');
+                    canToggleTorch = await html5QrCode.applyVideoConstraints({ advanced: [{ torch: false }] })
+                        .then(()=>true).catch(()=>false);
+                    torchBtn.disabled = !canToggleTorch;
+                    showAlert('Camera started. Aim at the barcode.', 'info');
                 } catch (e) {
                     showAlert('Failed to start camera: ' + (e?.message || e), 'danger');
                 }
