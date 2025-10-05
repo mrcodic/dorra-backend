@@ -26,6 +26,18 @@
         <div class="d-flex align-items-center gap-1 flex-wrap">
             <h5 class="mb-0 d-flex align-items-center gap-2">
                 <span class="badge bg-dark">{{ $model->code }}</span>
+
+                @if($model->orderItem?->order)
+                <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank"
+                    class="text-decoration-none">
+                    Order {{ $model->orderItem->order->order_number ?? $model->orderItem->order_id }}
+                </a>
+                @endif
+
+                @if($model->orderItem)
+                <span class="text-muted">— {{ $model->orderItem->itemable?->name ?? "Item #{$model->order_item_id}"
+                    }}</span>
+                @endif
             </h5>
         </div>
 
@@ -34,9 +46,19 @@
                 <i data-feather="arrow-left" class="me-25"></i> Back
             </a>
             <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
-                <i data-feather="printer" class="me-25"></i> Print
+                <i data-feather="printer" class="me-25"></i> Download
             </button>
         </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-1">
+        <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary">
+            <i data-feather="arrow-left" class="me-25"></i> Back
+        </a>
+        <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
+            <i data-feather="printer" class="me-25"></i> Print
+        </button>
+    </div>
     </div>
 
     @php
@@ -226,4 +248,18 @@
 <script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
+@endsection
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+{{-- Page js files --}}
+<script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
+<script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
+<script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('printTicketBtn')?.addEventListener('click', () => {
+                window.open("{{ route('job-tickets.pdf', $model->id) }}", "_blank");
+            });
+        });
+</script>
 @endsection

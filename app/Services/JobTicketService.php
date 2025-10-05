@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\JobTicket;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\{JsonResponse, Request};
@@ -200,4 +202,23 @@ class JobTicketService extends BaseService
         });
     }
 
+
+    public function downloadPdf(JobTicket $ticket)
+    {
+
+        $ticket->load([
+            'orderItem.order',
+            'orderItem.itemable.types',
+            'orderItem.orderable',
+            'jobEvents.admin.roles',
+            'station','currentStatus',
+        ]);
+
+        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', [
+            'model' => $ticket,
+        ])->setPaper('a4');
+        $filename = 'job_ticket_'.$ticket->code.'.pdf';
+        return $pdf->download($filename);
+
+    }
 }
