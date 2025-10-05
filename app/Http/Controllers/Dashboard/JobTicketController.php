@@ -31,7 +31,7 @@ class JobTicketController extends DashboardController
                     ->get(),
             ],
         ];
-        $this->methodRelations['show'] = ['jobEvents.admin'];
+        $this->methodRelations['show'] = ['jobEvents.admin.roles'];
     }
 
     public function getData(): JsonResponse
