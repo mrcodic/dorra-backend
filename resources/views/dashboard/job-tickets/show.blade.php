@@ -101,6 +101,7 @@
                             @foreach($model->orderItem->itemable->types as $type)
                             <div class="d-flex flex-column">
                                 <p style="margin: 0; color: #121212">{{ $type->value->label() }} Design</p>
+                                @dd($model->orderItem->itemable->getImageUrlForType($type->value->label()))
                                 <img src="{{$model->orderItem->itemable->getImageUrlForType($type->value->label())}}" alt="item photo">
                             </div>
                             @endforeach
