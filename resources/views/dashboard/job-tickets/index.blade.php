@@ -494,7 +494,6 @@
 
                         // Add expand icon to role column
                         $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
-                        feather.replace();
                         // Get data for details
                         const priority = $row.find('td:nth-child(4)').html() || '';
                         const currentStation = $row.find('td:nth-child(5)').html() || '';
@@ -592,6 +591,7 @@
             }, 500);
         });
 </script>
+<script src="https://unpkg.com/feather-icons"></script>
 
 <script>
     // Backup accordion handler in case the main one doesn't work
