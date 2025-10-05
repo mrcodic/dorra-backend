@@ -29,7 +29,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function find($id,$relations = [])
     {
-        dd($relations);
+  
         return $this->model->with($relations)->findOrFail($id);
     }
 
