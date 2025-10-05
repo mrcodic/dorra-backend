@@ -17,7 +17,7 @@ class OfferController extends DashboardController
         $this->updateRequestClass = new UpdateOrderRequest();
         $this->indexView = 'offers.index';
         $this->usePagination = true;
-        $this->resourceTable = 'categories';
+        $this->resourceTable = 'offers';
     }
 
     public function getData(): JsonResponse

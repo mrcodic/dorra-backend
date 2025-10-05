@@ -179,7 +179,7 @@
 
                                 @forelse($model->reviews as $review)
                                 <!-- Single Review -->
-                                <div class="review-wrapper" data-review-id="{{ $review->id }}">
+                                <div class="review-wrapper d-flex flex-wrap gap-1" data-review-id="{{ $review->id }}">
                                     <div class="d-flex align-items-center gap-1 mb-2">
                                         <img src="{{$review->reviewable?->getMainImageUrl() }}" alt="Avatar"
                                             class="rounded-circle" width="50" height="50">
