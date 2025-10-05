@@ -77,8 +77,9 @@
                             <img src="{{asset('/images/admin-avatar.png')}}" alt="Admin avatar">
                             <div class="d-flex flex-column">
                                 <h5 style="color: #121212">{{ $model->jobEvents->last()?->admin?->name }}</h5>
-                                <p style="margin: 0; color: #424746">{{ $model->jobEvents->last()?->admin?->roles->first()?->name }}</p>
+                                <p style="margin: 0; color: #424746">Admin</p>
                             </div>
+                        </div>
                     </div>
                 </div>
                 <hr>
