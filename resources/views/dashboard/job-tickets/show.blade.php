@@ -34,7 +34,7 @@
                 <i data-feather="arrow-left" class="me-25"></i> Back
             </a>
             <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
-                <i data-feather="dowomload" class="me-25"></i> Download
+                <i data-feather="download" class="me-25"></i> Download
             </button>
         </div>
     </div>
