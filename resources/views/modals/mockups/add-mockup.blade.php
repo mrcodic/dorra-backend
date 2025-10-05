@@ -18,7 +18,7 @@
                         <div class="form-group mb-2">
                             <label for="mockup-type" class="label-text mb-1">Mockup Type</label>
                             <div class="row">
-                                @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                @foreach($types as $type)
                                 <div class="col-md-4 mb-1">
                                     <label class="radio-box">
                                         <input class="form-check-input type-checkbox" type="checkbox" name="types[]"

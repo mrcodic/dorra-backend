@@ -147,7 +147,7 @@
                     <div class="col-12 col-md-2 col-lg-1">
                         <select name="type" class="form-select filter-type select2" data-placeholder="Type">
                             <option value="">Type</option>
-                            @foreach(\App\Models\Type::all(['id','value']) as $type)
+                            @foreach($associatedData['types'] as $type)
                             <option value="{{ $type->id }}">{{ $type->value->label() }}</option>
                             @endforeach
                         </select>
@@ -203,7 +203,7 @@
     'title' => 'Delete Mockups',
     'confirmText' => 'Are you sure you want to delete this items?',
     ])
-    @include('modals.mockups.add-mockup')
+    @include('modals.mockups.add-mockup',['types' => $associatedData['types']])
     <!-- list and filter end -->
 </section>
 <!-- users list ends -->
