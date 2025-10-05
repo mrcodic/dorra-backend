@@ -189,9 +189,11 @@
                                     </div>
 
                                     @forelse($review->images as $image)
-                                    <div class="d-flex flex-wrap gap-1 mb-2">
-                                        <img src="{{ $image?->getUrl() }}" alt="Review Image" class="img-fluid rounded"
-                                            style="width: 80px;height: 80px">
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <div class="mb-2">
+                                            <img src="{{ $image?->getUrl() }}" alt="Review Image" class="img-fluid rounded"
+                                                 style="width: 80px;height: 80px">
+                                        </div>
                                     </div>
                                     @empty
                                     <div class="mb-2 text-muted" style="font-style: italic;">No review
