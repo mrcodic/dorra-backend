@@ -33,7 +33,7 @@
             <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
                 <i data-feather="download" class="me-25"></i> Download
             </button>
-        </div>
+        
     </div>
 
 
