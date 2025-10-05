@@ -215,7 +215,7 @@ class JobTicketService extends BaseService
         ]);
 
         $ticket->barcode_for_pdf = $ticket->barcode_png_url ?? $ticket->barcode_svg_url ?? '';
-        $pdf = Pdf::loadView('job-tickets.pdf', [
+        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', [
             'model' => $ticket,
         ])->setPaper('a4');
         $filename = 'job_ticket_'.$ticket->code.'.pdf';
