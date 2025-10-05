@@ -28,7 +28,7 @@
                 <div class="d-flex flex-column align-items-center">
                     <h5 style="color: #121212; font-size: 20px;">{{ $station->name }}</h5>
                     <hr>
-                    <div class="d-flex flex-column align-items-center align-items-md-start">
+                    <div class="d-flex flex-column justify-content-center justify-content-md-start">
                         @foreach($station->jobTickets as $jobTicket)
                             <a href="{{ route('jobs.show', $jobTicket->id) }}" class="text-decoration-none">
                                 <div class="card p-1 hover-shadow" style="cursor: pointer;">
