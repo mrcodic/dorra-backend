@@ -11,7 +11,7 @@ class BarcodeService
     public function savePng1D(
         string $code,
         string $type = 'C128',
-        int $scale = 4,   
+        int $scale = 4,
         int $height = 120,
         array $color = [0, 0, 0]
     ): string {
