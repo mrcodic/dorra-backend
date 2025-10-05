@@ -588,6 +588,7 @@
             // Initialize on page load
             setTimeout(function () {
                 initAccordion();
+                feather.replace();
             }, 500);
         });
 </script>
