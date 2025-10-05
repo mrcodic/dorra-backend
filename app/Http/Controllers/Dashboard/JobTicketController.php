@@ -34,6 +34,7 @@ class JobTicketController extends DashboardController
         ];
         $this->methodRelations['show'] = [
             'jobEvents.admin.roles',
+            'jobEvents.admin.media',
             'orderItem.order',
             'orderItem.itemable.types',
             'orderItem.orderable'
