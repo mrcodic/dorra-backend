@@ -98,7 +98,7 @@
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
                         <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
-                            @foreach($model->orderItem?->types as $type)
+                            @foreach($model->orderItem->itemable->types as $type)
                             <div class="d-flex flex-column">
                                 <p style="margin: 0; color: #121212">{{ $type->value->label() }} Design</p>
                                 <img src="{{$model->orderItem->itemable->getImageUrlForType($type->value->label())}}" alt="item photo">
