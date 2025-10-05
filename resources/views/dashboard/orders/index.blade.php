@@ -175,65 +175,67 @@
                 {{-- Statistics Cards --}}
                 <div class="mb-3 d-flex flex-wrap gap-1">
                     <div class="d-flex flex-column justify-content-between p-1 card-specs status-card"
-                         data-status="{{ \App\Enums\Order\StatusEnum::PENDING->value }}"
-                    >
+                        data-status="{{ \App\Enums\Order\StatusEnum::PENDING->value }}">
                         <img src="{{asset('/images/pendingIcon.svg')}}" alt="pendingIcon" style="width: 32px">
                         <p>Pending Orders</p>
                         <div class="d-flex align-items-center">
-                            <span class="number">{{ \App\Models\Order::status(\App\Enums\Order\StatusEnum::PENDING)->count()}}</span>
+                            <span class="number">{{
+                                \App\Models\Order::status(\App\Enums\Order\StatusEnum::PENDING)->count()}}</span>
                             <span class="order">Orders</span>
                         </div>
                     </div>
 
                     <div class="d-flex flex-column justify-content-between p-1 card-specs status-card"
-                         data-status="{{ \App\Enums\Order\StatusEnum::CONFIRMED->value }}">
+                        data-status="{{ \App\Enums\Order\StatusEnum::CONFIRMED->value }}">
                         <img src="{{asset('/images/confirmedIcon.svg')}}" alt="confirmedIcon" style="width: 32px">
                         <p>Confirmd Orders</p>
                         <div class="d-flex align-items-center">
-                            <span class="number">{{  \App\Models\Order::status(\App\Enums\Order\StatusEnum::CONFIRMED)->count()}}</span>
+                            <span class="number">{{
+                                \App\Models\Order::status(\App\Enums\Order\StatusEnum::CONFIRMED)->count()}}</span>
                             <span class="order">Orders</span>
                         </div>
                     </div>
 
                     <div class="d-flex flex-column justify-content-between p-1 card-specs status-card"
-                         data-status="{{ \App\Enums\Order\StatusEnum::PREPARED->value }}"
-                    >
+                        data-status="{{ \App\Enums\Order\StatusEnum::PREPARED->value }}">
                         <img src="{{asset('/images/preparingIcon.svg')}}" alt="preparingIcon" style="width: 32px">
                         <p>Preparing Orders</p>
                         <div class="d-flex align-items-center">
-                            <span class="number">{{  \App\Models\Order::status(\App\Enums\Order\StatusEnum::PREPARED)->count()}}</span>
+                            <span class="number">{{
+                                \App\Models\Order::status(\App\Enums\Order\StatusEnum::PREPARED)->count()}}</span>
                             <span class="order">Orders</span>
                         </div>
                     </div>
 
                     <div class="d-flex flex-column justify-content-between p-1 card-specs status-card"
-                         data-status="{{ \App\Enums\Order\StatusEnum::SHIPPED->value }}"
-                    >
+                        data-status="{{ \App\Enums\Order\StatusEnum::SHIPPED->value }}">
                         <img src="{{asset('/images/deliveryIcon.svg')}}" alt="deliveryIcon" style="width: 32px">
                         <p>Out for delivery</p>
                         <div class="d-flex align-items-center">
-                            <span class="number">{{  \App\Models\Order::status(\App\Enums\Order\StatusEnum::SHIPPED)->count()}}</span>
+                            <span class="number">{{
+                                \App\Models\Order::status(\App\Enums\Order\StatusEnum::SHIPPED)->count()}}</span>
                             <span class="order">Orders</span>
                         </div>
                     </div>
 
                     <div class="d-flex flex-column justify-content-between p-1 card-specs status-card"
-                         data-status="{{ \App\Enums\Order\StatusEnum::DELIVERED->value }}"
-                    >
+                        data-status="{{ \App\Enums\Order\StatusEnum::DELIVERED->value }}">
                         <img src="{{asset('/images/deliveryIcon.svg')}}" alt="deliveryIcon" style="width: 32px">
                         <p>Delivered Orders</p>
                         <div class="d-flex align-items-center">
-                            <span class="number">{{ \App\Models\Order::status(\App\Enums\Order\StatusEnum::DELIVERED)->count() }}</span>
+                            <span class="number">{{
+                                \App\Models\Order::status(\App\Enums\Order\StatusEnum::DELIVERED)->count() }}</span>
                             <span class="order">Orders</span>
                         </div>
                     </div>
 
                     <div class="d-flex flex-column justify-content-between p-1 card-specs status-card"
-                         data-status="{{ \App\Enums\Order\StatusEnum::REFUNDED->value }}">
+                        data-status="{{ \App\Enums\Order\StatusEnum::REFUNDED->value }}">
                         <img src="{{asset('/images/refundedIcon.svg')}}" alt="refundedIcon" style="width: 32px">
                         <p>Refunded Orders</p>
                         <div class="d-flex align-items-center">
-                            <span class="number">{{ \App\Models\Order::status(\App\Enums\Order\StatusEnum::REFUNDED)->count() }}</span>
+                            <span class="number">{{
+                                \App\Models\Order::status(\App\Enums\Order\StatusEnum::REFUNDED)->count() }}</span>
                             <span class="order">Orders</span>
                         </div>
                     </div>
