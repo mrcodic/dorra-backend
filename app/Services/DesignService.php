@@ -58,7 +58,6 @@ class DesignService extends BaseService
                 $template->getMedia('back_templates')
                     ->last()
                     ?->copy($design, 'back_designs');
-                dd($template->types);
                 if ($template->types) {
                     $design->types()->attach($template->types->pluck('id'));
                 }
