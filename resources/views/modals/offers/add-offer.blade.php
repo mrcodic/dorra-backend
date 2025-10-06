@@ -69,7 +69,7 @@
                     <div class="row">
                         <div class="col  mb-2">
                             <label class="form-label">Start Date</label>
-                            <input name="start_at" type="date" class="form-control" value="2024-05-26">
+                            <input name="start_at" type="date" class="form-control">
                         </div>
                         <div class="col mb-2">
                             <label class="form-label">End Date</label>

@@ -23,7 +23,16 @@ class StoreOfferRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name.en' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'name.ar' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'value' => ['required', 'numeric', 'min:0'],
             'start_at' => ['required', 'date'],
             'end_at' => ['required', 'date', 'after_or_equal:start_at'],
