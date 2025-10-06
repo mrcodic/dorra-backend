@@ -179,6 +179,8 @@ class TemplateService extends BaseService
             }
             if (!empty($validatedData['tags']) ) {
                 $model->tags()->sync($validatedData['tags']);
+            }else{
+                $model->tags()->sync([]);
             }
             if (!empty($validatedData['flags'])) {
                 $model->flags()->sync($validatedData['flags']);

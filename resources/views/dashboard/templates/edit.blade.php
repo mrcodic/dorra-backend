@@ -361,42 +361,6 @@
         });
 </script>
 
-    <script>
-        // names must match your <select multiple name="..."> exactly
-        const MULTI_NAMES = [
-            'tags[]',
-            'product_ids[]',
-            'category_ids[]',
-            'product_with_category[]'
-        ];
-
-        // On submit, if a multi-select exists but nothing is selected,
-        // inject a temporary hidden input with the same name and empty value.
-        // This guarantees Laravel receives the field and you can treat it as [].
-        $(document).on('submit', '#editTemplateForm', function () {
-            const $form = $(this);
-
-            MULTI_NAMES.forEach((name) => {
-                const $select = $form.find(`select[name="${name}"]`);
-                if ($select.length === 0) return;
-
-                const val = $select.val(); // null or [] when nothing selected
-                const hasAny = Array.isArray(val) && val.length > 0;
-
-                // remove old markers first (so re-submits don't duplicate)
-                $form.find(`input.__empty_marker[name="${name}"]`).remove();
-
-                if (!hasAny) {
-                    $('<input>', {
-                        type: 'hidden',
-                        name,
-                        value: '',
-                        class: '__empty_marker'
-                    }).appendTo($form);
-                }
-            });
-        });
-    </script>
 
 <script !src="">
     handleAjaxFormSubmit("#editTemplateForm", {
