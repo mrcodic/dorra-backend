@@ -187,18 +187,19 @@
                                             <div class="fw-bold text-dark fs-4">{{ $review->review }}</div>
                                         </div>
                                     </div>
-
-                                    @forelse($review->images as $image)
-                                    <div class="mb-2 d-flex flex-wrap gap-1">
-                                        <img src="{{ $image?->getUrl() }}" alt="Review Image" class="img-fluid rounded"
-                                            style="width: 80px;height: 80px">
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @forelse($review->images as $image)
+                                        <div class="mb-2">
+                                            <img src="{{ $image?->getUrl() }}" alt="Review Image" class="img-fluid rounded"
+                                                style="width: 80px;height: 80px">
+                                        </div>
+                                        @empty
+                                        <div class="mb-2 text-muted" style="font-style: italic;">No review
+                                            images
+                                            available.
+                                        </div>
+                                        @endforelse
                                     </div>
-                                    @empty
-                                    <div class="mb-2 text-muted" style="font-style: italic;">No review
-                                        images
-                                        available.
-                                    </div>
-                                    @endforelse
                                     <div class="mb-2 d-flex align-items-center gap-2">
                                         <div class="rating-stars text-warning" data-rating="{{ $review->rating }}">
                                         </div>
