@@ -214,7 +214,7 @@ class JobTicketService extends BaseService
             'station','currentStatus',
         ]);
 
-        $pdf = Pdf::loadView('pdf.view', ['model' => $ticket]);
+        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', ['model' => $ticket]);
         $pdf->getDomPDF()->setHttpContext(stream_context_create([
             'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
         ]));
