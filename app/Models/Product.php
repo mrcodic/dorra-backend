@@ -194,7 +194,10 @@ class Product extends Model implements HasMedia
     {
         return $this->morphMany(CartItem::class, 'cartable');
     }
-
+    public function offers(): MorphToMany
+    {
+        return $this->morphToMany(Offer::class, 'offerable');
+    }
     public function getAllProductImages()
     {
         return $this->getMedia('product_extra_images')

@@ -119,10 +119,15 @@ class Category extends Model implements HasMedia
             ])
             ->withTimestamps();
     }
-    public function confirmedOrders()
+    public function confirmedOrders(): MorphToMany
     {
         return $this->morphToMany(Order::class,'orderable','order_items')
             ->where('status', \App\Enums\Order\StatusEnum::CONFIRMED);
+    }
+
+    public function offers(): MorphToMany
+    {
+        return $this->morphToMany(Offer::class, 'offerable');
     }
     protected function rating(): Attribute
     {

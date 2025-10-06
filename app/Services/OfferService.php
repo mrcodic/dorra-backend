@@ -4,16 +4,16 @@ namespace App\Services;
 
 
 use Illuminate\Http\JsonResponse;
-use App\Repositories\Interfaces\{
-    OfferRepositoryInterface,
-};
+use App\Repositories\Interfaces\{CategoryRepositoryInterface, OfferRepositoryInterface, ProductRepositoryInterface};
 use Yajra\DataTables\DataTables;
 
 
 class OfferService extends BaseService
 {
     public function __construct(
-        OfferRepositoryInterface $repository,
+        OfferRepositoryInterface           $repository,
+        public CategoryRepositoryInterface $categoryRepository,
+        public ProductRepositoryInterface  $productRepository
     )
     {
         parent::__construct($repository);
@@ -35,7 +35,6 @@ class OfferService extends BaseService
             })->when(request()->filled('created_at'), function ($query) {
                 $query->orderBy('created_at', request('created_at'));
             })
-
             ->latest();
 
         return DataTables::of($offers)
@@ -46,5 +45,25 @@ class OfferService extends BaseService
             })->make();
     }
 
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    {
+        $offer = $this->repository->create($validatedData);
+
+        if (!empty($validatedData['category_ids'])) {
+            $categories = $this->categoryRepository->query()->whereIn('id', $validatedData['category_ids'])->get();
+            collect($categories)->each(function ($category) use ($offer) {
+                $category->offers()->attach($offer->id);
+            });
+
+        }
+
+        if (!empty($validatedData['product_ids'])) {
+            $products = $this->productRepository->query()->whereIn('id', $validatedData['product_ids'])->get();
+            collect($products)->each(function ($product) use ($offer) {
+                $product->offers()->attach($offer->id);
+            });
+        }
+        return $offer;
+    }
 
 }
