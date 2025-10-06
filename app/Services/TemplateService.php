@@ -165,6 +165,7 @@ class TemplateService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+        dd($validatedData);
 
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
             $model = $this->repository->update($validatedData, $id);
@@ -177,7 +178,7 @@ class TemplateService extends BaseService
             if (!empty($validatedData['category_ids'])) {
                 $model->categories()->sync($validatedData['category_ids']);
             }
-            if (!empty($validatedData['tags'])) {
+            if (!empty($validatedData['tags']) ) {
                 $model->tags()->sync($validatedData['tags']);
             }
             if (!empty($validatedData['flags'])) {
