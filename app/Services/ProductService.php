@@ -225,97 +225,37 @@ class ProductService extends BaseService
                     $product->dimensions()->syncWithoutDetaching($dimension->id);
                 });
             }
-            // --- Prices block ---
             if (isset($validatedData['base_price'])) {
                 $product->prices()->delete();
             }
-
             if (isset($validatedData['prices'])) {
-                // If using tiered prices, clear base_price
                 $product->update(['base_price' => null]);
 
-                // Track changed price rows (by id) + a lookup map for the new values
-                $changedPriceIds = [];
-                $priceLookupById = [];
-
-                // To compare, cache existing rows keyed by id (and by quantity for convenience)
-                $existingById = $product->prices()->get()->keyBy('id');
-
-                // Upsert each submitted price; record changes
-                $submittedIds = [];
-                foreach ($validatedData['prices'] as $p) {
-                    // If you key on (quantity), keep this as in your original code:
-                    // $row = $product->prices()->updateOrCreate(['quantity' => $p['quantity']], ['price' => $p['price']]);
-
-                    // If you key on (id) when provided, fall back to quantity otherwise:
-                    $where = isset($p['id']) ? ['id' => $p['id']] : ['quantity' => $p['quantity']];
-                    $row   = $product->prices()->updateOrCreate($where, [
-                        'quantity' => $p['quantity'],
-                        'price'    => $p['price'],
-                    ]);
-
-                    $submittedIds[] = $row->id;
-
-                    // Detect actual changes (only when row existed before)
-                    $before = $existingById->get($row->id);
-                    $changed = $before && (((float)$before->price !== (float)$p['price'] || (int)$before->quantity !== (int)$p['quantity']));
-
-                    // Record changed IDs for later cart updates
-                    if ($changed) {
-                        $changedPriceIds[] = $row->id;
-                    }
-
-                    // Keep a lookup for the newest values (used when updating cart items)
-                    $priceLookupById[$row->id] = [
-                        'price'    => (float)$row->price,
-                        'quantity' => (int)$row->quantity,
-                    ];
+                if (($validatedData['has_custom_prices'] ?? false) && $product->has_custom_prices !== 1) {
+                    CartItem::where('cartable_id', $product->id)->get()->each(function ($item) use ($validatedData) {
+                        $item->update([
+                            'quantity' => $validatedData['prices'][0]['quantity'],
+                            'product_price' => $validatedData['prices'][0]['price'],
+                            'sub_total' => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity'])
+                                + $item->specs_price
+                                - $item->cart->discount_amount,
+                        ]);
+                    });
                 }
 
-                // Remove price rows that were not submitted
-                $product->prices()->whereNotIn('id', $submittedIds)->delete();
+                $submittedQuantities = collect($validatedData['prices'])->map(function ($price) use ($product) {
+                    $product->prices()->updateOrCreate(
+                        ['quantity' => $price['quantity']],
+                        ['price' => $price['price']]
+                    );
+                    return $price['quantity'];
+                })->toArray();
 
-                // Update ONLY cart items that point to price tiers that CHANGED
-                if (
-                    ($validatedData['has_custom_prices'] ?? false)
-                    && (int)$product->has_custom_prices !== 1
-                    && !empty($changedPriceIds)
-                ) {
-                 $tiers = $product->prices()->orderBy('quantity')->get(); // asc by quantity
-
-                    CartItem::where('cartable_id', $product->id)
-                        ->chunkById(200, function ($items) use ($tiers) {
-                            foreach ($items as $item) {
-                                // Find best tier: highest quantity <= item.quantity
-                                $best = null;
-                                foreach ($tiers as $t) {
-                                    if ((int)$t->quantity <= (int)$item->quantity) {
-                                        $best = $t; // keep moving up while it fits
-                                    } else {
-                                        break;
-                                    }
-                                }
-                                // Fallback: smallest tier if nothing fits
-                                if (!$best) {
-                                    $best = $tiers->first();
-                                }
-
-                                // Optional: if you store product_price_id on cart items, set it now
-                                $item->update([
-                                    'product_price_id' => $best->id,
-                                    'product_price'    => (float)$best->price,
-                                    // keep shopper’s quantity:
-                                    'sub_total'        => ((float)$best->price * (int)$item->quantity)
-                                        + (float)$item->specs_price
-                                        - (float)$item->cart->discount_amount,
-                                ]);
-                            }
-                        });
-
-                }
+                $product->prices()->whereNotIn('quantity', $submittedQuantities)->delete();
             }
 
-            if (!empty($validatedData['specifications'])) {
+
+                if (!empty($validatedData['specifications'])) {
                 $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                     $productSpecification = $product->specifications()->updateOrCreate(
                         [
@@ -362,7 +302,16 @@ class ProductService extends BaseService
                     return $productSpecification->id;
                 })->toArray();
 
+
+                $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
+                    $spec->options->each(function ($option) {
+                        $option->clearMediaCollection();
+                        $option->delete();
+                    });
+                    $spec->delete();
+                });
             } else {
+
                 $product->specifications->each(function ($spec) {
 
                     $spec->options->each(function ($option) {
