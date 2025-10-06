@@ -48,7 +48,7 @@ class AdminService extends BaseService
 
 
         if (!empty($validatedData['role_id'])) {
-            $model->roles()->delete();
+            $model->roles()->detach();
             $model->roles()->attach($validatedData['role_id'], [
                 'model_type' => get_class($model)
             ]);
