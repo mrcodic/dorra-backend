@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Offer;
 
+use App\Enums\Offer\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
 
 class UpdateOfferRequest extends BaseRequest
@@ -34,6 +35,8 @@ class UpdateOfferRequest extends BaseRequest
                 'max:255',
             ],
             'value' => ['required', 'numeric', 'min:0'],
+            'type' => ['required', 'in:'.TypeEnum::getValuesAsString()],
+
             'start_at' => ['required', 'date'],
             'end_at' => ['required', 'date', 'after_or_equal:start_at'],
             'product_ids' => ['required_without:category_ids', 'array'],
