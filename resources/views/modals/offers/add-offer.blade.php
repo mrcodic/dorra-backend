@@ -37,11 +37,11 @@
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="type" id="applyToProducts" value="2"
                                    checked>
-                            <label class="form-check-label text-black fs-16" for="applyToProducts">Categories</label>
+                            <label class="form-check-label text-black fs-16" for="applyToProducts">Products</label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="type" id="applyToCategories" value="1">
-                            <label class="form-check-label text-black fs-16" for="applyToCategories">Products</label>
+                            <label class="form-check-label text-black fs-16" for="applyToCategories">Categories</label>
                         </div>
                     </div>
                     <!-- Products dropdown -->
@@ -81,7 +81,7 @@
                 </div>
                 <div class="modal-footer border-top-0 d-flex justify-content-end">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                         <span>Add</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
                               aria-hidden="true"></span>
