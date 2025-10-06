@@ -24,7 +24,7 @@ class OfferService extends BaseService
         $locale = app()->getLocale();
         $offers = $this->repository
             ->query()
-            ->with('categories', 'products')
+            ->with('categories:id,name' , 'products:id,name')
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [

@@ -53,7 +53,7 @@ var dt_user_table = $('.offer-list-table').DataTable({
                                      data-end_at="${row.end_at}"
                                           data-products='${JSON.stringify(row.products || [])}'
        data-categories='${JSON.stringify(row.categories || [])}'>
-                                  >
+
                                      <i data-feather="eye"></i>
                                 </a>
 
