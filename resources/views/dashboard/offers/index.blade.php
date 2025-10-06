@@ -46,7 +46,7 @@
                         <i data-feather="search"
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                            id="search-category-form" placeholder="Search category..." style="height: 38px;">
+                            id="search-offer-form" placeholder="Search category..." style="height: 38px;">
                         <button type="button" id="clearRoleFilter"
                             class="position-absolute top-50 translate-middle-y text-muted"
                             style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
@@ -77,23 +77,24 @@
             </div>
 
 
-            <table class="category-list-table table">
+            <table class="offer-list-table table">
                 <thead class="table-light">
                     <tr>
                         <th>
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                         </th>
-                        <th>Name</th>
-                        <th>SubCategories</th>
-                        <th>NO.of Products</th>
-                        <th>Added Date</th>
+                        <th>Offer Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
             </table>
             <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                 <div class="delete-container">
-                    <p id="selected-count-text">0 Categories are selected</p>
+                    <p id="selected-count-text">0 Offers are selected</p>
                     <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
                         data-bs-target="#deleteCategoriesModal"
                         class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
@@ -158,11 +159,9 @@
 @endsection
 
 @section('page-script')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
-    const categoriesDataUrl = "{{ route('categories.data') }}";
-        const categoriesCreateUrl = "{{ route('categories.create') }}";
+    const offersDataUrl = "{{ route('offers.data') }}";
+        const offersCreateUrl = "{{ route('offers.create') }}";
         const locale = "{{ app()->getLocale() }}";
 </script>
 
@@ -217,5 +216,5 @@
 </script>
 
 {{-- Page js files --}}
-<script src="{{ asset('js/scripts/pages/app-category-list.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/scripts/pages/app-offer-list.js') }}?v={{ time() }}"></script>
 @endsection

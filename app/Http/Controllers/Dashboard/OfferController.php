@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
-use App\Services\CategoryService;
+use App\Services\OfferService;
 use Illuminate\Http\JsonResponse;
-use App\Http\Requests\Order\{StoreOrderRequest, UpdateOrderRequest};
+use App\Http\Requests\Offer\{StoreOfferRequest, UpdateOfferRequest};
 
 
 class OfferController extends DashboardController
 {
-    public function __construct(public CategoryService $categoryService)
+    public function __construct(public OfferService $offerService)
     {
-        parent::__construct($categoryService);
-        $this->storeRequestClass = new StoreOrderRequest();
-        $this->updateRequestClass = new UpdateOrderRequest();
+        parent::__construct($offerService);
+        $this->storeRequestClass = new StoreOfferRequest();
+        $this->updateRequestClass = new UpdateOfferRequest();
         $this->indexView = 'offers.index';
         $this->usePagination = true;
         $this->resourceTable = 'offers';
@@ -22,7 +22,7 @@ class OfferController extends DashboardController
 
     public function getData(): JsonResponse
     {
-        return $this->categoryService->getData();
+        return $this->offerService->getData();
     }
 
 
