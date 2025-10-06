@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="addOfferModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="addDiscountForm" method="post" enctype="multipart/form-data" action="{{ route('offers.store') }}">
+            <form id="addOfferForm" method="post" enctype="multipart/form-data" action="{{ route('offers.store') }}">
                 @csrf
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
@@ -93,6 +93,12 @@
     </div>
 </div>
 <script !src="">
+    handleAjaxFormSubmit("#addOfferForm",{
+        successMessage: "Offer Created Successfully",
+        onSuccess:function () {
+            location.reload()
+        }
+    })
     $(function () {
         $('.select2').select2({
             dropdownParent: $('#addOfferModal')

@@ -20,6 +20,8 @@ class Offer extends Model
     ];
     protected $casts = [
         'type' => TypeEnum::class,
+        'start_at' => 'date',
+        'end_at' => 'date',
     ];
 
     public function products(): MorphToMany

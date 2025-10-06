@@ -39,9 +39,9 @@ class OfferService extends BaseService
 
         return DataTables::of($offers)
             ->editColumn('start_at', function ($offer) {
-                $offer->format('d/m/Y');
+                $offer->start_at->format('d/m/Y');
             })->editColumn('end_at', function ($offer) {
-                $offer->format('d/m/Y');
+                $offer->end_at->format('d/m/Y');
             })->make();
     }
 
