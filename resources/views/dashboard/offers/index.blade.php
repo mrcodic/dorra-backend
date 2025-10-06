@@ -42,12 +42,12 @@
 
                 {{-- Search Input - 70% on md+, full width on xs --}}
                 <div class="col-12 col-md-7">
-                    <form action="" method="get" class="position-relative">
+                    <form action="" method="get" class="position-relative search-form">
                         <i data-feather="search"
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                            id="search-offer-form" placeholder="Search category..." style="height: 38px;">
-                        <button type="button" id="clearRoleFilter"
+                            id="search-offer-form" placeholder="Search offer..." style="height: 38px;">
+                        <button type="button"  id="clear-search"
                             class="position-absolute top-50 translate-middle-y text-muted"
                             style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
                             title="Clear search">
@@ -58,10 +58,13 @@
 
                 {{-- Filter Select - 10% on md+, half width on sm --}}
                 <div class="col-6 col-md-2">
-                    <select name="created_at" class="form-select filter-date">
-                        <option value="">Type</option>
-                        <option value="asc">asc</option>
-                        <option value="desc">desc</option>
+                    <select name="created_at" class="form-select filter-type" name="type">
+                        <option value="" selected disabled>Type</option>
+                        <option value="">All</option>
+                        @foreach(\App\Enums\Offer\TypeEnum::cases() as $type)
+                            <option value="{{ $type }}">{{ $type->label() }}</option>
+                        @endforeach
+
                     </select>
                 </div>
 
@@ -95,16 +98,16 @@
             <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                 <div class="delete-container">
                     <p id="selected-count-text">0 Offers are selected</p>
-                    <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
+                    <button type="button" id="delete-selected-btn" data-bs-toggle="modal"
                         data-bs-target="#deleteCategoriesModal"
                         class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                         <i data-feather="trash-2"></i> Delete Selected
                     </button>
                     <form style="display: none;" id="bulk-delete-form" method="POST"
-                        action="{{ route('categories.bulk-delete') }}">
+                        action="{{ route('offers.bulk-delete') }}">
                         @csrf
                         <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                            data-bs-target="#deleteCategoriesModal"
+                            data-bs-target="#deleteOffersModal"
                             class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                             <i data-feather="trash-2"></i> Delete Selected
                         </button>
@@ -118,14 +121,14 @@
         </div>
 
         @include('modals.delete',[
-        'id' => 'deleteCategoryModal',
-        'formId' => 'deleteCategoryForm',
-        'title' => 'Delete Category',
+        'id' => 'deleteOfferModal',
+        'formId' => 'deleteOfferForm',
+        'title' => 'Delete Offer',
         ])
         @include('modals.delete',[
-        'id' => 'deleteCategoriesModal',
+        'id' => 'deleteOffersModal',
         'formId' => 'bulk-delete-form',
-        'title' => 'Delete Categories',
+        'title' => 'Delete Offers',
         'confirmText' => 'Are you sure you want to delete this items?',
         ])
         @include('modals.offers.add-offer')
@@ -204,7 +207,7 @@
                 const count = selectedCheckboxes.length;
 
                 if (count > 0) {
-                    $('#selected-count-text').text(`${count} Categor${count > 1  ? 'ies' : 'y'} are selected`);
+                    $('#selected-count-text').text(`${count} Offer${count > 1  ? 's' : ''} are selected`);
                     $('#bulk-delete-container').show();
                 } else {
                     $('#bulk-delete-container').hide();

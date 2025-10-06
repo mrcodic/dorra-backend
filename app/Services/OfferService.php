@@ -32,8 +32,8 @@ class OfferService extends BaseService
                 } else {
                     $query->whereRaw('1 = 0');
                 }
-            })->when(request()->filled('created_at'), function ($query) {
-                $query->orderBy('created_at', request('created_at'));
+            })->when(request()->filled('type'), function ($query) {
+                $query->whereType(request('type'));
             })
             ->latest();
 
@@ -41,10 +41,16 @@ class OfferService extends BaseService
             ->addColumn('name', function ($offer) {
                 return $offer->getTranslation('name', app()->getLocale());
             })
+            ->editColumn('type', function ($offer) {
+                return [
+                    'value' => $offer->type->value,
+                    'label' => $offer->type->label()
+                ];
+            })
             ->editColumn('start_at', function ($offer) {
-                $offer->start_at->format('d/m/Y');
+                return $offer->start_at->format('d/m/Y');
             })->editColumn('end_at', function ($offer) {
-                $offer->end_at->format('d/m/Y');
+                return $offer->end_at->format('d/m/Y');
             })->make();
     }
 

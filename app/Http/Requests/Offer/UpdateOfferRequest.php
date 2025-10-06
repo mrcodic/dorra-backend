@@ -39,10 +39,10 @@ class UpdateOfferRequest extends BaseRequest
 
             'start_at' => ['required', 'date'],
             'end_at' => ['required', 'date', 'after_or_equal:start_at'],
-            'product_ids' => ['required_without:category_ids', 'array'],
+            'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
 
-            'category_ids' => ['required_without:product_ids', 'array'],
+            'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],
         ];
     }

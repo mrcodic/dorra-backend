@@ -13,7 +13,7 @@ var dt_user_table = $('.offer-list-table').DataTable({
         type: 'GET',
         data: function (d) {
             d.search_value = $('#search-offer-form'). val();
-            d.created_at = $('.filter-date').val();
+            d.type = $('.filter-type').val();
 
             return d;
         }
@@ -25,7 +25,13 @@ var dt_user_table = $('.offer-list-table').DataTable({
             }
         },
         {data: 'name', orderable: false},
-        {data: 'type', orderable: false},
+        {
+            data: 'type',
+            orderable: false,
+            render: function (data, type, row) {
+                return data?.label ?? '-';
+            }
+        },
         {data: 'value', orderable: false},
         {data: 'start_at', orderable: false},
         {data: 'end_at', orderable: false},
@@ -60,12 +66,11 @@ var dt_user_table = $('.offer-list-table').DataTable({
                             <i data-feather="edit-3"></i>
                        </a>
 
-      <a href="#" class="text-danger open-delete-tag-modal"
+      <a href="#" class="text-danger open-delete-offer-modal"
    data-id="${data}"
-   data-name="${row.name}"
-   data-action="/flags/${data}"
+   data-action="/offers/${data}"
    data-bs-toggle="modal"
-   data-bs-target="#deleteFlagModal">
+   data-bs-target="#deleteOfferModal">
    <i data-feather="trash-2"></i>
 </a>
 
@@ -110,7 +115,7 @@ $('#search-offer-form').on('keyup', function () {
     }, 300);
 });
 
-$('.filter-date').on('change', function () {
+$('.filter-type').on('change', function () {
     dt_user_table.draw();
 });
 $(document).ready(function () {
@@ -280,23 +285,25 @@ $(document).ready(function () {
     });
 
 
-    $(document).on("click", ".open-delete-tag-modal", function () {
-        const tagId = $(this).data("id");
-        $("#deleteFlagForm").data("id", tagId);
+    $(document).on("click", ".open-delete-offer-modal", function () {
+        const OfferId = $(this).data("id");
+        const OfferAction = $(this).data("action");
+        $("#deleteOfferForm").data("id", OfferId).attr("action", OfferAction);
+
     });
 
-    $(document).on('submit', '#deleteFlagForm', function (e) {
+    $(document).on('submit', '#deleteOfferForm', function (e) {
         e.preventDefault();
         const tagId = $(this).data("id");
 
         $.ajax({
-            url: `/flags/${tagId}`,
+            url: `/offers/${tagId}`,
             method: "DELETE",
             success: function (res) {
-                $("#deleteFlagModal").modal("hide");
+                $("#deleteOfferModal").modal("hide");
 
                 Toastify({
-                    text: "Flag deleted successfully!",
+                    text: "Offer deleted successfully!",
                     duration: 4000,
                     gravity: "top",
                     position: "right",
@@ -308,7 +315,7 @@ $(document).ready(function () {
 
             },
             error: function () {
-                $("#deleteFlagModal").modal("hide");
+                $("#deleteOfferModal    ").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",
                     duration: 4000,
@@ -333,14 +340,14 @@ $(document).ready(function () {
         if (selectedIds.length === 0) return;
 
         $.ajax({
-            url: "flags/bulk-delete",
+            url: "offers/bulk-delete",
             method: "POST",
             data: {
                 ids: selectedIds,
                 _token: $('meta[name="csrf-token"]').attr("content"),
             },
             success: function (response) {
-                $("#deleteFlagsModal").modal("hide");
+                $("#deleteOffersModal").modal("hide");
                 Toastify({
                     text: "Selected tags deleted successfully!",
                     duration: 1500,
@@ -359,7 +366,7 @@ $(document).ready(function () {
 
             },
             error: function () {
-                $("#deleteFlagsModal").modal("hide");
+                $("#deleteOffersModal").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",
                     duration: 1500,

@@ -26,8 +26,18 @@
 
                     <div class="form-group mb-2">
                         <label for="createDiscountValue" class="label-text mb-1">Offer Value (%)</label>
-                        <input type="text" name="value" id="createDiscountValue" class="form-control"
-                               placeholder="Enter offer’s value ">
+                        <input
+                            type="number"
+                            name="value"
+                            id="createDiscountValue"
+                            class="form-control"
+                            placeholder="Enter offer’s value"
+                            min="1"
+                            max="100"
+                            step="1"
+                            required
+                        >
+
                     </div>
 
 
@@ -93,6 +103,12 @@
     </div>
 </div>
 <script !src="">
+    $('#createDiscountValue').on('input', function () {
+        let val = parseInt($(this).val());
+        if (val > 100) $(this).val(100);
+        if (val < 1) $(this).val(1);
+    });
+
     handleAjaxFormSubmit("#addOfferForm",{
         successMessage: "Offer Created Successfully",
         onSuccess:function () {
