@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\JobTicket;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\{JsonResponse, Request};
@@ -203,9 +204,9 @@ class JobTicketService extends BaseService
     }
 
 
+
     public function downloadPdf(JobTicket $ticket)
     {
-
         $ticket->load([
             'orderItem.order',
             'orderItem.itemable.types',
@@ -214,12 +215,27 @@ class JobTicketService extends BaseService
             'station','currentStatus',
         ]);
 
-        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', ['model' => $ticket]);
+        // If you store the barcode under the public disk, e.g. 'barcodes/XYZ.png'
+        // Adjust to your actual stored path or derive it from $ticket
+        $pngPath = $ticket->barcode_png_path ?? null;           // e.g. 'barcodes/ABC.png'
+        $barcodeDataUri = null;
+
+        if ($pngPath && Storage::disk('public')->exists($pngPath)) {
+            $bytes = Storage::disk('public')->get($pngPath);
+            $barcodeDataUri = 'data:image/png;base64,'.base64_encode($bytes);
+        }
+
+        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', [
+            'model'           => $ticket,
+            'barcodeDataUri'  => $barcodeDataUri,
+        ]);
+
+        // (Optional) still fine to keep the relaxed SSL ctx
         $pdf->getDomPDF()->setHttpContext(stream_context_create([
             'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
         ]));
-        $filename = 'job_ticket_'.$ticket->code.'.pdf';
-        return $pdf->download($filename);
 
+        return $pdf->download('job_ticket_'.$ticket->code.'.pdf');
     }
+
 }
