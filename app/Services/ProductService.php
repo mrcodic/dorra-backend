@@ -258,9 +258,7 @@ class ProductService extends BaseService
 
                     // Detect actual changes (only when row existed before)
                     $before = $existingById->get($row->id);
-                    $changed = $before
-                        ? ((float)$before->price !== (float)$p['price'] || (int)$before->quantity !== (int)$p['quantity'])
-                        : false;
+                    $changed = $before && (((float)$before->price !== (float)$p['price'] || (int)$before->quantity !== (int)$p['quantity']));
 
                     // Record changed IDs for later cart updates
                     if ($changed) {
@@ -283,32 +281,37 @@ class ProductService extends BaseService
                     && (int)$product->has_custom_prices !== 1
                     && !empty($changedPriceIds)
                 ) {
-                    CartItem::query()
-                        ->where('cartable_id', $product->id)
-                        ->whereIn('product_price_id', $changedPriceIds)
-                        ->chunkById(200, function ($items) use ($priceLookupById) {
-                            /** @var \App\Models\CartItem $item */
+                 $tiers = $product->prices()->orderBy('quantity')->get(); // asc by quantity
+
+                    CartItem::where('cartable_id', $product->id)
+                        ->chunkById(200, function ($items) use ($tiers) {
                             foreach ($items as $item) {
-                                $pp = $priceLookupById[$item->product_price_id] ?? null;
-                                if (!$pp) {
-                                    // Defensive: if the price row was removed or not in lookup, skip
-                                    continue;
+                                // Find best tier: highest quantity <= item.quantity
+                                $best = null;
+                                foreach ($tiers as $t) {
+                                    if ((int)$t->quantity <= (int)$item->quantity) {
+                                        $best = $t; // keep moving up while it fits
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                // Fallback: smallest tier if nothing fits
+                                if (!$best) {
+                                    $best = $tiers->first();
                                 }
 
-                                // If you want to keep the user's chosen quantity, DO NOT overwrite quantity here.
-                                // If your design ties quantity to the tier, then set it from the tier:
-                                $newQty   = $pp['quantity'];      // or: $item->quantity
-                                $newPrice = $pp['price'];
-
+                                // Optional: if you store product_price_id on cart items, set it now
                                 $item->update([
-                                    'quantity'      => $newQty,
-                                    'product_price' => $newPrice,
-                                    'sub_total'     => ($newPrice * $newQty)
+                                    'product_price_id' => $best->id,
+                                    'product_price'    => (float)$best->price,
+                                    // keep shopper’s quantity:
+                                    'sub_total'        => ((float)$best->price * (int)$item->quantity)
                                         + (float)$item->specs_price
                                         - (float)$item->cart->discount_amount,
                                 ]);
                             }
                         });
+
                 }
             }
 
