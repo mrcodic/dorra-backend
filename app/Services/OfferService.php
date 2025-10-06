@@ -22,7 +22,7 @@ class OfferService extends BaseService
     public function getData(): JsonResponse
     {
         $locale = app()->getLocale();
-        $categories = $this->repository
+        $offers = $this->repository
             ->query()
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
@@ -38,9 +38,12 @@ class OfferService extends BaseService
 
             ->latest();
 
-        return DataTables::of($categories)
-            ->addColumn()
-            ->make(true);
+        return DataTables::of($offers)
+            ->editColumn('start_at', function ($offer) {
+                $offer->format('d/m/Y');
+            })->editColumn('end_at', function ($offer) {
+                $offer->format('d/m/Y');
+            })->make();
     }
 
 
