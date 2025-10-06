@@ -123,6 +123,44 @@ const dt_user_table = $(".job-list-table").DataTable({
         paginate: { previous: "&nbsp;", next: "&nbsp;" },
     },
 });
+function highlightStationCard(stationId) {
+    $('.station-card').removeClass('selected');
+    if (stationId) {
+        $(`.station-card[data-station="${stationId}"]`).addClass('selected');
+    }
+}
+
+// Optional: refresh the Status dropdown when station changes
+async function reloadStatusesForStation(stationId) {
+    const $select = $('.filter-status');
+    const url = $('.filter-station').data('statuses-url'); // you already set this in Blade
+    if (!url) return;
+
+    try {
+        const res = await $.ajax({
+            url,
+            type: 'GET',
+            data: { station_id: stationId || '' }
+        });
+
+        $select.empty().append(`<option value="">All Statuses</option>`);
+        (res?.data || []).forEach(s => {
+            // expects {id, name} or adapt as needed
+            $select.append(`<option value="${s.id}">${s.name}</option>`);
+        });
+    } catch (e) {
+        // fallback: keep existing options
+        console.warn('Failed to reload statuses', e);
+    }
+}
+
+function setStationFilter(stationId) {
+    $('.filter-station').val(stationId || '');
+    highlightStationCard(stationId || '');
+    reloadStatusesForStation(stationId || '');
+    // redraw table
+    $('.job-list-table').DataTable().draw();
+}
 
 // ---- events (reload table) ----
 $(document).on("click", ".station-card", function () {

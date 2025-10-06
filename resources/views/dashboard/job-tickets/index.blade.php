@@ -10,6 +10,13 @@
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+<style>
+    .station-card.selected {
+        border-color: #7367f0 !important;
+        box-shadow: 0 0 0 3px rgba(115,103,240,.15);
+        background: #faf8ff;
+    }
+</style>
 
 
 <!-- SweetAlert2 CSS -->
