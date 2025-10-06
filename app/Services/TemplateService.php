@@ -178,7 +178,6 @@ class TemplateService extends BaseService
                 $model->categories()->sync($validatedData['category_ids']);
             }
             if (!empty($validatedData['tags'])) {
-                dd($validatedData['tags']);
                 $model->tags()->sync($validatedData['tags']);
             }
             if (!empty($validatedData['flags'])) {
