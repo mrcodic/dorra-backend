@@ -168,7 +168,7 @@ $(document).on("click", ".station-card", function () {
 
     // set the dropdown filter for consistency
     $(".filter-station").val(station);
-
+    setStationFilter(station);
     // redraw DataTable
     dt_user_table.draw();
 });
@@ -224,6 +224,9 @@ $(".filter-priority").on("change", function () {
     dt_user_table.draw();
 });
 $(document).on("change", ".filter-station", function () {
+    const stationId = String($(this).val() || '');
+    highlightStationCard(stationId);
+    reloadStatusesForStation(stationId);
     dt_user_table.ajax.reload();
 });
 
