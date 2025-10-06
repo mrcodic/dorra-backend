@@ -95,45 +95,48 @@
                     </tr>
                 </thead>
             </table>
-            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                <div class="delete-container">
-                    <p id="selected-count-text">0 Offers are selected</p>
-                    <button type="button" id="delete-selected-btn" data-bs-toggle="modal"
-                        data-bs-target="#deleteCategoriesModal"
-                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
+            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display:none;">
+                <div class="delete-container d-flex align-items-center gap-2">
+                    <p id="selected-count-text" class="m-0">0 Offers are selected</p>
+
+                    <!-- Open modal -->
+                    <button type="button"
+                            id="open-bulk-delete-modal"
+                            class="btn btn-outline-danger d-flex align-items-center gap-1">
                         <i data-feather="trash-2"></i> Delete Selected
                     </button>
-                    <form style="display: none;" id="bulk-delete-form" method="POST"
-                        action="{{ route('offers.bulk-delete') }}">
+
+                    <!-- Hidden form actually posted on confirm -->
+                    <form id="bulk-delete-form" method="POST" action="{{ route('offers.bulk-delete') }}" style="display:none;">
                         @csrf
-                        <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                            data-bs-target="#deleteOffersModal"
-                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
-                            <i data-feather="trash-2"></i> Delete Selected
-                        </button>
+                        <!-- We’ll submit via AJAX; no visible button here -->
                     </form>
-
-
                 </div>
             </div>
 
 
         </div>
 
+        @include('modals.offers.show-offer')
+        @include('modals.offers.add-offer')
+        @include('modals.offers.edit-offer')
+
+
+
+
         @include('modals.delete',[
         'id' => 'deleteOfferModal',
         'formId' => 'deleteOfferForm',
         'title' => 'Delete Offer',
         ])
-        @include('modals.delete',[
-        'id' => 'deleteOffersModal',
-        'formId' => 'bulk-delete-form',
-        'title' => 'Delete Offers',
-        'confirmText' => 'Are you sure you want to delete this items?',
+        @include('modals.delete', [
+          'id' => 'deleteOffersModal',
+          'formId' => 'bulk-delete-form',
+          'buttonId' => 'confirm-bulk-delete',
+          'title' => 'Delete Offers',
+          'confirmText' => 'Are you sure you want to delete these items?',
         ])
-        @include('modals.offers.add-offer')
-        @include('modals.offers.show-offer')
-        @include('modals.offers.edit-offer')
+
 
 
     </div>

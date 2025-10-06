@@ -12,12 +12,12 @@
 
                     <div class="form-group mb-2">
                         <label for="createPrefix" class="label-text mb-1">Offer Name</label>
-                        <input type="text" name="code" id="createPrefix" class="form-control" placeholder="Enter offer’s name" disabled />
+                        <input type="text" name="code" id="showOfferName" class="form-control" placeholder="Enter offer’s name" disabled />
                     </div>
 
                     <div class="form-group mb-2">
                         <label for="createDiscountValue" class="label-text mb-1">Offer Value (%)</label>
-                        <input type="text" name="value" id="createDiscountValue" class="form-control" placeholder="Enter offer’s value " disabled />
+                        <input type="text" name="value" id="showOfferValue" class="form-control" placeholder="Enter offer’s value " disabled />
                     </div>
 
 
@@ -26,33 +26,26 @@
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Type</label>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="scope" id="applyToProducts" value="2" checked disabled />
-                            <label class="form-check-label text-black fs-16" for="applyToProducts">Products</label>
+                            <input class="form-check-input" type="radio" name="scope" id="showApplyToProducts" value="2" checked disabled />
+                            <label class="form-check-label text-black fs-16" for="showApplyToProducts">Products</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="scope" id="applyToCategories" value="1" disabled />
-                            <label class="form-check-label text-black fs-16" for="applyToCategories">Categories</label>
+                            <input class="form-check-input" type="radio" name="scope" id="showApplyToCategories" value="1" disabled />
+                            <label class="form-check-label text-black fs-16" for="showApplyToCategories">Categories</label>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col  mb-2">
-                            <label class="form-label">Start Date</label>
-                            <input type="date" class="form-control" value="2024-05-26" disabled />
-                        </div>
+                            <div class="col  mb-2">
+                                <label class="form-label">Start Date</label>
+                                <input id="showStartDate" type="date" class="form-control"  disabled />
+                            </div>
                         <div class="col mb-2">
                             <label class="form-label">End Date</label>
-                            <input type="date" class="form-control" value="2024-05-26" disabled />
+                            <input  id="showEndDate" type="date" class="form-control"  disabled />
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-top-0 d-flex justify-content-end">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary fs-5 " data-bs-toggle="modal"
-                            data-bs-target="#editOfferModal">
-                        <span>Edit</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
-                    </button>
-                </div>
+
             </form>
         </div>
     </div>

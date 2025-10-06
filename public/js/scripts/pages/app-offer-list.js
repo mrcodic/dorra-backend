@@ -12,7 +12,7 @@ var dt_user_table = $('.offer-list-table').DataTable({
         url: offersDataUrl,
         type: 'GET',
         data: function (d) {
-            d.search_value = $('#search-offer-form'). val();
+            d.search_value = $('#search-offer-form').val();
             d.type = $('.filter-type').val();
 
             return d;
@@ -44,19 +44,22 @@ var dt_user_table = $('.offer-list-table').DataTable({
         <div class="d-flex gap-1">
                                 <a href="#" class="view-details"
                                    data-bs-toggle="modal"
-                                     data-bs-target="#showFlagModal"
+                                     data-bs-target="#showOfferModal"
                                      data-id="${data}"
-                                     data-name_ar="${row.name_ar}"
-                                     data-name_en="${row.name_en}"
-                                     data-products="${row.no_of_products}"
-                                     data-templates="${row.no_of_templates}"
-                                     data-showdate="${row.show_date}">
+                                     data-name="${row.name}"
+                                     data-value="${row.value}"
+                                     data-type="${row.type.value}"
+                                     data-start_at="${row.start_at}"
+                                     data-end_at="${row.end_at}"
+                                          data-products='${JSON.stringify(row.products || [])}'
+       data-categories='${JSON.stringify(row.categories || [])}'>
+                                  >
                                      <i data-feather="eye"></i>
                                 </a>
 
                           <a href="#" class="edit-details"
                            data-bs-toggle="modal"
-                           data-bs-target="#editFlagModal"
+                           data-bs-target="#editOfferModal"
                              data-id="${data}"
                              data-name_ar="${row.name_ar}"
                              data-name_en="${row.name_en}"
@@ -175,24 +178,54 @@ $(document).ready(function () {
         });
     });
 
+// helper: normalize "2025-10-06 12:34:00" or ISO to "2025-10-06"
+    function toDateForInput(s) {
+        if (!s) return '';
+        s = String(s).trim();
+
+        // already yyyy-mm-dd
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+        // dd/mm/yyyy → yyyy-mm-dd
+        const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+
+        // yyyy-mm-dd HH:MM:SS or ISO → take date part
+        if (s.includes(' ') || s.includes('T')) return s.split('T')[0].split(' ')[0];
+
+        return '';
+    }
+
     $(document).on('click', '.view-details', function (e) {
-        const tagNameAR = $(this).data('name_ar');
-        const tagNameEn = $(this).data('name_en');
-        const products = $(this).data('products');
-        const templates = $(this).data('templates');
-        const addedDate = $(this).data('showdate');
-        const id = $(this).data('id');
-        // Populate modal
-        $('#showFlagModal #tag-name-ar').val(tagNameAR);
-        $('#showFlagModal #tag-name-en').val(tagNameEn);
-        $('#showFlagModal #tag-products').val(products);
-        $('#showFlagModal #tag-templates').val(templates);
-        $('#showFlagModal #tag-date').val(addedDate);
-        $('#showFlagModal #tag-id').val(id);
+        e.preventDefault();
+        const $btn = $(this);
 
+        const id = $btn.data('id');
+        const name = $btn.data('name') ?? '';
+        const value = $btn.data('value') ?? '';
+        const type = ($btn.data('type') ?? '').toString().toLowerCase(); // "1"/"2" or "products"/"categories"
+        const startAt = toDateForInput($btn.data('start_at'));
+        const endAt = toDateForInput($btn.data('end_at'));
 
-        // Show modal
-        $('#showFlagModal').modal('show');
+        const $m = $('#showOfferModal');
+
+        // fill fields
+        $m.find('#showOfferName').val(name);
+        $m.find('#showOfferValue').val(value);
+
+        // select radio (supports 1/2 or text values)
+        const isProducts = (type === '2' || type === 'products' || type === 'product');
+        const isCategories = (type === '1' || type === 'categories' || type === 'category');
+
+        $m.find('#showApplyToProducts').prop('checked', isProducts);
+        $m.find('#showApplyToCategories').prop('checked', isCategories);
+
+        // dates
+        $m.find('#showStartDate').val(startAt);
+        $m.find('#showEndDate').val(endAt);
+
+        // open modal (if not using data-bs-target already)
+        $m.modal('show');
 
     });
 
@@ -330,6 +363,29 @@ $(document).ready(function () {
         });
     });
 
+// Open the bulk delete modal (only if at least one is selected)
+    $(document).on('click', '#open-bulk-delete-modal', function () {
+        const selectedIds = $(".category-checkbox:checked").map(function () {
+            return $(this).val();
+        }).get();
+
+        if (selectedIds.length === 0) {
+            Toastify({
+                text: "Select at least one offer first.",
+                duration: 2000, gravity: "top", position: "right",
+                backgroundColor: "#EA5455", close: true
+            }).showToast();
+            return;
+        }
+
+        // show modal
+        $('#deleteOffersModal').modal('show');
+    });
+
+// When user confirms in the modal, submit the hidden form
+    $(document).on('click', '#confirm-bulk-delete', function () {
+        $('#bulk-delete-form').trigger('submit');
+    });
 
     $(document).on("submit", "#bulk-delete-form", function (e) {
         e.preventDefault();
@@ -349,7 +405,7 @@ $(document).ready(function () {
             success: function (response) {
                 $("#deleteOffersModal").modal("hide");
                 Toastify({
-                    text: "Selected tags deleted successfully!",
+                    text: "Selected offers deleted successfully!",
                     duration: 1500,
                     gravity: "top",
                     position: "right",
