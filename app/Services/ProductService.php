@@ -231,17 +231,17 @@ class ProductService extends BaseService
             if (isset($validatedData['prices'])) {
                 $product->update(['base_price' => null]);
 
-//                if (($validatedData['has_custom_prices'] ?? false) && $product->has_custom_prices !== 1) {
-//                    CartItem::where('cartable_id', $product->id)->get()->each(function ($item) use ($validatedData) {
-//                        $item->update([
-//                            'quantity' => $validatedData['prices'][0]['quantity'],
-//                            'product_price' => $validatedData['prices'][0]['price'],
-//                            'sub_total' => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity'])
-//                                + $item->specs_price
-//                                - $item->cart->discount_amount,
-//                        ]);
-//                    });
-//                }
+                if (($validatedData['has_custom_prices'] ?? false) && $product->has_custom_prices !== 1) {
+                    CartItem::where('cartable_id', $product->id)->get()->each(function ($item) use ($validatedData) {
+                        $item->update([
+                            'quantity' => $validatedData['prices'][0]['quantity'],
+                            'product_price' => $validatedData['prices'][0]['price'],
+                            'sub_total' => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity'])
+                                + $item->specs_price
+                                - $item->cart->discount_amount,
+                        ]);
+                    });
+                }
 
                 $submittedQuantities = collect($validatedData['prices'])->map(function ($price) use ($product) {
                     $product->prices()->updateOrCreate(
@@ -301,15 +301,7 @@ class ProductService extends BaseService
 
                     return $productSpecification->id;
                 })->toArray();
-
-
-                $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
-                    $spec->options->each(function ($option) {
-                        $option->clearMediaCollection();
-                        $option->delete();
-                    });
-                    $spec->delete();
-                });
+                
             } else {
 
                 $product->specifications->each(function ($spec) {
