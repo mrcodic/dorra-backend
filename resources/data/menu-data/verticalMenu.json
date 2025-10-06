@@ -109,7 +109,7 @@
         },
         {
             "name": "Logistics",
-            "icon": "Home.svg",
+            "icon": "logistics.svg",
             "slug": "",
             "submenu": [
                 {
