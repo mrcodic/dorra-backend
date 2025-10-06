@@ -58,7 +58,7 @@ class UpdateTemplateRequest extends BaseRequest
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
             'tags' => ['sometimes', 'array'],
-            'tags.*' => ['integer', 'exists:tags,id'],
+            'tags.*' => ['exists:tags,id'],
             'flags' => ['sometimes', 'array'],
             'flags.*' => ['integer', 'exists:flags,id'],
             'types' => ['required', 'array'],
