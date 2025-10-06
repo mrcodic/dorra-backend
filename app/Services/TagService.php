@@ -71,7 +71,7 @@ class TagService extends BaseService
         $locale = app()->getLocale();
         $tags = $this->repository
             ->query(['id', 'name', 'created_at'])
-            ->withCount(['templates', 'products'])
+            ->withCount(['templates', 'products','categories'])
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [

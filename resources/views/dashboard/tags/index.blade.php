@@ -183,6 +183,7 @@
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                         </th>
                         <th>Name</th>
+                        <th>NO.of Categories</th>
                         <th>NO.of Products</th>
                         <th>NO.of Templates</th>
                         <th>Added Date</th>

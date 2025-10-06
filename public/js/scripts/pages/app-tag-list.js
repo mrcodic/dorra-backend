@@ -24,6 +24,7 @@ var dt_user_table = $('.tag-list-table').DataTable({
             } },
         {data: 'name', orderable: false},
         {data: 'no_of_products', orderable: false},
+        {data: 'categories_count', orderable: false},
         {data: 'no_of_templates', orderable: false},
         {data: 'added_date', orderable: false},
 
