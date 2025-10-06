@@ -254,73 +254,51 @@ class ProductService extends BaseService
                 $product->prices()->whereNotIn('quantity', $submittedQuantities)->delete();
             }
 
+          $this->handleTransaction(function () use ($product, $validatedData) {
 
-                if (!empty($validatedData['specifications'])) {
-                $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
-                    $productSpecification = $product->specifications()->updateOrCreate(
-                        [
-                            'id' => $specification['id'] ?? null,
-                        ],
-                        [
-                            'name' => [
-                                'en' => $specification['name_en'],
-                                'ar' => $specification['name_ar'],
-                            ],
-                        ]
-                    );
+         
+                if (empty($validatedData['specifications'])) {
+                    return; // nothing to change, and we keep existing specs/options intact
+                }
 
-
-                    $submittedOptionIds = collect($specification['specification_options'] ?? [])->map(function ($option) use ($productSpecification) {
-                        $productOption = $productSpecification->options()->updateOrCreate(
-                            ['id' => $option['id'] ?? null],
+                collect($validatedData['specifications'])->each(function ($spec) use ($product) {
+                    // 1) Upsert spec (by id if present)
+                    $productSpecification = $product->specifications()
+                        ->updateOrCreate(
+                            ['id' => $spec['id'] ?? null],
                             [
-                                'value' => [
-                                    'en' => $option['value_en'],
-                                    'ar' => $option['value_ar'],
+                                'name' => [
+                                    'en' => $spec['name_en'],
+                                    'ar' => $spec['name_ar'],
                                 ],
-                                'price' => $option['price'] ?? 0,
                             ]
                         );
 
-                        if (isset($option['option_image'])) {
-                            Media::where('id', $option['option_image'])->update([
-                                'model_type' => get_class($productOption),
-                                'model_id' => $productOption->id,
+                    // 2) Upsert each option that arrived; do NOT delete missing ones
+                    collect($spec['specification_options'] ?? [])->each(function ($opt) use ($productSpecification) {
+                        $productOption = $productSpecification->options()
+                            ->updateOrCreate(
+                                ['id' => $opt['id'] ?? null],
+                                [
+                                    'value' => [
+                                        'en' => $opt['value_en'],
+                                        'ar' => $opt['value_ar'],
+                                    ],
+                                    'price' => $opt['price'] ?? 0,
+                                ]
+                            );
+
+                        if (isset($opt['option_image'])) {
+                            Media::where('id', $opt['option_image'])->update([
+                                'model_type'      => get_class($productOption),
+                                'model_id'        => $productOption->id,
                                 'collection_name' => 'productSpecificationOptions',
                             ]);
                         }
-
-                        return $productOption->id;
-                    })->toArray();
-
-
-                    $productSpecification->options()->whereNotIn('id', $submittedOptionIds)->each(function ($option) {
-                        $option->clearMediaCollection();
-                        $option->delete();
                     });
-
-                    return $productSpecification->id;
-                })->toArray();
-
-
-                $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
-                    $spec->options->each(function ($option) {
-                        $option->clearMediaCollection();
-                        $option->delete();
-                    });
-                    $spec->delete();
                 });
-            } else {
+            });
 
-                $product->specifications->each(function ($spec) {
-
-                    $spec->options->each(function ($option) {
-                        $option->clearMediaCollection();
-                        $option->delete();
-                    });
-                    $spec->delete();
-                });
-            }
 
 
             if (isset($validatedData['image_id'])) {
