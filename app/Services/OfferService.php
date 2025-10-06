@@ -38,6 +38,9 @@ class OfferService extends BaseService
             ->latest();
 
         return DataTables::of($offers)
+            ->addColumn('name', function ($offer) {
+                return $offer->getTranslation('name', app()->getLocale());
+            })
             ->editColumn('start_at', function ($offer) {
                 $offer->start_at->format('d/m/Y');
             })->editColumn('end_at', function ($offer) {
