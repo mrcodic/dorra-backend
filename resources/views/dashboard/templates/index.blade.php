@@ -110,7 +110,7 @@
             </div>
 
 
-            <div class="row gx-2 gy-2 align-items-center px-1 pt-2" id="templates-container">
+            <div class="row gx-2 gy-2 align-items-start px-1 pt-2" id="templates-container">
                 @include("dashboard.partials.filtered-templates")
             </div>
             <div id="pagination-container">
