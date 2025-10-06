@@ -177,10 +177,10 @@ class TemplateService extends BaseService
                 $model->categories()->sync($validatedData['category_ids'] ?? []);
             }
             if (!empty($validatedData['tags'])) {
-                $model->tags()->sync($validatedData['tags']);
+                $model->tags()->sync($validatedData['tags'] ?? []);
             }
             if (!empty($validatedData['flags'])) {
-                $model->flags()->sync($validatedData['flags']);
+                $model->flags()->sync($validatedData['flags'] ?? []);
             }
             if (!empty($validatedData['template_image_id'])) {
                 $model->getMedia('template_model_image')
