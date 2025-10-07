@@ -37,31 +37,31 @@
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="type" id="editApplyToProducts" value="2"
                                    checked>
-                            <label class="form-check-label" for="editApplyToProducts">Products</label>
+                            <label class="form-check-label" for="editApplyToProducts">Categories</label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="type" id="editApplyToCategories"
                                    value="1">
-                            <label class="form-check-label" for="editApplyToCategories">Categories</label>
+                            <label class="form-check-label" for="editApplyToCategories">Products</label>
                         </div>
                     </div>
 
                     <!-- Products multiselect: must submit product IDs -->
                     <div class="form-group mb-2 productsField" id="productsField">
-                        <label for="editProductsSelect" class="label-text mb-1">Products</label>
+                        <label for="editProductsSelect" class="label-text mb-1">Categories</label>
                         <select id="editProductsSelect" name="product_ids[]" class="form-select select2" multiple>
-                            @foreach($associatedData['categories'] as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @foreach($associatedData['products'] as $product)
+                                <option value="{{ $product->id }}">{{ $product->name }}</option>
                             @endforeach
                         </select>
                     </div>
 
                     <!-- Categories multiselect: must submit category IDs -->
                     <div class="form-group mb-2 d-none categoriesField" id="categoriesField">
-                        <label for="editCategoriesSelect" class="label-text mb-1">Categories</label>
+                        <label for="editCategoriesSelect" class="label-text mb-1">Products</label>
                         <select id="editCategoriesSelect" name="category_ids[]" class="form-select select2" multiple>
-                            @foreach($associatedData['products'] as $product)
-                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                            @foreach($associatedData['categories'] as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
                     </div>
