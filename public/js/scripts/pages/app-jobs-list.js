@@ -82,6 +82,7 @@ const dt_user_table = $(".job-list-table").DataTable({
         { data: "due_at" },
         { data: "order_number" },
         { data: "order_item_name" },
+        { data: "order_item_id" },
         {
             data: "id",
             orderable: false,
