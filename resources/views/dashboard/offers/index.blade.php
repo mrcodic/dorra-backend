@@ -454,6 +454,136 @@ $(document).ready(function() {
 });
 </script>
 
+
+<script>
+    // Common: clamp percent inputs
+    $(document).on('input', '#createDiscountValue, #editOfferValue', function () {
+        let v = parseInt($(this).val(), 10);
+        if (isNaN(v)) v = '';
+        else v = Math.max(1, Math.min(100, v));
+        $(this).val(v);
+    });
+
+    // ---- EDIT MODAL ----
+    $('#editOfferModal')
+        .on('shown.bs.modal', function () {
+            const $m = $(this);
+            // Init only selects inside this modal
+            $m.find('.select2').each(function () {
+                if (!$(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2({ dropdownParent: $m });
+                }
+            });
+            // Ensure correct section visibility on open
+            $m.find('input[name="type"]:checked').trigger('change');
+        })
+        .on('change', 'input[name="type"]', function () {
+            const $m = $('#editOfferModal');
+            const v = parseInt(this.value, 10);
+            if (v === 2) {
+                // Products
+                $m.find('.productsField').removeClass('d-none');
+                $m.find('.categoriesField').addClass('d-none');
+                $m.find('#editCategoriesSelect').val(null).trigger('change');
+            } else if (v === 1) {
+                // Categories
+                $m.find('.categoriesField').removeClass('d-none');
+                $m.find('.productsField').addClass('d-none');
+                $m.find('#editProductsSelect').val(null).trigger('change');
+            }
+        });
+
+    // ---- ADD MODAL ----
+    $('#addOfferModal')
+        .on('shown.bs.modal', function () {
+            const $m = $(this);
+            // Init only selects inside this modal
+            $m.find('.select2').each(function () {
+                if (!$(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2({ dropdownParent: $m });
+                }
+            });
+            // Ensure correct section visibility on open
+            $m.find('input[name="type"]:checked').trigger('change');
+        })
+        .on('change', 'input[name="type"]', function () {
+            const $m = $('#addOfferModal');
+            const v = parseInt(this.value, 10);
+            if (v === 2) {
+                // Products
+                $m.find('.addProductsField').removeClass('d-none');
+                $m.find('.addCategoriesField').addClass('d-none');
+                $m.find('.add-categories-select').val(null).trigger('change');
+            } else if (v === 1) {
+                // Categories
+                $m.find('.addCategoriesField').removeClass('d-none');
+                $m.find('.addProductsField').addClass('d-none');
+                $m.find('.add-products-select').val(null).trigger('change');
+            }
+        });
+
+    // Keep your form handlers
+    handleAjaxFormSubmit("#addOfferForm", {
+        successMessage: "Offer Created Successfully",
+        onSuccess: function () { location.reload(); }
+    });
+
+    handleAjaxFormSubmit("#editOfferForm", {
+        successMessage: "Offer Updated Successfully",
+        onSuccess: function () { location.reload(); }
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+            // Select all toggle
+            $('#select-all-checkbox').on('change', function () {
+                $('.category-checkbox').prop('checked', this.checked);
+                updateBulkDeleteVisibility();
+            });
+
+            // When individual checkbox changes
+            $(document).on('change', '.category-checkbox', function () {
+                // If any is unchecked, uncheck "Select All"
+                if (!this.checked) {
+                    $('#select-all-checkbox').prop('checked', false);
+                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
+                    $('#select-all-checkbox').prop('checked', true);
+                }
+                updateBulkDeleteVisibility();
+            });
+
+
+            // On table redraw (e.g. pagination, search)
+            $(document).on('draw.dt', function () {
+                $('#bulk-delete-container').hide();
+                $('#select-all-checkbox').prop('checked', false);
+            });
+
+            // Close bulk delete container
+            $(document).on('click', '#close-bulk-delete', function () {
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+            });
+
+            // Update the bulk delete container visibility
+            function updateBulkDeleteVisibility() {
+                const selectedCheckboxes = $('.category-checkbox:checked');
+                const count = selectedCheckboxes.length;
+
+                if (count > 0) {
+                    $('#selected-count-text').text(`${count} Offer${count > 1  ? 's' : ''} are selected`);
+                    $('#bulk-delete-container').show();
+                } else {
+                    $('#bulk-delete-container').hide();
+                }
+            }
+
+
+        });
+</script>
+
 {{-- Page js files --}}
 <script src="{{ asset('js/scripts/pages/app-offer-list.js') }}?v={{ time() }}"></script>
 @endsection
