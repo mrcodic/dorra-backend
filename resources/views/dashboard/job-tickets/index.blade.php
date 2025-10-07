@@ -13,7 +13,6 @@
 <style>
     .station-card.selected {
         border-color: #24B094 !important;
-        box-shadow: 0 0 0 3px rgba(115,103,240,.15);
         background: #E0F4F0;
     }
 </style>
