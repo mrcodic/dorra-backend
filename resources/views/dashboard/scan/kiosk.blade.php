@@ -3,110 +3,110 @@
 @section('title', 'Scan Job')
 
 @section('vendor-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/animate/animate.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/extensions/sweetalert2.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/animate/animate.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/extensions/sweetalert2.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
 @endsection
 
 @section('page-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
 @endsection
 @section('content')
-<div class="py-2" dir="ltr">
-    <h2 class="mb-3">Scan Job Ticket</h2>
+    <div class="py-2" dir="ltr">
+        <h2 class="mb-3">Scan Job Ticket</h2>
 
-    {{-- Mode Switcher --}}
-    <div class="btn-group mb-3" role="group" aria-label="Scanner Mode">
-        <button id="btn-mode-hw" type="button" class="btn btn-outline-primary active">
-            <i data-feather="type"></i> Hardware Scanner
-        </button>
-        <button id="btn-mode-cam" type="button" class="btn btn-outline-primary">
-            <i data-feather="camera"></i> Camera
-        </button>
-    </div>
+        {{-- Mode Switcher --}}
+        <div class="btn-group mb-3" role="group" aria-label="Scanner Mode">
+            <button id="btn-mode-hw" type="button" class="btn btn-outline-primary active">
+                <i data-feather="type"></i> Hardware Scanner
+            </button>
+            <button id="btn-mode-cam" type="button" class="btn btn-outline-primary">
+                <i data-feather="camera"></i> Camera
+            </button>
+        </div>
 
-    {{-- Status alert --}}
-    <div id="status" class="alert d-none" role="alert"></div>
+        {{-- Status alert --}}
+        <div id="status" class="alert d-none" role="alert"></div>
 
-    <div class="row g-3">
-        {{-- Hardware scanner section --}}
-        <div class="col-12" id="section-hw">
-            <form id="scan" action="{{ route('scan.submit') }}" method="post" class="p-3 border rounded-3">
-                @csrf
-                <label for="code" class="form-label mb-1">Scan / Enter Job Code</label>
-                <div class="input-group">
-                    <input type="text" id="code" name="code" class="form-control" placeholder="JT-YYYYMMDD-..."
-                        autofocus>
-                    <button class="btn btn-primary" type="submit">Submit</button>
+        <div class="row g-3">
+            {{-- Hardware scanner section --}}
+            <div class="col-12" id="section-hw">
+                <form id="scan" action="{{ route('scan.submit') }}" method="post" class="p-3 border rounded-3">
+                    @csrf
+                    <label for="code" class="form-label mb-1">Scan / Enter Job Code</label>
+                    <div class="input-group">
+                        <input type="text" id="code" name="code" class="form-control" placeholder="JT-YYYYMMDD-..."
+                               autofocus>
+                        <button class="btn btn-primary" type="submit">Submit</button>
+                    </div>
+                    <small class="text-muted d-block mt-1">Tip: connect a USB/BT barcode scanner—most act like a keyboard
+                        and press Enter automatically.</small>
+                </form>
+            </div>
+
+            {{-- Camera scanner section --}}
+            <div class="col-12 d-none" id="section-cam">
+                <div class="d-flex gap-2 flex-wrap align-items-center mb-2">
+                    <select id="camera-select" class="form-select" style="max-width: 280px;"></select>
+                    <button id="start-btn" class="btn btn-success" type="button" disabled>Start</button>
+                    <button id="stop-btn" class="btn btn-outline-secondary" type="button" disabled>Stop</button>
+                    <button id="torch-btn" class="btn btn-outline-dark" type="button" disabled>Torch</button>
                 </div>
-                <small class="text-muted d-block mt-1">Tip: connect a USB/BT barcode scanner—most act like a keyboard
-                    and press Enter automatically.</small>
-            </form>
-        </div>
-
-        {{-- Camera scanner section --}}
-        <div class="col-12 d-none" id="section-cam">
-            <div class="d-flex gap-2 flex-wrap align-items-center mb-2">
-                <select id="camera-select" class="form-select" style="max-width: 280px;"></select>
-                <button id="start-btn" class="btn btn-success" type="button" disabled>Start</button>
-                <button id="stop-btn" class="btn btn-outline-secondary" type="button" disabled>Stop</button>
-                <button id="torch-btn" class="btn btn-outline-dark" type="button" disabled>Torch</button>
+                <div id="reader" style="width: 100%; max-width: 520px;"></div>
             </div>
-            <div id="reader" style="width: 100%; max-width: 520px;"></div>
-        </div>
 
-        {{-- Last result (optional) --}}
-        <div class="col-12">
-            <div class="border rounded-3 p-2">
-                <div><strong>Last Code:</strong> <span id="last-code">—</span></div>
-                <div><strong>Station:</strong> <span id="last-station">—</span></div>
-                <div><strong>Status:</strong> <span id="last-status">—</span></div>
+            {{-- Last result (optional) --}}
+            <div class="col-12">
+                <div class="border rounded-3 p-2">
+                    <div><strong>Last Code:</strong> <span id="last-code">—</span></div>
+                    <div><strong>Station:</strong> <span id="last-station">—</span></div>
+                    <div><strong>Status:</strong> <span id="last-status">—</span></div>
+                </div>
             </div>
         </div>
+
+        {{-- Beep sounds (optional) --}}
+        <audio id="beep-ok" src="{{ asset('sounds/beep-ok.mp3')  }}" preload="auto"></audio>
+        <audio id="beep-ng" src="{{ asset('sounds/beep-ng.mp3')  }}" preload="auto"></audio>
     </div>
-
-    {{-- Beep sounds (optional) --}}
-    <audio id="beep-ok" src="{{ asset('sounds/beep-ok.mp3')  }}" preload="auto"></audio>
-    <audio id="beep-ng" src="{{ asset('sounds/beep-ng.mp3')  }}" preload="auto"></audio>
-</div>
 @endsection
 
 
 
 @section('vendor-script')
-{{-- Vendor js files --}}
-<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-{{-- data table --}}
-<script src="{{ asset(mix('vendors/js/extensions/moment.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/extensions/sweetalert2.all.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/extensions/polyfill.min.js')) }}"></script>
+    {{-- Vendor js files --}}
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+    {{-- data table --}}
+    <script src="{{ asset(mix('vendors/js/extensions/moment.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/extensions/sweetalert2.all.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/extensions/polyfill.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
-<script src="https://unpkg.com/html5-qrcode" defer></script>
-<script>
-    handleAjaxFormSubmit("#scan",{
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
+    <script>
+        handleAjaxFormSubmit("#scan",{
             successMessage: "Scan Submitted Successfully"
         })
         document.addEventListener('DOMContentLoaded', () => {
@@ -199,7 +199,6 @@
                     }
 
                     // success UI
-
                     try { document.getElementById('beep-ok').play(); } catch(e){}
                     showAlert(data.message || 'OK', 'success');
                     toastOk(data.message || 'Scan accepted');
@@ -359,5 +358,5 @@
             // default: HW mode
             switchToHw();
         });
-</script>
+    </script>
 @endsection
