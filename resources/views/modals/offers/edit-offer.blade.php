@@ -118,10 +118,5 @@
 
         $('input[name="type"]:checked').trigger('change');
     });
-    handleAjaxFormSubmit("#editOfferForm", {
-        successMessage: "Offer Updated Successfully",
-        onSuccess:function (){
-            location.reload()
-        }
-    })
+
 </script>
