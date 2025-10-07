@@ -34,6 +34,22 @@
                             <label class="form-check-label text-black fs-16" for="showApplyToCategories">Categories</label>
                         </div>
                     </div>
+                    {{-- Applied to --}}
+                    <div class="form-group mb-2">
+                        <label class="label-text mb-1 d-block">Applied To</label>
+
+                        {{-- Products --}}
+                        <div id="showProductsWrap" class="d-none">
+                            <div class="small text-muted mb-1">Products</div>
+                            <div id="showProducts" class="d-flex flex-wrap gap-1"></div>
+                        </div>
+
+                        {{-- Categories --}}
+                        <div id="showCategoriesWrap" class="d-none">
+                            <div class="small text-muted mb-1">Categories</div>
+                            <div id="showCategories" class="d-flex flex-wrap gap-1"></div>
+                        </div>
+                    </div>
                     <div class="row">
                             <div class="col  mb-2">
                                 <label class="form-label">Start Date</label>

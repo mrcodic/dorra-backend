@@ -200,38 +200,75 @@ $(document).ready(function () {
         return '';
     }
 
+// helpers to normalize payloads & render chips
+    function toItemsArray(raw) {
+        // Accept JSON string, array of IDs, or array of objects with {id, name}
+        if (raw == null) return [];
+        if (typeof raw === 'string') {
+            try { raw = JSON.parse(raw); } catch(e){ /* keep as-is */ }
+        }
+        if (!Array.isArray(raw)) return [];
+        return raw.map(it => {
+            if (typeof it === 'object' && it !== null) {
+                return { id: String(it.id ?? it.value ?? it), name: String(it.name ?? it.title ?? `#${it.id ?? it}`) };
+            }
+            // plain id
+            return { id: String(it), name: `#${it}` };
+        });
+    }
+
+    function renderChips($container, items) {
+        if (!items.length) {
+            $container.html('<span class="text-muted">— none —</span>');
+            return;
+        }
+        const html = items.map(it =>
+            `<span class="badge rounded-pill bg-light border text-dark me-1 mb-1">
+       ${_.escape(it.name)} <small class="text-muted">#${_.escape(it.id)}</small>
+     </span>`
+        ).join('');
+        $container.html(html);
+    }
+
     $(document).on('click', '.view-details', function (e) {
         e.preventDefault();
         const $btn = $(this);
-
-        const id = $btn.data('id');
-        const name = $btn.data('name') ?? '';
-        const value = $btn.data('value') ?? '';
-        const type = ($btn.data('type') ?? '').toString().toLowerCase(); // "1"/"2" or "products"/"categories"
-        const startAt = toDateForInput($btn.data('start_at'));
-        const endAt = toDateForInput($btn.data('end_at'));
-
         const $m = $('#showOfferModal');
 
-        // fill fields
+        // existing fields...
+        const name   = $btn.data('name') ?? '';
+        const value  = $btn.data('value') ?? '';
+        const type   = String($btn.data('type') ?? '').toLowerCase(); // '1'/'2'/'products'/'categories'
+        const start  = toDateForInput($btn.data('start_at'));
+        const end    = toDateForInput($btn.data('end_at'));
+
+        // normalize products/categories array from data-* (use attr to avoid jQuery caching)
+        const products   = toItemsArray($btn.attr('data-products'));
+        const categories = toItemsArray($btn.attr('data-categories'));
+
+        // fill
         $m.find('#showOfferName').val(name);
         $m.find('#showOfferValue').val(value);
+        $m.find('#showStartDate').val(start);
+        $m.find('#showEndDate').val(end);
 
-        // select radio (supports 1/2 or text values)
-        const isProducts = (type === '2' || type === 'products' || type === 'product');
+        const isProducts   = (type === '2' || type === 'products' || type === 'product');
         const isCategories = (type === '1' || type === 'categories' || type === 'category');
 
+        // set radios
         $m.find('#showApplyToProducts').prop('checked', isProducts);
         $m.find('#showApplyToCategories').prop('checked', isCategories);
 
-        // dates
-        $m.find('#showStartDate').val(startAt);
-        $m.find('#showEndDate').val(endAt);
+        // show/hide sections + render chips
+        $m.find('#showProductsWrap').toggleClass('d-none', !isProducts);
+        $m.find('#showCategoriesWrap').toggleClass('d-none', !isCategories);
 
-        // open modal (if not using data-bs-target already)
+        renderChips($m.find('#showProducts'), products);
+        renderChips($m.find('#showCategories'), categories);
+
         $m.modal('show');
-
     });
+
     function cleanPercent(val) {
         if (val == null) return '';
         let s = String(val).trim();
