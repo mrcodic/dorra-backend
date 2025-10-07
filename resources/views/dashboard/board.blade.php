@@ -32,7 +32,7 @@
                         @foreach($station->jobTickets as $jobTicket)
                             <a href="{{ route('jobs.show', $jobTicket->id) }}" class="text-decoration-none">
                                 <div class="card p-1 hover-shadow" style="cursor: pointer;">
-                                    <img src="{{ $jobTicket->orderItem->orderable->getMainImageUrl() }}"
+                                    <img src="{{ $jobTicket->orderItem->orderable?->getMainImageUrl() }}"
                                          alt="Item Photo" width="172px">
                                     <p style="color: #424746; margin: 0">{{ $jobTicket->code }}</p>
                                     <hr>
