@@ -57,7 +57,7 @@
                     <select id="camera-select" class="form-select" style="max-width: 280px;"></select>
                     <button id="start-btn" class="btn btn-success" type="button" disabled>Start</button>
                     <button id="stop-btn" class="btn btn-outline-secondary" type="button" disabled>Stop</button>
-                    <button id="torch-btn" class="btn btn-outline-dark" type="button" disabled>Torch</button>
+{{--                    <button id="torch-btn" class="btn btn-outline-dark" type="button" disabled>Torch</button>--}}
                 </div>
                 <div id="reader" style="width: 100%; max-width: 520px;"></div>
             </div>
