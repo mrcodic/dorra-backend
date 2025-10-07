@@ -150,9 +150,31 @@
                 status.classList.add('alert-' + type);
                 status.textContent = msg;
             }
+            function toastOk(msg) {
+                Toastify({
+                    text: msg || "Done",
+                    duration: 2500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28C76F",
+                    close: true,
+                    stopOnFocus: true
+                }).showToast();
+            }
+
+            function toastErr(msg) {
+                Toastify({
+                    text: msg || "Something went wrong",
+                    duration: 4000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#EA5455",
+                    close: true,
+                    stopOnFocus: true
+                }).showToast();
+            }
 
             async function postCode(code) {
-                // de-duplicate
                 const now = Date.now();
                 if (code === lastSent && (now - lastSentAt) < dedupeWindowMs) return;
                 lastSent = code; lastSentAt = now;
@@ -160,21 +182,39 @@
                 try {
                     const res = await fetch("{{ route('scan.submit') }}", {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json'
+                        },
                         body: JSON.stringify({ code })
                     });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'Scan failed');
 
+                    const data = await res.json();
+                    if (!res.ok) {
+                        // Prefer API message or first validation error
+                        const apiMsg =
+                            data?.message ||
+                            (data?.errors && Object.values(data.errors)[0]?.[0]) ||
+                            'Scan failed';
+                        throw new Error(apiMsg);
+                    }
+
+                    // success UI
                     try { document.getElementById('beep-ok').play(); } catch(e){}
                     showAlert(data.message || 'OK', 'success');
+                    toastOk(data.message || 'Scan accepted');
+
                     lastCodeEl.textContent = data.code ?? code;
                     lastMsgEl.textContent  = data.message ?? 'OK';
                     lastCntEl.textContent  = data.scan_count ?? '—';
                     lastStnEl.textContent  = (data.from_station ?? '—') + ' ➜ ' + (data.to_station ?? '—');
+
                 } catch (err) {
                     try { document.getElementById('beep-ng').play(); } catch(e){}
                     showAlert(err.message || 'Error', 'danger');
+                    toastErr(err.message || 'Scan rejected');
+
                     lastMsgEl.textContent = err.message || 'Error';
                     lastCodeEl.textContent = code;
                 }
