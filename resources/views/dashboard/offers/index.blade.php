@@ -404,7 +404,7 @@
                 const count = selectedCheckboxes.length;
 
                 if (count > 0) {
-                    $('#selected-count-text').text(${count} Admin${count > 1 ? 's are' : ' is'} selected);
+                    $('#selected-count-text').text(`${count} Admin${count > 1 ? 's are' : ' is'} selected`);
                     $('#bulk-delete-container').show();
                 } else {
                     $('#bulk-delete-container').hide();
@@ -573,7 +573,7 @@
                 const count = selectedCheckboxes.length;
 
                 if (count > 0) {
-                    $('#selected-count-text').text(${count} Offer${count > 1  ? 's' : ''} are selected);
+                    $('#selected-count-text').text(`${count} Offer${count > 1  ? 's' : ''} are selected`);
                     $('#bulk-delete-container').show();
                 } else {
                     $('#bulk-delete-container').hide();
