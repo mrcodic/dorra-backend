@@ -276,7 +276,63 @@
 <script>
     $(document).ready(function () {
     setupClearInput('roleSelect', 'clearRoleFilter');
+        // ---- EDIT MODAL ----
+        $('#editOfferModal')
+            .on('shown.bs.modal', function () {
+                const $m = $(this);
+                // Init only selects inside this modal
+                $m.find('.select2').each(function () {
+                    if (!$(this).hasClass('select2-hidden-accessible')) {
+                        $(this).select2({ dropdownParent: $m });
+                    }
+                });
+                // Ensure correct section visibility on open
+                $m.find('input[name="type"]:checked').trigger('change');
+            })
+            .on('change', 'input[name="type"]', function () {
+                const $m = $('#editOfferModal');
+                const v = parseInt(this.value, 10);
+                if (v === 2) {
+                    // Products
+                    $m.find('.productsField').removeClass('d-none');
+                    $m.find('.categoriesField').addClass('d-none');
+                    $m.find('#editCategoriesSelect').val(null).trigger('change');
+                } else if (v === 1) {
+                    // Categories
+                    $m.find('.categoriesField').removeClass('d-none');
+                    $m.find('.productsField').addClass('d-none');
+                    $m.find('#editProductsSelect').val(null).trigger('change');
+                }
+            });
 
+        // ---- ADD MODAL ----
+        $('#addOfferModal')
+            .on('shown.bs.modal', function () {
+                const $m = $(this);
+                // Init only selects inside this modal
+                $m.find('.select2').each(function () {
+                    if (!$(this).hasClass('select2-hidden-accessible')) {
+                        $(this).select2({ dropdownParent: $m });
+                    }
+                });
+                // Ensure correct section visibility on open
+                $m.find('input[name="type"]:checked').trigger('change');
+            })
+            .on('change', 'input[name="type"]', function () {
+                const $m = $('#addOfferModal');
+                const v = parseInt(this.value, 10);
+                if (v === 2) {
+                    // Products
+                    $m.find('.addProductsField').removeClass('d-none');
+                    $m.find('.addCategoriesField').addClass('d-none');
+                    $m.find('.add-categories-select').val(null).trigger('change');
+                } else if (v === 1) {
+                    // Categories
+                    $m.find('.addCategoriesField').removeClass('d-none');
+                    $m.find('.addProductsField').addClass('d-none');
+                    $m.find('.add-products-select').val(null).trigger('change');
+                }
+            });
     // Select all toggle
     $('#select-all-checkbox').on('change', function () {
         $('.category-checkbox').prop('checked', this.checked);
