@@ -84,6 +84,11 @@
                             <a href="{{ route('orders.show',$model->orderItem->order->id) }}"
                                 style="margin: 0; color: #24B094; cursor: pointer">Go to Order</a>
                         </div>
+                        <p style="color: #424746; margin: 0; font-size: 16px">Order Item ID:</p>
+
+                        <div class="d-flex align-items-center justify-content-between">
+                            <p style="margin: 0; color: #121212">{{ $model->orderItem->id }}</p>
+                        </div>
                     </div>
                 </div>
                 <hr>
