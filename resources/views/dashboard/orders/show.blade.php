@@ -109,6 +109,7 @@
                                 <div class="fw-bold text-black fs-16">
                                     {{ $product->name ?? 'No Product Found' }}
                                 </div>
+                                <div class="text-muted small">Item ID: #{{ $orderItem->id }}</div>
                                 <div class="text-dark fs-5">
                                     Qty: {{$orderItem->quantity }}
                                 </div>
