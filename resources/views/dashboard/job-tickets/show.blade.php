@@ -153,6 +153,7 @@
                 </div>
                 {{-- Codes card --}}
                 <div class="row g-1 text-center mt-2">
+                    @if($model->status != \App\Enums\JobTicket\StatusEnum::PENDING)
                     <div class="col-12">
                         {{-- Code128 --}}
                         <img src="{{ $model->qr_png_url }}" alt="Code128"
@@ -166,7 +167,7 @@
                             class="img-fluid border rounded p-2 w-100">
                     </div>
                 </div>
-
+                @endif
                 {{-- Specifications --}}
                 @php
                 $specsRaw = $model->specs ?? []; // or the JSON you have
