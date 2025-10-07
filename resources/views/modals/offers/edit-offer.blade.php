@@ -99,8 +99,6 @@
         if (val < 1) $(this).val(1);
     });
     $(function () {
-        $('.select2').select2({dropdownParent: $('#editOfferModal')});
-
         // Listen on name="type" (not "type")
         $('input[name="type"]').on('change', function () {
             const v = parseInt(this.value, 10);
