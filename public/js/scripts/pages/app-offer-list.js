@@ -251,58 +251,76 @@ $(document).ready(function () {
 
         return s;
     }
+// --- helpers ---
+    function toIdArray(raw) {
+        // Accept JSON string, array of IDs, or array of objects [{id:..}, {value:..}]
+        if (raw == null) return [];
+        if (typeof raw === 'string') {
+            try { raw = JSON.parse(raw); } catch(e){ /* keep as-is */ }
+        }
+        if (!Array.isArray(raw)) return [];
+        return raw.map(it => {
+            if (typeof it === 'object' && it !== null) {
+                return String(it.id ?? it.value ?? it);
+            }
+            return String(it);
+        });
+    }
+
+    function selectValues($select, ids) {
+        // Ensure every id has an <option>, otherwise Select2 won't show it as selected
+        ids.forEach(id => {
+            if ($select.find(`option[value="${id}"]`).length === 0) {
+                $select.append(new Option(`#${id}`, id, false, false)); // temp label if missing
+            }
+        });
+        $select.val(ids).trigger('change'); // Select2 refresh
+    }
 
     $(document).on('click', '.edit-details', function (e) {
         e.preventDefault();
-
         const $btn = $(this);
+        const id       = $btn.data('id');
+        const nameEn   = $btn.data('name_en') ?? '';
+        const nameAr   = $btn.data('name_ar') ?? '';
+        const value    = cleanPercent($btn.data('value') ?? '');
+        const typeRaw  = String($btn.data('type') ?? '').toLowerCase(); // "1"/"2"/"products"/"categories"
+        const startAt  = toDateForInput($btn.data('start_at'));
+        const endAt    = toDateForInput($btn.data('end_at'));
 
-        // Be resilient: read both name_translate and name object if present
-        const id = $btn.data('id');
-        const nameEn = $btn.data('name_en') ?? '';
-        const nameAr = $btn.data('name_ar') ?? '';
-
-        const value   = cleanPercent($btn.data('value') ?? ''); // ← clean here
-        const typeRaw = ($btn.data('type') ?? '').toString().toLowerCase(); // "1"/"2" OR "products"/"categories"
-        const startAt = toDateForInput($btn.data('start_at'));
-        const endAt   = toDateForInput($btn.data('end_at'));
-
-        const products   = $btn.data('products')   || []; // array of product ids
-        const categories = $btn.data('categories') || []; // array of category ids
+        // read from attributes to avoid jQuery’s data cache + normalize to ID array (strings)
+        const productIds   = toIdArray($btn.attr('data-products'));
+        const categoryIds  = toIdArray($btn.attr('data-categories'));
 
         const $m = $('#editOfferModal');
-        $('#editOfferForm').attr('action', '/offers/' + id)
-        // ✅ Correct IDs (match your markup exactly)
+        $('#editOfferForm').attr('action', '/offers/' + id);
+
         $m.find('#editOfferNameEn').val(nameEn);
         $m.find('#editOfferNameAr').val(nameAr);
-
         $m.find('#editOfferValue').val(value);
         $m.find('#editStartDate').val(startAt);
         $m.find('#editEndDate').val(endAt);
 
-        // Scope (radio) + show the right multiselect + preselect values
         const isProducts   = (typeRaw === '2' || typeRaw === 'products' || typeRaw === 'product');
         const isCategories = (typeRaw === '1' || typeRaw === 'categories' || typeRaw === 'category');
 
-        // ✅ Use distinct IDs for radios (see HTML fix below)
         $('#editApplyToProducts').prop('checked', isProducts);
         $('#editApplyToCategories').prop('checked', isCategories);
 
         if (isProducts) {
             $('.productsField').removeClass('d-none');
             $('.categoriesField').addClass('d-none');
-            // ✅ products select should hold product_ids[]
-            $('#editProductsSelect').val(products).trigger('change');
-            $('#editCategoriesSelect').val(null).trigger('change');
+            selectValues($('#editProductsSelect'), productIds);
+            selectValues($('#editCategoriesSelect'), []); // clear other
         } else if (isCategories) {
             $('.categoriesField').removeClass('d-none');
             $('.productsField').addClass('d-none');
-            // ✅ categories select should hold category_ids[]
-            $('#editCategoriesSelect').val(categories).trigger('change');
-            $('#editProductsSelect').val(null).trigger('change');
+            selectValues($('#editCategoriesSelect'), categoryIds);
+            selectValues($('#editProductsSelect'), []); // clear other
         } else {
             $('.productsField, .categoriesField').addClass('d-none');
-            $('#editProductsSelect, #editCategoriesSelect').val(null).trigger('change');
+            selectValues($('#editProductsSelect'), []);
+            selectValues($('#editCategoriesSelect'), []);
         }
 
         $m.modal('show');
