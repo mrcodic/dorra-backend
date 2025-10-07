@@ -30,7 +30,17 @@ class JobTicketService extends BaseService
             ->when(request()->filled('search_value'), function ($q) {
                 $search = request('search_value');
                 hasMeaningfulSearch($search)
-                    ? $q->where('code', 'like', "%{$search}%")
+                    ? $q->where(function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%')
+                            ->orWhereHas('orderItem', function ($q) use ($search) {
+                                $q->where('id',$search);
+                            })->orWhereHas('orderItem', function ($q) use ($search) {
+                                $q->whereHas('order',function ($q) use ($search){
+                                    $q->where('order_number', 'like', '%' . $search . '%');
+
+                                });
+                            });
+                })
                     : $q->whereRaw('1=0');
             })
             ->when(request()->boolean('overdue'), function ($q) {
