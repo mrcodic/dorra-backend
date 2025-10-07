@@ -60,12 +60,16 @@ var dt_user_table = $('.offer-list-table').DataTable({
                           <a href="#" class="edit-details"
                            data-bs-toggle="modal"
                            data-bs-target="#editOfferModal"
-                             data-id="${data}"
-                             data-name_ar="${row.name_ar}"
-                             data-name_en="${row.name_en}"
-                              data-products='${JSON.stringify(row.product_ids)}'
-               data-templates='${JSON.stringify(row.template_ids)}'
-               >
+                                     data-id="${data}"
+                                     data-name_en="${row.name_translate.en || ''}"
+                                     data-name_ar="${row.name_translate.ar || ''}"
+                                     data-value="${row.value}"
+                                     data-type="${row.type.value}"
+                                     data-start_at="${row.start_at}"
+                                     data-end_at="${row.end_at}"
+                                     data-products='${JSON.stringify(row.products || [])}'
+                                     data-categories='${JSON.stringify(row.categories || [])}'
+                                          >
                             <i data-feather="edit-3"></i>
                        </a>
 
@@ -228,28 +232,81 @@ $(document).ready(function () {
         $m.modal('show');
 
     });
+    function cleanPercent(val) {
+        if (val == null) return '';
+        let s = String(val).trim();
+
+        // convert Arabic-Indic digits → Latin
+        const arabicDigits = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
+        s = s.replace(/[٠-٩]/g, d => arabicDigits[d] || d);
+
+        // remove percent signs and spaces
+        s = s.replace(/[%٪]/g, '').trim();
+
+        // keep only digits, one dot/comma, and optional leading minus
+        s = s.replace(/(?!^-)[^0-9.,]/g, '');
+
+        // normalize comma to dot for decimals
+        if (s.indexOf(',') !== -1 && s.indexOf('.') === -1) s = s.replace(',', '.');
+
+        return s;
+    }
 
     $(document).on('click', '.edit-details', function (e) {
         e.preventDefault();
 
-        const tagId = $(this).data('id');
-        const tagNameAr = $(this).data('name_ar');
-        const tagNameEn = $(this).data('name_en');
-        const products = $(this).data('products');   // array of IDs
-        const templates = $(this).data('templates');  // array of IDs
+        const $btn = $(this);
 
-        // Populate fields
-        $('#editFlagModal #edit-tag-id').val(tagId);
-        $('#editFlagModal #edit-tag-name-ar').val(tagNameAr);
-        $('#editFlagModal #edit-tag-name-en').val(tagNameEn);
+        // Be resilient: read both name_translate and name object if present
+        const id = $btn.data('id');
+        const nameEn = $btn.data('name_en') ?? '';
+        const nameAr = $btn.data('name_ar') ?? '';
 
-        // Set multi-selects
-        $('#editProductsSelect').val(products).trigger('change');
-        $('#editTemplatesSelect').val(templates).trigger('change');
+        const value   = cleanPercent($btn.data('value') ?? ''); // ← clean here
+        const typeRaw = ($btn.data('type') ?? '').toString().toLowerCase(); // "1"/"2" OR "products"/"categories"
+        const startAt = toDateForInput($btn.data('start_at'));
+        const endAt   = toDateForInput($btn.data('end_at'));
 
-        $('#editFlagModal').modal('show');
+        const products   = $btn.data('products')   || []; // array of product ids
+        const categories = $btn.data('categories') || []; // array of category ids
+
+        const $m = $('#editOfferModal');
+        $('#editOfferForm').attr('action', '/offers/' + id)
+        // ✅ Correct IDs (match your markup exactly)
+        $m.find('#editOfferNameEn').val(nameEn);
+        $m.find('#editOfferNameAr').val(nameAr);
+
+        $m.find('#editOfferValue').val(value);
+        $m.find('#editStartDate').val(startAt);
+        $m.find('#editEndDate').val(endAt);
+
+        // Scope (radio) + show the right multiselect + preselect values
+        const isProducts   = (typeRaw === '2' || typeRaw === 'products' || typeRaw === 'product');
+        const isCategories = (typeRaw === '1' || typeRaw === 'categories' || typeRaw === 'category');
+
+        // ✅ Use distinct IDs for radios (see HTML fix below)
+        $('#editApplyToProducts').prop('checked', isProducts);
+        $('#editApplyToCategories').prop('checked', isCategories);
+
+        if (isProducts) {
+            $('.productsField').removeClass('d-none');
+            $('.categoriesField').addClass('d-none');
+            // ✅ products select should hold product_ids[]
+            $('#editProductsSelect').val(products).trigger('change');
+            $('#editCategoriesSelect').val(null).trigger('change');
+        } else if (isCategories) {
+            $('.categoriesField').removeClass('d-none');
+            $('.productsField').addClass('d-none');
+            // ✅ categories select should hold category_ids[]
+            $('#editCategoriesSelect').val(categories).trigger('change');
+            $('#editProductsSelect').val(null).trigger('change');
+        } else {
+            $('.productsField, .categoriesField').addClass('d-none');
+            $('#editProductsSelect, #editCategoriesSelect').val(null).trigger('change');
+        }
+
+        $m.modal('show');
     });
-
 
     $('#editButton').on('click', function () {
         var nameEN = $('#tag-name-en').val();

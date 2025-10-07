@@ -96,7 +96,14 @@
                     "icon": "circle",
                     "slug": "",
                     "url": "/discount-codes"
+                },
+                {
+                    "name": "Offers",
+                    "icon": "circle",
+                    "slug": "",
+                    "url": "/offers"
                 }
+
             ],
             "modalTarget": ""
 
