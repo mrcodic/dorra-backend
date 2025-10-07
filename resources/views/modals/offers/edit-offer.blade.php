@@ -102,11 +102,11 @@
         // Listen on name="type" (not "type")
         $('input[name="type"]').on('change', function () {
             const v = parseInt(this.value, 10);
-            if (v === 2) { // Products
+            if (v === 1) { // Products
                 $('.productsField').removeClass('d-none');
                 $('.categoriesField').addClass('d-none');
                 $('#editCategoriesSelect').val(null).trigger('change');
-            } else if (v === 1) { // Categories
+            } else if (v === 2) { // Categories
                 $('.categoriesField').removeClass('d-none');
                 $('.productsField').addClass('d-none');
                 $('#editProductsSelect').val(null).trigger('change');

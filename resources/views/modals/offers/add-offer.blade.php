@@ -120,12 +120,12 @@
     $('input[name="type"]').on('change', function () {
         const type = parseInt(this.value);
 
-        if (type === 2) {
+        if (type === 1) {
             // Products
             $('.productsField').removeClass('d-none');
             $('.addCategoriesField').addClass('d-none');
             $('.categoriesSelect').val(null).trigger('change');
-        } else if (type === 1) {
+        } else if (type === 2) {
             // Categories
             $('.addCategoriesField').removeClass('d-none');
             $('.productsField').addClass('d-none');
