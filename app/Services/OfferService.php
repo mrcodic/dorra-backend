@@ -79,7 +79,7 @@ class OfferService extends BaseService
         return $offer;
     }
 
-    use Illuminate\Support\Arr;
+
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
