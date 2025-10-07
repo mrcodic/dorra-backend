@@ -354,8 +354,9 @@
                             <th>Status</th>
                             <th>Due Date</th>
                             <th>Order Number</th>
-                            <th>Item Id</th>
                             <th>Item Name</th>
+                            <th>Item Id</th>
+                            
                             <th>Actions</th>
                         </tr>
                     </thead>
