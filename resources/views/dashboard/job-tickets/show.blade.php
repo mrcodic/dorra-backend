@@ -153,7 +153,7 @@
                 </div>
                 {{-- Codes card --}}
                 <div class="row g-1 text-center mt-2">
-                    @if($model->status != \App\Enums\JobTicket\StatusEnum::PENDING)
+                    @if($model->status !== \App\Enums\JobTicket\StatusEnum::PENDING)
                     <div class="col-12">
                         {{-- Code128 --}}
                         <img src="{{ $model->qr_png_url }}" alt="Code128"
