@@ -228,20 +228,28 @@ $(document).ready(function () {
             return { id, name: String(name) };
         });
     }
+    function escapeHtml(s) {
+        return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
     function renderChips($container, items) {
-        console.log(items)
-        if (!items.length) {
+        if (!items || !items.length) {
             $container.html('<span class="text-muted">— none —</span>');
             return;
         }
-        const html = items.map(it =>
-            `<span class="badge rounded-pill bg-light border text-dark me-1 mb-1">
-       ${_.escape(it.name.en)} <small class="text-muted">#${_.escape(it.id)}</small>
-     </span>`
-        ).join('');
+        const html = items.map(it => `
+    <span class="badge rounded-pill bg-light border text-dark me-1 mb-1">
+      ${escapeHtml(it.name)} <small class="text-muted">#${escapeHtml(it.id)}</small>
+    </span>
+  `).join('');
         $container.html(html);
     }
+
 
     $(document).on('click', '.view-details', function (e) {
         e.preventDefault();
