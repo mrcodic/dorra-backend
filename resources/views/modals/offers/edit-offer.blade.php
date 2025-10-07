@@ -35,13 +35,13 @@
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Type</label>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="type" id="editApplyToProducts" value="2"
+                            <input class="form-check-input" type="radio" name="type" id="editApplyToProducts" value="1"
                                    checked>
                             <label class="form-check-label" for="editApplyToProducts">Categories</label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="type" id="editApplyToCategories"
-                                   value="1">
+                                   value="2">
                             <label class="form-check-label" for="editApplyToCategories">Products</label>
                         </div>
                     </div>

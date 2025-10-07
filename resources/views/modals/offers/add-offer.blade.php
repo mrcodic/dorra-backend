@@ -45,12 +45,12 @@
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Type</label>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="type" id="applyToProducts" value="2"
+                            <input class="form-check-input" type="radio" name="type" id="applyToProducts" value="1"
                                    checked>
                             <label class="form-check-label text-black fs-16" for="applyToProducts">Categories</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="type" id="applyToCategories" value="1">
+                            <input class="form-check-input" type="radio" name="type" id="applyToCategories" value="2">
                             <label class="form-check-label text-black fs-16" for="applyToCategories">Products</label>
                         </div>
                     </div>
