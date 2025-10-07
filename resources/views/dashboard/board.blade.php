@@ -36,7 +36,7 @@
                                          alt="Item Photo" width="172px">
                                     <p style="color: #424746; margin: 0">{{ $jobTicket->code }}</p>
                                     <hr>
-                                    <h5 style="color: #121212; font-size: 18px">{{ $jobTicket->orderItem->orderable->name }}</h5>
+                                    <h5 style="color: #121212; font-size: 18px">{{ $jobTicket->orderItem->orderable?->name }}</h5>
                                     <div class="d-flex gap-1">
                                  <span class="rounded-3"
                                   style="color: #424746; background-color: #CED5D4; padding: 7px">{{ $jobTicket->currentStatus?->name }}</span>
