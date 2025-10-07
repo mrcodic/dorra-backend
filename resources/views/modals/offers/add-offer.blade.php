@@ -61,8 +61,8 @@
                                 name="product_ids[]"
                                 class="form-select select2 add-products-select"
                                 multiple>
-                            @foreach($associatedData['products'] as $product)
-                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                            @foreach($associatedData['categories'] as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -74,8 +74,8 @@
                                 name="category_ids[]"
                                 class="form-select select2 add-categories-select"
                                 multiple>
-                            @foreach($associatedData['categories'] as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @foreach($associatedData['products'] as $product)
+                                <option value="{{ $product->id }}">{{ $product->name }}</option>
                             @endforeach
                         </select>
                     </div>
