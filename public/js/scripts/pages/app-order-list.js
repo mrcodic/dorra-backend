@@ -146,7 +146,7 @@ var dt_user_table = $(".order-list-table").DataTable({
 });
 
 function setActiveStatusCard(val){
-    console.log(val)
+
     $(".status-card").removeClass("selected");
     if (val) $(`.status-card[data-status="${val}"]`).addClass("selected");
 }

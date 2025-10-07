@@ -215,25 +215,10 @@ class JobTicketService extends BaseService
             'station','currentStatus',
         ]);
 
-        // If you store the barcode under the public disk, e.g. 'barcodes/XYZ.png'
-        // Adjust to your actual stored path or derive it from $ticket
-        $pngPath = $ticket->barcode_png_path ?? null;           // e.g. 'barcodes/ABC.png'
-        $barcodeDataUri = null;
+        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', compact('ticket'));
+        $pdf->set_option('isRemoteEnabled', true);
+        $pdf->set_option('isHtml5ParserEnabled', true);
 
-        if ($pngPath && Storage::disk('public')->exists($pngPath)) {
-            $bytes = Storage::disk('public')->get($pngPath);
-            $barcodeDataUri = 'data:image/png;base64,'.base64_encode($bytes);
-        }
-
-        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', [
-            'model'           => $ticket,
-            'barcodeDataUri'  => $barcodeDataUri,
-        ]);
-
-        // (Optional) still fine to keep the relaxed SSL ctx
-        $pdf->getDomPDF()->setHttpContext(stream_context_create([
-            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
-        ]));
 
         return $pdf->download('job_ticket_'.$ticket->code.'.pdf');
     }
