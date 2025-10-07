@@ -207,7 +207,7 @@ class JobTicketService extends BaseService
 
     public function downloadPdf(JobTicket $ticket)
     {
-        $ticket->load([
+        $model= $ticket->load([
             'orderItem.order',
             'orderItem.itemable.types',
             'orderItem.orderable',
@@ -215,7 +215,7 @@ class JobTicketService extends BaseService
             'station','currentStatus',
         ]);
 
-        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', compact('ticket'));
+        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', compact('model'));
         $pdf->set_option('isRemoteEnabled', true);
         $pdf->set_option('isHtml5ParserEnabled', true);
 
