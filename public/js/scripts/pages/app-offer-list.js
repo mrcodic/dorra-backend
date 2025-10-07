@@ -244,7 +244,7 @@ $(document).ready(function () {
         }
         const html = items.map(it => `
     <span class="badge rounded-pill bg-light border text-dark me-1 mb-1">
-      ${escapeHtml(it.name)} 
+      ${escapeHtml(it.name)}
     </span>
   `).join('');
         $container.html(html);
