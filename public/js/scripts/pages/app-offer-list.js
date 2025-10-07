@@ -202,6 +202,7 @@ $(document).ready(function () {
 
 // helpers to normalize payloads & render chips
     function toItemsArray(raw) {
+        console.log(raw)
         // Accept JSON string, array of IDs, or array of objects with {id, name}
         if (raw == null) return [];
         if (typeof raw === 'string') {
