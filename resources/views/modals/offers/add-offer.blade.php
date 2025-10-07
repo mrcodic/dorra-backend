@@ -114,12 +114,6 @@
         if (val < 1) $(this).val(1);
     });
 
-    handleAjaxFormSubmit("#addOfferForm",{
-        successMessage: "Offer Created Successfully",
-        onSuccess:function () {
-            location.reload()
-        }
-    })
     $(function () {
 
     // Toggle between products and categories
