@@ -40,13 +40,13 @@
 
                         {{-- Products --}}
                         <div id="showProductsWrap" class="d-none">
-                            <div class="small text-muted mb-1">Products</div>
+                            <div class="small text-muted mb-1">Categories</div>
                             <div id="showProducts" class="d-flex flex-wrap gap-1"></div>
                         </div>
 
                         {{-- Categories --}}
                         <div id="showCategoriesWrap" class="d-none">
-                            <div class="small text-muted mb-1">Categories</div>
+                            <div class="small text-muted mb-1">Products</div>
                             <div id="showCategories" class="d-flex flex-wrap gap-1"></div>
                         </div>
                     </div>
