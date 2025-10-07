@@ -37,12 +37,12 @@
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="type" id="editApplyToProducts" value="1"
                                    checked>
-                            <label class="form-check-label" for="editApplyToProducts">Categories</label>
+                            <label class="form-check-label" for="editApplyToProducts">Products</label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="type" id="editApplyToCategories"
                                    value="2">
-                            <label class="form-check-label" for="editApplyToCategories">Products</label>
+                            <label class="form-check-label" for="editApplyToCategories">Categories</label>
                         </div>
                     </div>
 
