@@ -199,6 +199,7 @@
                     }
 
                     // success UI
+
                     try { document.getElementById('beep-ok').play(); } catch(e){}
                     showAlert(data.message || 'OK', 'success');
                     toastOk(data.message || 'Scan accepted');
