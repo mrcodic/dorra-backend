@@ -156,8 +156,9 @@
                     @if($model->station_id && $model->current_status_id)
                     <div class="col-12">
                         {{-- Code128 --}}
-                        <img src="{{ $model->qr_png_url }}" alt="Code128"
-                            class="img-fluid border rounded p-2 w-100">
+                        <img src="{{ $model->qr_png_url }}"
+                             alt="QR"
+                             style="width:120px; height:auto; border:1px solid #ddd; border-radius:6px; padding:4px;">
                     </div>
                 </div>
                 <div class="row g-1 text-center mt-2">
