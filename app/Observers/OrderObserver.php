@@ -75,11 +75,18 @@ class OrderObserver
 
                 foreach ($tickets as $ticket) {
                     if ($ticket->wasRecentlyCreated) {
+                        // 1D
                         $svc->savePng1D($ticket->code, 'C128', scale: 4, height: 120);
                         $svc->saveSvg1D($ticket->code, 'C128', width: 2, height: 60, withText: true);
+
+                        // 2D (QR) – Change $qrPayload to whatever you want encoded (e.g., URL to the ticket)
+                        $qrPayload = $ticket->code; // or route('tickets.show', $ticket), etc.
+                        $svc->savePngQR($qrPayload, scale: 6);
+                        $svc->saveSvgQR($qrPayload, width: 4, height: 4);
                     }
                 }
             }
+
 
             CreateInvoiceJob::dispatch($order);
         }

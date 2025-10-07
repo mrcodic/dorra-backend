@@ -25,7 +25,7 @@ class OfferService extends BaseService
         $locale = app()->getLocale();
         $offers = $this->repository
             ->query()
-            ->with('categories:id,name' , 'products:id,name')
+            ->with('categories:id,name', 'products:id,name')
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
@@ -42,7 +42,7 @@ class OfferService extends BaseService
         return DataTables::of($offers)
             ->addColumn('name', function ($offer) {
                 return $offer->getTranslation('name', app()->getLocale());
-            })   ->addColumn('name_translate', function ($offer) {
+            })->addColumn('name_translate', function ($offer) {
                 return $offer->getTranslations('name');
             })
             ->editColumn('type', function ($offer) {
@@ -82,20 +82,18 @@ class OfferService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $offer = $this->repository->update($validatedData, $id);
-       if (Arr::get($validatedData,'category_ids'))
-       {
-           $categories = $this->categoryRepository->query()->whereIn('id', Arr::get($validatedData,'category_ids'))->get();
-           collect($categories)->each(function ($category) use ($offer) {
-               $category->offers()->sync($offer->id);
-           });
-       }
-          if (Arr::get($validatedData,'product_ids'))
-          {
-              $products = $this->productRepository->query()->whereIn('id',  Arr::get($validatedData,'product_ids'))->get();
-              collect($products)->each(function ($product) use ($offer) {
-                  $product->offers()->sync($offer->id);
-              });
-          }
+        if (Arr::get($validatedData, 'category_ids')) {
+            $categories = $this->categoryRepository->query()->whereIn('id', Arr::get($validatedData, 'category_ids'))->get();
+            collect($categories)->each(function ($category) use ($offer) {
+                $category->offers()->sync($offer->id);
+            });
+        }
+        if (Arr::get($validatedData, 'product_ids')) {
+            $products = $this->productRepository->query()->whereIn('id', Arr::get($validatedData, 'product_ids'))->get();
+            collect($products)->each(function ($product) use ($offer) {
+                $product->offers()->sync($offer->id);
+            });
+        }
 
     }
 

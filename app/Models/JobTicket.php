@@ -8,7 +8,7 @@ use App\Observers\JobTicketObserver;
 use App\Services\BarcodeService;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo,HasMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 
 #[ObservedBy(JobTicketObserver::class)]
 class JobTicket extends Model
@@ -36,6 +36,7 @@ class JobTicket extends Model
 
     protected $appends = [
         'barcode_png_url', 'barcode_svg_url',
+        'qr_png_url', 'qr_svg_url',
     ];
 
     public function getBarcodePngUrlAttribute(): ?string
@@ -48,6 +49,20 @@ class JobTicket extends Model
     {
         if (!$this->code) return null;
         return app(BarcodeService::class)->saveSvg1D($this->code);
+    }
+
+    public function getQrPngUrlAttribute(): ?string
+    {
+        if (!$this->code) return null;
+        $payload = $this->code;
+        return app(BarcodeService::class)->savePngQR($payload, scale: 6);
+    }
+
+    public function getQrSvgUrlAttribute(): ?string
+    {
+        if (!$this->code) return null;
+        $payload = $this->code;
+        return app(BarcodeService::class)->saveSvgQR($payload, width: 4, height: 4);
     }
 
     public function orderItem(): BelongsTo
