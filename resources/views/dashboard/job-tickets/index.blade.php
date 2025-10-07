@@ -334,7 +334,9 @@
 
                     </div>
                     <div class="col-12 col-md-1">
-                        <a href="{{ route('scan.kiosk') }}" class="btn btn-primary">Scan</a>
+                        <a href="{{ route('scan.kiosk') }}" class="btn btn-primary">
+                            <i data-feather="camera"></i>
+                            <span>Scan</span></a>
 
                     </div>
                 </div>
