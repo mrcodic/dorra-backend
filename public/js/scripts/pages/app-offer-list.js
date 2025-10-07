@@ -202,19 +202,30 @@ $(document).ready(function () {
 
 // helpers to normalize payloads & render chips
     function toItemsArray(raw) {
-        console.log(raw)
-        // Accept JSON string, array of IDs, or array of objects with {id, name}
+        // Accept JSON string, array of IDs, or array of objects with {id, name/title/label}
         if (raw == null) return [];
         if (typeof raw === 'string') {
-            try { raw = JSON.parse(raw); } catch(e){ /* keep as-is */ }
+            try { raw = JSON.parse(raw); } catch (_) { /* keep as-is */ }
         }
         if (!Array.isArray(raw)) return [];
-        return raw.map(it => {
-            if (typeof it === 'object' && it !== null) {
-                return { id: String(it.id ?? it.value ?? it), name: String(it.name ?? it.title ?? `#${it.id ?? it}`) };
+
+        return raw.map((it) => {
+            // normalize id
+            const id = String(
+                (it && (it.id ?? it.value ?? it)) // object or primitive
+            );
+
+            // pick a "name-like" field
+            let name = (it && (it.name ?? it.title ?? it.label ?? null));
+
+            // if name is another object (e.g. {en, ar}), pick a sensible locale/first value
+            if (name && typeof name === 'object') {
+                name = name.en || name.ar || Object.values(name)[0] || `#${id}`;
             }
-            // plain id
-            return { id: String(it), name: `#${it}` };
+
+            if (!name) name = `#${id}`; // fallback
+
+            return { id, name: String(name) };
         });
     }
 
