@@ -66,9 +66,8 @@
         <div class="col-12">
             <div class="border rounded-3 p-2">
                 <div><strong>Last Code:</strong> <span id="last-code">—</span></div>
-                <div><strong>Message:</strong> <span id="last-msg">—</span></div>
-                <div><strong>Count:</strong> <span id="last-count">—</span></div>
                 <div><strong>Station:</strong> <span id="last-station">—</span></div>
+                <div><strong>Status:</strong> <span id="last-status">—</span></div>
             </div>
         </div>
     </div>
@@ -123,9 +122,8 @@
             // -------- Status / result UI --------
             const status   = document.getElementById('status');
             const lastCodeEl = document.getElementById('last-code');
-            const lastMsgEl  = document.getElementById('last-msg');
-            const lastCntEl  = document.getElementById('last-count');
             const lastStnEl  = document.getElementById('last-station');
+            const lastStatusEl  = document.getElementById('last-status');
             const token   = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             // -------- Camera controls --------
@@ -206,9 +204,8 @@
                     toastOk(data.message || 'Scan accepted');
 
                     lastCodeEl.textContent = data.code ?? code;
-                    lastMsgEl.textContent  = data.message ?? 'OK';
-                    lastCntEl.textContent  = data.scan_count ?? '—';
-                    lastStnEl.textContent  = (data.from_station ?? '—') + ' ➜ ' + (data.to_station ?? '—');
+                    lastStnEl.textContent  = (data.to_station ?? '—');
+                    lastStatusEl.textContent  = (data.to_status ?? '—');
 
                 } catch (err) {
                     try { document.getElementById('beep-ng').play(); } catch(e){}
