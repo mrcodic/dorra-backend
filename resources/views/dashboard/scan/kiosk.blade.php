@@ -203,9 +203,9 @@
                     showAlert(data.message || 'OK', 'success');
                     toastOk(data.message || 'Scan accepted');
 
-                    lastCodeEl.textContent = data.code ?? code;
-                    lastStnEl.textContent  = (data.to_station ?? '—');
-                    lastStatusEl.textContent  = (data.to_status ?? '—');
+                    lastCodeEl.textContent  = data.code ?? code;
+                    lastStnEl.textContent   = data.to_station ?? '—';
+                    lastStatusEl.textContent= data.to_status  ?? '—';
 
                 } catch (err) {
                     try { document.getElementById('beep-ng').play(); } catch(e){}
