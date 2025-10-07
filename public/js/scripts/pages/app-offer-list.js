@@ -225,7 +225,7 @@ $(document).ready(function () {
         }
         const html = items.map(it =>
             `<span class="badge rounded-pill bg-light border text-dark me-1 mb-1">
-       ${_.escape(it.name)} <small class="text-muted">#${_.escape(it.id)}</small>
+       ${_.escape(it.name.en)} <small class="text-muted">#${_.escape(it.id)}</small>
      </span>`
         ).join('');
         $container.html(html);
