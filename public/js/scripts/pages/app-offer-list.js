@@ -244,7 +244,8 @@ $(document).ready(function () {
         const end    = toDateForInput($btn.data('end_at'));
 
         // normalize products/categories array from data-* (use attr to avoid jQuery caching)
-        const products   = toItemsArray($btn.attr('data-products'));
+            const products   = toItemsArray($btn.attr('data-products'));
+        console.log($btn.attr('data-products'),products)
         const categories = toItemsArray($btn.attr('data-categories'));
 
         // fill
