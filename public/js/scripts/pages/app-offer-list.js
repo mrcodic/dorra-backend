@@ -219,6 +219,7 @@ $(document).ready(function () {
     }
 
     function renderChips($container, items) {
+        console.log(items)
         if (!items.length) {
             $container.html('<span class="text-muted">— none —</span>');
             return;
