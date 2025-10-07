@@ -158,7 +158,7 @@
                         {{-- Code128 --}}
                         <img src="{{ $model->qr_png_url }}"
                              alt="QR"
-                             style="width:120px; height:auto; border:1px solid #ddd; border-radius:6px; padding:4px;">
+                             style="width:200px; height:auto; border:1px solid #ddd; border-radius:6px; padding:4px;">
                     </div>
                 </div>
                 <div class="row g-1 text-center mt-2">
