@@ -348,14 +348,15 @@
                                 <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                             </th>
                             <th>Image</th>
-                            <th>Job Number</th>
+                            <th>Item Id</th>
+                            <th>Item Name</th>
+                            <th>Item Quantity</th>
+                            <th>Order Number</th>
                             <th>Priority</th>
                             <th>Current Station</th>
                             <th>Status</th>
                             <th>Due Date</th>
-                            <th>Order Number</th>
-                            <th>Item Name</th>
-                            <th>Item Id</th>
+
 
                             <th>Actions</th>
                         </tr>

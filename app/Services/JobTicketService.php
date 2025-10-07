@@ -71,6 +71,7 @@ class JobTicketService extends BaseService
             ->addColumn('current_station', fn($job) => $job->station?->name ?? '-')
             ->addColumn('order_number', fn($job) => $job->orderItem->order->order_number ?? '-')
             ->addColumn('order_item_name', fn($job) => $job->orderItem->orderable?->name ?? '-')
+            ->addColumn('order_item_quantity', fn($job) => $job->orderItem?->quantity ?? '-')
             ->addColumn('order_item_id', fn($job) => $job->orderItem?->id ?? '-')
             ->addColumn('order_item_image', fn($job) => $job->orderItem->itemable->getFrontImageUrl())
             ->make(true);
