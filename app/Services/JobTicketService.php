@@ -31,7 +31,7 @@ class JobTicketService extends BaseService
                 $search = request('search_value');
                 hasMeaningfulSearch($search)
                     ? $q->where(function ($q) use ($search) {
-                        $q->where('name', 'like', '%' . $search . '%')
+                        $q->where('code', 'like', '%' . $search . '%')
                             ->orWhereHas('orderItem', function ($q) use ($search) {
                                 $q->where('id',$search);
                             })->orWhereHas('orderItem', function ($q) use ($search) {
