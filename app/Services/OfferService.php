@@ -79,22 +79,38 @@ class OfferService extends BaseService
         return $offer;
     }
 
+    use Illuminate\Support\Arr;
+
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+
         $offer = $this->repository->update($validatedData, $id);
-        if (Arr::get($validatedData, 'category_ids')) {
-            $categories = $this->categoryRepository->query()->whereIn('id', Arr::get($validatedData, 'category_ids'))->get();
-            collect($categories)->each(function ($category) use ($offer) {
-                $category->offers()->sync($offer->id);
-            });
+
+        $type         = (int) Arr::get($validatedData, 'type', 0);
+        $categoryIds  = Arr::get($validatedData, 'category_ids', null);
+        $productIds   = Arr::get($validatedData, 'product_ids', null);
+
+        $categoryIds = is_array($categoryIds) ? $categoryIds : ($categoryIds === null ? null : (array) $categoryIds);
+        $productIds  = is_array($productIds)  ? $productIds  : ($productIds  === null ? null : (array) $productIds);
+
+        if ($type === 1) {
+
+            $offer->categories()->sync($categoryIds ?? []);
+            $offer->products()->sync([]);
+        } elseif ($type === 2) {
+
+            $offer->products()->sync($productIds ?? []);
+            $offer->categories()->sync([]);
+        } else {
+            $offer->categories()->sync([]);
+            $offer->products()->sync([]);
         }
-        if (Arr::get($validatedData, 'product_ids')) {
-            $products = $this->productRepository->query()->whereIn('id', Arr::get($validatedData, 'product_ids'))->get();
-            collect($products)->each(function ($product) use ($offer) {
-                $product->offers()->sync($offer->id);
-            });
+        if (!empty($relationsToLoad)) {
+            $offer->load($relationsToLoad);
         }
 
+        return $offer;
     }
+
 
 }
