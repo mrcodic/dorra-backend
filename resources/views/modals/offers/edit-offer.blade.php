@@ -105,7 +105,7 @@
             if (v === 2) { // Products
                 $('.productsField').removeClass('d-none');
                 $('.categoriesField').addClass('d-none');
-                $('#editCategoriesSelect').val(null).trigger('change');
+
             } else if (v === 1) { // Categories
                 $('.categoriesField').removeClass('d-none');
                 $('.productsField').addClass('d-none');

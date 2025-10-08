@@ -128,7 +128,6 @@
             // Categories
             $('.addCategoriesField').removeClass('d-none');
             $('.productsField').addClass('d-none');
-            $('.productsSelect').val(null).trigger('change');
         } else {
             // General
             $('.productsField, .addCategoriesField').addClass('d-none');
