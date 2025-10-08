@@ -201,33 +201,46 @@ $(document).ready(function () {
     }
 
 // helpers to normalize payloads & render chips
-    function toItemsArray(raw) {
-        // Accept JSON string, array of IDs, or array of objects with {id, name/title/label}
-        if (raw == null) return [];
-        if (typeof raw === 'string') {
-            try { raw = JSON.parse(raw); } catch (_) { /* keep as-is */ }
+// --- 1) unescape HTML entities (عكس escapeHtml) ---
+    function unescapeHtml(s) {
+        return String(s)
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&amp;/g, "&");
+    }
+
+// --- 2) parse آمن لأي قيمة ممكن تكون JSON أو لا ---
+    function parseMaybeJson(raw) {
+        if (raw == null) return null;
+        if (typeof raw !== "string") return raw;
+        const s = unescapeHtml(raw).trim();
+        if (!s) return null;
+        // بس جرّب الـ JSON لو شكله مصفوفة/كائن
+        if (s.startsWith("[") || s.startsWith("{")) {
+            try { return JSON.parse(s); } catch (_) { /* ignore */ }
         }
+        return raw;
+    }
+
+// --- 3) toItemsArray (تستخدم parseMaybeJson) ---
+    function toItemsArray(raw) {
+        raw = parseMaybeJson(raw);
         if (!Array.isArray(raw)) return [];
 
         return raw.map((it) => {
-            // normalize id
-            const id = String(
-                (it && (it.id ?? it.value ?? it)) // object or primitive
-            );
+            const id = String(it && (it.id ?? it.value ?? it));
+            let name = it && (it.name ?? it.title ?? it.label ?? null);
 
-            // pick a "name-like" field
-            let name = (it && (it.name ?? it.title ?? it.label ?? null));
-
-            // if name is another object (e.g. {en, ar}), pick a sensible locale/first value
-            if (name && typeof name === 'object') {
+            if (name && typeof name === "object") {
                 name = name.en || name.ar || Object.values(name)[0] || `#${id}`;
             }
-
-            if (!name) name = `#${id}`; // fallback
-
+            if (!name) name = `#${id}`;
             return { id, name: String(name) };
         });
     }
+
     function escapeHtml(s) {
         return String(s)
             .replace(/&/g, "&amp;")
@@ -238,6 +251,7 @@ $(document).ready(function () {
     }
 
     function renderChips($container, items) {
+        if (!$container.length) return; // لو العنصر مش موجود
         if (!items || !items.length) {
             $container.html('<span class="text-muted">— none —</span>');
             return;
@@ -250,43 +264,45 @@ $(document).ready(function () {
         $container.html(html);
     }
 
-
+// --- 4) Handler واحد فقط (احذف التكرار القديم) ---
     $(document).on('click', '.view-details', function (e) {
         e.preventDefault();
         const $btn = $(this);
         const $m = $('#showOfferModal');
 
-        // existing fields...
-        const name   = $btn.data('name') ?? '';
-        const value  = $btn.data('value') ?? '';
-        const type   = String($btn.data('type') ?? '').toLowerCase(); // '1'/'2'/'products'/'categories'
-        const start  = toDateForInput($btn.data('start_at'));
-        const end    = toDateForInput($btn.data('end_at'));
+        const name  = $btn.attr('data-name')  ?? $btn.data('name')  ?? '';
+        const value = $btn.attr('data-value') ?? $btn.data('value') ?? '';
+        const type  = String($btn.attr('data-type') ?? $btn.data('type') ?? '').toLowerCase();
+        const start = toDateForInput($btn.attr('data-start_at') ?? $btn.data('start_at'));
+        const end   = toDateForInput($btn.attr('data-end_at')   ?? $btn.data('end_at'));
 
-        // normalize products/categories array from data-* (use attr to avoid jQuery caching)
-            const products   = toItemsArray($btn.attr('data-products'));
-        console.log($btn.attr('data-products'),products)
-        const categories = toItemsArray($btn.attr('data-categories'));
+        // IMPORTANT: استخدم attr + unescape/parse
+        const productsRaw   = $btn.attr('data-products')   ?? $btn.data('products');
+        const categoriesRaw = $btn.attr('data-categories') ?? $btn.data('categories');
 
-        // fill
+        const products   = toItemsArray(productsRaw);
+        const categories = toItemsArray(categoriesRaw);
+
+        // تعبئة الحقول
         $m.find('#showOfferName').val(name);
         $m.find('#showOfferValue').val(value);
         $m.find('#showStartDate').val(start);
         $m.find('#showEndDate').val(end);
 
-        const isProducts   = (type === '1' || type === 'products' || type === 'product');
+        const isProducts   = (type === '1' || type === 'products'   || type === 'product');
         const isCategories = (type === '2' || type === 'categories' || type === 'category');
 
-        // set radios
         $m.find('#showApplyToProducts').prop('checked', isProducts);
         $m.find('#showApplyToCategories').prop('checked', isCategories);
 
-        // show/hide sections + render chips
         $m.find('#showProductsWrap').toggleClass('d-none', !isProducts);
         $m.find('#showCategoriesWrap').toggleClass('d-none', !isCategories);
 
         renderChips($m.find('#showProducts'), products);
         renderChips($m.find('#showCategories'), categories);
+
+        // Debug لو لسه فاضي
+        // console.log({ productsRaw, products, categoriesRaw, categories, type });
 
         $m.modal('show');
     });
