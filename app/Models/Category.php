@@ -133,7 +133,38 @@ class Category extends Model implements HasMedia
     }
     public function lastOffer(): BelongsTo
     {
-        return $this->offers()->lat;
+        return $this->belongsTo(Offer::class, 'last_offer_id');
+    }
+
+
+    public function scopeWithLastOfferId(Builder $q): Builder
+    {
+        $offerables = 'offerables';
+        $offers     = 'offers';
+        $table      = $this->getTable();
+
+
+        $morphType  = $this->getMorphClass();
+
+
+        if (empty($q->getQuery()->columns)) {
+            $q->select("$table.*");
+        }
+
+        return $q->addSelect([
+            'last_offer_id' => DB::table($offerables)
+                ->join($offers, "$offers.id", '=', "$offerables.offer_id")
+                ->select("$offers.id")
+                ->whereColumn("$offerables.offerable_id", "$table.id")
+                ->where("$offerables.offerable_type", $morphType)
+                ->where(function ($qq) use ($offers) {
+                    $qq->whereNull("$offers.end_at")
+                        ->orWhere("$offers.end_at", '>=', now());
+                })
+
+                ->orderByDesc("$offerables.id")
+                ->limit(1),
+        ]);
     }
 
     protected function rating(): Attribute

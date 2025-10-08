@@ -204,20 +204,17 @@ class Product extends Model implements HasMedia
         return $this->belongsTo(Offer::class, 'last_offer_id');
     }
 
-    /**
-     * Adds `last_offer_id` for the *latest* valid offer.
-     * “Valid” here = `end_at` is NULL or in the future (adjust as needed).
-     */
+
     public function scopeWithLastOfferId(Builder $q): Builder
     {
         $offerables = 'offerables';
         $offers     = 'offers';
         $table      = $this->getTable();
 
-        // IMPORTANT: use morph class, not static::class
+
         $morphType  = $this->getMorphClass();
 
-        // Ensure base columns are selected (in case the query already had a select)
+
         if (empty($q->getQuery()->columns)) {
             $q->select("$table.*");
         }
@@ -228,12 +225,11 @@ class Product extends Model implements HasMedia
                 ->select("$offers.id")
                 ->whereColumn("$offerables.offerable_id", "$table.id")
                 ->where("$offerables.offerable_type", $morphType)
-                // Validity filter — remove this block if you want any last offer regardless of end date
                 ->where(function ($qq) use ($offers) {
                     $qq->whereNull("$offers.end_at")
                         ->orWhere("$offers.end_at", '>=', now());
                 })
-                // Order by pivot recency; fallback to pivot id if no timestamps on pivot
+
                 ->orderByDesc("$offerables.id")
                 ->limit(1),
         ]);
