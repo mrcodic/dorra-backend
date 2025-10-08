@@ -34,7 +34,7 @@
                 <i data-feather="arrow-left" class="me-25"></i> Back
             </a>
             <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
-                <i data-feather="download" class="me-25"></i> Download
+                <i data-feather="print" class="me-25"></i> Print
             </button>
         </div>
     </div>
@@ -252,12 +252,22 @@
 <script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
+{{--<script>--}}
+{{--    document.addEventListener('DOMContentLoaded', () => {--}}
+{{--        document.getElementById('printTicketBtn')?.addEventListener('click', () => {--}}
+{{--            window.open("{{ route('job-tickets.pdf', $model->id) }}", "_blank");--}}
+{{--        });--}}
+{{--    });--}}
+{{--</script>--}}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('printTicketBtn')?.addEventListener('click', () => {
-            window.open("{{ route('job-tickets.pdf', $model->id) }}", "_blank");
+        const btn = document.getElementById('printTicketBtn');
+        if (!btn) return;
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.print();
         });
     });
 </script>
-
 @endsection
