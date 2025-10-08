@@ -484,12 +484,10 @@
                     // Products
                     $m.find('.productsField').removeClass('d-none');
                     $m.find('.categoriesField').addClass('d-none');
-                    $m.find('#editCategoriesSelect').val(null).trigger('change');
                 } else if (v === 1) {
                     // Categories
                     $m.find('.categoriesField').removeClass('d-none');
                     $m.find('.productsField').addClass('d-none');
-                    $m.find('#editProductsSelect').val(null).trigger('change');
                 }
             });
 
@@ -513,12 +511,10 @@
                     // Products
                     $m.find('.addProductsField').removeClass('d-none');
                     $m.find('.addCategoriesField').addClass('d-none');
-                    $m.find('.add-categories-select').val(null).trigger('change');
                 } else if (v === 1) {
                     // Categories
                     $m.find('.addCategoriesField').removeClass('d-none');
                     $m.find('.addProductsField').addClass('d-none');
-                    $m.find('.add-products-select').val(null).trigger('change');
                 }
             });
 
