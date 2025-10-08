@@ -333,7 +333,7 @@ $(document).ready(function () {
                 $select.append(new Option(`#${id}`, id, false, false)); // temp label if missing
             }
         });
-        $select.val(ids).trigger('change'); // Select2 refresh
+        
     }
 
     $(document).on('click', '.edit-details', function (e) {
