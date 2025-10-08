@@ -412,6 +412,7 @@
                                                 <div class="outer-repeater">
                                                     <div class="{{ $hasSpecs ? '' :'d-none' }}" data-repeater-list="specifications">
                                                         @forelse($model->specifications as $specification)
+                                                            <input type="hidden" name="id" value="{{ $specification->id }}">
                                                             <div data-repeater-item>
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
