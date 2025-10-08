@@ -45,12 +45,12 @@
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Type</label>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="type" id="applyToProducts" value="1"
+                            <input class="form-check-input" type="radio" name="type" id="applyToProducts" value="2"
                                    checked>
                             <label class="form-check-label text-black fs-16" for="applyToProducts">Products</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="type" id="applyToCategories" value="2">
+                            <input class="form-check-input" type="radio" name="type" id="applyToCategories" value="1">
                             <label class="form-check-label text-black fs-16" for="applyToCategories">Categories</label>
                         </div>
                     </div>
@@ -120,12 +120,12 @@
     $('input[name="type"]').on('change', function () {
         const type = parseInt(this.value);
 
-        if (type === 1) {
+        if (type === 2) {
             // Products
             $('.productsField').removeClass('d-none');
             $('.addCategoriesField').addClass('d-none');
             $('.categoriesSelect').val(null).trigger('change');
-        } else if (type === 2) {
+        } else if (type === 1) {
             // Categories
             $('.addCategoriesField').removeClass('d-none');
             $('.productsField').addClass('d-none');
