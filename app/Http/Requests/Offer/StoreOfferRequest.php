@@ -54,4 +54,12 @@ class StoreOfferRequest extends BaseRequest
         ];
     }
 
+    public function attributes(): array
+    {
+        return [
+            'start_at' => 'Start date',
+            'end_at' => 'End date',
+        ];
+    }
+
 }

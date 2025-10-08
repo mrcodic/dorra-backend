@@ -55,4 +55,11 @@ class UpdateOfferRequest extends BaseRequest
             'category_ids.*.exists' => 'One or more selected categories are invalid.',
         ];
     }
+    public function attributes(): array
+    {
+        return [
+            'start_at' => 'Start date',
+            'end_at' => 'End date',
+        ];
+    }
 }
