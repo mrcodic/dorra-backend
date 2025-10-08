@@ -436,6 +436,8 @@
                                                                             @foreach($specification->options as $option)
                                                                                 <div data-repeater-item>
                                                                                     <div class="row d-flex flex-column flex-md-row gap-1 gap-md-0 mt-2">
+                                                                                        <input type="hidden" name="id" value="{{ $option->id }}">
+
                                                                                         <!-- Option Name (EN) -->
                                                                                         <div class="col">
                                                                                             <label class="form-label label-text">Value (EN)</label>
