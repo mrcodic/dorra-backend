@@ -196,7 +196,8 @@ class Product extends Model implements HasMedia
     }
     public function offers(): MorphToMany
     {
-        return $this->morphToMany(Offer::class, 'offerable')->withTimestamps();
+        return $this->morphToMany(Offer::class, 'offerable')
+            ->withTimestamps();
     }
     /**
      * Computed FK via subquery → usable as a real relation.
