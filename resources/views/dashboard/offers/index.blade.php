@@ -46,7 +46,7 @@
                 transition: background-color 0.2s ease;
             }
 
-            /* Add expand indicator to the role column */
+            /* Add expand indicator to the first column */
             .offer-list-table tbody tr:not(.details-row) td:nth-child(1) {
                 position: relative;
                 padding-left: 20px !important;
@@ -79,13 +79,8 @@
             }
 
             @keyframes slideDown {
-                from {
-                    opacity: 0;
-                }
-
-                to {
-                    opacity: 1;
-                }
+                from { opacity: 0; }
+                to   { opacity: 1; }
             }
 
             .detail-row {
@@ -115,13 +110,8 @@
 
         /* Ensure normal behavior on desktop */
         @media (min-width: 769px) {
-            .details-row {
-                display: none !important;
-            }
-
-            .expand-icon {
-                display: none !important;
-            }
+            .details-row { display: none !important; }
+            .expand-icon { display: none !important; }
         }
     </style>
 @endsection
@@ -143,7 +133,7 @@
             <div class="card-datatable table-responsive pt-0">
                 <div class="row gx-2 gy-2 align-items-center px-1">
 
-                    {{-- Search Input - 70% on md+, full width on xs --}}
+                    {{-- Search Input --}}
                     <div class="col-12 col-md-6">
                         <form action="" method="get" class="position-relative search-form">
                             <i data-feather="search"
@@ -159,19 +149,18 @@
                         </form>
                     </div>
 
-                    {{-- Filter Select - 10% on md+, half width on sm --}}
+                    {{-- Filter Select --}}
                     <div class="col-12 col-md-3">
-                        <select name="created_at" class="form-select filter-type" name="type">
+                        <select class="form-select filter-type" name="type">
                             <option value="" selected disabled>Type</option>
                             <option value="">All</option>
                             @foreach(\App\Enums\Offer\TypeEnum::cases() as $type)
                                 <option value="{{ $type }}">{{ $type->label() }}</option>
                             @endforeach
-
                         </select>
                     </div>
 
-                    {{-- Add Button - 20% on md+, full width on xs --}}
+                    {{-- Add Button --}}
                     <div class="col-12 col-md-3 text-md-end">
                         <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
                            data-bs-target="#addOfferModal">
@@ -181,7 +170,6 @@
                     </div>
 
                 </div>
-
 
                 <table class="offer-list-table table">
                     <thead class="table-light">
@@ -198,6 +186,7 @@
                     </tr>
                     </thead>
                 </table>
+
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display:none;">
                     <div class="delete-container d-flex align-items-center gap-2">
                         <p id="selected-count-text" class="m-0">0 Offers are selected</p>
@@ -216,31 +205,26 @@
                         </form>
                     </div>
                 </div>
-
-
             </div>
 
+            {{-- Modals --}}
             @include('modals.offers.show-offer')
             @include('modals.offers.add-offer')
             @include('modals.offers.edit-offer')
 
-
-
-
             @include('modals.delete',[
-            'id' => 'deleteOfferModal',
-            'formId' => 'deleteOfferForm',
-            'title' => 'Delete Offer',
+                'id' => 'deleteOfferModal',
+                'formId' => 'deleteOfferForm',
+                'title' => 'Delete Offer',
             ])
+
             @include('modals.delete', [
-            'id' => 'deleteOffersModal',
-            'formId' => 'bulk-delete-form',
-            'buttonId' => 'confirm-bulk-delete',
-            'title' => 'Delete Offers',
-            'confirmText' => 'Are you sure you want to delete these items?',
+                'id' => 'deleteOffersModal',
+                'formId' => 'bulk-delete-form',
+                'buttonId' => 'confirm-bulk-delete',
+                'title' => 'Delete Offers',
+                'confirmText' => 'Are you sure you want to delete these items?',
             ])
-
-
 
         </div>
         <!-- list and filter end -->
@@ -269,13 +253,17 @@
 
 @section('page-script')
     <script>
-        const offersDataUrl = "{{ route('offers.data') }}";
+        const offersDataUrl   = "{{ route('offers.data') }}";
         const offersCreateUrl = "{{ route('offers.create') }}";
-        const locale = "{{ app()->getLocale() }}";
+        const locale          = "{{ app()->getLocale() }}";
     </script>
+
     <script>
         $(document).ready(function () {
-            setupClearInput('roleSelect', 'clearRoleFilter');
+            // Clear search input
+            $('#clear-search').on('click', function () {
+                $('#search-offer-form').val('').trigger('input');
+            });
 
             // Select all toggle
             $('#select-all-checkbox').on('change', function () {
@@ -293,35 +281,33 @@
                 updateBulkDeleteVisibility();
             });
 
-            // Simple accordion toggle function
+            // Simple accordion toggle function (mobile only)
             function toggleAccordion($row) {
-                if ($(window).width() > 768) return; // Only on mobile
-
+                if ($(window).width() > 768) return;
                 const $detailsRow = $row.next('.details-row');
                 const $icon = $row.find('.expand-icon');
 
-                // Close all other details
+                // Close all others
                 $('.details-row.show').removeClass('show');
                 $('.expand-icon.expanded').removeClass('expanded');
 
-                // If this row has details and they're not currently shown
                 if ($detailsRow.length && !$detailsRow.hasClass('show')) {
                     $detailsRow.addClass('show');
                     $icon.addClass('expanded');
                 }
             }
 
-            // Accordion click handler with event delegation
-            $(document).on('click.accordion', '.offer-list-table tbody tr:not(.details-row)', function(e) {
-                // Prevent accordion when clicking interactive elements
-                if ($(e.target).is('input, button, a, .btn') ||
-                    $(e.target).closest('input, button, a, .btn').length > 0) {
-                    return;
-                }
-
-                e.stopPropagation();
-                toggleAccordion($(this));
-            });
+            // Accordion click handler (single namespace)
+            $(document).off('click.accordion')
+                .on('click.accordion', '.offer-list-table tbody tr:not(.details-row)', function(e) {
+                    // Prevent accordion when clicking interactive elements
+                    if ($(e.target).is('input, button, a, .btn') ||
+                        $(e.target).closest('input, button, a, .btn').length > 0) {
+                        return;
+                    }
+                    e.stopPropagation();
+                    toggleAccordion($(this));
+                });
 
             // Initialize accordion after DataTable draw
             function initAccordion() {
@@ -333,41 +319,40 @@
                         $row.find('.expand-icon').remove();
                         $row.next('.details-row').remove();
 
-                        // Add expand icon to role column
+                        // Add expand icon to first column
                         $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                         // Get data for details
-                        const value = $row.find('td:nth-child(4)').html() || '';
+                        const value     = $row.find('td:nth-child(4)').html() || '';
                         const startDate = $row.find('td:nth-child(5)').html() || '';
-                        const endDate = $row.find('td:nth-child(6)').html() || '';
-                        const actions = $row.find('td:nth-child(7)').html() || '';
+                        const endDate   = $row.find('td:nth-child(6)').html() || '';
+                        const actions   = $row.find('td:nth-child(7)').html() || '';
 
                         // Create details row
                         const detailsHtml = `
-                    <tr class="details-row">
-                        <td colspan="4">
-                            <div class="details-content">
-                                <div class="detail-row">
-                                    <span class="detail-label">Value:</span>
-                                    <span class="detail-value">${value}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Start Date:</span>
-                                    <span class="detail-value">${startDate}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">End Date:</span>
-                                    <span class="detail-value">${endDate}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Actions:</span>
-                                    <span class="detail-value">${actions}</span>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-
+                            <tr class="details-row">
+                                <td colspan="4">
+                                    <div class="details-content">
+                                        <div class="detail-row">
+                                            <span class="detail-label">Value:</span>
+                                            <span class="detail-value">${value}</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">Start Date:</span>
+                                            <span class="detail-value">${startDate}</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">End Date:</span>
+                                            <span class="detail-value">${endDate}</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">Actions:</span>
+                                            <span class="detail-value">${actions}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
                         $row.after(detailsHtml);
                     });
                 } else {
@@ -386,8 +371,6 @@
             $(document).on('draw.dt', '.offer-list-table', function () {
                 $('#bulk-delete-container').hide();
                 $('#select-all-checkbox').prop('checked', false);
-
-                // Reinitialize accordion after DataTable operations
                 setTimeout(initAccordion, 100);
             });
 
@@ -404,7 +387,7 @@
                 const count = selectedCheckboxes.length;
 
                 if (count > 0) {
-                    $('#selected-count-text').text(`${count} Admin${count > 1 ? 's are' : ' is'} selected`);
+                    $('#selected-count-text').text(`${count} Offer${count > 1 ? 's' : ''} selected`);
                     $('#bulk-delete-container').show();
                 } else {
                     $('#bulk-delete-container').hide();
@@ -412,51 +395,12 @@
             }
 
             // Initialize on page load
-            setTimeout(function() {
-                initAccordion();
-            }, 500);
+            setTimeout(initAccordion, 500);
         });
     </script>
 
     <script>
-        // Backup accordion handler in case the main one doesn't work
-        $(document).ready(function() {
-            // Alternative click handler
-            $(document).off('click.accordion').on('click.accordion', '.offer-list-table tbody tr:not(.details-row)', function(e) {
-                console.log('Accordion clicked'); // Debug log
-
-                if ($(window).width() <= 768) {
-                    // Skip if clicking on interactive elements
-                    if ($(e.target).is('input, button, a') || $(e.target).closest('input, button, a').length) {
-                        return;
-                    }
-
-                    const $currentRow = $(this);
-                    const $detailsRow = $currentRow.next('.details-row');
-                    const $icon = $currentRow.find('.expand-icon');
-
-                    // Toggle logic
-                    if ($detailsRow.hasClass('show')) {
-                        // Close this one
-                        $detailsRow.removeClass('show');
-                        $icon.removeClass('expanded');
-                    } else {
-                        // Close all others first
-                        $('.details-row.show').removeClass('show');
-                        $('.expand-icon.expanded').removeClass('expanded');
-
-                        // Open this one
-                        $detailsRow.addClass('show');
-                        $icon.addClass('expanded');
-                    }
-                }
-            });
-        });
-    </script>
-
-
-    <script>
-        // Common: clamp percent inputs
+        // Clamp percent inputs
         $(document).on('input', '#createDiscountValue, #editOfferValue', function () {
             let v = parseInt($(this).val(), 10);
             if (isNaN(v)) v = '';
@@ -464,63 +408,87 @@
             $(this).val(v);
         });
 
+        /** ========== Select2 + Modal Type Toggle (with silent init) ========== */
+
+        // Helper: init select2 inside modal once
+        function initModalSelect2($m) {
+            $m.find('.select2').each(function () {
+                if (!$(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2({ dropdownParent: $m });
+                }
+            });
+        }
+
+        // Generic handler that accepts {silent:true} to avoid clearing values on init
+        function bindTypeToggle($m, optsSelects) {
+            // optsSelects = { productsFieldSel, categoriesFieldSel, productsSelectSel, categoriesSelectSel }
+            const {
+                productsFieldSel, categoriesFieldSel,
+                productsSelectSel, categoriesSelectSel
+            } = optsSelects;
+
+            // change handler (accepts e, [opts])
+            $m.on('change', 'input[name="type"]', function (e, opts = {}) {
+                const silent = !!opts.silent;
+                const v = parseInt(this.value, 10);
+
+                if (v === 2) {
+                    // Products
+                    $m.find(productsFieldSel).removeClass('d-none');
+                    $m.find(categoriesFieldSel).addClass('d-none');
+                    if (!silent) {
+                        $m.find(categoriesSelectSel).val(null).trigger('change'); // clear only when user changes
+                    }
+                } else if (v === 1) {
+                    // Categories
+                    $m.find(categoriesFieldSel).removeClass('d-none');
+                    $m.find(productsFieldSel).addClass('d-none');
+                    if (!silent) {
+                        $m.find(productsSelectSel).val(null).trigger('change'); // clear only when user changes
+                    }
+                }
+            });
+        }
+
         // ---- EDIT MODAL ----
         $('#editOfferModal')
             .on('shown.bs.modal', function () {
                 const $m = $(this);
-                // Init only selects inside this modal
-                $m.find('.select2').each(function () {
-                    if (!$(this).hasClass('select2-hidden-accessible')) {
-                        $(this).select2({ dropdownParent: $m });
-                    }
-                });
-                // Ensure correct section visibility on open
-                $m.find('input[name="type"]:checked').trigger('change');
-            })
-            .on('change', 'input[name="type"]', function () {
-                const $m = $('#editOfferModal');
-                const v = parseInt(this.value, 10);
-                if (v === 2) {
-                    // Products
-                    $m.find('.productsField').removeClass('d-none');
-                    $m.find('.categoriesField').addClass('d-none');
-                    $m.find('#editCategoriesSelect').val(null).trigger('change');
-                } else if (v === 1) {
-                    // Categories
-                    $m.find('.categoriesField').removeClass('d-none');
-                    $m.find('.productsField').addClass('d-none');
-                    $m.find('#editProductsSelect').val(null).trigger('change');
+                initModalSelect2($m);
+
+                // Ensure correct section visibility on open without clearing values
+                const $checked = $m.find('input[name="type"]:checked');
+                if ($checked.length) {
+                    $checked.trigger('change', [{ silent: true }]);
                 }
             });
+
+        bindTypeToggle($('#editOfferModal'), {
+            productsFieldSel: '.productsField',
+            categoriesFieldSel: '.categoriesField',
+            productsSelectSel:  '#editProductsSelect',
+            categoriesSelectSel:'#editCategoriesSelect'
+        });
 
         // ---- ADD MODAL ----
         $('#addOfferModal')
             .on('shown.bs.modal', function () {
                 const $m = $(this);
-                // Init only selects inside this modal
-                $m.find('.select2').each(function () {
-                    if (!$(this).hasClass('select2-hidden-accessible')) {
-                        $(this).select2({ dropdownParent: $m });
-                    }
-                });
-                // Ensure correct section visibility on open
-                $m.find('input[name="type"]:checked').trigger('change');
-            })
-            .on('change', 'input[name="type"]', function () {
-                const $m = $('#addOfferModal');
-                const v = parseInt(this.value, 10);
-                if (v === 2) {
-                    // Products
-                    $m.find('.addProductsField').removeClass('d-none');
-                    $m.find('.addCategoriesField').addClass('d-none');
-                    $m.find('.add-categories-select').val(null).trigger('change');
-                } else if (v === 1) {
-                    // Categories
-                    $m.find('.addCategoriesField').removeClass('d-none');
-                    $m.find('.addProductsField').addClass('d-none');
-                    $m.find('.add-products-select').val(null).trigger('change');
+                initModalSelect2($m);
+
+                // Ensure correct section visibility on open without clearing values
+                const $checked = $m.find('input[name="type"]:checked');
+                if ($checked.length) {
+                    $checked.trigger('change', [{ silent: true }]);
                 }
             });
+
+        bindTypeToggle($('#addOfferModal'), {
+            productsFieldSel: '.addProductsField',
+            categoriesFieldSel: '.addCategoriesField',
+            productsSelectSel:  '.add-products-select',
+            categoriesSelectSel:'.add-categories-select'
+        });
 
         // Keep your form handlers
         handleAjaxFormSubmit("#addOfferForm", {
@@ -536,7 +504,7 @@
 
     <script>
         $(document).ready(function () {
-            // Select all toggle
+            // Select all toggle (secondary block for safety if DT redraws)
             $('#select-all-checkbox').on('change', function () {
                 $('.category-checkbox').prop('checked', this.checked);
                 updateBulkDeleteVisibility();
@@ -544,7 +512,6 @@
 
             // When individual checkbox changes
             $(document).on('change', '.category-checkbox', function () {
-                // If any is unchecked, uncheck "Select All"
                 if (!this.checked) {
                     $('#select-all-checkbox').prop('checked', false);
                 } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
@@ -552,7 +519,6 @@
                 }
                 updateBulkDeleteVisibility();
             });
-
 
             // On table redraw (e.g. pagination, search)
             $(document).on('draw.dt', function () {
@@ -573,14 +539,12 @@
                 const count = selectedCheckboxes.length;
 
                 if (count > 0) {
-                    $('#selected-count-text').text(`${count} Offer${count > 1  ? 's' : ''} are selected`);
+                    $('#selected-count-text').text(`${count} Offer${count > 1  ? 's' : ''} selected`);
                     $('#bulk-delete-container').show();
                 } else {
                     $('#bulk-delete-container').hide();
                 }
             }
-
-
         });
     </script>
 
