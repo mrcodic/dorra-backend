@@ -26,11 +26,11 @@
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Type</label>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="scope" id="showApplyToProducts" value="2" checked disabled />
+                            <input class="form-check-input" type="radio" name="scope" id="showApplyToProducts" value="1" checked disabled />
                             <label class="form-check-label text-black fs-16" for="showApplyToProducts">Products</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="scope" id="showApplyToCategories" value="1" disabled />
+                            <input class="form-check-input" type="radio" name="scope" id="showApplyToCategories" value="2" disabled />
                             <label class="form-check-label text-black fs-16" for="showApplyToCategories">Categories</label>
                         </div>
                     </div>
