@@ -20,6 +20,8 @@
 @endsection
 @section('content')
 <section class="app-user-view-account">
+    <div id="ticketArea">
+
 
     {{-- Page header / toolbar --}}
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
@@ -53,9 +55,7 @@
         : 'Due in '.$due->diffForHumans($now, ['parts' => 2, 'short'=>true]))
         : 'No due date';
         @endphp
-    <div id="ticketArea">
-        <!-- ...ticket markup here... -->
-    </div>
+
         {{-- Top: Details + Codes + Status --}}
         <div class="p-1 d-flex flex-column flex-md-row gap-2 rounded-3" style="background-color: white">
             <div class="d-flex flex-column">
@@ -211,7 +211,7 @@
                 @endif
             </div>
         </div>
-
+    </div>
 
 </section>
 @endsection
