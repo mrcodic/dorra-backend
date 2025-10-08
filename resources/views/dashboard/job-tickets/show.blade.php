@@ -14,6 +14,28 @@
 @endsection
 
 @section('page-style')
+    <style>
+        @media print {
+            /* Hide everything except the printable area */
+            body * { visibility: hidden !important; }
+
+            #ticketArea, #ticketArea * { visibility: visible !important; }
+
+            /* Make the printed section occupy the page cleanly */
+            #ticketArea {
+                position: static !important;   /* keep normal flow */
+                width: 100% !important;
+                background: #fff !important;
+            }
+
+            /* Page setup */
+            @page { size: A4; margin: 12mm; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+            /* Don’t print UI chrome */
+            #printTicketBtn, .btn, .navbar, .footer, .no-print { display: none !important; }
+        }
+    </style>
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
@@ -270,28 +292,7 @@
     });
 </script>
 
-<style>
-    @media print {
-        /* Hide everything except the printable area */
-        body * { visibility: hidden !important; }
 
-        #ticketArea, #ticketArea * { visibility: visible !important; }
-
-        /* Make the printed section occupy the page cleanly */
-        #ticketArea {
-            position: static !important;   /* keep normal flow */
-            width: 100% !important;
-            background: #fff !important;
-        }
-
-        /* Page setup */
-        @page { size: A4; margin: 12mm; }
-        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-        /* Don’t print UI chrome */
-        #printTicketBtn, .btn, .navbar, .footer, .no-print { display: none !important; }
-    }
-</style>
 
 
 @endsection
