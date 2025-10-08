@@ -14,6 +14,19 @@
 @endsection
 
 @section('page-style')
+    <style>
+        @media print {
+            /* Hide UI chrome while printing */
+            #printTicketBtn, .btn, .navbar, .footer, .no-print { display: none !important; }
+
+            /* Page size / margins (A4 example) */
+            @page { size: A4; margin: 12mm; }
+
+            /* Make background colors/images print on supporting browsers */
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
