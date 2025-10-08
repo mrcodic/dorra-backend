@@ -257,6 +257,7 @@ class ProductService extends BaseService
 
 
                 if (!empty($validatedData['specifications'])) {
+                    dd($validatedData['specifications']);
                 $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                     $productSpecification = $product->specifications()->updateOrCreate(
                         [
