@@ -139,6 +139,7 @@ return [
 
 
 
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines
@@ -323,6 +324,9 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'start_at' => 'Start Date',
+        'end_at' => 'End Date',
+    ],
 
 ];

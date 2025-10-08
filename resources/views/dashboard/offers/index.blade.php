@@ -140,106 +140,48 @@
                 <div class="col-md-4 user_status"></div>
             </div>
         </div>
-        <div class="card-datatable table-responsive pt-0">
-            <div class="row gx-2 gy-2 align-items-center px-1">
+    </div>
+    <div class="card-datatable table-responsive pt-0">
+        <div class="row gx-2 gy-2 align-items-center px-1">
 
-                {{-- Search Input - 70% on md+, full width on xs --}}
-                <div class="col-12 col-md-6">
-                    <form action="" method="get" class="position-relative search-form">
-                        <i data-feather="search"
-                            class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
-                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                            id="search-offer-form" placeholder="Search offer..." style="height: 38px;">
-                        <button type="button" id="clear-search"
-                            class="position-absolute top-50 translate-middle-y text-muted"
-                            style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
-                            title="Clear search">
-                            &times;
-                        </button>
-                    </form>
-                </div>
-
-                {{-- Filter Select - 10% on md+, half width on sm --}}
-                <div class="col-12 col-md-3">
-                    <select name="created_at" class="form-select filter-type" name="type">
-                        <option value="" selected disabled>Type</option>
-                        <option value="">All</option>
-                        @foreach(\App\Enums\Offer\TypeEnum::cases() as $type)
-                        <option value="{{ $type }}">{{ $type->label() }}</option>
-                        @endforeach
-
-                    </select>
-                </div>
-
-                {{-- Add Button - 20% on md+, full width on xs --}}
-                <div class="col-12 col-md-3 text-md-end">
-                    <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                        data-bs-target="#addOfferModal">
-                        <i data-feather="plus"></i>
-                        Add New Offer
-                    </a>
-                </div>
-
-            </div>
+        </div>
 
 
-            <table class="offer-list-table table">
-                <thead class="table-light">
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
-                        </th>
-                        <th>Offer Name</th>
-                        <th>Type</th>
-                        <th>Value</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-            </table>
-            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display:none;">
-                <div class="delete-container d-flex align-items-center gap-2">
-                    <p id="selected-count-text" class="m-0">0 Offers are selected</p>
+        <table class="offer-list-table table">
+            <thead class="table-light">
+                <tr>
+                    <th>
+                        <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                    </th>
+                    <th>Offer Name</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        </table>
+        <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display:none;">
+            <div class="delete-container d-flex align-items-center gap-2">
+                <p id="selected-count-text" class="m-0">0 Offers are selected</p>
 
-                    <!-- Open modal -->
-                    <button type="button" id="open-bulk-delete-modal"
-                        class="btn btn-outline-danger d-flex align-items-center gap-1">
-                        <i data-feather="trash-2"></i> Delete Selected
-                    </button>
+                <!-- Open modal -->
+                <button type="button" id="open-bulk-delete-modal"
+                    class="btn btn-outline-danger d-flex align-items-center gap-1">
+                    <i data-feather="trash-2"></i> Delete Selected
+                </button>
 
-                    <!-- Hidden form actually posted on confirm -->
-                    <form id="bulk-delete-form" method="POST" action="{{ route('offers.bulk-delete') }}"
-                        style="display:none;">
-                        @csrf
-                        <!-- We’ll submit via AJAX; no visible button here -->
-                    </form>
-                </div>
+                <!-- Hidden form actually posted on confirm -->
+                <form id="bulk-delete-form" method="POST" action="{{ route('offers.bulk-delete') }}"
+                    style="display:none;">
+                    @csrf
+                    <!-- We’ll submit via AJAX; no visible button here -->
+                </form>
             </div>
 
 
         </div>
-
-        @include('modals.offers.show-offer')
-        @include('modals.offers.add-offer')
-        @include('modals.offers.edit-offer')
-
-
-
-
-        @include('modals.delete',[
-        'id' => 'deleteOfferModal',
-        'formId' => 'deleteOfferForm',
-        'title' => 'Delete Offer',
-        ])
-        @include('modals.delete', [
-        'id' => 'deleteOffersModal',
-        'formId' => 'bulk-delete-form',
-        'buttonId' => 'confirm-bulk-delete',
-        'title' => 'Delete Offers',
-        'confirmText' => 'Are you sure you want to delete these items?',
-        ])
-
 
 
     </div>
@@ -445,9 +387,28 @@ $(document).ready(function() {
                 $('.details-row.show').removeClass('show');
                 $('.expand-icon.expanded').removeClass('expanded');
 
-                // Open this one
-                $detailsRow.addClass('show');
-                $icon.addClass('expanded');
+                // Reinitialize accordion after DataTable operations
+                setTimeout(initAccordion, 100);
+            });
+
+            // Close bulk delete container
+            $(document).on('click', '#close-bulk-delete', function () {
+                $('#bulk-delete-container').hide();
+                $('.category-checkbox').prop('checked', false);
+                $('#select-all-checkbox').prop('checked', false);
+            });
+
+            // Update the bulk delete container visibility
+            function updateBulkDeleteVisibility() {
+                const selectedCheckboxes = $('.category-checkbox:checked');
+                const count = selectedCheckboxes.length;
+
+                if (count > 0) {
+                    $('#selected-count-text').text(`${count} Admin${count > 1 ? 's are' : ' is'} selected`);
+                    $('#bulk-delete-container').show();
+                } else {
+                    $('#bulk-delete-container').hide();
+                }
             }
         }
     });
@@ -522,16 +483,10 @@ $(document).ready(function() {
             }
         });
 
-    // Keep your form handlers
-    handleAjaxFormSubmit("#addOfferForm", {
-        successMessage: "Offer Created Successfully",
-        onSuccess: function () { location.reload(); }
-    });
-
-    handleAjaxFormSubmit("#editOfferForm", {
-        successMessage: "Offer Updated Successfully",
-        onSuccess: function () { location.reload(); }
-    });
+handleAjaxFormSubmit("#editOfferForm", {
+successMessage: "Offer Updated Successfully",
+onSuccess: function () { location.reload(); }
+});
 </script>
 
 <script>

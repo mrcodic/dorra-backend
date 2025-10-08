@@ -41,7 +41,10 @@ const dt_user_table = $(".job-list-table").DataTable({
             render: (src) =>
                 `<img src="${src}" alt="Product Image" style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid #ccc;" />`,
         },
-        { data: "code" },
+        { data: "order_item_id" },
+        { data: "order_item_name" },
+        { data: "order_item_quantity" },
+        { data: "order_number" },
         { data: "priority_label" },
         {
             data: "current_station",
@@ -80,8 +83,9 @@ const dt_user_table = $(".job-list-table").DataTable({
         }
         ,
         { data: "due_at" },
-        { data: "order_number" },
-        { data: "order_item_name" },
+
+
+
         {
             data: "id",
             orderable: false,

@@ -1,7 +1,7 @@
 <div class="modal modal-slide-in new-user-modal fade" id="showOfferModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="addDiscountForm" method="post" enctype="multipart/form-data" action="{{ route('discount-codes.store') }}">
+            <form id="addDiscountForm" method="post" enctype="multipart/form-data" action="">
                 @csrf
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
@@ -26,11 +26,11 @@
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Type</label>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="scope" id="showApplyToProducts" value="2" checked disabled />
+                            <input class="form-check-input" type="radio" name="scope" id="showApplyToProducts" value="1" checked disabled />
                             <label class="form-check-label text-black fs-16" for="showApplyToProducts">Products</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="scope" id="showApplyToCategories" value="1" disabled />
+                            <input class="form-check-input" type="radio" name="scope" id="showApplyToCategories" value="2" disabled />
                             <label class="form-check-label text-black fs-16" for="showApplyToCategories">Categories</label>
                         </div>
                     </div>
@@ -40,13 +40,13 @@
 
                         {{-- Products --}}
                         <div id="showProductsWrap" class="d-none">
-                            <div class="small text-muted mb-1">Categories</div>
-                            <div id="showProducts" class="d-flex flex-wrap gap-1"></div>
+                            <div class="small text-muted mb-1"></div>
+                            <div id="showProducts" class="d-flex flex-wrap gap-1">Products</div>
                         </div>
 
                         {{-- Categories --}}
                         <div id="showCategoriesWrap" class="d-none">
-                            <div class="small text-muted mb-1">Products</div>
+                            <div class="small text-muted mb-1">Categories</div>
                             <div id="showCategories" class="d-flex flex-wrap gap-1"></div>
                         </div>
                     </div>

@@ -7,8 +7,8 @@ use App\Helpers\EnumHelpers;
 enum TypeEnum : int
 {
     use EnumHelpers;
-    case CATEGORY = 1;
-    case PRODUCT = 2;
+    case CATEGORY = 2;
+    case PRODUCT = 1;
 
 
     public function label()

@@ -274,8 +274,8 @@ $(document).ready(function () {
         $m.find('#showStartDate').val(start);
         $m.find('#showEndDate').val(end);
 
-        const isProducts   = (type === '2' || type === 'products' || type === 'product');
-        const isCategories = (type === '1' || type === 'categories' || type === 'category');
+        const isProducts   = (type === '1' || type === 'products' || type === 'product');
+        const isCategories = (type === '2' || type === 'categories' || type === 'category');
 
         // set radios
         $m.find('#showApplyToProducts').prop('checked', isProducts);
@@ -285,8 +285,8 @@ $(document).ready(function () {
         $m.find('#showProductsWrap').toggleClass('d-none', !isProducts);
         $m.find('#showCategoriesWrap').toggleClass('d-none', !isCategories);
 
-        renderChips($m.find('#showProducts'), products);
-        renderChips($m.find('#showCategories'), categories);
+        renderChips($m.find('#showProducts'), categories);
+        renderChips($m.find('#showCategories'), products);
 
         $m.modal('show');
     });

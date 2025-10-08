@@ -89,6 +89,11 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <p style="margin: 0; color: #121212">{{ $model->orderItem->id }}</p>
                         </div>
+                        <p style="color: #424746; margin: 0; font-size: 16px">Order Item Quantity:</p>
+
+                        <div class="d-flex align-items-center justify-content-between">
+                            <p style="margin: 0; color: #121212">{{ $model->orderItem->quantity }}</p>
+                        </div>
                     </div>
                 </div>
                 <hr>
