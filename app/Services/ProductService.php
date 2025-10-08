@@ -97,6 +97,7 @@ class ProductService extends BaseService
 
         $query = QueryBuilder::for(Product::class)
             ->select($columns)
+            ->withLastOfferId()
             ->with($relations)
             ->withCount('reviews')
             ->when(request()->filled('search_value'), function ($query) use ($locale) {

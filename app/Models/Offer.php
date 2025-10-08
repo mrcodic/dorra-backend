@@ -34,11 +34,13 @@ class Offer extends Model
     }
     public function products(): MorphToMany
     {
-        return $this->morphedByMany(Product::class, 'offerable');
+        return $this->morphedByMany(Product::class, 'offerable')
+            ->withTimestamps();
     }
 
     public function categories(): MorphToMany
     {
-        return $this->morphedByMany(Category::class, 'offerable');
+        return $this->morphedByMany(Category::class, 'offerable')
+            ->withTimestamps();
     }
 }

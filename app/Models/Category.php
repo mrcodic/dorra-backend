@@ -128,41 +128,45 @@ class Category extends Model implements HasMedia
 
     public function offers(): MorphToMany
     {
-        return $this->morphToMany(Offer::class, 'offerable')->withTimestamps();
+        return $this->morphToMany(Offer::class, 'offerable')
+            ->withTimestamps();
     }
-    /**
-     * Computed FK via subquery → usable as a real relation.
-     */
     public function lastOffer(): BelongsTo
     {
         return $this->belongsTo(Offer::class, 'last_offer_id');
     }
 
-    /**
-     * Adds `last_offer_id` = the most recent offer (by pivot `offerables.created_at`).
-     * Works with eager loading: ->withLastOfferId()->with('lastOffer')
-     */
+
     public function scopeWithLastOfferId(Builder $q): Builder
     {
         $offerables = 'offerables';
         $offers     = 'offers';
         $table      = $this->getTable();
-        $class      = static::class;
+
+
+        $morphType  = $this->getMorphClass();
+
+
+        if (empty($q->getQuery()->columns)) {
+            $q->select("$table.*");
+        }
 
         return $q->addSelect([
             'last_offer_id' => DB::table($offerables)
                 ->join($offers, "$offers.id", '=', "$offerables.offer_id")
                 ->select("$offers.id")
                 ->whereColumn("$offerables.offerable_id", "$table.id")
-                ->where("$offerables.offerable_type", $class)
+                ->where("$offerables.offerable_type", $morphType)
                 ->where(function ($qq) use ($offers) {
                     $qq->whereNull("$offers.end_at")
                         ->orWhere("$offers.end_at", '>=', now());
                 })
-                ->orderByDesc("$offerables.created_at")
+
+                ->orderByDesc("$offerables.id")
                 ->limit(1),
         ]);
     }
+
     protected function rating(): Attribute
     {
         return Attribute::make(

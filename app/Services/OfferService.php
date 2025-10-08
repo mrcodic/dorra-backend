@@ -94,20 +94,16 @@ class OfferService extends BaseService
         $productIds  = is_array($productIds)  ? $productIds  : ($productIds  === null ? null : (array) $productIds);
 
         if ($type === 1) {
-
             $offer->categories()->sync($categoryIds ?? []);
             $offer->products()->sync([]);
         } elseif ($type === 2) {
-
             $offer->products()->sync($productIds ?? []);
             $offer->categories()->sync([]);
         } else {
             $offer->categories()->sync([]);
             $offer->products()->sync([]);
         }
-        if (!empty($relationsToLoad)) {
-            $offer->load($relationsToLoad);
-        }
+
 
         return $offer;
     }
