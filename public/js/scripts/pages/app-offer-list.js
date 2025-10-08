@@ -370,18 +370,17 @@ $(document).ready(function () {
             $('.productsField').removeClass('d-none');
             $('.categoriesField').addClass('d-none');
             selectValues($('#editProductsSelect'), productIds);
-            // selectValues($('#editCategoriesSelect'), []); // clear other
+            selectValues($('#editCategoriesSelect'), []); // clear other
         } else if (isCategories) {
             $('.categoriesField').removeClass('d-none');
             $('.productsField').addClass('d-none');
             selectValues($('#editCategoriesSelect'), categoryIds);
-            // selectValues($('#editProductsSelect'), []); // clear other
+            selectValues($('#editProductsSelect'), []); // clear other
+        } else {
+            $('.productsField, .categoriesField').addClass('d-none');
+            selectValues($('#editProductsSelect'), []);
+            selectValues($('#editCategoriesSelect'), []);
         }
-        // } else {
-        //     $('.productsField, .categoriesField').addClass('d-none');
-        //     selectValues($('#editProductsSelect'), []);
-        //     selectValues($('#editCategoriesSelect'), []);
-        // }
 
         $m.modal('show');
     });
