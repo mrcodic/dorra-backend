@@ -216,11 +216,7 @@ class ProductService extends BaseService
 
             $product = $this->repository->update($validatedData, $id);
             $product->load($this->relations);
-
-            // tags
             $product->tags()->sync($validatedData['tags'] ?? []);
-
-            // dimensions (existing kept unless explicitly removed via sync)
             if (!empty($validatedData['dimensions'])) {
                 $product->dimensions()->sync($validatedData['dimensions']);
             }
@@ -230,8 +226,6 @@ class ProductService extends BaseService
                     $product->dimensions()->syncWithoutDetaching($dimension->id);
                 });
             }
-
-            // prices (same behavior you had)
             if (isset($validatedData['base_price'])) {
                 $product->prices()->delete();
             }
@@ -240,42 +234,32 @@ class ProductService extends BaseService
 
                 if (($validatedData['has_custom_prices'] ?? false) && $product->has_custom_prices !== 1) {
                     CartItem::where('cartable_id', $product->id)->get()->each(function ($item) use ($validatedData) {
-                        $qty   = $validatedData['prices'][0]['quantity'];
-                        $price = $validatedData['prices'][0]['price'];
                         $item->update([
-                            'quantity'      => $qty,
-                            'product_price' => $price,
-                            'sub_total'     => ($price * $qty) + $item->specs_price - $item->cart->discount_amount,
+                            'quantity' => $validatedData['prices'][0]['quantity'],
+                            'product_price' => $validatedData['prices'][0]['price'],
+                            'sub_total' => ($validatedData['prices'][0]['price'] * $validatedData['prices'][0]['quantity'])
+                                + $item->specs_price
+                                - $item->cart->discount_amount,
                         ]);
                     });
                 }
 
-                // upsert submitted prices; do NOT delete others
-                collect($validatedData['prices'])->each(function ($price) use ($product) {
+                $submittedQuantities = collect($validatedData['prices'])->map(function ($price) use ($product) {
                     $product->prices()->updateOrCreate(
                         ['quantity' => $price['quantity']],
-                        ['price'    => $price['price']]
+                        ['price' => $price['price']]
                     );
-                });
+                    return $price['quantity'];
+                })->toArray();
+
+                $product->prices()->whereNotIn('quantity', $submittedQuantities)->delete();
             }
 
-            /**
-             * -----------------------------
-             * Specifications (NO DELETIONS)
-             * -----------------------------
-             *
-             * - If 'specifications' is absent, we leave everything as-is.
-             * - If present, we update existing or create new ones.
-             * - We DO NOT delete specs/options that are not in the payload.
-             */
-            if (!empty($validatedData['specifications'])) {
 
-                collect($validatedData['specifications'])->each(function ($specification) use ($product) {
-
-                    // Update by id if provided; otherwise create (by unique name if you have, or simple create)
+                if (!empty($validatedData['specifications'])) {
+                $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                     $productSpecification = $product->specifications()->updateOrCreate(
                         [
-                            // Match by id when present; otherwise force a create by using null id
                             'id' => $specification['id'] ?? null,
                         ],
                         [
@@ -286,9 +270,8 @@ class ProductService extends BaseService
                         ]
                     );
 
-                    // Options (NO pruning)
-                    collect($specification['specification_options'] ?? [])->each(function ($option) use ($productSpecification) {
 
+                    $submittedOptionIds = collect($specification['specification_options'] ?? [])->map(function ($option) use ($productSpecification) {
                         $productOption = $productSpecification->options()->updateOrCreate(
                             ['id' => $option['id'] ?? null],
                             [
@@ -302,46 +285,75 @@ class ProductService extends BaseService
 
                         if (isset($option['option_image'])) {
                             Media::where('id', $option['option_image'])->update([
-                                'model_type'      => get_class($productOption),
-                                'model_id'        => $productOption->id,
+                                'model_type' => get_class($productOption),
+                                'model_id' => $productOption->id,
                                 'collection_name' => 'productSpecificationOptions',
                             ]);
                         }
+
+                        return $productOption->id;
+                    })->toArray();
+
+
+                    $productSpecification->options()->whereNotIn('id', $submittedOptionIds)->each(function ($option) {
+                        $option->clearMediaCollection();
+                        $option->delete();
                     });
+
+                    return $productSpecification->id;
+                })->toArray();
+
+
+                $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
+                    $spec->options->each(function ($option) {
+                        $option->clearMediaCollection();
+                        $option->delete();
+                    });
+                    $spec->delete();
+                });
+            } else {
+
+                $product->specifications->each(function ($spec) {
+
+                    $spec->options->each(function ($option) {
+                        $option->clearMediaCollection();
+                        $option->delete();
+                    });
+                    $spec->delete();
                 });
             }
-            // else: do nothing to specs/options (keep existing intact)
 
-            // Media (same as before)
+
             if (isset($validatedData['image_id'])) {
-                Media::where('id', $validatedData['image_id'])->update([
-                    'model_type'      => get_class($product),
-                    'model_id'        => $product->id,
-                    'collection_name' => 'product_main_image',
-                ]);
-            }
+                Media::where('id', $validatedData['image_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'product_main_image',
+                    ]);
 
+            }
             if (isset($validatedData['images_ids'])) {
                 collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
-                    Media::where('id', $imageId)->update([
-                        'model_type'      => get_class($product),
-                        'model_id'        => $product->id,
-                        'collection_name' => 'product_extra_images',
-                    ]);
+                    Media::where('id', $imageId)
+                        ->update([
+                            'model_type' => get_class($product),
+                            'model_id' => $product->id,
+                            'collection_name' => 'product_extra_images',
+                        ]);
                 });
             }
-
             if (!empty($validatedData['image_model_id'])) {
-                // Keep only the provided model image; remove others in that collection
                 $product->getMedia('product_model_image')
                     ->where('id', '!=', $validatedData['image_model_id'])
                     ->each->delete();
 
-                Media::where('id', $validatedData['image_model_id'])->update([
-                    'model_type'      => get_class($product),
-                    'model_id'        => $product->id,
-                    'collection_name' => 'product_model_image',
-                ]);
+                Media::where('id', $validatedData['image_model_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'product_model_image',
+                    ]);
             }
 
             return $product;
