@@ -7,7 +7,7 @@ $.ajaxSetup({
 const dt_user_table = $(".job-list-table").DataTable({
     processing: true,
     serverSide: true,
-    ordering: fal,
+    ordering: false,
     ajax: {
         url: jobsDataUrl,
         type: "GET",
