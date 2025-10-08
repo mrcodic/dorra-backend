@@ -28,8 +28,16 @@ class OfferController extends DashboardController
                 'categories' => $this->categoryRepository->query()
                     ->whereNull('parent_id')
                     ->whereIsHasCategory(0)
-                    ->whereDoesntHave('offers',function ($query){
-                        $query->whereEndAt('<=', now());
+                    ->whereDoesntHave('offers', function ($q) {
+                        $q->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->whereNull('offers.start_at')
+                                    ->orWhere('offers.start_at', '<=', now());
+                            })->where(function ($q) {
+                                $q->whereNull('offers.end_at')
+                                    ->orWhere('offers.end_at', '>=', now());
+                            });
+                        });
                     })
                     ->get(['id', 'name']),
                 'editCategories' => $this->categoryRepository->query()
@@ -37,8 +45,16 @@ class OfferController extends DashboardController
                     ->whereIsHasCategory(0)
                     ->get(['id', 'name']),
                 'products' => $this->productRepository->query()
-                    ->whereDoesntHave('offers',function ($query){
-                        $query->whereEndAt('<=', now());
+                    ->whereDoesntHave('offers', function ($q) {
+                        $q->where(function ($q) {
+                            $q->where(function ($q) {
+                                $q->whereNull('offers.start_at')
+                                    ->orWhere('offers.start_at', '<=', now());
+                            })->where(function ($q) {
+                                $q->whereNull('offers.end_at')
+                                    ->orWhere('offers.end_at', '>=', now());
+                            });
+                        });
                     })
                     ->get(['id', 'name']),
                 'editProducts' => $this->productRepository->query()
