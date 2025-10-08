@@ -36,7 +36,7 @@
                 <i data-feather="arrow-left" class="me-25"></i> Back
             </a>
             <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
-                <i data-feather="print" class="me-25"></i> Print
+                <i data-feather="printer" class="me-25"></i> Print
             </button>
         </div>
     </div>
