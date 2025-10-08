@@ -20,7 +20,7 @@
 @endsection
 @section('content')
 <section class="app-user-view-account">
-    <div id="ticketArea">
+
 
 
     {{-- Page header / toolbar --}}
@@ -41,7 +41,7 @@
         </div>
     </div>
 
-
+    <div id="ticketArea">
     @php
     $specsRaw = $model->specs ?? []; // or the JSON you have
     $specs = is_array($specsRaw) ? $specsRaw : (json_decode($specsRaw ?? '[]', true) ?? []);
