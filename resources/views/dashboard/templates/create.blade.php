@@ -281,9 +281,8 @@
                 // Re-enable buttons & hide all loaders
                 $('.saveChangesButton').prop('disabled', false).find('.saveLoader').addClass('d-none');
                 if (response.data.redirect_url) {
-
-                    window.open(response.data.redirect_url, '_blank');
-                    location.reload();
+                    sessionStorage.setItem('openAfterReload', response.data.redirect_url);
+                    window.location.reload();
                 }else{
                     setTimeout(function () {
                         window.location.href = '/product-templates';
@@ -296,6 +295,13 @@
                 $('.saveChangesButton').prop('disabled', false).find('.saveLoader').addClass('d-none');
             }
         });
+    window.addEventListener('pageshow', () => {
+        const url = sessionStorage.getItem('openAfterReload');
+        if (url) {
+            window.open(url, '_blank');
+            sessionStorage.removeItem('openAfterReload');
+        }
+    });
 
 </script>
 
