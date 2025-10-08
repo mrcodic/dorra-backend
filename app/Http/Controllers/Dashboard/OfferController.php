@@ -31,11 +31,8 @@ class OfferController extends DashboardController
                     ->whereDoesntHave('offers', function ($q) {
                         $q->where(function ($q) {
                             $q->where(function ($q) {
-                                $q->whereNull('offers.start_at')
-                                    ->orWhere('offers.start_at', '<=', now());
-                            })->where(function ($q) {
                                 $q->whereNull('offers.end_at')
-                                    ->orWhere('offers.end_at', '>=', now());
+                                    ->orWhere('offers.end_at', '<=', now());
                             });
                         });
                     })
@@ -47,12 +44,9 @@ class OfferController extends DashboardController
                 'products' => $this->productRepository->query()
                     ->whereDoesntHave('offers', function ($q) {
                         $q->where(function ($q) {
-                            $q->where(function ($q) {
-                                $q->whereNull('offers.start_at')
-                                    ->orWhere('offers.start_at', '<=', now());
-                            })->where(function ($q) {
+                         $q->where(function ($q) {
                                 $q->whereNull('offers.end_at')
-                                    ->orWhere('offers.end_at', '>=', now());
+                                    ->orWhere('offers.end_at', '<=', now());
                             });
                         });
                     })
