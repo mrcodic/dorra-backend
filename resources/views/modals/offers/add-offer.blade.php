@@ -134,6 +134,6 @@
         }
     });
 
-    $('input[name="type"]:checked').trigger('change');
+
     });
 </script>
