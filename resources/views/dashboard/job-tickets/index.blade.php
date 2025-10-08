@@ -58,7 +58,7 @@
     }
 
     /* Responsive table accordion styles */
-    @media (max-width: 768px) {
+    @media only screen and (min-width: 375px) and (max-width: 1024px) {
 
         /* Hide the last 4 columns on mobile */
         .job-list-table th:nth-child(4),
@@ -67,7 +67,8 @@
         .job-list-table th:nth-child(7),
         .job-list-table th:nth-child(8),
         .job-list-table th:nth-child(9),
-        .job-list-table th:nth-child(10) {
+        .job-list-table th:nth-child(10),
+        .job-list-table th:nth-child(11) {
             display: none !important;
         }
 
@@ -77,7 +78,8 @@
         .job-list-table tbody tr:not(.details-row) td:nth-child(7),
         .job-list-table tbody tr:not(.details-row) td:nth-child(8),
         .job-list-table tbody tr:not(.details-row) td:nth-child(9),
-        .job-list-table tbody tr:not(.details-row) td:nth-child(10) {
+        .job-list-table tbody tr:not(.details-row) td:nth-child(10),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(11) {
             display: none !important;
         }
 
@@ -101,129 +103,69 @@
             transition: transform 0.3s ease;
             color: #666;
             font-size: 14px;
-            margin: 0;
-            padding: 0;
+            pointer-events: none;
         }
 
-        .card-specs .number {
-            color: #121212;
-            font-size: 20px;
-            font-weight: bold;
-            padding-right: 5px
+        .expand-icon.expanded {
+            transform: translateY(-50%) rotate(180deg);
         }
 
-        .card-specs .text {
-            color: #424746;
-            font-size: 16px;
+        /* Details row styling */
+        .details-row {
+            background-color: #F9FDFC !important;
+            display: none;
         }
 
-        /* Responsive table accordion styles */
-        @media (max-width: 768px) {
+        .details-row.show {
+            display: table-row !important;
+            animation: slideDown 0.3s ease;
+        }
 
-            /* Hide the last 4 columns on mobile */
-            .job-list-table th:nth-child(4),
-            .job-list-table th:nth-child(5),
-            .job-list-table th:nth-child(6),
-            .job-list-table th:nth-child(7),
-            .job-list-table th:nth-child(8),
-            .job-list-table th:nth-child(9),
-            .job-list-table th:nth-child(10) {
-                display: none !important;
+        @keyframes slideDown {
+            from {
+                opacity: 0;
             }
 
-            .job-list-table tbody tr:not(.details-row) td:nth-child(4),
-            .job-list-table tbody tr:not(.details-row) td:nth-child(5),
-            .job-list-table tbody tr:not(.details-row) td:nth-child(6),
-            .job-list-table tbody tr:not(.details-row) td:nth-child(7),
-            .job-list-table tbody tr:not(.details-row) td:nth-child(8),
-            .job-list-table tbody tr:not(.details-row) td:nth-child(9),
-            .job-list-table tbody tr:not(.details-row) td:nth-child(10) {
-                display: none !important;
-            }
-
-            /* Style for clickable rows */
-            .job-list-table tbody tr:not(.details-row) {
-                cursor: pointer;
-                transition: background-color 0.2s ease;
-            }
-
-            /* Add expand indicator to the role column */
-            .job-list-table tbody tr:not(.details-row) td:nth-child(1) {
-                position: relative;
-                padding-left: 20px !important;
-            }
-
-            .expand-icon {
-                position: absolute;
-                left: 70%;
-                top: 50%;
-                transform: translateY(-50%);
-                transition: transform 0.3s ease;
-                color: #666;
-                font-size: 14px;
-                pointer-events: none;
-            }
-
-            .expand-icon.expanded {
-                transform: translateY(-50%) rotate(180deg);
-            }
-
-            /* Details row styling */
-            .details-row {
-                background-color: #F9FDFC !important;
-                display: none;
-            }
-
-            .details-row.show {
-                display: table-row !important;
-                animation: slideDown 0.3s ease;
-            }
-
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                }
-
-                to {
-                    opacity: 1;
-                }
-            }
-
-            .detail-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 5px 0;
-                border-bottom: 1px solid #e9ecef;
-            }
-
-            .detail-row:last-child {
-                border-bottom: none;
-                padding-bottom: 0;
-            }
-
-            .detail-label {
-                font-weight: 600;
-                color: #495057;
-                font-size: 14px;
-            }
-
-            .detail-value {
-                color: #212529;
-                font-size: 14px;
+            to {
+                opacity: 1;
             }
         }
 
-        /* Ensure normal behavior on desktop */
-        @media (min-width: 769px) {
-            .details-row {
-                display: none !important;
-            }
-
-            .expand-icon {
-                display: none !important;
-            }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
         }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #212529;
+            font-size: 14px;
+        }
+    }
+
+    /* Ensure normal behavior on desktop */
+    @media (min-width: 1025px) {
+        .details-row {
+            display: none !important;
+        }
+
+        .expand-icon {
+            display: none !important;
+        }
+    }
 </style>
 @endsection
 
@@ -245,7 +187,7 @@
                 <div class="d-flex flex-column justify-content-between gap-1 p-1 card-specs station-card"
                     data-station="{{ $station->id }}">
                     <div class="d-flex align-items-center gap-1">
-                        <img src="{{asset("/images/".strtolower($station->name).".svg")}}" alt="users" style="width:
+                        <img src="{{asset(" /images/".strtolower($station->name).".svg")}}" alt="users" style="width:
                         28px">
                         <p>{{ $station->name }}</p>
                     </div>
@@ -327,13 +269,13 @@
                     </div>
 
                     {{-- Status --}}
-                    <div class="col-12 col-md-2">
+                    <div class="col-12 col-md-3">
                         <select class="form-select filter-status">
                             <option value="">All Statuses</option>
                         </select>
 
                     </div>
-                    <div class="col-12 col-md-1">
+                    <div class="col-12 col-md-2">
                         <a href="{{ route('scan.kiosk') }}" class="btn btn-primary">
                             <i data-feather="camera"></i>
                             <span>Scan</span></a>
@@ -448,7 +390,7 @@
 
                 // Simple accordion toggle function
                 function toggleAccordion($row) {
-                    if ($(window).width() > 768) return; // Only on mobile
+                    if ($(window).width() > 1024) return; // Only below desktop view
 
                     const $detailsRow = $row.next('.details-row');
                     const $icon = $row.find('.expand-icon');
@@ -478,7 +420,7 @@
 
                 // Initialize accordion after DataTable draw
                 function initAccordion() {
-                    if ($(window).width() <= 768) {
+                    if ($(window).width() <= 1024) {
                         $('.job-list-table tbody tr:not(.details-row)').each(function() {
                             const $row = $(this);
 
@@ -490,19 +432,32 @@
                             $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                             // Get data for details
-                            const priority = $row.find('td:nth-child(4)').html() || '';
-                            const currentStation = $row.find('td:nth-child(5)').html() || '';
-                            const status = $row.find('td:nth-child(6)').html() || '';
-                            const dueDate = $row.find('td:nth-child(7)').html() || '';
-                            const orderNumber = $row.find('td:nth-child(8)').html() || '';
-                            const orderItemName = $row.find('td:nth-child(9)').html() || '';
-                            const actions = $row.find('td:nth-child(10)').html() || '';
+                            const itemName = $row.find('td:nth-child(4)').html() || '';
+                            const itemQuantity = $row.find('td:nth-child(5)').html() || '';
+                            const orderNumber = $row.find('td:nth-child(6)').html() || '';
+                            const priority = $row.find('td:nth-child(7)').html() || '';
+                            const currentStation = $row.find('td:nth-child(8)').html() || '';
+                            const status = $row.find('td:nth-child(9)').html() || '';
+                            const dueDate = $row.find('td:nth-child(10)').html() || '';
+                            const actions = $row.find('td:nth-child(11)').html() || '';
 
                             // Create details row
                             const detailsHtml = `
                                 <tr class="details-row">
                                     <td colspan="4">
                                         <div class="details-content">
+                                            <div class="detail-row">
+                                                <span class="detail-label">Item Name:</span>
+                                                <span class="detail-value">${itemName}</span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span class="detail-label">Item Quantity:</span>
+                                                <span class="detail-value">${itemQuantity}</span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span class="detail-label">Order Number:</span>
+                                                <span class="detail-value">${orderNumber}</span>
+                                            </div>
                                             <div class="detail-row">
                                                 <span class="detail-label">Priority:</span>
                                                 <span class="detail-value">${priority}</span>
@@ -518,14 +473,6 @@
                                             <div class="detail-row">
                                                 <span class="detail-label">Due Date:</span>
                                                 <span class="detail-value">${dueDate}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Order Number:</span>
-                                                <span class="detail-value">${orderNumber}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Order Item Name:</span>
-                                                <span class="detail-value">${orderItemName}</span>
                                             </div>
                                             <div class="detail-row">
                                                 <span class="detail-label">Actions:</span>
@@ -593,7 +540,7 @@ $(document).ready(function() {
     $(document).off('click.accordion').on('click.accordion', '.job-list-table tbody tr:not(.details-row)', function(e) {
         console.log('Accordion clicked'); // Debug log
 
-        if ($(window).width() <= 768) {
+        if ($(window).width() <= 1024) {
             // Skip if clicking on interactive elements
             if ($(e.target).is('input, button, a') || $(e.target).closest('input, button, a').length) {
                 return;
