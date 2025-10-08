@@ -376,11 +376,7 @@ $(document).ready(function () {
             $('.productsField').addClass('d-none');
             selectValues($('#editCategoriesSelect'), categoryIds);
             selectValues($('#editProductsSelect'), []); // clear other
-        } else {
-            $('.productsField, .categoriesField').addClass('d-none');
-            selectValues($('#editProductsSelect'), []);
-            selectValues($('#editCategoriesSelect'), []);
-        }
+        } 
 
         $m.modal('show');
     });
