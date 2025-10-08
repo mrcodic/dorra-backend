@@ -271,28 +271,21 @@
 </script>
 
 <style>
-    /* Print ONLY #ticketArea */
     @media print {
-        /* Hide everything by default */
-        body * { visibility: hidden !important; }
+        /* Hide siblings instead of nuking visibility */
+        body > :not(#ticketArea) { display: none !important; }
 
-        /* Show the ticketArea and all its children */
-        #ticketArea, #ticketArea * { visibility: visible !important; }
-
-        /* Place the ticket at the top-left of the page */
+        /* Keep normal flow; center & constrain width so it fits A4 portrait */
         #ticketArea {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
+            display: block !important;
+            max-width: 180mm;   /* leave margins inside A4 */
+            margin: 0 auto;
+            background: #fff !important;
         }
 
-        /* Optional page setup */
-        @page { size: A4; margin: 12mm; }
+        @page { size: A4 portrait; margin: 12mm; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-        /* Don’t print the button/UI */
-        #printTicketBtn, .btn, .navbar, .footer, .no-print { display: none !important; }
     }
 </style>
+
 @endsection
