@@ -124,7 +124,6 @@
             // Products
             $('.productsField').removeClass('d-none');
             $('.addCategoriesField').addClass('d-none');
-            $('.categoriesSelect').val(null).trigger('change');
         } else if (type === 1) {
             // Categories
             $('.addCategoriesField').removeClass('d-none');
@@ -133,7 +132,6 @@
         } else {
             // General
             $('.productsField, .addCategoriesField').addClass('d-none');
-            $('.productsSelect, .categoriesSelect').val(null).trigger('change');
         }
     });
 

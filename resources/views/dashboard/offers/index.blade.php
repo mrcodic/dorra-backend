@@ -464,70 +464,59 @@
             $(this).val(v);
         });
 
-        // ===== Helpers =====
-        function initModalSelect2($m) {
-            $m.find('.select2').each(function () {
-                if (!$(this).hasClass('select2-hidden-accessible')) {
-                    $(this).select2({ dropdownParent: $m });
+        // ---- EDIT MODAL ----
+        $('#editOfferModal')
+            .on('shown.bs.modal', function () {
+                const $m = $(this);
+                // Init only selects inside this modal
+                $m.find('.select2').each(function () {
+                    if (!$(this).hasClass('select2-hidden-accessible')) {
+                        $(this).select2({ dropdownParent: $m });
+                    }
+                });
+                // Ensure correct section visibility on open
+                $m.find('input[name="type"]:checked').trigger('change');
+            })
+            .on('change', 'input[name="type"]', function () {
+                const $m = $('#editOfferModal');
+                const v = parseInt(this.value, 10);
+                if (v === 2) {
+                    // Products
+                    $m.find('.productsField').removeClass('d-none');
+                    $m.find('.categoriesField').addClass('d-none');
+                } else if (v === 1) {
+                    // Categories
+                    $m.find('.categoriesField').removeClass('d-none');
+                    $m.find('.productsField').addClass('d-none');
                 }
             });
-        }
-
-        function bindTypeToggle($m, { productsFieldSel, categoriesFieldSel }) {
-            // مبدّل النوع — يُظهر/يخفي فقط بدون مسح قيم Select2
-            $m.on('change', 'input[name="type"]', function () {
-                const v = parseInt(this.value, 10);
-                // v === 2 => Products, v === 1 => Categories
-                $m.find(productsFieldSel).toggleClass('d-none', v !== 2);
-                $m.find(categoriesFieldSel).toggleClass('d-none', v !== 1);
-            });
-        }
-
-        function applyInitialVisibilitySilent($m) {
-            // شغّل الـ change بشكل "صامت" = يحدّث الرؤية بدون ما يغيّر أي قيم
-            const $checked = $m.find('input[name="type"]:checked');
-            if ($checked.length) {
-                // لاحظ إن الـ handler الحالي لا يمسح قيم، بالتالي مش محتاج نمرّر silent
-                $checked.trigger('change');
-            }
-        }
-
-
-        // ---- EDIT MODAL ----
-        (function () {
-            const $m = $('#editOfferModal');
-
-            // اربط مبدّل النوع (يُظهر/يُخفي الأقسام فقط)
-            bindTypeToggle($m, {
-                productsFieldSel: '.productsField',
-                categoriesFieldSel: '.categoriesField'
-            });
-
-            // عند فتح المودال
-            $m.on('shown.bs.modal', function () {
-                initModalSelect2($m);
-                applyInitialVisibilitySilent($m);
-            });
-        })();
-
 
         // ---- ADD MODAL ----
-        (function () {
-            const $m = $('#addOfferModal');
-
-            // اربط مبدّل النوع (يُظهر/يُخفي الأقسام فقط)
-            bindTypeToggle($m, {
-                productsFieldSel: '.addProductsField',
-                categoriesFieldSel: '.addCategoriesField'
+        $('#addOfferModal')
+            .on('shown.bs.modal', function () {
+                const $m = $(this);
+                // Init only selects inside this modal
+                $m.find('.select2').each(function () {
+                    if (!$(this).hasClass('select2-hidden-accessible')) {
+                        $(this).select2({ dropdownParent: $m });
+                    }
+                });
+                // Ensure correct section visibility on open
+                $m.find('input[name="type"]:checked').trigger('change');
+            })
+            .on('change', 'input[name="type"]', function () {
+                const $m = $('#addOfferModal');
+                const v = parseInt(this.value, 10);
+                if (v === 2) {
+                    // Products
+                    $m.find('.addProductsField').removeClass('d-none');
+                    $m.find('.addCategoriesField').addClass('d-none');
+                } else if (v === 1) {
+                    // Categories
+                    $m.find('.addCategoriesField').removeClass('d-none');
+                    $m.find('.addProductsField').addClass('d-none');
+                }
             });
-
-            // عند فتح المودال
-            $m.on('shown.bs.modal', function () {
-                initModalSelect2($m);
-                applyInitialVisibilitySilent($m);
-            });
-        })();
-
 
         // Keep your form handlers
         handleAjaxFormSubmit("#addOfferForm", {

@@ -109,10 +109,10 @@
             } else if (v === 1) { // Categories
                 $('.categoriesField').removeClass('d-none');
                 $('.productsField').addClass('d-none');
-                $('#editProductsSelect').val(null).trigger('change');
+
             } else {
                 $('.productsField, .categoriesField').addClass('d-none');
-                $('#editProductsSelect, #editCategoriesSelect').val(null).trigger('change');
+
             }
         });
 
