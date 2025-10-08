@@ -88,7 +88,7 @@
                 <img class="img" src="{{ $barcodeDataUri }}" alt="Code128" style="max-width:100%;height:auto;">
             @else
                 {{-- Fallback: absolute URL + remote enabled (less reliable) --}}
-                <img class="img" src="{{ url($model->barcode_png_url) }}" alt="Code128" style="max-width:100%;height:auto;">
+                <img class="img" src="{{ $model->barcode_png_url }}" alt="Code128" style="max-width:100%;height:auto;">
             @endif
 
         </div>
