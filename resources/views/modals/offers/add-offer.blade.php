@@ -114,5 +114,29 @@
         if (val < 1) $(this).val(1);
     });
 
+    $(function () {
 
+    // Toggle between products and categories
+    $('input[name="type"]').on('change', function () {
+        const type = parseInt(this.value);
+
+        if (type === 2) {
+            // Products
+            $('.productsField').removeClass('d-none');
+            $('.addCategoriesField').addClass('d-none');
+            $('.categoriesSelect').val(null).trigger('change');
+        } else if (type === 1) {
+            // Categories
+            $('.addCategoriesField').removeClass('d-none');
+            $('.productsField').addClass('d-none');
+            $('.productsSelect').val(null).trigger('change');
+        } else {
+            // General
+            $('.productsField, .addCategoriesField').addClass('d-none');
+            $('.productsSelect, .categoriesSelect').val(null).trigger('change');
+        }
+    });
+
+    $('input[name="type"]:checked').trigger('change');
+    });
 </script>

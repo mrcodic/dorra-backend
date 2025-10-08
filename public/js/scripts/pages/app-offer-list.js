@@ -339,48 +339,63 @@ $(document).ready(function () {
     $(document).on('click', '.edit-details', function (e) {
         e.preventDefault();
         const $btn = $(this);
-        const id       = $btn.data('id');
-        const nameEn   = $btn.data('name_en') ?? '';
-        const nameAr   = $btn.data('name_ar') ?? '';
-        const value    = cleanPercent($btn.data('value') ?? '');
-        const typeRaw  = String($btn.data('type') ?? '').toLowerCase(); // "1"/"2"/"products"/"categories"
-        const startAt  = toDateForInput($btn.data('start_at'));
-        const endAt    = toDateForInput($btn.data('end_at'));
+        const $m   = $('#editOfferModal');
 
-        // read from attributes to avoid jQuery’s data cache + normalize to ID array (strings)
-        const productIds   = toIdArray($btn.attr('data-products'));
-        const categoryIds  = toIdArray($btn.attr('data-categories'));
+        const id      = $btn.data('id');
+        const nameEn  = $btn.data('name_en') ?? '';
+        const nameAr  = $btn.data('name_ar') ?? '';
+        const value   = cleanPercent($btn.data('value') ?? '');
+        const startAt = toDateForInput($btn.data('start_at'));
+        const endAt   = toDateForInput($btn.data('end_at'));
 
-        const $m = $('#editOfferModal');
-        $('#editOfferForm').attr('action', '/offers/' + id);
+        // NOTE: read attr to avoid jQuery caching & handle HTML entities
+        const productIds  = toIdArray($btn.attr('data-products'));
+        const categoryIds = toIdArray($btn.attr('data-categories'));
 
+        // type mapping: 2=products, 1=categories (عدّل حسب نظامك)
+        const typeRaw = String($btn.data('type') ?? '').toLowerCase();
+        const isProducts   = (typeRaw === '2' || typeRaw === 'products'  || typeRaw === 'product');
+        const isCategories = (typeRaw === '1' || typeRaw === 'categories' || typeRaw === 'category');
+
+        // form action
+        $m.find('#editOfferForm').attr('action', '/offers/' + id);
+
+        // fill basics
         $m.find('#editOfferNameEn').val(nameEn);
         $m.find('#editOfferNameAr').val(nameAr);
         $m.find('#editOfferValue').val(value);
         $m.find('#editStartDate').val(startAt);
         $m.find('#editEndDate').val(endAt);
 
-        const isProducts   = (typeRaw === '2' || typeRaw === 'products' || typeRaw === 'product');
-        const isCategories = (typeRaw === '1' || typeRaw === 'categories' || typeRaw === 'category');
+        // set radios (داخل المودال فقط)
+        $m.find('#editApplyToProducts').prop('checked', isProducts);
+        $m.find('#editApplyToCategories').prop('checked', isCategories);
 
-        $('#editApplyToProducts').prop('checked', isProducts);
-        $('#editApplyToCategories').prop('checked', isCategories);
-
+        // show/hide sections داخل المودال فقط—بدون تفريغ
         if (isProducts) {
-            $('.productsField').removeClass('d-none');
-            $('.categoriesField').addClass('d-none');
-            selectValues($('#editProductsSelect'), productIds);
-            selectValues($('#editCategoriesSelect'), []); // clear other
+            $m.find('.productsField').removeClass('d-none');
+            $m.find('.categoriesField').addClass('d-none');
         } else if (isCategories) {
-            $('.categoriesField').removeClass('d-none');
-            $('.productsField').addClass('d-none');
-            selectValues($('#editCategoriesSelect'), categoryIds);
-            selectValues($('#editProductsSelect'), []); // clear other
-        } 
+            $m.find('.categoriesField').removeClass('d-none');
+            $m.find('.productsField').addClass('d-none');
+        } else {
+            // لو النوع مش معروف، بس اخفي/اظهر حسب ما تحب—لكن لا تفرّغ القيم
+            $m.find('.productsField, .categoriesField').addClass('d-none');
+        }
+
+        // عبّي القيم في الاثنين—ولا تمسح التاني
+        selectValues($m.find('#editProductsSelect'),   productIds);
+        selectValues($m.find('#editCategoriesSelect'), categoryIds);
+
+        // Initialize select2 once (safe-guard)
+        $m.find('.select2').each(function () {
+            if (!$(this).hasClass('select2-hidden-accessible')) {
+                $(this).select2({ dropdownParent: $m });
+            }
+        });
 
         $m.modal('show');
     });
-
 
     $(document).on("click", ".open-delete-offer-modal", function () {
         const OfferId = $(this).data("id");
