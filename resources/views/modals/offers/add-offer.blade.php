@@ -114,26 +114,5 @@
         if (val < 1) $(this).val(1);
     });
 
-    $(function () {
 
-    // Toggle between products and categories
-    $('input[name="type"]').on('change', function () {
-        const type = parseInt(this.value);
-
-        if (type === 2) {
-            // Products
-            $('.productsField').removeClass('d-none');
-            $('.addCategoriesField').addClass('d-none');
-        } else if (type === 1) {
-            // Categories
-            $('.addCategoriesField').removeClass('d-none');
-            $('.productsField').addClass('d-none');
-        } else {
-            // General
-            $('.productsField, .addCategoriesField').addClass('d-none');
-        }
-    });
-
-
-    });
 </script>

@@ -98,25 +98,6 @@
         if (val > 100) $(this).val(100);
         if (val < 1) $(this).val(1);
     });
-    $(function () {
-        // Listen on name="type" (not "type")
-        $('input[name="type"]').on('change', function () {
-            const v = parseInt(this.value, 10);
-            if (v === 2) { // Products
-                $('.productsField').removeClass('d-none');
-                $('.categoriesField').addClass('d-none');
 
-            } else if (v === 1) { // Categories
-                $('.categoriesField').removeClass('d-none');
-                $('.productsField').addClass('d-none');
-
-            } else {
-                $('.productsField, .categoriesField').addClass('d-none');
-
-            }
-        });
-
-
-    });
 
 </script>
