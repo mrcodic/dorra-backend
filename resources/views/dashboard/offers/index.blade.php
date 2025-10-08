@@ -466,17 +466,17 @@
 
         // ---- EDIT MODAL ----
         $('#editOfferModal')
-            // .on('shown.bs.modal', function () {
-            //     const $m = $(this);
-            //     // Init only selects inside this modal
-            //     $m.find('.select2').each(function () {
-            //         if (!$(this).hasClass('select2-hidden-accessible')) {
-            //             $(this).select2({ dropdownParent: $m });
-            //         }
-            //     });
+            .on('shown.bs.modal', function () {
+                const $m = $(this);
+                // Init only selects inside this modal
+                $m.find('.select2').each(function () {
+                    // if (!$(this).hasClass('select2-hidden-accessible')) {
+                        $(this).select2({ dropdownParent: $m });
+                    // }
+                });
                 // Ensure correct section visibility on open
                 // $m.find('input[name="type"]:checked').trigger('change');
-            // })
+            })
             .on('change', 'input[name="type"]', function () {
                 const $m = $('#editOfferModal');
                 const v = parseInt(this.value, 10);
@@ -493,17 +493,17 @@
 
         // ---- ADD MODAL ----
         $('#addOfferModal')
-            // .on('shown.bs.modal', function () {
-            //     const $m = $(this);
-            //     // Init only selects inside this modal
-            //     // $m.find('.select2').each(function () {
-            //     //     if (!$(this).hasClass('select2-hidden-accessible')) {
-            //     //         $(this).select2({ dropdownParent: $m });
-            //     //     }
-            //     // });
-            //     // Ensure correct section visibility on open
-            //     $m.find('input[name="type"]:checked').trigger('change');
-            // })
+            .on('shown.bs.modal', function () {
+                const $m = $(this);
+                // Init only selects inside this modal
+                $m.find('.select2').each(function () {
+                    // if (!$(this).hasClass('select2-hidden-accessible')) {
+                        $(this).select2({ dropdownParent: $m });
+                    // }
+                });
+                // Ensure correct section visibility on open
+                // $m.find('input[name="type"]:checked').trigger('change');
+            })
             .on('change', 'input[name="type"]', function () {
                 const $m = $('#addOfferModal');
                 const v = parseInt(this.value, 10);
