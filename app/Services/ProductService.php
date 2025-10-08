@@ -257,6 +257,7 @@ class ProductService extends BaseService
 
 
                 if (!empty($validatedData['specifications'])) {
+                    dd($validatedData['specifications']);
                 $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                     $productSpecification = $product->specifications()->updateOrCreate(
                         [
@@ -295,22 +296,22 @@ class ProductService extends BaseService
                     })->toArray();
 
 
-//                    $productSpecification->options()->whereNotIn('id', $submittedOptionIds)->each(function ($option) {
-//                        $option->clearMediaCollection();
-//                        $option->delete();
-//                    });
+                    $productSpecification->options()->whereNotIn('id', $submittedOptionIds)->each(function ($option) {
+                        $option->clearMediaCollection();
+                        $option->delete();
+                    });
 
                     return $productSpecification->id;
                 })->toArray();
 
 
-//                $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
-//                    $spec->options->each(function ($option) {
-//                        $option->clearMediaCollection();
-//                        $option->delete();
-//                    });
-//                    $spec->delete();
-//                });
+                $product->specifications()->whereNotIn('id', $submittedSpecIds)->each(function ($spec) {
+                    $spec->options->each(function ($option) {
+                        $option->clearMediaCollection();
+                        $option->delete();
+                    });
+                    $spec->delete();
+                });
             } else {
 
                 $product->specifications->each(function ($spec) {
