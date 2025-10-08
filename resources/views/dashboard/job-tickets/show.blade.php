@@ -271,29 +271,26 @@
 </script>
 
 <style>
-    /* Print ONLY #ticketArea */
     @media print {
-        /* Hide everything by default */
+        /* Hide everything except the printable area */
         body * { visibility: hidden !important; }
 
-        /* Show the ticketArea and all its children */
         #ticketArea, #ticketArea * { visibility: visible !important; }
 
-        /* Place the ticket at the top-left of the page */
+        /* Make the printed section occupy the page cleanly */
         #ticketArea {
-            left: 0 !important;
-            top: 0 !important;
+            position: static !important;   /* keep normal flow */
             width: 100% !important;
+            background: #fff !important;
         }
 
-        /* Optional page setup */
+        /* Page setup */
         @page { size: A4; margin: 12mm; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-        /* Don’t print the button/UI */
+        /* Don’t print UI chrome */
         #printTicketBtn, .btn, .navbar, .footer, .no-print { display: none !important; }
     }
-
 </style>
 
 
