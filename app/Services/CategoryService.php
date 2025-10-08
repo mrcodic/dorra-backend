@@ -23,6 +23,7 @@ class CategoryService extends BaseService
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
         $query = $this->repository->query()
+            ->withLastOfferId()
             ->with($relations)
             ->whereNull('parent_id')
             ->when(request()->filled('is_landing'), function ($query) {
