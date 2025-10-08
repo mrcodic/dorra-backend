@@ -5,6 +5,7 @@ namespace App\Http\Resources\Product;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DimensionResource;
 use App\Http\Resources\MediaResource;
+use App\Http\Resources\OfferResource;
 use App\Http\Resources\TagResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -46,6 +47,7 @@ class ProductResource extends JsonResource
                 return TagResource::collection($tags);
             }),
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
+            'offer' => OfferResource::make($this->whenLoaded('lastOffer')),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
             'is_saved' => $this->when(
                 $this->relationLoaded('saves') && is_null($this->deleted_at),

@@ -129,6 +129,12 @@ class Category extends Model implements HasMedia
     {
         return $this->morphToMany(Offer::class, 'offerable');
     }
+    public function lastOffer(): ?Offer
+    {
+        return $this->offers()
+            ->orderByDesc('offerables.created_at')
+            ->first();
+    }
     protected function rating(): Attribute
     {
         return Attribute::make(

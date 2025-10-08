@@ -19,7 +19,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = $this->productService->getAll(relations: ['reviews','category:name','media'],
+        $products = $this->productService->getAll(relations: ['reviews','category:name','media', 'lastOffer'],
             paginate: request()->boolean('paginate',true),
            perPage: request()->integer('per_page',9)
         );

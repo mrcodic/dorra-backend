@@ -198,6 +198,13 @@ class Product extends Model implements HasMedia
     {
         return $this->morphToMany(Offer::class, 'offerable');
     }
+
+    public function lastOffer(): ?Offer
+    {
+        return $this->offers()
+            ->orderByDesc('offerables.created_at')
+            ->first();
+    }
     public function getAllProductImages()
     {
         return $this->getMedia('product_extra_images')
