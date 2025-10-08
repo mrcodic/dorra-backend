@@ -196,8 +196,42 @@ class Product extends Model implements HasMedia
     }
     public function offers(): MorphToMany
     {
-        return $this->morphToMany(Offer::class, 'offerable');
+        return $this->morphToMany(Offer::class, 'offerable')->withTimestamps();
     }
+    /**
+     * Computed FK via subquery → usable as a real relation.
+     */
+    public function lastOffer(): BelongsTo
+    {
+        return $this->belongsTo(Offer::class, 'last_offer_id');
+    }
+
+    /**
+     * Adds `last_offer_id` = the most recent offer (by pivot `offerables.created_at`).
+     * Works with eager loading: ->withLastOfferId()->with('lastOffer')
+     */
+    public function scopeWithLastOfferId(Builder $q): Builder
+    {
+        $offerables = 'offerables';
+        $offers     = 'offers';
+        $table      = $this->getTable();
+        $class      = static::class;
+
+        return $q->addSelect([
+            'last_offer_id' => DB::table($offerables)
+                ->join($offers, "$offers.id", '=', "$offerables.offer_id")
+                ->select("$offers.id")
+                ->whereColumn("$offerables.offerable_id", "$table.id")
+                ->where("$offerables.offerable_type", $class)
+                ->where(function ($qq) use ($offers) {
+                    $qq->whereNull("$offers.end_at")
+                        ->orWhere("$offers.end_at", '>=', now());
+                })
+                ->orderByDesc("$offerables.created_at")
+                ->limit(1),
+        ]);
+    }
+
     public function getAllProductImages()
     {
         return $this->getMedia('product_extra_images')
