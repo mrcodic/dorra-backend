@@ -53,34 +53,47 @@ const dt_user_table = $(".job-list-table").DataTable({
             },
         },
         {
-            data: "status_label",
-            render: function (data) {
-                const name = (data || "").toString().trim();
+            data: null, // we’ll read from row inside render
+            render: function (_data, type, row) {
+                const raw = row && row.currentStatus && row.currentStatus.name;
+                const name = (raw || 'Pending').toString().trim();
 
-                // map: name -> styles
+                // Normalize for matching (case-insensitive)
+                const key = name.toLowerCase();
+
                 const map = {
-                    "Waiting":      { bg: "#CED5D4", color: "#424746" },
-                    "in Progress":  { bg: "#FCF8FC", color: "#4E2775" },
-                    "Completed":    { bg: "#D7EEDD", color: "#30A84D" },
+                    'waiting':      { bg: '#CED5D4', color: '#424746' },
+                    'in progress':  { bg: '#FCF8FC', color: '#4E2775' },
+                    'completed':    { bg: '#D7EEDD', color: '#30A84D' },
+                    'pending':      { bg: '#F4F6F8', color: '#121212' }, // fallback style
                 };
+                const styles = map[key] || map['pending'];
 
-                const styles = map[name] || { bg: "#F4F6F8", color: "#121212" };
+                if (type !== 'display') {
+                    // for sort/search, return plain text
+                    return name;
+                }
+
+                // escape the text to avoid XSS
+                const esc = name
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
 
                 return `
-      <p class="rounded rounded-3 text-center"
-         style="
-           display:inline-block;
-           margin:0;
-           padding:.35rem .6rem;
-           background:${styles.bg};
-           color:${styles.color};
-
-         ">
-        ${name || "-"}
-      </p>
-    `;
-            },
+      <span class="rounded rounded-3 text-center"
+            style="
+              display:inline-block;
+              margin:0;
+              padding:.35rem .6rem;
+              background:${styles.bg};
+              color:${styles.color};
+            ">
+        ${esc}
+      </span>`;
+            }
         }
+
         ,
         { data: "due_at" },
 
