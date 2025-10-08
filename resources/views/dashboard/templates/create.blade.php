@@ -281,6 +281,7 @@
                 // Re-enable buttons & hide all loaders
                 $('.saveChangesButton').prop('disabled', false).find('.saveLoader').addClass('d-none');
                 if (response.data.redirect_url) {
+                    location.reload();
                     window.open(response.data.redirect_url, '_blank');
                 }else{
                     setTimeout(function () {
