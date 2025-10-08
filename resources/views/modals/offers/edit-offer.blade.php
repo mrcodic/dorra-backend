@@ -50,7 +50,7 @@
                     <div class="form-group mb-2 productsField" id="productsField">
                         <label for="editProductsSelect" class="label-text mb-1">Categories</label>
                         <select id="editProductsSelect" name="product_ids[]" class="form-select select2" multiple>
-                            @foreach($associatedData['products'] as $product)
+                            @foreach($associatedData['editProducts'] as $product)
                                 <option value="{{ $product->id }}">{{ $product->name }}</option>
                             @endforeach
                         </select>
@@ -60,7 +60,7 @@
                     <div class="form-group mb-2 d-none categoriesField" id="categoriesField">
                         <label for="editCategoriesSelect" class="label-text mb-1">Products</label>
                         <select id="editCategoriesSelect" name="category_ids[]" class="form-select select2" multiple>
-                            @foreach($associatedData['categories'] as $category)
+                            @foreach($associatedData['editCategories'] as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>

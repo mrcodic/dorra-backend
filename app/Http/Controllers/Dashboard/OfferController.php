@@ -30,8 +30,14 @@ class OfferController extends DashboardController
                     ->whereIsHasCategory(0)
                     ->whereDoesntHave('offers')
                     ->get(['id', 'name']),
+                'editCategories' => $this->categoryRepository->query()
+                    ->whereNull('parent_id')
+                    ->whereIsHasCategory(0)
+                    ->get(['id', 'name']),
                 'products' => $this->productRepository->query()
                     ->whereDoesntHave('offers')
+                    ->get(['id', 'name']),
+                'editProducts' => $this->productRepository->query()
                     ->get(['id', 'name']),
             ]
         ];
