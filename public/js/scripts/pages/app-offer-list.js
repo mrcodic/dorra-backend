@@ -333,7 +333,7 @@ $(document).ready(function () {
                 $select.append(new Option(`#${id}`, id, false, false)); // temp label if missing
             }
         });
-        $select.val(ids).trigger('change'); // Select2 refresh
+        // $select.val(ids).trigger('change'); // Select2 refresh
     }
 
     $(document).on('click', '.edit-details', function (e) {
@@ -383,72 +383,6 @@ $(document).ready(function () {
         }
 
         $m.modal('show');
-    });
-
-    $('#editButton').on('click', function () {
-        var nameEN = $('#tag-name-en').val();
-        var nameAR = $('#tag-name-ar').val();
-        var id = $('#tag-id').val();
-
-
-        $('#edit-tag-name-en').val(nameEN);
-        $('#edit-tag-name-ar').val(nameAR);
-        $('#edit-tag-id').val(id);
-        $('#editFlagModal').modal('show');
-
-    });
-
-    $('#editFlagForm').on('submit', function (e) {
-        e.preventDefault();
-        var tagId = $(this).find('#edit-tag-id').val();
-        saveButton.prop('disabled', true);
-        saveLoader.removeClass('d-none');
-        saveButtonText.addClass('d-none');
-        $.ajax({
-            url: `flags/${tagId}`,
-            type: 'POST',
-            data: new FormData(this),
-            processData: false,
-            contentType: false,
-            success: function (response) {
-
-                Toastify({
-                    text: "Flag updated successfully!",
-                    duration: 3000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#28C76F",
-                    close: true
-                }).showToast();
-                saveButton.prop('disabled', false);
-                saveLoader.addClass('d-none');
-                saveButtonText.removeClass('d-none');
-                // Close modal
-                $('#editFlagModal').modal('hide');
-                $('#showFlagModal').modal('hide');
-                $('.offer-list-table').DataTable().ajax.reload(null, false);
-
-
-            },
-            error: function (xhr) {
-                var errors = xhr.responseJSON.errors;
-                for (var key in errors) {
-                    if (errors.hasOwnProperty(key)) {
-                        Toastify({
-                            text: errors[key][0],
-                            duration: 4000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#EA5455", // red
-                            close: true
-                        }).showToast();
-                    }
-                }
-                saveButton.prop('disabled', false);
-                saveLoader.addClass('d-none');
-                saveButtonText.removeClass('d-none');
-            }
-        });
     });
 
 
