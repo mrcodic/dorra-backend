@@ -213,14 +213,20 @@ class Product extends Model implements HasMedia
     public function scopeWithLastOfferId(Builder $q): Builder
     {
         $offerables = 'offerables';
+        $offers     = 'offers';
         $table      = $this->getTable();
         $class      = static::class;
 
         return $q->addSelect([
-            'last_offer_id' => DB::table($offerables)
-                ->select('offer_id')
+            'last_valid_offer_id' => DB::table($offerables)
+                ->join($offers, "$offers.id", '=', "$offerables.offer_id")
+                ->select("$offers.id")
                 ->whereColumn("$offerables.offerable_id", "$table.id")
                 ->where("$offerables.offerable_type", $class)
+                ->where(function ($qq) use ($offers) {
+                    $qq->whereNull("$offers.end_at")
+                        ->orWhere("$offers.end_at", '>=', now());
+                })
                 ->orderByDesc("$offerables.created_at")
                 ->limit(1),
         ]);

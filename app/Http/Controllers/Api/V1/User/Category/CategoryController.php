@@ -23,7 +23,7 @@ class CategoryController extends Controller
             'landingSubCategories.subCategoryProducts',
             'landingProducts',
             'products',
-            
+            'lastOffer'
             ],
             paginate: request('paginate',false),
             perPage: request('per_page',8));
