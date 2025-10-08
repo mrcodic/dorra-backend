@@ -297,21 +297,5 @@
 
 </style>
 
-<style>
-    @media print {
-        /* Hide siblings instead of nuking visibility */
-        body > :not(#ticketArea) { display: none !important; }
-
-        /* Keep normal flow; center & constrain width so it fits A4 portrait */
-        #ticketArea {
-            display: block !important;
-            max-width: 180mm;   /* leave margins inside A4 */
-            margin: 0 auto;
-            background: #fff !important;
-        }
-
-        @page { size: A4 portrait; margin: 12mm; }
-        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
-</style>
+    
 @endsection
