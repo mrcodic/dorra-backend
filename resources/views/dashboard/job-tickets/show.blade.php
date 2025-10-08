@@ -14,19 +14,6 @@
 @endsection
 
 @section('page-style')
-    <style>
-        @media print {
-            /* Hide UI chrome while printing */
-            #printTicketBtn, .btn, .navbar, .footer, .no-print { display: none !important; }
-
-            /* Page size / margins (A4 example) */
-            @page { size: A4; margin: 12mm; }
-
-            /* Make background colors/images print on supporting browsers */
-            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        }
-    </style>
-
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
@@ -49,6 +36,7 @@
             <button id="printTicketBtn" class="btn btn-sm btn-outline-primary">
                 <i data-feather="print" class="me-25"></i> Print
             </button>
+
         </div>
     </div>
 
@@ -66,7 +54,7 @@
         : 'Due in '.$due->diffForHumans($now, ['parts' => 2, 'short'=>true]))
         : 'No due date';
         @endphp
-
+    <div id="ticketArea"> </div>
         {{-- Top: Details + Codes + Status --}}
         <div class="p-1 d-flex flex-column flex-md-row gap-2 rounded-3" style="background-color: white">
             <div class="d-flex flex-column">
@@ -273,13 +261,46 @@
 {{--    });--}}
 {{--</script>--}}
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('printTicketBtn');
-        if (!btn) return;
+    function printSection(selector) {
+        const node = document.querySelector(selector);
+        if (!node) return;
 
-        btn.addEventListener('click', (e) => {
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+    <html>
+      <head>
+        ${document.head.innerHTML}  <!-- re-use your CSS links -->
+        <style>
+          @page { size: A4; margin: 12mm; }
+          * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        </style>
+      </head>
+      <body>${node.outerHTML}</body>
+    </html>
+  `);
+        doc.close();
+
+        iframe.onload = () => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+            setTimeout(() => document.body.removeChild(iframe), 1000);
+        };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('printTicketBtn')?.addEventListener('click', (e) => {
             e.preventDefault();
-            window.print();
+            printSection('#ticketArea');  // change selector if needed
         });
     });
 </script>
