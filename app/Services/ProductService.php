@@ -257,7 +257,6 @@ class ProductService extends BaseService
 
 
                 if (!empty($validatedData['specifications'])) {
-                    dd($validatedData['specifications']);
                 $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                     $productSpecification = $product->specifications()->updateOrCreate(
                         [
@@ -272,28 +271,28 @@ class ProductService extends BaseService
                     );
 
 
-//                    $submittedOptionIds = collect($specification['specification_options'] ?? [])->map(function ($option) use ($productSpecification) {
-//                        $productOption = $productSpecification->options()->updateOrCreate(
-//                            ['id' => $option['id'] ?? null],
-//                            [
-//                                'value' => [
-//                                    'en' => $option['value_en'],
-//                                    'ar' => $option['value_ar'],
-//                                ],
-//                                'price' => $option['price'] ?? 0,
-//                            ]
-//                        );
-//
-//                        if (isset($option['option_image'])) {
-//                            Media::where('id', $option['option_image'])->update([
-//                                'model_type' => get_class($productOption),
-//                                'model_id' => $productOption->id,
-//                                'collection_name' => 'productSpecificationOptions',
-//                            ]);
-//                        }
-//
-//                        return $productOption->id;
-//                    })->toArray();
+                    $submittedOptionIds = collect($specification['specification_options'] ?? [])->map(function ($option) use ($productSpecification) {
+                        $productOption = $productSpecification->options()->updateOrCreate(
+                            ['id' => $option['id'] ?? null],
+                            [
+                                'value' => [
+                                    'en' => $option['value_en'],
+                                    'ar' => $option['value_ar'],
+                                ],
+                                'price' => $option['price'] ?? 0,
+                            ]
+                        );
+
+                        if (isset($option['option_image'])) {
+                            Media::where('id', $option['option_image'])->update([
+                                'model_type' => get_class($productOption),
+                                'model_id' => $productOption->id,
+                                'collection_name' => 'productSpecificationOptions',
+                            ]);
+                        }
+
+                        return $productOption->id;
+                    })->toArray();
 //
 //
 //                    $productSpecification->options()->whereNotIn('id', $submittedOptionIds)->each(function ($option) {

@@ -414,7 +414,7 @@
                                                         @forelse($model->specifications as $specification)
                                                             <div data-repeater-item>
                                                                 <input type="hidden" name="id" value="{{ $specification->id }}">
-
+                                                                
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
