@@ -14,31 +14,6 @@
 @endsection
 
 @section('page-style')
-    <style>
-        /* Print ONLY #ticketArea */
-        @media print {
-            /* Hide everything by default */
-            body * { visibility: hidden !important; }
-
-            /* Show the ticketArea and all its children */
-            #ticketArea, #ticketArea * { visibility: visible !important; }
-
-            /* Place the ticket at the top-left of the page */
-            #ticketArea {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-            }
-
-            /* Optional page setup */
-            @page { size: A4; margin: 12mm; }
-            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-            /* Don’t print the button/UI */
-            #printTicketBtn, .btn, .navbar, .footer, .no-print { display: none !important; }
-        }
-    </style>
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
@@ -287,22 +262,13 @@
 {{--    });--}}
 {{--</script>--}}
 <script>
-    // document.addEventListener('DOMContentLoaded', () => {
-    //     document.getElementById('printTicketBtn')?.addEventListener('click', (e) => {
-    //         e.preventDefault();
-    //         window.print();
-    //     });
-    // });
-    document.getElementById('printTicketBtn')?.addEventListener('click', async (e) => {
-        e.preventDefault();
-        await Promise.all(
-            Array.from(document.images)
-                .filter(img => !img.complete)
-                .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; }))
-        );
-        window.print();
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('printTicketBtn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.print();
+        });
     });
-
+    
 </script>
 
 
