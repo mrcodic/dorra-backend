@@ -28,28 +28,14 @@ class OfferController extends DashboardController
                 'categories' => $this->categoryRepository->query()
                     ->whereNull('parent_id')
                     ->whereIsHasCategory(0)
-                    ->whereDoesntHave('offers', function ($q) {
-                        $q->where(function ($q) {
-                            $q->where(function ($q) {
-                                $q->whereNull('offers.end_at')
-                                    ->orWhere('offers.end_at', '<=', now());
-                            });
-                        });
-                    })
+                    ->whereDoesntHave('offers')
                     ->get(['id', 'name']),
                 'editCategories' => $this->categoryRepository->query()
                     ->whereNull('parent_id')
                     ->whereIsHasCategory(0)
                     ->get(['id', 'name']),
                 'products' => $this->productRepository->query()
-                    ->whereDoesntHave('offers', function ($q) {
-                        $q->where(function ($q) {
-                         $q->where(function ($q) {
-                                $q->whereNull('offers.end_at')
-                                    ->orWhere('offers.end_at', '<=', now());
-                            });
-                        });
-                    })
+                    ->whereDoesntHave('offers')
                     ->get(['id', 'name']),
                 'editProducts' => $this->productRepository->query()
                     ->get(['id', 'name']),
