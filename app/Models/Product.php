@@ -218,7 +218,7 @@ class Product extends Model implements HasMedia
         $class      = static::class;
 
         return $q->addSelect([
-            'last_valid_offer_id' => DB::table($offerables)
+            'last_offer_id' => DB::table($offerables)
                 ->join($offers, "$offers.id", '=', "$offerables.offer_id")
                 ->select("$offers.id")
                 ->whereColumn("$offerables.offerable_id", "$table.id")
