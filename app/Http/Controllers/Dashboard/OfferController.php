@@ -29,7 +29,7 @@ class OfferController extends DashboardController
                     ->whereNull('parent_id')
                     ->whereIsHasCategory(0)
                     ->whereDoesntHave('offers')
-                    ->whereHave('offers',function($query){
+                    ->whereHas('offers',function($query){
                         $query->where(function($query){
                             $query->where('offers.end_at','<', now());
                         });
@@ -41,7 +41,7 @@ class OfferController extends DashboardController
                     ->get(['id', 'name']),
                 'products' => $this->productRepository->query()
                     ->whereDoesntHave('offers')
-                    ->whereHave('offers',function($query){
+                    ->whereHas('offers',function($query){
                         $query->where(function($query){
                             $query->where('offers.end_at','<', now());
                         });
