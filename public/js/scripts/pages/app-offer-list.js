@@ -333,7 +333,7 @@ $(document).ready(function () {
                 $select.append(new Option(`#${id}`, id, false, false)); // temp label if missing
             }
         });
-        
+        $select.val(ids).trigger('change'); // Select2 refresh
     }
 
     $(document).on('click', '.edit-details', function (e) {
@@ -370,20 +370,22 @@ $(document).ready(function () {
             $('.productsField').removeClass('d-none');
             $('.categoriesField').addClass('d-none');
             selectValues($('#editProductsSelect'), productIds);
-            selectValues($('#editCategoriesSelect'), []); // clear other
+            // selectValues($('#editCategoriesSelect'), []); // clear other
         } else if (isCategories) {
             $('.categoriesField').removeClass('d-none');
             $('.productsField').addClass('d-none');
             selectValues($('#editCategoriesSelect'), categoryIds);
-            selectValues($('#editProductsSelect'), []); // clear other
-        } else {
-            $('.productsField, .categoriesField').addClass('d-none');
-            selectValues($('#editProductsSelect'), []);
-            selectValues($('#editCategoriesSelect'), []);
+            // selectValues($('#editProductsSelect'), []); // clear other
         }
+        // } else {
+        //     $('.productsField, .categoriesField').addClass('d-none');
+        //     selectValues($('#editProductsSelect'), []);
+        //     selectValues($('#editCategoriesSelect'), []);
+        // }
 
         $m.modal('show');
     });
+
 
 
     $(document).on("click", ".open-delete-offer-modal", function () {
