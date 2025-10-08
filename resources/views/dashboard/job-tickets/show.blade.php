@@ -281,7 +281,6 @@
 
         /* Place the ticket at the top-left of the page */
         #ticketArea {
-            position: absolute !important;
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
@@ -297,5 +296,5 @@
 
 </style>
 
-    
+
 @endsection
