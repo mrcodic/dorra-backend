@@ -136,6 +136,8 @@ return [
         'numbers' => 'Your password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special symbol. Example: MyP@ssw0rd!',
         'symbols' => 'Your password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special symbol. Example: MyP@ssw0rd!',
     ],
+    'start_at' => 'Start Date',
+    'end_at' => 'End Date',
 
 
 
