@@ -274,8 +274,8 @@ $(document).ready(function () {
         $m.find('#showStartDate').val(start);
         $m.find('#showEndDate').val(end);
 
-        const isProducts   = (type === '2' || type === 'products' || type === 'product');
-        const isCategories = (type === '1' || type === 'categories' || type === 'category');
+        const isProducts   = (type === '1' || type === 'products' || type === 'product');
+        const isCategories = (type === '2' || type === 'categories' || type === 'category');
 
         // set radios
         $m.find('#showApplyToProducts').prop('checked', isProducts);
