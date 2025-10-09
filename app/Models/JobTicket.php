@@ -38,27 +38,27 @@ class JobTicket extends Model
     public function getBarcodePngUrlAttribute(): ?string
     {
         if (!$this->code) return null;
-        return app(BarcodeService::class)->savePng1D($this->code);
+        return app(BarcodeService::class)->savePng1D('job-tickets',$this->code);
     }
 
     public function getBarcodeSvgUrlAttribute(): ?string
     {
         if (!$this->code) return null;
-        return app(BarcodeService::class)->saveSvg1D($this->code);
+        return app(BarcodeService::class)->saveSvg1D('job-tickets',$this->code);
     }
 
     public function getQrPngUrlAttribute(): ?string
     {
         if (!$this->code) return null;
         $payload = $this->code;
-        return app(BarcodeService::class)->savePngQR($payload, scale: 6);
+        return app(BarcodeService::class)->savePngQR('job-tickets',$payload, scale: 6);
     }
 
     public function getQrSvgUrlAttribute(): ?string
     {
         if (!$this->code) return null;
         $payload = $this->code;
-        return app(BarcodeService::class)->saveSvgQR($payload, width: 4, height: 4);
+        return app(BarcodeService::class)->saveSvgQR('job-tickets',$payload, width: 4, height: 4);
     }
 
     public function orderItem(): BelongsTo
