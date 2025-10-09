@@ -45,7 +45,7 @@ class Order extends Model
     ];
     public function getBarcodePngUrlAttribute(): ?string
     {
-        $jobsDataUrl = route("job-tickets.index",['search_value'=> $this->order_number]);
+        $jobsDataUrl = route("jobs.index",['search_value'=> $this->order_number]);
 
         if (!$jobsDataUrl) return null;
         return app(BarcodeService::class)->savePng1D('orders',$jobsDataUrl);
@@ -53,7 +53,7 @@ class Order extends Model
 
     public function getBarcodeSvgUrlAttribute(): ?string
     {
-        $jobsDataUrl = route("job-tickets.index",['search_value'=> $this->order_number]);
+        $jobsDataUrl = route("jobs.index",['search_value'=> $this->order_number]);
 
         if (!$jobsDataUrl) return null;
         return app(BarcodeService::class)->saveSvg1D('orders',$jobsDataUrl);
@@ -61,14 +61,14 @@ class Order extends Model
 
     public function getQrPngUrlAttribute(): ?string
     {
-        $jobsDataUrl = route("job-tickets.index",['search_value'=> $this->order_number]);
+        $jobsDataUrl = route("jobs.index",['search_value'=> $this->order_number]);
         if (!$jobsDataUrl) return null;
         return app(BarcodeService::class)->savePngQR('orders',$jobsDataUrl, scale: 6);
     }
 
     public function getQrSvgUrlAttribute(): ?string
     {
-        $jobsDataUrl = route("job-tickets.index",['search_value'=> $this->order_number]);
+        $jobsDataUrl = route("jobs.index",['search_value'=> $this->order_number]);
         if (!$jobsDataUrl) return null;
         return app(BarcodeService::class)->saveSvgQR('orders',$jobsDataUrl, width: 4, height: 4);
 
