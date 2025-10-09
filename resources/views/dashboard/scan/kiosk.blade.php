@@ -192,7 +192,7 @@
 
             // ---------- Camera mode (html5-qrcode) ----------
             async function onScanSuccess(decodedText) {
-                console.log("Scanned:", decodedText); 
+                console.log("Scanned:", decodedText);
                 const code = (decodedText || '').trim();
                 if (!code) return;
                 inputCode.value = code;
