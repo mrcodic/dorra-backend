@@ -83,7 +83,10 @@ var dt_user_table = $(".order-list-table").DataTable({
            render: function(data, type, row) {
     return `
         <div class="d-flex gap-1">
-            <a href="/orders/${data}" class="">
+            <a href="/orders/print/${data}" class="">
+                <i data-feather="printer"></i>
+            </a>
+               <a href="/orders/${data}" class="">
                 <i data-feather="eye"></i>
             </a>
             <a href="/orders/${data}/edit" class="">

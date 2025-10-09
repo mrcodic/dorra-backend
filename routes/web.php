@@ -255,7 +255,8 @@ Route::prefix('api/v1/')->group(function () {
         Route::post("step6", 'storeStep6')->name('step6');
         Route::put('orders/{order}/edit-shipping-addresses', 'editShippingAddresses')->name('edit-shipping-addresses');
         Route::delete('orders/{orderId}/designs/{designId}', 'deleteDesign')->name('designs.delete');
-        Route::get('/print','print')->name('print');
+        Route::get('/print','printNewOrders')->name('print');
+        Route::get('/print/{order}','print')->name('printOrder');
     });
     Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'destroy']);
     Route::patch('templates/{template}', [TemplateController::class, 'updateEditorData']);

@@ -670,7 +670,7 @@ class OrderService extends BaseService
 
     }
 
-    public function print()
+    public function printNewOrders()
     {
         $orders = $this->repository->query()
             ->whereStatus(StatusEnum::CONFIRMED)
@@ -682,6 +682,10 @@ class OrderService extends BaseService
         $html = view('dashboard.orders._print-template', compact('orders'))->render();
         $this->repository->query()->whereIn('id', $orders->pluck('id'))->update(['is_already_printed' => 1]);
         return $html;
+    }
+    public function print($order)
+    {
+        return view('dashboard.orders._print-one-template', compact('order'))->render();
     }
 
     private function attachDesignsToOrder($order, $designsData)

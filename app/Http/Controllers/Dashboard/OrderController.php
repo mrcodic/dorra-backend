@@ -203,6 +203,11 @@ class OrderController extends DashboardController
         return response()->json(['success' => false, 'message' => 'Location not found.']);
     }
 
+    public function printNewOrders(): JsonResponse
+    {
+        $html = $this->orderService->printNewOrders();
+        return response()->json(['html' => $html]);
+    }
     public function print(): JsonResponse
     {
         $html = $this->orderService->print();
