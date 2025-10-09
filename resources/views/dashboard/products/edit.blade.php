@@ -413,6 +413,8 @@
                                                     <div class="{{ $hasSpecs ? '' :'d-none' }}" data-repeater-list="specifications">
                                                         @forelse($model->specifications as $specification)
                                                             <div data-repeater-item>
+                                                                <input type="hidden" name="id" value="{{ $specification->id }}">
+
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
@@ -435,6 +437,8 @@
                                                                             @foreach($specification->options as $option)
                                                                                 <div data-repeater-item>
                                                                                     <div class="row d-flex flex-column flex-md-row gap-1 gap-md-0 mt-2">
+                                                                                        <input type="hidden" name="id" value="{{ $option->id }}">
+
                                                                                         <!-- Option Name (EN) -->
                                                                                         <div class="col">
                                                                                             <label class="form-label label-text">Value (EN)</label>

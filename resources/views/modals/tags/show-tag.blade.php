@@ -21,8 +21,12 @@
 
                 <!-- Number of Products -->
                 <div class="mb-1">
-                    <label class="form-label label-text">Number of Products</label>
+                    <label class="form-label label-text">Number of Categories</label>
                     <input type="number" id="tag-products" class="form-control" disabled />
+                </div>
+                <div class="mb-1">
+                    <label class="form-label label-text">Number of Products</label>
+                    <input type="number" id="tag-categories" class="form-control" disabled />
                 </div>
                 <div class="mb-1">
                     <label class="form-label label-text">Number of Templates</label>

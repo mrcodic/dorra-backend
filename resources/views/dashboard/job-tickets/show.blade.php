@@ -14,6 +14,28 @@
 @endsection
 
 @section('page-style')
+    <style>
+        @media print {
+            /* Hide everything except the printable area */
+            body * { visibility: hidden !important; }
+
+            #ticketArea, #ticketArea * { visibility: visible !important; }
+
+            /* Make the printed section occupy the page cleanly */
+            #ticketArea {
+                position: static !important;   /* keep normal flow */
+                width: 100% !important;
+                background: #fff !important;
+            }
+
+            /* Page setup */
+            @page { size: A4; margin: 12mm; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+            /* Don’t print UI chrome */
+            #printTicketBtn, .btn, .navbar, .footer, .no-print { display: none !important; }
+        }
+    </style>
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
@@ -21,23 +43,13 @@
 @section('content')
 <section class="app-user-view-account">
 
+
+
     {{-- Page header / toolbar --}}
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
         <div class="d-flex align-items-center gap-1 flex-wrap">
             <h5 class="mb-0 d-flex align-items-center gap-2">
                 <span class="badge bg-dark">{{ $model->code }}</span>
-
-                @if($model->orderItem?->order)
-                <a href="{{ route('orders.show', $model->orderItem->order_id) }}" target="_blank"
-                    class="text-decoration-none">
-                    Order {{ $model->orderItem->order->order_number ?? $model->orderItem->order_id }}
-                </a>
-                @endif
-
-                @if($model->orderItem)
-                <span class="text-muted">— {{ $model->orderItem->itemable?->name ?? "Item #{$model->order_item_id}"
-                    }}</span>
-                @endif
             </h5>
         </div>
 
@@ -51,6 +63,7 @@
         </div>
     </div>
 
+    <div id="ticketArea">
     @php
     $specsRaw = $model->specs ?? []; // or the JSON you have
     $specs = is_array($specsRaw) ? $specsRaw : (json_decode($specsRaw ?? '[]', true) ?? []);
@@ -68,46 +81,63 @@
         {{-- Top: Details + Codes + Status --}}
         <div class="p-1 d-flex flex-column flex-md-row gap-2 rounded-3" style="background-color: white">
             <div class="d-flex flex-column">
-                <img src="{{ $model->orderItem->orderable->getMainImageUrl() ?: asset('/images/item-photo.png')}}" alt="item photo" class="mb-2" width="320px"
-                    height="320px">
+                <img src="{{ $model->orderItem->orderable?->getMainImageUrl() ?: asset('/images/item-photo.png')}}"
+                    alt="item photo" class="mb-2" width="320px" height="320px">
+                @if($model->jobEvents->last()?->admin)
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
-                        <p style="color: #424746; margin: 0; font-size: 16px">Operator:</p>
+                        <p style="color: #424746; margin: 0; font-size: 16px">Last Operator:</p>
                         <div class="d-flex align-items-center gap-1">
-                            <img src="{{asset('/images/admin-avatar.png')}}" alt="Admin avatar">
+                            <img src="{{ $model->jobEvents->last()?->admin?->image?->getUrl() ?: asset('/images/admin-avatar.png') }}"
+                                alt="Admin avatar">
                             <div class="d-flex flex-column">
-                                <h5 style="color: #121212">John Doe</h5>
-                                <p style="margin: 0; color: #424746">Admin</p>
+                                <h5 style="color: #121212">{{ $model->jobEvents->last()?->admin?->name }}</h5>
+                                <p style="margin: 0; color: #424746">{{
+                                    $model->jobEvents->last()?->admin?->roles->first()?->name }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
+                @endif
                 <hr>
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Order ID:</p>
                         <div class="d-flex align-items-center justify-content-between">
-                            <p style="margin: 0; color: #121212">{{ $model->code }}</p>
-                            <a href="{{ route("orders.show",$model->orderItem->order->id) }}" style="margin: 0; color: #24B094; cursor: pointer">Go to Order</a>
+                            <p style="margin: 0; color: #121212">{{ $model->orderItem->order->order_number }}</p>
+                            <a href="{{ route('orders.show',$model->orderItem->order->id) }}"
+                                style="margin: 0; color: #24B094; cursor: pointer">Go to Order</a>
+                        </div>
+                        <p style="color: #424746; margin: 0; font-size: 16px">Order Item ID:</p>
+
+                        <div class="d-flex align-items-center justify-content-between">
+                            <p style="margin: 0; color: #121212">{{ $model->orderItem->id }}</p>
+                        </div>
+                        <p style="color: #424746; margin: 0; font-size: 16px">Order Item Quantity:</p>
+
+                        <div class="d-flex align-items-center justify-content-between">
+                            <p style="margin: 0; color: #121212">{{ $model->orderItem->quantity }}</p>
                         </div>
                     </div>
                 </div>
                 <hr>
+                @if($model->orderItem->itemable?->types)
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
                         <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
+                            @foreach($model->orderItem->itemable->types as $type)
                             <div class="d-flex flex-column">
-                                <p style="margin: 0; color: #121212">Design</p>
-                                <img src="{{$model->orderItem->itemable->getImageUrl()}}" alt="item photo">
+                                <p style="margin: 0; color: #121212">{{ $type->value->label() }} Design</p>
+                                <img class="img-fluid rounded" style="max-height:200px"
+                                    src="{{$model->orderItem->itemable->getImageUrlForType($type->value->label())}}"
+                                    alt="item photo">
                             </div>
-{{--                            <div class="d-flex flex-column">--}}
-{{--                                <p style="margin: 0; color: #121212">Back Design</p>--}}
-{{--                                <img src="{{asset('/images/item-photo.png')}}" alt="item photo">--}}
-{{--                            </div>--}}
+                            @endforeach
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
             {{-- Details --}}
             <div class="d-flex flex-column">
@@ -121,29 +151,50 @@
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Station:</p>
                                 <span class="rounded-3"
-                                    style="color: #424746; background-color: #FAFBFC; padding: 7px">{{ $model->station?->name }}</span>
+                                    style="color: #424746; background-color: #FAFBFC; padding: 7px">{{
+                                    $model->station?->name }}</span>
                             </div>
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Status:</p>
                                 <span class="rounded-3"
-                                    style="color: #424746; background-color: #CED5D4; padding: 7px">{{ $model->currentStatus?->name }}</span>
+                                    style="color: #424746; background-color: #CED5D4; padding: 7px">{{
+                                    $model->currentStatus?->name }}</span>
                             </div>
                         </div>
 
                         <div class="d-flex gap-2 gap-md-4">
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Priority:</p>
-                                <span class="rounded-3"
-                                    style="color: white; background-color: {{ $model->priority == \App\Enums\JobTicket\PriorityEnum::STANDARD ? '#F8AB1B' : '#E74943' }}; padding: 7px">{{ $model->priority->label() }}</span>
+                                <span class="rounded-3" @php use App\Enums\JobTicket\PriorityEnum; $bg=match
+                                    ($model->priority) {
+                                    PriorityEnum::STANDARD => '#F8AB1B',
+                                    PriorityEnum::RUSH => '#E74943',
+                                    default => null,
+                                    };
+                                    @endphp
+
+                                    <span @if($bg) style="color:white;background-color:{{ $bg }};padding:7px" @endif>
+                                        {{ $model->priority?->label() }}
+                                    </span>
                             </div>
                             <div class="d-flex gap-1 align-items-center">
                                 <p style="color: #424746; margin:0">Due Date:</p>
-                                <span class="rounded-3" style="color: #424746; padding: 7px">{{ $model->due_at?->format("d/m/Y") }}</span>
+                                <span class="rounded-3" style="color: #424746; padding: 7px">{{
+                                    $model->due_at?->format("d/m/Y") }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 {{-- Codes card --}}
+                <div class="row g-1 text-center mt-2">
+                    @if($model->station_id && $model->current_status_id)
+                    <div class="col-12">
+                        {{-- Code128 --}}
+                        <img src="{{ $model->qr_png_url }}"
+                             alt="QR"
+                             style="width:200px; height:auto; border:1px solid #ddd; border-radius:6px; padding:4px;">
+                    </div>
+                </div>
                 <div class="row g-1 text-center mt-2">
                     <div class="col-12">
                         {{-- Code128 --}}
@@ -151,7 +202,7 @@
                             class="img-fluid border rounded p-2 w-100">
                     </div>
                 </div>
-
+                @endif
                 {{-- Specifications --}}
                 @php
                 $specsRaw = $model->specs ?? []; // or the JSON you have
@@ -182,9 +233,7 @@
                 @endif
             </div>
         </div>
-
-
-
+    </div>
 
 </section>
 @endsection
@@ -221,4 +270,29 @@
 <script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+{{-- Page js files --}}
+<script src="{{ asset('js/scripts/pages/modal-edit-user.js') }}?v={{ time() }}"></script>
+<script src="{{ asset(mix('js/scripts/pages/app-user-view-account.js')) }}"></script>
+<script src="{{ asset(mix('js/scripts/pages/app-user-view.js')) }}"></script>
+{{--<script>--}}
+{{--    document.addEventListener('DOMContentLoaded', () => {--}}
+{{--        document.getElementById('printTicketBtn')?.addEventListener('click', () => {--}}
+{{--            window.open("{{ route('job-tickets.pdf', $model->id) }}", "_blank");--}}
+{{--        });--}}
+{{--    });--}}
+{{--</script>--}}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('printTicketBtn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.print();
+        });
+    });
+</script>
+
+
+
+
 @endsection

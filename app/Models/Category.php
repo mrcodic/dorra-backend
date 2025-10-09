@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -119,11 +120,53 @@ class Category extends Model implements HasMedia
             ])
             ->withTimestamps();
     }
-    public function confirmedOrders()
+    public function confirmedOrders(): MorphToMany
     {
         return $this->morphToMany(Order::class,'orderable','order_items')
             ->where('status', \App\Enums\Order\StatusEnum::CONFIRMED);
     }
+
+    public function offers(): MorphToMany
+    {
+        return $this->morphToMany(Offer::class, 'offerable')
+            ->withTimestamps();
+    }
+    public function lastOffer(): BelongsTo
+    {
+        return $this->belongsTo(Offer::class, 'last_offer_id');
+    }
+
+
+    public function scopeWithLastOfferId(Builder $q): Builder
+    {
+        $offerables = 'offerables';
+        $offers     = 'offers';
+        $table      = $this->getTable();
+
+
+        $morphType  = $this->getMorphClass();
+
+
+        if (empty($q->getQuery()->columns)) {
+            $q->select("$table.*");
+        }
+
+        return $q->addSelect([
+            'last_offer_id' => DB::table($offerables)
+                ->join($offers, "$offers.id", '=', "$offerables.offer_id")
+                ->select("$offers.id")
+                ->whereColumn("$offerables.offerable_id", "$table.id")
+                ->where("$offerables.offerable_type", $morphType)
+                ->where(function ($qq) use ($offers) {
+                    $qq->whereNull("$offers.end_at")
+                        ->orWhere("$offers.end_at", '>=', now());
+                })
+
+                ->orderByDesc("$offerables.id")
+                ->limit(1),
+        ]);
+    }
+
     protected function rating(): Attribute
     {
         return Attribute::make(

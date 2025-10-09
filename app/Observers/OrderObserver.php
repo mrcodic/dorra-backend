@@ -37,52 +37,73 @@ class OrderObserver
     public function updated(Order $order): void
     {
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
-            $order->loadMissing(['paymentMethod']);
+            $order->loadMissing(['paymentMethod', 'orderItems']);
+
             if ($order->paymentMethod?->code === 'cash_on_delivery') {
                 $order->update([
-                        'payment_status' => \App\Enums\Payment\StatusEnum::PAID
-                    ]);
-            }
-            $jobTicket =      $order->orderItems->each(function (OrderItem $orderItem) use ($order) {
-                $sequence = JobTicket::where('order_item_id',$orderItem->id)->count() + 1;
-
-               return  JobTicket::firstOrCreate( [
-                    'order_item_id' => $orderItem->id,
-                ],[
-                    'code' => sprintf(
-                        "JT-%s-%d-%d-%02d",
-                        now()->format('Ymd'),
-                        $order->id,
-                        $orderItem->id,
-                        $sequence
-                    ),
-                    'order_item_id' => $orderItem->id,
-                    'specs' => $orderItem->specs->map(fn($item) => [
-                        'spec_name' => $item->spec_name,
-                        'option_name' => $item->option_name,
-                    ])->toArray(),
+                    'payment_status' => \App\Enums\Payment\StatusEnum::PAID
                 ]);
-            });
-            if ($jobTicket->wasRecentlyCreated) {
-                $svc = app(BarcodeService::class);
-
-                $svc->savePng1D($jobTicket->code, 'C128', scale: 3, height: 80);
-                $svc->saveSvg1D($jobTicket->code, 'C128', width: 2, height: 60, withText: true);
             }
-            CreateInvoiceJob::dispatch($order);
 
+
+            $tickets = $order->orderItems->map(function (OrderItem $orderItem) use ($order) {
+
+                $sequence = JobTicket::where('order_item_id', $orderItem->id)->count() + 1;
+
+                return JobTicket::firstOrCreate(
+                    ['order_item_id' => $orderItem->id],
+                    [
+                        'code' => sprintf(
+                            "JT-%s-%d-%d-%02d",
+                            now()->format('Ymd'),
+                            $order->id,
+                            $orderItem->id,
+                            $sequence
+                        ),
+                        'specs' => $orderItem->specs?->map(fn ($item) => [
+                            'spec_name'   => $item->spec_name,
+                            'option_name' => $item->option_name,
+                        ])->toArray(),
+                    ]
+                );
+            });
+
+
+            if ($tickets->isNotEmpty()) {
+                /** @var \App\Services\BarcodeService $svc */
+                $svc = app(\App\Services\BarcodeService::class);
+
+                foreach ($tickets as $ticket) {
+                    if ($ticket->wasRecentlyCreated) {
+                        // 1D
+                        $svc->savePng1D($ticket->code, 'C128', scale: 4, height: 120);
+                        $svc->saveSvg1D($ticket->code, 'C128', width: 2, height: 60, withText: true);
+
+                        // 2D (QR) – Change $qrPayload to whatever you want encoded (e.g., URL to the ticket)
+                        $qrPayload = $ticket->code; // or route('tickets.show', $ticket), etc.
+                        $svc->savePngQR($qrPayload, scale: 6);
+                        $svc->saveSvgQR($qrPayload, width: 4, height: 4);
+                    }
+                }
+            }
+
+
+            CreateInvoiceJob::dispatch($order);
         }
+
         if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
             $order->loadMissing(['paymentMethod']);
+
             if ($order->paymentMethod?->code === 'cash_on_delivery') {
                 $order->update([
-                        'payment_status' => \App\Enums\Payment\StatusEnum::PENDING
-                    ]);
+                    'payment_status' => \App\Enums\Payment\StatusEnum::PENDING
+                ]);
             }
+
             CreateInvoiceJob::dispatch($order);
         }
-
     }
+
 
     /**
      * Handle the Order "deleted" event.

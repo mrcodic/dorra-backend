@@ -145,6 +145,11 @@ var dt_user_table = $(".order-list-table").DataTable({
     },
 });
 
+function setActiveStatusCard(val){
+
+    $(".status-card").removeClass("selected");
+    if (val) $(`.status-card[data-status="${val}"]`).addClass("selected");
+}
 // Search functionality
 let searchTimeout;
 $('#search-order-form').on('keyup', function () {
@@ -161,6 +166,7 @@ $(".filter-date").on("change", function () {
     dt_user_table.draw();
 });
 $(".filter-status").on("change", function () {
+    setActiveStatusCard($(this).val() || "");
     dt_user_table.draw();
 });
 

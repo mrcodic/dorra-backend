@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\JobTicket;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\{JsonResponse, Request};
@@ -27,7 +30,16 @@ class JobTicketService extends BaseService
             ->when(request()->filled('search_value'), function ($q) {
                 $search = request('search_value');
                 hasMeaningfulSearch($search)
-                    ? $q->where('code', 'like', "%{$search}%")
+                    ? $q->where(function ($q) use ($search) {
+                    $q->whereHas('orderItem', function ($q) use ($search) {
+                                $q->where('id',$search);
+                            })->orWhereHas('orderItem', function ($q) use ($search) {
+                                $q->whereHas('order',function ($q) use ($search){
+                                    $q->where('order_number', 'like', '%' . $search . '%');
+
+                                });
+                            });
+                })
                     : $q->whereRaw('1=0');
             })
             ->when(request()->boolean('overdue'), function ($q) {
@@ -58,8 +70,10 @@ class JobTicketService extends BaseService
             ->editColumn('due_at', fn($job) => $job->due_at?->format('Y-m-d') ?? '-')
             ->addColumn('current_station', fn($job) => $job->station?->name ?? '-')
             ->addColumn('order_number', fn($job) => $job->orderItem->order->order_number ?? '-')
-            ->addColumn('order_item_name', fn($job) => $job->orderItem->orderable->name ?? '-')
-            ->addColumn('order_item_image', fn($job) => $job->orderItem->itemable->getImageUrl())
+            ->addColumn('order_item_name', fn($job) => $job->orderItem->orderable?->name ?? '-')
+            ->addColumn('order_item_quantity', fn($job) => $job->orderItem?->quantity ?? '-')
+            ->addColumn('order_item_id', fn($job) => $job->orderItem?->id ?? '-')
+            ->addColumn('order_item_image', fn($job) => $job->orderItem->itemable->getFrontImageUrl())
             ->make(true);
     }
 
@@ -198,6 +212,26 @@ class JobTicketService extends BaseService
                 'to_status'     => $toStatusName,
             ];
         });
+    }
+
+
+
+    public function downloadPdf(JobTicket $ticket)
+    {
+        $model= $ticket->load([
+            'orderItem.order',
+            'orderItem.itemable.types',
+            'orderItem.orderable',
+            'jobEvents.admin.roles',
+            'station','currentStatus',
+        ]);
+
+        $pdf = Pdf::loadView('dashboard.job-tickets.pdf', compact('model'));
+        $pdf->set_option('isRemoteEnabled', true);
+        $pdf->set_option('isHtml5ParserEnabled', true);
+
+
+        return $pdf->download('job_ticket_'.$ticket->code.'.pdf');
     }
 
 }

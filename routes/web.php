@@ -212,9 +212,12 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'jobs', 'as' => 'job-tickets.', 'controller' => JobTicketController::class,], function () {
         Route::get('/data', 'getData')->name('data');
+        Route::get('/{jobTicket}/pdf', 'pdf')->name('pdf');
+
 //        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::apiResource('/jobs', JobTicketController::class);
+
     Route::get('board', BoardController::class)->name('board');
     Route::view('/scan', 'dashboard.scan.kiosk')->name('scan.kiosk');
     Route::post('/scan', [JobTicketController::class, 'scan'])

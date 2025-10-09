@@ -101,9 +101,27 @@ class Template extends Model implements HasMedia
             ->withTimestamps();
     }
 
-    public function getImageUrl(): string
+    public function getFrontImageUrl(): string
     {
         return $this->getFirstMediaUrl('templates') ?:  asset('images/default-product.png');
+    }
+    public function getBackImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('back_templates') ?:  asset('images/default-product.png');
+    }
+    public function getNoneImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('templates') ?:  asset('images/default-product.png');
+    }
+    public function getImageUrlForType(string $type): string
+    {
+        $type = strtolower($type);
+        return match ($type) {
+            'front' => $this->getFrontImageUrl(),
+            'back'  => $this->getBackImageUrl(),
+
+            default => $this->getNoneImageUrl(),
+        };
     }
 
 

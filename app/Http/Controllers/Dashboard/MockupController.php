@@ -8,6 +8,7 @@ use App\Http\Controllers\Base\DashboardController;
 
 use App\Http\Resources\MockupResource;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Interfaces\TypeRepositoryInterface;
 use App\Services\MockupService;
 use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Mockup\{StoreMockupRequest, UpdateMockupEditorRequest, UpdateMockupRequest};
@@ -18,7 +19,7 @@ class MockupController extends DashboardController
     public function __construct(
         public MockupService              $mockupService,
         public ProductRepositoryInterface $productRepository,
-
+        public TypeRepositoryInterface    $typeRepository,
 
     )
     {
@@ -31,10 +32,11 @@ class MockupController extends DashboardController
         $this->assoiciatedData = [
             'index' => [
                 'products' => $this->productRepository->query()->whereHasMockup(true)->get(['id', 'name']),
+                'types' => $this->typeRepository->query()->get(['id', 'name']),
             ],
         ];
         $this->methodRelations = [
-            'index' => ['product.saves','types'],
+            'index' => ['product.saves', 'types'],
         ];
         $this->resourceClass = MockupResource::class;
     }
@@ -47,7 +49,7 @@ class MockupController extends DashboardController
         $associatedData = $this->getAssociatedData('index');
 
         if (request()->ajax()) {
-            $cards = view('dashboard.partials.filtered-mockups', compact('data','associatedData'))->render();
+            $cards = view('dashboard.partials.filtered-mockups', compact('data', 'associatedData'))->render();
 
             $pagination = '';
             if ($data instanceof \Illuminate\Pagination\LengthAwarePaginator) {
@@ -61,11 +63,9 @@ class MockupController extends DashboardController
                 'pagination' => $pagination,
                 'total' => is_countable($data) ? count($data) : $data->total(),
             ]);
-        }
-        elseif (request()->expectsJson()) {
+        } elseif (request()->expectsJson()) {
             return Response::api(data: MockupResource::collection($data->load('types'))->response()->getData(true));
-        }
-        else{
+        } else {
             return view("dashboard.mockups.index", get_defined_vars());
         }
 

@@ -7,6 +7,7 @@ $.ajaxSetup({
 const dt_user_table = $(".job-list-table").DataTable({
     processing: true,
     serverSide: true,
+    ordering: false,
     ajax: {
         url: jobsDataUrl,
         type: "GET",
@@ -29,19 +30,22 @@ const dt_user_table = $(".job-list-table").DataTable({
         }
     },
     columns: [
-        // {
-        //     data: null,
-        //     defaultContent: "",
-        //     orderable: false,
-        //     render: (data) =>
-        //         `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`,
-        // },
+        {
+            data: null,
+            defaultContent: "",
+            orderable: false,
+            render: (data) =>
+                `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`,
+        },
         {
             data: "order_item_image",
             render: (src) =>
                 `<img src="${src}" alt="Product Image" style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid #ccc;" />`,
         },
-        { data: "code" },
+        { data: "order_item_id" },
+        { data: "order_item_name" },
+        { data: "order_item_quantity" },
+        { data: "order_number" },
         { data: "priority_label" },
         {
             data: "current_station",
@@ -80,8 +84,9 @@ const dt_user_table = $(".job-list-table").DataTable({
         }
         ,
         { data: "due_at" },
-        { data: "order_number" },
-        { data: "order_item_name" },
+
+
+
         {
             data: "id",
             orderable: false,
@@ -123,6 +128,44 @@ const dt_user_table = $(".job-list-table").DataTable({
         paginate: { previous: "&nbsp;", next: "&nbsp;" },
     },
 });
+function highlightStationCard(stationId) {
+    $('.station-card').removeClass('selected');
+    if (stationId) {
+        $(`.station-card[data-station="${stationId}"]`).addClass('selected');
+    }
+}
+
+// Optional: refresh the Status dropdown when station changes
+async function reloadStatusesForStation(stationId) {
+    const $select = $('.filter-status');
+    const url = $('.filter-station').data('statuses-url'); // you already set this in Blade
+    if (!url) return;
+
+    try {
+        const res = await $.ajax({
+            url,
+            type: 'GET',
+            data: { station_id: stationId || '' }
+        });
+
+        $select.empty().append(`<option value="">All Statuses</option>`);
+        (res?.data || []).forEach(s => {
+            // expects {id, name} or adapt as needed
+            $select.append(`<option value="${s.id}">${s.name}</option>`);
+        });
+    } catch (e) {
+        // fallback: keep existing options
+        console.warn('Failed to reload statuses', e);
+    }
+}
+
+function setStationFilter(stationId) {
+    $('.filter-station').val(stationId || '');
+    highlightStationCard(stationId || '');
+    reloadStatusesForStation(stationId || '');
+    // redraw table
+    $('.job-list-table').DataTable().draw();
+}
 
 // ---- events (reload table) ----
 $(document).on("click", ".station-card", function () {
@@ -130,7 +173,7 @@ $(document).on("click", ".station-card", function () {
 
     // set the dropdown filter for consistency
     $(".filter-station").val(station);
-
+    setStationFilter(station);
     // redraw DataTable
     dt_user_table.draw();
 });
@@ -186,6 +229,9 @@ $(".filter-priority").on("change", function () {
     dt_user_table.draw();
 });
 $(document).on("change", ".filter-station", function () {
+    const stationId = String($(this).val() || '');
+    highlightStationCard(stationId);
+    reloadStatusesForStation(stationId);
     dt_user_table.ajax.reload();
 });
 

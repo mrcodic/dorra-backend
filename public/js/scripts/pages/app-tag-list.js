@@ -24,6 +24,7 @@ var dt_user_table = $('.tag-list-table').DataTable({
             } },
         {data: 'name', orderable: false},
         {data: 'no_of_products', orderable: false},
+        {data: 'categories_count', orderable: false},
         {data: 'no_of_templates', orderable: false},
         {data: 'added_date', orderable: false},
 
@@ -40,6 +41,7 @@ var dt_user_table = $('.tag-list-table').DataTable({
                                      data-name_ar="${row.name_ar}"
                                      data-name_en="${row.name_en}"
                                      data-products="${row.no_of_products}"
+                                     data-categories="${row.categories_count}"
                                      data-templates="${row.no_of_templates}"
                                      data-showdate="${row.show_date}">
                                      <i data-feather="eye"></i>
@@ -171,12 +173,14 @@ $(document).ready(function () {
         const tagNameEn = $(this).data('name_en');
         const products = $(this).data('products');
         const templates = $(this).data('templates');
+        const categories = $(this).data('categories');
         const addedDate = $(this).data('showdate');
         const id = $(this).data('id');
         // Populate modal
         $('#showTagModal #tag-name-ar').val(tagNameAR);
         $('#showTagModal #tag-name-en').val(tagNameEn);
         $('#showTagModal #tag-products').val(products);
+        $('#showTagModal #tag-categories').val(categories);
         $('#showTagModal #tag-templates').val(templates);
         $('#showTagModal #tag-date').val(addedDate);
         $('#showTagModal #tag-id').val(id);

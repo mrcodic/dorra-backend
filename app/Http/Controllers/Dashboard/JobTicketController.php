@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Requests\JobTicket\UpdateJobTicketRequest;
+use App\Models\JobTicket;
 use App\Repositories\Interfaces\StationRepositoryInterface;
 use App\Services\JobTicketService;
 use Illuminate\Http\JsonResponse;
@@ -13,8 +14,8 @@ use Illuminate\Support\Facades\Response;
 
 class JobTicketController extends DashboardController
 {
-    public function __construct(public JobTicketService $jobTicketService,
-    StationRepositoryInterface $stationRepository,
+    public function __construct(public JobTicketService    $jobTicketService,
+                                StationRepositoryInterface $stationRepository,
 
     )
     {
@@ -29,10 +30,17 @@ class JobTicketController extends DashboardController
             'index' => [
                 'stations' => $stationRepository->query()->withCount('jobTickets')
                     ->get(),
-            ]
+            ],
         ];
-
+        $this->methodRelations['show'] = [
+            'jobEvents.admin.roles',
+            'jobEvents.admin.media',
+            'orderItem.order',
+            'orderItem.itemable.types',
+            'orderItem.orderable'
+        ];
     }
+
     public function getData(): JsonResponse
     {
         return $this->jobTicketService->getData();
@@ -40,8 +48,13 @@ class JobTicketController extends DashboardController
 
     public function scan(Request $request): JsonResponse
     {
-       $data =  $this->jobTicketService->scan($request);
+        $data = $this->jobTicketService->scan($request);
         return Response::api(data: $data);
 
+    }
+
+    public function pdf(JobTicket $jobTicket)
+    {
+        return $this->jobTicketService->downloadPdf($jobTicket);
     }
 }

@@ -25,29 +25,27 @@
 @endsection
 
 @section('content')
-<div class="card d-flex flex-row">
+<div class="card d-flex flex-column flex-md-row">
     {{-- Left Side: Vertical Tabs --}}
-    <div class="nav flex-column nav-pills  px-2 py-3 gap-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-        <button class="btn profile-tab active" id="tab1-tab" data-bs-toggle="pill" data-bs-target="#tab1" type="button" role="tab" aria-controls="tab1" aria-selected="true">
+    <div class="nav d-flex flex-md-column nav-pills px-2 py-3 gap-1 gap-md-3" id="v-pills-tab" role="tablist">
+        <button class="btn profile-tab active" id="tab1-tab" data-bs-toggle="pill" data-bs-target="#tab1" type="button"
+            role="tab" aria-controls="tab1" aria-selected="true">
             Account Information
         </button>
-        <button class="btn profile-tab" id="tab2-tab" data-bs-toggle="pill" data-bs-target="#tab2" type="button" role="tab" aria-controls="tab2" aria-selected="false">
+        <button class="btn profile-tab" id="tab2-tab" data-bs-toggle="pill" data-bs-target="#tab2" type="button"
+            role="tab" aria-controls="tab2" aria-selected="false">
             Security
         </button>
     </div>
 
     {{-- Right Side: Tab Content --}}
-    <div class="tab-content flex-grow-1 p-3" id="v-pills-tabContent">
+    <div class="tab-content flex-grow-1 px-1 py-3" id="v-pills-tabContent">
         <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
 
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-1">
-                    <img
-                        id="userAvatar"
-                        class="img-fluid rounded-circle mb-2"
-                        src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}"
-                        height="48"
-                        width="48"
+                    <img id="userAvatar" class="img-fluid rounded-circle mb-2"
+                        src="{{ asset('images/portrait/small/avatar-s-2.jpg') }}" height="48" width="48"
                         alt="User avatar" />
                 </div>
                 <div>
@@ -55,7 +53,8 @@
 
                     <!-- Hidden file input -->
                     <input type="file" accept="image/*" id="changeImageInput" style="display: none;" />
-                    <button type="button" class="btn btn-outline-secondary fs-5" id="changePhotoBtn">Change Photo</button>
+                    <button type="button" class="btn btn-outline-secondary fs-5" id="changePhotoBtn">Change
+                        Photo</button>
                 </div>
             </div>
 
@@ -67,7 +66,8 @@
                 <div class="row mb-2">
                     <div class="col-md-10">
                         <label for="first_name" class="form-label label-text ">First Name</label>
-                        <input type="text" id="first_name" name="first_name" value="{{ Auth::user()->first_name }}" class="form-control" placeholder="Enter first name" required>
+                        <input type="text" id="first_name" name="first_name" value="{{ Auth::user()->first_name }}"
+                            class="form-control" placeholder="Enter first name" required>
                     </div>
 
 
@@ -77,7 +77,8 @@
 
                     <div class="col-md-10">
                         <label for="last_name" class="form-label label-text ">Last Name</label>
-                        <input type="text" id="last_name" name="last_name" value="{{ Auth::user()->last_name }}" class="form-control" placeholder="Enter last name" required>
+                        <input type="text" id="last_name" name="last_name" value="{{ Auth::user()->last_name }}"
+                            class="form-control" placeholder="Enter last name" required>
                     </div>
 
 
@@ -87,26 +88,30 @@
                 <div class="row mb-2">
                     <div class="col-md-10">
                         <label for="email" class="form-label label-text ">Email Address</label>
-                        <input type="email" id="email" name="email" value="{{ Auth::user()->email }}" class="form-control" placeholder="Enter email address" required>
+                        <input type="email" id="email" name="email" value="{{ Auth::user()->email }}"
+                            class="form-control" placeholder="Enter email address" required>
                     </div>
 
                 </div>
                 <!-- Phone Number (Country Code + Number) -->
                 <div class="row mb-2">
-                    <div class="col-md-2">
+                    <div class="col-md-4 col-lg-2">
                         <label for="country_code" class="form-label label-text ">Country Code</label>
                         <select id="country_code" name="country_code_id" class="form-select" required>
                             @foreach($countryCodes as $countryCode)
-                                <option value="{{ $countryCode?->id }}" @selected(Auth::user()->countryCode?->id == $countryCode?->id)>{{ $countryCode?->phone_code }} ({{ $countryCode->iso_code }})</option>
+                            <option value="{{ $countryCode?->id }}" @selected(Auth::user()->countryCode?->id ==
+                                $countryCode?->id)>{{ $countryCode?->phone_code }} ({{ $countryCode->iso_code }})
+                            </option>
 
                             @endforeach
 
                             <!-- Add more countries as needed -->
                         </select>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-6 col-lg-8">
                         <label for="phone_number" class="form-label label-text ">Phone Number</label>
-                        <input type="tel" id="phone_number" name="phone_number" value="{{ Auth::user()->phone_number }}" class="form-control" placeholder="Enter phone number" required>
+                        <input type="tel" id="phone_number" name="phone_number" value="{{ Auth::user()->phone_number }}"
+                            class="form-control" placeholder="Enter phone number" required>
                     </div>
 
                 </div>
@@ -131,15 +136,12 @@
 
                     </div>
                     <div class="input-group input-group-merge form-password-toggle">
-                        <input
-                            type="password"
-                            class="form-control form-control-merge"
-                            id="old-password"
-                            name="old-password"
-                            placeholder="Enter old password" />
+                        <input type="password" class="form-control form-control-merge" id="old-password"
+                            name="old-password" placeholder="Enter old password" />
                     </div>
                     <div class="w-100 text-end">
-                        <a href="#" class="text-primary text-decoration-underline fs-6 text-end" style="color: #24B094 !important;">Forgot password?</a>
+                        <a href="#" class="text-primary text-decoration-underline fs-6 text-end"
+                            style="color: #24B094 !important;">Forgot password?</a>
                     </div>
                 </div>
 
@@ -157,7 +159,8 @@
                 </div>
                 <div class="mb-1">
                     <label class="form-label label-text" for="confirm-new-password">Confirm Password</label>
-                    <input type="password" class="form-control" id="confirm-new-password" placeholder="Confirm new password" />
+                    <input type="password" class="form-control" id="confirm-new-password"
+                        placeholder="Confirm new password" />
                 </div>
                 <div class="d-flex gap-1 justify-content-end mt-2">
                     <button type="button" class="btn btn-outline-secondary fs-16">Cancel</button>

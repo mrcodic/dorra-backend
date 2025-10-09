@@ -104,8 +104,10 @@ class UpdateProductRequest extends BaseRequest
 
             'specifications' => ['sometimes', 'array'],
             'specifications.*.name_en' => 'sometimes|string',
+            'specifications.*.id' => 'sometimes|integer',
             'specifications.*.name_ar' => 'sometimes|string',
             'specifications.*.specification_options' => ['sometimes', 'array', 'min:1'],
+            'specifications.*.specification_options.*.id' => 'required_with:specifications|integer',
             'specifications.*.specification_options.*.value_en' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.value_ar' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.price' => 'nullable|numeric|min:1',

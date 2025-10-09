@@ -181,24 +181,25 @@
                                 <!-- Single Review -->
                                 <div class="review-wrapper" data-review-id="{{ $review->id }}">
                                     <div class="d-flex align-items-center gap-1 mb-2">
-                                        <img src="{{$review->reviewable->getMainImageUrl() }}" alt="Avatar"
+                                        <img src="{{$review->reviewable?->getMainImageUrl() }}" alt="Avatar"
                                             class="rounded-circle" width="50" height="50">
                                         <div>
                                             <div class="fw-bold text-dark fs-4">{{ $review->review }}</div>
                                         </div>
                                     </div>
-
-                                    @forelse($review->images as $image)
-                                    <div class="mb-2">
-                                        <img src="{{ $image?->getUrl() }}" alt="Review Image" class="img-fluid rounded"
-                                            style="width: 80px;height: 80px">
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @forelse($review->images as $image)
+                                        <div class="mb-2">
+                                            <img src="{{ $image?->getUrl() }}" alt="Review Image" class="img-fluid rounded"
+                                                style="width: 80px;height: 80px">
+                                        </div>
+                                        @empty
+                                        <div class="mb-2 text-muted" style="font-style: italic;">No review
+                                            images
+                                            available.
+                                        </div>
+                                        @endforelse
                                     </div>
-                                    @empty
-                                    <div class="mb-2 text-muted" style="font-style: italic;">No review
-                                        images
-                                        available.
-                                    </div>
-                                    @endforelse
                                     <div class="mb-2 d-flex align-items-center gap-2">
                                         <div class="rating-stars text-warning" data-rating="{{ $review->rating }}">
                                         </div>
@@ -243,7 +244,7 @@
                                     <div class="mb-2 label-text mx-5 reply-comment">
                                         {{ $review->comment }}
                                     </div>
-                                    <div class="mb-2">
+                                    <div class="mb-2 d-flex flex-wrap gap-1">
                                         <img src="{{ $review->getFirstMediaUrl('review_reply') ?? " -"}}"
                                             alt="Review Image" class="img-fluid rounded reply-image"
                                             style="width: 80px;height: 80px">
