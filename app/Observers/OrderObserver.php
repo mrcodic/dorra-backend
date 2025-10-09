@@ -3,7 +3,10 @@
 namespace App\Observers;
 
 use App\Jobs\ProcessConfirmedOrderJob;
+use App\Jobs\ProcessPreparedOrderJob;
+use App\Jobs\ProcessShippedOrderJob;
 use App\Models\Admin;
+use App\Models\Inventory;
 use App\Models\JobTicket;
 use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
@@ -40,6 +43,13 @@ class OrderObserver
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
+        }
+        if ($order->wasChanged('status') && $order->status === StatusEnum::PREPARED) {
+            ProcessPreparedOrderJob::dispatch($order);
+        }
+        if ($order->wasChanged('status') && $order->status === StatusEnum::SHIPPED) {
+
+          ProcessShippedOrderJob::dispatch($order);
         }
 
         if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
