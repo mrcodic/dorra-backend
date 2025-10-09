@@ -11,19 +11,19 @@
 
 @section('content')
 <div class="bg-white rounded-3 p-2">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <div>
-            <span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">{{
-                $model->order_number }}</span></div>
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div class="d-flex align-items-center flex-wrap gap-1">
+            <span class="fs-6 text-dark fw-bold">Order Number:</span>
+            <span class="fs-5 text-black fw-bold">{{ $model->order_number }}</span>
+        </div>
+
         @if($model->status == \App\Enums\Order\StatusEnum::CONFIRMED)
-
-        <button type="button" id="print-order" class="btn btn-outline-primary w-100 w-md-auto">
-            <i data-feather="printer"></i>
-            Print
-        </button>
+            <button type="button" id="print-order" class="btn btn-outline-primary btn-sm">
+                <i data-feather="printer" class="me-25"></i> Print
+            </button>
         @endif
-
     </div>
+
     <form>
         <div class="row">
             <!-- Left Column -->
