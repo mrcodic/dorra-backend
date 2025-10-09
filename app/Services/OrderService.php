@@ -595,7 +595,7 @@ class OrderService extends BaseService
                     ];
                 })->toArray()
             );
-            $cartItems  = $cart->items->values();
+            $cartItems = $cart->items->values();
             $orderItems = $orderItems->values();
 
             $orderItems->each(function ($orderItem, $i) use ($cartItems) {
@@ -604,11 +604,11 @@ class OrderService extends BaseService
                 $cartItem->loadMissing(['specs.productSpecification', 'specs.productSpecificationOption']);
                 $cartItem->specs->each(function ($spec) use ($orderItem) {
                     $orderItem->specs()->create([
-                        'spec_name'                 => $spec->productSpecification?->name,
-                        'option_name'               => $spec->productSpecificationOption?->value,
-                        'option_price'              => $spec->productSpecificationOption?->price,
-                        'product_specification_id'  => $spec->productSpecification?->id,
-                        'spec_option_id'            => $spec->productSpecificationOption?->id,
+                        'spec_name' => $spec->productSpecification?->name,
+                        'option_name' => $spec->productSpecificationOption?->value,
+                        'option_price' => $spec->productSpecificationOption?->price,
+                        'product_specification_id' => $spec->productSpecification?->id,
+                        'spec_option_id' => $spec->productSpecificationOption?->id,
                     ]);
                 });
             });
@@ -676,8 +676,14 @@ class OrderService extends BaseService
             ->whereStatus(StatusEnum::CONFIRMED)
             ->whereIsAlreadyPrinted(0)
             ->get();
-        return view('dashboard.orders._print-template', compact('orders'))->render();
+        if ($orders->isEmpty()) {
+            return '<h4>No new confirmed orders to print.</h4>';
+        }
+        $html = view('dashboard.orders._print-template', compact('orders'))->render();
+        $this->repository->query()->whereIn('id', $orders->pluck('id'))->update(['is_already_printed' => 1]);
+        return $html;
     }
+
     private function attachDesignsToOrder($order, $designsData)
     {
         $pivotData = [];

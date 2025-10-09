@@ -23,7 +23,7 @@
                 <tbody>
                 @foreach($order->orderItems as $item)
                     <tr>
-                        <td style="border:1px solid #ddd;padding:5px;">{{ $item->name }}</td>
+                        <td style="border:1px solid #ddd;padding:5px;">{{ $item->orderable?->name }}</td>
                         <td style="border:1px solid #ddd;padding:5px;">{{ $item->quantity }}</td>
                         <td style="border:1px solid #ddd;padding:5px;">{{ number_format($item->sub_total, 2) }}</td>
                     </tr>
