@@ -28,6 +28,7 @@ class Order extends Model
         'subtotal',
         'total_price',
         'status',
+        'is_already_printed',
     ];
 
     protected $casts = [
