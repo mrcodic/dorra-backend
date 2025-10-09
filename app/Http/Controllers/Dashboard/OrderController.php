@@ -49,7 +49,7 @@ class OrderController extends DashboardController
                 'locations' => $this->LocationRepository->query(['id', 'name', 'address_line', 'latitude', 'longitude'])->get(),
             ],
             'index' => [
-                'searchValue' => request('search_value')
+                'searchValue' => request('search_value') ?? ''
             ]
 
         ];
