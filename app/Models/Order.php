@@ -40,24 +40,9 @@ class Order extends Model
         'payment_status' => \App\Enums\Payment\StatusEnum::PENDING,
     ];
     protected $appends = [
-        'barcode_png_url', 'barcode_svg_url',
         'qr_png_url', 'qr_svg_url',
     ];
-    public function getBarcodePngUrlAttribute(): ?string
-    {
-        $jobsDataUrl = route("jobs.index",['search_value'=> $this->order_number]);
 
-        if (!$jobsDataUrl) return null;
-        return app(BarcodeService::class)->savePng1D('orders',$jobsDataUrl);
-    }
-
-    public function getBarcodeSvgUrlAttribute(): ?string
-    {
-        $jobsDataUrl = route("jobs.index",['search_value'=> $this->order_number]);
-
-        if (!$jobsDataUrl) return null;
-        return app(BarcodeService::class)->saveSvg1D('orders',$jobsDataUrl);
-    }
 
     public function getQrPngUrlAttribute(): ?string
     {

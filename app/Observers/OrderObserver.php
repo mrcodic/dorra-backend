@@ -17,7 +17,7 @@ class OrderObserver
     {
         $now = now();
         $dateString = $now->format('d-m-Y');
-        $order->order_number = "#ORD-{$dateString}-".mt_rand(100, 999);
+        $order->order_number = "#ORD-{$dateString}-" . mt_rand(100, 999);
     }
 
     /**
@@ -25,26 +25,25 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
-        if (request()->user() instanceof Admin)
-        {
-            $order->update(["status"=> StatusEnum::CONFIRMED]);
+        if (request()->user() instanceof Admin) {
+            $order->update(["status" => StatusEnum::CONFIRMED]);
         }
 
     }
+
     /**
      * Handle the Order "updated" event.
      */
-    public function updated(Order $order,BarcodeService $svc): void
+    public function updated(Order $order): void
     {
+        $svc = app(BarcodeService::class);
+
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
-            $order->loadMissing(['paymentMethod','orderItems']);
-                $jobsDataUrl = route("jobs.index",['search_value'=> $order->order_number]);
-            // 1D
-            $svc->savePng1D('orders',$jobsDataUrl, 'C128', scale: 4, height: 120);
-            $svc->saveSvg1D('orders',$jobsDataUrl, 'C128', width: 2, height: 60, withText: true);
+            $order->loadMissing(['paymentMethod', 'orderItems']);
+            $jobsDataUrl = route("jobs.index", ['search_value' => $order->order_number]);
             // 2D (QR)
-            $svc->savePngQR('orders',$jobsDataUrl, scale: 6);
-            $svc->saveSvgQR('orders',$jobsDataUrl, width: 4, height: 4);
+            $svc->savePngQR('orders', $jobsDataUrl, scale: 6);
+            $svc->saveSvgQR('orders', $jobsDataUrl, width: 4, height: 4);
 
             if ($order->paymentMethod?->code === 'cash_on_delivery') {
                 $order->update([
@@ -67,8 +66,8 @@ class OrderObserver
                             $orderItem->id,
                             $sequence
                         ),
-                        'specs' => $orderItem->specs?->map(fn ($item) => [
-                            'spec_name'   => $item->spec_name,
+                        'specs' => $orderItem->specs?->map(fn($item) => [
+                            'spec_name' => $item->spec_name,
                             'option_name' => $item->option_name,
                         ])->toArray(),
                     ]
@@ -78,22 +77,20 @@ class OrderObserver
 
             if ($tickets->isNotEmpty()) {
                 /** @var \App\Services\BarcodeService $svc */
-//                $svc = app(\App\Services\BarcodeService::class);
 
                 foreach ($tickets as $ticket) {
                     if ($ticket->wasRecentlyCreated) {
                         // 1D
-                        $svc->savePng1D('job-tickets',$ticket->code, 'C128', scale: 4, height: 120);
-                        $svc->saveSvg1D('job-tickets',$ticket->code, 'C128', width: 2, height: 60, withText: true);
+                        $svc->savePng1D('job-tickets', $ticket->code, 'C128', scale: 4, height: 120);
+                        $svc->saveSvg1D('job-tickets', $ticket->code, 'C128', width: 2, height: 60, withText: true);
 
                         // 2D (QR)
                         $qrPayload = $ticket->code;
-                        $svc->savePngQR('job-tickets',$qrPayload, scale: 6);
-                        $svc->saveSvgQR('job-tickets',$qrPayload, width: 4, height: 4);
+                        $svc->savePngQR('job-tickets', $qrPayload, scale: 6);
+                        $svc->saveSvgQR('job-tickets', $qrPayload, width: 4, height: 4);
                     }
                 }
             }
-
 
 
             CreateInvoiceJob::dispatch($order);
