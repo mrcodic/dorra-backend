@@ -38,7 +38,7 @@ class OrderObserver
     {
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
             $order->loadMissing(['paymentMethod','orderItems']);
-            $jobsDataUrl = route("jobs.data",['search_value'=> $order->order_number]);
+            $jobsDataUrl = route("jobs-tickets.data",['search_value'=> $order->order_number]);
             // 1D
             $svc->savePng1D('orders',$jobsDataUrl, 'C128', scale: 4, height: 120);
             $svc->saveSvg1D('orders',$jobsDataUrl, 'C128', width: 2, height: 60, withText: true);
