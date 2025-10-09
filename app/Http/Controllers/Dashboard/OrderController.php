@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Location;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\OrderService;
 use Illuminate\Support\Facades\Cache;
@@ -47,9 +48,6 @@ class OrderController extends DashboardController
             'edit' => [
                 'countries' => $this->countryRepository->query(['id', 'name'])->get(),
                 'locations' => $this->LocationRepository->query(['id', 'name', 'address_line', 'latitude', 'longitude'])->get(),
-            ],
-            'index' => [
-                'searchValue' => request('search_value') ?? ''
             ]
 
         ];
@@ -205,9 +203,10 @@ class OrderController extends DashboardController
         return response()->json(['success' => false, 'message' => 'Location not found.']);
     }
 
-    public function print()
+    public function print(): JsonResponse
     {
-
+        $html = $this->orderService->print();
+        return response()->json(['html' => $html]);
     }
 
 

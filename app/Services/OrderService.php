@@ -670,6 +670,14 @@ class OrderService extends BaseService
 
     }
 
+    public function print()
+    {
+        $orders = $this->repository->query()
+            ->whereStatus(StatusEnum::CONFIRMED)
+            ->whereIsAlreadyPrinted(0)
+            ->get();
+        return view('orders._print-template', compact('orders'))->render();
+    }
     private function attachDesignsToOrder($order, $designsData)
     {
         $pivotData = [];

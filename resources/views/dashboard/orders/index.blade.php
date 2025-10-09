@@ -287,10 +287,10 @@
 
                     {{-- Add Button - 20% on md+, full width on xs --}}
                     <div class="col-12 col-md-2">
-                        <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route('orders.new.print') }}">
+                        <button type="button" id="print-confirmed-orders" class="btn btn-outline-primary w-100 w-md-auto">
                             <i data-feather="printer"></i>
                             Printing New orders
-                        </a>
+                        </button>
                     </div>
                     <div class="col-12 col-md-2">
                         <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route('orders.create') }}">
@@ -382,6 +382,44 @@
                 const ordersDataUrl = "{{ route('orders.data') }}";
                 const ordersCreateUrl = "{{ route('orders.create') }}";
             </script>
+                <script>
+                    $(document).on('click', '#print-confirmed-orders', function () {
+                        $.ajax({
+                            url: "{{ route('orders.print') }}",
+                            method: "GET",
+                            success: function (response) {
+                                // Create hidden printable iframe
+                                const printWindow = window.open('', '', 'width=900,height=650');
+                                printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Confirmed Orders</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; }
+                            table { border-collapse: collapse; width: 100%; }
+                            th, td { border: 1px solid #ccc; padding: 5px; }
+                            h3 { margin-bottom: 5px; }
+                        </style>
+                    </head>
+                    <body>
+                        ${response.html}
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(() => window.close(), 500);
+                            };
+                        <\/script>
+                    </body>
+                </html>
+            `);
+                                printWindow.document.close();
+                            },
+                            error: function () {
+                                alert('❌ Failed to load confirmed orders for printing.');
+                            }
+                        });
+                    });
+                </script>
 
             {{-- Page js files --}}
             <script src="{{ asset('js/scripts/pages/app-order-list.js') }}?v={{ time() }}"></script>
