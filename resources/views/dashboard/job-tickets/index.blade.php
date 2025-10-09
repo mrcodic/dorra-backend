@@ -208,7 +208,9 @@
                         <i data-feather="search"
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                            id="search-job-form" placeholder="Search item id or order number..." style="height: 38px;">
+                            id="search-job-form" placeholder="Search item id or order number..."
+                               value="{{ request('search_value') }}"
+                               style="height: 38px;">
                         <!-- Clear button -->
                         <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                background: transparent; border: none; font-weight: bold;
