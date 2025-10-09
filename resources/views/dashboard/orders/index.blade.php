@@ -252,6 +252,7 @@
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
 
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                               value="{{ $searchValue }}"
                             id="search-order-form" placeholder="Search order..." style="height: 38px;">
 
                         <!-- Clear button -->

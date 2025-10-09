@@ -48,6 +48,9 @@ class OrderController extends DashboardController
                 'countries' => $this->countryRepository->query(['id', 'name'])->get(),
                 'locations' => $this->LocationRepository->query(['id', 'name', 'address_line', 'latitude', 'longitude'])->get(),
             ],
+            'index' => [
+                'searchValue' => request('search_value')
+            ]
 
         ];
 
