@@ -12,9 +12,17 @@
 @section('content')
 <div class="bg-white rounded-3 p-2">
     <div class="d-flex align-items-center justify-content-between mb-3">
-        <div><span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">{{
+        <div>
+            <span class="fs-16 text-dark fw-bold">Order Number: </span><span class="fs-4 text-black fw-bold">{{
                 $model->order_number }}</span></div>
+        @if($model->status == \App\Enums\Order\StatusEnum::CONFIRMED)
 
+        <button type="button" id="print-order" class="btn btn-outline-primary w-100 w-md-auto">
+            <i data-feather="printer"></i>
+            Print
+        </button>
+        @endif
+            
     </div>
     <form>
         <div class="row">
@@ -198,6 +206,45 @@
 @endsection
 
 @section('page-script')
+    <script>
+        $(document).on('click', '#print-order', function () {
+            $.ajax({
+                url: "{{ route('orders.printOrder',$model) }}",
+                method: "GET",
+                success: function (response) {
+                    // Create hidden printable iframe
+                    const printWindow = window.open('', '', 'width=900,height=650');
+                    printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Confirmed Order</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; }
+                            table { border-collapse: collapse; width: 100%; }
+                            th, td { border: 1px solid #ccc; padding: 5px; }
+                            h3 { margin-bottom: 5px; }
+                        </style>
+                    </head>
+                    <body>
+                        ${response.html}
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(() => window.close(), 500);
+                            };
+                        <\/script>
+                    </body>
+                </html>
+            `);
+                    printWindow.document.close();
+                },
+                error: function () {
+                    alert('❌ Failed to load confirmed orders for printing.');
+                }
+            });
+        });
+    </script>
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://unpkg.com/feather-icons"></script>
