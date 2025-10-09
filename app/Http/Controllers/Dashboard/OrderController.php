@@ -208,9 +208,9 @@ class OrderController extends DashboardController
         $html = $this->orderService->printNewOrders();
         return response()->json(['html' => $html]);
     }
-    public function print(): JsonResponse
+    public function print($order): JsonResponse
     {
-        $html = $this->orderService->print();
+        $html = $this->orderService->print($order);
         return response()->json(['html' => $html]);
     }
 

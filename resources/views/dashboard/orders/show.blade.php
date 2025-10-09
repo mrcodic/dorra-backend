@@ -22,7 +22,7 @@
             Print
         </button>
         @endif
-            
+
     </div>
     <form>
         <div class="row">

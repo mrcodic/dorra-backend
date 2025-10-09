@@ -685,6 +685,7 @@ class OrderService extends BaseService
     }
     public function print($order)
     {
+        $order = $this->repository->find($order);
         return view('dashboard.orders._print-one-template', compact('order'))->render();
     }
 
