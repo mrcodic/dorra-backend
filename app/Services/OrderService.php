@@ -676,7 +676,7 @@ class OrderService extends BaseService
             ->whereStatus(StatusEnum::CONFIRMED)
             ->whereIsAlreadyPrinted(0)
             ->get();
-        return view('orders._print-template', compact('orders'))->render();
+        return view('dashboard.orders._print-template', compact('orders'))->render();
     }
     private function attachDesignsToOrder($order, $designsData)
     {
