@@ -21,7 +21,6 @@ class JobTicket extends Model
         'specs',
         'priority',
         'due_at',
-        'status',
     ];
     protected $casts = [
         'specs' => 'array',
@@ -29,10 +28,7 @@ class JobTicket extends Model
         'priority' => PriorityEnum::class,
         'due_at' => 'date',
     ];
-    protected $attributes = [
-        'status' => StatusEnum::PENDING,
 
-    ];
 
     protected $appends = [
         'barcode_png_url', 'barcode_svg_url',

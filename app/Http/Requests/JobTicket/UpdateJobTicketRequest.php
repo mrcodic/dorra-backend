@@ -17,7 +17,7 @@ class UpdateJobTicketRequest extends BaseRequest
         return [
         'station_id' => 'required|exists:stations,id',
             'priority' =>['required','in:'.PriorityEnum::getValuesAsString()],
-            'due_at' => 'required|date|after_or_equal:today',
+            'due_at' => 'nullable|date|after_or_equal:today',
         ];
 
 

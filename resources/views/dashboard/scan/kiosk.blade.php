@@ -57,7 +57,7 @@
                     <select id="camera-select" class="form-select" style="max-width: 280px;"></select>
                     <button id="start-btn" class="btn btn-success" type="button" disabled>Start</button>
                     <button id="stop-btn" class="btn btn-outline-secondary" type="button" disabled>Stop</button>
-{{--                    <button id="torch-btn" class="btn btn-outline-dark" type="button" disabled>Torch</button>--}}
+                    <button id="torch-btn" class="btn btn-outline-dark" type="button" disabled>Torch</button>
                 </div>
                 <div id="reader" style="width: 100%; max-width: 520px;"></div>
             </div>
@@ -203,9 +203,9 @@
                     showAlert(data.message || 'OK', 'success');
                     toastOk(data.message || 'Scan accepted');
 
-                    lastCodeEl.textContent  = data.data.code ?? code;
-                    lastStnEl.textContent   = data.data.to_station ?? '—';
-                    lastStatusEl.textContent= data.data.to_status  ?? '—';
+                    lastCodeEl.textContent  = data.code ?? code;
+                    lastStnEl.textContent   = data.to_station ?? '—';
+                    lastStatusEl.textContent= data.to_status  ?? '—';
 
                 } catch (err) {
                     try { document.getElementById('beep-ng').play(); } catch(e){}

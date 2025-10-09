@@ -4,11 +4,9 @@ namespace App\Services;
 
 use App\Models\JobTicket;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\{JsonResponse, Request};
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Repositories\Interfaces\{JobEventRepositoryInterface, JobTicketRepositoryInterface, StationRepositoryInterface};
 
 class JobTicketService extends BaseService
