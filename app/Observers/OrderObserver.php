@@ -34,10 +34,17 @@ class OrderObserver
     /**
      * Handle the Order "updated" event.
      */
-    public function updated(Order $order): void
+    public function updated(Order $order,BarcodeService $svc): void
     {
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
-            $order->loadMissing(['paymentMethod', 'orderItems']);
+            $order->loadMissing(['paymentMethod','orderItems']);
+            $jobsDataUrl = route("jobs.data",['search_value'=> $order->order_number]);
+            // 1D
+            $svc->savePng1D('orders',$jobsDataUrl, 'C128', scale: 4, height: 120);
+            $svc->saveSvg1D('orders',$jobsDataUrl, 'C128', width: 2, height: 60, withText: true);
+            // 2D (QR)
+            $svc->savePngQR('orders',$jobsDataUrl, scale: 6);
+            $svc->saveSvgQR('orders',$jobsDataUrl, width: 4, height: 4);
 
             if ($order->paymentMethod?->code === 'cash_on_delivery') {
                 $order->update([
@@ -71,21 +78,22 @@ class OrderObserver
 
             if ($tickets->isNotEmpty()) {
                 /** @var \App\Services\BarcodeService $svc */
-                $svc = app(\App\Services\BarcodeService::class);
+//                $svc = app(\App\Services\BarcodeService::class);
 
                 foreach ($tickets as $ticket) {
                     if ($ticket->wasRecentlyCreated) {
                         // 1D
-                        $svc->savePng1D($ticket->code, 'C128', scale: 4, height: 120);
-                        $svc->saveSvg1D($ticket->code, 'C128', width: 2, height: 60, withText: true);
+                        $svc->savePng1D('job-tickets',$ticket->code, 'C128', scale: 4, height: 120);
+                        $svc->saveSvg1D('job-tickets',$ticket->code, 'C128', width: 2, height: 60, withText: true);
 
-                        // 2D (QR) – Change $qrPayload to whatever you want encoded (e.g., URL to the ticket)
-                        $qrPayload = $ticket->code; // or route('tickets.show', $ticket), etc.
-                        $svc->savePngQR($qrPayload, scale: 6);
-                        $svc->saveSvgQR($qrPayload, width: 4, height: 4);
+                        // 2D (QR)
+                        $qrPayload = $ticket->code;
+                        $svc->savePngQR('job-tickets',$qrPayload, scale: 6);
+                        $svc->saveSvgQR('job-tickets',$qrPayload, width: 4, height: 4);
                     }
                 }
             }
+
 
 
             CreateInvoiceJob::dispatch($order);

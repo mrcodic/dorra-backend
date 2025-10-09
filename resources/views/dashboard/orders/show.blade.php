@@ -30,6 +30,9 @@
                     <label class="form-label fw-bold">Last Name</label>
                     <input type="text" class="form-control" name="last_name"
                         value="{{ $model->orderAddress?->last_name }}" readonly>
+                </div>     <div class="mb-2">
+                    <label class="form-label fw-bold">Qr</label>
+                    <img src="{{ $model->qr_png_url ?? "-" }}" alt="">
                 </div>
                 <div class="mb-2">
                     <label class="form-label fw-bold">Email</label>

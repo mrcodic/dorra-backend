@@ -5,6 +5,7 @@ namespace App\Models;
 
 use App\Enums\Order\StatusEnum;
 use App\Observers\OrderObserver;
+use App\Services\BarcodeService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -38,7 +39,41 @@ class Order extends Model
     protected $attributes = [
         'payment_status' => \App\Enums\Payment\StatusEnum::PENDING,
     ];
+    protected $appends = [
+        'barcode_png_url', 'barcode_svg_url',
+        'qr_png_url', 'qr_svg_url',
+    ];
+    public function getBarcodePngUrlAttribute(): ?string
+    {
+        $jobsDataUrl = route("jobs.data",['search_value'=> $this->order_number]);
 
+        if (!$jobsDataUrl) return null;
+        return app(BarcodeService::class)->savePng1D($jobsDataUrl);
+    }
+
+    public function getBarcodeSvgUrlAttribute(): ?string
+    {
+        $jobsDataUrl = route("jobs.data",['search_value'=> $this->order_number]);
+
+        if (!$jobsDataUrl) return null;
+        return app(BarcodeService::class)->saveSvg1D($jobsDataUrl);
+    }
+
+    public function getQrPngUrlAttribute(): ?string
+    {
+        $jobsDataUrl = route("jobs.data",['search_value'=> $this->order_number]);
+        if (!$jobsDataUrl) return null;
+        return app(BarcodeService::class)->savePngQR($jobsDataUrl, scale: 6);
+    }
+
+    public function getQrSvgUrlAttribute(): ?string
+    {
+        $jobsDataUrl = route("jobs.data",['search_value'=> $this->order_number]);
+
+        if (!$jobsDataUrl) return null;
+        return app(BarcodeService::class)->saveSvgQR($jobsDataUrl, width: 4, height: 4);
+
+    }
     public function totalPrice(): Attribute
     {
         return Attribute::get(function ($value) {

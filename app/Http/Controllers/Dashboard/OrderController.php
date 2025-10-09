@@ -21,12 +21,13 @@ use App\Http\Requests\Order\{StoreOrderRequest, UpdateOrderRequest};
 class OrderController extends DashboardController
 {
     public function __construct(
-        public OrderService $orderService,
+        public OrderService                $orderService,
         public CategoryRepositoryInterface $categoryRepository,
-        public TagRepositoryInterface $tagRepository,
-        public CountryRepositoryInterface $countryRepository,
+        public TagRepositoryInterface      $tagRepository,
+        public CountryRepositoryInterface  $countryRepository,
         public LocationRepositoryInterface $LocationRepository
-    ) {
+    )
+    {
         parent::__construct($orderService);
         $this->storeRequestClass = new StoreOrderRequest();
         $this->updateRequestClass = new UpdateOrderRequest();
@@ -45,20 +46,20 @@ class OrderController extends DashboardController
             ],
             'edit' => [
                 'countries' => $this->countryRepository->query(['id', 'name'])->get(),
-                'locations' => $this->LocationRepository->query(['id', 'name' , 'address_line' , 'latitude' , 'longitude'])->get(),
-                ],
+                'locations' => $this->LocationRepository->query(['id', 'name', 'address_line', 'latitude', 'longitude'])->get(),
+            ],
 
-            ];
+        ];
 
         $this->methodRelations = [
-            'edit' => ['orderItems' , 'orderItems.product', 'orderItems.itemable' ],
-            'show' => ['orderItems.itemable' , 'orderItems.product'],
+            'edit' => ['orderItems', 'orderItems.product', 'orderItems.itemable'],
+            'show' => ['orderItems.itemable', 'orderItems.product'],
         ];
 
     }
 
 
-        public function getData()
+    public function getData()
     {
         return $this->orderService->getData();
     }
@@ -106,40 +107,39 @@ class OrderController extends DashboardController
         return Response::api(
             message: "discount code applied successfully",
             data: [
-                "discount_amount" => getDiscountAmount($code , $orderStepData['pricing_details']['sub_total']),
+                "discount_amount" => getDiscountAmount($code, $orderStepData['pricing_details']['sub_total']),
                 "total" => getTotalPrice($code, $orderStepData['pricing_details']['sub_total']),
             ]
         );
     }
 
 
-
-       public function store(Request $request)
+    public function store(Request $request)
     {
-            $order = $this->orderService->storeResource([]);
-            return Response::api(
-                message: 'Order placed successfully!',
-                data: [
-                    'order_id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'redirect_url' => route('orders.index', $order->id)
-                ]
-            );
+        $order = $this->orderService->storeResource([]);
+        return Response::api(
+            message: 'Order placed successfully!',
+            data: [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'redirect_url' => route('orders.index', $order->id)
+            ]
+        );
     }
 
 
     public function editShippingAddresses(Request $request, $orderId)
     {
 
-            $validatedData = $request->validate([
-                'shipping_address_id' => 'nullable|integer',
-                'location_id' => 'nullable|integer',
-                'type' => 'nullable|string',
-                'pickup_first_name' => 'nullable|string|max:255',
-                'pickup_last_name'  => 'nullable|string|max:255',
-                'pickup_email'      => 'nullable|email',
-                'pickup_phone'      => 'nullable|string',
-            ]);
+        $validatedData = $request->validate([
+            'shipping_address_id' => 'nullable|integer',
+            'location_id' => 'nullable|integer',
+            'type' => 'nullable|string',
+            'pickup_first_name' => 'nullable|string|max:255',
+            'pickup_last_name' => 'nullable|string|max:255',
+            'pickup_email' => 'nullable|email',
+            'pickup_phone' => 'nullable|string',
+        ]);
 
         $order = $this->orderService->editShippingAddresses($validatedData, $orderId);;
 
@@ -147,14 +147,14 @@ class OrderController extends DashboardController
         return Response::api(
             message: 'Shipping address updated successfully!',
             data: [
-                'order_id'     => $order->id,
+                'order_id' => $order->id,
                 'order_number' => $order->order_number,
                 'redirect_url' => route('orders.index', $order->id),
             ]
         );
     }
 
-        public function deleteDesign(Request $request, $orderId, $designId)
+    public function deleteDesign(Request $request, $orderId, $designId)
     {
         try {
             $order = $this->orderService->deleteDesignFromOrder($orderId, $designId);
@@ -162,7 +162,7 @@ class OrderController extends DashboardController
             return Response::api(
                 message: 'Design deleted and order updated successfully!',
                 data: [
-                    'order_id'     => $order->id,
+                    'order_id' => $order->id,
                     'order_number' => $order->order_number,
                     'redirect_url' => route('orders.index', $order->id),
                 ]
@@ -184,25 +184,28 @@ class OrderController extends DashboardController
     }
 
 
-        public function search(Request $request)
-        {
-            $query = $request->input('query');
-            $location = Location::where('name', 'LIKE', '%' . $query . '%')->first();
-            if ($location) {
-                return response()->json([
-                    'success' => true,
-                    'data' => [
-                        'name' => $location->name,
-                        'latitude' => $location->latitude,
-                        'longitude' => $location->longitude,
-                        'address' => $location->address_line,
-                    ]
-                ]);
-            }
-            return response()->json(['success' => false, 'message' => 'Location not found.']);
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $location = Location::where('name', 'LIKE', '%' . $query . '%')->first();
+        if ($location) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'name' => $location->name,
+                    'latitude' => $location->latitude,
+                    'longitude' => $location->longitude,
+                    'address' => $location->address_line,
+                ]
+            ]);
         }
+        return response()->json(['success' => false, 'message' => 'Location not found.']);
+    }
 
+    public function print()
+    {
 
+    }
 
 
 }

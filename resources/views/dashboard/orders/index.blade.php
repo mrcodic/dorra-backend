@@ -286,7 +286,13 @@
                     </div>
 
                     {{-- Add Button - 20% on md+, full width on xs --}}
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-2">
+                        <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route('orders.new.print') }}">
+                            <i data-feather="printer"></i>
+                            Printing New orders
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-2">
                         <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route('orders.create') }}">
                             <i data-feather="plus"></i>
                             Add New Order

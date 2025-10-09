@@ -10,14 +10,16 @@ class BarcodeService
 {
     // ------------ 1D (Code 128) ------------
     public function savePng1D(
+        string $resource,
         string $code,
         string $type = 'C128',
         int $scale = 4,
         int $height = 120,
-        array $color = [0, 0, 0]
+        array $color = [0, 0, 0],
+
     ): string {
         $disk = Storage::disk('public');
-        $relPath = "barcodes/job-tickets/{$code}.png";
+        $relPath = "barcodes/{$resource}/{$code}.png";
 
         if (!$disk->exists($relPath)) {
             $gen = new DNS1D();
@@ -30,6 +32,7 @@ class BarcodeService
     }
 
     public function saveSvg1D(
+        string $resource,
         string $code,
         string $type = 'C128',
         int $width = 2,
@@ -38,7 +41,7 @@ class BarcodeService
         bool $withText = true
     ): string {
         $disk = Storage::disk('public');
-        $relPath = "barcodes/job-tickets/{$code}.svg";
+        $relPath = "barcodes/{$resource}/{$code}.svg";
 
         if (!$disk->exists($relPath)) {
             $gen = new DNS1D();
@@ -51,12 +54,13 @@ class BarcodeService
 
     // ------------ 2D (QR Code) ------------
     public function savePngQR(
+        string $resource,
         string $text,
         int $scale = 6,              // pixel scaling for both axes
         array $color = [0, 0, 0]
     ): string {
         $disk = Storage::disk('public');
-        $relPath = "barcodes/job-tickets/qr-{$this->slug($text)}.png";
+        $relPath = "barcodes/{$resource}/qr-{$this->slug($text)}.png";
 
         if (!$disk->exists($relPath)) {
             $gen = new DNS2D();
@@ -69,13 +73,14 @@ class BarcodeService
     }
 
     public function saveSvgQR(
+        string $resource,
         string $text,
         int $width = 4,              // module width
         int $height = 4,             // module height
         string $color = 'black'
     ): string {
         $disk = Storage::disk('public');
-        $relPath = "barcodes/job-tickets/qr-{$this->slug($text)}.svg";
+        $relPath = "barcodes/{$resource}/qr-{$this->slug($text)}.svg";
 
         if (!$disk->exists($relPath)) {
             $gen = new DNS2D();
