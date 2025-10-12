@@ -1,5 +1,3 @@
-
-
 <div class="modal modal-slide-in new-user-modal fade" id="editOrderShippingModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">

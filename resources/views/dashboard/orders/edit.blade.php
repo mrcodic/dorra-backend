@@ -126,16 +126,18 @@
                     @endforeach
                 </select>
 
-                <select class="form-select select2">
+                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Inventory</label>
+                <select class="form-select mb-4" name="inventory_id" id="inventory_id">
                     @foreach ($associatedData['inventories'] as $inventory)
-                        <option value="{{ $inventory->id }}" >
-                            {{ $inventory->name }}
-                        </option>
+                        <option value="{{ $inventory->id }}">{{ $inventory->name }}</option>
                     @endforeach
                 </select>
-{{--                <select name="" id="">--}}
 
-{{--                </select>--}}
+                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
+                <select class="form-select mb-4" name="place_id" id="place_id">
+                    <option value="">— Select —</option>
+                </select>
+
 
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
                 @foreach ($model->orderItems as $orderItem)
@@ -253,7 +255,68 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://unpkg.com/feather-icons"></script>
+<script>
+    (function () {
+        const inventorySelect = document.getElementById('inventory_id');
+        const placeSelect     = document.getElementById('place_id');
 
+        function resetPlaces(placeholder = '— Select —') {
+            placeSelect.innerHTML = '';
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = placeholder;
+            placeSelect.appendChild(opt);
+        }
+
+        async function loadPlaces(parentId) {
+            if (!parentId) { resetPlaces(); return; }
+
+            // route('inventories.availablePlaces', ':id') replacement
+            const url = "{{ route('inventories.availablePlaces', ':id') }}".replace(':id', parentId);
+
+            placeSelect.disabled = true;
+            resetPlaces('Loading...');
+
+            try {
+                const res   = await fetch(url, { headers: { 'Accept': 'application/json' }});
+                const items = await res.json();
+
+                placeSelect.disabled = false;
+                resetPlaces('— Select —');
+
+                if (!Array.isArray(items) || items.length === 0) {
+                    resetPlaces('(No available places)');
+                    return;
+                }
+
+                items.forEach(row => {
+                    const opt = document.createElement('option');
+                    opt.value = row.id;
+                    opt.textContent = row.name;
+                    placeSelect.appendChild(opt);
+                });
+
+                // If you're editing and have an old value, reselect it:
+                @if(old('place_id'))
+                    placeSelect.value = "{{ old('place_id') }}";
+                @endif
+
+            } catch (e) {
+                placeSelect.disabled = false;
+                resetPlaces('Failed to load');
+                console.error('Failed to load places', e);
+            }
+        }
+
+        // initial load (if first inventory is preselected)
+        loadPlaces(inventorySelect.value);
+
+        // on change
+        inventorySelect.addEventListener('change', function () {
+            loadPlaces(this.value);
+        });
+    })();
+</script>
 <script>
     $(document).ready(function () {
         // $(document).on('submit', '.delete-design-form', function (e) {

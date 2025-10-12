@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Inventory extends Model
 {
-    protected $fillable = ['name', 'number','parent_id'];
+    protected $fillable = ['name', 'number','parent_id','is_available'];
 }

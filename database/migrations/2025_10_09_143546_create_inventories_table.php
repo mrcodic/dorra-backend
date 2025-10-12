@@ -17,6 +17,9 @@ return new class extends Migration
             $table->unsignedBigInteger('number');
             $table->foreignId('parent_id')
             ->nullable()->constrained('inventories');
+            $table->boolean('is_available')
+                ->nullable()
+                ->default(false);
             $table->timestamps();
         });
     }
