@@ -45,7 +45,14 @@ class OrderObserver
             CreateInvoiceJob::dispatch($order);
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::PREPARED) {
-            ProcessPreparedOrderJob::dispatch($order)->afterCommit();
+            foreach ($order->orderItems as $item) {
+                $attrs = [
+                    'inventoryable_id'   => $item->orderable_id,
+                    'inventoryable_type' => $item->orderable_type,
+                ];
+                $inventory = Inventory::firstOrCreate($attrs);
+                $inventory->reserve($item->quantity);
+            }
 
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::SHIPPED) {

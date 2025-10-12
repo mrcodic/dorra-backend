@@ -28,14 +28,7 @@ class ProcessPreparedOrderJob implements ShouldQueue
 
         if (! $order) return;
 
-        foreach ($order->orderItems as $item) {
-            $attrs = [
-                'inventoryable_id'   => $item->orderable_id,
-                'inventoryable_type' => $item->orderable_type,
-            ];
-            $inventory = Inventory::firstOrCreate($attrs);
-            $inventory->reserve($item->quantity);
-        }
+
     }
 
 }
