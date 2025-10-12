@@ -101,7 +101,7 @@
                     $address = $model->OrderAddress;
                     @endphp
 
-                    @if($address->type == \App\Enums\Order\OrderTypeEnum::PICKUP)
+                    @if($address?->type == \App\Enums\Order\OrderTypeEnum::PICKUP)
                     <div class="border rounded-3 p-1 mb-2">
                         <p class="text-black">{{ $address?->location_name }}</p>
                         <p>{{ $address?->state }} , {{ $address?->country }}</p>
