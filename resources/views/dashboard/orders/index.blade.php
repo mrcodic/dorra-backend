@@ -388,32 +388,67 @@
                             url: "{{ route('orders.print') }}",
                             method: "GET",
                             success: function (response) {
-                                // Create hidden printable iframe
-                                const printWindow = window.open('', '', 'width=900,height=650');
+                                const printWindow = window.open('', '_blank', 'width=900,height=650');
+
+                                // Defensive close function (idempotent)
+                                const safeClose = () => {
+                                    try { printWindow.close(); } catch (e) {}
+                                };
+
+                                // Write the document
                                 printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Confirmed Orders</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; }
-                            table { border-collapse: collapse; width: 100%; }
-                            th, td { border: 1px solid #ccc; padding: 5px; }
-                            h3 { margin-bottom: 5px; }
-                        </style>
-                    </head>
-                    <body>
-                        ${response.html}
-                        <script>
-                            window.onload = function() {
-                                window.print();
-                                setTimeout(() => window.close(), 500);
-                            };
-                        <\/script>
-                    </body>
-                </html>
-            `);
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Confirmed Orders</title>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #ccc; padding: 5px; }
+          h3 { margin-bottom: 5px; }
+        </style>
+      </head>
+      <body>
+        ${response.html}
+        <script>
+          // Close after printing finishes
+          window.onafterprint = function () { window.close(); };
+          // Fallback for browsers that fire print media change events
+          try {
+            var mql = window.matchMedia('print');
+            if (mql && mql.addEventListener) {
+              mql.addEventListener('change', function(e){
+                if (!e.matches) { window.close(); }
+              });
+            } else if (mql && mql.addListener) { // older
+              mql.addListener(function(e){
+                if (!e.matches) { window.close(); }
+              });
+            }
+          } catch (e) {}
+          // Trigger print once content is ready
+          setTimeout(function(){
+            window.focus();
+            window.print();
+          }, 0);
+        <\/script>
+      </body>
+    </html>
+  `);
+
                                 printWindow.document.close();
+                                printWindow.focus();
+
+                                // Extra safety: if the user cancels print and the browser never fires afterprint,
+                                // close when the popup loses print focus and the opener regains focus.
+                                window.addEventListener('focus', function onFocus() {
+                                    // if the popup still exists after focus returns, attempt close
+                                    safeClose();
+                                    window.removeEventListener('focus', onFocus);
+                                }, { once: true });
                             },
+
                             error: function () {
                                 alert('❌ Failed to load confirmed orders for printing.');
                             }
