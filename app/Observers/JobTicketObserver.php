@@ -7,6 +7,7 @@ use App\Models\JobTicket;
 use App\Models\Order;
 use App\Models\Station;
 use App\Models\StationStatus;
+use Illuminate\Support\Facades\Log;
 
 class JobTicketObserver
 {
@@ -54,6 +55,7 @@ class JobTicketObserver
             ->exists();
 
         if (!$hasRemaining) {
+            Log::info("here");
             Order::whereKey($orderId)->update(['status' => \App\Enums\Order\StatusEnum::PREPARED]);
         }
     }
