@@ -7,6 +7,7 @@ use App\Models\JobTicket;
 use App\Models\Order;
 use App\Models\Station;
 use App\Models\StationStatus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class JobTicketObserver
@@ -33,30 +34,36 @@ class JobTicketObserver
 
     }
 
+
+
     public function updated(JobTicket $jobTicket): void
     {
         if (!$jobTicket->wasChanged('current_status_id')) {
             return;
         }
-        $orderId = $jobTicket->orderItem->order_id ?? null;
-        if (!$orderId) {
-            return;
-        }
-
         $terminalStatusIds = $this->workflowTerminalStatusIds();
-        if ($terminalStatusIds->isEmpty()) {
+        if ($terminalStatusIds->isEmpty()) return;
+
+        if (!in_array($jobTicket->current_status_id, $terminalStatusIds->all(), true)) {
             return;
         }
 
+        $orderId = $jobTicket->orderItem()->value('order_id'); // no relation access needed
+        if (!$orderId) return;
 
-        $hasRemaining = JobTicket::query()
-            ->whereHas('orderItem', fn($q) => $q->where('order_id', $orderId))
-            ->whereNotIn('current_status_id', $terminalStatusIds)
-            ->exists();
+        DB::transaction(function () use ($orderId, $terminalStatusIds) {
+            Order::whereKey($orderId)->lockForUpdate()->first();
+            $hasRemaining = JobTicket::query()
+                ->whereHas('orderItem', fn ($q) => $q->where('order_id', $orderId))
+                ->whereNotIn('current_status_id', $terminalStatusIds)
+                ->exists();
 
-        if (!$hasRemaining) {
-            Order::whereKey($orderId)->update(['status' => \App\Enums\Order\StatusEnum::PREPARED]);
-        }
+            if (!$hasRemaining) {
+                Order::whereKey($orderId)
+                    ->first()
+                    ->update(['status' => \App\Enums\Order\StatusEnum::PREPARED]);
+            }
+        });
     }
 
 
