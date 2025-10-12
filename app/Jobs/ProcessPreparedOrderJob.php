@@ -17,18 +17,25 @@ use Illuminate\Queue\SerializesModels;
 class ProcessPreparedOrderJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
+    public $afterCommit = true;
     public function __construct(public Order $order) {}
 
     public function handle(): void
     {
+        $order = Order::query()
+            ->with(['orderItems'])
+            ->find($this->order->getKey());
 
-        foreach ($this->order->orderItems as $item)
-        {
-            $inventory = Inventory::firstOrCreate(['inventoryable_id'=> $item->orderable->id,
-                'inventoryable_type' => get_class($item->orderable)
-            ]);
+        if (! $order) return;
+
+        foreach ($order->orderItems as $item) {
+            $attrs = [
+                'inventoryable_id'   => $item->orderable_id,
+                'inventoryable_type' => $item->orderable_type,
+            ];
+            $inventory = Inventory::firstOrCreate($attrs);
             $inventory->reserve($item->quantity);
         }
     }
+
 }

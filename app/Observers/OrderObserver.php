@@ -45,7 +45,8 @@ class OrderObserver
             CreateInvoiceJob::dispatch($order);
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::PREPARED) {
-            ProcessPreparedOrderJob::dispatch($order);
+            ProcessPreparedOrderJob::dispatch($order)->afterCommit();
+
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::SHIPPED) {
 
