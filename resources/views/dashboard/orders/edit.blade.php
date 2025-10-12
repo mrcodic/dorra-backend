@@ -118,7 +118,7 @@
 
 
                 <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Status</label>
-                <select class="form-select mb-4" name="status">
+                <select class="form-select mb-1" name="status">
                     @foreach (App\Enums\Order\StatusEnum::cases() as $status)
                     <option value="{{ $status->value }}" @selected($status == $model->status)>
                         {{ $status->label() }}
