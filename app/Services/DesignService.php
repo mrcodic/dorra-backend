@@ -68,7 +68,8 @@ class DesignService extends BaseService
                     'template:id',
                     'designable.specifications.options',
                     'specifications.options',
-                    'productPrice'
+                    'productPrice',
+                    'dimension'
                 ]);
             });
 
@@ -95,7 +96,8 @@ class DesignService extends BaseService
             'template:id',
             'designable.specifications.options',
             'specifications.options',
-            'productPrice'
+            'productPrice',
+            'dimension'
         ]);
     }
 
