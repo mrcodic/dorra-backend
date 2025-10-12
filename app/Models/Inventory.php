@@ -18,20 +18,20 @@ class Inventory extends Model
 
     public function getTotalQtyAttribute(): int
     {
-        if ($this->inventoryable_type === Product::class) {
-            return OrderItem::where('orderable_id', $this->inventoryable_id)
-                ->where('orderable_type' , Product::class)
-                ->sum('quantity');
-        }
-        if ($this->inventoryable_type === Category::class)
-        {
-            return OrderItem::where('orderable_id', $this->inventoryable_id)
-                ->where('orderable_type' , Category::class)
-                ->sum('quantity');
-        }
+        $type = $this->inventoryable_type;
 
-        return 0;
+
+        if (!in_array($type, [Product::class, Category::class], true)) {
+            return 0;
+        }
+        return (int) OrderItem::query()
+            ->where('orderable_id', $this->inventoryable_id)
+            ->where('orderable_type', $type)
+            ->whereHas('order', fn($q) => $q->where('status', 'confirmed'))
+            ->sum('quantity');
+
     }
+
 
     public function getAvailableQtyAttribute(): int
     {

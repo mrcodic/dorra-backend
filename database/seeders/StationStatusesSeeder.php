@@ -59,16 +59,17 @@ class StationStatusesSeeder extends Seeder
                     return;
                 }
 
-
+                $isTerminalOfStation = $i === array_key_last($enumCases);
                 $rows = collect($enumCases)
                     ->values()
-                    ->map(function (StatusEnum $enum, int $i) use ($enumCases, $station, $now) {
+                    ->map(function (StatusEnum $enum, int $i) use ($enumCases, $station, $now,$isTerminalOfStation, $stationCode) {
                         return [
                             'station_id'  => $station->id,
                             'code'        => $this->enumCode($enum),
                             'name'        => $enum->label(),
                             'sequence'    => $i + 1,
-                            'is_terminal' => $i === array_key_last($enumCases),
+                            'is_terminal' => $isTerminalOfStation,
+                            'is_workflow_terminal' => $isTerminalOfStation && $stationCode === 'pack',
                             'created_at'  => $now,
                             'updated_at'  => $now,
                         ];

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Enums\JobTicket\StatusEnum;
 use App\Models\JobTicket;
+use App\Models\Order;
 use App\Models\Station;
 use App\Models\StationStatus;
 
@@ -30,5 +31,42 @@ class JobTicketObserver
 
 
     }
+
+    public function updated(JobTicket $jobTicket): void
+    {
+        if (!$jobTicket->wasChanged('current_status_id')) {
+            return;
+        }
+        $orderId = $jobTicket->orderItem->order_id ?? null;
+        if (!$orderId) {
+            return;
+        }
+
+        $terminalStatusIds = $this->workflowTerminalStatusIds();
+        if ($terminalStatusIds->isEmpty()) {
+            return;
+        }
+
+
+        $hasRemaining = JobTicket::query()
+            ->whereHas('orderItem', fn($q) => $q->where('order_id', $orderId))
+            ->whereNotIn('current_status_id', $terminalStatusIds)
+            ->exists();
+
+        if (!$hasRemaining) {
+            Order::whereKey($orderId)->update(['status' => \App\Enums\Order\StatusEnum::PREPARED]);
+        }
+    }
+
+
+    protected function workflowTerminalStatusIds()
+    {
+        return StationStatus::query()
+            ->where('is_workflow_terminal', true)
+            ->pluck('id');
+    }
+
+
+
 
 }

@@ -231,9 +231,6 @@ class ProductService extends BaseService
             }
             if (isset($validatedData['prices'])) {
                 $product->update(['base_price' => null]);
-
-  
-
                 $submittedQuantities = collect($validatedData['prices'])->map(function ($price) use ($product) {
                     $product->prices()->updateOrCreate(
                         ['quantity' => $price['quantity']],
