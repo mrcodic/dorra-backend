@@ -388,15 +388,19 @@
                             url: "{{ route('orders.print') }}",
                             method: "GET",
                             success: function (response) {
-                                const printWindow = window.open('', '_blank', 'width=900,height=650');
+                                // Create a hidden iframe for printing
+                                const iframe = document.createElement('iframe');
+                                iframe.style.position = 'fixed';
+                                iframe.style.right = '0';
+                                iframe.style.bottom = '0';
+                                iframe.style.width = '0';
+                                iframe.style.height = '0';
+                                iframe.style.border = '0';
+                                document.body.appendChild(iframe);
 
-                                // Defensive close function (idempotent)
-                                const safeClose = () => {
-                                    try { printWindow.close(); } catch (e) {}
-                                };
-
-                                // Write the document
-                                printWindow.document.write(`
+                                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                                doc.open();
+                                doc.write(`
     <!DOCTYPE html>
     <html>
       <head>
@@ -411,42 +415,47 @@
       </head>
       <body>
         ${response.html}
-        <script>
-          // Close after printing finishes
-          window.onafterprint = function () { window.close(); };
-          // Fallback for browsers that fire print media change events
-          try {
-            var mql = window.matchMedia('print');
-            if (mql && mql.addEventListener) {
-              mql.addEventListener('change', function(e){
-                if (!e.matches) { window.close(); }
-              });
-            } else if (mql && mql.addListener) { // older
-              mql.addListener(function(e){
-                if (!e.matches) { window.close(); }
-              });
-            }
-          } catch (e) {}
-          // Trigger print once content is ready
-          setTimeout(function(){
-            window.focus();
-            window.print();
-          }, 0);
-        <\/script>
       </body>
     </html>
   `);
+                                doc.close();
 
-                                printWindow.document.close();
-                                printWindow.focus();
+                                const cleanup = () => {
+                                    try { document.body.removeChild(iframe); } catch (e) {}
+                                };
 
-                                // Extra safety: if the user cancels print and the browser never fires afterprint,
-                                // close when the popup loses print focus and the opener regains focus.
-                                window.addEventListener('focus', function onFocus() {
-                                    // if the popup still exists after focus returns, attempt close
-                                    safeClose();
-                                    window.removeEventListener('focus', onFocus);
-                                }, { once: true });
+                                const cw = iframe.contentWindow;
+                                // Close/cleanup when printing is done
+                                if ('onafterprint' in cw) {
+                                    cw.onafterprint = cleanup;
+                                } else {
+                                    try {
+                                        const mql = cw.matchMedia('print');
+                                        if (mql && mql.addEventListener) {
+                                            mql.addEventListener('change', e => { if (!e.matches) cleanup(); });
+                                        } else if (mql && mql.addListener) {
+                                            mql.addListener(e => { if (!e.matches) cleanup(); });
+                                        } else {
+                                            // Last-ditch: cleanup when parent regains focus
+                                            window.addEventListener('focus', function onFocus() {
+                                                cleanup();
+                                                window.removeEventListener('focus', onFocus);
+                                            }, { once: true });
+                                        }
+                                    } catch (e) {
+                                        // Fallback cleanup when parent regains focus
+                                        window.addEventListener('focus', function onFocus() {
+                                            cleanup();
+                                            window.removeEventListener('focus', onFocus);
+                                        }, { once: true });
+                                    }
+                                }
+
+                                // Trigger print after iframe paints
+                                iframe.onload = function () {
+                                    cw.focus();
+                                    cw.print();
+                                };
                             },
 
                             error: function () {
