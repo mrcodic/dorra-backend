@@ -47,11 +47,10 @@ class InventoryService extends BaseService
         });
     }
 
-    public function availablePlaces(Request $request)
+    public function availablePlaces($id)
     {
-        $parentId = (string)$request->query('parent_id', '');
         return $this->repository->query()
-            ->where('parent_id', $parentId)
+            ->where('parent_id', $id)
             ->whereIsAvailable(0)
             ->get();
     }
