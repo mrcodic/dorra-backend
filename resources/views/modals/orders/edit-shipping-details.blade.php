@@ -64,16 +64,16 @@
                             @foreach ($model->user?->addresses ?? $model->guest?->addresses ?? [] as $address)
                                 <div class="col-12 form-check border rounded-3 p-1 px-3 text-break">
                                 <input class="form-check-input" type="radio" name="shipping_address_id"
-                                    id="address{{ $address->id }}" value="{{ $address->id }}" {{
-                                    $shippingAddressId==$address->id ? 'checked' : '' }}>
-                                <label class="form-check-label fs-4 text-black" for="address{{ $address->id }}">
-                                    <p>{{ $address->label ?? 'No Label' }}</p>
+                                    id="address{{ $address?->id }}" value="{{ $address?->id }}" {{
+                                    $shippingAddressId==$address?->id ? 'checked' : '' }}>
+                                <label class="form-check-label fs-4 text-black" for="address{{ $address?->id }}">
+                                    <p>{{ $address?->label ?? 'No Label' }}</p>
                                     <p class="text-dark fs-16">
-                                        {{ $address->line ?? 'No Address' }}
-                                        @if($address->relationLoaded('state') && $address->state)
-                                        , {{ $address->state->name }}
-                                        @if($address->state->relationLoaded('country') && $address->state->country)
-                                        , {{ $address->state->country->name }}
+                                        {{ $address?->line ?? 'No Address' }}
+                                        @if($address?->relationLoaded('state') && $address->state)
+                                        , {{ $address?->state->name }}
+                                        @if($address?->state->relationLoaded('country') && $address->state->country)
+                                        , {{ $address?->state->country->name }}
                                         @endif
                                         @endif
                                     </p>
