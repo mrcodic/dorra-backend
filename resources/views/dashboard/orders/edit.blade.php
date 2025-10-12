@@ -126,6 +126,17 @@
                     @endforeach
                 </select>
 
+                <select class="form-select select2">
+                    @foreach ($associatedData['inventories'] as $inventory)
+                        <option value="{{ $inventory->id }}" >
+                            {{ $inventory->name }}
+                        </option>
+                    @endforeach
+                </select>
+{{--                <select name="" id="">--}}
+
+{{--                </select>--}}
+
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
                 @foreach ($model->orderItems as $orderItem)
                 @php

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Location;
+use App\Repositories\Interfaces\InventoryRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\OrderService;
@@ -26,7 +27,8 @@ class OrderController extends DashboardController
         public CategoryRepositoryInterface $categoryRepository,
         public TagRepositoryInterface      $tagRepository,
         public CountryRepositoryInterface  $countryRepository,
-        public LocationRepositoryInterface $LocationRepository
+        public LocationRepositoryInterface $LocationRepository,
+        public InventoryRepositoryInterface $inventoryRepository,
     )
     {
         parent::__construct($orderService);
@@ -48,6 +50,7 @@ class OrderController extends DashboardController
             'edit' => [
                 'countries' => $this->countryRepository->query(['id', 'name'])->get(),
                 'locations' => $this->LocationRepository->query(['id', 'name', 'address_line', 'latitude', 'longitude'])->get(),
+                'inventories' => $this->inventoryRepository->query() ->whereNull('parent_id')->get(['id', 'name']),
             ]
 
         ];

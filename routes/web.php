@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     DiscountCodeController,
     FaqController,
     FlagController,
+    InventoryController,
     InvoiceController,
     JobTicketController,
     LocationController,
@@ -210,19 +211,26 @@ Route::middleware('auth')->group(function () {
 
     Route::apiResource('/products', ProductController::class)->only(['show', 'index']);
 
+
+    Route::apiResource('/jobs',JobTicketController::class);
     Route::group(['prefix' => 'jobs', 'as' => 'job-tickets.', 'controller' => JobTicketController::class,], function () {
         Route::get('/data', 'getData')->name('data');
         Route::get('/{jobTicket}/pdf', 'pdf')->name('pdf');
-
-//        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
-    Route::apiResource('/jobs', JobTicketController::class);
 
     Route::get('board', BoardController::class)->name('board');
     Route::view('/scan', 'dashboard.scan.kiosk')->name('scan.kiosk');
     Route::post('/scan', [JobTicketController::class, 'scan'])
         ->middleware('throttle:60,1')
         ->name('scan.submit');
+
+    Route::group(['prefix' => 'inventories', 'as' => 'inventories.', 'controller' => InventoryController::class,], function () {
+        Route::get('/data','getData')->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::resource('/inventories', InventoryController::class);
+
+
 });
 Route::prefix('api/v1/')->group(function () {
 

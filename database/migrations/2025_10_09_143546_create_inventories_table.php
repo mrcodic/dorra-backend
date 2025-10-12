@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
-            $table->morphs('inventoryable');
-            $table->unsignedInteger('blocked_qty')->default(0);
-            $table->unsignedInteger('shipped_qty')->default(0);
+            $table->string('name');
+            $table->unsignedBigInteger('number');
+            $table->foreignId('parent_id')
+            ->nullable()->constrained('inventories');
             $table->timestamps();
         });
     }
