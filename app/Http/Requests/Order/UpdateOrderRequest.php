@@ -32,6 +32,7 @@ class UpdateOrderRequest extends BaseRequest
             'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:255'],
             'status' => ['nullable'],
+            'inventory_id' => ['nullable','exists:inventories,id'],
         ];
     }
 

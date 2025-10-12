@@ -13,6 +13,7 @@ use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
 use App\Models\OrderItem;
 use App\Services\BarcodeService;
+use Illuminate\Support\Facades\DB;
 
 
 class OrderObserver
@@ -43,6 +44,16 @@ class OrderObserver
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
+        }
+        if ($order->wasChanged('status') && $order->status === StatusEnum::PREPARED) {
+            $inventory = Inventory::query()->whereNotNull('parent_id')
+            ->available()->first();
+            DB::transaction(function () use ($inventory, $order) {
+                $order->update(["inventory_id" => $inventory->id]);
+                $inventory->update(["is_available" => false]);
+            });
+
+
         }
 
         if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {

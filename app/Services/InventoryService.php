@@ -51,7 +51,7 @@ class InventoryService extends BaseService
     {
         return $this->repository->query()
             ->where('parent_id', $id)
-            ->whereIsAvailable(0)
+            ->available()
             ->get();
     }
 }
