@@ -58,11 +58,10 @@ class StationStatusesSeeder extends Seeder
                     $this->command?->warn("Station '{$stationCode}' not found. Skipping.");
                     return;
                 }
-
-                $isTerminalOfStation = $i === array_key_last($enumCases);
                 $rows = collect($enumCases)
                     ->values()
-                    ->map(function (StatusEnum $enum, int $i) use ($enumCases, $station, $now,$isTerminalOfStation, $stationCode) {
+                    ->map(function (StatusEnum $enum, int $i) use ($enumCases, $station, $now, $stationCode) {
+                        $isTerminalOfStation = $i === array_key_last($enumCases);
                         return [
                             'station_id'  => $station->id,
                             'code'        => $this->enumCode($enum),
