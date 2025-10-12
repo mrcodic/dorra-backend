@@ -227,10 +227,8 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'inventories', 'as' => 'inventories.', 'controller' => InventoryController::class,], function () {
         Route::get('/data','getData')->name('data');
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
-
         Route::get('/{parent}/available-places', 'availablePlaces')
-            ->name('.availablePlaces');
-
+            ->name('availablePlaces');
     });
     Route::resource('/inventories', InventoryController::class);
 
