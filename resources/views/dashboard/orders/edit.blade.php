@@ -126,17 +126,24 @@
                     @endforeach
                 </select>
 
-                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Inventory</label>
-                <select class="form-select mb-4" name="inventory_id" id="inventory_id">
-                    @foreach ($associatedData['inventories'] as $inventory)
-                        <option value="{{ $inventory->id }}">{{ $inventory->name }}</option>
-                    @endforeach
-                </select>
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Inventory</label>
+                        <select class="form-select" name="inventory_id" id="inventory_id">
+                            @foreach ($associatedData['inventories'] as $inventory)
+                                <option value="{{ $inventory->id }}">{{ $inventory->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
-                <select class="form-select mb-4" name="place_id" id="place_id">
-                    <option value="">— Select —</option>
-                </select>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
+                        <select class="form-select" name="place_id" id="place_id">
+                            <option value="">— Select —</option>
+                        </select>
+                    </div>
+                </div>
+
 
 
                 <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
