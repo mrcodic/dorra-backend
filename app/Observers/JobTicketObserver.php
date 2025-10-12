@@ -55,7 +55,6 @@ class JobTicketObserver
             ->exists();
 
         if (!$hasRemaining) {
-            Log::info("here");
             Order::whereKey($orderId)->update(['status' => \App\Enums\Order\StatusEnum::PREPARED]);
         }
     }
