@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Inventory extends Model
 {
     protected $fillable = ['name', 'number', 'parent_id', 'is_available'];
+    protected $attributes = [
+        'is_available' => 1,
+    ];
 
     public function parent(): BelongsTo
     {
@@ -21,14 +25,17 @@ class Inventory extends Model
         return $this->hasMany(Inventory::class, 'parent_id');
     }
 
-    public function scopeAvailable()
+    public function scopeAvailable(Builder $query): Builder
     {
-        return $this->whereNotNull('parent_id')->whereIsAvailable(0);
+        return $query
+            ->whereNotNull('parent_id')
+            ->where('is_available', 1);
+    }
+    public function scopeUnAvailable(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('parent_id')
+            ->where('is_available', 0);
     }
 
-    public function scopeUnAvailable()
-    {
-        return $this->whereNotNull('parent_id')->whereIsAvailable(1);
-
-    }
 }
