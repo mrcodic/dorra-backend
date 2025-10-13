@@ -420,6 +420,14 @@ class OrderService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+        $model = $this->repository->find($id);
+        if (isset($validatedData['inventory_id'])) {
+            if ($model->inventory_id) {
+                $inventory = $this->inventoryRepository->find($model->inventory_id);
+                $inventory->update(["is_available" => true]);
+            }
+
+        }
         $model = $this->repository->update($validatedData, $id);
 
         if (
@@ -443,13 +451,7 @@ class OrderService extends BaseService
             $model->status = $validatedData['status'];
             $model->save();
         }
-        if (isset($validatedData['inventory_id'])) {
-            if ($model->inventory_id) {
-                $inventory = $this->inventoryRepository->find($model->inventory_id);
-                $inventory->update(["is_available" => true]);
-            }
 
-        }
         return $model->load($relationsToLoad);
     }
 
