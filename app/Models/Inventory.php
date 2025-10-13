@@ -15,10 +15,19 @@ class Inventory extends Model
         'is_available' => 1,
     ];
 
-    public static function booted()
+    protected static function booted(): void
     {
-        static::deleted(function ($inventory) {
-            $inventory->children()->delete();
+
+        static::deleting(function (Inventory $inventory) {
+
+            $inventory->orders()->update(['inventory_id' => null]);
+            $inventory->children()->each(function (Inventory $child) use ($inventory) {
+                if (method_exists($inventory, 'isForceDeleting') && $inventory->isForceDeleting()) {
+                    $child->forceDelete();
+                } else {
+                    $child->delete();
+                }
+            });
         });
     }
     public function parent(): BelongsTo
