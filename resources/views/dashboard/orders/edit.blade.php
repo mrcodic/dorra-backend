@@ -129,7 +129,11 @@
                             </option>
                         @endforeach
                     </select>
+                    @php
 
+                        $parent   = $model->inventory?->parent ?? $model->inventory;
+                        $children = $parent?->children()->available()->get() ?? collect();
+                    @endphp
                     <div class="row g-3 align-items-end">
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Inventory</label>
@@ -141,17 +145,17 @@
                                 @endforeach
                             </select>
                         </div>
-@dd($model->inventory?->parent->children()->available()->get() )
+
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
                             <select class="form-select" name="inventory_id" id="place_id">
-                                @forelse($model->inventory?->parent()->children()->available()->get() ?? [] as $child)
-                                    <option value="{{ $child->id }}"@selected($model->inventory?->id == $child->id)>{{ $child->name }}</option>
-
+                                @forelse($children as $child)
+                                    <option value="{{ $child->id }}" @selected($model->inventory?->id === $child->id)>
+                                        {{ $child->name }}
+                                    </option>
                                 @empty
-                                    <option value="" selected disabled>— Select —</option>
+                                    <option value="" selected disabled>— No available places —</option>
                                 @endforelse
-
                             </select>
                         </div>
                     </div>
