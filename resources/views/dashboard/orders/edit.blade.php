@@ -136,7 +136,7 @@
                             <select class="form-select" name="inventory_id" id="inventory_id">
                                 @foreach ($associatedData['inventories'] as $inventory)
                                     <option
-                                        value="{{ $inventory->id }}" @selected($model->inventory->parent->id == $inventory->id)>{{ $inventory->name }}</option>
+                                        value="{{ $inventory->id }}" @selected($model->inventory?->parent->id == $inventory->id)>{{ $inventory->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -145,7 +145,7 @@
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
                             <select class="form-select" name="place_id" id="place_id">
                                 @forelse($model->inventory->children()->available()->get() as $child)
-                                    <option value="{{ $child->id }}"@selected($model->inventory->id == $child->id)>{{ $child->name }}</option>
+                                    <option value="{{ $child->id }}"@selected($model->inventory?->id == $child->id)>{{ $child->name }}</option>
 
                                 @empty
                                     <option value="" selected disabled>— Select —</option>
