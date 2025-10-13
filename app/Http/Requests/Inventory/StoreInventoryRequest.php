@@ -17,7 +17,9 @@ class StoreInventoryRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required',
+                'unique:inventories,name',
+                'string', 'max:255'],
             'number' => ['required', 'integer'],
         ];
 
