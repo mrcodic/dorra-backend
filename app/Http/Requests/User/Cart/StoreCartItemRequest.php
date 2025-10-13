@@ -19,6 +19,12 @@ class StoreCartItemRequest extends BaseRequest
     private Template|null $template = null;
     private Design|null $design = null;
     private Category|Product|null $product = null;
+public function __construct()
+
+{
+    $this->design = Design::find($this->design_id);
+    
+}
 
     /**
      * Determine if the v1 is authorized to make this request.
