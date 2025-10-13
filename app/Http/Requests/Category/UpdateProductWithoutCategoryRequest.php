@@ -92,6 +92,7 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
             'specifications.*.name_en' => 'sometimes|string',
             'specifications.*.name_ar' => 'sometimes|string',
             'specifications.*.specification_options' => ['required_with:specifications', 'array', 'min:1'],
+            'specifications.*.specification_options.*.id' => 'nullable|integer',
             'specifications.*.specification_options.*.value_en' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.value_ar' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.price' => 'nullable|numeric|min:1',
