@@ -67,7 +67,7 @@ class ProcessConfirmedOrderJob implements ShouldQueue
             }
         }
 
-        DB::transaction(function () use ($order) {
+//        DB::transaction(function () use ($order) {
             $inventory = Inventory::query()
                 ->whereNotNull('parent_id')
                 ->where('is_available', 1)
@@ -80,10 +80,8 @@ class ProcessConfirmedOrderJob implements ShouldQueue
 
 
           $order->inventories()->attach([$inventory->id]);
-
-
             Inventory::where('id', $inventory->id)->update(['is_available' => 0]);
-        });
+//        });
 
     }
 }
