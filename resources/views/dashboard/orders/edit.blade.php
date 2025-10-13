@@ -145,32 +145,41 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
                             @php
-                                $parent      = $model->inventory?->parent ?? $model->inventory;
-                                $assignedId  = $model->inventory?->id;
+                                use App\Models\Inventory;
 
-                                $children = $parent?->children()
+                                // All inventories currently attached to the order (pivot)
+                                $assignedIds = $model->inventories?->pluck('id')->all() ?? [];
+
+                                // The parent context you want to browse under (keep your existing logic)
+                                $parent = $model->inventory?->parent ?? $model->inventory;
+
+                                // Available children under that parent
+                                $available = $parent?->children()
                                     ->select('id','name','is_available')
-                                    ->where(function ($q) use ($assignedId) {
-                                        $q->available();
-                                        if ($assignedId) {
-                                            $q->orWhere('id', $assignedId);
-                                        }
-                                    })->get() ?? collect();
+                                    ->whereNotNull('parent_id')
+                                    ->where('is_available', 1)
+                                    ->get() ?? collect();
+
+                                // Ensure *selected* items are present even if unavailable or under a different parent
+                                $selected = !empty($assignedIds)
+                                    ? Inventory::query()->whereIn('id', $assignedIds)->get(['id','name','is_available'])
+                                    : collect();
+
+                                // Merge & de-duplicate, then sort
+                                $options = $selected->concat($available)->unique('id')->sortBy('name');
                             @endphp
 
-
-
                             <select class="form-select select2" name="inventory_ids[]" id="place_id"
-                                    data-assigned="{{ $model->inventory?->id ?? '' }}"
                                     data-placeholder="Search place…" multiple>
-                                @forelse($children as $child)
-                                    <option value="{{ $child->id }}" @selected($model->inventory?->id === $child->id)>
-                                        {{ $child->name }}
+                                @forelse($options as $opt)
+                                    <option value="{{ $opt->id }}" @selected(in_array($opt->id, $assignedIds))>
+                                        {{ $opt->name }}{{ $opt->is_available ? '' : ' (occupied)' }}
                                     </option>
                                 @empty
-                                    <option value="" selected disabled>— No places —</option>
+                                    <option value="" disabled>— No places —</option>
                                 @endforelse
                             </select>
+
 
 
                         </div>
