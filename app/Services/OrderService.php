@@ -469,7 +469,7 @@ class OrderService extends BaseService
                 $model->save();
             }
         });
-        
+
         return $model->fresh()->load($relationsToLoad);
     }
 

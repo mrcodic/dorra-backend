@@ -137,7 +137,7 @@
                                 <option value="" selected disabled>— Select Inventory —</option>
                                 @foreach ($associatedData['inventories'] as $inventory)
                                     <option
-                                        value="{{ $inventory->id }}" @selected($model->inventory?->parent->id == $inventory->id)>{{ $inventory->name }}</option>
+                                        value="{{ $inventory->id }}" @selected($model->inventories->first()?->parent->id == $inventory->id)>{{ $inventory->name }}</option>
                                 @endforeach
                             </select>
                         </div>
