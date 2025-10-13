@@ -141,7 +141,7 @@
                                 @endforeach
                             </select>
                         </div>
-
+@dd($model->inventory)
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
                             <select class="form-select" name="inventory_id" id="place_id">
