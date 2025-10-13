@@ -145,17 +145,20 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
                             @php
-                                $parent   = $model->inventory?->parent ?? $model->inventory;
-                                $children = $parent?->children()->select('id','name','is_available')->
-                                where(function ($q) use ($model){
-                                    $q->available()
-                                    ->orWhereHas('orders',function ($qq) use ($model){
-                                        $qq->where('orders.inventory_id',$model->inventory);
-                                    });
+                                $parent      = $model->inventory?->parent ?? $model->inventory;
+                                $assignedId  = $model->inventory?->id;
 
-                                })
-                                ->get() ?? collect();
+                                $children = $parent?->children()
+                                    ->select('id','name','is_available')
+                                    ->where(function ($q) use ($assignedId) {
+                                        $q->available();
+                                        if ($assignedId) {
+                                            $q->orWhere('id', $assignedId);
+                                        }
+                                    })->get() ?? collect();
                             @endphp
+
+
 
                             <select class="form-select" name="inventory_id" id="place_id"
                                     data-assigned="{{ $model->inventory?->id ?? '' }}">
