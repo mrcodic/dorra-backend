@@ -50,25 +50,7 @@ class OrderObserver
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
         }
-        if ($order->wasChanged('status') && $order->status === StatusEnum::PREPARED) {
-            if ($order->inventory_id) {
-                return;
-            }
 
-            DB::transaction(function () use ($order) {
-                $inventory = Inventory::query()
-                    ->whereNotNull('parent_id')
-                    ->where('is_available', 1)
-                    ->lockForUpdate()
-                    ->first();
-
-                if (!$inventory) {
-                    return;
-                }
-                $inventory->update(['is_available' => 0]);
-                $order->update(['inventory_id' => $inventory->id]);
-            });
-        }
 
         if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
             $order->loadMissing(['paymentMethod']);

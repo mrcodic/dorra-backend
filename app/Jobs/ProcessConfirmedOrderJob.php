@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Inventory;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\JobTicket;
@@ -12,6 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 class ProcessConfirmedOrderJob implements ShouldQueue
 {
@@ -64,5 +66,19 @@ class ProcessConfirmedOrderJob implements ShouldQueue
                 $svc->saveSvgQR('job-tickets', $ticket->code, width: 4, height: 4);
             }
         }
+
+        DB::transaction(function () use ($order) {
+            $inventory = Inventory::query()
+                ->whereNotNull('parent_id')
+                ->where('is_available', 1)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$inventory) {
+                return;
+            }
+            $inventory->update(['is_available' => 0]);
+            $order->inventories()->sync([$inventory->id]);
+        });
     }
 }
