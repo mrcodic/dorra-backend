@@ -146,26 +146,19 @@
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
                             @php
                                 use App\Models\Inventory;
-
-                                // All inventories currently attached to the order (pivot)
                                 $assignedIds = $model->inventories?->pluck('id')->all() ?? [];
+                                $parent = $model->inventories->first()?->parent ?? $model->inventories->first();
 
-                                // The parent context you want to browse under (keep your existing logic)
-                                $parent = $model->inventory?->parent ?? $model->inventory;
-
-                                // Available children under that parent
                                 $available = $parent?->children()
                                     ->select('id','name','is_available')
                                     ->whereNotNull('parent_id')
                                     ->where('is_available', 1)
                                     ->get() ?? collect();
 
-                                // Ensure *selected* items are present even if unavailable or under a different parent
                                 $selected = !empty($assignedIds)
                                     ? Inventory::query()->whereIn('id', $assignedIds)->get(['id','name','is_available'])
                                     : collect();
 
-                                // Merge & de-duplicate, then sort
                                 $options = $selected->concat($available)->unique('id')->sortBy('name');
                             @endphp
 

@@ -63,28 +63,30 @@ class OrderObserver
         }
     }
 
-
-    /**
-     * Handle the Order "deleted" event.
-     */
-    public function deleted(Order $order): void
+    public function pivotSynced(Order $order, string $relation, array $changes): void
     {
-        //
+        if ($relation !== 'inventories') return;
+
+        if (!empty($changes['attached'])) {
+            Inventory::whereIn('id', $changes['attached'])->update(['is_available' => 0]);
+        }
+
+        if (!empty($changes['detached'])) {
+            Inventory::whereIn('id', $changes['detached'])->update(['is_available' => 1]);
+        }
     }
 
-    /**
-     * Handle the Order "restored" event.
-     */
-    public function restored(Order $order): void
+
+    public function pivotAttached(Order $order, string $relation, array $ids, array $attributes): void
     {
-        //
+        if ($relation !== 'inventories') return;
+        Inventory::whereIn('id', $ids)->update(['is_available' => 0]);
     }
 
-    /**
-     * Handle the Order "force deleted" event.
-     */
-    public function forceDeleted(Order $order): void
+
+    public function pivotDetached(Order $order, string $relation, array $ids): void
     {
-        //
+        if ($relation !== 'inventories') return;
+        Inventory::whereIn('id', $ids)->update(['is_available' => 1]);
     }
 }

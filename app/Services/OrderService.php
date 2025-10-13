@@ -430,6 +430,8 @@ class OrderService extends BaseService
             }
                 $model->inventories()->sync($validatedData['inventory_ids']);
 
+
+
             }
 
 
