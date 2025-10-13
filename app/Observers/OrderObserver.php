@@ -41,6 +41,11 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
+        if ($order->wasChanged('inventory_id'))
+        {
+            $inventory = Inventory::find($order->inventory_id);
+            $inventory->update(["is_available" => false]);
+        }
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
