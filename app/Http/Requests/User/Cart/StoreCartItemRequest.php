@@ -20,7 +20,6 @@ class StoreCartItemRequest extends BaseRequest
     private Design|null $design = null;
     private Category|Product|null $product = null;
 
-
     /**
      * Determine if the v1 is authorized to make this request.
      */
@@ -36,8 +35,6 @@ class StoreCartItemRequest extends BaseRequest
      */
     public function rules(): array
     {
-        $this->design = Design::find($this->design_id);
-        
         return [
             'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
             'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
@@ -45,7 +42,7 @@ class StoreCartItemRequest extends BaseRequest
             'cartable_type' => ['required_with:template_id', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'product_price_id' => [
                 Rule::requiredIf(function () {
-                    $cartable = Product::find($this->cartable_id ?? $this->design->designable->id) ?? Category::find($this->cartable_id ?? $this->design->designable->id);
+                    $cartable = Product::find($this->cartable_id) ?? Category::find($this->cartable_id);
                     return $cartable && $cartable->prices()->exists();
                 }),
                 'exists:product_prices,id',
