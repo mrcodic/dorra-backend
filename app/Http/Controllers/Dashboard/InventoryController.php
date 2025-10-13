@@ -27,9 +27,9 @@ class InventoryController extends DashboardController
         return $this->inventoryService->getData();
     }
 
-    public function availablePlaces($id)
+    public function availablePlaces($id): JsonResponse
     {
-        return $this->inventoryService->availablePlaces($id);
+        return response()->json($this->inventoryService->availablePlaces($id));
 
     }
 

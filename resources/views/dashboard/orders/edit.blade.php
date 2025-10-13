@@ -301,7 +301,7 @@
                 try {
                     const res = await fetch(url, {headers: {'Accept': 'application/json'}});
                     const items = await res.json();
-
+                    console.log(items)
                     placeSelect.disabled = false;
                     resetPlaces('— Select —');
 
