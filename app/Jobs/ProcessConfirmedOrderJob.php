@@ -77,8 +77,14 @@ class ProcessConfirmedOrderJob implements ShouldQueue
             if (!$inventory) {
                 return;
             }
+
+
+            $order->inventories()->syncWithoutDetaching([$inventory->id]);
+
+            $order->unsetRelation('inventories');
+
             $inventory->update(['is_available' => 0]);
-            $order->inventories()->sync([$inventory->id]);
         });
+
     }
 }

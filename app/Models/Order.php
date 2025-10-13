@@ -95,7 +95,8 @@ class Order extends Model
     }
     public function inventories(): BelongsToMany
     {
-        return $this->belongsToMany(Inventory::class);
+        return $this->belongsToMany(Inventory::class, 'inventory_order', 'order_id', 'inventory_id')
+            ->withTimestamps();
     }
 
     public function orderItems(): HasMany

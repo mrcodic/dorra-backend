@@ -56,7 +56,8 @@ class Inventory extends Model
 
     public function orders(): BelongsToMany
     {
-        return $this->belongsToMany(Order::class);
+        return $this->belongsToMany(Order::class, 'inventory_order', 'inventory_id', 'order_id')
+            ->withTimestamps();
     }
 
 }
