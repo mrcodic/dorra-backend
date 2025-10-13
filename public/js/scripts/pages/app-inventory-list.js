@@ -11,9 +11,9 @@ var dt_user_table = $(".inventory-list-table").DataTable({
         url: inventoriesDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $("#search-order-form").val(); // get from input
+            d.search_value = $("#search-inventory-form").val(); // get from input
             d.created_at = $(".filter-date").val();
-            d.status = $(".filter-status").val();
+
             return d;
         },
     },
@@ -35,18 +35,32 @@ var dt_user_table = $(".inventory-list-table").DataTable({
                 return `
         <div class="d-flex gap-1">
 
-               <a href="/orders/${data}" class="">
-                <i data-feather="eye"></i>
-            </a>
-            <a href="/orders/${data}/edit" class="">
-                <i data-feather="edit"></i>
-            </a>
+                            <a href="#" class="view-details"
+                                   data-bs-toggle="modal"
+                                     data-bs-target="#showInventoryModal"
+                                     data-id="${data}"
+                                     data-name="${row.name}"
+                                     data-number="${row.number}"
+                                     data-children_count="${row.available_places_count}"
+                              >
+
+                                     <i data-feather="eye"></i>
+                                </a>
+
+                          <a href="#" class="edit-details"
+                           data-bs-toggle="modal"
+                           data-bs-target="#editInventoryModal"
+                                     data-id="${data}"
+                                       data-name="${row.name}"
+                                     data-number="${row.number}"
+                                          >
+                            <i data-feather="edit-3"></i>
+                       </a>
             <a href="#" class="text-danger open-delete-order-modal"
                data-id="${data}"
-               data-name="${row.order_number}"
-               data-action="/orders/${data}"
+               data-action="/inventories/${data}"
                data-bs-toggle="modal"
-               data-bs-target="#deleteOrderModal">
+               data-bs-target="#deleteInventoryModal">
                <i data-feather="trash-2"></i>
             </a>
         </div>
@@ -73,7 +87,7 @@ var dt_user_table = $(".inventory-list-table").DataTable({
             },
         },
         {
-            text: "Add New Order",
+            text: "Add New Inventory",
             className: "add-new btn btn-outline-primary",
             action: function (e, dt, node, config) {
                 window.location.href = ordersCreateUrl;
@@ -105,14 +119,14 @@ function setActiveStatusCard(val) {
 
 // Search functionality
 let searchTimeout;
-$('#search-order-form').on('keyup', function () {
+$('#search-inventory-form').on('keyup', function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
     }, 300);
 });
 $('#clear-search').on('click', function () {
-    $('#search-order-form').val('');  // clear input
+    $('#search-inventory-form').val('');  // clear input
     dt_user_table.search('').draw();  // reset DataTable search
 });
 $(".filter-date").on("change", function () {
@@ -177,48 +191,43 @@ function toggleBulkDeleteContainer() {
 }
 
 $(document).ready(function () {
-    // Success messages for orders
-    if (sessionStorage.getItem("order_added") == "true") {
-        Toastify({
-            text: "Order added successfully!",
-            duration: 4000,
-            gravity: "top",
-            position: "right",
-            backgroundColor: "#28a745",
-            close: true,
-        }).showToast();
-        sessionStorage.removeItem("order_added");
-    }
-
-    if (sessionStorage.getItem("order_updated") == "true") {
-        Toastify({
-            text: "Order updated successfully!",
-            duration: 4000,
-            gravity: "top",
-            position: "right",
-            backgroundColor: "#28a745",
-            close: true,
-        }).showToast();
-        sessionStorage.removeItem("order_updated");
-    }
-
-    // Single order delete modal handler
-    $(document).on("click", ".delete-order", function (e) {
+    $(document).on('click', '.view-details', function (e) {
         e.preventDefault();
-        const orderId = $(this).data("id");
+        const $btn = $(this);
+        const $m = $('#showInventoryModal');
+        const name   = $btn.data('name') ?? '';
+        const value  = $btn.data('number') ?? '';
+        const count  = $btn.data('children_count') ?? '';
+        console.log(count,value,name)
 
-        // Show confirmation modal
-        if (confirm("Are you sure you want to delete this order?")) {
-            deleteOrder(orderId);
-        }
+        $m.find('#show-name').val(name);
+        $m.find('#show-number').val(value);
+        $m.find('#show-children-count').val(count);
+
+        $m.modal('show');
+    });
+
+    $(document).on('click', '.edit-details', function (e) {
+        e.preventDefault();
+        const $btn = $(this);
+        const id       = $btn.data('id');
+        const name   = $btn.data('name') ?? '';
+        const value  = $btn.data('number') ?? '';
+
+        const $m = $('#editInventoryModal');
+        $('#editInventoryForm').attr('action', '/inventories/' + id);
+        $m.find('#editInventoryName').val(name);
+        $m.find('#editInventoryNumber').val(value);
+
+        $m.modal('show');
     });
 
     // Alternative modal-based delete handler
     $(document).on("click", ".open-delete-order-modal", function () {
         const orderId = $(this).data("id");
         console.log(orderId);
-        $("#deleteOrderForm").data("id", orderId);
-        $("#deleteOrderModal").modal("show");
+        $("#deleteInventoryForm").data("id", orderId);
+        $("#deleteInventoryModal").modal("show");
     });
 
     // Single order delete form submission
@@ -267,7 +276,7 @@ $(document).on("click", "#bulk-delete-btn", function (e) {
         return;
     }
 
-    $("#deleteOrdersModal").modal("show");
+    $("#deleteInventoriesModal").modal("show");
 });
 
 // Confirm bulk delete modal
@@ -282,20 +291,20 @@ $(document).on("click", "#confirm-bulk-delete", function () {
 });
 
 // Single order delete function
-$(document).on("submit", "#deleteOrderForm", function (e) {
+$(document).on("submit", "#deleteInventoryForm", function (e) {
     e.preventDefault();
     const OrderId = $(this).data("id");
     console.log(OrderId);
 
     $.ajax({
-        url: `/orders/${OrderId}`,
+        url: `/inventories/${OrderId}`,
         method: "DELETE",
         success: function (res) {
 
-            $("#deleteOrderModal").modal("hide");
+            $("#deleteInventoryModal").modal("hide");
 
             Toastify({
-                text: "Order deleted successfully!",
+                text: "Inventory deleted successfully!",
                 duration: 2000,
                 gravity: "top",
                 position: "right",
@@ -307,7 +316,7 @@ $(document).on("submit", "#deleteOrderForm", function (e) {
         },
         error: function () {
 
-            $("#deleteOrderModal").modal("hide");
+            $("#deleteInventoryModal").modal("hide");
             Toastify({
                 text: "Something Went Wrong!",
                 duration: 2000,
@@ -333,16 +342,16 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
     if (selectedIds.length === 0) return;
 
     $.ajax({
-        url: "orders/bulk-delete",
+        url: "inventories/bulk-delete",
         method: "POST",
         data: {
             ids: selectedIds,
             _token: $('meta[name="csrf-token"]').attr("content"),
         },
         success: function (response) {
-            $("#deleteOrdersModal").modal("hide");
+            $("#deleteInventorysModal").modal("hide");
             Toastify({
-                text: "Selected orders deleted successfully!",
+                text: "Selected inventories deleted successfully!",
                 duration: 1500,
                 gravity: "top",
                 position: "right",
@@ -362,7 +371,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
 
         },
         error: function () {
-            $("#deleteOrdersModal").modal("hide");
+            $("#deleteInventorysModal").modal("hide");
             Toastify({
                 text: "Something Went Wrong!",
                 duration: 1500,

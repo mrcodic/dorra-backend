@@ -218,6 +218,12 @@
                     "name": "Board",
                     "icon": "circle",
                     "slug": "app-user-list"
+                },
+                {
+                    "url": "/inventories",
+                    "name": "Inventory",
+                    "icon": "circle",
+                    "slug": "app-user-list"
                 }
             ],
             "modalTarget": ""

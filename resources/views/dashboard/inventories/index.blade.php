@@ -184,7 +184,7 @@
                             class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
 
                         <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                            id="search-order-form" placeholder="Search order..." style="height: 38px;">
+                            id="search-inventory-form" placeholder="Search inventory..." style="height: 38px;">
 
                         <!-- Clear button -->
                         <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
@@ -199,18 +199,12 @@
                     <div class="col-12 col-md-2">
                         <select name="created_at" class="form-select filter-date">
                             <option value="" disabled selected>Date</option>
-                            <option value="asc">Oldest</option>
                             <option value="desc">Newest</option>
+                            <option value="asc">Oldest</option>
                         </select>
                     </div>
 
-                    {{-- Add Button - 20% on md+, full width on xs --}}
-                    <div class="col-12 col-md-2">
-                        <button type="button" id="print-confirmed-orders" class="btn btn-outline-primary w-100 w-md-auto">
-                            <i data-feather="printer"></i>
-                            Printing New orders
-                        </button>
-                    </div>
+
                     <div class="col-12 col-md-2">
                         <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
                             <i data-feather="plus"></i>
@@ -244,7 +238,7 @@
                             <i data-feather="trash-2"></i> Delete Selected
                         </button>
                         <form style="display: none;" id="bulk-delete-form" method="POST"
-                            action="{{ route('orders.bulk-delete') }}">
+                            action="{{ route('inventories.bulk-delete') }}">
                             @csrf
                             <button type="submit" id="delete-selected-btn"
                                 class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
@@ -255,15 +249,13 @@
                 </div>
             </div>
 
-            @include('modals.categories.show-category')
-            @include('modals.categories.edit-category')
-            @include('modals.inventories.add-inventory')
+
             @include('modals.delete', [
-            'id' => 'deleteOrderModal',
-            'formId' => 'deleteOrderForm',
-            'title' => 'Delete Order',
-            'message' => 'Are you sure you want to delete this order? This action cannot be undone.',
-            'confirmText' => 'Yes, Delete Order'
+            'id' => 'deleteInventoryModal',
+            'formId' => 'deleteInventoryForm',
+            'title' => 'Delete Inventory',
+            'message' => 'Are you sure you want to delete this inventory? This action cannot be undone.',
+            'confirmText' => 'Yes, Delete Inventory'
             ])
 
             @include('modals.delete',[
@@ -272,6 +264,9 @@
             'title' => 'Delete Inventories',
             'confirmText' => 'Are you sure you want to delete this items?',
             ])
+            @include('modals.inventories.show-inventory')
+            @include('modals.inventories.edit-inventory')
+            @include('modals.inventories.add-inventory')
             @endsection
 
             @section('vendor-script')
@@ -434,7 +429,7 @@
                     const count = selectedCheckboxes.length;
 
                     if (count > 0) {
-                        $('#selected-count-text').text(`${count} Order${count > 1 ? 's are' : ' is'} selected`);
+                        $('#selected-count-text').text(`${count} inventor${count > 1 ? 'ies are' : 'y'} selected`);
                         $('#bulk-delete-container').show();
                     } else {
                         $('#bulk-delete-container').hide();

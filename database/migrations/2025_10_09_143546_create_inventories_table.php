@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedBigInteger('number');
             $table->foreignId('parent_id')
-            ->nullable()->constrained('inventories');
+            ->nullable()->constrained('inventories')
+                ->nullOnDelete();
             $table->boolean('is_available')
                 ->nullable()
                 ->default(true);

@@ -19,6 +19,7 @@ class InventoryController extends DashboardController
         $this->storeRequestClass = new StoreInventoryRequest();
         $this->updateRequestClass = new UpdateInventoryRequest();
         $this->usePagination = true;
+        $this->resourceTable = 'inventories';
 
     }
 

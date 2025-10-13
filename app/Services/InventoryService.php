@@ -18,9 +18,22 @@ class InventoryService extends BaseService
     {
         $inventories = $this->repository
             ->query()
+            ->when(request()->filled('search_value'), function ($query) {
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $search = request('search_value');
+                    $query->where("name", 'LIKE', "%{$search}%");
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
+            })->when(request()->filled('created_at'), function ($query) {
+                $query->orderBy('created_at', request('created_at'));
+            })
             ->whereNull('parent_id')
             ->latest();
         return DataTables::of($inventories)
+            ->addColumn('available_places_count', function ($inventory) {
+                return $inventory->children()->available()->count();
+            })
             ->make(true);
     }
 
