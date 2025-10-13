@@ -15,6 +15,12 @@ class Inventory extends Model
         'is_available' => 1,
     ];
 
+    public static function booted()
+    {
+        static::deleting(function ($inventory) {
+            $inventory->children()->delete();
+        });
+    }
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'parent_id');
