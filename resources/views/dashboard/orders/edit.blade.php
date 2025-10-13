@@ -162,7 +162,7 @@
 
                             <select class="form-select select2" name="inventory_ids[]" id="place_id"
                                     data-assigned="{{ $model->inventory?->id ?? '' }}"
-                                    data-placeholder="Search place…">
+                                    data-placeholder="Search place…" multiple>
                                 @forelse($children as $child)
                                     <option value="{{ $child->id }}" @selected($model->inventory?->id === $child->id)>
                                         {{ $child->name }}
