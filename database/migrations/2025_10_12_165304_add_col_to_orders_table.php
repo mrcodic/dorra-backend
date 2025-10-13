@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->after('is_already_printed',function ($table) {
                 $table->foreignIdFor(Inventory::class)
+                    ->nullable()
                 ->constrained()
                 ->cascadeOnDelete();
             });
