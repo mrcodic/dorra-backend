@@ -19,12 +19,7 @@ class StoreCartItemRequest extends BaseRequest
     private Template|null $template = null;
     private Design|null $design = null;
     private Category|Product|null $product = null;
-public function __construct()
 
-{
-    $this->design = Design::find($this->design_id);
-    
-}
 
     /**
      * Determine if the v1 is authorized to make this request.
@@ -41,6 +36,8 @@ public function __construct()
      */
     public function rules(): array
     {
+        $this->design = Design::find($this->design_id);
+        
         return [
             'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
             'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
