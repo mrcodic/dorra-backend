@@ -421,13 +421,18 @@ class OrderService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->find($id);
-        if (isset($validatedData['inventory_id'])) {
-            if ($model->inventory_id) {
-                $inventory = $this->inventoryRepository->find($model->inventory_id);
-                $inventory->update(["is_available" => true]);
+        if (isset($validatedData['inventory_ids'])) {
+            if ($model->inventories) {
+                collect($model->inventories)->each(function ($inventory) {
+                    $inventory = $this->inventoryRepository->find($inventory);
+                    $inventory->update(["is_available" => true]);
+                });
+            }
+                $model->inventories()->sync($validatedData['inventory_ids']);
+
             }
 
-        }
+
         $model = $this->repository->update($validatedData, $id);
 
         if (

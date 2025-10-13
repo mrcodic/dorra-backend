@@ -160,16 +160,18 @@
 
 
 
-                            <select class="form-select" name="inventory_id" id="place_id"
-                                    data-assigned="{{ $model->inventory?->id ?? '' }}">
+                            <select class="form-select select2" name="inventory_ids[]" id="place_id"
+                                    data-assigned="{{ $model->inventory?->id ?? '' }}"
+                                    data-placeholder="Search place…">
                                 @forelse($children as $child)
-                                    <option value="{{ $child->id }}"@selected($model->inventory?->id === $child->id)>
-                                    {{ $child->name }}
+                                    <option value="{{ $child->id }}" @selected($model->inventory?->id === $child->id)>
+                                        {{ $child->name }}
                                     </option>
                                 @empty
                                     <option value="" selected disabled>— No places —</option>
                                 @endforelse
                             </select>
+
 
                         </div>
                     </div>
@@ -289,6 +291,22 @@
 @endsection
 
 @section('page-script')
+    <script>
+        $(function () {
+            const $place = $('#place_id');
+
+            $place.select2({
+                width: '100%',
+                allowClear: true,
+                placeholder: $place.data('placeholder') || 'Search…',
+                // If the select lives inside a Bootstrap modal, anchor the dropdown there for z-index
+                dropdownParent: $place.closest('.modal').length ? $place.closest('.modal') : $(document.body),
+                // Set this to 'rtl' if your current locale is Arabic
+                dir: document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'
+            });
+        });
+    </script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://unpkg.com/feather-icons"></script>

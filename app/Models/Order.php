@@ -93,6 +93,10 @@ class Order extends Model
     {
         return $this->belongsTo(Inventory::class);
     }
+    public function inventories(): BelongsToMany
+    {
+        return $this->belongsToMany(Inventory::class);
+    }
 
     public function orderItems(): HasMany
     {
