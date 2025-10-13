@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Inventory extends Model
 {
-    protected $fillable = ['name', 'number','parent_id','is_available'];
+    protected $fillable = ['name', 'number', 'parent_id', 'is_available'];
 
     public function parent(): BelongsTo
     {
@@ -23,10 +23,12 @@ class Inventory extends Model
 
     public function scopeAvailable()
     {
-        return $this->whereIsAvailable(true);
+        return $this->whereIsAvailable(false);
     }
+
     public function scopeUnAvailable()
     {
-        return $this->whereIsAvailable(false);
+        return $this->whereIsAvailable(true);
+
     }
 }
