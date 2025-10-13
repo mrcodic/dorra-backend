@@ -146,7 +146,7 @@
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
                             @php
                                 $parent   = $model->inventory?->parent ?? $model->inventory;
-                                $children = $parent?->children()->select('id','name','is_available')->get() ?? collect();
+                                $children = $parent?->children()->select('id','name','is_available')->available()->get() ?? collect();
                             @endphp
 
                             <select class="form-select" name="inventory_id" id="place_id"
