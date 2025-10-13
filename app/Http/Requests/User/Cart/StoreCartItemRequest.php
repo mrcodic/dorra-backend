@@ -42,7 +42,7 @@ class StoreCartItemRequest extends BaseRequest
             'cartable_type' => ['required_with:template_id', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'product_price_id' => [
                 Rule::requiredIf(function () {
-                    $cartable = Product::find($this->cartable_id) ?? Category::find($this->cartable_id);
+                    $cartable = Product::find($this->cartable_id ?? $this->design->designable->id) ?? Category::find($this->cartable_id ?? $this->design->designable->id);
                     return $cartable && $cartable->prices()->exists();
                 }),
                 'exists:product_prices,id',
