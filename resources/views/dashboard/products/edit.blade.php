@@ -640,6 +640,7 @@
                 initEmpty: {{ $hasSpecs ? 'false' : 'true' }},
                 repeaters: [{
                     selector: '.inner-repeater',
+                    initEmpty: true,
                     show: function () {
                         $(this).slideDown();
                         feather.replace();
