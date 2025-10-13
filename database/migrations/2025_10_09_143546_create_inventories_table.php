@@ -19,7 +19,7 @@ return new class extends Migration
             ->nullable()->constrained('inventories');
             $table->boolean('is_available')
                 ->nullable()
-                ->default(false);
+                ->default(true);
             $table->timestamps();
         });
     }
