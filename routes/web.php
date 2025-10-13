@@ -212,11 +212,11 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('/products', ProductController::class)->only(['show', 'index']);
 
 
-    Route::apiResource('/jobs',JobTicketController::class);
     Route::group(['prefix' => 'jobs', 'as' => 'job-tickets.', 'controller' => JobTicketController::class,], function () {
         Route::get('/data', 'getData')->name('data');
         Route::get('/{jobTicket}/pdf', 'pdf')->name('pdf');
     });
+    Route::apiResource('/jobs',JobTicketController::class);
 
     Route::get('board', BoardController::class)->name('board');
     Route::view('/scan', 'dashboard.scan.kiosk')->name('scan.kiosk');
