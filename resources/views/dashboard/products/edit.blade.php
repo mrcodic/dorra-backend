@@ -640,13 +640,10 @@
                 initEmpty: {{ $hasSpecs ? 'false' : 'true' }},
                 repeaters: [{
                     selector: '.inner-repeater',
-                    // ✅ make inner repeater empty when a new spec is created
-                    initEmpty: true,
                     show: function () {
                         $(this).slideDown();
                         feather.replace();
 
-                        // init dropzone (if you use it)
                         let dzElement = $(this).find(".option-dropzone")[0];
                         if (dzElement && typeof initOptionDropzone === 'function') {
                             initOptionDropzone(dzElement);
@@ -665,14 +662,6 @@
                     $(this).slideDown();
                     feather.replace();
 
-                    // ✅ ensure a NEW spec starts with ZERO options,
-                    // then add exactly ONE blank option
-                    const $inner = $(this).find('.inner-repeater').first();
-                    const $innerList = $inner.find('[data-repeater-list]');
-                    $innerList.empty(); // remove any cloned options from last spec
-                    $inner.find('[data-repeater-create]').first().trigger('click'); // add one blank value
-
-                    // init dropzone for the newly created blank value
                     let dzElement = $(this).find(".option-dropzone")[0];
                     if (dzElement && typeof initOptionDropzone === 'function') {
                         initOptionDropzone(dzElement);
@@ -682,18 +671,22 @@
                 },
                 hide: function (deleteElement) {
                     var $item = $(this);
-                    $item.slideUp(deleteElement, function () {
+                    $item.slideUp(deleteElement, function() {
                         var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
                         var $items = $specList.find('[data-repeater-item]').not(':hidden');
-                        // keep or hide as you prefer
-                        // if ($items.length === 0) $specList.addClass('d-none');
+
+                        // keep visible if needed, comment out if not
+                        // if ($items.length === 0) {
+                        //     $specList.addClass('d-none');
+                        // }
                     });
                 },
                 isFirstItemUndeletable: false
             });
 
-            // DO NOT re-initialize inner repeater elsewhere; avoid double init
-            // Keep your Dropzone init for existing items:
+            // ✅ remove the second inner-repeater initializer to avoid double items
+
+            // Initialize dropzones for existing option images
             if (typeof initOptionDropzone === 'function') {
                 document.querySelectorAll(".option-dropzone").forEach(el => {
                     let media = el.dataset.existingMedia ? JSON.parse(el.dataset.existingMedia) : null;
@@ -703,7 +696,6 @@
 
             feather.replace();
         });
-
 
     </script>
 
