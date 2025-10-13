@@ -145,7 +145,7 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
                             <select class="form-select" name="inventory_id" id="place_id">
-                                @forelse($model->inventory?->children()->available()->get() ?? [] as $child)
+                                @forelse($model->inventory?->parent->children()->available()->get() ?? [] as $child)
                                     <option value="{{ $child->id }}"@selected($model->inventory?->id == $child->id)>{{ $child->name }}</option>
 
                                 @empty
