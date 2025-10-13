@@ -81,7 +81,7 @@ class BaseService
                     }
                 }
             });
-            return $this->repository->query()->whereIn('id', $ids)->delete();
+            return $models->delete();
         });
 
 
