@@ -38,4 +38,9 @@ class Inventory extends Model
             ->where('is_available', 0);
     }
 
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
 }
