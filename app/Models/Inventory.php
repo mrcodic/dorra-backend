@@ -23,12 +23,12 @@ class Inventory extends Model
 
     public function scopeAvailable()
     {
-        return $this->whereNotNull('parent_id')->whereIsAvailable(false);
+        return $this->whereNotNull('parent_id')->whereIsAvailable(0);
     }
 
     public function scopeUnAvailable()
     {
-        return $this->whereNotNull('parent_id')->whereIsAvailable(true);
+        return $this->whereNotNull('parent_id')->whereIsAvailable(1);
 
     }
 }
