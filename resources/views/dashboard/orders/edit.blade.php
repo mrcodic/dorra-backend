@@ -129,11 +129,7 @@
                             </option>
                         @endforeach
                     </select>
-                    @php
 
-                        $parent   = $model->inventory?->parent ?? $model->inventory;
-                        $children = $parent?->children()->available()->get() ?? collect();
-                    @endphp
                     <div class="row g-3 align-items-end">
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Inventory</label>
@@ -148,15 +144,24 @@
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
-                            <select class="form-select" name="inventory_id" id="place_id">
+                            @php
+                                $parent   = $model->inventory?->parent ?? $model->inventory;
+                                // NOTE: no ->available() here so the assigned one shows even if unavailable
+                                $children = $parent?->children()->select('id','name','is_available')->orderBy('name')->get() ?? collect();
+                            @endphp
+
+                            <select class="form-select" name="inventory_id" id="place_id"
+                                    data-assigned="{{ $model->inventory?->id ?? '' }}">
                                 @forelse($children as $child)
-                                    <option value="{{ $child->id }}" @selected($model->inventory?->id === $child->id)>
-                                        {{ $child->name }}
+                                    <option value="{{ $child->id }}"
+                                    @selected($model->inventory?->id === $child->id)">
+                                    {{ $child->name }}{{ $child->is_available ? '' : ' (occupied)' }}
                                     </option>
                                 @empty
-                                    <option value="" selected disabled>— No available places —</option>
+                                    <option value="" selected disabled>— No places —</option>
                                 @endforelse
                             </select>
+
                         </div>
                     </div>
 
@@ -334,8 +339,7 @@
                 }
             }
 
-            // initial load (if first inventory is preselected)
-            loadPlaces(inventorySelect.value);
+
 
             // on change
             inventorySelect.addEventListener('change', function () {
