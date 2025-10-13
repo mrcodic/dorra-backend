@@ -349,7 +349,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
             _token: $('meta[name="csrf-token"]').attr("content"),
         },
         success: function (response) {
-            $("#deleteInventorysModal").modal("hide");
+            $("#deleteInventoriesModal").modal("hide");
             Toastify({
                 text: "Selected inventories deleted successfully!",
                 duration: 1500,
@@ -371,7 +371,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
 
         },
         error: function () {
-            $("#deleteInventorysModal").modal("hide");
+            $("#deleteInventoriesModal").modal("hide");
             Toastify({
                 text: "Something Went Wrong!",
                 duration: 1500,
