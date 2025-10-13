@@ -433,7 +433,9 @@ class OrderService extends BaseService
 
             }
         $model->inventories()->sync($validatedData['inventory_ids'] ?? []);
-
+        collect($model->inventories)->each(function ($inventory) {
+            $inventory->update(["is_available" => false]);
+        });
 
 
         $model = $this->repository->update($validatedData, $id);

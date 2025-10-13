@@ -65,6 +65,7 @@ class OrderObserver
 
     public function pivotSynced(Order $order, string $relation, array $changes): void
     {
+
         if ($relation !== 'inventories') return;
 
         if (!empty($changes['attached'])) {
