@@ -418,51 +418,59 @@ class OrderService extends BaseService
         });
     }
 
+
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->find($id);
-        if (isset($validatedData['inventory_ids'])) {
-            if ($model->inventories) {
-                collect($model->inventories)->each(function ($inventory) {
-                    $inventory = $this->inventoryRepository->find($inventory);
-                    $inventory->update(["is_available" => true]);
-                });
+
+        DB::transaction(function () use (&$model, $validatedData) {
+            // ===== Handle inventories (multi-select) =====
+            if (array_key_exists('inventory_ids', $validatedData)) {
+                $newIds = array_values(array_unique(array_filter($validatedData['inventory_ids'] ?? [], fn ($v) => !empty($v))));
+
+
+                $changes = $model->inventories()->sync($newIds);
+
+                if (!empty($changes['attached'])) {
+                    $this->inventoryRepository->query()->
+                    whereIn('id', $changes['attached'])->update(['is_available' => 0]);
+                }
+
+                if (!empty($changes['detached'])) {
+                    $this->inventoryRepository->query()->
+                    whereIn('id', $changes['detached'])->update(['is_available' => 1]);
+                }
+
+
             }
 
 
+            $model = $this->repository->update($validatedData, $model->getKey());
 
+            if (
+                array_key_exists('first_name', $validatedData) ||
+                array_key_exists('last_name',  $validatedData) ||
+                array_key_exists('email',      $validatedData) ||
+                array_key_exists('phone',      $validatedData)
+            ) {
+                if ($orderAddress = $model->orderAddress()->first()) {
+                    $orderAddress->update([
+                        'first_name' => $validatedData['first_name'] ?? $orderAddress->first_name,
+                        'last_name'  => $validatedData['last_name']  ?? $orderAddress->last_name,
+                        'email'      => $validatedData['email']      ?? $orderAddress->email,
+                        'phone'      => $validatedData['phone']      ?? $orderAddress->phone,
+                    ]);
+                }
             }
-        $model->inventories()->sync($validatedData['inventory_ids'] ?? []);
-        collect($model->inventories)->each(function ($inventory) {
-            $inventory->update(["is_available" => false]);
+
+
+            if (array_key_exists('status', $validatedData)) {
+                $model->status = $validatedData['status'];
+                $model->save();
+            }
         });
-
-
-        $model = $this->repository->update($validatedData, $id);
-
-        if (
-            isset($validatedData['first_name']) ||
-            isset($validatedData['last_name']) ||
-            isset($validatedData['email']) ||
-            isset($validatedData['phone'])
-        ) {
-            $orderAddress = $model->orderAddress()->first();
-            if ($orderAddress) {
-                $orderAddress->update([
-                    'first_name' => $validatedData['first_name'] ?? $orderAddress->first_name,
-                    'last_name' => $validatedData['last_name'] ?? $orderAddress->last_name,
-                    'email' => $validatedData['email'] ?? $orderAddress->email,
-                    'phone' => $validatedData['phone'] ?? $orderAddress->phone,
-                ]);
-            }
-        }
-
-        if (isset($validatedData['status'])) {
-            $model->status = $validatedData['status'];
-            $model->save();
-        }
-
-        return $model->load($relationsToLoad);
+        
+        return $model->fresh()->load($relationsToLoad);
     }
 
 
