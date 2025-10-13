@@ -640,15 +640,17 @@
                 initEmpty: {{ $hasSpecs ? 'false' : 'true' }},
                 repeaters: [{
                     selector: '.inner-repeater',
+                    // ❌ initEmpty: true,   // <- remove this
+                    // ✅ keep existing options on page load
+                    initEmpty: false,
                     show: function () {
                         $(this).slideDown();
                         feather.replace();
 
-                        let dzElement = $(this).find(".option-dropzone")[0];
+                        const dzElement = $(this).find(".option-dropzone")[0];
                         if (dzElement && typeof initOptionDropzone === 'function') {
                             initOptionDropzone(dzElement);
                         }
-
                         $(this).find('.uploadedImage').val('');
                     },
                     hide: function (deleteElement) {
@@ -656,33 +658,35 @@
                     }
                 }],
                 show: function () {
-                    var $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                    const $specList = $(this).closest('.outer-repeater').find('[data-repeater-list="specifications"]');
                     $specList.removeClass('d-none');
 
                     $(this).slideDown();
                     feather.replace();
 
-                    let dzElement = $(this).find(".option-dropzone")[0];
+                    // This runs ONLY for a NEW spec; safe to reset its inner list
+                    const $inner = $(this).find('.inner-repeater').first();
+                    const $innerList = $inner.find('[data-repeater-list]');
+                    $innerList.empty();                           // remove cloned options from last spec
+                    $inner.find('[data-repeater-create]').first().trigger('click'); // add exactly one blank
+
+                    const dzElement = $(this).find(".option-dropzone")[0];
                     if (dzElement && typeof initOptionDropzone === 'function') {
                         initOptionDropzone(dzElement);
                     }
-
                     $(this).find('.uploadedImage').val('');
                 },
                 hide: function (deleteElement) {
-                    var $item = $(this);
-                    $item.slideUp(deleteElement, function() {
-                        var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
-                        var $items = $specList.find('[data-repeater-item]').not(':hidden');
-
-                        // keep visible if needed, comment out if not
-                        // if ($items.length === 0) {
-                        //     $specList.addClass('d-none');
-                        // }
+                    const $item = $(this);
+                    $item.slideUp(deleteElement, function () {
+                        const $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                        const $items = $specList.find('[data-repeater-item]').not(':hidden');
+                        // if ($items.length === 0) $specList.addClass('d-none');
                     });
                 },
                 isFirstItemUndeletable: false
             });
+
 
             // ✅ remove the second inner-repeater initializer to avoid double items
 
