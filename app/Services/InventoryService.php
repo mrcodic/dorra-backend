@@ -50,7 +50,6 @@ class InventoryService extends BaseService
     public function availablePlaces($id)
     {
         return $this->repository->query()
-            ->whereNotNull('parent_id')
             ->where('parent_id', $id)
             ->available()
             ->get();
