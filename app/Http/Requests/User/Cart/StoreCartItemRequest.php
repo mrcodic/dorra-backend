@@ -38,8 +38,8 @@ class StoreCartItemRequest extends BaseRequest
         return [
             'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
             'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
-            'cartable_id' => ['required', 'integer'],
-            'cartable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
+            'cartable_id' => ['required_with:template_id', 'integer'],
+            'cartable_type' => ['required_with:template_id', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'product_price_id' => [
                 Rule::requiredIf(function () {
                     $cartable = Product::find($this->cartable_id) ?? Category::find($this->cartable_id);

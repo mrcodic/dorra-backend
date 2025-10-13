@@ -59,14 +59,17 @@ class CartService extends BaseService
                     ...Arr::except($validatedData, ['design_id', 'cookie_id']),
                 ]);
             }
+            $design = $request->getDesign();
 
-
+            if ($request->design_id) {
+                $request->cartable_id = $design->designable_id;
+                $request->cartable_type = $design->designable_type;
+            }
             $product = $request->cartable_type === 'App\\Models\\Product'
                 ? $this->productRepository->find($request->cartable_id)
                 : $this->categoryRepository->find($request->cartable_id);
 
             $template = $request->getTemplate();
-            $design = $request->getDesign();
 
             $priceDetails = $this->calculatePriceDetails($validatedData, $product);
 
@@ -360,11 +363,11 @@ class CartService extends BaseService
         $cartId = auth('sanctum')->user()?->cart?->id ?? Guest::whereCookieValue(request()->cookie('cookie_id'))->first()?->cart?->id;
         $mapItemTypes = [
             'template' => Template::class,
-            'design'=> Design::class,
+            'design' => Design::class,
         ];
         $mapCartItem = [
             'category' => Category::class,
-            'product'=> Product::class,
+            'product' => Product::class,
         ];
         return $this->cartItemRepository->query()->where('cart_id', $cartId)
             ->where('cartable_id', $request->cartable_id)
