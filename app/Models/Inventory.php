@@ -17,7 +17,7 @@ class Inventory extends Model
 
     public static function booted()
     {
-        static::deleting(function ($inventory) {
+        static::deleted(function ($inventory) {
             $inventory->children()->delete();
         });
     }
