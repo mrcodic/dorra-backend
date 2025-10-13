@@ -21,7 +21,7 @@ class Inventory extends Model
 
         static::deleting(function (Inventory $inventory) {
 
-            $inventory->orders()->update(['inventory_id' => null]);
+//            $inventory->orders()->update(['inventory_id' => null]);
             $inventory->children()->each(function (Inventory $child) use ($inventory) {
                 if (method_exists($inventory, 'isForceDeleting') && $inventory->isForceDeleting()) {
                     $child->forceDelete();
