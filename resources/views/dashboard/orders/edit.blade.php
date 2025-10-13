@@ -134,6 +134,7 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Inventory</label>
                             <select class="form-select" id="inventory_id">
+                                <option value="" selected disabled>— Select Inventory —</option>
                                 @foreach ($associatedData['inventories'] as $inventory)
                                     <option
                                         value="{{ $inventory->id }}" @selected($model->inventory?->parent->id == $inventory->id)>{{ $inventory->name }}</option>
