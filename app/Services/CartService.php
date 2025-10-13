@@ -93,7 +93,7 @@ class CartService extends BaseService
     private function calculatePriceDetails(array $validatedData, $product,$design=null, $price = null): array
     {
         $productPrice = $this->productPriceRepository->query()
-            ->find(Arr::get($validatedData, 'product_price_id') ?? $design->productPrice?->id);
+            ->find(Arr::get($validatedData, 'product_price_id') ?? $design?->productPrice?->id);
         $productPriceValue = $productPrice?->price ?? $price;
         $specsSum = collect(Arr::get($validatedData, 'specs') ?? $design->specifications)
             ->map(function ($spec) {
