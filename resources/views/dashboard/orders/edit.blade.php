@@ -153,9 +153,8 @@
                             <select class="form-select" name="inventory_id" id="place_id"
                                     data-assigned="{{ $model->inventory?->id ?? '' }}">
                                 @forelse($children as $child)
-                                    <option value="{{ $child->id }}"
-                                    @selected($model->inventory?->id === $child->id)">
-                                    {{ $child->name }}{{ $child->is_available ? '' : ' (occupied)' }}
+                                    <option value="{{ $child->id }}"@selected($model->inventory?->id === $child->id)>
+                                    {{ $child->name }}
                                     </option>
                                 @empty
                                     <option value="" selected disabled>— No places —</option>
