@@ -80,8 +80,8 @@ class BaseService
                         clearMediaCollections($model);
                     }
                 }
+                $model->delete();
             });
-            return $models->delete();
         });
 
 
