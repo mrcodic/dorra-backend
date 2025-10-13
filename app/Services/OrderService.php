@@ -15,7 +15,8 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\{DB, Auth, Cache};
 use App\Models\{Order, Design, Product, Location, ShippingAddress};
 use App\DTOs\Order\{OrderData, OrderAddressData, OrderItemData, PickupContactData};
-use App\Repositories\Interfaces\{PaymentMethodRepositoryInterface,
+use App\Repositories\Interfaces\{InventoryRepositoryInterface,
+    PaymentMethodRepositoryInterface,
     UserRepositoryInterface,
     OrderRepositoryInterface,
     DesignRepositoryInterface,
@@ -24,8 +25,7 @@ use App\Repositories\Interfaces\{PaymentMethodRepositoryInterface,
     DiscountCodeRepositoryInterface,
     ProductPriceRepositoryInterface,
     ShippingAddressRepositoryInterface,
-    ProductSpecificationOptionRepositoryInterface
-};
+    ProductSpecificationOptionRepositoryInterface};
 
 
 class OrderService extends BaseService
@@ -47,6 +47,7 @@ class OrderService extends BaseService
         public CartService                                   $cartService,
         public PaymentMethodRepositoryInterface              $paymentMethodRepository,
         public PaymentGatewayFactory                         $paymentFactory,
+        public InventoryRepositoryInterface $inventoryRepository,
 
     )
 
@@ -442,7 +443,13 @@ class OrderService extends BaseService
             $model->status = $validatedData['status'];
             $model->save();
         }
+        if (isset($validatedData['inventory_id'])) {
+            if ($model->inventory_id) {
+                $inventory = $this->inventoryRepository->find($model->inventory_id);
+                $inventory->update(["is_available" => true]);
+            }
 
+        }
         return $model->load($relationsToLoad);
     }
 
