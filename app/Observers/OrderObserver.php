@@ -54,8 +54,8 @@ class OrderObserver
             $inventory = Inventory::query()->whereNotNull('parent_id')
             ->available()->first();
             DB::transaction(function () use ($inventory, $order) {
-                $order->update(["inventory_id" => $inventory->id]);
-                $inventory->update(["is_available" => false]);
+                $order->update(["inventory_id" => $inventory?->id]);
+                $inventory?->update(["is_available" => false]);
             });
 
 
