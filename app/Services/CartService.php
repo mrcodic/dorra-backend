@@ -167,7 +167,7 @@ class CartService extends BaseService
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->with([
-                'items.cartable.offer', 'items.itemable' => function ($query) {
+                'items.cartable.lastOffer', 'items.itemable' => function ($query) {
                     $query->select(['id', 'name']);
                 }, 'items.itemable.products'])
             ->first();
