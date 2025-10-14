@@ -9,7 +9,8 @@
                     </p>
                     <p style="margin:5px 0;">
                         <strong>Reserved Places:</strong>
-                        {{ $order->reserved_places ?? 'N/A' }}
+                        {{ $order->reserved_places }}
+                        ({{ $order->inventories->pluck('name')->join(', ') ?: 'N/A' }})
                     </p>
                 </div>
                 <div>
