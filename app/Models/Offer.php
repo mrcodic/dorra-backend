@@ -25,13 +25,13 @@ class Offer extends Model
         'end_at'   => 'datetime',
     ];
 
-//    protected function value(): Attribute
-//    {
-//        return Attribute::make(
-//            get: fn ($value) => (int) $value . '%',
-//
-//        );
-//    }
+    protected function value(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => (int) $value . '%',
+
+        );
+    }
     public function products(): MorphToMany
     {
         return $this->morphedByMany(Product::class, 'offerable')
