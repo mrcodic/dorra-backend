@@ -18,6 +18,9 @@ class CartItemResource extends JsonResource
         $item = $this->itemable;
         $cartable = $this->cartable;
         $lastOffer = $this->cartable->lastOffer;
+        $sub  = (float) $this->getAttribute('sub_total');
+        $val  = (float) ($lastOffer->value ?? 0);
+        $after= $lastOffer ? round($sub * (1 - ($val / 100)), 2) : null;
         return [
             'id' => $this->id,
             'type' => $this->when($item, class_basename($item)),
@@ -33,10 +36,7 @@ class CartItemResource extends JsonResource
                     : new CategoryResource($cartable->load('lastOffer'));
             }),
             'price' => $this->sub_total,
-            'price_after_offer' => $lastOffer ?
-                    round($this->sub_total - ($lastOffer->value / 100 * $this->sub_total),2)
-                    : null
-            ,
+            'price_after_offer' => $after,
             'quantity' => $this->quantity,
         ];
     }
