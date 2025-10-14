@@ -146,11 +146,11 @@ var dt_user_table = $(".order-list-table").DataTable({
     },
 });
 
-function setActiveStatusCard(val){
-
+function setActiveStatusCard(val) {
     $(".status-card").removeClass("selected");
-    if (val) $(`.status-card[data-status="${val}"]`).addClass("selected");
+    if (val) { $(`.status-card[data-status="${val}"]`).addClass("selected"); }
 }
+
 // Search functionality
 let searchTimeout;
 $('#search-order-form').on('keyup', function () {
@@ -172,12 +172,14 @@ $(".filter-status").on("change", function () {
 });
 
 $(document).on("click", ".status-card", function () {
-    const status = $(this).data("status");
+    const clicked = String($(this).data("status"));
+    const current = String($(".filter-status").val() || "");
 
-    // set the dropdown filter for consistency
-    $(".filter-status").val(status);
+    // toggle: if clicking the already-selected card, clear filter (show All)
+    const nextVal = (clicked === current) ? "" : clicked;
 
-    // redraw DataTable
+    $(".filter-status").val(nextVal);
+    setActiveStatusCard(nextVal);
     dt_user_table.draw();
 });
 
