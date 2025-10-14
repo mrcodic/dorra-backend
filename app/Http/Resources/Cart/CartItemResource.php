@@ -34,7 +34,7 @@ class CartItemResource extends JsonResource
             }),
             'price' => $this->sub_total,
             'price_after_offer' => $lastOffer ?
-                    $this->sub_total - ($lastOffer->getOriginal('value') * $this->sub_total)
+                    $this->sub_total - ($lastOffer->value / 100 * $this->sub_total)
                     : null
             ,
             'quantity' => $this->quantity,
