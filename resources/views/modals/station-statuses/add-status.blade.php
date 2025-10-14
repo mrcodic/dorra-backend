@@ -43,7 +43,7 @@
                         <select class="form-select" name="parent_id">
                           <option value="">— None —</option>
                           @foreach ($associatedData['statuses'] ?? [] as $s)
-                            <option value="{{ $s->id }}">{{ $s->getTranslation('name', app()->getLocale()) }}</option>
+                            <option value="{{ $s->id }}">{{ $s->name }}</option>
                           @endforeach
                         </select>
 
