@@ -27,12 +27,14 @@ class StationStatusController extends DashboardController
        $this->usePagination = true;
        $this->resourceTable = 'station_statuses';
        $this->assoiciatedData = [
-           'stations' => $this->stationRepository->query(['id','name'])->get(),
-           'statuses' => $this->stationStatusRepository->query()
-               ->whereNull('parent_id')
-               ->get(),
-           'job_tickets' => $this->jobTicketRepository->query()
-           ->get()
+          'index' => [
+              'stations' => $this->stationRepository->query(['id','name'])->get(),
+              'statuses' => $this->stationStatusRepository->query()
+                  ->whereNull('parent_id')
+                  ->get(),
+              'job_tickets' => $this->jobTicketRepository->query()
+                  ->get()
+          ]
        ];
    }
 

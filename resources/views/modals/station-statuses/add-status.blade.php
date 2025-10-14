@@ -32,8 +32,7 @@
                             <option value="{{ $station->id }}">{{ $station->name }}</option>
                           @endforeach
                         </select>
-                        {{-- AJAX Select2 version --}}
-                        <select class="form-select js-ajax-stations" name="station_id" required></select>
+
                     </div>
 
                     {{-- Parent Status (optional) --}}
@@ -47,8 +46,7 @@
                             <option value="{{ $s->id }}">{{ $s->getTranslation('name', app()->getLocale()) }}</option>
                           @endforeach
                         </select>
-                        {{-- AJAX Select2 version --}}
-                        <select class="form-select js-ajax-statuses" name="parent_id"></select>
+
                     </div>
 
                     {{-- Job Ticket (optional) --}}
@@ -62,8 +60,6 @@
                           @endforeach
                         </select>
 
-                        {{-- AJAX Select2 version --}}
-                        <select class="form-select js-ajax-jobtickets" name="job_ticket_id"></select>
                     </div>
 
                 </div>
