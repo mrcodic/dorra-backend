@@ -13,8 +13,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('station_statuses', function (Blueprint $table) {
-        $table->foreignId('parent_id')->after('sequence')->nullable()->index()->constrained()->cascadeOnDelete();
-        $table->foreignIdFor(JobTicket::class)->nullable()->index()->constrained()->cascadeOnDelete();
+            $table->foreignId('parent_id')
+                ->after('sequence')
+                ->nullable()
+                ->constrained('station_statuses')
+                ->cascadeOnDelete();
+
+
+            $table->foreignIdFor(JobTicket::class)
+                ->nullable()
+                ->after('parent_id')
+                ->constrained()
+                ->cascadeOnDelete();
         });
     }
 
@@ -24,12 +34,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('station_statuses', function (Blueprint $table) {
-            $table->dropForeign('station_statuses_parent_id_foreign');
-            $table->dropIndex('station_statuses_parent_id_foreign');
-            $table->dropForeign('station_statuses_job_ticket_id_foreign');
-            $table->dropIndex('station_statuses_job_ticket_id_foreign');
-            $table->dropColumn('parent_id');
-            $table->dropColumn('job_ticket_id');
+            $table->dropConstrainedForeignId('parent_id');
+            $table->dropConstrainedForeignId('job_ticket_id');
         });
     }
 };
