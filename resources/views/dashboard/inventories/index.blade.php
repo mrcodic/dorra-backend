@@ -29,47 +29,15 @@
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 
 <style>
-    /* Statistics Cards */
-    .card-specs {
-        border: 1.5px solid #CED5D4;
-        border-radius: 20px;
-        width: 166px;
-        flex: 1;
-    }
-
-    .card-specs p {
-        color: #424746;
-        font-size: 16px;
-        padding-top: 5px;
-    }
-
-    .card-specs .number {
-        color: #121212;
-        font-size: 20px;
-        font-weight: bold;
-        padding-right: 5px
-    }
-
-    .card-specs .order {
-        color: #424746;
-        font-size: 16px;
-    }
-
     /* Responsive table accordion styles */
     @media (max-width: 768px) {
 
-        /* Hide the last 4 columns on mobile */
-        .inventory-list-table th:nth-child(2),
-        .inventory-list-table th:nth-child(6),
-        .inventory-list-table th:nth-child(7),
-        .inventory-list-table th:nth-child(8) {
+        /* Hide the last column on mobile */
+        .inventory-list-table th:nth-child(4) {
             display: none !important;
         }
 
-        .inventory-list-table tbody tr:not(.details-row) td:nth-child(2),
-        .inventory-list-table tbody tr:not(.details-row) td:nth-child(6),
-        .inventory-list-table tbody tr:not(.details-row) td:nth-child(7),
-        .inventory-list-table tbody tr:not(.details-row) td:nth-child(8) {
+        .inventory-list-table tbody tr:not(.details-row) td:nth-child(4) {
             display: none !important;
         }
 
@@ -205,8 +173,9 @@
                     </div>
 
 
-                    <div class="col-12 col-md-2">
-                        <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
+                    <div class="col-12 col-md-4 col-lg-2">
+                        <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
+                            data-bs-target="#addInventoryModal">
                             <i data-feather="plus"></i>
                             Add New Inventory
                         </a>
@@ -220,9 +189,7 @@
                             <th>
                                 <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                             </th>
-
-
-                            <th >Name</th>
+                            <th>Name</th>
                             <th>Number</th>
                             <th>Actions</th>
                         </tr>
@@ -362,28 +329,13 @@
                             $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                             // Get data for details
-                            const orderNumber = $row.find('td:nth-child(2)').html() || '';
-                            const orderStatus = $row.find('td:nth-child(6)').html() || '';
-                            const addedDate = $row.find('td:nth-child(7)').html() || '';
-                            const actions = $row.find('td:nth-child(8)').html() || '';
+                            const actions = $row.find('td:nth-child(4)').html() || '';
 
                             // Create details row
                             const detailsHtml = `
                                 <tr class="details-row">
                                     <td colspan="4">
                                         <div class="details-content">
-                                            <div class="detail-row">
-                                                <span class="detail-label">Order Number:</span>
-                                                <span class="detail-value">${orderNumber}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Order Status:</span>
-                                                <span class="detail-value">${orderStatus}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Added Date:</span>
-                                                <span class="detail-value">${addedDate}</span>
-                                            </div>
                                             <div class="detail-row">
                                                 <span class="detail-label">Actions:</span>
                                                 <span class="detail-value">${actions}</span>
