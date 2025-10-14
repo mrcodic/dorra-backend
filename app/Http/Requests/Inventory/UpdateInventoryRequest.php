@@ -17,7 +17,7 @@ class UpdateInventoryRequest extends BaseRequest
     {
         return [
             'name' => ['required',
-                Rule::unique('inventories', 'name')->ignore($id, 'name'),
+                Rule::unique('inventories', 'name')->ignore($id, 'id'),
                 'string', 'max:255'],
             'number' => ['required', 'integer'],
         ];
