@@ -36,7 +36,7 @@ class CartItemResource extends JsonResource
                     : new CategoryResource($cartable->load('lastOffer'));
             }),
             'price' => $this->sub_total,
-            'price_after_offer' => $after,
+            'price_after_offer' => is_null($after) ? null : sprintf('%.2f', round($after, 2)),
             'quantity' => $this->quantity,
         ];
     }
