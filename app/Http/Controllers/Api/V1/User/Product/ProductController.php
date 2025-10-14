@@ -40,6 +40,7 @@ class ProductController extends Controller
             'specifications.options',
             'dimensions',
             'prices' => fn($q) => $q->orderBy('quantity'),
+            'lastOffer',
         ])));
     }
 

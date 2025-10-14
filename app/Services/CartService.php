@@ -17,6 +17,7 @@ use App\Repositories\Interfaces\{CartItemRepositoryInterface,
 };
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\{Facades\Response, Arr};
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -167,9 +168,17 @@ class CartService extends BaseService
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->with([
-                'items.cartable.lastOffer', 'items.itemable' => function ($query) {
+                'items.cartable' => function (MorphTo $cartable) {
+                $cartable->morphWith([
+                    Product::class => ['lastOffer'],
+                    CartItem::class => ['lastOffer'],
+                ]);
+                },
+                'items.itemable' => function ($query) {
                     $query->select(['id', 'name']);
-                }, 'items.itemable.products'])
+                },
+                'items.itemable.products'
+            ])
             ->first();
     }
 
