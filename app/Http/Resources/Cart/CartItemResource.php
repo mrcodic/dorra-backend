@@ -28,11 +28,11 @@ class CartItemResource extends JsonResource
             'specs' => CartItemSpecsResource::collection($this->whenLoaded('specs')),
             'product' => $this->when($cartable, function () use ($cartable) {
                 return $cartable instanceof Product
-                    ? new ProductResource($cartable)
-                    : new CategoryResource($cartable);
+                    ? new ProductResource($cartable->load('lastOffer'))
+                    : new CategoryResource($cartable->load('lastOffer'));
             }),
             'price' => $this->sub_total,
-            'price_after_offer' =>$cartable->lastOffer ?
+            'price_after_offer' => $cartable->lastOffer ?
                 $this->sub_total - ($cartable->lastOffer->getOriginal('value') * $this->sub_total)
             : null,
             'quantity' => $this->quantity,
