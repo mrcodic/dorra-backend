@@ -19,7 +19,7 @@ class CartItemResource extends JsonResource
         $cartable = $this->cartable;
         $lastOffer = $this->cartable->lastOffer;
         $sub  = (float) $this->getAttribute('sub_total');
-        $val  = (float) ($lastOffer->getRawOriginal('value') ?? 0);
+        $val  = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
         $after= $lastOffer ? round($sub * (1 - ($val / 100)), 2) : null;
         return [
             'id' => $this->id,
