@@ -175,9 +175,9 @@
 
                         <div class="col-12 col-md-4 col-lg-2">
                             <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                               data-bs-target="#addInventoryModal">
+                               data-bs-target="#addStatusModal">
                                 <i data-feather="plus"></i>
-                                Add New Inventory
+                                Add New Status
                             </a>
                         </div>
 
@@ -231,9 +231,9 @@
                 'title' => 'Delete Inventories',
                 'confirmText' => 'Are you sure you want to delete this items?',
                 ])
-                @include('modals.inventories.show-inventory')
-                @include('modals.inventories.edit-inventory')
-                @include('modals.inventories.add-inventory')
+                @include('modals.station-statuses.show-status')
+                @include('modals.station-statuses.edit-status')
+                @include('modals.station-statuses.add-status')
                 @endsection
 
                 @section('vendor-script')
