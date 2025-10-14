@@ -68,7 +68,10 @@ class Order extends Model
 
         });
     }
-
+    protected function reservedPlaces(): Attribute
+    {
+        return Attribute::get(fn () => $this->inventories->count());
+    }
     public function scopeStatus(Builder $query, $status): Builder
     {
         return $query->whereStatus($status);

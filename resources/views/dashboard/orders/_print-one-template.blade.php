@@ -2,7 +2,15 @@
         <div style="border:1px solid #ccc;padding:15px;margin-bottom:15px;border-radius:10px;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <h3>Order #{{ $order->order_number }}</h3>
+                    <h3>Order {{ $order->order_number }}</h3>
+                    <p style="margin:5px 0;">
+                        <strong>Total Items:</strong>
+                        {{ $order->orderItems->sum('quantity') }}
+                    </p>
+                    <p style="margin:5px 0;">
+                        <strong>Reserved Places:</strong>
+                        {{ $order->reserved_places ?? 'N/A' }}
+                    </p>
                 </div>
                 <div>
                     <img src="{{ $order->qr_png_url }}"
