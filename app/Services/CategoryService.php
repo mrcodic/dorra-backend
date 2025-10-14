@@ -52,6 +52,13 @@ class CategoryService extends BaseService
         return $paginate ? $query->paginate($perPage) : $query->get();
     }
 
+    public function showResource($id, $relations = [])
+    {
+        return $this->repository->query()
+            ->withLastOfferId()
+            ->find($id, $relations);
+    }
+
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->repository->create($validatedData);
