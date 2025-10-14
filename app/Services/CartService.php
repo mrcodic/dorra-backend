@@ -327,7 +327,7 @@ class CartService extends BaseService
 
 
         $product = $cartItem->cartable;
-        $priceDetails = $this->calculatePriceDetails($validatedData, $product, $cartItem->product_price);
+        $priceDetails = $this->calculatePriceDetails($validatedData, $product, price: $cartItem->product_price);
 
         $cartItem->update([
             'sub_total' => $priceDetails['sub_total'],
