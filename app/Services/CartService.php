@@ -169,9 +169,9 @@ class CartService extends BaseService
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->with([
                 'items.cartable' => function (MorphTo $cartable) {
-                $cartable->morphWith([
-                    Product::class => ['lastOffer'],
-                    CartItem::class => ['lastOffer'],
+                $cartable->constrain([
+                    Product::class  => fn($q) => $q->withLastOfferId()->with('lastOffer'),
+                    Category::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
                 ]);
                 },
                 'items.itemable' => function ($query) {
