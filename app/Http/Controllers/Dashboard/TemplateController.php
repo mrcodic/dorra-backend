@@ -142,9 +142,7 @@ class TemplateController extends DashboardController
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
         }
 
-        $templateData = TemplateResource::collection($templates->filter(function ($template) {
-            return $template->design_data !== null || $template->design_back_data !== null;
-        }))
+        $templateData = TemplateResource::collection($templates)
             ->additional([
                 'product' => [
                     'name' => $this->productRepositoryInterface->query()->whereKey($productId)?->value('name')
