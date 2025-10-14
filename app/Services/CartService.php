@@ -313,6 +313,12 @@ class CartService extends BaseService
             ->select(['id', 'cartable_id', 'cartable_type', 'quantity', 'sub_total', 'itemable_id', 'itemable_type'])
             ->findOrFail($itemId)?->load([
                 'itemable:id', 'itemable.media', 'product',
+                'cartable' => function (MorphTo $cartable) {
+                    $cartable->constrain([
+                        Product::class  => fn($q) => $q->withLastOfferId()->with('lastOffer'),
+                        Category::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
+                    ]);
+                },
                 'cartable.specifications.options', 'specs',
                 'itemable', 'specs.productSpecificationOption',
                 'specs.productSpecification']);

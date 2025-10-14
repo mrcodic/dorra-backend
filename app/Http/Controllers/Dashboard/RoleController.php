@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Repositories\Interfaces\PermissionRepositoryInterface;
 use App\Repositories\Interfaces\RoleRepositoryInterface;
-use App\Http\Requests\Role\{StoreRoleRequest, UpdateRoleRequest};
+use App\Http\Requests\Role\{StoreStationStatusRequest, UpdateRoleRequest};
 use App\Services\RoleService;
 
 class RoleController extends DashboardController
@@ -17,7 +17,7 @@ class RoleController extends DashboardController
     )
     {
         parent::__construct($roleService);
-        $this->storeRequestClass = new StoreRoleRequest();
+        $this->storeRequestClass = new StoreStationStatusRequest();
         $this->updateRequestClass = new UpdateRoleRequest();
         $this->indexView = 'roles.index';
         $this->createView = 'roles.create';

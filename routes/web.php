@@ -22,6 +22,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     RoleController,
     SettingController,
     ShippingAddressController,
+    StationStatusController,
     StatisticsController,
     SubCategoryController,
     TagController,
@@ -161,6 +162,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
     });
     Route::resource('/flags', FlagController::class);
+
+    Route::group(['prefix' => 'station-statuses', 'as' => 'station-statuses.', 'controller' => StationStatusController::class,], function () {
+        Route::get('/data',  'getData')->name('data');
+        Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+    });
+    Route::resource('/station-statuses', StationStatusController::class);
 
 
     Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
