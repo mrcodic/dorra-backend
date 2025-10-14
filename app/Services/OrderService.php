@@ -443,7 +443,7 @@ class OrderService extends BaseService
 
 
             }
-
+            $model->inventories()->sync($newIds ?? []);
 
             $model = $this->repository->update($validatedData, $model->getKey());
 
