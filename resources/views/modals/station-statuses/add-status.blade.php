@@ -28,14 +28,7 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <label class="form-label label-text">Product</label>
-                            <select name="parent_id" class="form-select" id="">
-                                <option value="" disabled selected>Choose Main Product</option>
-                                @foreach($associatedData['categories'] as $category)
-                                <option value="{{ $category->id }}"> {{
-                                    $category->getTranslation('name',app()->getLocale()) }}</option>
-                                @endforeach
-
-                            </select>
+                        
                         </div>
                     </div>
 
