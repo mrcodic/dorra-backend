@@ -47,6 +47,21 @@ class OrderObserver
             $inventory->update(["is_available" => false]);
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
+            DB::transaction(function () use ($order) {
+            $inventory = Inventory::query()
+                ->whereNotNull('parent_id')
+                ->where('is_available', 1)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$inventory) {
+                return;
+            }
+
+
+            $order->inventories()->attach([$inventory->id]);
+            Inventory::where('id', $inventory->id)->update(['is_available' => 0]);
+        });
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
         }
