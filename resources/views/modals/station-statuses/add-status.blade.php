@@ -13,8 +13,6 @@
 
                 <div class="modal-body flex-grow-1">
 
-                    {{-- Name (EN/AR) --}}
-
                         <div class="col-md-12">
                             <label class="form-label label-text">Name </label>
                             <input type="text" class="form-control" name="name" placeholder="e.g. Printing Started" required>
@@ -37,11 +35,11 @@
 
                     {{-- Parent Status (optional) --}}
                     <div class="mb-2">
-                        <label class="form-label label-text">Parent Status (optional)</label>
+                        <label class="form-label label-text">Parent Status</label>
                         {{-- Static options version (uncomment if you pass $statuses) --}}
 
                         <select class="form-select" name="parent_id">
-                          <option value="">— None —</option>
+                          <option value="">— Select Status —</option>
                           @foreach ($associatedData['statuses'] ?? [] as $s)
                             <option value="{{ $s->id }}">{{ $s->name }}</option>
                           @endforeach
@@ -51,10 +49,10 @@
 
                     {{-- Job Ticket (optional) --}}
                     <div class="mb-2">
-                        <label class="form-label label-text">Job Ticket (optional)</label>
+                        <label class="form-label label-text">Job Ticket</label>
                         {{-- Static options version (uncomment if you pass $jobTickets) --}}
                         <select class="form-select" name="job_ticket_id">
-                          <option value="">— None —</option>
+                          <option value="">— Select Ticket —</option>
                           @foreach ($associatedData['job_tickets'] ?? [] as $jt)
                             <option value="{{ $jt->id }}">{{ $jt->code }}</option>
                           @endforeach
