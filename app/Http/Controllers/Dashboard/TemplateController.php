@@ -104,7 +104,7 @@ class TemplateController extends DashboardController
         $template = $this->templateService->storeResource($request->validated());
         return Response::api(data: [
             "redirect_url" =>
-                config('services.editor_url') . 'templates/' . $template->id
+                config('services.editor_url') . 'templates/' . $template->id . 'is_clear'
         ]);
     }
 

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\JobTicket;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\{JsonResponse, Request};
@@ -24,31 +23,35 @@ class JobTicketService extends BaseService
     {
         $jobs = $this->repository
             ->query()
-            ->with(['station', 'orderItem', 'currentStatus'])
+            ->with(['station','orderItem','currentStatus'])
+
             ->when(request()->filled('search_value'), function ($q) {
                 $search = request('search_value');
                 hasMeaningfulSearch($search)
                     ? $q->where(function ($q) use ($search) {
                     $q->whereHas('orderItem', function ($q) use ($search) {
-                        $q->where('id', $search);
-                    })->orWhereHas('orderItem', function ($q) use ($search) {
-                        $q->whereHas('order', function ($q) use ($search) {
-                            $q->where('order_number', 'like', '%' . $search . '%');
+                                $q->where('id',$search);
+                            })->orWhereHas('orderItem', function ($q) use ($search) {
+                                $q->whereHas('order',function ($q) use ($search){
+                                    $q->where('order_number', 'like', '%' . $search . '%');
 
-                        });
-                    });
+                                });
+                            });
                 })
                     : $q->whereRaw('1=0');
             })
             ->when(request()->boolean('overdue'), function ($q) {
                 $q->whereNotNull('due_at')->where('due_at', '<', today())
-                    ->whereHas('station', function ($q) {
-                        $q->whereIsTerminal(false);
-                    });
+                ->whereHas('station', function ($q) {
+                    $q->whereIsTerminal(false);
+                })
+                ;
             })
+
             ->when(request()->boolean('pending'), function ($q) {
                 $q->whereNull('current_status_id');
             })
+
             ->when(!request()->boolean('pending') && request()->filled('status_id'), function ($q) {
                 $q->where('current_status_id', request('status_id'));
             })
@@ -79,99 +82,61 @@ class JobTicketService extends BaseService
 
     public function scan(Request $request)
     {
-        $data = $request->validate([
-            'code' => ['required', 'string', 'exists:job_tickets,code'],
-        ]);
-
+            $data = $request->validate([
+                'code' => ['required', 'string', 'exists:job_tickets,code'],
+            ]);
         return $this->handleTransaction(function () use ($data) {
+
             $ticket = $this->repository->query()
-                ->with(['station', 'currentStatus'])
+                ->with(['station.statuses', 'currentStatus'])
                 ->whereCode($data['code'])
                 ->lockForUpdate()
                 ->firstOrFail();
+            $station   = $ticket->station;
 
-            $station = $ticket->station;
+            $statuses = $ticket->stationStatuses()
+                ->whereStationId($station->id)
+                ->isNotEmpty() ?
+                $station->statuses
+                : $station?->statuses?->sortBy('sequence')->values();
 
-            // Build expanded chain for a station: [base, ...customChildrenOfBase, nextBase, ...]
-            $buildExpandedChain = function ($station, $ticket) {
-                if (!$station) {
-                    return collect();
-                }
 
-                // Base defaults for the station
-                $base = $station->statuses()
-                    ->orderBy('sequence')
-                    ->get();
-
-                if ($base->isEmpty()) {
-                    return collect();
-                }
-
-                // Fetch all custom children for this ticket & station in a single query
-                // Custom rows have: station_id = $station->id, job_ticket_id = $ticket->id, parent_id = base_status_id
-                $customAll = \App\Models\StationStatus::query()
-                    ->where('station_id', $station->id)
-                    ->where('job_ticket_id', $ticket->id)
-                    ->whereNotNull('parent_id')
-                    ->orderBy('sequence')
-                    ->get()
-                    ->groupBy('parent_id'); // parent_id => [customs...]
-
-                // Merge: each base followed by its custom children (if any)
-                $expanded = collect();
-                foreach ($base as $b) {
-                    $expanded->push($b);
-                    if (isset($customAll[$b->id])) {
-                        foreach ($customAll[$b->id] as $child) {
-                            $expanded->push($child);
-                        }
-                    }
-                }
-                return $expanded->values();
-            };
-
-            // 1) Expanded chain for CURRENT station
-            $chain = $buildExpandedChain($station, $ticket);
-
-            if (!$station || $chain->isEmpty()) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'station' => 'Job ticket still pending (no statuses configured).',
-                ]);
+            if (!$station || !$statuses || $statuses->isEmpty()) {
+               throw ValidationException::withMessages(["station" => "Job ticket still pending."]);
             }
 
             $fromStationName = (string) $station->name;
             $fromStatusName  = $ticket->currentStatus
                 ? (string) $ticket->currentStatus->name
-                : (string) ($chain->first()->name ?? '');
+                : (string) ($statuses->first()->name ?? '');
 
-            // 2) Ensure current_status_id is valid (or set it to the first item in the expanded chain)
             $currentIndex = 0;
             if ($ticket->current_status_id) {
-                $found = $chain->search(fn ($s) => (int) $s->id === (int) $ticket->current_status_id);
+                $found = $statuses->search(fn ($s) => (int)$s->id === (int)$ticket->current_status_id);
                 if ($found !== false) {
                     $currentIndex = (int) $found;
                 } else {
-                    $ticket->current_status_id = $chain->first()->id;
+                    $ticket->current_status_id = $statuses->first()->id;
                     $ticket->save();
-                    $currentIndex = 0;
+
                 }
             } else {
-                $ticket->current_status_id = $chain->first()->id;
+                $ticket->current_status_id = $statuses->first()->id;
                 $ticket->save();
-                $currentIndex = 0;
+
             }
 
-            // 3) Next status in SAME station (within the expanded chain)
-            $nextInSame = $chain->get($currentIndex + 1);
+            $nextStatusInSame = $statuses->get($currentIndex + 1);
 
-            // 4) NEXT station + its expanded chain (custom if present, else default)
             $nextStation = $this->stationRepository->query()
                 ->where('workflow_order', '>', $station->workflow_order)
                 ->orderBy('workflow_order')
                 ->first();
 
-            $nextChain = $nextStation ? $buildExpandedChain($nextStation, $ticket) : collect();
-            $firstOfNext = $nextChain->first();
+            $firstStatusOfNext = $nextStation
+                ? $nextStation->statuses()->orderBy('sequence')->first()
+                : null;
+
 
             $toStationName = $fromStationName;
             $toStatusName  = $fromStatusName;
@@ -179,59 +144,56 @@ class JobTicketService extends BaseService
             $resultKey     = null;
 
             match (true) {
-                // Advance inside current station's expanded chain
-                (bool) $nextInSame => (function () use ($ticket, $station, $nextInSame, &$toStationName, &$toStatusName, &$message, &$resultKey) {
+                (bool) $nextStatusInSame => (function () use ($ticket, $station, $nextStatusInSame, &$toStationName, &$toStatusName, &$message, &$resultKey) {
                     $this->eventRepository->create([
                         'job_ticket_id'     => $ticket->id,
                         'station_id'        => $station->id,
-                        'station_status_id' => $nextInSame->id,
+                        'station_status_id' => $nextStatusInSame->id,
                         'admin_id'          => auth()->id(),
                         'action'            => 'advance',
                     ]);
 
-                    $ticket->current_status_id = $nextInSame->id;
+                    $ticket->current_status_id = $nextStatusInSame->id;
                     $ticket->save();
 
                     $toStationName = (string) $station->name;
-                    $toStatusName  = (string) $nextInSame->name;
+                    $toStatusName  = (string) $nextStatusInSame->name;
                     $message       = 'Advanced to next status';
                     $resultKey     = 'advanced_status';
                 })(),
 
-                // Move to next station (start at first of its expanded chain)
-                $nextStation && $firstOfNext => (function () use ($ticket, $nextStation, $firstOfNext, &$toStationName, &$toStatusName, &$message, &$resultKey) {
+                $nextStation && $firstStatusOfNext => (function () use ($ticket, $nextStation, $firstStatusOfNext, &$toStationName, &$toStatusName, &$message, &$resultKey) {
                     $this->eventRepository->create([
                         'job_ticket_id'     => $ticket->id,
                         'station_id'        => $nextStation->id,
-                        'station_status_id' => $firstOfNext->id,
+                        'station_status_id' => $firstStatusOfNext->id,
                         'admin_id'          => auth()->id(),
                         'action'            => 'advance',
                         'notes'             => 'Moved to next station',
                     ]);
 
                     $ticket->station_id        = $nextStation->id;
-                    $ticket->current_status_id = $firstOfNext->id;
+                    $ticket->current_status_id = $firstStatusOfNext->id;
                     $ticket->save();
 
                     $toStationName = (string) $nextStation->name;
-                    $toStatusName  = (string) $firstOfNext->name;
+                    $toStatusName  = (string) $firstStatusOfNext->name;
                     $message       = 'Moved to next station';
                     $resultKey     = 'advanced_station';
                 })(),
 
-                // No more stations/statuses → complete workflow
-                default => (function () use ($ticket, $chain, &$toStationName, &$toStatusName, &$message, &$resultKey) {
+                default => (function () use ($ticket, $statuses, &$toStationName, &$toStatusName, &$message, &$resultKey) {
                     $this->eventRepository->create([
                         'job_ticket_id'     => $ticket->id,
                         'station_id'        => $ticket->station_id,
-                        'station_status_id' => $ticket->current_status_id ?? $chain->last()->id,
+                        'station_status_id' => $ticket->current_status_id ?? $statuses->last()->id,
                         'admin_id'          => auth()->id(),
                         'action'            => 'advance',
                         'notes'             => 'Completed last station',
                     ]);
 
                     $toStationName = (string) optional($ticket->station)->name ?: '';
-                    $toStatusName  = (string) ($ticket->currentStatus->name ?? $chain->last()->name ?? '');
+                    $toStatusName  = (string) ($ticket->currentStatus->name ?? $statuses->last()->name ?? '');
                     $message       = 'Completed workflow';
                     $resultKey     = 'completed_workflow';
                 })(),
@@ -241,28 +203,30 @@ class JobTicketService extends BaseService
                 ->where('job_ticket_id', $ticket->id)
                 ->count();
 
+
             return [
-                'code'         => $ticket->code,
-                'message'      => $message,
-                'result'       => $resultKey,
-                'scan_count'   => $scanCount,
-                'from_station' => $fromStationName,
-                'to_station'   => $toStationName,
-                'from_status'  => $fromStatusName,
-                'to_status'    => $toStatusName,
+                'code'          => $ticket->code,
+                'message'       => $message,
+                'result'        => $resultKey,
+                'scan_count'    => $scanCount,
+                'from_station'  => $fromStationName,
+                'to_station'    => $toStationName,
+                'from_status'   => $fromStatusName,
+                'to_status'     => $toStatusName,
             ];
         });
     }
 
 
+
     public function downloadPdf(JobTicket $ticket)
     {
-        $model = $ticket->load([
+        $model= $ticket->load([
             'orderItem.order',
             'orderItem.itemable.types',
             'orderItem.orderable',
             'jobEvents.admin.roles',
-            'station', 'currentStatus',
+            'station','currentStatus',
         ]);
 
         $pdf = Pdf::loadView('dashboard.job-tickets.pdf', compact('model'));
@@ -270,7 +234,7 @@ class JobTicketService extends BaseService
         $pdf->set_option('isHtml5ParserEnabled', true);
 
 
-        return $pdf->download('job_ticket_' . $ticket->code . '.pdf');
+        return $pdf->download('job_ticket_'.$ticket->code.'.pdf');
     }
 
 }
