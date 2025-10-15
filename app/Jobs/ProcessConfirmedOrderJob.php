@@ -5,6 +5,8 @@ namespace App\Jobs;
 use App\Models\Inventory;
 use App\Models\Order;
 use App\Models\JobTicket;
+use App\Models\Station;
+use App\Models\StationStatus;
 use App\Services\BarcodeService;
 use App\Enums\Payment\StatusEnum;
 use Illuminate\Bus\Queueable;
@@ -50,12 +52,21 @@ class ProcessConfirmedOrderJob implements ShouldQueue
                         $orderItem->id,
                         $sequence
                     ),
+                    'station_id' =>Station::first()?->id,
                     'specs' => $orderItem->specs?->map(fn($item) => [
                         'spec_name' => $item->spec_name,
                         'option_name' => $item->option_name,
                     ])->toArray(),
                 ]
             );
+
+            $ticket->orderItem->orderable->stationStatuses->isEmpty() ?
+                $ticket->updateQuietly([
+                    'current_status_id' => $ticket->orderItem->orderable->stationStatuses->first()?->id,
+                ])
+                : $ticket->updateQuietly([
+                'current_status_id' => StationStatus::first()?->id
+            ]);
 
             if ($ticket->wasRecentlyCreated) {
                 $svc->savePng1D('job-tickets', $ticket->code, 'C128', scale: 4, height: 120);
