@@ -81,114 +81,147 @@ class JobTicketService extends BaseService
         $data = $request->validate([
             'code' => ['required', 'string', 'exists:job_tickets,code'],
         ]);
-        return $this->handleTransaction(function () use ($data) {
 
+        return $this->handleTransaction(function () use ($data) {
             $ticket = $this->repository->query()
-                ->with(['station.statuses', 'currentStatus'])
+                ->with(['station', 'currentStatus'])
                 ->whereCode($data['code'])
                 ->lockForUpdate()
                 ->firstOrFail();
+
             $station = $ticket->station;
-            $statuses = $ticket->stationStatuses->isNotEmpty() ?
-                $ticket->stationStatuses
-                : $station?->statuses?->sortBy('sequence')->values();
 
+            // Helper: get effective statuses for a given (ticket, station)
+            $getEffectiveStatuses = function ($ticket, $station) {
+                // Try custom statuses (ticket-level) for this station if you have such a relation.
+                // If your custom statuses are not per-station, drop the station filter below.
+                $custom = $ticket->stationStatuses()
+                    ->when($station, fn ($q) => $q->where('station_id', $station->id))
+                    ->orderBy('sequence')
+                    ->get();
 
-            if (!$station || !$statuses || $statuses->isEmpty()) {
-                throw ValidationException::withMessages(["station" => "Job ticket still pending."]);
+                if ($custom->isNotEmpty()) {
+                    return $custom->values();
+                }
+
+                // Fallback: station defaults
+                $defaults = $station?->statuses()
+                    ->orderBy('sequence')
+                    ->get() ?? collect();
+
+                if ($defaults->isNotEmpty()) {
+                    return $defaults->values();
+                }
+
+                // Final fallback: empty collection
+                return collect();
+            };
+
+            // 1) Effective statuses for CURRENT station
+            $statuses = $getEffectiveStatuses($ticket, $station);
+
+            if (!$station || $statuses->isEmpty()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'station' => 'Job ticket still pending (no statuses configured).',
+                ]);
             }
 
-            $fromStationName = (string)$station->name;
-            $fromStatusName = $ticket->currentStatus
-                ? (string)$ticket->currentStatus->name
-                : (string)($statuses->first()->name ?? '');
+            $fromStationName = (string) $station->name;
+            $fromStatusName  = $ticket->currentStatus
+                ? (string) $ticket->currentStatus->name
+                : (string) ($statuses->first()->name ?? '');
 
+            // 2) Ensure current_status_id is valid (or set it to the first effective status)
             $currentIndex = 0;
             if ($ticket->current_status_id) {
-                $found = $statuses->search(fn($s) => (int)$s->id === (int)$ticket->current_status_id);
+                $found = $statuses->search(fn ($s) => (int) $s->id === (int) $ticket->current_status_id);
                 if ($found !== false) {
-                    $currentIndex = (int)$found;
+                    $currentIndex = (int) $found;
                 } else {
                     $ticket->current_status_id = $statuses->first()->id;
                     $ticket->save();
-
+                    $currentIndex = 0;
                 }
             } else {
                 $ticket->current_status_id = $statuses->first()->id;
                 $ticket->save();
-
+                $currentIndex = 0;
             }
 
+            // 3) Next status in the same station (within the effective chain)
             $nextStatusInSame = $statuses->get($currentIndex + 1);
 
+            // 4) Next station and its FIRST effective status (custom for that station → default)
             $nextStation = $this->stationRepository->query()
                 ->where('workflow_order', '>', $station->workflow_order)
                 ->orderBy('workflow_order')
                 ->first();
 
             $firstStatusOfNext = $nextStation
-                ? $nextStation->statuses()->orderBy('sequence')->first()
+                ? $getEffectiveStatuses($ticket, $nextStation)->first()
                 : null;
 
-
             $toStationName = $fromStationName;
-            $toStatusName = $fromStatusName;
-            $message = 'OK';
-            $resultKey = null;
+            $toStatusName  = $fromStatusName;
+            $message       = 'OK';
+            $resultKey     = null;
 
             match (true) {
-                (bool)$nextStatusInSame => (function () use ($ticket, $station, $nextStatusInSame, &$toStationName, &$toStatusName, &$message, &$resultKey) {
+                // Advance inside same station
+                (bool) $nextStatusInSame => (function () use ($ticket, $station, $nextStatusInSame, &$toStationName, &$toStatusName, &$message, &$resultKey) {
                     $this->eventRepository->create([
-                        'job_ticket_id' => $ticket->id,
-                        'station_id' => $station->id,
+                        'job_ticket_id'     => $ticket->id,
+                        'station_id'        => $station->id,
                         'station_status_id' => $nextStatusInSame->id,
-                        'admin_id' => auth()->id(),
-                        'action' => 'advance',
+                        'admin_id'          => auth()->id(),
+                        'action'            => 'advance',
                     ]);
 
                     $ticket->current_status_id = $nextStatusInSame->id;
                     $ticket->save();
 
-                    $toStationName = (string)$station->name;
-                    $toStatusName = (string)$nextStatusInSame->name;
-                    $message = 'Advanced to next status';
-                    $resultKey = 'advanced_status';
+                    $toStationName = (string) $station->name;
+                    $toStatusName  = (string) $nextStatusInSame->name;
+                    $message       = 'Advanced to next status';
+                    $resultKey     = 'advanced_status';
                 })(),
 
+                // Move to next station (and use its effective first status)
                 $nextStation && $firstStatusOfNext => (function () use ($ticket, $nextStation, $firstStatusOfNext, &$toStationName, &$toStatusName, &$message, &$resultKey) {
                     $this->eventRepository->create([
-                        'job_ticket_id' => $ticket->id,
-                        'station_id' => $nextStation->id,
+                        'job_ticket_id'     => $ticket->id,
+                        'station_id'        => $nextStation->id,
                         'station_status_id' => $firstStatusOfNext->id,
-                        'admin_id' => auth()->id(),
-                        'action' => 'advance',
-                        'notes' => 'Moved to next station',
+                        'admin_id'          => auth()->id(),
+                        'action'            => 'advance',
+                        'notes'             => 'Moved to next station',
                     ]);
 
-                    $ticket->station_id = $nextStation->id;
+                    $ticket->station_id        = $nextStation->id;
                     $ticket->current_status_id = $firstStatusOfNext->id;
                     $ticket->save();
 
-                    $toStationName = (string)$nextStation->name;
-                    $toStatusName = (string)$firstStatusOfNext->name;
-                    $message = 'Moved to next station';
-                    $resultKey = 'advanced_station';
+                    $toStationName = (string) $nextStation->name;
+                    $toStatusName  = (string) $firstStatusOfNext->name;
+                    $message       = 'Moved to next station';
+                    $resultKey     = 'advanced_station';
                 })(),
 
+                // No more stations/statuses → complete
                 default => (function () use ($ticket, $statuses, &$toStationName, &$toStatusName, &$message, &$resultKey) {
                     $this->eventRepository->create([
-                        'job_ticket_id' => $ticket->id,
-                        'station_id' => $ticket->station_id,
+                        'job_ticket_id'     => $ticket->id,
+                        'station_id'        => $ticket->station_id,
                         'station_status_id' => $ticket->current_status_id ?? $statuses->last()->id,
-                        'admin_id' => auth()->id(),
-                        'action' => 'advance',
-                        'notes' => 'Completed last station',
+                        'admin_id'          => auth()->id(),
+                        'action'            => 'advance',
+                        'notes'             => 'Completed last station',
                     ]);
 
-                    $toStationName = (string)optional($ticket->station)->name ?: '';
-                    $toStatusName = (string)($ticket->currentStatus->name ?? $statuses->last()->name ?? '');
-                    $message = 'Completed workflow';
-                    $resultKey = 'completed_workflow';
+                    $toStationName = (string) optional($ticket->station)->name ?: '';
+                    $toStatusName  = (string) ($ticket->currentStatus->name ?? $statuses->last()->name ?? '');
+                    $message       = 'Completed workflow';
+                    $resultKey     = 'completed_workflow';
                 })(),
             };
 
@@ -196,16 +229,15 @@ class JobTicketService extends BaseService
                 ->where('job_ticket_id', $ticket->id)
                 ->count();
 
-
             return [
-                'code' => $ticket->code,
-                'message' => $message,
-                'result' => $resultKey,
-                'scan_count' => $scanCount,
+                'code'         => $ticket->code,
+                'message'      => $message,
+                'result'       => $resultKey,
+                'scan_count'   => $scanCount,
                 'from_station' => $fromStationName,
-                'to_station' => $toStationName,
-                'from_status' => $fromStatusName,
-                'to_status' => $toStatusName,
+                'to_station'   => $toStationName,
+                'from_status'  => $fromStatusName,
+                'to_status'    => $toStatusName,
             ];
         });
     }
