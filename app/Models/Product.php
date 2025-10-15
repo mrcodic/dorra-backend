@@ -235,6 +235,10 @@ class Product extends Model implements HasMedia
         ]);
     }
 
+    public function stationStatuses(): MorphMany
+    {
+        return $this->morphMany(StationStatus::class, 'resourceable');
+    }
     public function getAllProductImages()
     {
         return $this->getMedia('product_extra_images')

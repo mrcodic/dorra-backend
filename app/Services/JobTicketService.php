@@ -92,9 +92,12 @@ class JobTicketService extends BaseService
                 ->whereCode($data['code'])
                 ->lockForUpdate()
                 ->firstOrFail();
-
             $station   = $ticket->station;
-            $statuses  = $station?->statuses?->sortBy('sequence')->values();
+
+            $statuses  =  $ticket->orderItem->orderable->stationStatuses ?
+                $ticket->orderItem->orderable->stationStatuses->sortBy('sequence')->values()
+                :$station?->statuses?->sortBy('sequence')->values();
+
 
             if (!$station || !$statuses || $statuses->isEmpty()) {
                throw ValidationException::withMessages(["station" => "Job ticket still pending."]);

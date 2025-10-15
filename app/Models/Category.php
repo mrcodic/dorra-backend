@@ -60,6 +60,11 @@ class Category extends Model implements HasMedia
         return $this->hasMany(Product::class);
     }
 
+    public function stationStatuses(): MorphMany
+    {
+        return $this->morphMany(StationStatus::class, 'resourceable');
+    }
+
     public function templates()
     {
         return $this->morphToMany(
