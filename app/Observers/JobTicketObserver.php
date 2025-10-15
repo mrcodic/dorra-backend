@@ -14,35 +14,13 @@ class JobTicketObserver
 {
     public function creating(JobTicket $jobTicket)
     {
+        Log::info("dsafsdafdsf",$jobTicket->orderItem->orderable->stationStatuses->toArray());
+        $jobTicket->station_id = Station::first()?->id;
+        $jobTicket->current_status_id = $jobTicket->orderItem->orderable->stationStatuses->isEmpty() ?
+            StationStatus::first()?->id
+            : $jobTicket->orderItem->orderable->stationStatuses->first()?->id;
 
-        $startStation = Station::query()
-            ->orderBy('workflow_order')
-            ->first() ?? Station::query()->first();
-
-        $jobTicket->station_id = $startStation?->id;
-
-
-        $currentStatusId = null;
-
-        if ($startStation && $jobTicket->orderItem && $jobTicket->orderItem->orderable) {
-            $orderable = $jobTicket->orderItem->orderable;
-
-            if (method_exists($orderable, 'stationStatuses')) {
-                $customQ = $orderable->stationStatuses()->whereBelongsTo($startStation);
-
-                if ($customQ->exists()) {
-                    $currentStatusId = (int) $customQ->orderBy('sequence')->limit(1)->value('id');
-                }
-            }
-        }
-
-        if (!$currentStatusId && $startStation) {
-            $currentStatusId = (int) $startStation->statuses()->orderBy('sequence')->limit(1)->value('id');
-        }
-
-        $jobTicket->current_status_id = $currentStatusId ?: null;
     }
-
 
     public function updating(JobTicket $jobTicket): void
     {
