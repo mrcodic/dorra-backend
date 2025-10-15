@@ -1,4 +1,5 @@
 @extends('layouts/contentLayoutMaster')
+@dd($model->orderItem->orderable->stationStatuses)
 @section('title', 'Jobs')
 
 @section('vendor-style')

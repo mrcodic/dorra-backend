@@ -54,7 +54,7 @@
                         <div class="row">
                             <div class="col-md-6 form-group mb-2">
                                 <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
-                                <select id="categoriesSelect" class="form-select" 
+                                <select id="categoriesSelect" class="form-select"
                                 >
                                     <option value="" selected disabled>— Select Product —</option>
                                     @foreach($associatedData['product_with_categories'] as $category)
