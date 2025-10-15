@@ -185,7 +185,7 @@
                         <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
                             <button type="reset" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
                             <div class="d-flex gap-1">
-                                <a href="{{ config("services.editor_url")."templates/".$model->id.'is_clear'}}"
+                                <a href="{{ config("services.editor_url")."templates/".$model->id.'?is_clear'}}"
                                     class="btn btn-outline-secondary fs-5 "
                                     target="_blank"
                                     >
