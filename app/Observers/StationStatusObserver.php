@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 
+use App\Models\JobTicket;
 use App\Models\StationStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -32,6 +33,7 @@ class StationStatusObserver
             $stationStatus->is_terminal          = 1;
             $stationStatus->is_workflow_terminal = 1;
         });
+
     }
 
 }

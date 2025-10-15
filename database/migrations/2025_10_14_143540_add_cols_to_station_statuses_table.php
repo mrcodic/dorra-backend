@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::table('station_statuses', function (Blueprint $table) {
             $table->after('sequence',function ($table){
                 $table->nullableMorphs('resourceable');
+                $table->boolean('is_custom')->default(false);
             });
         });
     }
@@ -26,6 +27,7 @@ return new class extends Migration
     {
         Schema::table('station_statuses', function (Blueprint $table) {
          $table->dropMorphs('resourceable');
+         $table->dropColumn('is_custom');
         });
     }
 };

@@ -190,7 +190,8 @@
                                 <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                             </th>
                             <th>Name</th>
-                            <th>Number</th>
+                            <th>Station</th>
+                            <th>Product</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -259,6 +260,7 @@
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
                     <script>
                         const stationStatusesDataUrl = "{{ route('station-statuses.data') }}";
+                        const locale = "{{ app()->getLocale() }}"
 
                     </script>
 

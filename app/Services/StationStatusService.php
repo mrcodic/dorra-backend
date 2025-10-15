@@ -22,7 +22,8 @@ class StationStatusService extends BaseService
     {
         $stationStatuses = $this->repository
             ->query()
-            ->whereNotNull('parent_id')
+            ->whereIsCustom(true)
+            ->with(['station','resourceable'])
             ->when(request()->filled('search_value'), function ($query)  {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $query->where('name', 'like', '%' . request('search_value') . '%');

@@ -32,9 +32,17 @@ var dt_user_table = $('.offer-list-table').DataTable({
                 return data?.label ?? '-';
             }
         },
-        {data: 'value', orderable: false},
-        {data: 'start_at', orderable: false},
-        {data: 'end_at', orderable: false},
+        {data: 'name', orderable: false},
+        {data: 'station', orderable: false,
+        render: function (data, type, row){
+            return data?.name ?? "-";
+        }
+        },
+        {data: 'resourceable', orderable: false,
+            render: function (data, type, row){
+                return data?.name.locale ?? "-";
+            }
+        },
 
         {
             data: 'id',
