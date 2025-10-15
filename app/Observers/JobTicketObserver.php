@@ -14,13 +14,11 @@ class JobTicketObserver
 {
     public function creating(JobTicket $jobTicket)
     {
-        if (!$jobTicket->station_id) {
-            $jobTicket->station_id = Station::first()?->id;
-        }
+        $jobTicket->station_id = Station::first()?->id;
+        $jobTicket->current_status_id = $jobTicket->orderItem->orderable->stationStatuses->isEmpty() ?
+            StationStatus::first()?->id
+            : $jobTicket->orderItem->orderable->stationStatuses->first()?->id;
 
-        if (!$jobTicket->current_status_id) {
-            $jobTicket->current_status_id = StationStatus::first()?->id;
-        }
     }
 
     public function updating(JobTicket $jobTicket): void
@@ -28,12 +26,12 @@ class JobTicketObserver
         if ($jobTicket->isDirty('station_id') && $jobTicket->isClean('current_status_id')) {
             $station = optional($jobTicket->station)
                 ?? Station::whereKey($jobTicket->station_id)->first();
-            $jobTicket->current_status_id = $station->statuses->first()->id;
+            $jobTicket->current_status_id = $jobTicket->orderItem->orderable->stationStatuses->isEmpty() ?
+                $station->statuses->first()->id
+                : $jobTicket->orderItem->orderable->stationStatuses->first()?->id;
+
         }
-
-
     }
-
 
 
     public function updated(JobTicket $jobTicket): void
@@ -54,7 +52,7 @@ class JobTicketObserver
         DB::transaction(function () use ($orderId, $terminalStatusIds) {
             Order::whereKey($orderId)->lockForUpdate()->first();
             $hasRemaining = JobTicket::query()
-                ->whereHas('orderItem', fn ($q) => $q->where('order_id', $orderId))
+                ->whereHas('orderItem', fn($q) => $q->where('order_id', $orderId))
                 ->whereNotIn('current_status_id', $terminalStatusIds)
                 ->exists();
 
@@ -73,8 +71,6 @@ class JobTicketObserver
             ->where('is_workflow_terminal', true)
             ->pluck('id');
     }
-
-
 
 
 }
