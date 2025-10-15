@@ -1,5 +1,5 @@
 @extends('layouts/contentLayoutMaster')
-
+@dd($model->stationStatuses)
 @section('title', 'Jobs')
 
 @section('vendor-style')
