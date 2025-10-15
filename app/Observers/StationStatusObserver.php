@@ -28,14 +28,14 @@ class StationStatusObserver
                 StationStatus::withoutEvents(function () use ($last) {
                     $last->updateQuietly([
                         'is_terminal'           => 0,
-                        'is_workfolw_terminal'  => 0,
+                        'is_workflow_terminal'  => 0,
                     ]);
                 });
             }
 
             $stationStatus->sequence             = ($last?->sequence ?? 0) + 1;
             $stationStatus->is_terminal          = 1;
-            $stationStatus->is_workfolw_terminal = 1;
+            $stationStatus->is_workflow_terminal = 1;
         });
     }
 
