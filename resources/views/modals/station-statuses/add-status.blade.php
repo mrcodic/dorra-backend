@@ -89,7 +89,7 @@
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",
-                    category_ids: selectedIds
+                    category_ids: [selectedIds]
                 },
                 success: function (response) {
                     const $productsSelect = $('#productsSelect');
