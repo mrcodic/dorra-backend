@@ -109,7 +109,7 @@ class JobTicketService extends BaseService
                     : null;
 
                 if ($customQ && $customQ->exists()) {
-                    return $customQ->orderBy('sequence')->get()->values();
+                    return $customQ->orderBy('station_id')->get()->values();
                 }
 
 

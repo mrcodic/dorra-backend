@@ -40,7 +40,7 @@ class JobTicketObserver
             $currentStatusId = (int) $startStation->statuses()->orderBy('sequence')->limit(1)->value('id');
         }
 
-        $jobTicket->current_status_id = $currentStatusId ?: null; 
+        $jobTicket->current_status_id = $currentStatusId ?: null;
     }
 
 
