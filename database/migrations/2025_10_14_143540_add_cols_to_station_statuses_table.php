@@ -13,7 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('station_statuses', function (Blueprint $table) {
-            $table->nullableMorphs('resourceable');
+            $table->after('sequence',function ($table){
+                $table->nullableMorphs('resourceable');
+            });
         });
     }
 
