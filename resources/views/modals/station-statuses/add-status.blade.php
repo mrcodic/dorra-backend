@@ -97,27 +97,23 @@
     </div>
 </div>
 <script>
-    // Listen for change on "Products With Categories"
+    // keep your existing AJAX handler for #categoriesSelect
     $('#categoriesSelect').on('change', function () {
-        let selectedIds = $(this).val();
-
-        if (selectedIds && selectedIds.length > 0) {
+        let selectedId = $(this).val();
+        if (selectedId) {
             $.ajax({
                 url: "{{ route('products.categories') }}",
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",
-                    category_ids: [selectedIds]
+                    category_ids: [selectedId]
                 },
                 success: function (response) {
                     const $productsSelect = $('#productsSelect');
-
-                    // Save current selections
                     let currentValues = $productsSelect.val() || [];
 
                     if (response.data && response.data.length > 0) {
                         response.data.forEach(function (category) {
-                            // Only add if it doesn’t already exist
                             if ($productsSelect.find('option[value="' + category.id + '"]').length === 0) {
                                 let option = new Option(category.name, category.id, false, false);
                                 $productsSelect.append(option);
@@ -125,7 +121,6 @@
                         });
                     }
 
-                    // Restore selections
                     $productsSelect.val(currentValues).trigger('change');
                 },
                 error: function (xhr) {
@@ -135,4 +130,50 @@
         }
     });
 
+    // NEW: radio-driven toggling
+    function setMode(mode) {
+        const $withWrap = $('#withCategoriesWrap');
+        const $withoutWrap = $('#withoutCategoriesWrap');
+
+        const $categoriesSelect = $('#categoriesSelect');
+        const $productsSelect = $('#productsSelect');
+        const $productsWithout = $('#productsWithoutCategoriesSelect');
+
+        if (mode === 'with') {
+            // show with-categories, hide without
+            $withWrap.removeClass('d-none');
+            $withoutWrap.addClass('d-none');
+
+            // required/disabled
+            $categoriesSelect.prop('disabled', false).prop('required', true);
+            $productsSelect.prop('disabled', false);
+
+            // clear and disable the other group
+            $productsWithout.val(null).trigger('change');
+            $productsWithout.prop('disabled', true).prop('required', false);
+        } else {
+            // show without-categories, hide with
+            $withWrap.addClass('d-none');
+            $withoutWrap.removeClass('d-none');
+
+            // disable with-categories fields
+            $categoriesSelect.val(null).trigger('change');
+            $productsSelect.val(null).trigger('change');
+
+            $categoriesSelect.prop('disabled', true).prop('required', false);
+            $productsSelect.prop('disabled', true);
+
+            // enable without-categories
+            $productsWithout.prop('disabled', false).prop('required', true);
+        }
+    }
+
+    // init (default to "with")
+    setMode($('input[name="product_mode"]:checked').val());
+
+    // listen for radio changes
+    $('input[name="product_mode"]').on('change', function() {
+        setMode($(this).val());
+    });
 </script>
+
