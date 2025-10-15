@@ -14,12 +14,16 @@ class JobTicketObserver
 {
     public function creating(JobTicket $jobTicket)
     {
-        Log::info("dsafsdafdsf",$jobTicket->orderItem->orderable->stationStatuses->toArray());
         $jobTicket->station_id = Station::first()?->id;
+
+
+    }
+
+    public function created(JobTicket $jobTicket)
+    {
         $jobTicket->current_status_id = $jobTicket->orderItem->orderable->stationStatuses->isEmpty() ?
             StationStatus::first()?->id
             : $jobTicket->orderItem->orderable->stationStatuses->first()?->id;
-
     }
 
     public function updating(JobTicket $jobTicket): void
