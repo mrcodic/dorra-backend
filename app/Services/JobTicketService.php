@@ -94,7 +94,7 @@ class JobTicketService extends BaseService
                 ->firstOrFail();
             $station   = $ticket->station;
 
-            $statuses  =  $ticket->orderItem->orderable->stationStatuses ?
+            $statuses  =  $ticket->orderItem->orderable->stationStatuses->isNotEmpty() ?
                 $ticket->orderItem->orderable->stationStatuses->sortBy('sequence')->values()
                 : $station?->statuses?->sortBy('sequence')->values();
 
