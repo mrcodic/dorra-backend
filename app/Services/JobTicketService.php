@@ -92,7 +92,7 @@ class JobTicketService extends BaseService
                     'station.statuses',
                     'currentStatus',
                     'orderItem.orderable.stationStatuses' => function ($q) {
-                        $q->with('station'); // احتياطي لو هتحتاجه في whereBelongsTo
+                        $q->with('station');
                     },
                     'orderItem.orderable',
                 ])

@@ -62,7 +62,7 @@ class ProcessConfirmedOrderJob implements ShouldQueue
 
             $ticket->orderItem->orderable->stationStatuses->isNotEmpty() ?
                 $ticket->updateQuietly([
-                    'current_status_id' => $ticket->orderItem->orderable->stationStatuses->first()?->id,
+                    'current_status_id' => $ticket->orderItem->orderable->stationStatuses->sortBy('station_id')->first()?->id,
                 ])
                 : $ticket->updateQuietly([
                 'current_status_id' => StationStatus::first()?->id
