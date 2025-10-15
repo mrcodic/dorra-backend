@@ -3,121 +3,70 @@ $.ajaxSetup({
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
 });
-var dt_user_table = $('.status-list-table').DataTable({
+$.ajaxSetup({
+    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+});
+
+const dt = $('.status-list-table').DataTable({
     processing: true,
     serverSide: true,
     searching: false,
-    orderable: false,
+    // use POST if your route expects it
     ajax: {
         url: stationStatusesDataUrl,
-        type: 'GET',
+        type: 'POST',
         data: function (d) {
-            d.search_value = $('#search-offer-form').val();
-            d.type = $('.filter-type').val();
-
-            return d;
+            d.search_value = $('#search-inventory-form').val() || '';
+            d.type = $('.filter-type').val() || '';
         }
     },
+    // >>> match EXACTLY 5 columns in your thead <<<
     columns: [
         {
-            data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            }
-        },
-        {data: 'name', orderable: false},
-        {
-            data: 'type',
+            data: null,
             orderable: false,
-            render: function (data, type, row) {
-                return data?.label ?? '-';
-            }
+            render: (data) => `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`
         },
-        {data: 'name', orderable: false},
-        {data: 'station', orderable: false,
-        render: function (data, type, row){
-            return data?.name ?? "-";
-        }
+        { data: 'name', orderable: false },                 // Name
+        {                                                  // Station
+            data: 'station',
+            orderable: false,
+            render: (data) => data?.name ?? '-'
         },
-        {data: 'resourceable', orderable: false,
-            render: function (data, type, row){
-                return data?.name.locale ?? "-";
-            }
+        {                                                  // Product
+            data: 'resourceable',
+            orderable: false,
+            render: (data) => (data?.name?.[locale] ?? data?.name ?? '-')  // supports translated names
         },
-
-        {
+        {                                                  // Actions
             data: 'id',
             orderable: false,
-            render: function (data, type, row, meta) {
-                return `
-        <div class="d-flex gap-1">
-                                <a href="#" class="view-details"
-                                   data-bs-toggle="modal"
-                                     data-bs-target="#showOfferModal"
-                                     data-id="${data}"
-                                     data-name="${row.name}"
-                                     data-value="${row.value}"
-                                     data-type="${row.type.value}"
-                                     data-start_at="${row.start_at}"
-                                     data-end_at="${row.end_at}"
-                                          data-products='${JSON.stringify(row.products || [])}'
-       data-categories='${JSON.stringify(row.categories || [])}'>
-
-                                     <i data-feather="eye"></i>
-                                </a>
-
-                          <a href="#" class="edit-details"
-                           data-bs-toggle="modal"
-                           data-bs-target="#editOfferModal"
-                                     data-id="${data}"
-                                     data-name_en="${row.name_translate.en || ''}"
-                                     data-name_ar="${row.name_translate.ar || ''}"
-                                     data-value="${row.value}"
-                                     data-type="${row.type.value}"
-                                     data-start_at="${row.start_at}"
-                                     data-end_at="${row.end_at}"
-                                     data-products='${JSON.stringify(row.products || [])}'
-                                     data-categories='${JSON.stringify(row.categories || [])}'
-                                          >
-                            <i data-feather="edit-3"></i>
-                       </a>
-
-      <a href="#" class="text-danger open-delete-offer-modal"
-   data-id="${data}"
-   data-action="/offers/${data}"
-   data-bs-toggle="modal"
-   data-bs-target="#deleteOfferModal">
-   <i data-feather="trash-2"></i>
-</a>
-
+            render: (id, type, row) => `
+          <div class="d-flex gap-1">
+            <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showOfferModal"
+               data-id="${id}"
+               data-name="${row.name ?? ''}">
+               <i data-feather="eye"></i>
+            </a>
+            <a href="#" class="edit-details" data-bs-toggle="modal" data-bs-target="#editOfferModal"
+               data-id="${id}">
+               <i data-feather="edit-3"></i>
+            </a>
+            <a href="#" class="text-danger open-delete-offer-modal"
+               data-id="${id}" data-action="/offers/${id}" data-bs-toggle="modal" data-bs-target="#deleteOfferModal">
+               <i data-feather="trash-2"></i>
+            </a>
           </div>
-        `;
-            }
+        `
         }
     ],
     order: [[1, 'asc']],
     dom:
-        '<"d-flex align-items-center header-actions mx-2 row mb-2"' +
-        '<"col-12 d-flex flex-wrap align-items-center justify-content-between"' +
-        ">" +
-        ">t" +
-        '<"d-flex  mx-2 row mb-1"' +
-        '<"col-sm-12 col-md-6"i>' +
-        '<"col-sm-12 col-md-6"p>' +
-        ">",
-
-    drawCallback: function () {
-        feather.replace();
-    },
-    language: {
-        sLengthMenu: 'Show _MENU_',
-        search: '',
-        searchPlaceholder: 'Search..',
-        paginate: {
-            previous: '&nbsp;',
-            next: '&nbsp;'
-        }
-    }
+        '<"d-flex align-items-center header-actions mx-2 row mb-2"<"col-12 d-flex flex-wrap align-items-center justify-content-between">>t' +
+        '<"d-flex mx-2 row mb-1"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+    drawCallback: function () { feather.replace(); }
 });
+
 $('#clear-search').on('click', function () {
     $('#search-offer-form').val('');  // clear input
     dt_user_table.search('').draw();  // reset DataTable search
