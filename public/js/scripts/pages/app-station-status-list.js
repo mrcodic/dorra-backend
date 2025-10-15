@@ -14,7 +14,7 @@ const dt = $('.status-list-table').DataTable({
     // use POST if your route expects it
     ajax: {
         url: stationStatusesDataUrl,
-        type: 'POST',
+        type: 'Get',
         data: function (d) {
             d.search_value = $('#search-inventory-form').val() || '';
             d.type = $('.filter-type').val() || '';
