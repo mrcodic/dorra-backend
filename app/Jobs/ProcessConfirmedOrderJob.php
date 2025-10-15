@@ -52,7 +52,7 @@ class ProcessConfirmedOrderJob implements ShouldQueue
                         $orderItem->id,
                         $sequence
                     ),
-                    'station_id' =>Station::first()?->id,
+//                    'station_id' =>Station::first()?->id,
                     'specs' => $orderItem->specs?->map(fn($item) => [
                         'spec_name' => $item->spec_name,
                         'option_name' => $item->option_name,
@@ -60,13 +60,13 @@ class ProcessConfirmedOrderJob implements ShouldQueue
                 ]
             );
 
-            $ticket->orderItem->orderable->stationStatuses->isNotEmpty() ?
-                $ticket->updateQuietly([
-                    'current_status_id' => $ticket->orderItem->orderable->stationStatuses->first()?->id,
-                ])
-                : $ticket->updateQuietly([
-                'current_status_id' => StationStatus::first()?->id
-            ]);
+//            $ticket->orderItem->orderable->stationStatuses->isNotEmpty() ?
+//                $ticket->updateQuietly([
+//                    'current_status_id' => $ticket->orderItem->orderable->stationStatuses->first()?->id,
+//                ])
+//                : $ticket->updateQuietly([
+//                'current_status_id' => StationStatus::first()?->id
+//            ]);
 
             if ($ticket->wasRecentlyCreated) {
                 $svc->savePng1D('job-tickets', $ticket->code, 'C128', scale: 4, height: 120);
