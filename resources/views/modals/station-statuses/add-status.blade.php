@@ -49,7 +49,7 @@
                         </div>
                     </div>
                     <div id="withCategoriesWrap">
-{{--                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Category::class }}">--}}
+
 
                         <div class="row">
                             <div class="col-md-6 form-group mb-2">
@@ -74,7 +74,9 @@
                         </div>
                     </div>
                     <div id="withoutCategoriesWrap" class="d-none">
-{{--                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Product::class }}">--}}
+                        <input type="hidden" name="resourceable_type" id="resourceableType"
+                               value='@json(\App\Models\Category::class)'>
+
                         <div class="form-group mb-2">
                             <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products Without
                                 Categories</label>
@@ -138,42 +140,48 @@
     });
 
     // NEW: radio-driven toggling
-    function setMode(mode) {
+
+        function setMode(mode) {
         const $withWrap = $('#withCategoriesWrap');
         const $withoutWrap = $('#withoutCategoriesWrap');
 
         const $categoriesSelect = $('#categoriesSelect');
-        const $productsSelect = $('#productsSelect');
-        const $productsWithout = $('#productsWithoutCategoriesSelect');
+        const $productsSelect = $('#productsSelect'); // will provide resourceable_id in "with"
+        const $productsWithout = $('#productsWithoutCategoriesSelect'); // will provide resourceable_id in "without"
+        const $type = $('#resourceableType');
 
         if (mode === 'with') {
-            // show with-categories, hide without
-            $withWrap.removeClass('d-none');
-            $withoutWrap.addClass('d-none');
+        // UI
+        $withWrap.removeClass('d-none');
+        $withoutWrap.addClass('d-none');
 
-            // required/disabled
-            $categoriesSelect.prop('disabled', false).prop('required', true);
-            $productsSelect.prop('disabled', false);
+        $categoriesSelect.prop('disabled', false).prop('required', true);
+        $productsSelect.prop('disabled', false).prop('required', true);
 
-            // clear and disable the other group
-            $productsWithout.val(null).trigger('change');
-            $productsWithout.prop('disabled', true).prop('required', false);
-        } else {
-            // show without-categories, hide with
-            $withWrap.addClass('d-none');
-            $withoutWrap.removeClass('d-none');
+        $productsWithout.val(null).trigger('change');
+        $productsWithout.prop('disabled', true).prop('required', false);
 
-            // disable with-categories fields
-            $categoriesSelect.val(null).trigger('change');
-            $productsSelect.val(null).trigger('change');
+        // TYPE: Category::class
+        $type.val(@json(\App\Models\Category::class));
+    } else {
+        // UI
+        $withWrap.addClass('d-none');
+        $withoutWrap.removeClass('d-none');
 
-            $categoriesSelect.prop('disabled', true).prop('required', false);
-            $productsSelect.prop('disabled', true);
+        $categoriesSelect.val(null).trigger('change').prop('disabled', true).prop('required', false);
+        $productsSelect.val(null).trigger('change').prop('disabled', true).prop('required', false);
 
-            // enable without-categories
-            $productsWithout.prop('disabled', false).prop('required', true);
-        }
+        $productsWithout.prop('disabled', false).prop('required', true);
+
+        // TYPE: Product::class
+        $type.val(@json(\App\Models\Product::class));
     }
+    }
+
+        // init + listener (unchanged)
+        setMode($('input[name="product_mode"]:checked').val());
+        $('input[name="product_mode"]').on('change', function () { setMode($(this).val()); });
+
 
     // init (default to "with")
     setMode($('input[name="product_mode"]:checked').val());
