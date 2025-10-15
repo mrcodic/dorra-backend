@@ -98,6 +98,7 @@ class JobTicketService extends BaseService
                 // If your custom statuses are not per-station, drop the station filter below.
                 $custom = $ticket->stationStatuses()
                     ->when($station, fn ($q) => $q->where('station_id', $station->id))
+                    ->when($ticket->cuurentStatus, fn ($q) => $q->where('parent_id', $ticket->cuurentStatus->id))
                     ->orderBy('sequence')
                     ->get();
 
