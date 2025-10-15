@@ -32,35 +32,39 @@
                         </select>
 
                     </div>
-
-                    {{-- Parent Status (optional) --}}
-                    <div class="mb-2">
-                        <label class="form-label label-text">Parent Status</label>
-                        {{-- Static options version (uncomment if you pass $statuses) --}}
-
-                        <select class="form-select" name="parent_id">
-                          <option value="">— Select Status —</option>
-                          @foreach ($associatedData['statuses'] ?? [] as $s)
-                            <option value="{{ $s->id }}">{{ $s->name }}</option>
-                          @endforeach
+                <div>
+                    <div class="col-md-6 form-group mb-2">
+                        <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
+                        <select id="categoriesSelect" class="form-select" name="product_with_category"
+                                >
+                            @foreach($associatedData['product_with_categories'] as $category)
+                                <option value="{{ $category->id }}">
+                                    {{ $category->getTranslation('name', app()->getLocale()) }}
+                                </option>
+                            @endforeach
                         </select>
-
                     </div>
+                    <div class="col-md-6 form-group mb-2">
+                        <label for="productsSelect" class="label-text mb-1">Categories</label>
+                        <select id="productsSelect" class="form-select" name="product_ids[]"
+                                >
 
-                    {{-- Job Ticket (optional) --}}
-                    <div class="mb-2">
-                        <label class="form-label label-text">Job Ticket</label>
-                        {{-- Static options version (uncomment if you pass $jobTickets) --}}
-                        <select class="form-select" name="job_ticket_id">
-                          <option value="">— Select Ticket —</option>
-                          @foreach ($associatedData['job_tickets'] ?? [] as $jt)
-                            <option value="{{ $jt->id }}">{{ $jt->code }}</option>
-                          @endforeach
                         </select>
-
                     </div>
-
                 </div>
+
+                <div class="form-group mb-2">
+                    <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products Without Categories</label>
+                    <select id="productsWithoutCategoriesSelect" class="form-select " name="category_ids[]"
+                            >
+                        @foreach($associatedData['product_without_categories'] as $category)
+                            <option value="{{ $category->id }}">
+                                {{ $category->getTranslation('name', app()->getLocale()) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
 
                 <div class="modal-footer border-top-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -74,3 +78,43 @@
         </div>
     </div>
 </div>
+<script>
+    // Listen for change on "Products With Categories"
+    $('#categoriesSelect').on('change', function () {
+        let selectedIds = $(this).val();
+
+        if (selectedIds && selectedIds.length > 0) {
+            $.ajax({
+                url: "{{ route('products.categories') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    category_ids: selectedIds
+                },
+                success: function (response) {
+                    const $productsSelect = $('#productsSelect');
+
+                    // Save current selections
+                    let currentValues = $productsSelect.val() || [];
+
+                    if (response.data && response.data.length > 0) {
+                        response.data.forEach(function (category) {
+                            // Only add if it doesn’t already exist
+                            if ($productsSelect.find('option[value="' + category.id + '"]').length === 0) {
+                                let option = new Option(category.name, category.id, false, false);
+                                $productsSelect.append(option);
+                            }
+                        });
+                    }
+
+                    // Restore selections
+                    $productsSelect.val(currentValues).trigger('change');
+                },
+                error: function (xhr) {
+                    console.error("Error fetching categories:", xhr.responseText);
+                }
+            });
+        }
+    });
+
+</script>

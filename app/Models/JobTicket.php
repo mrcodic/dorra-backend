@@ -82,8 +82,5 @@ class JobTicket extends Model
         return $this->hasMany(JobEvent::class);
     }
 
-    public function stationStatuses(): HasMany
-    {
-        return $this->hasMany(StationStatus::class);
-    }
+
 }

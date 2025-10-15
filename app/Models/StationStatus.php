@@ -10,10 +10,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[ObservedBy(StationStatusObserver::class)]
 class StationStatus extends Model
 {
-    protected $fillable = ['station_id','code','name','sequence',
-        'parent_id',
-        'job_ticket_id',
+    protected $fillable = ['station_id', 'code', 'name', 'sequence',
+        'resourceable_id',
+        'resourceable_type',
         'is_terminal'];
+
+    public function resourceable()
+    {
+        return $this->morphTo();
+    }
 
     public function station(): BelongsTo
     {

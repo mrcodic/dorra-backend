@@ -31,7 +31,6 @@ class TemplateController extends DashboardController
         public TemplateRepositoryInterface             $templateRepository,
         public TagRepositoryInterface                  $tagRepository,
         public ProductSpecificationRepositoryInterface $productSpecificationRepository,
-        public ProductRepositoryInterface              $productRepositoryInterface,
         public CategoryRepositoryInterface              $categoryRepository,
         public FlagRepositoryInterface                  $flagRepository,
 

@@ -4,7 +4,9 @@ namespace App\Http\Requests\StationStatus;
 
 
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Category;
 use App\Models\CountryCode;
+use App\Models\Product;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Propaganistas\LaravelPhone\Rules\Phone;
@@ -33,8 +35,12 @@ class UpdateStationStatusRequest extends BaseRequest
                 'string',
                 'max:255',],
             'station_id' => ['required', 'integer', 'exists:stations,id'],
-            'parent_id' => ['required', 'integer', 'exists:station_statuses,id'],
-            'job_ticket_id' => ['required', 'integer', 'exists:job_tickets,id'],
+            'resourceable_type' => [
+                'required',
+                'string',
+                Rule::in([Product::class, Category::class]),
+            ],
+            'resourceable_id'   => ['required', 'integer'],
         ];
     }
 

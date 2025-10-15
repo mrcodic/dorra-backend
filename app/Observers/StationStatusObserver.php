@@ -15,11 +15,6 @@ class StationStatusObserver
 
         DB::transaction(function () use ($stationStatus) {
             $scope = StationStatus::query()
-                ->when(
-                    is_null($stationStatus->parent_id),
-                    fn ($q) => $q->whereNull('parent_id'),
-                    fn ($q) => $q->where('parent_id', $stationStatus->parent_id)
-                )
                 ->lockForUpdate();
 
             $last = (clone $scope)->orderByDesc('sequence')->first();
