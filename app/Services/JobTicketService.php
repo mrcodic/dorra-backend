@@ -204,7 +204,7 @@ class JobTicketService extends BaseService
                     $resultKey     = 'advanced_station';
                 })(),
 
-         
+
                 default => (function () use ($ticket, $statuses, &$toStationName, &$toStatusName, &$message, &$resultKey) {
                     $this->eventRepository->create([
                         'job_ticket_id'     => $ticket->id,
