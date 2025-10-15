@@ -49,7 +49,9 @@
                         </div>
                     </div>
                     <div id="withCategoriesWrap">
-                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Product::class }}">
+                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Product
+
+::class }}">
 
                         <div class="row">
                             <div class="col-md-6 form-group mb-2">
