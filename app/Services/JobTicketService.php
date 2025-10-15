@@ -102,7 +102,7 @@ class JobTicketService extends BaseService
                     ->get();
 
                 if ($custom->isNotEmpty()) {
-                    Log::info("custom status",$custom->values());
+                    Log::info("custom status",$custom->values()->toArray());
                     return $custom->values();
                 }
 
