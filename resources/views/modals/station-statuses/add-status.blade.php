@@ -67,7 +67,7 @@
                         </select>
                     </div>
                 </div>
-
+                    </div>
                         <div id="withoutCategoriesWrap" class="d-none">
 
                 <div class="form-group mb-2">
