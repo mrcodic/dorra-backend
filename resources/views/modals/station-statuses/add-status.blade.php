@@ -25,7 +25,7 @@
                         {{-- Static options version (uncomment if you pass $stations) --}}
 
                         <select class="form-select" name="station_id" required>
-                          <option value="">— Select Station —</option>
+                            <option value="" selected disabled>— Select Station —</option>
                           @foreach ($associatedData['stations'] ?? [] as $station)
                             <option value="{{ $station->id }}">{{ $station->name }}</option>
                           @endforeach
@@ -37,6 +37,7 @@
                         <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
                         <select id="categoriesSelect" class="form-select" name="product_with_category"
                                 >
+                            <option value="" selected disabled>— Select Product —</option>
                             @foreach($associatedData['product_with_categories'] as $category)
                                 <option value="{{ $category->id }}">
                                     {{ $category->getTranslation('name', app()->getLocale()) }}
@@ -48,7 +49,7 @@
                         <label for="productsSelect" class="label-text mb-1">Categories</label>
                         <select id="productsSelect" class="form-select" name="product_ids[]"
                                 >
-
+                            <option value="" selected disabled>— Select Category —</option>
                         </select>
                     </div>
                 </div>
@@ -57,6 +58,7 @@
                     <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products Without Categories</label>
                     <select id="productsWithoutCategoriesSelect" class="form-select " name="category_ids[]"
                             >
+                        <option value="" selected disabled>— Select Product —</option>
                         @foreach($associatedData['product_without_categories'] as $category)
                             <option value="{{ $category->id }}">
                                 {{ $category->getTranslation('name', app()->getLocale()) }}
