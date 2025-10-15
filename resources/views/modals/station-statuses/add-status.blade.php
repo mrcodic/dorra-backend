@@ -49,7 +49,7 @@
                         </div>
                     </div>
                     <div id="withCategoriesWrap">
-                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Product::class }}">
+                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Category::class }}">
 
                         <div class="row">
                             <div class="col-md-6 form-group mb-2">
@@ -74,7 +74,7 @@
                         </div>
                     </div>
                     <div id="withoutCategoriesWrap" class="d-none">
-                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Category::class }}">
+                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Product::class }}">
                         <div class="form-group mb-2">
                             <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products Without
                                 Categories</label>
