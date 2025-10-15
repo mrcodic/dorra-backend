@@ -17,7 +17,7 @@ class StationStatusService extends BaseService
         parent::__construct($repository);
 
     }
-    
+
     public function getData(): JsonResponse
     {
         $stationStatuses = $this->repository
@@ -36,10 +36,6 @@ class StationStatusService extends BaseService
         return DataTables::of($stationStatuses)
             ->make();
     }
-
-    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
-    {
-        
-    }
+    
 
 }
