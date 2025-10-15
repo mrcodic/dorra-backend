@@ -98,7 +98,9 @@ class JobTicketService extends BaseService
                 ->whereStationId($station->id)
                 ->get()
                 ->isNotEmpty() ?
-                $station->statuses
+                $ticket->stationStatuses()
+                    ->whereStationId($station->id)
+                    ->get()->sortBy('sequence')->values()
                 : $station?->statuses?->sortBy('sequence')->values();
 
 
