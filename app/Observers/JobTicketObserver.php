@@ -12,31 +12,31 @@ use Illuminate\Support\Facades\Log;
 
 class JobTicketObserver
 {
-//    public function creating(JobTicket $jobTicket)
-//    {
-//        $jobTicket->station_id = Station::first()?->id;
-//
-//
-//    }
-//
-//    public function created(JobTicket $jobTicket)
-//    {
-//        $jobTicket->current_status_id = $jobTicket->orderItem->orderable->stationStatuses->isEmpty() ?
-//            StationStatus::first()?->id
-//            : $jobTicket->orderItem->orderable->stationStatuses->first()?->id;
-//    }
+    public function creating(JobTicket $jobTicket)
+    {
+        $jobTicket->station_id = Station::first()?->id;
 
-//    public function updating(JobTicket $jobTicket): void
-//    {
-//        if ($jobTicket->isDirty('station_id') && $jobTicket->isClean('current_status_id')) {
-//            $station = optional($jobTicket->station)
-//                ?? Station::whereKey($jobTicket->station_id)->first();
-//            $jobTicket->current_status_id = $jobTicket->orderItem->orderable->stationStatuses->isEmpty() ?
-//                $station->statuses->first()->id
-//                : $jobTicket->orderItem->orderable->stationStatuses->first()?->id;
-//
-//        }
-//    }
+
+    }
+
+    public function created(JobTicket $jobTicket)
+    {
+        $jobTicket->current_status_id = $jobTicket->orderItem->orderable->stationStatuses->isEmpty() ?
+            StationStatus::first()?->id
+            : $jobTicket->orderItem->orderable->stationStatuses->first()?->id;
+    }
+
+    public function updating(JobTicket $jobTicket): void
+    {
+        if ($jobTicket->isDirty('station_id') && $jobTicket->isClean('current_status_id')) {
+            $station = optional($jobTicket->station)
+                ?? Station::whereKey($jobTicket->station_id)->first();
+            $jobTicket->current_status_id = $jobTicket->orderItem->orderable->stationStatuses->isEmpty() ?
+                $station->statuses->first()->id
+                : $jobTicket->orderItem->orderable->stationStatuses->first()?->id;
+
+        }
+    }
 
 
     public function updated(JobTicket $jobTicket): void
