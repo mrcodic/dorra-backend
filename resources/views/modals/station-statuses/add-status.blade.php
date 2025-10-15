@@ -32,7 +32,7 @@
                         </select>
 
                     </div>
-                <div>
+                <div class="row">
                     <div class="col-md-6 form-group mb-2">
                         <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
                         <select id="categoriesSelect" class="form-select" name="product_with_category"
