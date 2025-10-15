@@ -10,7 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[ObservedBy(StationStatusObserver::class)]
 class StationStatus extends Model
 {
-    protected $fillable = ['station_id','code','name','sequence','is_terminal'];
+    protected $fillable = ['station_id','code','name','sequence',
+        'parent_id',
+        'job_ticket_id',
+        'is_terminal'];
 
     public function station(): BelongsTo
     {
