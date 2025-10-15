@@ -36,6 +36,6 @@ class StationStatusService extends BaseService
         return DataTables::of($stationStatuses)
             ->make();
     }
-    
+
 
 }

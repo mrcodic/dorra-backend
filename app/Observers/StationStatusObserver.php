@@ -12,20 +12,31 @@ class StationStatusObserver
     public function creating(StationStatus $stationStatus)
     {
         $stationStatus->code = Str::snake($stationStatus->name);
-        $stationStatus->sequence = DB::transaction(function () use ($stationStatus) {
-            $q = StationStatus::query();
 
-            if (is_null($stationStatus->parent_id)) {
-                $q->whereNull('parent_id');
-            } else {
-                $q->where('parent_id', $stationStatus->parent_id);
+        DB::transaction(function () use ($stationStatus) {
+            $scope = StationStatus::query()
+                ->when(
+                    is_null($stationStatus->parent_id),
+                    fn ($q) => $q->whereNull('parent_id'),
+                    fn ($q) => $q->where('parent_id', $stationStatus->parent_id)
+                )
+                ->lockForUpdate();
+
+            $last = (clone $scope)->orderByDesc('sequence')->first();
+
+            if ($last) {
+                StationStatus::withoutEvents(function () use ($last) {
+                    $last->updateQuietly([
+                        'is_terminal'           => 0,
+                        'is_workfolw_terminal'  => 0,
+                    ]);
+                });
             }
 
-            $max = $q->lockForUpdate()->max('sequence');
-
-            return (int) ($max ?? 0) + 1;
+            $stationStatus->sequence             = ($last?->sequence ?? 0) + 1;
+            $stationStatus->is_terminal          = 1;
+            $stationStatus->is_workfolw_terminal = 1;
         });
-
-
     }
+
 }
