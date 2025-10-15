@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\JobTicket;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\{JsonResponse, Request};
@@ -101,6 +102,7 @@ class JobTicketService extends BaseService
                     ->get();
 
                 if ($custom->isNotEmpty()) {
+                    Log::info("custom status",$custom->values());
                     return $custom->values();
                 }
 
@@ -140,12 +142,10 @@ class JobTicketService extends BaseService
                 } else {
                     $ticket->current_status_id = $statuses->first()->id;
                     $ticket->save();
-                    $currentIndex = 0;
                 }
             } else {
                 $ticket->current_status_id = $statuses->first()->id;
                 $ticket->save();
-                $currentIndex = 0;
             }
 
             // 3) Next status in the same station (within the effective chain)
