@@ -13,10 +13,11 @@
 
                 <div class="modal-body flex-grow-1">
 
-                        <div class="col-md-12">
-                            <label class="form-label label-text">Name </label>
-                            <input type="text" class="form-control" name="name" placeholder="e.g. Printing Started" required>
-                        </div>
+                    <div class="col-md-12">
+                        <label class="form-label label-text">Name </label>
+                        <input type="text" class="form-control" name="name" placeholder="e.g. Printing Started"
+                               required>
+                    </div>
 
 
                     {{-- Station (required) --}}
@@ -26,9 +27,9 @@
 
                         <select class="form-select" name="station_id" required>
                             <option value="" selected disabled>— Select Station —</option>
-                          @foreach ($associatedData['stations'] ?? [] as $station)
-                            <option value="{{ $station->id }}">{{ $station->name }}</option>
-                          @endforeach
+                            @foreach ($associatedData['stations'] ?? [] as $station)
+                                <option value="{{ $station->id }}">{{ $station->name }}</option>
+                            @endforeach
                         </select>
 
                     </div>
@@ -36,61 +37,67 @@
                         <label class="form-label label-text d-block mb-1">Products Source</label>
 
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="product_mode" id="mode_with" value="with" checked>
+                            <input class="form-check-input" type="radio" name="product_mode" id="mode_with" value="with"
+                                   checked>
                             <label class="form-check-label" for="mode_with">With Categories</label>
                         </div>
 
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="product_mode" id="mode_without" value="without">
+                            <input class="form-check-input" type="radio" name="product_mode" id="mode_without"
+                                   value="without">
                             <label class="form-check-label" for="mode_without">Without Categories</label>
                         </div>
                     </div>
                     <div id="withCategoriesWrap">
-                <div class="row">
-                    <div class="col-md-6 form-group mb-2">
-                        <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
-                        <select id="categoriesSelect" class="form-select" name="product_with_category"
-                                >
-                            <option value="" selected disabled>— Select Product —</option>
-                            @foreach($associatedData['product_with_categories'] as $category)
-                                <option value="{{ $category->id }}">
-                                    {{ $category->getTranslation('name', app()->getLocale()) }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-6 form-group mb-2">
-                        <label for="productsSelect" class="label-text mb-1">Categories</label>
-                        <select id="productsSelect" class="form-select" name="product_ids[]"
-                                >
-                            <option value="" selected disabled>— Select Category —</option>
-                        </select>
-                    </div>
-                </div>
-                    </div>
-                        <div id="withoutCategoriesWrap" class="d-none">
+                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Product::class }}">
 
-                <div class="form-group mb-2">
-                    <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products Without Categories</label>
-                    <select id="productsWithoutCategoriesSelect" class="form-select " name="category_ids[]"
-                            >
-                        <option value="" selected disabled>— Select Product —</option>
-                        @foreach($associatedData['product_without_categories'] as $category)
-                            <option value="{{ $category->id }}">
-                                {{ $category->getTranslation('name', app()->getLocale()) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-2">
+                                <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
+                                <select id="categoriesSelect" class="form-select" name="resourceable_id"
+                                >
+                                    <option value="" selected disabled>— Select Product —</option>
+                                    @foreach($associatedData['product_with_categories'] as $category)
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->getTranslation('name', app()->getLocale()) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group mb-2">
+                                <label for="productsSelect" class="label-text mb-1">Categories</label>
+                                <select id="productsSelect" class="form-select" name="product_ids[]"
+                                >
+                                    <option value="" selected disabled>— Select Category —</option>
+                                </select>
+                            </div>
                         </div>
+                    </div>
+                    <div id="withoutCategoriesWrap" class="d-none">
+                        <input type="hidden" name="resourceable_type" value="{{ \App\Models\Category::class }}">
+                        <div class="form-group mb-2">
+                            <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products Without
+                                Categories</label>
+                            <select id="productsWithoutCategoriesSelect" class="form-select " name="resourceable_id"
+                            >
+                                <option value="" selected disabled>— Select Product —</option>
+                                @foreach($associatedData['product_without_categories'] as $category)
+                                    <option value="{{ $category->id }}">
+                                        {{ $category->getTranslation('name', app()->getLocale()) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
 
-                <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                        <span class="btn-text">Save</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    </button>
-                </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                            <span class="btn-text">Save</span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none" role="status"
+                                  aria-hidden="true"></span>
+                        </button>
+                    </div>
             </form>
 
         </div>
@@ -172,8 +179,15 @@
     setMode($('input[name="product_mode"]:checked').val());
 
     // listen for radio changes
-    $('input[name="product_mode"]').on('change', function() {
+    $('input[name="product_mode"]').on('change', function () {
         setMode($(this).val());
     });
+
+    handleAjaxFormSubmit("#addStationStatusForm", {
+        successMessage: "Status added Successfully.",
+        onSuccess:function () {
+            location.reload()
+        }
+    })
 </script>
 
