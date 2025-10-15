@@ -183,7 +183,7 @@
 
                     </div>
 
-                    <table class="inventory-list-table table">
+                    <table class="status-list-table table">
                         <thead class="table-light">
                         <tr>
                             <th>

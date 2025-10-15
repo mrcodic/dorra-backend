@@ -3,7 +3,7 @@ $.ajaxSetup({
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
 });
-var dt_user_table = $('.offer-list-table').DataTable({
+var dt_user_table = $('.status-list-table').DataTable({
     processing: true,
     serverSide: true,
     searching: false,
@@ -167,7 +167,7 @@ $(document).ready(function () {
                 $('#addFlagModal').modal('hide');
                 location.reload();
 
-                $('.offer-list-table').DataTable().ajax.reload(); // reload your table
+                $('.status-list-table').DataTable().ajax.reload(); // reload your table
             },
             error: function (xhr) {
                 var errors = xhr.responseJSON.errors;
@@ -420,7 +420,7 @@ $(document).ready(function () {
                     backgroundColor: "#28C76F",
                     close: true,
                 }).showToast();
-                $(".offer-list-table").DataTable().ajax.reload(null, false);
+                $(".status-list-table").DataTable().ajax.reload(null, false);
 
 
             },
@@ -434,7 +434,7 @@ $(document).ready(function () {
                     backgroundColor: "#EA5455", // red
                     close: true,
                 }).showToast();
-                $(".offer-list-table").DataTable().ajax.reload(null, false);
+                $(".status-list-table").DataTable().ajax.reload(null, false);
 
             },
         });
@@ -495,7 +495,7 @@ $(document).ready(function () {
                 $('#bulk-delete-container').hide();
                 $('.category-checkbox').prop('checked', false);
                 $('#select-all-checkbox').prop('checked', false);
-                $(".offer-list-table").DataTable().ajax.reload(null, false);
+                $(".status-list-table").DataTable().ajax.reload(null, false);
 
             },
             error: function () {
