@@ -216,6 +216,31 @@
         }
     </script>
     <script>
+        // Safe numeric parser
+        function asNum(x) {
+            const n = Number(x);
+            return Number.isFinite(n) ? n : null;
+        }
+
+        // Make "H * W" (optionally with unit)
+        function dimensionLabelHW(d, { decimals = 0, showUnit = true } = {}) {
+            const h = asNum(d.height ?? d.h);
+            const w = asNum(d.width  ?? d.w);
+            const unit = d.unit ?? d.u ?? '';
+
+            if (h != null && w != null) {
+                const fmt = v => (decimals > 0 ? v.toFixed(decimals) : String(v)).replace(/\.0+$/,'');
+                const core = `${fmt(h)} * ${fmt(w)}`;  // HEIGHT * WIDTH
+                return showUnit && unit ? `${core} ${unit}` : core;
+            }
+
+            // fallbacks
+            if (d.name || d.label) return d.name ?? d.label;
+            return `#${d.id ?? ''}`.trim();
+        }
+    </script>
+
+    <script>
         // Human-readable label for each dimension option
         function dimensionLabel(d) {
             const name   = d.name ?? d.label ?? null;
@@ -262,17 +287,17 @@
                     $sizes.empty();
 
                     const items = res.data || res || [];
-                    console.log(items)
                     items.forEach(item => {
                         const id    = item.id;
                         const attrs = item.attributes || {};
-                        const text  = dimensionLabel({ id, ...attrs });
+                        // 👇 will show "HEIGHT * WIDTH" (and unit if present)
+                        const text  = dimensionLabelHW({ id, ...attrs }, { decimals: 0, showUnit: true });
                         $sizes.append(new Option(text, id, false, false));
                     });
 
-                    // restore still-valid selection
                     $sizes.val(current.filter(v => $sizes.find(`option[value="${v}"]`).length)).trigger('change');
                 },
+
                 error(xhr) {
                     console.error('Failed to load dimensions:', xhr.responseText);
                     $('#sizesSelect').empty().trigger('change');
