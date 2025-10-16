@@ -221,18 +221,17 @@
     <script>
         // Build parallel arrays from current UI selections
         function buildDimensionPayloadFromUI() {
-            // Right column = CATEGORIES (from "Products With Categories")
-            const categoryIds = ($('#productsSelect').val() || []).map(String);
-            // Bottom field = PRODUCTS (from "Products Without Categories")
-            const productIds  = ($('#productsWithoutCategoriesSelect').val() || []).map(String);
+            const categoryIds = ($('#productsSelect').val() || []).map(String);               // categories
+            const productIds  = ($('#productsWithoutCategoriesSelect').val() || []).map(String); // products
 
             const resource_ids   = [];
             const resource_types = [];
 
-            // ✅ categories → category
-            categoryIds.forEach(id => { resource_ids.push(id); resource_types.push('product'); });
-            // ✅ products   → product
-            productIds.forEach(id  => { resource_ids.push(id); resource_types.push('category'); });
+            // ✅ categories → "category"
+            categoryIds.forEach(id => { resource_ids.push(id); resource_types.push('category'); });
+
+            // ✅ products → "product"
+            productIds.forEach(id  => { resource_ids.push(id); resource_types.push('product'); });
 
             return { resource_ids, resource_types };
         }
@@ -244,16 +243,15 @@
             $('#dimensionResourceTypes').val(JSON.stringify(resource_types));
         }
 
-        // Pretty number to trim float noise (0.5600000 → 0.56)
-        const nf = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
+        // Pretty number (single declaration!)
         const nf = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
 
-        // Make "HEIGHT * WIDTH (Unit)" from top-level api fields
+        // "HEIGHT * WIDTH (Unit)"
         function dimensionLabelHWTop(item, { showUnit = true } = {}) {
             const src = item.attributes ? item.attributes : item;
             const h = Number(src.height);
             const w = Number(src.width);
-            const unitObj = src.unit; // may be { value, label } or string
+            const unitObj = src.unit;
             const unitLabel = unitObj && typeof unitObj === 'object' ? (unitObj.label || '') : (unitObj || '');
 
             if (Number.isFinite(h) && Number.isFinite(w)) {
@@ -263,7 +261,7 @@
             return src.name || src.label || `#${item.id ?? ''}`.trim();
         }
 
-        // Read payload back from hidden inputs (exactly what will be submitted)
+        // Read payload back from hidden inputs
         function buildDimensionPayloadFromHidden() {
             let ids = [], types = [];
             try { ids   = JSON.parse($('#dimensionResourceIds').val()   || '[]'); } catch {}
@@ -271,9 +269,8 @@
             return { resource_ids: ids, resource_types: types };
         }
 
-        // Fetch sizes and render
+        // Fetch & render sizes
         function refreshSizes(preselectId = null) {
-            // keep canonical copy in hidden inputs
             syncSelectedResourcesToHiddenInputs();
             const payload = buildDimensionPayloadFromHidden();
 
@@ -289,18 +286,13 @@
                 url: "{{ route('dimensions.index') }}",
                 method: "POST",
                 data: payload,
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
                 success(res) {
                     $sizes.empty().append(new Option('Select Size', '', false, false));
-
                     const items = res.data || res || [];
                     items.forEach(item => {
-                        const text = dimensionLabelHWTop(item, { showUnit: true }); // "H * W Cm"
-                        const id   = item.id;
-                        $sizes.append(new Option(text, id, false, false));
+                        $sizes.append(new Option(dimensionLabelHWTop(item, { showUnit: true }), item.id, false, false));
                     });
-
-                    // Restore (or preselect) if still valid
                     const target = Array.isArray(current) ? current : [String(current)];
                     $sizes.val(target.filter(v => $sizes.find(`option[value="${v}"]`).length)).trigger('change');
                 },
@@ -310,47 +302,63 @@
                 }
             });
         }
+
     </script>
 
     <script>
         // Listen for change on "Products With Categories"
+        // Left: Products With Categories → updates right list, then refresh
         $('#categoriesSelect').on('change', function () {
             syncSelectedResourcesToHiddenInputs();
-            let selectedIds = $(this).val(); // selected categories
-            let previouslySelected = $('#productsSelect').val() || []; // save old selections
+            const selectedIds = $(this).val();
+            const prev = $('#productsSelect').val() || [];
 
-            if (selectedIds && selectedIds.length > 0) {
+            if (selectedIds && selectedIds.length) {
                 $.ajax({
                     url: "{{ route('products.categories') }}",
                     type: "POST",
                     data: { _token: "{{ csrf_token() }}", category_ids: selectedIds },
                     success(response) {
-                        const $right = $('#productsSelect');
-                        $right.empty();
-
-                        (response.data || []).forEach(p => {
-                            $right.append(new Option(p.name, p.id, false, false));
-                        });
-
-                        // restore
-                        $right.val(previouslySelected).trigger('change');
-
-                        // 🔔 now fetch sizes
-                        refreshSizes();
+                        const $right = $('#productsSelect').empty();
+                        (response.data || []).forEach(p => $right.append(new Option(p.name, p.id, false, false)));
+                        $right.val(prev).trigger('change');
+                        refreshSizes(); // 🔔 fetch sizes
                     },
                     error(xhr) {
                         console.error("Error fetching categories:", xhr.responseText);
-                        // still try to refresh with whatever we have
                         refreshSizes();
                     }
                 });
             } else {
                 $('#productsSelect').empty().trigger('change');
-                refreshSizes(); // nothing selected → clears sizes
+                refreshSizes();
             }
-    
-
         });
+
+        // Right: categories changed → refresh sizes
+        $('#productsSelect').on('change', function () {
+            syncSelectedResourcesToHiddenInputs();
+            refreshSizes();
+        });
+
+        // Bottom: products without categories changed → refresh sizes
+        $('#productsWithoutCategoriesSelect').on('change', function () {
+            syncSelectedResourcesToHiddenInputs();
+            refreshSizes();
+        });
+
+        // Also fetch when opening the sizes select
+        $('#sizesSelect').on('mousedown focus', function () {
+            refreshSizes();
+        });
+
+        // On load: sync & preselect saved size
+        $(document).ready(function () {
+            syncSelectedResourcesToHiddenInputs();
+            const savedDimensionId = "{{ $model->dimension_id ?? '' }}";
+            refreshSizes(savedDimensionId || null);
+        });
+
 
     </script>
 
@@ -482,18 +490,7 @@
         });
 
 </script>
-<script !src="">
-    $('#sizesSelect').on('mousedown focus', function () {
-        refreshSizes();
-    });
-    $(document).ready(function () {
-        syncSelectedResourcesToHiddenInputs();
 
-        // If you have the saved dimension id, pass it here:
-        const savedDimensionId = "{{ $model->dimension_id ?? '' }}";
-        refreshSizes(savedDimensionId || null);
-    });
-</script>
 <script>
     $(document).ready(function () {
         $('#productsSelect').select2({
