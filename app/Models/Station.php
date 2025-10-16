@@ -22,6 +22,8 @@ class Station extends Model
 
     public function statuses(): HasMany
     {
-        return $this->hasMany(StationStatus::class);
+        return
+            $this->hasMany(StationStatus::class)
+            ->whereIsCustom(0);
     }
 }
