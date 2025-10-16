@@ -96,6 +96,40 @@
         </div>
     </div>
 </div>
+<script !src="">
+    $('#editCategoriesSelect').on('change', function () {
+        let selectedId = $(this).val();
+        if (selectedId) {
+            $.ajax({
+                url: "{{ route('products.categories') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    category_ids: [selectedId]
+                },
+                success: function (response) {
+                    const $productsSelect = $('#editProductsSelect');
+                    let currentValues = $productsSelect.val() || [];
+
+                    if (response.data && response.data.length > 0) {
+                        response.data.forEach(function (category) {
+                            if ($productsSelect.find('option[value="' + category.id + '"]').length === 0) {
+                                let option = new Option(category.name, category.id, false, false);
+                                $productsSelect.append(option);
+                            }
+                        });
+                    }
+
+                    $productsSelect.val(currentValues).trigger('change');
+                },
+                error: function (xhr) {
+                    console.error("Error fetching categories:", xhr.responseText);
+                }
+            });
+        }
+    });
+
+</script>
 <script>
     function editSetMode(mode) {
         const $withWrap     = $('#editWithCategoriesWrap');
