@@ -96,45 +96,7 @@
         </div>
     </div>
 </div>
-<script !src="">
-    $('#editCategoriesSelect').on('change', function () {
-        const productId = $(this).val();
-        if (!productId) return;
 
-        $.ajax({
-            url: "{{ route('products.categories') }}",
-            type: "POST",
-            data: { _token: "{{ csrf_token() }}", category_ids: [productId] },
-            success(res) {
-                const $right = $('#editProductsSelect');
-                const target = String($right.data('targetCategoryId') || '');
-
-                $right.empty().append(new Option('— Select Category —', '', false, false));
-
-                (res.data || []).forEach(c => {
-                    // normalize ids to string
-                    $right.append(new Option(c.name, String(c.id), false, false));
-                });
-
-                const evt = $right.hasClass('select2') ? 'change.select2' : 'change';
-                if (target && $right.find(`option[value="${target}"]`).length) {
-                    $right.val(target).trigger(evt);      // 3) preselect category now that options exist
-                } else {
-                    $right.val('').trigger(evt);
-                }
-                $right.removeData('targetCategoryId');   // cleanup
-            },
-            error(xhr) {
-                console.error('Category load failed:', xhr.responseText);
-            }
-        });
-    });
-    // radio sync
-    $('input[name="edit_product_mode"]').on('change', function () {
-        editSetMode($(this).val());
-    });
-
-</script>
 <script>
     function editSetMode(mode) {
         const $withWrap     = $('#editWithCategoriesWrap');
