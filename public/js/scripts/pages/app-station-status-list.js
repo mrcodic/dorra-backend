@@ -146,7 +146,7 @@ $(document).on('click', '.edit-details', function (e) {
     editSetMode(mode);
 
     // IDs from the row
-    // const resourceableId = String($b.data('resourceableId') || '');       // saved category id (when with) or product id (when without)
+    const resourceableId = String($b.data('resourceable-id') || '');       // saved category id (when with) or product id (when without)
     // const parentId       = String($b.data('resourceableParentId') || ''); // saved product id (when with)
     const resourceLabel  = $b.data('resource') || `#${resourceableId}`;
 
