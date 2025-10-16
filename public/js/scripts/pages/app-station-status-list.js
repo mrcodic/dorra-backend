@@ -39,6 +39,7 @@ const dt = $('.status-list-table').DataTable({
             orderable: false,
             render: (id, type, row) => {
                 const mode = row.resourceable_type === 'App\\Models\\Category' ? 'without' : 'with';
+                console.log(row.resourceable?.parent?.id,row.resourceable?.parent?.name?.[locale])
                 return `
       <div class="d-flex gap-1">
         <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showStatusModal"
