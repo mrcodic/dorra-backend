@@ -187,7 +187,6 @@ $(document).on('click', '.edit-details', function (e) {
 
         // ✅ tell the categories select which value to preselect once options arrive
         $rightCats.data('targetCategoryId', String(resourceableId));
-        $leftProducts.data('targetCategoryId', String(parentId));
 
         // placeholder before load
         $rightCats.empty().append(new Option('— Select Category —', '', false, false));
