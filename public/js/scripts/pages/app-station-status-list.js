@@ -142,32 +142,28 @@ $(document).on('click', '.edit-details', function (e) {
     $('#edit_mode_without').prop('checked', mode === 'without');
     editSetMode(mode);
 
-    const resourceableId = $b.data('resourceableId') || ''; // category id (in "with"
-    const parentId       = $b.data('parentId') || '';       // product id (in "with")
+    const resourceableId = $b.data('resourceableId') || ''; // category id (when mode = 'with')
+    const parentId       = $b.data('parentId') || '';       // product id   (when mode = 'with')
     const resourceLabel  = $b.data('resourceLabel') || `#${resourceableId}`;
-    console.log(resourceableId,resourceLabel)
 
     if (mode === 'with') {
         const $leftProducts = $('#editCategoriesSelect'); // products
         const $rightCats    = $('#editProductsSelect');   // categories
 
-        // keep full product list; don't empty() it
-        // tell the right select which category to preselect once it loads
+        // ✅ tell the categories select which value to preselect once options arrive
+        $rightCats.data('targetCategoryId', String(resourceableId));
+
+        // placeholder before load
         $rightCats.empty().append(new Option('— Select Category —', '', false, false));
 
-
-        // select the saved product; its change handler will load categories,
-        // then your AJAX success will pick up targetCategoryId and select it
+        // this triggers the AJAX that fills categories, and your success handler will preselect
         $leftProducts.val(String(parentId)).trigger('change');
-
     } else {
-        // Without categories → resourceable is a Product
         ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceLabel);
     }
 
     $('#editStatusModal').modal('show');
 });
-
 
 
     // Keep radio in sync
