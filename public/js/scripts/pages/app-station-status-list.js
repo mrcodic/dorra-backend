@@ -17,7 +17,7 @@ const dt = $('.status-list-table').DataTable({
         type: 'Get',
         data: function (d) {
             d.search_value = $('#search-status-form').val() || '';
-            d.created_at = $('.filter-date').val() || '';
+            d.type = $('.filter-date').val() || '';
         }
     },
     // >>> match EXACTLY 5 columns in your thead <<<
@@ -68,11 +68,11 @@ const dt = $('.status-list-table').DataTable({
 });
 
 $('#clear-search').on('click', function () {
-    $('#search-offer-form').val('');  // clear input
+    $('#search-status-form').val('');  // clear input
     dt_user_table.search('').draw();  // reset DataTable search
 });
 let searchTimeout;
-$('#search-offer-form').on('keyup', function () {
+$('#search-status-form').on('keyup', function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();
