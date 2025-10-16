@@ -55,7 +55,10 @@ const dt = $('.status-list-table').DataTable({
            data-station-id="${row.station?.id ?? ''}"
            data-mode="${mode}"
            data-resourceable-type="${row.resourceable_type ?? ''}"
-           data-resourceable-id="${row.resourceable?.id ?? ''}">
+           data-resourceable-id="${row.resourceable?.id ?? ''}"
+           data-resource="${row.resourceable?.name?.[locale] ?? row.resourceable?.name ?? ''}">
+           
+           >
            <i data-feather="edit-3"></i>
         </a>
 
@@ -144,7 +147,7 @@ $('.filter-date').on('change', function () {
     $rightCats.empty().append(new Option('— Select Category —', '', false, false));
 
     // Use any decent label you have; fallback to "#<id>"
-    const currentLabel = resourceableId || `#${resourceableId}`;
+    const currentLabel = $b.data('resource') || `#${resourceableId}`;
     ensureAndSelect($rightCats, resourceableId, currentLabel);
 
     // Left stays blank until user changes it.
@@ -152,7 +155,7 @@ $('.filter-date').on('change', function () {
 
 } else {
     // Without categories => resourceable is Product; just select it.
-    ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceableId || `#${resourceableId}`);
+    ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, $b.data('resource') || `#${resourceableId}`);
 }
 
     $('#editStatusModal').modal('show');
