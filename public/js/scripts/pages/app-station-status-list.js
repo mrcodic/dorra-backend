@@ -118,7 +118,7 @@ $('.filter-date').on('change', function () {
     const id  = $b.data('id');
 
     // Form action to PUT /station-statuses/{id}
-    const updateUrl = "{{ route('station-statuses.update', ':id') }}".replace(':id', id);
+    const updateUrl = `/station-statuses/${id}`;
     $('#editStationStatusForm').attr('action', updateUrl);
 
     // Basics
@@ -136,7 +136,7 @@ $('.filter-date').on('change', function () {
     const resourceableId   = $b.data('resourceableId') || '';
     const resourceableType = String($b.data('resourceableType') || '');
 
-    if (mode === 'with') {
+    if (mode === 'without') {
     // Right-side "Categories" select should show currently selected category.
     // We don't know the owning product here (by design), so we inject a single option for display.
     // If user changes the left product, you'll reload categories as usual.
