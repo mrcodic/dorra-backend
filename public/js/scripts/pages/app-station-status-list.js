@@ -143,9 +143,9 @@ $(document).on('click', '.edit-details', function (e) {
     editSetMode(mode);
 
     const resourceableId = $b.data('resourceableId') || ''; // category id (in "with"
-    console.log(resourceableId,resourceLabel)
     const parentId       = $b.data('parentId') || '';       // product id (in "with")
     const resourceLabel  = $b.data('resourceLabel') || `#${resourceableId}`;
+    console.log(resourceableId,resourceLabel)
 
     if (mode === 'with') {
         const $leftProducts = $('#editCategoriesSelect'); // products
