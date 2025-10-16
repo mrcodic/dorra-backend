@@ -203,7 +203,7 @@
                 resource_ids.push(id);
                 resource_types.push('category');
             });
-
+            console.log(resource_ids, resource_types)
             return { resource_ids, resource_types };
         }
 
