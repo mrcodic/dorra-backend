@@ -105,7 +105,7 @@
         const $productsNo   = $('#editProductsWithoutCategoriesSelect'); // products-without-categories
         const $type         = $('#editResourceableType');
 
-        if (mode === 'without') {
+        if (mode === 'with') {
             $withWrap.removeClass('d-none');
             $withoutWrap.addClass('d-none');
 
