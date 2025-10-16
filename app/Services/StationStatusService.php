@@ -23,7 +23,15 @@ class StationStatusService extends BaseService
         $stationStatuses = $this->repository
             ->query()
             ->whereIsCustom(true)
-            ->with(['station','resourceable.category'])
+            ->with(['station',
+                'resourceable' => function (MorphTo $morphTo) {
+                    $morphTo->morphWith([
+                        Product::class  => ['category'],
+                        Category::class => ['parent'],
+                    ]);
+                }
+            ])
+
             ->when(request()->filled('search_value'), function ($query)  {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $query->where('name', 'like', '%' . request('search_value') . '%');
