@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Inventories')
-@section('main-page', 'Inventories')
+@section('title', 'Custom Statuses')
+@section('main-page', 'Custom Statuses')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -152,7 +152,7 @@
                                class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
 
                             <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                                   id="search-inventory-form" placeholder="Search inventory..." style="height: 38px;">
+                                   id="search-status-form" placeholder="Search status..." style="height: 38px;">
 
                             <!-- Clear button -->
                             <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
@@ -199,7 +199,7 @@
                     <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
                         <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
                              style="z-index: 10;">
-                            <p id="selected-count-text">0 Inventories are selected</p>
+                            <p id="selected-count-text">0 Custom Statuses are selected</p>
                             <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
                                     data-bs-target="#deleteInventoriesModal"
                                     class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">

@@ -16,8 +16,8 @@ const dt = $('.status-list-table').DataTable({
         url: stationStatusesDataUrl,
         type: 'Get',
         data: function (d) {
-            d.search_value = $('#search-inventory-form').val() || '';
-            d.type = $('.filter-type').val() || '';
+            d.search_value = $('#search-status-form').val() || '';
+            d.created_at = $('.filter-date').val() || '';
         }
     },
     // >>> match EXACTLY 5 columns in your thead <<<
@@ -79,7 +79,7 @@ $('#search-offer-form').on('keyup', function () {
     }, 300);
 });
 
-$('.filter-type').on('change', function () {
+$('.filter-date').on('change', function () {
     dt_user_table.draw();
 });
 $(document).ready(function () {
