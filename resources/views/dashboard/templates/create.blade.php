@@ -145,6 +145,10 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                {{-- Persisted resources (used on submit) --}}
+                                <input type="hidden" name="dimension_resource_ids"   id="dimensionResourceIds">
+                                <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
+
                                 <div class="form-group mb-2">
                                     <label for="sizesSelect" class="label-text mb-1">Sizes</label>
                                     <select id="sizesSelect" class="form-select" name="dimension_id">
@@ -184,35 +188,36 @@
 @endsection
 @section('vendor-script')
     <script>
-        // Build parallel arrays from current selections
-        function buildDimensionPayload() {
-            const categoryIds = ($('#productsSelect').val() || []).map(v => String(v));
-            const productIds  = ($('#productsWithoutCategoriesSelect').val() || []).map(v => String(v));
+        // Build parallel arrays from current UI selections
+        function buildDimensionPayloadFromUI() {
+            // Right: CATEGORIES of "Products With Categories"
+            const categoryIds = ($('#productsSelect').val() || []).map(String);
+
+            // Bottom: PRODUCTS of "Products Without Categories"
+            const productIds  = ($('#productsWithoutCategoriesSelect').val() || []).map(String);
 
             const resource_ids   = [];
             const resource_types = [];
 
-            // categories → type=category
-            categoryIds.forEach(id => {
-                resource_ids.push(id);
-                resource_types.push('product');
-            });
+            // ✅ categories → type=category
+            categoryIds.forEach(id => { resource_ids.push(id); resource_types.push('category'); });
 
-            // products (without categories) → type=product
-            productIds.forEach(id => {
-                resource_ids.push(id);
-                resource_types.push('category');
-            });
-            console.log(resource_ids, resource_types)
+            // ✅ products → type=product
+            productIds.forEach(id  => { resource_ids.push(id); resource_types.push('product');  });
+
             return { resource_ids, resource_types };
         }
 
-        // Turn DimensionResource item into text for the option
+        // Save the arrays into the hidden inputs (as JSON)
+        function syncSelectedResourcesToHiddenInputs() {
+            const { resource_ids, resource_types } = buildDimensionPayloadFromUI();
+            $('#dimensionResourceIds').val(JSON.stringify(resource_ids));
+            $('#dimensionResourceTypes').val(JSON.stringify(resource_types));
+        }
+    </script>
+    <script>
+        // Human-readable label for each dimension option
         function dimensionLabel(d) {
-            // Adjust to your actual resource fields
-            // Common patterns:
-            //  - name
-            //  - width/height + unit
             const name   = d.name ?? d.label ?? null;
             const width  = d.width ?? d.w ?? null;
             const height = d.height ?? d.h ?? null;
@@ -224,10 +229,21 @@
             return `#${d.id}`;
         }
 
-        function refreshSizes() {
-            const payload = buildDimensionPayload();
+        // Build payload from hidden inputs (the same thing you'll submit)
+        function buildDimensionPayloadFromHidden() {
+            let ids   = [];
+            let types = [];
+            try { ids   = JSON.parse($('#dimensionResourceIds').val()   || '[]'); } catch {}
+            try { types = JSON.parse($('#dimensionResourceTypes').val() || '[]'); } catch {}
 
-            // If nothing selected, clear sizes
+            return { resource_ids: ids, resource_types: types };
+        }
+
+        function refreshSizes() {
+            // Make sure hidden inputs reflect latest UI, then read from them
+            syncSelectedResourcesToHiddenInputs();
+            const payload = buildDimensionPayloadFromHidden();
+
             if (!payload.resource_ids.length) {
                 $('#sizesSelect').empty().trigger('change');
                 return;
@@ -235,129 +251,96 @@
 
             $.ajax({
                 url: "{{ route('dimensions.index') }}",
-                method: "POST", // use GET if your route is GET; switch both sides consistently
-                data: payload,
+                method: "POST",
+                data: payload,                   // parallel arrays
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                success: function (res) {
+                success(res) {
                     const $sizes = $('#sizesSelect');
                     const current = $sizes.val() || [];
                     $sizes.empty();
 
                     const items = res.data || res || [];
                     items.forEach(item => {
-                        // item.id + item.attributes...
                         const id    = item.id;
                         const attrs = item.attributes || {};
                         const text  = dimensionLabel({ id, ...attrs });
                         $sizes.append(new Option(text, id, false, false));
                     });
 
-                    // restore previous selection if still valid
+                    // restore still-valid selection
                     $sizes.val(current.filter(v => $sizes.find(`option[value="${v}"]`).length)).trigger('change');
                 },
-                error: function (xhr) {
+                error(xhr) {
                     console.error('Failed to load dimensions:', xhr.responseText);
                     $('#sizesSelect').empty().trigger('change');
                 }
             });
         }
-
-        // When "Products With Categories" (left) changes, you fetch categories for #productsSelect — after that, refresh sizes.
+    </script>
+    <script>
+        // After “Products With Categories (left)” changes we fetch its categories (right), then sync + refresh
         $('#categoriesSelect').on('change', function () {
-            let selectedIds = $(this).val();
+            const selectedIds = $(this).val();
             if (selectedIds && selectedIds.length > 0) {
                 $.ajax({
                     url: "{{ route('products.categories') }}",
                     type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        category_ids: selectedIds
-                    },
-                    success: function (response) {
-                        const $productsSelect = $('#productsSelect');
-                        const currentValues = $productsSelect.val() || [];
+                    data: { _token: "{{ csrf_token() }}", category_ids: selectedIds },
+                    success(response) {
+                        const $right = $('#productsSelect');
+                        const saved  = $right.val() || [];
+                        (response.data || []).forEach(cat => {
+                            if ($right.find(`option[value="${cat.id}"]`).length === 0) {
+                                $right.append(new Option(cat.name, cat.id, false, false));
+                            }
+                        });
+                        $right.val(saved).trigger('change');
 
-                        if (response.data && response.data.length > 0) {
-                            response.data.forEach(function (category) {
-                                if ($productsSelect.find('option[value="' + category.id + '"]').length === 0) {
-                                    $productsSelect.append(new Option(category.name, category.id, false, false));
-                                }
-                            });
-                        }
-
-                        $productsSelect.val(currentValues).trigger('change');
-                        // 🔔 After categories list updated, refresh sizes
-                        refreshSizes();
+                        // sync + maybe refresh
+                        syncSelectedResourcesToHiddenInputs();
+                        // optional immediate refresh: refreshSizes();
                     },
-                    error: function (xhr) {
+                    error(xhr) {
                         console.error("Error fetching categories:", xhr.responseText);
-                        refreshSizes(); // still try to refresh (may clear)
+                        syncSelectedResourcesToHiddenInputs();
                     }
                 });
             } else {
-                // none selected, clear right list and sizes
+                // Clear right select and sync
                 $('#productsSelect').empty().trigger('change');
-                refreshSizes();
+                syncSelectedResourcesToHiddenInputs();
             }
         });
 
-        // Whenever user changes the right-side categories selection → refresh sizes
-        $('#productsSelect').on('change', refreshSizes);
+        // Right (categories) changed
+        $('#productsSelect').on('change', function () {
+            syncSelectedResourcesToHiddenInputs();
+            // optional immediate refresh:
+            // refreshSizes();
+        });
 
-        // Whenever user changes the "Products Without Categories" selection → refresh sizes
-        $('#productsWithoutCategoriesSelect').on('change', refreshSizes);
+        // Products without categories changed
+        $('#productsWithoutCategoriesSelect').on('change', function () {
+            syncSelectedResourcesToHiddenInputs();
+            // optional immediate refresh:
+            // refreshSizes();
+        });
 
-        // Optional: initial load if page has preselected values
-        $(document).ready(function () {
+        // When user opens/clicks Sizes, fetch fresh sizes
+        // Works for click/focus; pick one or both
+        $('#sizesSelect').on('mousedown focus', function () {
             refreshSizes();
         });
-    </script>
 
-
-
-    <script>
-        // Listen for change on "Products With Categories"
-        $('#categoriesSelect').on('change', function () {
-            let selectedIds = $(this).val();
-
-            if (selectedIds && selectedIds.length > 0) {
-                $.ajax({
-                    url: "{{ route('products.categories') }}",
-                    type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        category_ids: selectedIds
-                    },
-                    success: function (response) {
-                        const $productsSelect = $('#productsSelect');
-
-                        // Save current selections
-                        let currentValues = $productsSelect.val() || [];
-
-                        if (response.data && response.data.length > 0) {
-                            response.data.forEach(function (category) {
-                                // Only add if it doesn’t already exist
-                                if ($productsSelect.find('option[value="' + category.id + '"]').length === 0) {
-                                    let option = new Option(category.name, category.id, false, false);
-                                    $productsSelect.append(option);
-                                }
-                            });
-                        }
-
-                        // Restore selections
-                        $productsSelect.val(currentValues).trigger('change');
-                    },
-                    error: function (xhr) {
-                        console.error("Error fetching categories:", xhr.responseText);
-                    }
-                });
-            }
+        // Initial sync on page load
+        $(document).ready(function () {
+            syncSelectedResourcesToHiddenInputs();
         });
-
     </script>
-<script !src="">
+
+    <script !src="">
     $(document).ready(function () {
             $('#cancelButton').on('click', function (e) {
                 e.preventDefault();
