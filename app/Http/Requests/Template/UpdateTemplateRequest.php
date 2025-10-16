@@ -64,6 +64,7 @@ class UpdateTemplateRequest extends BaseRequest
             'types' => ['required', 'array'],
             'types.*' => ['integer', 'exists:types,id'],
             'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
+            'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
 
         ];
     }
