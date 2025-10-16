@@ -57,8 +57,7 @@ const dt = $('.status-list-table').DataTable({
            data-resourceable-type="${row.resourceable_type ?? ''}"
            data-resourceable-id="${row.resourceable?.id ?? ''}"
            data-resource="${row.resourceable?.name?.[locale] ?? row.resourceable?.name ?? ''}">
-           
-           >
+
            <i data-feather="edit-3"></i>
         </a>
 
@@ -139,7 +138,7 @@ $('.filter-date').on('change', function () {
     const resourceableId   = $b.data('resourceableId') || '';
     const resourceableType = String($b.data('resourceableType') || '');
 
-    if (mode === 'without') {
+    if (mode === 'with') {
     // Right-side "Categories" select should show currently selected category.
     // We don't know the owning product here (by design), so we inject a single option for display.
     // If user changes the left product, you'll reload categories as usual.
