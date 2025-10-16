@@ -158,7 +158,7 @@ $(document).on('click', '.edit-details', function (e) {
         console.log(parentId)
         // select the saved product; its change handler will load categories,
         // then your AJAX success will pick up targetCategoryId and select it
-        $leftProducts.val(String(parentId)).trigger('change');
+        $leftProducts.val(String(resourceableId)).trigger('change');
 
     } else {
         // Without categories → resourceable is a Product
