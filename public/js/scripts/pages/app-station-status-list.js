@@ -1,63 +1,57 @@
 $.ajaxSetup({
-    headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    }
-});
-$.ajaxSetup({
     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
 });
+
+// prevent the surrounding form (if any) from submitting
+$(document).on('submit', '#filters-form', function (e) { e.preventDefault(); });
 
 const dt = $('.status-list-table').DataTable({
     processing: true,
     serverSide: true,
     searching: false,
-    // use POST if your route expects it
     ajax: {
         url: stationStatusesDataUrl,
-        type: 'Get',
+        type: 'GET',
         data: function (d) {
             d.search_value = $('#search-status-form').val() || '';
-            d.type = $('.filter-date').val() || '';
+            d.created_at   = $('.filter-date').val() || '';   // name it as your backend expects
         }
     },
-    // >>> match EXACTLY 5 columns in your thead <<<
     columns: [
         {
             data: null,
             orderable: false,
             render: (data) => `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`
         },
-        { data: 'name', orderable: false },                 // Name
-        {                                                  // Station
+        { data: 'name', orderable: false },
+        {
             data: 'station',
             orderable: false,
             render: (data) => data?.name ?? '-'
         },
-        {                                                  // Product
+        {
             data: 'resourceable',
             orderable: false,
-            render: (data) => (data?.name?.[locale] ?? data?.name ?? '-')  // supports translated names
+            render: (data) => (data?.name?.[locale] ?? data?.name ?? '-')
         },
-        {                                                  // Actions
+        {
             data: 'id',
             orderable: false,
             render: (id, type, row) => `
-          <div class="d-flex gap-1">
-            <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showOfferModal"
-               data-id="${id}"
-               data-name="${row.name ?? ''}">
-               <i data-feather="eye"></i>
-            </a>
-            <a href="#" class="edit-details" data-bs-toggle="modal" data-bs-target="#editOfferModal"
-               data-id="${id}">
-               <i data-feather="edit-3"></i>
-            </a>
-            <a href="#" class="text-danger open-delete-offer-modal"
-               data-id="${id}" data-action="/offers/${id}" data-bs-toggle="modal" data-bs-target="#deleteOfferModal">
-               <i data-feather="trash-2"></i>
-            </a>
-          </div>
-        `
+        <div class="d-flex gap-1">
+          <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showOfferModal"
+             data-id="${id}" data-name="${row.name ?? ''}">
+             <i data-feather="eye"></i>
+          </a>
+          <a href="#" class="edit-details" data-bs-toggle="modal" data-bs-target="#editOfferModal" data-id="${id}">
+             <i data-feather="edit-3"></i>
+          </a>
+          <a href="#" class="text-danger open-delete-offer-modal"
+             data-id="${id}" data-action="/offers/${id}" data-bs-toggle="modal" data-bs-target="#deleteOfferModal">
+             <i data-feather="trash-2"></i>
+          </a>
+        </div>
+      `
         }
     ],
     order: [[1, 'asc']],
@@ -67,21 +61,25 @@ const dt = $('.status-list-table').DataTable({
     drawCallback: function () { feather.replace(); }
 });
 
+// Clear button
 $('#clear-search').on('click', function () {
-    $('#search-status-form').val('');  // clear input
-    dt_user_table.search('').draw();  // reset DataTable search
+    $('#search-status-form').val('');
+    $('.filter-date').val('');
+    dt.draw();                   // use the SAME instance variable
 });
+
+// Debounced text search (server param `search_value`)
 let searchTimeout;
 $('#search-status-form').on('keyup', function () {
     clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        dt_user_table.draw();
-    }, 300);
+    searchTimeout = setTimeout(() => dt.draw(), 300);
 });
 
+// Date filter
 $('.filter-date').on('change', function () {
-    dt_user_table.draw();
+    dt.draw();
 });
+
 $(document).ready(function () {
     const saveButton = $('.saveChangesButton');
     const saveLoader = $('.saveLoader');
