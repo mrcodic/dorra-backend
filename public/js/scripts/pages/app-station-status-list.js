@@ -47,7 +47,7 @@ const dt = $('.status-list-table').DataTable({
              <i data-feather="edit-3"></i>
           </a>
           <a href="#" class="text-danger open-delete-offer-modal"
-             data-id="${id}" data-action="/offers/${id}" data-bs-toggle="modal" data-bs-target="#deleteOfferModal">
+             data-id="${id}" data-action="/offers/${id}" data-bs-toggle="modal" data-bs-target="#deleteStatusModal">
              <i data-feather="trash-2"></i>
           </a>
         </div>
@@ -345,22 +345,22 @@ $(document).ready(function () {
     $(document).on("click", ".open-delete-offer-modal", function () {
         const OfferId = $(this).data("id");
         const OfferAction = $(this).data("action");
-        $("#deleteOfferForm").data("id", OfferId).attr("action", OfferAction);
+        $("#deleteStatusForm").data("id", OfferId).attr("action", OfferAction);
 
     });
 
-    $(document).on('submit', '#deleteOfferForm', function (e) {
+    $(document).on('submit', '#deleteStatusForm', function (e) {
         e.preventDefault();
         const tagId = $(this).data("id");
 
         $.ajax({
-            url: `/offers/${tagId}`,
+            url: `/station-statuses/${tagId}`,
             method: "DELETE",
             success: function (res) {
-                $("#deleteOfferModal").modal("hide");
+                $("#deleteStatusModal").modal("hide");
 
                 Toastify({
-                    text: "Offer deleted successfully!",
+                    text: "Status deleted successfully!",
                     duration: 4000,
                     gravity: "top",
                     position: "right",
@@ -372,7 +372,7 @@ $(document).ready(function () {
 
             },
             error: function () {
-                $("#deleteOfferModal    ").modal("hide");
+                $("#deleteStatusModal").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",
                     duration: 4000,

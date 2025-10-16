@@ -219,11 +219,11 @@
 
 
                 @include('modals.delete', [
-                'id' => 'deleteInventoryModal',
-                'formId' => 'deleteInventoryForm',
-                'title' => 'Delete Inventory',
-                'message' => 'Are you sure you want to delete this inventory? This action cannot be undone.',
-                'confirmText' => 'Yes, Delete Inventory'
+                'id' => 'deleteStatusModal',
+                'formId' => 'deleteStatusForm',
+                'title' => 'Delete Status',
+                'message' => 'Are you sure you want to delete this status? This action cannot be undone.',
+                'confirmText' => 'Yes, Delete Status'
                 ])
 
                 @include('modals.delete',[
