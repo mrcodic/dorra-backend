@@ -223,21 +223,27 @@
         }
 
         // Make "H * W" (optionally with unit)
-        function dimensionLabelHW(d, { decimals = 0, showUnit = true } = {}) {
-            const h = asNum(d.height ?? d.h);
-            const w = asNum(d.width  ?? d.w);
-            const unit = d.unit ?? d.u ?? '';
+        // Pretty number, trims float noise (e.g., 0.56)
+        const nf = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
 
-            if (h != null && w != null) {
-                const fmt = v => (decimals > 0 ? v.toFixed(decimals) : String(v)).replace(/\.0+$/,'');
-                const core = `${fmt(h)} * ${fmt(w)}`;  // HEIGHT * WIDTH
-                return showUnit && unit ? `${core} ${unit}` : core;
+        function dimensionLabelHWTop(item, { showUnit = true } = {}) {
+            // Support both shapes: top-level or {attributes:{...}}
+            const src = item.attributes ? item.attributes : item;
+
+            const h = Number(src.height);
+            const w = Number(src.width);
+            const unitObj = src.unit; // { value, label } or string/null
+            const unitLabel = unitObj && typeof unitObj === 'object' ? (unitObj.label || '') : (unitObj || '');
+
+            if (Number.isFinite(h) && Number.isFinite(w)) {
+                const core = `${nf.format(h)} * ${nf.format(w)}`;
+                return showUnit && unitLabel ? `${core} ${unitLabel}` : core;
             }
 
-            // fallbacks
-            if (d.name || d.label) return d.name ?? d.label;
-            return `#${d.id ?? ''}`.trim();
+            // Fallbacks
+            return src.name || src.label || `#${item.id ?? ''}`.trim();
         }
+
     </script>
 
     <script>
@@ -288,16 +294,13 @@
 
                     const items = res.data || res || [];
                     items.forEach(item => {
-                        const id    = item.id;
-                        const attrs = item.attributes || {};
-                        // 👇 will show "HEIGHT * WIDTH" (and unit if present)
-                        const text  = dimensionLabelHW({ id, ...attrs }, { decimals: 0, showUnit: true });
+                        const text = dimensionLabelHWTop(item, { showUnit: true });  // "H * W Cm"
+                        const id   = item.id;
                         $sizes.append(new Option(text, id, false, false));
                     });
 
                     $sizes.val(current.filter(v => $sizes.find(`option[value="${v}"]`).length)).trigger('change');
                 },
-
                 error(xhr) {
                     console.error('Failed to load dimensions:', xhr.responseText);
                     $('#sizesSelect').empty().trigger('change');
