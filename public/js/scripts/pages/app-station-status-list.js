@@ -39,15 +39,18 @@ const dt = $('.status-list-table').DataTable({
             orderable: false,
             render: (id, type, row) => `
         <div class="d-flex gap-1">
-          <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showOfferModal"
-             data-id="${id}" data-name="${row.name ?? ''}">
+          <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showStatusModal"
+             data-id="${id}"
+              data-name="${row.name ?? ''}">
+              data-station="${row.station.name ?? ''}">
+              data-resource="${row.resourceable.name?.[locale] ?? ''}">
              <i data-feather="eye"></i>
           </a>
-          <a href="#" class="edit-details" data-bs-toggle="modal" data-bs-target="#editOfferModal" data-id="${id}">
+          <a href="#" class="edit-details" data-bs-toggle="modal" data-bs-target="#editStatusModal" data-id="${id}">
              <i data-feather="edit-3"></i>
           </a>
           <a href="#" class="text-danger open-delete-offer-modal"
-             data-id="${id}" data-action="/offers/${id}" data-bs-toggle="modal" data-bs-target="#deleteStatusModal">
+             data-id="${id}" data-action="/station-statuses/${id}" data-bs-toggle="modal" data-bs-target="#deleteStatusModal">
              <i data-feather="trash-2"></i>
           </a>
         </div>
@@ -209,87 +212,21 @@ $(document).ready(function () {
     $(document).on('click', '.view-details', function (e) {
         e.preventDefault();
         const $btn = $(this);
-        const $m = $('#showOfferModal');
+        const $m = $('#showStatusModal');
 
-        // existing fields...
+
         const name   = $btn.data('name') ?? '';
-        const value  = $btn.data('value') ?? '';
-        const type   = String($btn.data('type') ?? '').toLowerCase(); // '1'/'2'/'products'/'categories'
-        const start  = toDateForInput($btn.data('start_at'));
-        const end    = toDateForInput($btn.data('end_at'));
+        const station  = $btn.data('station') ?? '';
+        const resource   =$btn.data('resource') ?? '';
 
-        // normalize products/categories array from data-* (use attr to avoid jQuery caching)
-            const products   = toItemsArray($btn.attr('data-products'));
-        console.log($btn.attr('data-products'),products)
-        const categories = toItemsArray($btn.attr('data-categories'));
+        $m.find('#show-status-name').val(name);
+        $m.find('#show-status-station').val(station);
+        $m.find('#show-status-resource').val(resource);
 
-        // fill
-        $m.find('#showOfferName').val(name);
-        $m.find('#showOfferValue').val(value);
-        $m.find('#showStartDate').val(start);
-        $m.find('#showEndDate').val(end);
-
-        const isProducts   = (type === '1' || type === 'products' || type === 'product');
-        const isCategories = (type === '2' || type === 'categories' || type === 'category');
-
-        // set radios
-        $m.find('#showApplyToProducts').prop('checked', isProducts);
-        $m.find('#showApplyToCategories').prop('checked', isCategories);
-
-        // show/hide sections + render chips
-        $m.find('#showProductsWrap').toggleClass('d-none', !isProducts);
-        $m.find('#showCategoriesWrap').toggleClass('d-none', !isCategories);
-
-        renderChips($m.find('#showProducts'), categories);
-        renderChips($m.find('#showCategories'), products);
 
         $m.modal('show');
     });
 
-    function cleanPercent(val) {
-        if (val == null) return '';
-        let s = String(val).trim();
-
-        // convert Arabic-Indic digits → Latin
-        const arabicDigits = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
-        s = s.replace(/[٠-٩]/g, d => arabicDigits[d] || d);
-
-        // remove percent signs and spaces
-        s = s.replace(/[%٪]/g, '').trim();
-
-        // keep only digits, one dot/comma, and optional leading minus
-        s = s.replace(/(?!^-)[^0-9.,]/g, '');
-
-        // normalize comma to dot for decimals
-        if (s.indexOf(',') !== -1 && s.indexOf('.') === -1) s = s.replace(',', '.');
-
-        return s;
-    }
-// --- helpers ---
-    function toIdArray(raw) {
-        // Accept JSON string, array of IDs, or array of objects [{id:..}, {value:..}]
-        if (raw == null) return [];
-        if (typeof raw === 'string') {
-            try { raw = JSON.parse(raw); } catch(e){ /* keep as-is */ }
-        }
-        if (!Array.isArray(raw)) return [];
-        return raw.map(it => {
-            if (typeof it === 'object' && it !== null) {
-                return String(it.id ?? it.value ?? it);
-            }
-            return String(it);
-        });
-    }
-
-    function selectValues($select, ids) {
-        // Ensure every id has an <option>, otherwise Select2 won't show it as selected
-        ids.forEach(id => {
-            if ($select.find(`option[value="${id}"]`).length === 0) {
-                $select.append(new Option(`#${id}`, id, false, false)); // temp label if missing
-            }
-        });
-        $select.val(ids).trigger('change'); // Select2 refresh
-    }
 
     $(document).on('click', '.edit-details', function (e) {
         e.preventDefault();
