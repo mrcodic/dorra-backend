@@ -154,6 +154,9 @@
                                     <select id="sizesSelect" class="form-select" name="dimension_id">
                                         <option value="" selected disabled>Select Size</option>
                                     </select>
+                                    <small class="form-text text-muted">
+                                        If no size is selected, the default 620×620 will be applied.
+                                    </small>
                                 </div>
 
                             </div>
