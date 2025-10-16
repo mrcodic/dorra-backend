@@ -215,8 +215,6 @@
             $('#dimensionResourceTypes').val(JSON.stringify(resource_types));
         }
     </script>
-
-
     <script>
         // Safe numeric parser
         function asNum(x) {
@@ -240,6 +238,9 @@
             if (d.name || d.label) return d.name ?? d.label;
             return `#${d.id ?? ''}`.trim();
         }
+    </script>
+
+    <script>
         // Human-readable label for each dimension option
         function dimensionLabel(d) {
             const name   = d.name ?? d.label ?? null;
@@ -286,28 +287,16 @@
                     $sizes.empty();
 
                     const items = res.data || res || [];
-
-                    // Number formatter: trims float noise, up to 3 decimals
-                    const nf = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
-
                     items.forEach(item => {
-                        // Support both shapes: top-level {width,height,unit} or {attributes:{...}}
-                        const src  = item.attributes ? item.attributes : item;
-                        const id   = item.id ?? src.id;
-                        const h    = Number(src.height ?? src.h);
-                        const w    = Number(src.width  ?? src.w);
-                        const unit = (src.unit && (src.unit.label || src.unit)) ? ` ${src.unit.label || src.unit}` : '';
-
-                        const label = (Number.isFinite(h) && Number.isFinite(w))
-                            ? `${nf.format(h)} * ${nf.format(w)}${unit}`   // HEIGHT * WIDTH
-                            : (src.name || src.label || `#${id}`);
-
-                        $sizes.append(new Option(label, id, false, false));
+                        const id    = item.id;
+                        const attrs = item.attributes || {};
+                        // 👇 will show "HEIGHT * WIDTH" (and unit if present)
+                        const text  = dimensionLabelHW({ id, ...attrs }, { decimals: 0, showUnit: true });
+                        $sizes.append(new Option(text, id, false, false));
                     });
 
-                    // restore still-valid selection
                     $sizes.val(current.filter(v => $sizes.find(`option[value="${v}"]`).length)).trigger('change');
-                }
+                },
 
                 error(xhr) {
                     console.error('Failed to load dimensions:', xhr.responseText);
