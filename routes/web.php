@@ -259,7 +259,7 @@ Route::prefix('api/v1/')->group(function () {
         Route::delete('media/{media}', 'removeMedia')->name('remove-media');
         Route::post('media/{resource}', 'addMedia')->name('add-media');
         Route::post('dimensions', 'storeDimension')->name('dimensions.store');
-        Route::post('dimensions', 'getDimensions')->name('dimensions.index');
+        Route::post('get-dimensions', 'getDimensions')->name('dimensions.index');
         Route::get('admin-check', 'adminCheck')->name('admin-check');
     });
 
