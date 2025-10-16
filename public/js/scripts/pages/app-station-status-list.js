@@ -142,7 +142,7 @@ $(document).on('click', '.edit-details', function (e) {
     $('#edit_mode_without').prop('checked', mode === 'without');
     editSetMode(mode);
 
-    const resourceableId = $b.data('resourceableId') || ''; // category id (in "with")
+    const resourceableId = $b.data('resourceable-id') || ''; // category id (in "with")
     const parentId       = $b.data('parentId') || '';       // product id (in "with")
     const resourceLabel  = $b.data('resourceLabel') || `#${resourceableId}`;
 
