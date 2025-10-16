@@ -228,10 +228,10 @@
             const resource_types = [];
 
             // ✅ categories → "category"
-            categoryIds.forEach(id => { resource_ids.push(id); resource_types.push('category'); });
+            categoryIds.forEach(id => { resource_ids.push(id); resource_types.push('product'); });
 
             // ✅ products → "product"
-            productIds.forEach(id  => { resource_ids.push(id); resource_types.push('product'); });
+            productIds.forEach(id  => { resource_ids.push(id); resource_types.push('category'); });
 
             return { resource_ids, resource_types };
         }
