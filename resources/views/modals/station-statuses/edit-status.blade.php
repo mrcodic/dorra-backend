@@ -135,38 +135,4 @@
     });
 
 </script>
-<script>
-    function editSetMode(mode) {
-        const $withWrap     = $('#editWithCategoriesWrap');
-        const $withoutWrap  = $('#editWithoutCategoriesWrap');
-        const $leftProducts = $('#editCategoriesSelect');                // left (products-with-categories)
-        const $rightCats    = $('#editProductsSelect');                  // right (categories)
-        const $productsNo   = $('#editProductsWithoutCategoriesSelect'); // products-without-categories
-        const $type         = $('#editResourceableType');
 
-        if (mode === 'with') {
-            $withWrap.removeClass('d-none');
-            $withoutWrap.addClass('d-none');
-
-            $leftProducts.prop('disabled', false).prop('required', true);
-            $rightCats.prop('disabled', false).prop('required', true);
-
-            $productsNo.val(null).trigger('change');
-            $productsNo.prop('disabled', true).prop('required', false);
-
-            // Category::class
-            $type.val(@json(\App\Models\Product::class));
-        } else {
-            $withWrap.addClass('d-none');
-            $withoutWrap.removeClass('d-none');
-
-            $leftProducts.val(null).trigger('change').prop('disabled', true).prop('required', false);
-            $rightCats.val(null).trigger('change').prop('disabled', true).prop('required', false);
-
-            $productsNo.prop('disabled', false).prop('required', true);
-
-            // Product::class
-            $type.val(@json(\App\Models\Category::class));
-        }
-    }
-</script>

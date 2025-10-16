@@ -117,6 +117,41 @@ $('.filter-date').on('change', function () {
 
     // Utility: ensure an option exists & select it
 // Utility unchanged
+function editSetMode(mode) {
+    const $withWrap     = $('#editWithCategoriesWrap');
+    const $withoutWrap  = $('#editWithoutCategoriesWrap');
+    const $leftProducts = $('#editCategoriesSelect');                // left (products-with-categories)
+    const $rightCats    = $('#editProductsSelect');                  // right (categories)
+    const $productsNo   = $('#editProductsWithoutCategoriesSelect'); // products-without-categories
+    const $type         = $('#editResourceableType');
+
+    if (mode === 'with') {
+        $withWrap.removeClass('d-none');
+        $withoutWrap.addClass('d-none');
+
+        $leftProducts.prop('disabled', false).prop('required', true);
+        $rightCats.prop('disabled', false).prop('required', true);
+
+        $productsNo.val(null).trigger('change');
+        $productsNo.prop('disabled', true).prop('required', false);
+
+        // Category::class
+        $type.val("App\\Models\\Product");
+
+    } else {
+        $withWrap.addClass('d-none');
+        $withoutWrap.removeClass('d-none');
+
+        $leftProducts.val(null).trigger('change').prop('disabled', true).prop('required', false);
+        $rightCats.val(null).trigger('change').prop('disabled', true).prop('required', false);
+
+        $productsNo.prop('disabled', false).prop('required', true);
+
+        // Product::class
+        $type.val("App\\Models\\Category");
+    }
+}
+
 function ensureAndSelect($select, value, label) {
     if (!value) return;
     const v = String(value);
@@ -157,7 +192,7 @@ $(document).on('click', '.edit-details', function (e) {
         $rightCats.empty().append(new Option('— Select Category —', '', false, false));
 
         // this triggers the AJAX that fills categories, and your success handler will preselect
-        $rightCats.val(String(parentId)).trigger('change');
+        $leftProducts.val(String(parentId)).trigger('change');
     } else {
         ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceLabel);
     }
