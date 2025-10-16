@@ -57,7 +57,7 @@ const dt = $('.status-list-table').DataTable({
            data-resourceable-type="${row.resourceable_type ?? ''}"
            data-resourceable-id="${row.resourceable?.id ?? ''}"
            data-resourceable-parent-id="${row.resourceable?.category?.id ?? ''}"
-           data-parent-resource="${row.resourceable?.category?.name?.[locale] ?? ''}}"
+           data-parent-resource="${row.resourceable?.category?.name?.[locale] ?? ''}"
            data-resource="${row.resourceable?.name?.[locale] ?? row.resourceable?.name ?? ''}">
 
            <i data-feather="edit-3"></i>
