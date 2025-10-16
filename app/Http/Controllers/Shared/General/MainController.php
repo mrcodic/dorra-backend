@@ -309,7 +309,6 @@ class MainController extends Controller
        $dimensions = collect($validatedData['resource_types'])->map(function ($resourceType) use ($allowedTypes, $validatedData) {
             $modelClass = $allowedTypes[$resourceType];
             collect($validatedData['resource_ids'])->map(function ($resourceId) use ($resourceType, $modelClass) {
-                dd($modelClass);
                 $model = $modelClass::findOrFail($resourceId);
                 return $model->dimensions;
             });
