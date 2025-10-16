@@ -358,7 +358,7 @@ class MainController extends Controller
 
         return DimensionResource::collection($dimensions);
     }
-}
+
 
     public function stationStatuses(Request $request)
     {
