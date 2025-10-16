@@ -298,9 +298,7 @@ class MainController extends Controller
     {
         $validatedData = $request->validate([
             'resource_ids' =>['required', 'array'],
-            'resource_ids.*' => ['required', Rule::when($request->resource_type == 'product', function () {
-                Rule::exists('products', 'resource_id');
-            }, Rule::exists('categories', 'id'))],
+            'resource_ids.*' => ['required',],
             'resource_types' =>['required', 'array'],
             'resource_types.*' => ['required', 'in:product,category'],
         ]);
