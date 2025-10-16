@@ -164,16 +164,17 @@
                                         @endforeach
                                     </select>
                                 </div>
-{{--                                <div class="form-group mb-2">--}}
-{{--                                    <label for="flagsSelect" class="label-text mb-1">Flags</label>--}}
-{{--                                    <select id="flagsSelect" class="form-select select2" name="flags[]" multiple>--}}
-{{--                                        @foreach($associatedData['flags'] as $flag)--}}
-{{--                                            <option value="{{ $flag->id }}" @selected($model->flags->contains($flag))>--}}
-{{--                                                {{ $flag->getTranslation('name', app()->getLocale()) }}--}}
-{{--                                            </option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
-{{--                                </div>--}}
+                                {{-- Persisted resources (used on submit / ajax) --}}
+                                <input type="hidden" name="dimension_resource_ids"   id="dimensionResourceIds">
+                                <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
+
+                                <div class="form-group mb-2">
+                                    <label for="sizesSelect" class="label-text mb-1">Sizes</label>
+                                    <select id="sizesSelect" class="form-select" name="dimension_id">
+                                        <option value="" disabled>Select Size</option>
+                                    </select>
+                                </div>
+
 
                             </div>
                         </div>
@@ -218,8 +219,102 @@
 
 @section('page-script')
     <script>
+        // Build parallel arrays from current UI selections
+        function buildDimensionPayloadFromUI() {
+            // Right column = CATEGORIES (from "Products With Categories")
+            const categoryIds = ($('#productsSelect').val() || []).map(String);
+            // Bottom field = PRODUCTS (from "Products Without Categories")
+            const productIds  = ($('#productsWithoutCategoriesSelect').val() || []).map(String);
+
+            const resource_ids   = [];
+            const resource_types = [];
+
+            // ✅ categories → category
+            categoryIds.forEach(id => { resource_ids.push(id); resource_types.push('product'); });
+            // ✅ products   → product
+            productIds.forEach(id  => { resource_ids.push(id); resource_types.push('category'); });
+
+            return { resource_ids, resource_types };
+        }
+
+        // Persist arrays into hidden inputs (so they submit with the form)
+        function syncSelectedResourcesToHiddenInputs() {
+            const { resource_ids, resource_types } = buildDimensionPayloadFromUI();
+            $('#dimensionResourceIds').val(JSON.stringify(resource_ids));
+            $('#dimensionResourceTypes').val(JSON.stringify(resource_types));
+        }
+
+        // Pretty number to trim float noise (0.5600000 → 0.56)
+        const nf = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
+
+        // Make "HEIGHT * WIDTH (Unit)" from top-level api fields
+        function dimensionLabelHWTop(item, { showUnit = true } = {}) {
+            const src = item.attributes ? item.attributes : item;
+            const h = Number(src.height);
+            const w = Number(src.width);
+            const unitObj = src.unit; // may be { value, label } or string
+            const unitLabel = unitObj && typeof unitObj === 'object' ? (unitObj.label || '') : (unitObj || '');
+
+            if (Number.isFinite(h) && Number.isFinite(w)) {
+                const core = `${nf.format(h)} * ${nf.format(w)}`;
+                return showUnit && unitLabel ? `${core} ${unitLabel}` : core;
+            }
+            return src.name || src.label || `#${item.id ?? ''}`.trim();
+        }
+
+        // Read payload back from hidden inputs (exactly what will be submitted)
+        function buildDimensionPayloadFromHidden() {
+            let ids = [], types = [];
+            try { ids   = JSON.parse($('#dimensionResourceIds').val()   || '[]'); } catch {}
+            try { types = JSON.parse($('#dimensionResourceTypes').val() || '[]'); } catch {}
+            return { resource_ids: ids, resource_types: types };
+        }
+
+        // Fetch sizes and render
+        function refreshSizes(preselectId = null) {
+            // keep canonical copy in hidden inputs
+            syncSelectedResourcesToHiddenInputs();
+            const payload = buildDimensionPayloadFromHidden();
+
+            const $sizes = $('#sizesSelect');
+            const current = preselectId ?? ($sizes.val() || []);
+
+            if (!payload.resource_ids.length) {
+                $sizes.empty().append(new Option('Select Size', '', false, false)).trigger('change');
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('dimensions.index') }}",
+                method: "POST",
+                data: payload,
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                success(res) {
+                    $sizes.empty().append(new Option('Select Size', '', false, false));
+
+                    const items = res.data || res || [];
+                    items.forEach(item => {
+                        const text = dimensionLabelHWTop(item, { showUnit: true }); // "H * W Cm"
+                        const id   = item.id;
+                        $sizes.append(new Option(text, id, false, false));
+                    });
+
+                    // Restore (or preselect) if still valid
+                    const target = Array.isArray(current) ? current : [String(current)];
+                    $sizes.val(target.filter(v => $sizes.find(`option[value="${v}"]`).length)).trigger('change');
+                },
+                error(xhr) {
+                    console.error('Failed to load dimensions:', xhr.responseText);
+                    $sizes.empty().append(new Option('Select Size', '', false, false)).trigger('change');
+                }
+            });
+        }
+    </script>
+
+    <script>
         // Listen for change on "Products With Categories"
         $('#categoriesSelect').on('change', function () {
+            syncSelectedResourcesToHiddenInputs();
             let selectedIds = $(this).val(); // selected categories
             let previouslySelected = $('#productsSelect').val() || []; // save old selections
 
@@ -386,7 +481,16 @@
 
 </script>
 <script !src="">
+    $('#sizesSelect').on('mousedown focus', function () {
+        refreshSizes();
+    });
+    $(document).ready(function () {
+        syncSelectedResourcesToHiddenInputs();
 
+        // If you have the saved dimension id, pass it here:
+        const savedDimensionId = "{{ $model->dimension_id ?? '' }}";
+        refreshSizes(savedDimensionId || null);
+    });
 </script>
 <script>
     $(document).ready(function () {
