@@ -120,10 +120,10 @@ $('.filter-date').on('change', function () {
 function ensureAndSelect($select, value, label) {
     if (!value) return;
     const v = String(value);
-    if ($select.find(`option[value="${v}"]`).length === 0) {
+    // if ($select.find(`option[value="${v}"]`).length === 0) {
         $select.append(new Option(label || v, v, false, false));
-    }
-    $select.val(v).trigger('change');
+    // }
+    // $select.val(v).trigger('change');
 }
 
 $(document).on('click', '.edit-details', function (e) {
