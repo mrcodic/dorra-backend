@@ -172,7 +172,7 @@ $('.filter-date').on('change', function () {
     $.ajax({
     url: "/products/categories",
     type: "POST",
-    data: { _token: "{{ csrf_token() }}", category_ids: [productId] },
+    data: { _token: $('meta[name="csrf-token"]').attr('content'), category_ids: [productId] },
     success: function (res) {
     const $right = $('#editProductsSelect');
     $right.empty().append(new Option('— Select Category —', '', false, false));
