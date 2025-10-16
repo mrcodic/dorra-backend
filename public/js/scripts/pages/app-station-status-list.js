@@ -155,7 +155,7 @@ $(document).on('click', '.edit-details', function (e) {
         // tell the right select which category to preselect once it loads
         $rightCats.empty().append(new Option('— Select Category —', '', false, false));
         $rightCats.data('targetCategoryId', String(resourceableId));
-       
+
         // select the saved product; its change handler will load categories,
         // then your AJAX success will pick up targetCategoryId and select it
         $leftProducts.val(String(parentId)).trigger('change');
