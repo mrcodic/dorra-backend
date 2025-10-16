@@ -8,16 +8,16 @@
             <div class="modal-body flex-grow-1">
 
 
-                <div class="col-md-3">
+                <div class="col-md-12">
                     <label class="form-label label-text">Name</label>
                     <input type="text" class="form-control" id="show-status-name" disabled/>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-12">
                     <label class="form-label label-text">Station</label>
                     <input type="text" class="form-control" id="show-status-station" disabled/>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-12">
                     <label class="form-label label-text">Resource</label>
                     <input type="text" class="form-control" id="show-status-resource" disabled/>
                 </div>
