@@ -116,7 +116,7 @@
             $productsNo.prop('disabled', true).prop('required', false);
 
             // Category::class
-            $type.val(@json(\App\Models\Category::class));
+            $type.val(@json(\App\Models\Product::class));
         } else {
             $withWrap.addClass('d-none');
             $withoutWrap.removeClass('d-none');
@@ -127,7 +127,7 @@
             $productsNo.prop('disabled', false).prop('required', true);
 
             // Product::class
-            $type.val(@json(\App\Models\Product::class));
+            $type.val(@json(\App\Models\Category::class));
         }
     }
 </script>
