@@ -195,13 +195,13 @@
             // categories → type=category
             categoryIds.forEach(id => {
                 resource_ids.push(id);
-                resource_types.push('category');
+                resource_types.push('product');
             });
 
             // products (without categories) → type=product
             productIds.forEach(id => {
                 resource_ids.push(id);
-                resource_types.push('product');
+                resource_types.push('category');
             });
 
             return { resource_ids, resource_types };
