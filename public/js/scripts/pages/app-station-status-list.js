@@ -142,31 +142,31 @@ $(document).on('click', '.edit-details', function (e) {
     $('#edit_mode_without').prop('checked', mode === 'without');
     editSetMode(mode);
 
-    const resourceableId   = $b.data('resourceableId') || '';
-    const resourceLabel    = $b.data('resourceLabel') || `#${resourceableId}`;
-    const parentId         = $b.data('parentId') || '';
-    const parentLabel      = $b.data('parentLabel') || `#${parentId}`;
+    const resourceableId = $b.data('resourceableId') || ''; // category id (in "with")
+    const parentId       = $b.data('parentId') || '';       // product id (in "with")
+    const resourceLabel  = $b.data('resourceLabel') || `#${resourceableId}`;
 
     if (mode === 'with') {
-        // Left (products), Right (categories)
-        const $leftProducts   = $('#editCategoriesSelect'); // misnamed but: products
-        const $rightCategories= $('#editProductsSelect');   // misnamed but: categories
+        const $leftProducts = $('#editCategoriesSelect'); // products
+        const $rightCats    = $('#editProductsSelect');   // categories
 
-        $leftProducts.empty().append(new Option('— Select Product —', '', false, false));
-        $rightCategories.empty().append(new Option('— Select Category —', '', false, false));
+        // keep full product list; don't empty() it
+        // tell the right select which category to preselect once it loads
+        $rightCats.empty().append(new Option('— Select Category —', '', false, false));
+        $rightCats.data('targetCategoryId', String(resourceableId));
 
-        // Preselect: product on the left, category on the right
-        ensureAndSelect($leftProducts, resourceableId, resourceLabel);
-        ensureAndSelect($rightCategories, parentId, parentLabel);
+        // select the saved product; its change handler will load categories,
+        // then your AJAX success will pick up targetCategoryId and select it
+        $leftProducts.val(String(parentId)).trigger('change');
 
     } else {
-        // Without categories => resourceable is Category itself (or your alternate case)
-        // If in your UI this means selecting a product instead, adjust accordingly.
+        // Without categories → resourceable is a Product
         ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceLabel);
     }
 
     $('#editStatusModal').modal('show');
 });
+
 
 
     // Keep radio in sync
