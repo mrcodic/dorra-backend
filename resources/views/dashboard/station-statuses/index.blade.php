@@ -202,7 +202,7 @@
                             <p id="selected-count-text">0 offers are selected</p>
                             <form id="bulk-delete-form" method="POST" action="{{ route('station-statuses.bulk-delete') }}">
                                 @csrf
-                                <button type="submit" id="delete-selected-btn"
+                                <button type="button" id="delete-selected-btn"
                                         class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
                                     <i data-feather="trash-2"></i> Delete Selected
                                 </button>
