@@ -153,12 +153,12 @@ $(document).on('click', '.edit-details', function (e) {
 
         // keep full product list; don't empty() it
         // tell the right select which category to preselect once it loads
-        $leftProducts.empty().append(new Option('— Select Category —', '', false, false));
-        $leftProducts.data('targetCategoryId', String(resourceableId));
-        console.log(parentId)
+        $rightCats.empty().append(new Option('— Select Category —', '', false, false));
+        $rightCats.data('targetCategoryId', String(resourceableId));
+       
         // select the saved product; its change handler will load categories,
         // then your AJAX success will pick up targetCategoryId and select it
-        $rightCats.val(String(parentId)).trigger('change');
+        $leftProducts.val(String(parentId)).trigger('change');
 
     } else {
         // Without categories → resourceable is a Product
