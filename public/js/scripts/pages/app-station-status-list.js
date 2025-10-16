@@ -149,6 +149,7 @@ $(document).on('click', '.edit-details', function (e) {
     const resourceableId = String($b.data('resourceable-id') || '');       // saved category id (when with) or product id (when without)
     // const parentId       = String($b.data('resourceableParentId') || ''); // saved product id (when with)
     const resourceLabel  = $b.data('resource') || `#${resourceableId}`;
+    console.log(resourceableId)
 
     if (mode === 'with') {
         // Left (products-with-categories): select the saved product
