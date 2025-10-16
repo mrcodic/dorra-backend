@@ -314,56 +314,43 @@
 
     <script>
         // Listen for change on "Products With Categories"
-        // Left: Products With Categories
         $('#categoriesSelect').on('change', function () {
             syncSelectedResourcesToHiddenInputs();
-
-            const selectedIds = $(this).val();
-            const previouslySelected = $('#productsSelect').val() || [];
+            let selectedIds = $(this).val(); // selected categories
+            let previouslySelected = $('#productsSelect').val() || []; // save old selections
 
             if (selectedIds && selectedIds.length > 0) {
                 $.ajax({
                     url: "{{ route('products.categories') }}",
                     type: "POST",
-                    data: { _token: "{{ csrf_token() }}", category_ids: selectedIds },
-                    success(response) {
-                        const $right = $('#productsSelect');
-                        $right.empty();
-
-                        (response.data || []).forEach(p => {
-                            $right.append(new Option(p.name, p.id, false, false));
-                        });
-
-                        // restore
-                        $right.val(previouslySelected).trigger('change');
-
-                        // 🔔 now fetch sizes
-                        refreshSizes();
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        category_ids: selectedIds
                     },
-                    error(xhr) {
-                        console.error("Error fetching categories:", xhr.responseText);
-                        // still try to refresh with whatever we have
+                    success: function (response) {
+                        // Clear old options
+                        $('#productsSelect').empty();
+
+                        if (response.data && response.data.length > 0) {
+                            response.data.forEach(function (product) {
+                                // create option
+                                let option = new Option(product.name, product.id, false, false);
+                                $('#productsSelect').append(option);
+                            });
+                        }
                         refreshSizes();
+                        // ✅ restore previous selections (if they still exist in new list)
+                        $('#productsSelect').val(previouslySelected).trigger('change');
+                    },
+                    error: function (xhr) {
+                        refreshSizes();
+                        console.error("Error fetching categories:", xhr.responseText);
                     }
                 });
             } else {
                 $('#productsSelect').empty().trigger('change');
-                refreshSizes(); // nothing selected → clears sizes
             }
         });
-
-        // Right: Categories list changed
-        $('#productsSelect').on('change', function () {
-            syncSelectedResourcesToHiddenInputs();
-            refreshSizes();
-        });
-
-        // Bottom: Products without categories changed
-        $('#productsWithoutCategoriesSelect').on('change', function () {
-            syncSelectedResourcesToHiddenInputs();
-            refreshSizes();
-        });
-
 
     </script>
 
