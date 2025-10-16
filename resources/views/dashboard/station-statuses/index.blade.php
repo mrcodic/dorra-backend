@@ -147,7 +147,8 @@
                 <div class="card-datatable table-responsive pt-0">
                     {{-- Search and Select Options --}}
                     <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                        <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-4 search-form">
+                        <form action="" method="get"
+                              class="position-relative flex-grow-1 me-1 col-12 col-md-4 search-form">
                             <i data-feather="search"
                                class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
 
@@ -197,10 +198,12 @@
                         </thead>
                     </table>
                     <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                        <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                             style="z-index: 10;">
+                        <div
+                            class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                            style="z-index: 10;">
                             <p id="selected-count-text">0 offers are selected</p>
-                            <form id="bulk-delete-form" method="POST" action="{{ route('station-statuses.bulk-delete') }}">
+                            <form id="bulk-delete-form" method="POST"
+                                  action="{{ route('station-statuses.bulk-delete') }}">
                                 @csrf
                                 <button type="button" id="delete-selected-btn"
                                         class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
@@ -210,123 +213,131 @@
                         </div>
                     </div>
 
-                @include('modals.delete', [
-                'id' => 'deleteStatusModal',
-                'formId' => 'deleteStatusForm',
-                'title' => 'Delete Status',
-                'message' => 'Are you sure you want to delete this status? This action cannot be undone.',
-                'confirmText' => 'Yes, Delete Status'
-                ])
+                    @include('modals.delete', [
+                    'id' => 'deleteStatusModal',
+                    'formId' => 'deleteStatusForm',
+                    'title' => 'Delete Status',
+                    'message' => 'Are you sure you want to delete this status? This action cannot be undone.',
+                    'confirmText' => 'Yes, Delete Status'
+                    ])
 
-                @include('modals.delete',[
-                'id' => 'deleteStatusesModal',
-                'formId' => 'bulk-delete-form',
-                'title' => 'Delete Statuses',
-                'confirmText' => 'Are you sure you want to delete this items?',
-                ])
-                @include('modals.station-statuses.show-status')
-                @include('modals.station-statuses.edit-status')
-                @include('modals.station-statuses.add-status')
-                @endsection
+                    @include('modals.delete',[
+                    'id' => 'deleteStatusesModal',
+                    'formId' => 'bulk-delete-form',
+                    'title' => 'Delete Statuses',
+                    'buttonId' => 'confirm-bulk-delete',
 
-                @section('vendor-script')
-                    {{-- Vendor js files --}}
-                    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-                    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
-                @endsection
+                    'confirmText' => 'Are you sure you want to delete this items?',
+                    ])
+                    @include('modals.station-statuses.show-status')
+                    @include('modals.station-statuses.edit-status')
+                    @include('modals.station-statuses.add-status')
+                    @endsection
 
-                @section('page-script')
-                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
-                    <script>
-                        const stationStatusesDataUrl = "{{ route('station-statuses.data') }}";
-                        const locale = "{{ app()->getLocale() }}"
+                    @section('vendor-script')
+                        {{-- Vendor js files --}}
+                        <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+                        <script
+                            src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+                        <script
+                            src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+                        <script
+                            src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+                        <script
+                            src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+                    @endsection
 
-                    </script>
+                    @section('page-script')
+                        <link rel="stylesheet"
+                              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"/>
+                        <script>
+                            const stationStatusesDataUrl = "{{ route('station-statuses.data') }}";
+                            const locale = "{{ app()->getLocale() }}"
 
-                    {{-- Page js files --}}
-                    <script src="{{ asset('js/scripts/pages/app-station-status-list.js') }}?v={{ time() }}"></script>
-                    <script src="https://unpkg.com/feather-icons"></script>
-                    <script>
-                        $(document).ready(function () {
-                            setupClearInput('roleSelect', 'clearRoleFilter');
+                        </script>
 
-                            // Select all toggle
-                            $('#select-all-checkbox').on('change', function () {
-                                $('.category-checkbox').prop('checked', this.checked);
-                                updateBulkDeleteVisibility();
-                            });
+                        {{-- Page js files --}}
+                        <script
+                            src="{{ asset('js/scripts/pages/app-station-status-list.js') }}?v={{ time() }}"></script>
+                        <script src="https://unpkg.com/feather-icons"></script>
+                        <script>
+                            $(document).ready(function () {
+                                setupClearInput('roleSelect', 'clearRoleFilter');
 
-                            // When individual checkbox changes
-                            $(document).on('change', '.category-checkbox', function () {
-                                if (!this.checked) {
-                                    $('#select-all-checkbox').prop('checked', false);
-                                } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
-                                    $('#select-all-checkbox').prop('checked', true);
+                                // Select all toggle
+                                $('#select-all-checkbox').on('change', function () {
+                                    $('.category-checkbox').prop('checked', this.checked);
+                                    updateBulkDeleteVisibility();
+                                });
+
+                                // When individual checkbox changes
+                                $(document).on('change', '.category-checkbox', function () {
+                                    if (!this.checked) {
+                                        $('#select-all-checkbox').prop('checked', false);
+                                    } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
+                                        $('#select-all-checkbox').prop('checked', true);
+                                    }
+                                    updateBulkDeleteVisibility();
+                                });
+
+                                // Simple accordion toggle function
+                                function toggleAccordion($row) {
+                                    if ($(window).width() > 768) return; // Only on mobile
+
+                                    const $detailsRow = $row.next('.details-row');
+                                    const $icon = $row.find('.expand-icon');
+
+                                    // Close all other details
+                                    $('.details-row.show').removeClass('show');
+                                    $('.expand-icon.expanded').removeClass('expanded');
+
+                                    // If this row has details and they're not currently shown
+                                    if ($detailsRow.length && !$detailsRow.hasClass('show')) {
+                                        $detailsRow.addClass('show');
+                                        $icon.addClass('expanded');
+                                    }
                                 }
-                                updateBulkDeleteVisibility();
-                            });
 
-                            // Simple accordion toggle function
-                            function toggleAccordion($row) {
-                                if ($(window).width() > 768) return; // Only on mobile
+                                // Accordion click handler with event delegation
+                                $(document).on('click.accordion', '.inventory-list-table tbody tr:not(.details-row)', function (e) {
+                                    // Prevent accordion when clicking interactive elements
+                                    if ($(e.target).is('input, button, a, .btn') ||
+                                        $(e.target).closest('input, button, a, .btn').length > 0) {
+                                        return;
+                                    }
 
-                                const $detailsRow = $row.next('.details-row');
-                                const $icon = $row.find('.expand-icon');
+                                    e.stopPropagation();
+                                    toggleAccordion($(this));
+                                });
 
-                                // Close all other details
-                                $('.details-row.show').removeClass('show');
-                                $('.expand-icon.expanded').removeClass('expanded');
+                                // Initialize accordion after DataTable draw
+                                function initAccordion() {
+                                    if ($(window).width() <= 768) {
+                                        $('.inventory-list-table tbody tr:not(.details-row)').each(function () {
+                                            const $row = $(this);
 
-                                // If this row has details and they're not currently shown
-                                if ($detailsRow.length && !$detailsRow.hasClass('show')) {
-                                    $detailsRow.addClass('show');
-                                    $icon.addClass('expanded');
-                                }
-                            }
+                                            // Remove existing details and icons first
+                                            $row.find('.expand-icon').remove();
+                                            $row.next('.details-row').remove();
 
-                            // Accordion click handler with event delegation
-                            $(document).on('click.accordion', '.inventory-list-table tbody tr:not(.details-row)', function(e) {
-                                // Prevent accordion when clicking interactive elements
-                                if ($(e.target).is('input, button, a, .btn') ||
-                                    $(e.target).closest('input, button, a, .btn').length > 0) {
-                                    return;
-                                }
+                                            // Add expand icon to role column
+                                            $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
-                                e.stopPropagation();
-                                toggleAccordion($(this));
-                            });
+                                            // Get data for details
+                                            const actions = $row.find('td:nth-child(4)').html() || '';
 
-                            // Initialize accordion after DataTable draw
-                            function initAccordion() {
-                                if ($(window).width() <= 768) {
-                                    $('.inventory-list-table tbody tr:not(.details-row)').each(function() {
-                                        const $row = $(this);
-
-                                        // Remove existing details and icons first
-                                        $row.find('.expand-icon').remove();
-                                        $row.next('.details-row').remove();
-
-                                        // Add expand icon to role column
-                                        $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
-
-                                        // Get data for details
-                                        const actions = $row.find('td:nth-child(4)').html() || '';
-
-                                        // Create details row
-                                        const detailsHtml = `
+                                            // Create details row
+                                            const detailsHtml = `
                                 <tr class="details-row">
                                     <td colspan="4">
                                         <div class="details-content">
@@ -339,90 +350,90 @@
                                 </tr>
                             `;
 
-                                        $row.after(detailsHtml);
-                                    });
-                                } else {
-                                    // Remove mobile elements on desktop
-                                    $('.details-row').remove();
-                                    $('.expand-icon').remove();
-                                }
-                            }
-
-                            // Handle window resize
-                            $(window).on('resize', function() {
-                                setTimeout(initAccordion, 100);
-                            });
-
-                            // On DataTable events
-                            $(document).on('draw.dt', '.inventory-list-table', function () {
-                                $('#bulk-delete-container').hide();
-                                $('#select-all-checkbox').prop('checked', false);
-
-                                // Reinitialize accordion after DataTable operations
-                                setTimeout(initAccordion, 100);
-                            });
-
-                            // Close bulk delete container
-                            $(document).on('click', '#close-bulk-delete', function () {
-                                $('#bulk-delete-container').hide();
-                                $('.category-checkbox').prop('checked', false);
-                                $('#select-all-checkbox').prop('checked', false);
-                            });
-
-                            // Update the bulk delete container visibility
-                            function updateBulkDeleteVisibility() {
-                                const selectedCheckboxes = $('.category-checkbox:checked');
-                                const count = selectedCheckboxes.length;
-
-                                if (count > 0) {
-                                    $('#selected-count-text').text(`${count} inventor${count > 1 ? 'ies are' : 'y'} selected`);
-                                    $('#bulk-delete-container').show();
-                                } else {
-                                    $('#bulk-delete-container').hide();
-                                }
-                            }
-
-                            // Initialize on page load
-                            setTimeout(function() {
-                                initAccordion();
-                            }, 500);
-                        });
-                    </script>
-
-                    <script>
-                        // Backup accordion handler in case the main one doesn't work
-                        $(document).ready(function() {
-                            // Alternative click handler
-                            $(document).off('click.accordion').on('click.accordion', '.inventory-list-table tbody tr:not(.details-row)', function(e) {
-                                console.log('Accordion clicked'); // Debug log
-
-                                if ($(window).width() <= 768) {
-                                    // Skip if clicking on interactive elements
-                                    if ($(e.target).is('input, button, a') || $(e.target).closest('input, button, a').length) {
-                                        return;
-                                    }
-
-                                    const $currentRow = $(this);
-                                    const $detailsRow = $currentRow.next('.details-row');
-                                    const $icon = $currentRow.find('.expand-icon');
-
-                                    // Toggle logic
-                                    if ($detailsRow.hasClass('show')) {
-                                        // Close this one
-                                        $detailsRow.removeClass('show');
-                                        $icon.removeClass('expanded');
+                                            $row.after(detailsHtml);
+                                        });
                                     } else {
-                                        // Close all others first
-                                        $('.details-row.show').removeClass('show');
-                                        $('.expand-icon.expanded').removeClass('expanded');
-
-                                        // Open this one
-                                        $detailsRow.addClass('show');
-                                        $icon.addClass('expanded');
+                                        // Remove mobile elements on desktop
+                                        $('.details-row').remove();
+                                        $('.expand-icon').remove();
                                     }
                                 }
+
+                                // Handle window resize
+                                $(window).on('resize', function () {
+                                    setTimeout(initAccordion, 100);
+                                });
+
+                                // On DataTable events
+                                $(document).on('draw.dt', '.inventory-list-table', function () {
+                                    $('#bulk-delete-container').hide();
+                                    $('#select-all-checkbox').prop('checked', false);
+
+                                    // Reinitialize accordion after DataTable operations
+                                    setTimeout(initAccordion, 100);
+                                });
+
+                                // Close bulk delete container
+                                $(document).on('click', '#close-bulk-delete', function () {
+                                    $('#bulk-delete-container').hide();
+                                    $('.category-checkbox').prop('checked', false);
+                                    $('#select-all-checkbox').prop('checked', false);
+                                });
+
+                                // Update the bulk delete container visibility
+                                function updateBulkDeleteVisibility() {
+                                    const selectedCheckboxes = $('.category-checkbox:checked');
+                                    const count = selectedCheckboxes.length;
+
+                                    if (count > 0) {
+                                        $('#selected-count-text').text(`${count} inventor${count > 1 ? 'ies are' : 'y'} selected`);
+                                        $('#bulk-delete-container').show();
+                                    } else {
+                                        $('#bulk-delete-container').hide();
+                                    }
+                                }
+
+                                // Initialize on page load
+                                setTimeout(function () {
+                                    initAccordion();
+                                }, 500);
                             });
-                        });
-                    </script>
+                        </script>
+
+                        <script>
+                            // Backup accordion handler in case the main one doesn't work
+                            $(document).ready(function () {
+                                // Alternative click handler
+                                $(document).off('click.accordion').on('click.accordion', '.inventory-list-table tbody tr:not(.details-row)', function (e) {
+                                    console.log('Accordion clicked'); // Debug log
+
+                                    if ($(window).width() <= 768) {
+                                        // Skip if clicking on interactive elements
+                                        if ($(e.target).is('input, button, a') || $(e.target).closest('input, button, a').length) {
+                                            return;
+                                        }
+
+                                        const $currentRow = $(this);
+                                        const $detailsRow = $currentRow.next('.details-row');
+                                        const $icon = $currentRow.find('.expand-icon');
+
+                                        // Toggle logic
+                                        if ($detailsRow.hasClass('show')) {
+                                            // Close this one
+                                            $detailsRow.removeClass('show');
+                                            $icon.removeClass('expanded');
+                                        } else {
+                                            // Close all others first
+                                            $('.details-row.show').removeClass('show');
+                                            $('.expand-icon.expanded').removeClass('expanded');
+
+                                            // Open this one
+                                            $detailsRow.addClass('show');
+                                            $icon.addClass('expanded');
+                                        }
+                                    }
+                                });
+                            });
+                        </script>
 
 @endsection
