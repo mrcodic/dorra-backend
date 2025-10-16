@@ -57,6 +57,7 @@ const dt = $('.status-list-table').DataTable({
            data-resourceable-type="${row.resourceable_type ?? ''}"
            data-resourceable-id="${row.resourceable?.id ?? ''}"
            data-resourceable-parent-id="${row.resourceable?.category?.id ?? ''}"
+           data-parent-resource="${row.resourceable?.category?.name?.[locale] ?? ''}}"
            data-resource="${row.resourceable?.name?.[locale] ?? row.resourceable?.name ?? ''}">
 
            <i data-feather="edit-3"></i>
@@ -151,8 +152,9 @@ $('.filter-date').on('change', function () {
 
     // Use any decent label you have; fallback to "#<id>"
     const currentLabel = $b.data('resource') || `#${resourceableId}`;
+    const parentCurrentLabel = $b.data('parent-resource') || `#${resourceableId}`;
     ensureAndSelect($rightCats, resourceableId, currentLabel);
-    ensureAndSelect($rightParentCats, parentResourceableId, currentLabel);
+    ensureAndSelect($rightParentCats, parentResourceableId, parentCurrentLabel);
 
     // Left stays blank until user changes it.
     $('#editCategoriesSelect').val(null).trigger('change');
