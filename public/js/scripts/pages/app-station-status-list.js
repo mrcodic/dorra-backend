@@ -157,7 +157,7 @@ $(document).on('click', '.edit-details', function (e) {
         $rightCats.empty().append(new Option('— Select Category —', '', false, false));
 
         // this triggers the AJAX that fills categories, and your success handler will preselect
-        $leftProducts.val(String(parentId)).trigger('change');
+        $rightCats.val(String(parentId)).trigger('change');
     } else {
         ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceLabel);
     }
