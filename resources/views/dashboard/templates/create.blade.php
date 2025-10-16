@@ -152,6 +152,7 @@
                                 <div class="form-group mb-2">
                                     <label for="sizesSelect" class="label-text mb-1">Sizes</label>
                                     <select id="sizesSelect" class="form-select" name="dimension_id">
+                                        <option value="" selected disabled>Select Size</option>
                                     </select>
                                 </div>
 

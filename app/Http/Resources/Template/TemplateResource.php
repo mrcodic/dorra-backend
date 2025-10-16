@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Template;
 
+use App\Http\Resources\DimensionResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\TagResource;
 use App\Models\Guest;
@@ -48,6 +49,7 @@ class TemplateResource extends JsonResource
                 'value' => $this->orientation?->value,
                 'label' => $this->orientation?->label(),
             ],
+            'dimension' => DimensionResource::make($this->whenLoaded('dimension')),
 
         ];
     }

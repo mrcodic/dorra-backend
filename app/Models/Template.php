@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -30,7 +31,8 @@ class Template extends Model implements HasMedia
         'description',
         'is_landing',
         'colors',
-        'orientation'
+        'orientation',
+        'dimension_id',
     ];
     protected $casts = [
         'status' => StatusEnum::class,
@@ -43,24 +45,32 @@ class Template extends Model implements HasMedia
     protected $attributes = [
         'status' => StatusEnum::DRAFTED,
     ];
+
     public function scopeIsLanding(Builder $builder): Builder
     {
         return $builder->where('is_landing', true);
     }
+
     public function scopeStatus(Builder $query, $status): Builder
     {
         return $query->whereStatus($status);
     }
+
     public function getImageAttribute(): string
     {
         return $this->getFirstMediaUrl('templates') ?: "";
 
     }
+
     public function scopeLive(Builder $builder): Builder
     {
         return $builder->where('status', StatusEnum::LIVE);
     }
 
+    public function dimension(): BelongsTo
+    {
+        return $this->belongsTo(Dimension::class);
+    }
 
     public function products()
     {
@@ -89,6 +99,7 @@ class Template extends Model implements HasMedia
     {
         return $this->morphToMany(Tag::class, 'taggable')->withTimestamps();
     }
+
     public function flags()
     {
         return $this->morphToMany(Flag::class, 'flaggable')->withTimestamps();
@@ -101,29 +112,31 @@ class Template extends Model implements HasMedia
             ->withTimestamps();
     }
 
-    public function getFrontImageUrl(): string
-    {
-        return $this->getFirstMediaUrl('templates') ?:  asset('images/default-product.png');
-    }
-    public function getBackImageUrl(): string
-    {
-        return $this->getFirstMediaUrl('back_templates') ?:  asset('images/default-product.png');
-    }
-    public function getNoneImageUrl(): string
-    {
-        return $this->getFirstMediaUrl('templates') ?:  asset('images/default-product.png');
-    }
     public function getImageUrlForType(string $type): string
     {
         $type = strtolower($type);
         return match ($type) {
             'front' => $this->getFrontImageUrl(),
-            'back'  => $this->getBackImageUrl(),
+            'back' => $this->getBackImageUrl(),
 
             default => $this->getNoneImageUrl(),
         };
     }
 
+    public function getFrontImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('templates') ?: asset('images/default-product.png');
+    }
+
+    public function getBackImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('back_templates') ?: asset('images/default-product.png');
+    }
+
+    public function getNoneImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('templates') ?: asset('images/default-product.png');
+    }
 
 
 }
