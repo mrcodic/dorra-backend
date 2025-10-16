@@ -128,8 +128,8 @@ $('.filter-date').on('change', function () {
 
     // Mode decided by data-mode
     const mode = $b.data('mode') === 'with' ? 'with' : 'without';
-    $('#edit_mode_with').prop('checked', mode === 'with');
-    $('#edit_mode_without').prop('checked', mode === 'without');
+    $('#edit_mode_with').prop('checked', mode === 'without');
+    $('#edit_mode_without').prop('checked', mode === 'with');
     editSetMode(mode);
 
     // We only have resourceable_id; set it depending on mode
