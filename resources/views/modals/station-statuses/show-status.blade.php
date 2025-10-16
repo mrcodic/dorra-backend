@@ -18,7 +18,7 @@
                     <input type="text" class="form-control" id="show-status-station" disabled/>
                 </div>
                 <div class="col-md-12">
-                    <label class="form-label label-text">Resource</label>
+                    <label class="form-label label-text">Product/Category</label>
                     <input type="text" class="form-control" id="show-status-resource" disabled/>
                 </div>
             </div>

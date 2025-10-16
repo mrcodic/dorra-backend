@@ -37,25 +37,39 @@ const dt = $('.status-list-table').DataTable({
         {
             data: 'id',
             orderable: false,
-            render: (id, type, row) => `
-        <div class="d-flex gap-1">
-          <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showStatusModal"
-             data-id="${id}"
-              data-name="${row.name ?? ''}"
-              data-station="${row.station.name ?? ''}"
-              data-resource="${row.resourceable.name?.[locale] ?? ''}">
-             <i data-feather="eye"></i>
-          </a>
-          <a href="#" class="edit-details" data-bs-toggle="modal" data-bs-target="#editStatusModal" data-id="${id}">
-             <i data-feather="edit-3"></i>
-          </a>
-          <a href="#" class="text-danger open-delete-offer-modal"
-             data-id="${id}" data-action="/station-statuses/${id}" data-bs-toggle="modal" data-bs-target="#deleteStatusModal">
-             <i data-feather="trash-2"></i>
-          </a>
-        </div>
-      `
+            render: (id, type, row) => {
+                const mode = row.resourceable_type === 'App\\Models\\Category' ? 'with' : 'without';
+                return `
+      <div class="d-flex gap-1">
+        <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showStatusModal"
+           data-id="${id}"
+           data-name="${row.name ?? ''}"
+           data-station="${row.station?.name ?? ''}"
+           data-resource="${row.resourceable?.name?.[locale] ?? row.resourceable?.name ?? ''}">
+           <i data-feather="eye"></i>
+        </a>
+
+        <a href="#" class="edit-details" data-bs-toggle="modal" data-bs-target="#editStatusModal"
+           data-id="${id}"
+           data-name="${row.name ?? ''}"
+           data-station-id="${row.station?.id ?? ''}"
+           data-mode="${mode}"
+           data-resourceable-type="${row.resourceable_type ?? ''}"
+           data-resourceable-id="${row.resourceable?.id ?? ''}">
+           <i data-feather="edit-3"></i>
+        </a>
+
+        <a href="#" class="text-danger open-delete-offer-modal"
+           data-id="${id}" data-action="/station-statuses/${id}"
+           data-bs-toggle="modal" data-bs-target="#deleteStatusModal">
+           <i data-feather="trash-2"></i>
+        </a>
+      </div>
+    `;
+            }
         }
+
+
     ],
     order: [[1, 'asc']],
     dom:
@@ -82,6 +96,103 @@ $('#search-status-form').on('keyup', function () {
 $('.filter-date').on('change', function () {
     dt.draw();
 });
+
+    // Switch the edit modal UI
+
+
+    // Utility: ensure an option exists & select it
+    function ensureAndSelect($select, value, label) {
+    if (!value) return;
+    const v = String(value);
+    if ($select.find(`option[value="${v}"]`).length === 0) {
+    $select.append(new Option(label || v, v, false, false));
+}
+    $select.val(v).trigger('change');
+}
+
+    // Edit open — hydrate with minimal data
+    $(document).on('click', '.edit-details', function (e) {
+    e.preventDefault();
+
+    const $b  = $(this);
+    const id  = $b.data('id');
+
+    // Form action to PUT /station-statuses/{id}
+    const updateUrl = "{{ route('station-statuses.update', ':id') }}".replace(':id', id);
+    $('#editStationStatusForm').attr('action', updateUrl);
+
+    // Basics
+    $('#edit_status_id').val(id);
+    $('#edit_name').val($b.data('name') || '');
+    $('#edit_station_id').val(String($b.data('stationId') || ''));
+
+    // Mode decided by data-mode
+    const mode = $b.data('mode') === 'with' ? 'with' : 'without';
+    $('#edit_mode_with').prop('checked', mode === 'with');
+    $('#edit_mode_without').prop('checked', mode === 'without');
+    editSetMode(mode);
+
+    // We only have resourceable_id; set it depending on mode
+    const resourceableId   = $b.data('resourceableId') || '';
+    const resourceableType = String($b.data('resourceableType') || '');
+
+    if (mode === 'with') {
+    // Right-side "Categories" select should show currently selected category.
+    // We don't know the owning product here (by design), so we inject a single option for display.
+    // If user changes the left product, you'll reload categories as usual.
+    const $rightCats = $('#editProductsSelect');
+    $rightCats.empty().append(new Option('— Select Category —', '', false, false));
+
+    // Use any decent label you have; fallback to "#<id>"
+    const currentLabel = $b.data('resource') || `#${resourceableId}`;
+    ensureAndSelect($rightCats, resourceableId, currentLabel);
+
+    // Left stays blank until user changes it.
+    $('#editCategoriesSelect').val(null).trigger('change');
+
+} else {
+    // Without categories => resourceable is Product; just select it.
+    ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, $b.data('resource') || `#${resourceableId}`);
+}
+
+    $('#editStatusModal').modal('show');
+});
+
+    // Keep radio in sync
+    $('input[name="edit_product_mode"]').on('change', function() {
+    editSetMode($(this).val());
+});
+
+    // If the user picks a product on the left, load that product’s categories normally (optional)
+    $('#editCategoriesSelect').on('change', function () {
+    const productId = $(this).val();
+    if (!productId) return;
+
+    // Your existing endpoint — expects product id and returns its categories
+    $.ajax({
+    url: "{{ route('products.categories') }}",
+    type: "POST",
+    data: { _token: "{{ csrf_token() }}", category_ids: [productId] },
+    success: function (res) {
+    const $right = $('#editProductsSelect');
+    $right.empty().append(new Option('— Select Category —', '', false, false));
+    (res.data || []).forEach(cat => {
+    $right.append(new Option(cat.name, cat.id));
+});
+    $right.trigger('change');
+}
+});
+});
+
+    // Submit via your existing helper
+    handleAjaxFormSubmit("#editStationStatusForm", {
+    successMessage: "Status updated successfully.",
+    onSuccess: function () {
+    $('#editStatusModal').modal('hide');
+    $(".status-list-table").DataTable().ajax.reload(null, false);
+}
+});
+
 
 $(document).ready(function () {
     const saveButton = $('.saveChangesButton');
@@ -227,55 +338,6 @@ $(document).ready(function () {
         $m.modal('show');
     });
 
-
-    $(document).on('click', '.edit-details', function (e) {
-        e.preventDefault();
-        const $btn = $(this);
-        const id       = $btn.data('id');
-        const nameEn   = $btn.data('name_en') ?? '';
-        const nameAr   = $btn.data('name_ar') ?? '';
-        const value    = cleanPercent($btn.data('value') ?? '');
-        const typeRaw  = String($btn.data('type') ?? '').toLowerCase(); // "1"/"2"/"products"/"categories"
-        const startAt  = toDateForInput($btn.data('start_at'));
-        const endAt    = toDateForInput($btn.data('end_at'));
-
-        // read from attributes to avoid jQuery’s data cache + normalize to ID array (strings)
-        const productIds   = toIdArray($btn.attr('data-products'));
-        const categoryIds  = toIdArray($btn.attr('data-categories'));
-
-        const $m = $('#editOfferModal');
-        $('#editOfferForm').attr('action', '/offers/' + id);
-
-        $m.find('#editOfferNameEn').val(nameEn);
-        $m.find('#editOfferNameAr').val(nameAr);
-        $m.find('#editOfferValue').val(value);
-        $m.find('#editStartDate').val(startAt);
-        $m.find('#editEndDate').val(endAt);
-
-        const isProducts   = (typeRaw === '2' || typeRaw === 'products' || typeRaw === 'product');
-        const isCategories = (typeRaw === '1' || typeRaw === 'categories' || typeRaw === 'category');
-
-        $('#editApplyToProducts').prop('checked', isProducts);
-        $('#editApplyToCategories').prop('checked', isCategories);
-
-        if (isProducts) {
-            $('.productsField').removeClass('d-none');
-            $('.categoriesField').addClass('d-none');
-            selectValues($('#editProductsSelect'), productIds);
-            selectValues($('#editCategoriesSelect'), []); // clear other
-        } else if (isCategories) {
-            $('.categoriesField').removeClass('d-none');
-            $('.productsField').addClass('d-none');
-            selectValues($('#editCategoriesSelect'), categoryIds);
-            selectValues($('#editProductsSelect'), []); // clear other
-        } else {
-            $('.productsField, .categoriesField').addClass('d-none');
-            selectValues($('#editProductsSelect'), []);
-            selectValues($('#editCategoriesSelect'), []);
-        }
-
-        $m.modal('show');
-    });
 
 
 

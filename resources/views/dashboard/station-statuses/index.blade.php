@@ -192,7 +192,7 @@
                             </th>
                             <th>Name</th>
                             <th>Station</th>
-                            <th>Product</th>
+                            <th>Product/Category</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
