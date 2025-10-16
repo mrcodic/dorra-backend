@@ -137,6 +137,7 @@ $('.filter-date').on('change', function () {
 
     // We only have resourceable_id; set it depending on mode
     const resourceableId   = $b.data('resourceableId') || '';
+    const parentResourceableId   = $b.data('resourceable-parent-id') || '';
     const resourceableType = String($b.data('resourceableType') || '');
 
     if (mode === 'with') {
@@ -151,6 +152,7 @@ $('.filter-date').on('change', function () {
     // Use any decent label you have; fallback to "#<id>"
     const currentLabel = $b.data('resource') || `#${resourceableId}`;
     ensureAndSelect($rightCats, resourceableId, currentLabel);
+    ensureAndSelect($rightParentCats, parentResourceableId, currentLabel);
 
     // Left stays blank until user changes it.
     $('#editCategoriesSelect').val(null).trigger('change');
