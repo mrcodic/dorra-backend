@@ -176,26 +176,7 @@ $(document).on('click', '.edit-details', function (e) {
     editSetMode($(this).val());
 });
 
-    // If the user picks a product on the left, load that product’s categories normally (optional)
-    $('#editCategoriesSelect').on('change', function () {
-    const productId = $(this).val();
-    if (!productId) return;
 
-    // Your existing endpoint — expects product id and returns its categories
-    $.ajax({
-    url: "/products/categories",
-    type: "POST",
-    data: { _token: $('meta[name="csrf-token"]').attr('content'), category_ids: [productId] },
-    success: function (res) {
-    const $right = $('#editProductsSelect');
-    $right.empty().append(new Option('— Select Category —', '', false, false));
-    (res.data || []).forEach(cat => {
-    $right.append(new Option(cat.name, cat.id));
-});
-    $right.trigger('change');
-}
-});
-});
 
     // Submit via your existing helper
     handleAjaxFormSubmit("#editStationStatusForm", {
