@@ -38,14 +38,25 @@ const dt = $('.status-list-table').DataTable({
             data: 'id',
             orderable: false,
             render: (id, type, row) => {
-                const mode = row.resourceable_type === 'App\\Models\\Category' ? 'without' : 'with';
+                const isProduct = row.resourceable_type === 'App\\Models\\Product';
+
+                const resource = row.resourceable || {};
+                const resourceName = resource?.name?.[locale] ?? resource?.name ?? '';
+
+                // parent info (category for product; parent for category)
+                const parentObj = isProduct ? (resource.category || {}) : (resource.parent || {});
+                const parentId   = parentObj?.id ?? '';
+                const parentName = parentObj?.name?.[locale] ?? parentObj?.name ?? '';
+
+                const mode = isProduct ? 'with' : 'without';
+
                 return `
       <div class="d-flex gap-1">
         <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showStatusModal"
            data-id="${id}"
            data-name="${row.name ?? ''}"
            data-station="${row.station?.name ?? ''}"
-           data-resource="${row.resourceable?.name?.[locale] ?? row.resourceable?.name ?? ''}">
+           data-resource="${resourceName}">
            <i data-feather="eye"></i>
         </a>
 
@@ -55,11 +66,10 @@ const dt = $('.status-list-table').DataTable({
            data-station-id="${row.station?.id ?? ''}"
            data-mode="${mode}"
            data-resourceable-type="${row.resourceable_type ?? ''}"
-           data-resourceable-id="${row.resourceable?.id ?? ''}"
-           data-resourceable-parent-id="${row.resourceable?.category?.id ?? ''}"
-           data-parent-resource="${row.resourceable?.category?.name?.[locale] ?? ''}"
-           data-resource="${row.resourceable?.name?.[locale] ?? row.resourceable?.name ?? ''}">
-
+           data-resourceable-id="${resource?.id ?? ''}"
+           data-resource-label="${resourceName}"
+           data-parent-id="${parentId}"
+           data-parent-label="${parentName}">
            <i data-feather="edit-3"></i>
         </a>
 
@@ -72,6 +82,7 @@ const dt = $('.status-list-table').DataTable({
     `;
             }
         }
+
 
 
     ],
@@ -105,67 +116,58 @@ $('.filter-date').on('change', function () {
 
 
     // Utility: ensure an option exists & select it
-    function ensureAndSelect($select, value, label) {
+// Utility unchanged
+function ensureAndSelect($select, value, label) {
     if (!value) return;
     const v = String(value);
     if ($select.find(`option[value="${v}"]`).length === 0) {
-    $select.append(new Option(label || v, v, false, false));
-}
+        $select.append(new Option(label || v, v, false, false));
+    }
     $select.val(v).trigger('change');
 }
 
-    // Edit open — hydrate with minimal data
-    $(document).on('click', '.edit-details', function (e) {
+$(document).on('click', '.edit-details', function (e) {
     e.preventDefault();
 
     const $b  = $(this);
     const id  = $b.data('id');
 
-    // Form action to PUT /station-statuses/{id}
-    const updateUrl = `/station-statuses/${id}`;
-    $('#editStationStatusForm').attr('action', updateUrl);
-
-    // Basics
+    $('#editStationStatusForm').attr('action', `/station-statuses/${id}`);
     $('#edit_status_id').val(id);
     $('#edit_name').val($b.data('name') || '');
     $('#edit_station_id').val(String($b.data('stationId') || ''));
 
-    // Mode decided by data-mode
     const mode = $b.data('mode') === 'with' ? 'with' : 'without';
     $('#edit_mode_with').prop('checked', mode === 'with');
     $('#edit_mode_without').prop('checked', mode === 'without');
     editSetMode(mode);
 
-    // We only have resourceable_id; set it depending on mode
     const resourceableId   = $b.data('resourceableId') || '';
-    const parentResourceableId   = $b.data('resourceable-parent-id') || '';
-    const resourceableType = String($b.data('resourceableType') || '');
+    const resourceLabel    = $b.data('resourceLabel') || `#${resourceableId}`;
+    const parentId         = $b.data('parentId') || '';
+    const parentLabel      = $b.data('parentLabel') || `#${parentId}`;
 
     if (mode === 'with') {
-    // Right-side "Categories" select should show currently selected category.
-    // We don't know the owning product here (by design), so we inject a single option for display.
-    // If user changes the left product, you'll reload categories as usual.
-    const $rightParentCats = $('#editCategoriesSelect');
-    const $rightCats = $('#editProductsSelect');
-    $rightCats.empty().append(new Option('— Select Category —', '', false, false));
-        $rightParentCats.empty().append(new Option('— Select Product —', '', false, false));
+        // Left (products), Right (categories)
+        const $leftProducts   = $('#editCategoriesSelect'); // misnamed but: products
+        const $rightCategories= $('#editProductsSelect');   // misnamed but: categories
 
-    // Use any decent label you have; fallback to "#<id>"
-    const currentLabel = $b.data('resource') || `#${resourceableId}`;
-    const parentCurrentLabel = $b.data('parent-resource') || `#${resourceableId}`;
-    ensureAndSelect($rightCats, resourceableId, currentLabel);
-    ensureAndSelect($rightParentCats, parentResourceableId, parentCurrentLabel);
+        $leftProducts.empty().append(new Option('— Select Product —', '', false, false));
+        $rightCategories.empty().append(new Option('— Select Category —', '', false, false));
 
-    // Left stays blank until user changes it.
-    $('#editCategoriesSelect').val(null).trigger('change');
+        // Preselect: product on the left, category on the right
+        ensureAndSelect($leftProducts, resourceableId, resourceLabel);
+        ensureAndSelect($rightCategories, parentId, parentLabel);
 
-} else {
-    // Without categories => resourceable is Product; just select it.
-    ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, $b.data('resource') || `#${resourceableId}`);
-}
+    } else {
+        // Without categories => resourceable is Category itself (or your alternate case)
+        // If in your UI this means selecting a product instead, adjust accordingly.
+        ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceLabel);
+    }
 
     $('#editStatusModal').modal('show');
 });
+
 
     // Keep radio in sync
     $('input[name="edit_product_mode"]').on('change', function() {
