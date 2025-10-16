@@ -41,8 +41,8 @@ const dt = $('.status-list-table').DataTable({
         <div class="d-flex gap-1">
           <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showStatusModal"
              data-id="${id}"
-              data-name="${row.name ?? ''}">
-              data-station="${row.station.name ?? ''}">
+              data-name="${row.name ?? ''}"
+              data-station="${row.station.name ?? ''}"
               data-resource="${row.resourceable.name?.[locale] ?? ''}">
              <i data-feather="eye"></i>
           </a>
