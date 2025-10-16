@@ -126,49 +126,49 @@ function ensureAndSelect($select, value, label) {
     $select.val(v).trigger('change');
 }
 
+// Open edit modal
 $(document).on('click', '.edit-details', function (e) {
     e.preventDefault();
 
     const $b  = $(this);
     const id  = $b.data('id');
 
+    // form basics
     $('#editStationStatusForm').attr('action', `/station-statuses/${id}`);
     $('#edit_status_id').val(id);
     $('#edit_name').val($b.data('name') || '');
     $('#edit_station_id').val(String($b.data('stationId') || ''));
 
+    // decide mode
     const mode = $b.data('mode') === 'with' ? 'with' : 'without';
     $('#edit_mode_with').prop('checked', mode === 'with');
     $('#edit_mode_without').prop('checked', mode === 'without');
     editSetMode(mode);
 
-    const resourceableId   = $b.data('resourceableId') || '';
-    const resourceLabel    = $b.data('resourceLabel') || `#${resourceableId}`;
-    const parentId         = $b.data('parentId') || '';
-    const parentLabel      = $b.data('parentLabel') || `#${parentId}`;
+    // IDs from the row
+    const resourceableId = String($b.data('resourceableId') || '');       // saved category id (when with) or product id (when without)
+    const parentId       = String($b.data('resourceableParentId') || ''); // saved product id (when with)
+    const resourceLabel  = $b.data('resource') || `#${resourceableId}`;
 
     if (mode === 'with') {
-        // Left (products), Right (categories)
-        const $leftProducts   = $('#editCategoriesSelect'); // misnamed but: products
-        const $rightCategories= $('#editProductsSelect');   // misnamed but: categories
+        // Left (products-with-categories): select the saved product
+        $('#editCategoriesSelect').val(parentId || '').trigger('change');
 
-        $leftProducts.empty().append(new Option('— Select Product —', '', false, false));
-        $rightCategories.empty().append(new Option('— Select Category —', '', false, false));
+        // Remember which category we want to select after AJAX fills the right list
+        $('#editProductsSelect').data('targetCategoryId', resourceableId);
 
-        // Preselect: product on the left, category on the right
-        ensureAndSelect($leftProducts, resourceableId, resourceLabel);
-        ensureAndSelect($rightCategories, parentId, parentLabel);
+        // Trigger the same logic your change handler uses to fetch categories of that product
+        if (parentId) {
+            $('#editCategoriesSelect').trigger('change');
+        }
 
     } else {
-        // Without categories => resourceable is Category itself (or your alternate case)
-        // If in your UI this means selecting a product instead, adjust accordingly.
+        // Without categories: select saved product in the bottom select
         ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceLabel);
     }
 
     $('#editStatusModal').modal('show');
 });
-
-
     // Keep radio in sync
     $('input[name="edit_product_mode"]').on('change', function() {
     editSetMode($(this).val());

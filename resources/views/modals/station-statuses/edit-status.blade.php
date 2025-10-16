@@ -98,35 +98,44 @@
 </div>
 <script !src="">
     $('#editCategoriesSelect').on('change', function () {
-        let selectedId = $(this).val();
-        if (selectedId) {
-            $.ajax({
-                url: "{{ route('products.categories') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    category_ids: [selectedId]
-                },
-                success: function (response) {
-                    const $productsSelect = $('#editProductsSelect');
-                    let currentValues = $productsSelect.val() || [];
+        const productId = $(this).val();
+        if (!productId) return;
 
-                    if (response.data && response.data.length > 0) {
-                        response.data.forEach(function (category) {
-                            if ($productsSelect.find('option[value="' + category.id + '"]').length === 0) {
-                                let option = new Option(category.name, category.id, false, false);
-                                $productsSelect.append(option);
-                            }
-                        });
-                    }
+        $.ajax({
+            url: "{{ route('products.categories') }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                category_ids: [productId]
+            },
+            success(res) {
+                const $right = $('#editProductsSelect');
+                const targetCatId = String($right.data('targetCategoryId') || '');
 
-                    $productsSelect.val(currentValues).trigger('change');
-                },
-                error: function (xhr) {
-                    console.error("Error fetching categories:", xhr.responseText);
+                $right.empty().append(new Option('— Select Category —', '', false, false));
+                (res.data || []).forEach(c => {
+                    $right.append(new Option(c.name, c.id, false, false));
+                });
+
+                // preselect previously saved category (if it belongs to this product)
+                if (targetCatId && $right.find(`option[value="${targetCatId}"]`).length) {
+                    $right.val(targetCatId).trigger('change');
+                } else {
+                    $right.val('').trigger('change');
                 }
-            });
-        }
+
+                // clear the one-off memory
+                $right.removeData('targetCategoryId');
+            },
+            error(xhr) {
+                console.error("Error fetching categories:", xhr.responseText);
+            }
+        });
+    });
+
+    // radio sync
+    $('input[name="edit_product_mode"]').on('change', function () {
+        editSetMode($(this).val());
     });
 
 </script>
