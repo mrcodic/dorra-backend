@@ -294,6 +294,30 @@ class MainController extends Controller
         $model = $modelClass::findOrFail($validatedData['resource_id']);
         return DimensionResource::collection($model->dimensions);
     }
+    public function getDimensions(Request $request)
+    {
+        $validatedData = $request->validate([
+            'resource_ids' =>['required', 'array'],
+            'resource_ids.*' => ['required', Rule::when($request->resource_type == 'product', function () {
+                Rule::exists('products', 'resource_id');
+            }, Rule::exists('categories', 'id'))],
+            'resource_types' =>['required', 'array'],
+            'resource_types.*' => ['required', 'in:product,category'],
+        ]);
+        $allowedTypes = [
+            'product' => Product::class,
+            'category' => Category::class,
+        ];
+       $dimensions = collect($validatedData['resource_types'])->map(function ($resourceType) use ($allowedTypes, $validatedData) {
+            $modelClass = $allowedTypes[$resourceType];
+            collect($validatedData['resource_ids'])->map(function ($resourceId) use ($resourceType, $modelClass) {
+                $model = $modelClass::findOrFail($resourceId);
+                return $model->dimensions;
+            });
+        });
+        dd($dimensions);
+        return DimensionResource::collection($dimensions);
+    }
 
     public function stationStatuses(Request $request)
     {

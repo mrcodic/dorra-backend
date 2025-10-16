@@ -145,16 +145,11 @@
                                         @endforeach
                                     </select>
                                 </div>
-{{--                                <div class="form-group mb-2">--}}
-{{--                                    <label for="flagsSelect" class="label-text mb-1">Flags</label>--}}
-{{--                                    <select id="flagsSelect" class="form-select select2" name="flags[]" multiple>--}}
-{{--                                        @foreach($associatedData['flags'] as $flag)--}}
-{{--                                            <option value="{{ $flag->id }}">--}}
-{{--                                                {{ $flag->getTranslation('name', app()->getLocale()) }}--}}
-{{--                                            </option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
-{{--                                </div>--}}
+                                <div class="form-group mb-2">
+                                    <label for="sizesSelect" class="label-text mb-1">Sizes</label>
+                                    <select id="sizesSelect" class="form-select" name="dimension_id">
+                                    </select>
+                                </div>
 
                             </div>
                         </div>
@@ -188,6 +183,140 @@
 
 @endsection
 @section('vendor-script')
+    <script>
+        // Build parallel arrays from current selections
+        function buildDimensionPayload() {
+            const categoryIds = ($('#productsSelect').val() || []).map(v => String(v));
+            const productIds  = ($('#productsWithoutCategoriesSelect').val() || []).map(v => String(v));
+
+            const resource_ids   = [];
+            const resource_types = [];
+
+            // categories → type=category
+            categoryIds.forEach(id => {
+                resource_ids.push(id);
+                resource_types.push('product');
+            });
+
+            // products (without categories) → type=product
+            productIds.forEach(id => {
+                resource_ids.push(id);
+                resource_types.push('category');
+            });
+
+            return { resource_ids, resource_types };
+        }
+
+        // Turn DimensionResource item into text for the option
+        function dimensionLabel(d) {
+            // Adjust to your actual resource fields
+            // Common patterns:
+            //  - name
+            //  - width/height + unit
+            const name   = d.name ?? d.label ?? null;
+            const width  = d.width ?? d.w ?? null;
+            const height = d.height ?? d.h ?? null;
+            const unit   = d.unit ?? d.u ?? null;
+
+            if (name) return name;
+            if (width && height && unit) return `${width}×${height} ${unit}`;
+            if (width && height) return `${width}×${height}`;
+            return `#${d.id}`;
+        }
+
+        function refreshSizes() {
+            const payload = buildDimensionPayload();
+
+            // If nothing selected, clear sizes
+            if (!payload.resource_ids.length) {
+                $('#sizesSelect').empty().trigger('change');
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('dimensions.index') }}",
+                method: "POST", // use GET if your route is GET; switch both sides consistently
+                data: payload,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                success: function (res) {
+                    const $sizes = $('#sizesSelect');
+                    const current = $sizes.val() || [];
+                    $sizes.empty();
+
+                    const items = res.data || res || [];
+                    items.forEach(item => {
+                        // item.id + item.attributes...
+                        const id    = item.id;
+                        const attrs = item.attributes || {};
+                        const text  = dimensionLabel({ id, ...attrs });
+                        $sizes.append(new Option(text, id, false, false));
+                    });
+
+                    // restore previous selection if still valid
+                    $sizes.val(current.filter(v => $sizes.find(`option[value="${v}"]`).length)).trigger('change');
+                },
+                error: function (xhr) {
+                    console.error('Failed to load dimensions:', xhr.responseText);
+                    $('#sizesSelect').empty().trigger('change');
+                }
+            });
+        }
+
+        // When "Products With Categories" (left) changes, you fetch categories for #productsSelect — after that, refresh sizes.
+        $('#categoriesSelect').on('change', function () {
+            let selectedIds = $(this).val();
+            if (selectedIds && selectedIds.length > 0) {
+                $.ajax({
+                    url: "{{ route('products.categories') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        category_ids: selectedIds
+                    },
+                    success: function (response) {
+                        const $productsSelect = $('#productsSelect');
+                        const currentValues = $productsSelect.val() || [];
+
+                        if (response.data && response.data.length > 0) {
+                            response.data.forEach(function (category) {
+                                if ($productsSelect.find('option[value="' + category.id + '"]').length === 0) {
+                                    $productsSelect.append(new Option(category.name, category.id, false, false));
+                                }
+                            });
+                        }
+
+                        $productsSelect.val(currentValues).trigger('change');
+                        // 🔔 After categories list updated, refresh sizes
+                        refreshSizes();
+                    },
+                    error: function (xhr) {
+                        console.error("Error fetching categories:", xhr.responseText);
+                        refreshSizes(); // still try to refresh (may clear)
+                    }
+                });
+            } else {
+                // none selected, clear right list and sizes
+                $('#productsSelect').empty().trigger('change');
+                refreshSizes();
+            }
+        });
+
+        // Whenever user changes the right-side categories selection → refresh sizes
+        $('#productsSelect').on('change', refreshSizes);
+
+        // Whenever user changes the "Products Without Categories" selection → refresh sizes
+        $('#productsWithoutCategoriesSelect').on('change', refreshSizes);
+
+        // Optional: initial load if page has preselected values
+        $(document).ready(function () {
+            refreshSizes();
+        });
+    </script>
+
+
+
     <script>
         // Listen for change on "Products With Categories"
         $('#categoriesSelect').on('change', function () {
@@ -400,10 +529,6 @@
             });
             $('#tagsSelect').select2({
                 placeholder: "Choose Tags",
-                allowClear: true
-            });
-            $('#flagsSelect').select2({
-                placeholder: "Choose Flags",
                 allowClear: true
             });
             $('#colorsSelect').select2({
