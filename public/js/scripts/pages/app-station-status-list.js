@@ -144,7 +144,7 @@ $('.filter-date').on('change', function () {
     $rightCats.empty().append(new Option('— Select Category —', '', false, false));
 
     // Use any decent label you have; fallback to "#<id>"
-    const currentLabel = $b.data('resource') || `#${resourceableId}`;
+    const currentLabel = resourceableId || `#${resourceableId}`;
     ensureAndSelect($rightCats, resourceableId, currentLabel);
 
     // Left stays blank until user changes it.
@@ -152,7 +152,7 @@ $('.filter-date').on('change', function () {
 
 } else {
     // Without categories => resourceable is Product; just select it.
-    ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, $b.data('resource') || `#${resourceableId}`);
+    ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceableId || `#${resourceableId}`);
 }
 
     $('#editStatusModal').modal('show');
