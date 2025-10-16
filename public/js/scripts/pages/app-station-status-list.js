@@ -403,7 +403,7 @@ $(document).ready(function () {
         }
 
         // show modal
-        $('#deleteOffersModal').modal('show');
+        $('#deleteStatusesModal').modal('show');
     });
 
 // When user confirms in the modal, submit the hidden form
@@ -420,16 +420,16 @@ $(document).ready(function () {
         if (selectedIds.length === 0) return;
 
         $.ajax({
-            url: "offers/bulk-delete",
+            url: "station-statuses/bulk-delete",
             method: "POST",
             data: {
                 ids: selectedIds,
                 _token: $('meta[name="csrf-token"]').attr("content"),
             },
             success: function (response) {
-                $("#deleteOffersModal").modal("hide");
+                $("#deleteStatusesModal").modal("hide");
                 Toastify({
-                    text: "Selected offers deleted successfully!",
+                    text: "Selected custom statuses deleted successfully!",
                     duration: 1500,
                     gravity: "top",
                     position: "right",
@@ -446,7 +446,7 @@ $(document).ready(function () {
 
             },
             error: function () {
-                $("#deleteOffersModal").modal("hide");
+                $("#deleteStatusesModal").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",
                     duration: 1500,

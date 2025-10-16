@@ -206,7 +206,7 @@
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
                             <form style="display: none;" id="bulk-delete-form" method="POST"
-                                  action="{{ route('inventories.bulk-delete') }}">
+                                  action="{{ route('station-statuses.bulk-delete') }}">
                                 @csrf
                                 <button type="submit" id="delete-selected-btn"
                                         class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
@@ -227,9 +227,9 @@
                 ])
 
                 @include('modals.delete',[
-                'id' => 'deleteInventoriesModal',
+                'id' => 'deleteStatusesModal',
                 'formId' => 'bulk-delete-form',
-                'title' => 'Delete Inventories',
+                'title' => 'Delete Statuses',
                 'confirmText' => 'Are you sure you want to delete this items?',
                 ])
                 @include('modals.station-statuses.show-status')
