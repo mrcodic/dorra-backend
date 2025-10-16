@@ -45,6 +45,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 
@@ -294,28 +295,70 @@ class MainController extends Controller
         $model = $modelClass::findOrFail($validatedData['resource_id']);
         return DimensionResource::collection($model->dimensions);
     }
+
     public function getDimensions(Request $request)
     {
-        $validatedData = $request->validate([
-            'resource_ids' =>['required', 'array'],
-            'resource_ids.*' => ['required',],
-            'resource_types' =>['required', 'array'],
+        // 1) Validate input
+        $data = $request->validate([
+            'resource_ids'     => ['required', 'array', 'min:1'],
+            'resource_ids.*'   => ['required', 'integer'],
+            'resource_types'   => ['required', 'array'],
             'resource_types.*' => ['required', 'in:product,category'],
         ]);
-        $allowedTypes = [
-            'product' => Product::class,
-            'category' => Category::class,
-        ];
-       $dimensions = collect($validatedData['resource_types'])->map(function ($resourceType) use ($allowedTypes, $validatedData) {
-            $modelClass = $allowedTypes[$resourceType];
-            collect($validatedData['resource_ids'])->map(function ($resourceId) use ($resourceType, $modelClass) {
-                $model = $modelClass::findOrFail($resourceId);
-                return $model->dimensions;
-            });
-        });
-        dd($dimensions);
+
+        // Ensure parallel arrays align
+        if (count($data['resource_ids']) !== count($data['resource_types'])) {
+            throw ValidationException::withMessages([
+                'resource_ids'   => 'resource_ids and resource_types must be the same length.',
+                'resource_types' => 'resource_ids and resource_types must be the same length.',
+            ]);
+        }
+
+        // 2) Group ids by type
+        $idsByType = ['product' => [], 'category' => []];
+        foreach ($data['resource_ids'] as $i => $id) {
+            $type = $data['resource_types'][$i];
+            $idsByType[$type][] = (int) $id;
+        }
+
+        // 3) Batch fetch with dimensions (avoid N+1)
+        $products = !empty($idsByType['product'])
+            ? Product::with('dimensions')->whereIn('id', array_unique($idsByType['product']))->get()
+            : collect();
+
+        $categories = !empty($idsByType['category'])
+            ? Category::with('dimensions')->whereIn('id', array_unique($idsByType['category']))->get()
+            : collect();
+
+        // 4) Validate existence against request (nice error messages)
+        $missing = [];
+        $foundProducts   = $products->pluck('id')->all();
+        $foundCategories = $categories->pluck('id')->all();
+
+        foreach ($data['resource_ids'] as $i => $id) {
+            $type = $data['resource_types'][$i];
+            if ($type === 'product'  && !in_array((int)$id, $foundProducts, true)) {
+                $missing["resource_ids.$i"] = "Product not found: $id";
+            }
+            if ($type === 'category' && !in_array((int)$id, $foundCategories, true)) {
+                $missing["resource_ids.$i"] = "Category not found: $id";
+            }
+        }
+
+        if (!empty($missing)) {
+            throw ValidationException::withMessages($missing);
+        }
+
+        // 5) Flatten & dedupe dimensions
+        $dimensions = collect()
+            ->merge($products->flatMap->dimensions)
+            ->merge($categories->flatMap->dimensions)
+            ->unique('id')
+            ->values();
+
         return DimensionResource::collection($dimensions);
     }
+}
 
     public function stationStatuses(Request $request)
     {
