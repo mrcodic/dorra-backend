@@ -104,34 +104,25 @@
         $.ajax({
             url: "{{ route('products.categories') }}",
             type: "POST",
-            data: {
-                _token: "{{ csrf_token() }}",
-                category_ids: [productId]
-            },
+            data: { _token: "{{ csrf_token() }}", category_ids: [productId] }, // or product_id(s) per your API
             success(res) {
                 const $right = $('#editProductsSelect');
-                const targetCatId = String($right.data('targetCategoryId') || '');
+                const target = String($right.data('targetCategoryId') || '');
 
                 $right.empty().append(new Option('— Select Category —', '', false, false));
-                (res.data || []).forEach(c => {
-                    $right.append(new Option(c.name, c.id, false, false));
-                });
+                (res.data || []).forEach(c => $right.append(new Option(c.name, c.id)));
 
-                // preselect previously saved category (if it belongs to this product)
-                if (targetCatId && $right.find(`option[value="${targetCatId}"]`).length) {
-                    $right.val(targetCatId).trigger('change');
+                if (target && $right.find(`option[value="${target}"]`).length) {
+                    $right.val(target).trigger('change');
                 } else {
                     $right.val('').trigger('change');
                 }
 
-                // clear the one-off memory
                 $right.removeData('targetCategoryId');
-            },
-            error(xhr) {
-                console.error("Error fetching categories:", xhr.responseText);
             }
         });
     });
+
 
     // radio sync
     $('input[name="edit_product_mode"]').on('change', function () {
