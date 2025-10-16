@@ -262,6 +262,7 @@
                     $sizes.empty();
 
                     const items = res.data || res || [];
+                    console.log(items)
                     items.forEach(item => {
                         const id    = item.id;
                         const attrs = item.attributes || {};
