@@ -224,6 +224,12 @@
                     "name": "Inventory",
                     "icon": "circle",
                     "slug": "app-user-list"
+                },
+                {
+                    "url": "/station-statuses",
+                    "name": "Custom Statuses",
+                    "icon": "circle",
+                    "slug": "app-user-list"
                 }
             ],
             "modalTarget": ""

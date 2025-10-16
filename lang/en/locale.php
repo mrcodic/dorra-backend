@@ -6,6 +6,7 @@ return [
     "Dashboards" => "Dashboards",
     "Jobs" => "Jobs",
     "Print command" => "Print Command",
+    "Custom Statuses" => "Custom Statuses",
     "Inventory" => "Inventory",
     "Board" => "Board",
     "Website" => "Website",
