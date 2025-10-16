@@ -170,7 +170,7 @@ $('.filter-date').on('change', function () {
 
     // Your existing endpoint — expects product id and returns its categories
     $.ajax({
-    url: "{{ route('products.categories') }}",
+    url: "/products/categories",
     type: "POST",
     data: { _token: "{{ csrf_token() }}", category_ids: [productId] },
     success: function (res) {
