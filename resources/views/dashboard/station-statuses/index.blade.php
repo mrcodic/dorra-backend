@@ -198,20 +198,21 @@
                         </thead>
                     </table>
                     <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                        <div
-                            class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                            style="z-index: 10;">
-                            <p id="selected-count-text">0 offers are selected</p>
-                            <form id="bulk-delete-form" method="POST"
-                                  action="{{ route('station-statuses.bulk-delete') }}">
+                        <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between">
+                            <p id="selected-count-text">0 custom statuses are selected</p>
+
+                            <!-- Keep the hidden form but DO NOT submit on this button -->
+                            <form id="bulk-delete-form" method="POST" action="{{ route('station-statuses.bulk-delete') }}">
                                 @csrf
-                                <button type="button" id="delete-selected-btn"
-                                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                                <!-- This opens the modal -->
+                                <button type="button" id="open-bulk-delete-modal"
+                                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
                                     <i data-feather="trash-2"></i> Delete Selected
                                 </button>
                             </form>
                         </div>
                     </div>
+
 
                     @include('modals.delete', [
                     'id' => 'deleteStatusModal',
