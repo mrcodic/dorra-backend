@@ -387,7 +387,7 @@
                                     const count = selectedCheckboxes.length;
 
                                     if (count > 0) {
-                                        $('#selected-count-text').text(`${count} inventor${count > 1 ? 'ies are' : 'y'} selected`);
+                                        $('#selected-count-text').text(`${count} status${count > 1 ? 'es are' : ''} selected`);
                                         $('#bulk-delete-container').show();
                                     } else {
                                         $('#bulk-delete-container').hide();
