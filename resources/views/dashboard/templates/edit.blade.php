@@ -323,33 +323,33 @@
                 $.ajax({
                     url: "{{ route('products.categories') }}",
                     type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        category_ids: selectedIds
-                    },
-                    success: function (response) {
-                        // Clear old options
-                        $('#productsSelect').empty();
+                    data: { _token: "{{ csrf_token() }}", category_ids: selectedIds },
+                    success(response) {
+                        const $right = $('#productsSelect');
+                        $right.empty();
 
-                        if (response.data && response.data.length > 0) {
-                            response.data.forEach(function (product) {
-                                // create option
-                                let option = new Option(product.name, product.id, false, false);
-                                $('#productsSelect').append(option);
-                            });
-                        }
+                        (response.data || []).forEach(p => {
+                            $right.append(new Option(p.name, p.id, false, false));
+                        });
+
+                        // restore
+                        $right.val(previouslySelected).trigger('change');
+
+                        // 🔔 now fetch sizes
                         refreshSizes();
-                        // ✅ restore previous selections (if they still exist in new list)
-                        $('#productsSelect').val(previouslySelected).trigger('change');
                     },
-                    error: function (xhr) {
-                        refreshSizes();
+                    error(xhr) {
                         console.error("Error fetching categories:", xhr.responseText);
+                        // still try to refresh with whatever we have
+                        refreshSizes();
                     }
                 });
             } else {
                 $('#productsSelect').empty().trigger('change');
+                refreshSizes(); // nothing selected → clears sizes
             }
+    
+
         });
 
     </script>
