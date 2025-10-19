@@ -28,6 +28,16 @@ class StoreCartItemRequest extends BaseRequest
         return true;
     }
 
+
+    private function cartable(): Category|Product|null
+    {
+        return $this->cartable_type === Product::class
+            ? Product::find($this->cartable_id)
+            : ($this->cartable_type === Category::class
+                ? Category::find($this->cartable_id)
+                : null);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -35,11 +45,22 @@ class StoreCartItemRequest extends BaseRequest
      */
     public function rules(): array
     {
+        $cartableType = $this->cartable_type;
+        $cartable     = $this->cartable();
+        $hasSpecs     = (bool) $cartable?->specifications()->exists();
         return [
             'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
             'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
-            'cartable_id' => ['required_with:template_id', 'integer'],
-            'cartable_type' => ['required_with:template_id', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
+            'cartable_type' => ['required', 'in:' . Product::class . ',' . Category::class],
+            'cartable_id' => [
+                'required',
+                'integer',
+                Rule::when(
+                    $cartableType === Product::class,
+                    Rule::exists('products', 'id'),
+                    Rule::exists('categories', 'id')
+                ),
+            ],
             'product_price_id' => [
                 Rule::requiredIf(function () {
                     $cartable = Product::find($this->cartable_id) ?? Category::find($this->cartable_id);
@@ -47,9 +68,21 @@ class StoreCartItemRequest extends BaseRequest
                 }),
                 'exists:product_prices,id',
             ],
-            "specs" => ["sometimes", "array"],
-            "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
-            "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
+            'specs' => [
+                Rule::requiredIf($hasSpecs),
+                'array',
+                $hasSpecs ? 'min:1' : 'sometimes',
+            ],
+            'specs.*.id' => [
+                Rule::requiredIf($hasSpecs),
+                'integer',
+                'exists:product_specifications,id',
+            ],
+            'specs.*.option' => [
+                Rule::requiredIf($hasSpecs),
+                'integer',
+                'exists:product_specification_options,id',
+            ],
         ];
     }
 
