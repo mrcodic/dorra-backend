@@ -76,6 +76,9 @@
               e.preventDefault();
               const $form = $(this);
 
+              // Clear previous errors (if you added placeholders)
+              $form.find('.is-invalid').removeClass('is-invalid');
+              $form.find('[data-error-for]').text('');
 
               const $submitBtn = $form.find('button[type="submit"]');
               const $loader = $form.find('.spinner-border');
@@ -84,8 +87,6 @@
               $loader.removeClass('d-none');
 
               const formData = new FormData(this);
-              // Debug log (optional)
-              // for (let pair of formData.entries()) console.log(pair[0]+ ':', pair[1]);
 
               $.ajax({
                   url: $form.attr('action'),
@@ -95,33 +96,63 @@
                   processData: false,
                   headers: {
                       'X-CSRF-TOKEN': $('input[name="_token"]').val(),
-                      'Accept': 'application/json'
+                      'Accept': 'application/json' // 👈 important for Fortify
                   },
                   success: function (response) {
-                      Toastify({
-                          text: options.successMessage || "✅ Operation successful!",
-                          duration: 3000,
-                          gravity: "top",
-                          backgroundColor: "#28a745",
-                      }).showToast();
+                      // If your Fortify response is JSON with redirect, follow it
+                      if (response && response.redirect) {
+                          window.location.href = response.redirect;
+                          return;
+                      }
+
+                      // Otherwise show toast & optionally reset
+                      if (window.Toastify) {
+                          Toastify({
+                              text: options.successMessage || "✅ Operation successful!",
+                              duration: 3000,
+                              gravity: "top",
+                              backgroundColor: "#28a745",
+                          }).showToast();
+                      }
 
                       if (options.onSuccess) options.onSuccess(response, $form);
                       if (options.resetForm !== false) $form.trigger('reset');
                       if (options.closeModal) $(options.closeModal).modal('hide');
                   },
                   error: function (xhr) {
-                      if (xhr.responseJSON && xhr.responseJSON.errors) {
+                      // 419 = CSRF, 401 = unauthorized, 422 = validation
+                      if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
                           const errors = xhr.responseJSON.errors;
-                          for (const key in errors) {
-                              Toastify({
-                                  text: errors[key][0],
-                                  duration: 4000,
-                                  gravity: "top",
-                                  position: "right",
-                                  backgroundColor: "#EA5455",
-                                  close: true,
-                              }).showToast();
+
+                          // Paint per-field errors into data-error-for="field"
+                          Object.keys(errors).forEach(key => {
+                              const msg = errors[key][0];
+
+                              const $slot = $form.find(`[data-error-for="${key}"]`);
+                              if ($slot.length) $slot.text(msg);
+
+                              const $input = $form.find(`[name="${key}"]`);
+                              if ($input.length) $input.addClass('is-invalid');
+
+                              if (window.Toastify) {
+                                  Toastify({
+                                      text: msg,
+                                      duration: 4000,
+                                      gravity: "top",
+                                      position: "right",
+                                      backgroundColor: "#EA5455",
+                                      close: true,
+                                  }).showToast();
+                              }
+                          });
+
+                          // If Fortify put the generic error under email, also show it globally
+                          if (!errors.general && errors.email) {
+                              $form.find('[data-error-for="general"]').text(errors.email[0]);
                           }
+                      } else {
+                          // non-validation errors
+                          $form.find('[data-error-for="general"]').text('Something went wrong. Please try again.');
                       }
 
                       if (options.onError) options.onError(xhr, $form);
@@ -133,6 +164,7 @@
               });
           });
       }
+
 
   </script>
 
