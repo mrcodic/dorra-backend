@@ -67,10 +67,8 @@
         .job-list-table th:nth-child(7),
         .job-list-table th:nth-child(8),
         .job-list-table th:nth-child(9),
-        .job-list-table th:nth-child(10)
-        /*,*/
-        /*.job-list-table th:nth-child(11) */
-        {
+        .job-list-table th:nth-child(10),
+        .job-list-table th:nth-child(11) {
             display: none !important;
         }
 
@@ -80,10 +78,8 @@
         .job-list-table tbody tr:not(.details-row) td:nth-child(7),
         .job-list-table tbody tr:not(.details-row) td:nth-child(8),
         .job-list-table tbody tr:not(.details-row) td:nth-child(9),
-        .job-list-table tbody tr:not(.details-row) td:nth-child(10)
-        /*,*/
-        /*.job-list-table tbody tr:not(.details-row) td:nth-child(11) */
-        {
+        .job-list-table tbody tr:not(.details-row) td:nth-child(10),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(11) {
             display: none !important;
         }
 
@@ -450,9 +446,12 @@
                             // Create details row
                             const detailsHtml = `
                                 <tr class="details-row">
-                                    <td colspan="4">
+                                    <td colspan="3">
                                         <div class="details-content">
-                                         
+                                            <div class="detail-row">
+                                                <span class="detail-label">Item Name:</span>
+                                                <span class="detail-value">${itemName}</span>
+                                            </div>
                                             <div class="detail-row">
                                                 <span class="detail-label">Item Quantity:</span>
                                                 <span class="detail-value">${itemQuantity}</span>
