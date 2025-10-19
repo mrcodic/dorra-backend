@@ -30,43 +30,34 @@
                     @csrf
                     <div class="mb-1">
                         <label for="login-email" class="form-label label-text">Email Address</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="login-email"
-                            name="email"
-                            placeholder="john@example.com"
-                            aria-describedby="login-email"
-                            tabindex="1"
-                            autofocus />
+                        <input type="text" class="form-control" id="login-email" name="email" placeholder="john@example.com" />
+                        <div class="invalid-feedback" data-error-for="email"></div>
                     </div>
 
                     <div class="mb-1">
                         <div class="d-flex justify-content-between">
                             <label class="form-label label-text" for="login-password">Password</label>
-
                         </div>
                         <div class="input-group input-group-merge form-password-toggle">
-                            <input
-                                type="password"
-                                class="form-control form-control-merge"
-                                id="login-password"
-                                name="password"
-                                tabindex="2"
-                                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                aria-describedby="login-password" />
+                            <input type="password" class="form-control form-control-merge" id="login-password" name="password" placeholder="••••••••••••" />
                             <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
                         </div>
+                        <div class="invalid-feedback d-block" data-error-for="password"></div>
                     </div>
+
                     <div class="mb-1 d-flex justify-content-between">
                         <div class="form-check">
-                            <input class="form-check-input" name="remember_token" type="checkbox" id="remember-me" tabindex="3" />
+                            <!-- Hidden fallback -->
+                            <input type="hidden" name="remember" value="0">
+                            <input class="form-check-input" name="remember" type="checkbox" id="remember-me" value="1" />
                             <label class="form-check-label" for="remember-me"> Remember Me </label>
                         </div>
-                        <a href="{{url('/forgot-password')}}">
-                            <small>Forgot Password?</small>
-                        </a>
+                        <a href="{{ url('/forgot-password') }}"><small>Forgot Password?</small></a>
                     </div>
+
+                    <!-- Place to show a general error like "invalid credentials" -->
+                    <div class="text-danger small mb-1" data-error-for="general"></div>
+
                     <button class="btn btn-primary w-100" tabindex="4">Sign in</button>
                 </form>
 
