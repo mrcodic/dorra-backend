@@ -31,7 +31,7 @@
                     <div class="mb-1">
                         <label for="login-email" class="form-label label-text">Email Address</label>
                         <input type="text" class="form-control" id="login-email" name="email" value="{{old('email')}}" placeholder="john@example.com" />
-                        <div class="invalid-feedback">
+                        <div class="invalid-feedback d-block">
                             @error('email') {{ $message }} @enderror
                         </div>
                     </div>
