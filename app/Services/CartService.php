@@ -232,6 +232,7 @@ class CartService extends BaseService
             throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
         }
         $items = $cart->load('items.product.category')->items;
+//        if ($items->)
         $products = $items->pluck('product.id')->filter()->unique();
         $categories = $items->pluck('product.category.id')->filter()->unique();
         $allSameProduct = $products->count() === 1;

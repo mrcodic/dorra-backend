@@ -69,7 +69,7 @@
                     </div>
                     <button class="btn btn-primary w-100" tabindex="4">Sign in</button>
                 </form>
-              
+
 
 
 
@@ -86,4 +86,9 @@
 
 @section('page-script')
 <script src="{{asset(mix('js/scripts/pages/auth-login.js'))}}"></script>
+<script !src="">
+    handleAjaxFormSubmit(".auth-login-form",{
+        successMessage: "You are logged in successfully"
+    })
+</script>
 @endsection
