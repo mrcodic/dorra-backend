@@ -72,14 +72,15 @@
 @endsection
 
 @section('vendor-script')
+    <script !src="">
+        handleAjaxFormSubmit(".auth-login-form",{
+            successMessage: "You are logged in successfully"
+        })
+    </script>
 <script src="{{asset(mix('vendors/js/forms/validation/jquery.validate.min.js'))}}"></script>
 @endsection
 
 @section('page-script')
-<script src="{{asset(mix('js/scripts/pages/auth-login.js'))}}"></script>
-<script !src="">
-    handleAjaxFormSubmit(".auth-login-form",{
-        successMessage: "You are logged in successfully"
-    })
-</script>
+{{--<script src="{{asset(mix('js/scripts/pages/auth-login.js'))}}"></script>--}}
+
 @endsection
