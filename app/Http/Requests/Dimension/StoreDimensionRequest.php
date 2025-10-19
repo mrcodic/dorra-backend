@@ -21,14 +21,14 @@ class StoreDimensionRequest extends BaseRequest
             'height' => [
                 'bail',
                 'required',
-                'decimal:1,3',
+                'decimal',
                 new DimensionWithinUnitRange(),
                 'gt:0',
             ],
             'width' => [
                 'bail',
                 'required',
-                'decimal:1,3',
+                'decimal',
                 new DimensionWithinUnitRange(),
                 'gt:0',
             ],
