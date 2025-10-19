@@ -164,6 +164,8 @@
               });
           });
       }
+  
+          handleAjaxFormSubmit(".auth-login-form")
 
 
   </script>
