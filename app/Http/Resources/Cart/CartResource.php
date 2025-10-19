@@ -28,7 +28,7 @@ class CartResource extends JsonResource
 //            'total_after_offer' => getTotalPrice($this->discountCode ?? 0, $subAfter),
             'tax' => [
                 'ratio' => setting('tax') * 100 . "%",
-                'value' => getPriceAfterTax(setting('tax'), $this->price),
+                'value' => getPriceAfterTax(setting('tax'), $subAfter),
             ],
             'delivery' => setting('delivery'),
             'discount' => [
