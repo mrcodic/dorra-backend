@@ -15,16 +15,17 @@ class CartResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $subAfter = round(
+            $this->items->sum(fn ($item) => $item->sub_total_after_offer ?? $item->sub_total),
+            2
+        );
         return [
             "id" => $this->id,
             "items" => CartItemResource::collection($this->whenLoaded('items')),
             'sub_total' => $this->price,
-            'sub_total_after_offer' => round(
-                $this->items->sum(function ($item) {
-                    return $item->sub_total_after_offer;
-                }), 2
-            ),
+            'sub_total_after_offer' => $subAfter,
             'total' => getTotalPrice($this->discountCode ?? 0, $this->price),
+            'total_after_offer' => getTotalPrice($this->discountCode ?? 0, $subAfter),
             'tax' => [
                 'ratio' => setting('tax') * 100 . "%",
                 'value' => getPriceAfterTax(setting('tax'), $this->price),
