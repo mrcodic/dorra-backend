@@ -11,13 +11,29 @@
                     <div class="">
                         <div class="form-group mb-2">
                             <label for="width" class="label-text mb-1">Width</label>
-                            <input type="number" id="width" class="form-control" name="width"
-                                   placeholder="Width">
+                            <input
+                                type="number"
+                                id="width"
+                                name="width"
+                                class="form-control"
+                                placeholder="Width"
+                                step="any"
+                            min="0"
+                            inputmode="decimal"
+                            >
                         </div>
                         <div class="form-group mb-2">
                             <label for="height" class="label-text mb-1">Height</label>
-                            <input type="number" id="height" class="form-control" name="height"
-                                   placeholder="Height">
+                            <input
+                                type="number"
+                                id="height"
+                                name="height"
+                                class="form-control"
+                                placeholder="Height"
+                                step="any"     
+                            min="0"
+                            inputmode="decimal"
+                            >
                         </div>
 
                         <div class="form-group mb-2">
