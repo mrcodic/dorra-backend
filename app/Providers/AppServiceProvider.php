@@ -3,14 +3,18 @@
 namespace App\Providers;
 
 use App\Enums\HttpEnum;
+use App\Models\Admin;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Fortify;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,7 +31,33 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
-    {
+    {  Fortify::authenticateUsing(function (Request $request) {
+        // Optional: validate format first
+        $request->validate([
+            'email'    => ['required','email'],
+            'password' => ['required','string','min:6'],
+        ]);
+
+        $user = Admin::where('email', $request->email)->first();
+
+        if (!$user) {
+            // Email doesn’t exist
+            throw ValidationException::withMessages([
+                'email' => trans('auth.user_not_found'),
+            ]);
+        }
+
+        if (! Hash::check($request->password, $user->password)) {
+            // Password wrong
+            throw ValidationException::withMessages([
+                'password' => trans('auth.password_incorrect'),
+            ]);
+        }
+
+
+
+        return $user;
+    });
 
         Fortify::loginView(fn () => view('dashboard.auth.login'));
 
