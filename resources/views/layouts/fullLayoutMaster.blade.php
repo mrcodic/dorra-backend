@@ -106,14 +106,14 @@
                       }
 
                       // Otherwise show toast & optionally reset
-                      if (window.Toastify) {
+
                           Toastify({
                               text: options.successMessage || "✅ Operation successful!",
                               duration: 3000,
                               gravity: "top",
                               backgroundColor: "#28a745",
                           }).showToast();
-                      }
+                      
 
                       if (options.onSuccess) options.onSuccess(response, $form);
                       if (options.resetForm !== false) $form.trigger('reset');
@@ -164,7 +164,7 @@
               });
           });
       }
-  
+
           handleAjaxFormSubmit(".auth-login-form")
 
 
