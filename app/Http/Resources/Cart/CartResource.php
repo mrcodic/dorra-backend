@@ -19,6 +19,14 @@ class CartResource extends JsonResource
             "id" => $this->id,
             "items" => CartItemResource::collection($this->whenLoaded('items')),
             'sub_total' => $this->price,
+            'sub_total_after_offer' => round(
+                $this->items->sum(function ($item) {
+                    $sub = (float) $item->getAttribute('sub_total');
+                    $val = (float) optional($item->cartable->lastOffer)->getRawOriginal('value');
+                    return $val > 0 ? $sub * (1 - $val / 100) : $sub;
+                }),
+                2
+            ),
             'total' => getTotalPrice($this->discountCode ?? 0, $this->price),
             'tax' => [
                 'ratio' => setting('tax') * 100 . "%",

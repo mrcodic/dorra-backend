@@ -288,9 +288,9 @@
                 <table class="job-list-table table">
                     <thead class="table-light">
                         <tr>
-                            <th>
-                                <input type="checkbox" id="select-all-checkbox" class="form-check-input">
-                            </th>
+{{--                            <th>--}}
+{{--                                <input type="checkbox" id="select-all-checkbox" class="form-check-input">--}}
+{{--                            </th>--}}
                             <th>Image</th>
                             <th>Item Id</th>
                             <th>Item Name</th>
