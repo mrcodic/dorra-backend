@@ -94,7 +94,8 @@
                   contentType: false,
                   processData: false,
                   headers: {
-                      'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                      'X-CSRF-TOKEN': $('input[name="_token"]').val(),
+                      'Accept': 'application/json'
                   },
                   success: function (response) {
                       Toastify({
@@ -132,7 +133,7 @@
               });
           });
       }
-      
+
   </script>
 
 </body>
