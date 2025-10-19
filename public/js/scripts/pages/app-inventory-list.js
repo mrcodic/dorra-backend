@@ -47,15 +47,7 @@ var dt_user_table = $(".inventory-list-table").DataTable({
                                      <i data-feather="eye"></i>
                                 </a>
 
-                       //    <a href="#" class="edit-details"
-                       //     data-bs-toggle="modal"
-                       //     data-bs-target="#editInventoryModal"
-                       //               data-id="${data}"
-                       //                 data-name="${row.name}"
-                       //               data-number="${row.number}"
-                       //                    >
-                       //      <i data-feather="edit-3"></i>
-                       // </a>
+
             <a href="#" class="text-danger open-delete-order-modal"
                data-id="${data}"
                data-action="/inventories/${data}"
