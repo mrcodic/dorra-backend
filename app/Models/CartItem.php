@@ -25,6 +25,14 @@ class CartItem extends Model
         'quantity'
     ];
     protected $table = 'cart_items';
+    protected $appends = ['sub_total_after_offer'];
+
+    public function getSubTotalAfterOfferAttribute(): float
+    {
+        $sub = (float) $this->sub_total;
+        $val = (float) optional($this->cartable->lastOffer)->getRawOriginal('value');
+        return $val > 0 ? $sub * (1 - $val / 100) : $sub;
+    }
 
     public function itemable(): MorphTo
     {
