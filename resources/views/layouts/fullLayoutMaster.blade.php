@@ -113,7 +113,7 @@
                               gravity: "top",
                               backgroundColor: "#28a745",
                           }).showToast();
-                      
+
 
                       if (options.onSuccess) options.onSuccess(response, $form);
                       if (options.resetForm !== false) $form.trigger('reset');
@@ -134,7 +134,7 @@
                               const $input = $form.find(`[name="${key}"]`);
                               if ($input.length) $input.addClass('is-invalid');
 
-                              if (window.Toastify) {
+
                                   Toastify({
                                       text: msg,
                                       duration: 4000,
@@ -143,7 +143,7 @@
                                       backgroundColor: "#EA5455",
                                       close: true,
                                   }).showToast();
-                              }
+
                           });
 
                           // If Fortify put the generic error under email, also show it globally
