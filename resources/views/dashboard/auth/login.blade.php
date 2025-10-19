@@ -30,7 +30,7 @@
                     @csrf
                     <div class="mb-1">
                         <label for="login-email" class="form-label label-text">Email Address</label>
-                        <input type="text" class="form-control" id="login-email" name="email" placeholder="john@example.com" />
+                        <input type="text" class="form-control" id="login-email" name="email" value="{{old('email')}}" placeholder="john@example.com" />
                         <div class="invalid-feedback">
                             @error('email') {{ $message }} @enderror
                         </div>
