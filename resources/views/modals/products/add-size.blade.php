@@ -30,7 +30,7 @@
                                 name="height"
                                 class="form-control"
                                 placeholder="Height"
-                                step="any"     
+                                step="any"
                             min="0"
                             inputmode="decimal"
                             >
