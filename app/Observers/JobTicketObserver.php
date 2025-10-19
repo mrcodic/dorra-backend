@@ -51,7 +51,7 @@ class JobTicketObserver
             return;
         }
 
-        $orderId = $jobTicket->orderItem()->value('order_id'); // no relation access needed
+        $orderId = $jobTicket->orderItem()->value('order_id');
         if (!$orderId) return;
 
         DB::transaction(function () use ($orderId, $terminalStatusIds) {

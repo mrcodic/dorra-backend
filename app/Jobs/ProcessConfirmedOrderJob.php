@@ -14,6 +14,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 class ProcessConfirmedOrderJob implements ShouldQueue
 {
@@ -23,6 +24,21 @@ class ProcessConfirmedOrderJob implements ShouldQueue
 
     public function handle(): void
     {
+        DB::transaction(function () use ($order) {
+            $inventory = Inventory::query()
+                ->whereNotNull('parent_id')
+                ->where('is_available', 1)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$inventory) {
+                return;
+            }
+
+
+            $order->inventories()->attach([$inventory->id]);
+            Inventory::where('id', $inventory->id)->update(['is_available' => 0]);
+        });
         $order = $this->order->loadMissing(['paymentMethod', 'orderItems']);
         $svc = app(BarcodeService::class);
 

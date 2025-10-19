@@ -31,7 +31,11 @@ class StationStatusObserver
 
             $stationStatus->sequence             = ($last?->sequence ?? 0) + 1;
             $stationStatus->is_terminal          = 1;
-            $stationStatus->is_workflow_terminal = 1;
+            if ($stationStatus->station->code == 'packed')
+            {
+              $stationStatus->is_workflow_terminal = 1;
+                
+            }
             $stationStatus->is_custom = 1;
         });
 
