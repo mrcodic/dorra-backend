@@ -19,11 +19,11 @@ class StoreDimensionRequest extends BaseRequest
     {
         return [
             'height' => [
-                'decimal',
+                'numeric',
                 new DimensionWithinUnitRange()
             ],
             'width' => [
-                'decimal',
+                'numeric',
                 new DimensionWithinUnitRange()
             ],
             'unit' => [
