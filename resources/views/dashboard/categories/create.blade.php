@@ -1174,13 +1174,5 @@
             showStep(currentStep);
         });
 </script>
-<script !src="">
-    handleAjaxFormSubmit("#category-form",{
-            successMessage: "Product Created Successfully",
-            onSuccess:function (){
-                window.location.replace("/categories");
 
-            }
-        })
-</script>
 @endsection
