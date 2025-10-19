@@ -30,6 +30,15 @@ class Inventory extends Model
                 }
             });
         });
+//        static::updating(function (Inventory $inventory) {
+//            if ($inventory->isDirty('number')) {
+//                $old = $inventory->getOriginal('number');
+//                $new = $inventory->number;
+//                Inventory::create([
+//                   ''
+//                ]);
+//            }
+//        });
     }
     public function parent(): BelongsTo
     {

@@ -81,6 +81,9 @@
 @endsection
 
 @section('page-script')
+    <script>
+        handleAjaxFormSubmit(".auth-login-form")
+    </script>
 {{--<script src="{{asset(mix('js/scripts/pages/auth-login.js'))}}"></script>--}}
 
 @endsection
