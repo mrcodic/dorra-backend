@@ -67,8 +67,10 @@
         .job-list-table th:nth-child(7),
         .job-list-table th:nth-child(8),
         .job-list-table th:nth-child(9),
-        .job-list-table th:nth-child(10),
-        .job-list-table th:nth-child(11) {
+        .job-list-table th:nth-child(10)
+        /*,*/
+        /*.job-list-table th:nth-child(11)*/
+        {
             display: none !important;
         }
 
@@ -78,8 +80,10 @@
         .job-list-table tbody tr:not(.details-row) td:nth-child(7),
         .job-list-table tbody tr:not(.details-row) td:nth-child(8),
         .job-list-table tbody tr:not(.details-row) td:nth-child(9),
-        .job-list-table tbody tr:not(.details-row) td:nth-child(10),
-        .job-list-table tbody tr:not(.details-row) td:nth-child(11) {
+        .job-list-table tbody tr:not(.details-row) td:nth-child(10)
+        /*,*/
+        /*.job-list-table tbody tr:not(.details-row) td:nth-child(11) */
+        {
             display: none !important;
         }
 
