@@ -1127,9 +1127,10 @@
                 processData: false,
                 contentType: false,
                 success: function (res) {
+                    window.location.replace('/categories');
                     if (res.success) {
                         sessionStorage.setItem('product_added', 'true');
-                        window.location.href = '/products';
+                  c
                     } else {
                         // backend returned success:false
                         saveButton.prop('disabled', false);
