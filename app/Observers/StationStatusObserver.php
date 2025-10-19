@@ -34,7 +34,7 @@ class StationStatusObserver
             if ($stationStatus->station->code == 'packed')
             {
               $stationStatus->is_workflow_terminal = 1;
-                
+
             }
             $stationStatus->is_custom = 1;
         });

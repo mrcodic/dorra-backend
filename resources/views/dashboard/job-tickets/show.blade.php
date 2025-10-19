@@ -87,8 +87,14 @@
                     <div class="d-flex flex-column gap-1">
                         <p style="color: #424746; margin: 0; font-size: 16px">Last Operator:</p>
                         <div class="d-flex align-items-center gap-1">
-                            <img src="{{ $model->jobEvents->last()?->admin?->image?->getUrl() ?: asset('/images/admin-avatar.png') }}"
-                                alt="Admin avatar">
+                            <img
+                                src="{{ $model->jobEvents->last()?->admin?->image?->getUrl() ?: asset('images/admin-avatar.png') }}"
+                                alt="Admin avatar"
+                                width="48" height="48"
+                                class="rounded-circle"
+                                style="object-fit:cover"
+                            />
+
                             <div class="d-flex flex-column">
                                 <h5 style="color: #121212">{{ $model->jobEvents->last()?->admin?->name }}</h5>
                                 <p style="margin: 0; color: #424746">{{
