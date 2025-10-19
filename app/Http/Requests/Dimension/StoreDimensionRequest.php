@@ -19,13 +19,20 @@ class StoreDimensionRequest extends BaseRequest
     {
         return [
             'height' => [
-                'numeric',
-                new DimensionWithinUnitRange()
+                'bail',
+                'required',
+                'decimal:1,3',
+                new DimensionWithinUnitRange(),
+                'gt:0',
             ],
             'width' => [
-                'numeric',
-                new DimensionWithinUnitRange()
+                'bail',
+                'required',
+                'decimal:1,3',
+                new DimensionWithinUnitRange(),
+                'gt:0',
             ],
+
             'unit' => [
                 'integer',
                 'in:' . UnitEnum::getValuesAsString(),
