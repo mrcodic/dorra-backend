@@ -31,7 +31,9 @@
                     <div class="mb-1">
                         <label for="login-email" class="form-label label-text">Email Address</label>
                         <input type="text" class="form-control" id="login-email" name="email" placeholder="john@example.com" />
-                        <div class="invalid-feedback" data-error-for="email"></div>
+                        <div class="invalid-feedback">
+                            @error('email') {{ $message }} @enderror
+                        </div>
                     </div>
 
                     <div class="mb-1">
@@ -42,7 +44,9 @@
                             <input type="password" class="form-control form-control-merge" id="login-password" name="password" placeholder="••••••••••••" />
                             <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
                         </div>
-                        <div class="invalid-feedback d-block" data-error-for="password"></div>
+                        <div class="invalid-feedback d-block">
+                            @error('password') {{ $message }} @enderror
+                        </div>
                     </div>
 
                     <div class="mb-1 d-flex justify-content-between">
@@ -72,11 +76,7 @@
 @endsection
 
 @section('vendor-script')
-    <script !src="">
-        handleAjaxFormSubmit(".auth-login-form",{
-            successMessage: "You are logged in successfully"
-        })
-    </script>
+
 <script src="{{asset(mix('vendors/js/forms/validation/jquery.validate.min.js'))}}"></script>
 @endsection
 
