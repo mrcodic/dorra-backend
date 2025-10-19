@@ -67,10 +67,8 @@
         .job-list-table th:nth-child(7),
         .job-list-table th:nth-child(8),
         .job-list-table th:nth-child(9),
-        .job-list-table th:nth-child(10)
-        /*,*/
-        /*.job-list-table th:nth-child(11)*/
-        {
+        .job-list-table th:nth-child(10),
+        .job-list-table th:nth-child(11) {
             display: none !important;
         }
 
@@ -80,10 +78,8 @@
         .job-list-table tbody tr:not(.details-row) td:nth-child(7),
         .job-list-table tbody tr:not(.details-row) td:nth-child(8),
         .job-list-table tbody tr:not(.details-row) td:nth-child(9),
-        .job-list-table tbody tr:not(.details-row) td:nth-child(10)
-        /*,*/
-        /*.job-list-table tbody tr:not(.details-row) td:nth-child(11) */
-        {
+        .job-list-table tbody tr:not(.details-row) td:nth-child(10),
+        .job-list-table tbody tr:not(.details-row) td:nth-child(11) {
             display: none !important;
         }
 
@@ -425,78 +421,137 @@
                 });
 
                 // Initialize accordion after DataTable draw
-                function initAccordion() {
-                    if ($(window).width() <= 1024) {
-                        $('.job-list-table tbody tr:not(.details-row)').each(function() {
-                            const $row = $(this);
+        function initAccordion() {
+            if ($(window).width() <= 1024) {
+                $('.job-list-table tbody tr:not(.details-row)').each(function () {
+                    const $row = $(this);
 
-                            // Remove existing details and icons first
-                            $row.find('.expand-icon').remove();
-                            $row.next('.details-row').remove();
+                    // Remove existing details and icons first
+                    $row.find('.expand-icon').remove();
+                    $row.next('.details-row').remove();
 
-                            // Add expand icon to role column
-                            $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
+                    // Add expand icon to the first visible column (Image col)
+                    $row.find('td:nth-child(1)').css('position','relative')
+                        .append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
-                            // Get data for details
-                            const itemName = $row.find('td:nth-child(4)').html() || '';
-                            const itemQuantity = $row.find('td:nth-child(5)').html() || '';
-                            const orderNumber = $row.find('td:nth-child(6)').html() || '';
-                            const priority = $row.find('td:nth-child(7)').html() || '';
-                            const currentStation = $row.find('td:nth-child(8)').html() || '';
-                            const status = $row.find('td:nth-child(9)').html() || '';
-                            const dueDate = $row.find('td:nth-child(10)').html() || '';
-                            const actions = $row.find('td:nth-child(11)').html() || '';
+                    // ✅ Column map after removing the checkbox column:
+                    // 1: Image
+                    // 2: Item Id
+                    // 3: Item Name
+                    // 4: Item Quantity (hidden on mobile)
+                    // 5: Order Number   (hidden on mobile)
+                    // 6: Priority       (hidden on mobile)
+                    // 7: Current Station(hidden on mobile)
+                    // 8: Status         (hidden on mobile)
+                    // 9: Due Date       (hidden on mobile)
+                    // 10: Actions       (hidden on mobile)
 
-                            // Create details row
-                            const detailsHtml = `
-                                <tr class="details-row">
-                                    <td colspan="3">
-                                        <div class="details-content">
-                                            <div class="detail-row">
-                                                <span class="detail-label">Item Name:</span>
-                                                <span class="detail-value">${itemName}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Item Quantity:</span>
-                                                <span class="detail-value">${itemQuantity}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Order Number:</span>
-                                                <span class="detail-value">${orderNumber}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Priority:</span>
-                                                <span class="detail-value">${priority}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Current Station:</span>
-                                                <span class="detail-value">${currentStation}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Status:</span>
-                                                <span class="detail-value">${status}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Due Date:</span>
-                                                <span class="detail-value">${dueDate}</span>
-                                            </div>
-                                            <div class="detail-row">
-                                                <span class="detail-label">Actions:</span>
-                                                <span class="detail-value">${actions}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            `;
+                    const itemName       = $row.find('td:nth-child(3)').html() || '';
+                    const itemQuantity   = $row.find('td:nth-child(4)').html() || '';
+                    const orderNumber    = $row.find('td:nth-child(5)').html() || '';
+                    const priority       = $row.find('td:nth-child(6)').html() || '';
+                    const currentStation = $row.find('td:nth-child(7)').html() || '';
+                    const status         = $row.find('td:nth-child(8)').html() || '';
+                    const dueDate        = $row.find('td:nth-child(9)').html() || '';
+                    const actions        = $row.find('td:nth-child(10)').html() || '';
 
-                            $row.after(detailsHtml);
-                        });
-                    } else {
-                        // Remove mobile elements on desktop
-                        $('.details-row').remove();
-                        $('.expand-icon').remove();
-                    }
-                }
+                    // Use colspan=3 because only 3 columns are visible on mobile
+                    const detailsHtml = `
+        <tr class="details-row">
+          <td colspan="3">
+            <div class="details-content">
+              <div class="detail-row"><span class="detail-label">Item Name:</span><span class="detail-value">${itemName}</span></div>
+              <div class="detail-row"><span class="detail-label">Item Quantity:</span><span class="detail-value">${itemQuantity}</span></div>
+              <div class="detail-row"><span class="detail-label">Order Number:</span><span class="detail-value">${orderNumber}</span></div>
+              <div class="detail-row"><span class="detail-label">Priority:</span><span class="detail-value">${priority}</span></div>
+              <div class="detail-row"><span class="detail-label">Current Station:</span><span class="detail-value">${currentStation}</span></div>
+              <div class="detail-row"><span class="detail-label">Status:</span><span class="detail-value">${status}</span></div>
+              <div class="detail-row"><span class="detail-label">Due Date:</span><span class="detail-value">${dueDate}</span></div>
+              <div class="detail-row"><span class="detail-label">Actions:</span><span class="detail-value">${actions}</span></div>
+            </div>
+          </td>
+        </tr>`;
+                    $row.after(detailsHtml);
+                });
+            } else {
+                // Remove mobile elements on desktop
+                $('.details-row').remove();
+                $('.expand-icon').remove();
+            }
+        }
+
+        // function initAccordion() {
+                //     if ($(window).width() <= 1024) {
+                //         $('.job-list-table tbody tr:not(.details-row)').each(function() {
+                //             const $row = $(this);
+                //
+                //             // Remove existing details and icons first
+                //             $row.find('.expand-icon').remove();
+                //             $row.next('.details-row').remove();
+                //
+                //             // Add expand icon to role column
+                //             $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
+                //
+                //             // Get data for details
+                //             const itemName = $row.find('td:nth-child(4)').html() || '';
+                //             const itemQuantity = $row.find('td:nth-child(5)').html() || '';
+                //             const orderNumber = $row.find('td:nth-child(6)').html() || '';
+                //             const priority = $row.find('td:nth-child(7)').html() || '';
+                //             const currentStation = $row.find('td:nth-child(8)').html() || '';
+                //             const status = $row.find('td:nth-child(9)').html() || '';
+                //             const dueDate = $row.find('td:nth-child(10)').html() || '';
+                //             const actions = $row.find('td:nth-child(11)').html() || '';
+                //
+                //             // Create details row
+                //             const detailsHtml = `
+                //                 <tr class="details-row">
+                //                     <td colspan="4">
+                //                         <div class="details-content">
+                //                             <div class="detail-row">
+                //                                 <span class="detail-label">Item Name:</span>
+                //                                 <span class="detail-value">${itemName}</span>
+                //                             </div>
+                //                             <div class="detail-row">
+                //                                 <span class="detail-label">Item Quantity:</span>
+                //                                 <span class="detail-value">${itemQuantity}</span>
+                //                             </div>
+                //                             <div class="detail-row">
+                //                                 <span class="detail-label">Order Number:</span>
+                //                                 <span class="detail-value">${orderNumber}</span>
+                //                             </div>
+                //                             <div class="detail-row">
+                //                                 <span class="detail-label">Priority:</span>
+                //                                 <span class="detail-value">${priority}</span>
+                //                             </div>
+                //                             <div class="detail-row">
+                //                                 <span class="detail-label">Current Station:</span>
+                //                                 <span class="detail-value">${currentStation}</span>
+                //                             </div>
+                //                             <div class="detail-row">
+                //                                 <span class="detail-label">Status:</span>
+                //                                 <span class="detail-value">${status}</span>
+                //                             </div>
+                //                             <div class="detail-row">
+                //                                 <span class="detail-label">Due Date:</span>
+                //                                 <span class="detail-value">${dueDate}</span>
+                //                             </div>
+                //                             <div class="detail-row">
+                //                                 <span class="detail-label">Actions:</span>
+                //                                 <span class="detail-value">${actions}</span>
+                //                             </div>
+                //                         </div>
+                //                     </td>
+                //                 </tr>
+                //             `;
+                //
+                //             $row.after(detailsHtml);
+                //         });
+                //     } else {
+                //         // Remove mobile elements on desktop
+                //         $('.details-row').remove();
+                //         $('.expand-icon').remove();
+                //     }
+                // }
 
                 // Handle window resize
                 $(window).on('resize', function() {
