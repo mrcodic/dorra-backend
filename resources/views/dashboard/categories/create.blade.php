@@ -3,8 +3,8 @@
 @section('title', 'Add Products')
 @section('main-page', 'Products')
 @section('sub-page', 'Add New Product')
-@section('main-page-url', route("products.index"))
-@section('sub-page-url', route("products.create"))
+@section('main-page-url', route("categories.index"))
+@section('sub-page-url', route("categories.create"))
 
 
 @section('vendor-style')
@@ -801,7 +801,7 @@
     console.log(jQuery.fn.jquery);
 
         $(document).ready(function () {
-            const form = $("#product-form");
+            const form = $("#category-form");
             let currentStep = 0;
 
             const steps = [
@@ -1069,7 +1069,7 @@
             });
 
             // Form submit
-            $('#product-form').on('submit', function (e) {
+            $('#category-form').on('submit', function (e) {
                 e.preventDefault();
                 const saveButton = $('.saveChangesButton');
                 const saveLoader = $('.saveLoader');
