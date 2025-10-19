@@ -1069,57 +1069,94 @@
             });
 
             // Form submit
-            $('#category-form').on('submit', function (e) {
-                e.preventDefault();
-                const saveButton = $('.saveChangesButton');
-                const saveLoader = $('.saveLoader');
-                const saveButtonText = $('.saveChangesButton .btn-text');
-                saveButton.prop('disabled', true);
-                saveLoader.removeClass('d-none');
-                saveButtonText.addClass('d-none');
-                const formData = new FormData(this);
-                const customDimensions = sessionStorage.getItem('custom_dimensions');
-                if (customDimensions) {
-                    const parsedDimensions = JSON.parse(customDimensions);
-                    parsedDimensions.forEach((dim, index) => {
-                        formData.append(`custom_dimensions[${index}][width]`, dim.width);
-                        formData.append(`custom_dimensions[${index}][height]`, dim.height);
-                        formData.append(`custom_dimensions[${index}][unit]`, dim.unit);
-                        formData.append(`custom_dimensions[${index}][name]`, dim.name);
-                        formData.append(`custom_dimensions[${index}][is_custom]`, dim.is_custom);
-                    });
-                }
+        $('#category-form').on('submit', function (e) {
+            e.preventDefault();
 
-                $.ajax({
-                    url: this.action,
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (res) {
-                        if (res.success) {
-                            sessionStorage.setItem('product_added', 'true');
-                            window.location.href = '/products';
-                        }
-                    },
-                    error: function (xhr) {
-                        $.each(xhr.responseJSON.errors, (k, msgArr) => {
-                            Toastify({
-                                text: msgArr[0],
-                                duration: 4000,
-                                gravity: "top",
-                                position: "right",
-                                backgroundColor: "#EA5455",
-                                close: true
-                            }).showToast();
-                        });
+            const saveButton = $('.saveChangesButton');
+            const saveLoader = $('.saveLoader');
+            const saveButtonText = $('.saveChangesButton .btn-text');
+
+            saveButton.prop('disabled', true);
+            saveLoader.removeClass('d-none');
+            saveButtonText.addClass('d-none');
+
+            const formEl = this;
+            const formData = new FormData(formEl);
+
+            // (Optional) also inject as hidden inputs for full safety
+            formEl.querySelectorAll('input[data-custom-dim="1"]').forEach(n => n.remove());
+
+            const raw = sessionStorage.getItem('custom_dimensions');
+            if (raw) {
+                try {
+                    const dims = JSON.parse(raw);
+                    console.log('[custom_dimensions] parsed:', dims);
+
+                    dims.forEach((dim, i) => {
+                        const isCustom = dim.is_custom ? 1 : 0;
+
+                        // -> FormData (server receives via $_POST)
+                        formData.append(`custom_dimensions[${i}][width]`,  dim.width);
+                        formData.append(`custom_dimensions[${i}][height]`, dim.height);
+                        formData.append(`custom_dimensions[${i}][unit]`,   dim.unit);
+                        formData.append(`custom_dimensions[${i}][name]`,   dim.name);
+                        formData.append(`custom_dimensions[${i}][is_custom]`, isCustom);
+
+                        // -> Hidden inputs (belt & suspenders)
+                        [['width', dim.width], ['height', dim.height], ['unit', dim.unit], ['name', dim.name], ['is_custom', isCustom]]
+                            .forEach(([k, v]) => {
+                                const inp = document.createElement('input');
+                                inp.type = 'hidden';
+                                inp.name = `custom_dimensions[${i}][${k}]`;
+                                inp.value = v;
+                                inp.setAttribute('data-custom-dim', '1');
+                                formEl.appendChild(inp);
+                            });
+                    });
+                } catch (e) {
+                    console.warn('[custom_dimensions] JSON parse error:', e, 'raw:', raw);
+                }
+            } else {
+                console.log('[custom_dimensions] none in sessionStorage');
+            }
+
+            $.ajax({
+                url: formEl.action,
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    if (res.success) {
+                        sessionStorage.setItem('product_added', 'true');
+                        window.location.href = '/products';
+                    } else {
+                        // backend returned success:false
                         saveButton.prop('disabled', false);
                         saveLoader.addClass('d-none');
                         saveButtonText.removeClass('d-none');
                     }
-                });
+                },
+                error: function (xhr) {
+                    const errs = (xhr.responseJSON && xhr.responseJSON.errors) || {};
+                    Object.keys(errs).forEach(k => {
+                        Toastify({
+                            text: errs[k][0],
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true
+                        }).showToast();
+                    });
+                    saveButton.prop('disabled', false);
+                    saveLoader.addClass('d-none');
+                    saveButtonText.removeClass('d-none');
+                }
             });
         });
+
+    });
 </script>
 
 <script>
