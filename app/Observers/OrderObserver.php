@@ -3,17 +3,13 @@
 namespace App\Observers;
 
 use App\Jobs\ProcessConfirmedOrderJob;
-use App\Jobs\ProcessPreparedOrderJob;
-use App\Jobs\ProcessShippedOrderJob;
+
 use App\Models\Admin;
 use App\Models\Inventory;
-use App\Models\JobTicket;
+
 use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
-use App\Models\OrderItem;
-use App\Services\BarcodeService;
-use Illuminate\Support\Facades\DB;
 
 
 class OrderObserver

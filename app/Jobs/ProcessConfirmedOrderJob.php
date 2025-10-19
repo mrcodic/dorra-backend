@@ -24,6 +24,7 @@ class ProcessConfirmedOrderJob implements ShouldQueue
 
     public function handle(): void
     {
+        $order = $this->order->loadMissing(['paymentMethod', 'orderItems']);
         DB::transaction(function () use ($order) {
             $inventory = Inventory::query()
                 ->whereNotNull('parent_id')
@@ -39,7 +40,6 @@ class ProcessConfirmedOrderJob implements ShouldQueue
             $order->inventories()->attach([$inventory->id]);
             Inventory::where('id', $inventory->id)->update(['is_available' => 0]);
         });
-        $order = $this->order->loadMissing(['paymentMethod', 'orderItems']);
         $svc = app(BarcodeService::class);
 
         $jobsDataUrl = route("jobs.index", ['search_value' => $order->order_number]);
