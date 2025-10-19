@@ -96,7 +96,7 @@ class CartService extends BaseService
         $productPrice = $this->productPriceRepository->query()
             ->find(Arr::get($validatedData, 'product_price_id') ?? $design?->productPrice?->id);
         $productPriceValue = $productPrice?->price ?? $price;
-        $specsSum = collect(Arr::get($validatedData, 'specs') ?? $design->specifications)
+        $specsSum = collect(Arr::get($validatedData, 'specs') ?? $design?->specifications)
             ->map(function ($spec) {
                 return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
             })->sum();
