@@ -606,7 +606,7 @@ class OrderService extends BaseService
 
         $subTotal = $cart->items()->sum('sub_total');
         $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
-            $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode));
+            $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode,$cart));
             $orderItems = $order->orderItems()->createMany(
                 $cart->items->map(function ($item) {
                     return [
@@ -617,7 +617,7 @@ class OrderService extends BaseService
                         'itemable_id' => $item->itemable_id,
                         'itemable_type' => $item->itemable_type,
                         'specs_price' => $item->specs_price,
-                        'sub_total' => $item->sub_total,
+                        'sub_total' => $item->sub_total_after_offer ?: $item->sub_total,
                         'product_price_id' => $item->product_price_id,
                     ];
                 })->toArray()

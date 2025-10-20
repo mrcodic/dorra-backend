@@ -169,7 +169,7 @@
     handleAjaxFormSubmit(".auth-login-form",{
         successMessage: "You are Logged in Successfully"
     })
-    
+
 
 
 </script>

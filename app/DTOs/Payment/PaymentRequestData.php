@@ -63,6 +63,14 @@ class PaymentRequestData
                 'quantity' => 1,
             ];
         }
+        if ($this->order?->offer_amount > 0 )
+        {
+            $extraItems[] =  [
+                'name' => Str::limit('Offer', 50, ''),
+                'amount' => -(int) round($this->order->offer_amount),
+                'quantity' => 1,
+            ];
+        }
         $allItems = array_merge($baseItems, $extraItems);
         return [
             'amount' => $amountCents,
