@@ -231,7 +231,7 @@ class CartService extends BaseService
         if (!$cart) {
             throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
         }
-        $items = $cart->load('items.product.category')->items;
+        $items = $cart->items;
         $hasOffer = $items->contains(function ($item) {
             return (float) $item->cartable->lastOffer?->getRawOriginal('value') > 0;
         });
