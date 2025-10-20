@@ -233,7 +233,7 @@ class CartService extends BaseService
         }
         $items = $cart->load('items.product.category')->items;
         $hasOffer = $cart->items()
-            ->whereHasMorph('cartable', [\App\Models\Product::class], function ($q) {
+            ->whereHasMorph('cartable', [\App\Models\Product::class,Category::class], function ($q) {
                 $q->withLastOfferId()
                     ->whereHas('lastOffer', fn ($q) => $q->where('value', '>', 0));
             })
