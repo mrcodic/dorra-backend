@@ -199,8 +199,8 @@
                     </thead>
                 </table>
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                    <div
-                        class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between">
+                    <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                        style="z-index: 10;">
                         <p id="selected-count-text">0 custom statuses are selected</p>
 
                         <!-- Keep the hidden form but DO NOT submit on this button -->
@@ -338,7 +338,7 @@
                                             // Create details row
                                             const detailsHtml = `
                                 <tr class="details-row">
-                                    <td colspan="4">
+                                    <td colspan="3">
                                         <div class="details-content">
                                             <div class="detail-row">
                                                 <span class="detail-label">Product/Category:</span>
