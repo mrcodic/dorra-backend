@@ -61,7 +61,8 @@
                             </div>
                             <div class="col-md-6 form-group mb-2">
                                 <label for="editProductsSelect" class="label-text mb-1">Categories</label>
-                                <select id="editProductsSelect" class="form-select" name="resourceable_id">
+                                <select id="editProductsSelect"  class="form-select" name="resourceable_id"
+                                        data-target-category-id="">
                                     <option value="" disabled>— Select Category —</option>
                                 </select>
                             </div>
