@@ -235,7 +235,7 @@ class CartService extends BaseService
         $hasOffer = $items->contains(function ($item) {
             return (float) optional($item->cartable->lastOffer)->value > 0;
         });
-        dd($hasOffer);
+
         if ($hasOffer) {
             throw ValidationException::withMessages(['offer' => ["You can't apply discount when at least one item is offered."]]);
 
