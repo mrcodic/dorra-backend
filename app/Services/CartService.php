@@ -232,7 +232,11 @@ class CartService extends BaseService
             throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
         }
         $items = $cart->load('items.product.category')->items;
-//        if ($items->)
+        $hasOffer = $items->contains(fn ($item) => $item->offer_amount > 0);
+        if ($hasOffer) {
+            throw ValidationException::withMessages(['offer' => ["You can't apply discount when at least one item is offered."]]);
+
+        }
         $products = $items->pluck('product.id')->filter()->unique();
         $categories = $items->pluck('product.category.id')->filter()->unique();
         $allSameProduct = $products->count() === 1;
