@@ -180,7 +180,7 @@ class CartService extends BaseService
                 'items.product.category'
             ])
             ->first();
-        if ($cart && $cart->expires_at->isPast()) {
+        if ($cart && $cart->expires_at?->isPast()) {
             $cart->delete();
             return false;
         }
