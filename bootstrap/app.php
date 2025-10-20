@@ -1,12 +1,14 @@
 <?php
 
 use App\Enums\HttpEnum;
+use App\Models\Cart;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -76,4 +78,9 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        $schedule->call(function () {
+            Cart::where('expires_at', '<', now())->delete();
+        })->everyMinute();
     })->create();

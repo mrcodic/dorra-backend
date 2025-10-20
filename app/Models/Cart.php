@@ -14,9 +14,20 @@ class Cart extends Model
         "guest_id",
         "price",
         "discount_amount",
-        "discount_code_id"
-
+        "discount_code_id",
+        "expires_at",
     ];
+
+    protected $casts = [
+        "expires_at" => "datetime",
+    ];
+
+    protected static function booted(): void
+    {
+        static::creating(function ($model) {
+            $model->expires_at = now()->addMinute();
+        });
+    }
 
     public function price(): Attribute
     {

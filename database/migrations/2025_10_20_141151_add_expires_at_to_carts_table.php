@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('carts', function (Blueprint $table) {
-            //
+            $table->timestamp('expires_at')->nullable()->index();
         });
+
     }
 
     /**
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('carts', function (Blueprint $table) {
-            //
+            $table->dropColumn('expires_at');
         });
     }
 };

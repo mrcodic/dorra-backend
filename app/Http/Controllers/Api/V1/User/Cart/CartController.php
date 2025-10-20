@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\User\Cart;
 
+use App\Enums\HttpEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Cart\{StoreCartItemRequest, UpdateCartItemRequest};
 use App\Http\Resources\Cart\{CartItemResource, CartResource};
@@ -28,6 +29,12 @@ class CartController extends Controller
     public function index()
     {
         $cart = $this->cartService->getCurrentUserOrGuestCart();
+        if ($cart === false)
+        {
+            return Response::api(statusCode: HttpEnum::GONE,errors:[
+                'message' => ['Cart expired']
+            ]);
+        }
         $data = $cart ? CartResource::make($cart) : (object)[];
         return Response::api(data: $data);
     }

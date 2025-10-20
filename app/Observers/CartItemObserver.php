@@ -24,6 +24,8 @@ class CartItemObserver
      */
     public function updated(CartItem $cartItem): void
     {
+        $cartItem->cart->expires_at = now()->addMinute();
+        $cartItem->cart->saveQuietly();
         $specsPrice = $cartItem->specs->sum(
             fn($item) => $item->productSpecificationOption?->price ?? 0
         );
@@ -53,7 +55,8 @@ class CartItemObserver
      */
     public function deleted(CartItem $cartItem): void
     {
-        //
+        $cartItem->cart->expires_at = now()->addMinute();
+        $cartItem->cart->saveQuietly();
     }
 
     /**

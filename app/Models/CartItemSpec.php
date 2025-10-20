@@ -18,7 +18,10 @@ class CartItemSpec extends Model
     {
         static::created(fn ($item) => $item->recalculateCartItem());
         static::deleted(fn ($item) => $item->recalculateCartItem());
-        static::updated(fn ($item) => $item->recalculateCartItem());
+        static::updated(function($item){
+            $item->recalculateCartItem();
+            $item->cartItem->cart->expires_at = now()->addMinute();
+        });
     }
 
     public function recalculateCartItem()

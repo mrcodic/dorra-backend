@@ -72,7 +72,7 @@ class CartService extends BaseService
 
             $template = $request->getTemplate();
 
-            $priceDetails = $this->calculatePriceDetails($validatedData, $product,$design);
+            $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design);
 
             $cartItem = $cart->addItem(
                 $design ?? $template,
@@ -91,7 +91,7 @@ class CartService extends BaseService
         });
     }
 
-    private function calculatePriceDetails(array $validatedData, $product,$design=null, $price = null): array
+    private function calculatePriceDetails(array $validatedData, $product, $design = null, $price = null): array
     {
         $productPrice = $this->productPriceRepository->query()
             ->find(Arr::get($validatedData, 'product_price_id') ?? $design?->productPrice?->id);
@@ -163,16 +163,15 @@ class CartService extends BaseService
         if (!$userId && !$guestId) {
             return null;
         }
-
-        return $this->repository->query()
+        $cart = $this->repository->query()
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->with([
                 'items.cartable' => function (MorphTo $cartable) {
-                $cartable->constrain([
-                    Product::class  => fn($q) => $q->withLastOfferId()->with('lastOffer'),
-                    Category::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
-                ]);
+                    $cartable->constrain([
+                        Product::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
+                        Category::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
+                    ]);
                 },
                 'items.itemable' => function ($query) {
                     $query->select(['id', 'name']);
@@ -181,6 +180,11 @@ class CartService extends BaseService
                 'items.product.category'
             ])
             ->first();
+        if ($cart && $cart->expires_at->isPast()) {
+            $cart->delete();
+            return false;
+        }
+        return $cart;
     }
 
     public function deleteItemFromCart($itemId)
@@ -234,7 +238,7 @@ class CartService extends BaseService
         }
         $items = $cart->items;
         $hasOffer = $items->contains(function ($item) {
-            return (float) $item->cartable->lastOffer?->getRawOriginal('value') > 0;
+            return (float)$item->cartable->lastOffer?->getRawOriginal('value') > 0;
         });
         if ($hasOffer) {
             throw ValidationException::withMessages(['offer' => ["You can't apply discount when at least one item is offered."]]);
@@ -318,12 +322,12 @@ class CartService extends BaseService
     public function priceDetails($itemId)
     {
         return $this->cartItemRepository->query()
-            ->select(['id', 'cartable_id', 'cartable_type', 'quantity', 'sub_total', 'itemable_id', 'itemable_type','product_price'])
+            ->select(['id', 'cartable_id', 'cartable_type', 'quantity', 'sub_total', 'itemable_id', 'itemable_type', 'product_price'])
             ->findOrFail($itemId)?->load([
                 'itemable:id', 'itemable.media', 'product',
                 'cartable' => function (MorphTo $cartable) {
                     $cartable->constrain([
-                        Product::class  => fn($q) => $q->withLastOfferId()->with('lastOffer'),
+                        Product::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
                         Category::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
                     ]);
                 },
