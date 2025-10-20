@@ -29,12 +29,7 @@ class CartController extends Controller
     public function index()
     {
         $cart = $this->cartService->getCurrentUserOrGuestCart();
-        if ($cart === false)
-        {
-            return Response::api(statusCode: HttpEnum::GONE,errors:[
-                'message' => ['Cart expired']
-            ]);
-        }
+  
         $data = $cart ? CartResource::make($cart) : (object)[];
         return Response::api(data: $data);
     }

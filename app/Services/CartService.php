@@ -181,8 +181,8 @@ class CartService extends BaseService
             ])
             ->first();
         if ($cart && $cart->expires_at?->isPast()) {
-//            $cart->delete();
-            return false;
+            $cart->delete();
+            return null;
         }
         return $cart;
     }
