@@ -17,7 +17,7 @@ class OrderData
             'payment_method_id' => request('payment_method_id'),
             'subtotal' => $subTotal,
             'discount_amount' => getDiscountAmount($discountCode ?? 0, $subTotal),
-            'offer_amount' => $cart->items()->sum('offer_amount'),
+            'offer_amount' => $cart->items->sum('offer_amount'),
             'delivery_amount' => setting('delivery') ?? 30,
             'tax_amount' => getPriceAfterTax(setting('tax'), $subTotal),
             'total_price' => getTotalPrice($discountCode ?? 0, $subTotal),
