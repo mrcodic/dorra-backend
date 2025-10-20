@@ -232,7 +232,9 @@ class CartService extends BaseService
             throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
         }
         $items = $cart->load('items.product.category')->items;
-        $hasOffer = $items->contains(fn ($item) => $item->offer_amount > 0);
+        $hasOffer = $items->contains(function ($item) {
+            return (float) optional($item->cartable->lastOffer)->value > 0;
+        });
         if ($hasOffer) {
             throw ValidationException::withMessages(['offer' => ["You can't apply discount when at least one item is offered."]]);
 
