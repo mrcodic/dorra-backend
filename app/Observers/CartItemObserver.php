@@ -6,26 +6,51 @@ use App\Models\CartItem;
 
 class CartItemObserver
 {
-    /**
-     * Handle the CartItem "created" event.
-     */
+
     public function created(CartItem $cartItem): void
     {
-        $cart = $cartItem->cart;
-        $total = $cart->items()->sum('sub_total');
-        $cart->update([
-            'price' => $total
-        ]);
-
+        $this->updateCartTotals($cartItem);
     }
 
-    /**
-     * Handle the CartItem "updated" event.
-     */
+
     public function updated(CartItem $cartItem): void
     {
-        $cartItem->cart->expires_at = now()->addMinute();
-        $cartItem->cart->saveQuietly();
+        $this->refreshCartExpiration($cartItem);
+        $this->updateCartItemSubtotal($cartItem);
+        $this->updateCartTotals($cartItem);
+    }
+
+
+    public function deleted(CartItem $cartItem): void
+    {
+        $this->refreshCartExpiration($cartItem);
+        $this->updateCartTotals($cartItem);
+    }
+
+
+    private function refreshCartExpiration(CartItem $cartItem): void
+    {
+        $cart = $cartItem->cart;
+
+        $cart->expires_at = match (true) {
+            $cart->user_id => now()->addHours(config('cart.user_expiration_hours', 24)),
+            $cart->guest_id => now()->addMinutes(config('cart.guest_expiration_minutes', 60)),
+            default => now()->addHour(),
+        };
+
+        $cart->saveQuietly();
+    }
+
+
+    private function updateCartTotals(CartItem $cartItem): void
+    {
+        $cart = $cartItem->cart;
+        $cart->price = $cart->items()->sum('sub_total');
+        $cart->saveQuietly();
+    }
+
+    private function updateCartItemSubtotal(CartItem $cartItem): void
+    {
         $specsPrice = $cartItem->specs->sum(
             fn($item) => $item->productSpecificationOption?->price ?? 0
         );
@@ -42,36 +67,5 @@ class CartItemObserver
 
         $cartItem->sub_total = $subTotal;
         $cartItem->saveQuietly();
-
-        $cart = $cartItem->cart;
-
-        $cart->price = $cart->items()->sum('sub_total');
-        $cart->saveQuietly();
-    }
-
-
-    /**
-     * Handle the CartItem "deleted" event.
-     */
-    public function deleted(CartItem $cartItem): void
-    {
-        $cartItem->cart->expires_at = now()->addMinute();
-        $cartItem->cart->saveQuietly();
-    }
-
-    /**
-     * Handle the CartItem "restored" event.
-     */
-    public function restored(CartItem $cartItem): void
-    {
-        //
-    }
-
-    /**
-     * Handle the CartItem "force deleted" event.
-     */
-    public function forceDeleted(CartItem $cartItem): void
-    {
-        //
     }
 }

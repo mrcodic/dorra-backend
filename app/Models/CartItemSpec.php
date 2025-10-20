@@ -20,7 +20,21 @@ class CartItemSpec extends Model
         static::deleted(fn ($item) => $item->recalculateCartItem());
         static::updated(function($item){
             $item->recalculateCartItem();
-            $item->cartItem->cart->expires_at = now()->addMinute();
+            if ($item->cartItem->user_id) {
+                $item->cartItem->expires_at = now()->addHours(
+                    config('cart.user_expiration_hours', 24)
+                );
+                $item->cartItem->saveQuietly();
+            } elseif ($item->cartItem->guest_id) {
+                $item->cartItem->expires_at = now()->addMinutes(
+                    config('cart.guest_expiration_minutes', 60)
+                );
+                $item->cartItem->saveQuietly();
+            } else {
+                $item->cartItem->expires_at = now()->addHour();
+                $item->cartItem->saveQuietly();
+            }
+
         });
     }
 
