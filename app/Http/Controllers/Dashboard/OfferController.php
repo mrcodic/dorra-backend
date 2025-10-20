@@ -38,6 +38,12 @@ class OfferController extends DashboardController
                 'editCategories' => $this->categoryRepository->query()
                     ->whereNull('parent_id')
                     ->whereIsHasCategory(0)
+                    ->where(function ($query) {
+                        $query->whereDoesntHave('offers')
+                            ->orWhereHas('offers',function ($query) {
+                                $query->where('offers.end_at', '<=', now());
+                            });
+                    })
                     ->get(['id', 'name']),
                 'products' => $this->productRepository->query()
                     ->where(function ($query) {
@@ -47,7 +53,13 @@ class OfferController extends DashboardController
                             });
                     })
                     ->get(['id', 'name']),
-                'editProducts' => $this->productRepository->query()
+                'editProducts' =>  $this->productRepository->query()
+                    ->where(function ($query) {
+                        $query->whereDoesntHave('offers')
+                            ->orWhereHas('offers',function ($query) {
+                                $query->where('offers.end_at', '<=', now());
+                            });
+                    })
                     ->get(['id', 'name']),
             ]
         ];
