@@ -189,7 +189,7 @@ $(document).on('click', '.edit-details', function (e) {
         $rightCats.data('targetCategoryId', String(resourceableId));
 
         // placeholder before load
-        $rightCats.empty().append(new Option('— Select Category —', '', false, false));
+        // $rightCats.empty().append(new Option('— Select Category —', '', false, false));
 
         // this triggers the AJAX that fills categories, and your success handler will preselect
         $leftProducts.val(String(parentId)).trigger('change');
