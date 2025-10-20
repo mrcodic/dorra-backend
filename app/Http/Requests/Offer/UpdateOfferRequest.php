@@ -4,6 +4,9 @@ namespace App\Http\Requests\Offer;
 
 use App\Enums\Offer\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Category;
+use App\Models\Offer;
+use App\Models\Product;
 
 class UpdateOfferRequest extends BaseRequest
 {
@@ -21,7 +24,7 @@ class UpdateOfferRequest extends BaseRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules($id): array
     {
         return [
             'name.en' => [
@@ -40,10 +43,20 @@ class UpdateOfferRequest extends BaseRequest
             'start_at' => ['required', 'date',  'after_or_equal:today'],
             'end_at' => ['required', 'date', 'after_or_equal:start_at'],
             'product_ids' => ['nullable', 'array'],
-            'product_ids.*' => ['integer', 'exists:products,id'],
+            'product_ids.*' => ['integer', 'exists:products,id',function ($attribute, $value, $fail) use ($id) {
+                $hasOffer = Product::find($value)?->offers->contains($id);
+                if ($hasOffer) {
+                    $fail("This product is already included in another active offer.");
+                }
+            }],
 
             'category_ids' => ['nullable', 'array'],
-            'category_ids.*' => ['integer', 'exists:categories,id'],
+            'category_ids.*' => ['integer', 'exists:categories,id',function ($attribute, $value, $fail) use ($id) {
+                $hasOffer = Category::find($value)?->offers->contains($id);
+                if ($hasOffer) {
+                    $fail("This category is already included in another active offer.");
+                }
+            }],
         ];
     }
 
