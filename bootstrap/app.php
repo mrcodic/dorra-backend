@@ -83,5 +83,5 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule) {
         $schedule->call(function () {
             Cart::where('expires_at', '<', now())->delete();
-        })->everyMinute();
+        })->everyFifteenMinutes();
     })->create();

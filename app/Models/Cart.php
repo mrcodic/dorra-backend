@@ -25,7 +25,19 @@ class Cart extends Model
     protected static function booted(): void
     {
         static::creating(function ($model) {
-            $model->expires_at = now()->addMinute();
+            if ($model->user_id) {
+                $model->expires_at = now()->addHours(
+                    config('cart.user_expiration_hours', 24)
+                );
+            } elseif ($model->guest_id) {
+
+                $model->expires_at = now()->addMinutes(
+                    config('cart.guest_expiration_minutes', 60)
+                );
+            } else {
+
+                $model->expires_at = now()->addHour();
+            }
         });
     }
 

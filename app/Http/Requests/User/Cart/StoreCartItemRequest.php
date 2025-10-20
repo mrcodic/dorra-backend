@@ -51,9 +51,9 @@ class StoreCartItemRequest extends BaseRequest
         return [
             'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
             'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
-            'cartable_type' => ['required', 'in:' . Product::class . ',' . Category::class],
+            'cartable_type' => ['sometimes', 'in:' . Product::class . ',' . Category::class],
             'cartable_id' => [
-                'required',
+                'sometimes',
                 'integer',
                 Rule::when(
                     $cartableType === Product::class,
