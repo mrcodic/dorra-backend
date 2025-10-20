@@ -27,12 +27,12 @@ class Cart extends Model
         static::creating(function ($model) {
             if ($model->user_id) {
                 $model->expires_at = now()->addHours(
-                    config('cart.user_expiration_hours', 24)
+                    (int) config('cart.user_expiration_hours', 24)
                 );
             } elseif ($model->guest_id) {
 
                 $model->expires_at = now()->addMinutes(
-                    config('cart.guest_expiration_minutes', 60)
+                    (int) config('cart.guest_expiration_minutes', 60)
                 );
             } else {
 

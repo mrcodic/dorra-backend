@@ -33,8 +33,8 @@ class CartItemObserver
         $cart = $cartItem->cart;
 
         $cart->expires_at = match (true) {
-            $cart->user_id => now()->addHours(config('cart.user_expiration_hours', 24)),
-            $cart->guest_id => now()->addMinutes(config('cart.guest_expiration_minutes', 60)),
+            $cart->user_id => now()->addHours( (int) config('cart.user_expiration_hours', 24)),
+            $cart->guest_id => now()->addMinutes( (int) config('cart.guest_expiration_minutes', 60)),
             default => now()->addHour(),
         };
 

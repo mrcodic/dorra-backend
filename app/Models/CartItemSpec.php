@@ -22,12 +22,12 @@ class CartItemSpec extends Model
             $item->recalculateCartItem();
             if ($item->cartItem->user_id) {
                 $item->cartItem->expires_at = now()->addHours(
-                    config('cart.user_expiration_hours', 24)
+                     (int) config('cart.user_expiration_hours', 24)
                 );
                 $item->cartItem->saveQuietly();
             } elseif ($item->cartItem->guest_id) {
                 $item->cartItem->expires_at = now()->addMinutes(
-                    config('cart.guest_expiration_minutes', 60)
+                    (int)  config('cart.guest_expiration_minutes', 60)
                 );
                 $item->cartItem->saveQuietly();
             } else {
