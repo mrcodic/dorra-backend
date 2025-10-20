@@ -38,8 +38,7 @@ class UpdateOfferRequest extends BaseRequest
             'type' => ['required', 'in:'.TypeEnum::getValuesAsString()],
 
             'start_at' => ['required', 'date',  'after_or_equal:today'],
-
-            'end_at' => ['required', 'date'],
+            'end_at' => ['required', 'date', 'after_or_equal:start_at'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
 
