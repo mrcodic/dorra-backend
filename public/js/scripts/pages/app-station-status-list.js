@@ -199,7 +199,34 @@ $(document).on('click', '.edit-details', function (e) {
 
     $('#editStatusModal').modal('show');
 });
+$('#editCategoriesSelect').on('change', function () {
+    const productId = $(this).val();
+    if (!productId) return;
 
+    const url = PRODUCT_CATEGORIES_URL.replace(':id', encodeURIComponent(productId));
+
+    $.ajax({
+        url: url,              // GET /products/{id}/categories
+        type: 'GET',
+        success(res) {
+            const $right = $('#editProductsSelect');
+            const target = String($right.data('targetCategoryId') || '');
+
+            $right.empty().append(new Option('— Select Category —', '', false, false));
+
+            (res.data || []).forEach(c => {
+                $right.append(new Option(c.name, String(c.id), false, false));
+            });
+
+            const evt = $right.hasClass('select2') ? 'change.select2' : 'change';
+            $right.val(target && $right.find(`option[value="${target}"]`).length ? target : '').trigger(evt);
+            $right.removeData('targetCategoryId');
+        },
+        error(xhr) {
+            console.error('Category load failed:', xhr.responseText);
+        }
+    });
+});
 
     // Keep radio in sync
     $('input[name="edit_product_mode"]').on('change', function() {

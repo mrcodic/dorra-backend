@@ -264,6 +264,10 @@
                             const locale = "{{ app()->getLocale() }}"
 
                 </script>
+                    <script>
+                        // Blade will output the route with a placeholder you can replace at runtime
+                        const PRODUCT_CATEGORIES_URL = "{{ route('products.categories', ['category_ids' => ':id']) }}";
+                    </script>
 
                 {{-- Page js files --}}
                 <script src="{{ asset('js/scripts/pages/app-station-status-list.js') }}?v={{ time() }}"></script>
