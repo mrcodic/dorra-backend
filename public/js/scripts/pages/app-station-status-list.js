@@ -186,11 +186,11 @@ $(document).on('click', '.edit-details', function (e) {
         const $rightCats    = $('#editProductsSelect');   // categories
 
         // ✅ tell the categories select which value to preselect once options arrive
-        $rightCats.data('targetCategoryId', String(resourceableId));
+
 
         // placeholder before load
-        // $rightCats.empty().append(new Option('— Select Category —', '', false, false));
-
+        $rightCats.empty().append(new Option('— Select Category —', '', false, false));
+        $rightCats.data('targetCategoryId', String(resourceableId));
         // this triggers the AJAX that fills categories, and your success handler will preselect
         $leftProducts.val(String(parentId)).trigger('change');
     } else {
