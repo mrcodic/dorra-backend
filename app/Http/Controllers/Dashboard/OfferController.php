@@ -48,6 +48,12 @@ class OfferController extends DashboardController
                     })
                     ->get(['id', 'name']),
                 'editProducts' => $this->productRepository->query()
+                    ->where(function ($query) {
+                        $query->whereHave('offers')
+                            ->orWhereHas('offers',function ($query) {
+                                $query->where('offers.end_at', '>=', now());
+                            });
+                    })
                     ->get(['id', 'name']),
             ]
         ];
