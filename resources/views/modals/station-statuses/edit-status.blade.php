@@ -65,6 +65,7 @@
                                     <option value="" disabled>— Select Category —</option>
                                 </select>
                             </div>
+
                         </div>
                     </div>
 
@@ -97,14 +98,15 @@
     </div>
 </div>
 <script !src="">
+    // When product changes, load its categories into the right select
     $('#editCategoriesSelect').on('change', function () {
         const productId = $(this).val();
         if (!productId) return;
 
         $.ajax({
-            url: "{{ route('products.categories') }}",
+            url: "{{ route('products.categories') }}",   // must return categories for a product
             type: "POST",
-            data: { _token: "{{ csrf_token() }}", category_ids: [productId] },
+            data: { _token: "{{ csrf_token() }}", product_id: productId }, // ← use product_id
             success(res) {
                 const $right = $('#editProductsSelect');
                 const target = String($right.data('targetCategoryId') || '');
@@ -112,23 +114,26 @@
                 $right.empty().append(new Option('— Select Category —', '', false, false));
 
                 (res.data || []).forEach(c => {
-                    // normalize ids to string
+                    // normalize to string values
                     $right.append(new Option(c.name, String(c.id), false, false));
                 });
 
                 const evt = $right.hasClass('select2') ? 'change.select2' : 'change';
+
                 if (target && $right.find(`option[value="${target}"]`).length) {
-                    $right.val(target).trigger(evt);      // 3) preselect category now that options exist
+                    $right.val(target).trigger(evt);  // ✅ preselect the category now that options exist
                 } else {
                     $right.val('').trigger(evt);
                 }
-                $right.removeData('targetCategoryId');   // cleanup
+
+                $right.removeData('targetCategoryId'); // cleanup
             },
             error(xhr) {
                 console.error('Category load failed:', xhr.responseText);
             }
         });
     });
+
     // radio sync
     $('input[name="edit_product_mode"]').on('change', function () {
         editSetMode($(this).val());

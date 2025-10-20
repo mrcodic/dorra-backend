@@ -177,24 +177,24 @@ $(document).on('click', '.edit-details', function (e) {
     $('#edit_mode_without').prop('checked', mode === 'without');
     editSetMode(mode);
 
-    const resourceableId = $b.data('resourceableId') || ''; // category id (when mode = 'with')
-    const parentId       = $b.data('parentId') || '';       // product id   (when mode = 'with')
-    const resourceLabel  = $b.data('resourceLabel') || `#${resourceableId}`;
+    const productIdForLeft   = $b.data('parentId') || '';       // product id (left select)
+    const categoryIdToSelect = $b.data('resourceableId') || ''; // category id (right select)
 
     if (mode === 'with') {
         const $leftProducts = $('#editCategoriesSelect'); // products
         const $rightCats    = $('#editProductsSelect');   // categories
 
-        // ✅ tell the categories select which value to preselect once options arrive
-        $rightCats.data('targetCategoryId', String(resourceableId));
+        // store the category that must be preselected after load
+        $rightCats.data('targetCategoryId', String(categoryIdToSelect));
 
-        // placeholder before load
+        // placeholder while loading
         $rightCats.empty().append(new Option('— Select Category —', '', false, false));
 
-        // this triggers the AJAX that fills categories, and your success handler will preselect
-        $leftProducts.val(String(parentId)).trigger('change');
+        // set the left (product) then trigger change -> will AJAX load categories
+        $leftProducts.val(String(productIdForLeft)).trigger('change');
     } else {
-        ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceLabel);
+        // without-categories mode
+        ensureAndSelect($('#editProductsWithoutCategoriesSelect'), $b.data('resourceableId'), $b.data('resourceLabel'));
     }
 
     $('#editStatusModal').modal('show');
