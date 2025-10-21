@@ -183,7 +183,8 @@ enum PermissionEnum: string
             // Tags
             self::INDEX_TAGS, self::CREATE_TAGS, self::SHOW_TAGS, self::UPDATE_TAGS, self::DELETE_TAGS
             => 'Tags',
-
+            self::INDEX_FLAGS, self::CREATE_FLAGS, self::SHOW_FLAGS, self::UPDATE_FLAGS, self::DELETE_FLAGS
+            => 'Flags',
             // Templates
             self::INDEX_TEMPLATES, self::CREATE_TEMPLATES, self::SHOW_TEMPLATES, self::UPDATE_TEMPLATES, self::DELETE_TEMPLATES
             => 'Templates',
