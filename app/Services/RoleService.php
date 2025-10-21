@@ -29,7 +29,7 @@ class RoleService extends BaseService
         }
         return $query
             ->withCount('users')
-            ->with('users')->get();
+            ->with('users.media')->get();
 
     }
 
