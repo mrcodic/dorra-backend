@@ -69,11 +69,13 @@
                                            ->unique()
                                            ->values()
                                            ->all();
+                                        $currentActions = $model->permissions->pluck('name')->map(fn ($n) => Str::afterLast($n, '_'))
+                                           ->unique()
+                                           ->values()
+                                           ->all();
                                          $isAvailable = collect($supportedActions)->contains(strtolower($action));
-                                         $permissionIds   = $model->permissions->pluck('id');
-                                         $groupIds  = $groupPermissions->pluck('id');
-                                        $anyChecked = $permissionIds->intersect($groupIds)->isNotEmpty();
-                                        dump($anyChecked, $permissionIds, $groupIds)
+                                         $isChecked = collect($currentActions)->contains(strtolower($action));
+
                                     @endphp
 
                                     <td>
@@ -81,7 +83,7 @@
                                             <input type="checkbox"
                                                    class="form-check-input permission-checkbox {{ $group }}-checkbox"
                                                    name="permissions[]"
-                                                   @checked($anyChecked)
+                                                   @checked($isChecked)
                                                    value="{{strtolower($group).'_'.strtolower($action) }}"
                                                    id="{{ $group.$action }}" @disabled(!$isAvailable) />
 
