@@ -63,7 +63,7 @@
                                 </div>
                             </td>
 
-                            @foreach(PermissionAction::values() as $action)
+                            @foreach(\App\Enums\Permission\PermissionAction::values() as $action)
                                 @php
                                     $supportedActions = $groupPermissions->pluck('name')->map(fn ($n) => Str::afterLast($n, '_'))
                                        ->unique()
