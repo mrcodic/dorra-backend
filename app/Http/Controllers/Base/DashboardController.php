@@ -49,7 +49,7 @@ class DashboardController extends Controller
         $associatedData = $this->getAssociatedData('index');
         if (request()->expectsJson())
         {
-            dd($data);
+
             return Response::api(data: $this->resourceClass ? $this->resourceClass::collection($data) : $data);
         }
         return view(self::BASE_FOLDER . "$this->indexView", get_defined_vars());

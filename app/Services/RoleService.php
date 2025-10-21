@@ -18,9 +18,9 @@ class RoleService extends BaseService
         {
             $locale = app()->getLocale();
            $query =  $query->when(request()->filled('search'), function ($query) use ($locale) {
-                if (hasMeaningfulSearch(request('search_value'))) {
+                if (hasMeaningfulSearch(request('search'))) {
                     $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                        '%' . strtolower(request('search_value')) . '%'
+                        '%' . strtolower(request('search')) . '%'
                     ]);
                 } else {
                     $query->whereRaw('1 = 0');
