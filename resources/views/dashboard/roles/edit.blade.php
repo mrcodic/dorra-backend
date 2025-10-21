@@ -73,6 +73,7 @@
                                          $permissionIds   = $model->permissions->pluck('id');
                                          $groupIds  = $groupPermissions->pluck('id');
                                         $anyChecked = $permissionIds->intersect($groupIds)->isNotEmpty();
+                                        dd($anyChecked,$permissionIds,$groupIds)
                                     @endphp
 
                                     <td>
