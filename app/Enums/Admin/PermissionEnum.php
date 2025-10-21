@@ -130,7 +130,7 @@ enum PermissionEnum: string
     case SETTINGS_DETAILS = 'settings.details_show';
     case SETTINGS_PAYMENTS = 'settings.payments_show';
     case SETTINGS_NOTIFICATIONS = 'settings.notifications_show';
-    case SETTINGS_WEBSITE = 'settings_website';
+    case SETTINGS_WEBSITE = 'settings.website_show';
 
     // Jobs
     case INDEX_JOBS = 'jobs_index';

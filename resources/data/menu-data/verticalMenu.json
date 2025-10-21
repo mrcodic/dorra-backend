@@ -133,14 +133,7 @@
             "name": "Roles",
             "icon": "Roles.svg",
             "slug": "",
-            "submenu": [
-                {
-                    "url": "/roles",
-                    "name": "Roles",
-                    "icon": "circle",
-                    "slug": "app-user-list"
-                }
-            ],
+            "url": "/roles",
             "modalTarget": ""
 
         },
