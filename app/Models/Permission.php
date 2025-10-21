@@ -8,6 +8,13 @@ use Spatie\Translatable\HasTranslations;
 class Permission extends SpatiePermission
 {
     use HasTranslations;
+    protected $fillable =[
+        'name',
+        'guard_name',
+        'group',
+        'group_key',
+        'routes'
+        ];
     public $translatable = ['group'];
 
     protected $casts = [

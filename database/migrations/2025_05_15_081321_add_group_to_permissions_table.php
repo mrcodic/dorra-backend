@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('permissions', function (Blueprint $table) {
             $table->json('group_key')->after('name')->nullable();
-            $table->json('group')->after('group_key')->nullable();
+            $table->string('group')->after('group_key')->nullable();
         });
     }
 
