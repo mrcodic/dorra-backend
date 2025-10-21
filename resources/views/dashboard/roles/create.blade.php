@@ -78,7 +78,7 @@
                                           ->unique()
                                           ->values()
                                           ->all();
-                                       dump($supportedActions);
+                                       dump($supportedActions,$action);
                                         $permissionKey = strtolower($group) . '_' . strtolower($action);
                                         $isAvailable = in_array($action, $supportedActions);
                                     @endphp
