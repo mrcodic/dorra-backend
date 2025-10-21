@@ -73,7 +73,7 @@
                                            ->unique()
                                            ->values()
                                            ->all();
-                                        dd($currentActions);
+                                        dump($currentActions);
                                          $isAvailable = collect($supportedActions)->contains(strtolower($action));
                                          $isChecked = collect($currentActions)->contains(strtolower($action));
 
