@@ -53,9 +53,10 @@ class UpdateOfferRequest extends BaseRequest
                             $q->where('offers.id', '!=', $id);
                         })
                         ->exists();
-
-                    $name = Product::whereKey($value)->value('name') ?? "#{$value}";
-                    $fail("Product \"{$name}\" is already included in another offer.");
+                    if ($overlaps) {
+                        $name = Product::whereKey($value)->value('name') ?? "#{$value}";
+                        $fail("Product \"{$name}\" is already included in another offer.");
+                    }
                 },
             ],
             'category_ids' => ['nullable', 'array'],
@@ -65,9 +66,10 @@ class UpdateOfferRequest extends BaseRequest
                         $q->where('offers.id', '!=', $id);
                     })
                     ->exists();
-
-                $name = Category::whereKey($value)->value('name') ?? "#{$value}";
-                $fail("Product \"{$name}\" is already included in another offer.");
+                if ($overlaps) {
+                    $name = Category::whereKey($value)->value('name') ?? "#{$value}";
+                    $fail("Product \"{$name}\" is already included in another offer.");
+                }
             }],
         ];
     }
