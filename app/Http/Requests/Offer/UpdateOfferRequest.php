@@ -42,19 +42,33 @@ class UpdateOfferRequest extends BaseRequest
 
             'start_at' => ['required', 'date',  'after_or_equal:today'],
             'end_at' => ['required', 'date', 'after_or_equal:start_at'],
-            'product_ids' => ['nullable', 'array'],
-            'product_ids.*' => ['integer', 'exists:products,id',function ($attribute, $value, $fail) use ($id) {
-                $hasOffer = Product::find($value)?->offers->contains($id);
-                if ($hasOffer) {
-                    $fail("This product $value is already included in another active offer.");
-                }
-            }],
+            'product_ids'   => ['nullable', 'array'],
+            'product_ids.*' => [
+                'integer',
+                'distinct',
+                'exists:products,id',
+                function ($attribute, $value, $fail)  use($id){
+                    $overlaps = Product::whereKey($value)
+                        ->whereHas('offers', function ($q) use ($id) {
+                            $q->where('offers.id', '!=', $id);
+                        })
+                        ->exists();
 
+                    if ($overlaps) {
+                        $fail("Product #{$value} is already included in another offer.");
+                    }
+                },
+            ],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id',function ($attribute, $value, $fail) use ($id) {
-                $hasOffer = Category::find($value)?->offers->contains($id);
-                if ($hasOffer) {
-                    $fail("This category $value is already included in another active offer.");
+                $overlaps = Category::whereKey($value)
+                    ->whereHas('offers', function ($q) use ($id) {
+                        $q->where('offers.id', '!=', $id);
+                    })
+                    ->exists();
+
+                if ($overlaps) {
+                    $fail("Product #{$value} is already included in another offer.");
                 }
             }],
         ];
