@@ -19,7 +19,8 @@ class RolesAndPermissionsSeeder extends Seeder
             Permission::query()->firstOrCreate(
                 ['name' => $permissionEnum->value],
             [
-                'group' => $permissionEnum->group(),
+                'group_key' => $permissionEnum->group()['key'],
+                'group' => $permissionEnum->group()['value'],
                 'guard_name' => 'web',
                 'routes' => $permissionEnum->routes(),
             ]);

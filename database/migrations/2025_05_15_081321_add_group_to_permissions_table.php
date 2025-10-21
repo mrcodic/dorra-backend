@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('permissions', function (Blueprint $table) {
-            $table->json('group')->after('name')->nullable();
+            $table->json('group_key')->after('name')->nullable();
+            $table->json('group')->after('group_key')->nullable();
         });
     }
 
@@ -22,6 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('permissions', function (Blueprint $table) {
+            $table->dropColumn('group_key');
             $table->dropColumn('group');
         });
     }
