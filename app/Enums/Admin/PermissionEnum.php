@@ -2,8 +2,6 @@
 
 namespace App\Enums\Admin;
 
-use Illuminate\Support\Str;
-
 enum PermissionEnum: string
 {
     // Dashboards
@@ -157,67 +155,126 @@ enum PermissionEnum: string
     case UPDATE_STATION_STATUSES = 'station-statuses_update';
 
 
-    public function group(): array
+    public function group()
     {
-        return [
-            'key'   => $this->groupKey(),
-            'value' => $this->groupLabel(),
-        ];
-    }
+        return match ($this) {
+            self::DASHBOARDS => 'Dashboards',
 
+            // Admins
+            self::INDEX_ADMINS, self::CREATE_ADMINS, self::SHOW_ADMINS, self::UPDATE_ADMINS, self::DELETE_ADMINS
+            => [
+               'key' => 'admins',
+               'value' => 'Admins',
+                ],
 
-    public function groupKey(): string
-    {
-        return explode('_', $this->value)[0];
-    }
+            // Users
+            self::INDEX_USERS, self::CREATE_USERS, self::SHOW_USERS, self::UPDATE_USERS, self::DELETE_USERS
+            => 'Users',
 
+            // Products
+            self::INDEX_PRODUCTS, self::CREATE_PRODUCTS, self::SHOW_PRODUCTS, self::UPDATE_PRODUCTS, self::DELETE_PRODUCTS
+            => 'Products',
 
-    private function groupLabel(): string
-    {
-        return match ($this->groupKey()) {
-            'dashboards'          => 'Dashboards',
-            'admins'              => 'Admins',
-            'users'               => 'Users',
-            'products'            => 'Products',
-            'categories'          => 'Categories',
-            'sub-categories'      => 'Sub Products',
-            'tags'                => 'Tags',
-            'flags'               => 'Flags',
-            'product-templates'   => 'Templates',
-            'mockups'             => 'Mockups',
-            'orders'              => 'Orders',
-            'discount-codes'      => 'Discount Codes',
-            'offers'              => 'Offers',
-            'invoices'            => 'Invoices',
-            'locations'           => 'Locations',
-            'roles'               => 'Roles',
-            'faqs'                => 'FAQs',
-            'messages'            => 'Messages',
-            'settings.details'    => 'Settings Details',
-            'settings.payments'   => 'Settings Payments',
-            'settings.notifications' => 'Settings Notifications',
-            'settings.website'    => 'Settings Website',
-            'jobs'                => 'Jobs',
-            'board'               => 'Board',
-            'inventories'         => 'Inventories',
-            'station-statuses'    => 'Station Statuses',
-            default               => Str::headline(str_replace('-', ' ', $this->groupKey())),
+            // Categories
+            self::INDEX_CATEGORIES, self::CREATE_CATEGORIES, self::SHOW_CATEGORIES, self::UPDATE_CATEGORIES, self::DELETE_CATEGORIES
+            => 'Categories',
+
+            // Sub Products
+            self::INDEX_SUBCATEGORIES, self::CREATE_SUBCATEGORIES, self::SHOW_SUBCATEGORIES, self::UPDATE_SUBCATEGORIES, self::DELETE_SUBCATEGORIES
+            => 'Sub Products',
+
+            // Tags
+            self::INDEX_TAGS, self::CREATE_TAGS, self::SHOW_TAGS, self::UPDATE_TAGS, self::DELETE_TAGS
+            => 'Tags',
+            self::INDEX_FLAGS, self::CREATE_FLAGS, self::SHOW_FLAGS, self::UPDATE_FLAGS, self::DELETE_FLAGS
+            => 'Flags',
+            // Templates
+            self::INDEX_TEMPLATES, self::CREATE_TEMPLATES, self::SHOW_TEMPLATES, self::UPDATE_TEMPLATES, self::DELETE_TEMPLATES
+            => 'Templates',
+
+            // Mockups
+            self::INDEX_MOCKUPS, self::CREATE_MOCKUPS, self::SHOW_MOCKUPS, self::UPDATE_MOCKUPS, self::DELETE_MOCKUPS
+            => 'Mockups',
+
+            // Orders
+            self::INDEX_ORDERS, self::CREATE_ORDERS, self::SHOW_ORDERS, self::UPDATE_ORDERS, self::DELETE_ORDERS
+            => 'Orders',
+
+            // Discount Codes
+            self::INDEX_DISCOUNT_CODES, self::CREATE_DISCOUNT_CODES, self::SHOW_DISCOUNT_CODES, self::UPDATE_DISCOUNT_CODES, self::DELETE_DISCOUNT_CODES
+            => 'Discount Codes',
+
+            // Offers
+            self::INDEX_OFFERS, self::CREATE_OFFERS, self::SHOW_OFFERS, self::UPDATE_OFFERS, self::DELETE_OFFERS
+            => 'Offers',
+
+            // Invoices
+            self::INDEX_INVOICES, self::SHOW_INVOICES, self::UPDATE_INVOICES, self::DELETE_INVOICES
+            => 'Invoices',
+
+            // Logistics
+//            self::SHOW_LOGISTICS_DASHBOARD => 'Logistics',
+
+            // Locations
+            self::INDEX_LOCATIONS, self::CREATE_LOCATIONS, self::SHOW_LOCATIONS, self::UPDATE_LOCATIONS, self::DELETE_LOCATIONS
+            => 'Locations',
+
+            // Roles
+            self::INDEX_ROLES, self::CREATE_ROLES, self::SHOW_ROLES, self::UPDATE_ROLES, self::DELETE_ROLES
+            => 'Roles',
+
+            // FAQs
+            self::INDEX_FAQS, self::CREATE_FAQS, self::SHOW_FAQS, self::UPDATE_FAQS, self::DELETE_FAQS
+            => 'FAQs',
+
+            // Messages
+            self::INDEX_MESSAGES, self::SHOW_MESSAGES, self::DELETE_MESSAGES
+            => 'Messages',
+
+            // Settings
+            self::SETTINGS_DETAILS
+            => 'Settings Details',
+            self::SETTINGS_PAYMENTS
+            => 'Settings Payments',
+            self::SETTINGS_NOTIFICATIONS
+            => 'Settings Notifications',
+            self::SETTINGS_WEBSITE
+            => 'Settings Website',
+
+            // Jobs
+            self::INDEX_JOBS, self::SHOW_JOBS, self::UPDATE_JOBS
+            => 'Jobs',
+
+            // Board
+            self::SHOW_BOARD
+            => 'Board',
+
+            // Inventories
+            self::INDEX_INVENTORIES, self::SHOW_INVENTORIES, self::CREATE_INVENTORIES, self::DELETE_INVENTORIES, self::UPDATE_INVENTORIES
+            => 'Inventories',
+
+            // Station Statuses
+            self::INDEX_STATION_STATUSES, self::SHOW_STATION_STATUSES, self::CREATE_STATION_STATUSES, self::DELETE_STATION_STATUSES, self::UPDATE_STATION_STATUSES
+            => 'Station Statuses',
         };
     }
-
 
     public function routes(): array
     {
         $resource = $this->groupKey();
 
         return match (true) {
-            str_contains($this->value, '_index')  => [$resource . '.index'],
+            str_contains($this->value, '_index') => [$resource . '.index'],
             str_contains($this->value, '_create') => [$resource . '.create', $resource . '.store'],
             str_contains($this->value, '_update') => [$resource . '.edit', $resource . '.update'],
-            str_contains($this->value, '_show')   => [$resource . '.show'],
+            str_contains($this->value, '_show') => [$resource . '.show'],
             str_contains($this->value, '_delete') => [$resource . '.destroy', $resource . '.bulk-delete'],
-            default                               => [],
+            default => [],
         };
     }
 
+    public function groupKey(): string
+    {
+        return explode('_', $this->value)[0];
+    }
 }

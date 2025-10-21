@@ -309,5 +309,5 @@ use Illuminate\Support\Facades\Route;
         Route::delete('/media/{media}', [MainController::class, 'removeMedia'])->name("media.destroy");
 
     });
-    
+
 //});
