@@ -52,42 +52,66 @@
                         </thead>
                         <tbody>
 
+                        @php
+                            use Illuminate\Support\Str;
+
+                            // Lowercased list of the role's permission names (e.g. posts_update, users_create)
+                            $rolePermissionNames = $model->permissions
+                                ->pluck('name')
+                                ->map(fn ($n) => Str::lower($n))
+                                ->values();
+                        @endphp
+
                         @foreach($associatedData['permissions'] as $group => $groupPermissions)
+                            @php
+                                // Normalize the group key once for ids/classes/data-attrs
+                                $groupKey = Str::snake(Str::lower($group));
+
+                                // Lowercased list of this group's available permission names
+                                $groupPermissionNames = $groupPermissions
+                                    ->pluck('name')
+                                    ->map(fn ($n) => Str::lower($n))
+                                    ->values();
+                            @endphp
+
                             <tr>
                                 <td>
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input row-checkbox"
-                                               data-group="{{ $group }}"/>
-
+                                        <input
+                                            type="checkbox"
+                                            class="form-check-input row-checkbox"
+                                            data-group="{{ $groupKey }}"
+                                        />
                                         <span>{{ $group }}</span>
                                     </div>
                                 </td>
 
                                 @foreach(\App\Enums\Permission\PermissionAction::values() as $action)
                                     @php
-                                        $supportedActions = $groupPermissions->pluck('name')->map(fn ($n) => Str::afterLast($n, '_'))
-                                           ->unique()
-                                           ->values()
-                                           ->all();
-                                        $currentActions = $model->permissions->pluck('name')->map(fn ($n) => Str::afterLast($n, '_'))
-                                           ->unique()
-                                           ->values()
-                                           ->all();
-//                                        dump($currentActions,$model->permissions->pluck('name'));
-                                         $isAvailable = collect($supportedActions)->contains(strtolower($action));
-                                         $isChecked = collect($currentActions)->contains(strtolower($action));
+                                        // Normalize action to snake/lower (e.g. "Update Profile" => "update_profile")
+                                        $actionKey = Str::snake(Str::lower($action));
 
+                                        // Full permission name for this cell
+                                        $permName = "{$groupKey}_{$actionKey}";
+
+                                        // Available in this group?
+                                        $isAvailable = $groupPermissionNames->contains($permName);
+
+                                        // Already assigned to this role?
+                                        $isChecked = $rolePermissionNames->contains($permName);
                                     @endphp
 
                                     <td>
                                         <div class="form-check">
-                                            <input type="checkbox"
-                                                   class="form-check-input permission-checkbox {{ $group }}-checkbox"
-                                                   name="permissions[]"
-                                                   @checked($isChecked)
-                                                   value="{{strtolower($group).'_'.strtolower($action) }}"
-                                                   id="{{ $group.$action }}" @disabled(!$isAvailable) />
-
+                                            <input
+                                                type="checkbox"
+                                                class="form-check-input permission-checkbox {{ $groupKey }}-checkbox"
+                                                name="permissions[]"
+                                                value="{{ $permName }}"
+                                                id="perm_{{ $groupKey }}_{{ $actionKey }}"
+                                                @checked($isChecked)
+                                                @disabled(!$isAvailable)
+                                            />
                                         </div>
                                     </td>
                                 @endforeach
