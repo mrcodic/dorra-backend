@@ -40,44 +40,36 @@
   </div>
 
   <!-- Role cards -->
-  <div class="row">
-    @foreach($associatedData['roles'] as $role)
-
-    <div class="col-xl-4 col-lg-6 col-md-6">
-      <div class="card">
-
-        <div class="card-body">
-
-          <div class="d-flex justify-content-between">
-            <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-              @foreach($role->users as $user)
-              <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="Jimmy Ressula"
-                class="avatar avatar-sm pull-up">
-                <img class="rounded-circle" src="{{$user->getFirstMediaUrl('admins') ?: asset('images/default-user.png')}}"
-                  alt="Avatar" />
-              </li>
-              @endforeach
-            </ul>
-            <span>{{ $role->users_count }} Users</span>
-          </div>
-          <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
-            <div class="role-heading">
-              <h4 class="">{{ $role->name }}</h4>
-              <a href="{{ route('roles.edit',$role->id) }}" class="role-edit-modal">
-                Edit Role
-              </a>
+    <div id="rolesGrid" class="row">
+        @foreach($associatedData['roles'] as $role)
+            <div class="col-xl-4 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
+                                @foreach($role->users as $user)
+                                    <li data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="{{ $user->name ?? 'User' }}" class="avatar avatar-sm pull-up">
+                                        <img class="rounded-circle"
+                                             src="{{ $user->getFirstMediaUrl('admins') ?: asset('images/default-user.png') }}"
+                                             alt="Avatar" />
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <span>{{ $role->users_count }} Users</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
+                            <div class="role-heading">
+                                <h4 class="">{{ is_array($role->name) ? ($role->name[app()->getLocale()] ?? reset($role->name)) : $role->name }}</h4>
+                                <a href="{{ route('roles.edit',$role->id) }}" class="role-edit-modal">Edit Role</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-          </div>
-
-        </div>
-
-      </div>
+        @endforeach
     </div>
-    @endforeach
 
-    {{-- Repeat for more role cards --}}
-  </div>
 </div>
 @endsection
 
@@ -110,30 +102,101 @@
 <script src="{{ asset(mix('js/scripts/pages/app-access-roles.js')) }}"></script>
 <script>
     (function () {
-        let t;
+        let t, xhr;
+
         const $input = $('#searchInput');
+        const $grid  = $('#rolesGrid');
+
+        const editBase = "{{ url('/roles') }}"; // we'll build /roles/{id}/edit
+
+        function esc(str) {
+            // very small escape to avoid accidental HTML injection in names
+            return String(str ?? '').replace(/[&<>"']/g, s => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[s]));
+        }
+
+        function renderRoles(data) {
+            if (!data || !data.length) {
+                $grid.html('<div class="col-12 text-center text-muted py-5">No roles found.</div>');
+                return;
+            }
+
+            const html = data.map(r => {
+                const avatars = (r.users || []).map(u => `
+          <li data-bs-toggle="tooltip" data-bs-placement="top" title="${esc(u.name || 'User')}"
+              class="avatar avatar-sm pull-up">
+            <img class="rounded-circle" src="${esc(u.avatar)}" alt="Avatar">
+          </li>
+        `).join('');
+
+                return `
+          <div class="col-xl-4 col-lg-6 col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
+                    ${avatars}
+                  </ul>
+                  <span>${r.users_count} Users</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
+                  <div class="role-heading">
+                    <h4>${esc(r.name)}</h4>
+                    <a href="${editBase}/${encodeURIComponent(r.id)}/edit" class="role-edit-modal">Edit Role</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+            }).join('');
+
+            $grid.html(html);
+
+            // Re-init tooltips & feather if you use them
+            if (window.feather) window.feather.replace();
+            $('[data-bs-toggle="tooltip"]').each(function () {
+                if (!this._tooltip) { this._tooltip = new bootstrap.Tooltip(this); }
+            });
+        }
+
+        function setLoading() {
+            $grid.html('<div class="col-12 text-center py-5">Loading...</div>');
+        }
 
         $input.on('input', function () {
             clearTimeout(t);
             const q = $(this).val();
 
-            // small debounce
             t = setTimeout(() => {
-                $.ajax({
+                if (xhr && xhr.readyState !== 4) xhr.abort();
+
+                // Update URL (?search=) without reload
+                const urlObj = new URL(window.location.href);
+                if (q) urlObj.searchParams.set('search', q);
+                else   urlObj.searchParams.delete('search');
+                history.replaceState({}, '', urlObj);
+
+                setLoading();
+
+                xhr = $.ajax({
                     url: "{{ request()->url() }}",
                     method: "GET",
+                    dataType: "json",
                     data: { search: q },
-
                     success: function (res) {
-
+                        renderRoles(res.data || []);
                     },
                     error: function (xhr) {
+                        if (xhr.statusText === 'abort') return;
                         console.error('Search failed', xhr.responseText);
+                        $grid.html('<div class="col-12 text-center text-danger py-5">Search failed.</div>');
                     }
                 });
             }, 300);
         });
     })();
 </script>
+
 
 @endsection
