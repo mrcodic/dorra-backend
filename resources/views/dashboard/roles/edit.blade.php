@@ -77,12 +77,12 @@
                         @foreach($associatedData['permissions'] as $group => $groupPermissions)
                             @php
 
-                                $groupKey = Str::snake(Str::lower($group));
+                                $groupKey  = Str::kebab($group);
 
-                                $groupPermissionNames = $groupPermissions
-                                    ->pluck('name')
-                                    ->map(fn ($n) => Str::lower($n))
-                                    ->values();
+                                 $groupPermissionNames = $groupPermissions
+                                     ->pluck('name')
+                                     ->map(fn ($n) => Str::lower($n))
+                                     ->values();
                             @endphp
 
                             <tr>
