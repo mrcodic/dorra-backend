@@ -152,13 +152,16 @@ function editSetMode(mode) {
     }
 }
 
-function ensureAndSelect($select, value, label) {
-    if (!value) return;
-    const v = String(value);
-    if ($select.find(`option[value="${v}"]`).length === 0) {
-        $select.append(new Option(label || v, v, false, false));
+function ensureAndSelect($sel, val, label, doSelect = false) {
+    if (!val) return;
+    const v = String(val);
+    if ($sel.find(`option[value="${v}"]`).length === 0) {
+        $sel.append(new Option(label ?? v, v, false, false));
     }
-    $select.val(v).trigger('change');
+    if (doSelect) {
+        const evt = $sel.hasClass('select2') ? 'change.select2' : 'change';
+        $sel.val(v).trigger(evt);
+    }
 }
 
 $(document).on('click', '.edit-details', function (e) {
@@ -185,16 +188,17 @@ $(document).on('click', '.edit-details', function (e) {
         const $leftProducts = $('#editCategoriesSelect'); // products
         const $rightCats    = $('#editProductsSelect');   // categories
 
-        // ✅ tell the categories select which value to preselect once options arrive
-
+        // 1) set product -> triggers categories load
         $leftProducts.val(String(parentId)).trigger('change');
 
-        // placeholder before load
-        $rightCats.empty().append(new Option('— Select Category —', '', false, false));
-        $rightCats.data('targetCategoryId', String(resourceableId));
-        ensureAndSelect($rightCats, resourceableId, resourceLabel);
+        // 2) prepare right (parent categories), preselect target when they arrive
+        $rightCats
+            .empty()
+            .append(new Option('— Select Category —', '', false, false))
+            .data('targetCategoryId', String(resourceableId));
 
-        // this triggers the AJAX that fills categories, and your success handler will preselect
+        // if you already know the label for target, stash it in case endpoint returns a subset
+        ensureAndSelect($rightCats, resourceableId, resourceLabel);
     } else {
         ensureAndSelect($('#editProductsWithoutCategoriesSelect'), resourceableId, resourceLabel);
     }
