@@ -104,29 +104,24 @@
     (function () {
         let t, xhr;
 
-        const $input = $('#searchInput');
-        const $grid  = $('#rolesGrid');
-        const editBase = "{{ url('/roles') }}";          // -> /roles/{id}/edit
-        const LOCALE  = "{{ app()->getLocale() }}";      // 'en' or 'ar'
+        const $input   = $('#searchInput');
+        const $grid    = $('#rolesGrid');
+        const editBase = "{{ url('/roles') }}";                 // -> /roles/{id}/edit
+        const DEFAULT_AVATAR = "{{ asset('images/default-user.png') }}";
 
-        // small escape to avoid injecting HTML
+        // escape text
         function esc(str) {
             return String(str ?? '').replace(/[&<>"']/g, s => ({
                 '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
             }[s]));
         }
-
-        // pick value from {en, ar} object or fallback
-        function pickLocale(val) {
-            if (val == null) return '';
-            if (typeof val === 'object') {
-                return val[LOCALE] ?? Object.values(val).find(Boolean) ?? '';
-            }
-            return String(val);
+        // pick avatar url
+        function avatarUrl(u) {
+            return (u && u.image && u.image.url) ? u.image.url : DEFAULT_AVATAR;
         }
 
         function renderRolesFromApi(payload) {
-            const ok = payload && payload.success !== false && (payload.status === undefined || payload.status === 200);
+            const ok   = payload && payload.success !== false && (payload.status === undefined || payload.status === 200);
             const list = ok ? (payload.data || []) : [];
 
             if (!list.length) {
@@ -135,22 +130,29 @@
             }
 
             const html = list.map(r => {
-                const name = esc(pickLocale(r.name));
-                const desc = esc(pickLocale(r.description));
-                const created = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
+                const avatars = (r.users || []).map(u => `
+          <li data-bs-toggle="tooltip" data-bs-placement="top"
+              title="${esc([u.first_name, u.last_name].filter(Boolean).join(' ') || u.email || 'User')}"
+              class="avatar avatar-sm pull-up">
+            <img class="rounded-circle" src="${esc(avatarUrl(u))}" alt="Avatar" />
+          </li>
+        `).join('');
 
                 return `
           <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card">
               <div class="card-body">
+
                 <div class="d-flex justify-content-between">
-                  <span class="text-muted small">${created}</span>
+                  <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
+                    ${avatars}
+                  </ul>
+                  <span>${r.users_count ?? 0} Users</span>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
                   <div class="role-heading">
-                    <h4 class="mb-25">${name}</h4>
-                    ${desc ? `<div class="text-muted small mb-50">${desc}</div>` : ''}
+                    <h4 class="">${esc(r.name)}</h4>
                     <a href="${editBase}/${encodeURIComponent(r.id)}/edit" class="role-edit-modal">Edit Role</a>
                   </div>
                 </div>
@@ -162,8 +164,11 @@
 
             $grid.html(html);
 
+            // Re-init icons/tooltips
             if (window.feather) window.feather.replace();
-            // (Tooltips only if you add any in this markup)
+            $('[data-bs-toggle="tooltip"]').each(function () {
+                if (!this._tooltip) this._tooltip = new bootstrap.Tooltip(this);
+            });
         }
 
         function setLoading() {
@@ -177,7 +182,6 @@
             t = setTimeout(() => {
                 if (xhr && xhr.readyState !== 4) xhr.abort();
 
-                // keep ?search= in URL without reload
                 const urlObj = new URL(window.location.href);
                 if (q) urlObj.searchParams.set('search', q);
                 else   urlObj.searchParams.delete('search');
@@ -201,6 +205,7 @@
         });
     })();
 </script>
+
 
 
 
