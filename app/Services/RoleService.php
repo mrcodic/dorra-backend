@@ -13,7 +13,8 @@ class RoleService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
-        $query = $this->repository->query();
+        $query = $this->repository->query() ->withCount('users')
+            ->with('users.media');
         if (request()->ajax())
         {
             $locale = app()->getLocale();
@@ -27,9 +28,7 @@ class RoleService extends BaseService
                 }
             });
         }
-        return $query
-            ->withCount('users')
-            ->with('users.media')->get();
+        return $query->get();
 
     }
 
