@@ -53,8 +53,7 @@
                         <tbody>
 
                         @php
-                        
-                            // Lowercased list of the role's permission names (e.g. posts_update, users_create)
+
                             $rolePermissionNames = $model->permissions
                                 ->pluck('name')
                                 ->map(fn ($n) => Str::lower($n))
@@ -63,10 +62,9 @@
 
                         @foreach($associatedData['permissions'] as $group => $groupPermissions)
                             @php
-                                // Normalize the group key once for ids/classes/data-attrs
+
                                 $groupKey = Str::snake(Str::lower($group));
 
-                                // Lowercased list of this group's available permission names
                                 $groupPermissionNames = $groupPermissions
                                     ->pluck('name')
                                     ->map(fn ($n) => Str::lower($n))
@@ -87,16 +85,10 @@
 
                                 @foreach(\App\Enums\Permission\PermissionAction::values() as $action)
                                     @php
-                                        // Normalize action to snake/lower (e.g. "Update Profile" => "update_profile")
                                         $actionKey = Str::snake(Str::lower($action));
-
-                                        // Full permission name for this cell
                                         $permName = "{$groupKey}_{$actionKey}";
 
-                                        // Available in this group?
                                         $isAvailable = $groupPermissionNames->contains($permName);
-
-                                        // Already assigned to this role?
                                         $isChecked = $rolePermissionNames->contains($permName);
                                     @endphp
 
