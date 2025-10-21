@@ -144,6 +144,7 @@ enum PermissionEnum: string
     case INDEX_INVENTORIES  = 'inventories_index';
     case SHOW_INVENTORIES   = 'inventories_show';
     case CREATE_INVENTORIES = 'inventories_create';
+    case UPDATE_INVENTORIES = 'inventories_update';
     case DELETE_INVENTORIES = 'inventories_delete';
 
     // Station Statuses
@@ -151,6 +152,7 @@ enum PermissionEnum: string
     case SHOW_STATION_STATUSES   = 'station-statuses_show';
     case CREATE_STATION_STATUSES = 'station-statuses_create';
     case DELETE_STATION_STATUSES = 'station-statuses_delete';
+    case UPDATE_STATION_STATUSES = 'station-statuses_update';
 
 
     public function group(): string
@@ -238,11 +240,11 @@ enum PermissionEnum: string
             => 'Board',
 
             // Inventories
-            self::INDEX_INVENTORIES, self::SHOW_INVENTORIES, self::CREATE_INVENTORIES, self::DELETE_INVENTORIES
+            self::INDEX_INVENTORIES, self::SHOW_INVENTORIES, self::CREATE_INVENTORIES, self::DELETE_INVENTORIES,self::UPDATE_INVENTORIES
             => 'Inventories',
 
             // Station Statuses
-            self::INDEX_STATION_STATUSES, self::SHOW_STATION_STATUSES, self::CREATE_STATION_STATUSES, self::DELETE_STATION_STATUSES
+            self::INDEX_STATION_STATUSES, self::SHOW_STATION_STATUSES, self::CREATE_STATION_STATUSES, self::DELETE_STATION_STATUSES,self::UPDATE_STATION_STATUSES
             => 'Station Statuses',
         };
     }
