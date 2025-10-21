@@ -127,7 +127,7 @@
                 <button type="button" data-bs-toggle="modal" data-bs-target="#deleteRoleModal" class="btn btn-outline-danger">Delete
                 </button>
                 <div class="d-flex gap-1">
-                    <button type="submit" class="btn btn-outline-secondary">Cancel</button>
+                    <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </div>
