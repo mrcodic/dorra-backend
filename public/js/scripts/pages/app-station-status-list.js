@@ -190,7 +190,7 @@ $(document).on('click', '.edit-details', function (e) {
         $leftProducts.val(String(parentId)).trigger('change');
 
         // placeholder before load
-        $rightCats.empty().append(new Option('— Select Category —', '', false, false));
+        // $rightCats.empty().append(new Option('— Select Category —', '', false, false));
         $rightCats.data('targetCategoryId', String(resourceableId));
         ensureAndSelect($rightCats, resourceableId, resourceLabel);
 
