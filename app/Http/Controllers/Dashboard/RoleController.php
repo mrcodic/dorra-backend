@@ -27,10 +27,8 @@ class RoleController extends DashboardController
         $this->usePagination = true;
         $this->resourceClass = RoleResource::class;
         $this->assoiciatedData = [
-            'create' => [
-                'permissions' => $this->permissionRepository->query()->get()->groupBy('group'),
-            ],
-            'edit' => [
+         
+            'shared' => [
                 'permissions' => $this->permissionRepository->query()->get()->groupBy('group'),
             ],
             'index' => [
