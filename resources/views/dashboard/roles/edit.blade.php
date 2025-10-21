@@ -124,6 +124,8 @@
                 <!-- Permission table -->
             </div>
             <div class="d-flex justify-content-between mt-2">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#deleteRoleModal" class="btn btn-outline-danger">Delete
+                </button>
                 <div class="d-flex gap-1">
                     <button type="submit" class="btn btn-outline-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
@@ -132,6 +134,12 @@
         </form>
         <!--/ Add role form -->
     </div>
+        @include('modals.delete',[
+         'id' => 'deleteRoleModal',
+        'formId' => 'deleteRoleForm',
+        'title' => 'Delete Role',
+        'action' => route('roles.destroy', $model),
+    ])
 @endsection
 
 @section('vendor-script')
@@ -158,8 +166,15 @@
                 $(`.${group}-checkbox`).prop('checked', isChecked);
             });
         });
-        handleAjaxFormSubmit("#editRoleForm",{
+        handleAjaxFormSubmit("#editRoleForm", {
             successMessage: "Role updated successfully",
+            onSuccess: function () {
+                location.replace('/roles');
+
+            }
+        })
+        handleAjaxFormSubmit("#deleteRoleForm",{
+            successMessage: "Role deleted successfully",
             onSuccess: function () {
                 location.replace('/roles');
 
