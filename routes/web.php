@@ -188,9 +188,9 @@ Route::middleware('auth')->group(function () {
 
 
     Route::controller(SettingController::class)->prefix('settings')->group(function () {
-        Route::get('/details', 'details')->name('settings.details');
-        Route::get('/payments', 'payments')->name('settings.payments');
-        Route::get('/website', 'website')->name('settings.website');
+        Route::get('/details', 'details')->name('settings.details.show');
+        Route::get('/payments', 'payments')->name('settings.payments.show');
+        Route::get('/website', 'website')->name('settings.website.show');
         Route::get('/notifications', 'notifications')->name('settings.notifications');
 
         Route::post('/carousels/{carousel?}', 'createOrUpdateCarousel')->name('carousels.update');
