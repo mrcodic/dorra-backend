@@ -56,7 +56,7 @@ class UpdateOfferRequest extends BaseRequest
                         ->exists();
                     if ($overlaps) {
                         $name = Product::whereKey($value)->value('name') ?? "#{$value}";
-                        $fail("Product \"{$name}\" is already included in another offer.");
+                        $fail("Category \"{$name}\" is already included in another offer.");
                     }
                 },
             ],
@@ -70,7 +70,7 @@ class UpdateOfferRequest extends BaseRequest
                     ->exists();
                 if ($overlaps) {
                     $name = Category::whereKey($value)->value('name') ?? "#{$value}";
-                    $fail("Category \"{$name}\" is already included in another offer.");
+                    $fail("Product \"{$name}\" is already included in another offer.");
                 }
             }],
         ];
