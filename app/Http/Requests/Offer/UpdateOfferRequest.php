@@ -46,7 +46,7 @@ class UpdateOfferRequest extends BaseRequest
             'product_ids.*' => ['integer', 'exists:products,id',function ($attribute, $value, $fail) use ($id) {
                 $hasOffer = Product::find($value)?->offers->contains($id);
                 if ($hasOffer) {
-                    $fail("This product is already included in another active offer.");
+                    $fail("This product $value is already included in another active offer.");
                 }
             }],
 
@@ -54,7 +54,7 @@ class UpdateOfferRequest extends BaseRequest
             'category_ids.*' => ['integer', 'exists:categories,id',function ($attribute, $value, $fail) use ($id) {
                 $hasOffer = Category::find($value)?->offers->contains($id);
                 if ($hasOffer) {
-                    $fail("This category is already included in another active offer.");
+                    $fail("This category $value is already included in another active offer.");
                 }
             }],
         ];
