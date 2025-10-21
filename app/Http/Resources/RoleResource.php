@@ -18,7 +18,7 @@ class RoleResource extends JsonResource
             'id' => $this->id,
             'name' =>$this->name,
             'description' =>$this->description,
-            'users' => AdminResource::make($this->whenLoaded('users')),
+            'users' => AdminResource::collection($this->whenLoaded('users')),
         ];
     }
 }
