@@ -1,4 +1,3 @@
-@php use Illuminate\Support\Str; @endphp
 @extends('layouts/contentLayoutMaster')
 @section('title', 'Edit Role')
 @section('main-page', 'Roles')
@@ -52,7 +51,7 @@
                     </thead>
                     <tbody>
 
-                    @foreach($model->permissions->groupBy('group') as $group => $groupPermissions)
+                    @foreach($associatedData['permissions'] as $group => $groupPermissions)
                         <tr>
                             <td>
                                 <div class="form-check">
@@ -78,7 +77,7 @@
                                         <input type="checkbox"
                                                class="form-check-input permission-checkbox {{ $group }}-checkbox"
                                                name="permissions[]"
-{{--                                               @checked($action == )--}}
+{{--                                               @checked($model->permissions->groupBy('group'))--}}
                                                value="{{strtolower($group).'_'.strtolower($action) }}"
                                                id="{{ $group.$action }}" @disabled(!$isAvailable) />
 
