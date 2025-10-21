@@ -135,12 +135,6 @@
             "slug": "",
             "submenu": [
                 {
-                    "url": "/permissions",
-                    "name": "Permissions",
-                    "icon": "circle",
-                    "slug": "app-user-list"
-                },
-                {
                     "url": "/roles",
                     "name": "Roles",
                     "icon": "circle",
