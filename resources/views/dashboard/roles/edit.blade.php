@@ -31,13 +31,22 @@
 
 
             <!-- New Role Description field -->
-            <div class="col-12 mt-1">
-                <label class="form-label" for="modalRoleDescription">Role Description</label>
-                <textarea id="modalRoleDescription" name="modalRoleDescription" class="form-control" rows="3"
-                          placeholder="Enter role description"
-                          data-msg="Please enter a description for the role">{{ $model->description }}</textarea>
+            <div class="col-md-6 mt-1">
+                <label class="form-label" for="modalRoleDescription">Role Description (EN)</label>
+                <textarea id="modalRoleDescription" name="description[en]" class="form-control" rows="3"
+                          placeholder="Enter role description in english"
+                          data-msg="Please enter a description for the role">
+                    {{ $model->getTranslation('description','en') }}
+                </textarea>
             </div>
-
+            <div class="col-md-6 mt-1">
+                <label class="form-label" for="modalRoleDescription">Role Description (AR)</label>
+                <textarea id="modalRoleDescription" name="description[ar]" class="form-control" rows="3"
+                          placeholder="Enter role description in arabic"
+                          data-msg="Please enter a description for the role ">
+                     {{ $model->getTranslation('description','ar') }}
+                </textarea>
+            </div>
             <div class="col-12">
                 <h4 class="mt-2 pt-50">Role Permissions</h4>
                 <!-- Permission table -->
