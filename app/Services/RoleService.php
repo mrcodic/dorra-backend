@@ -27,7 +27,9 @@ class RoleService extends BaseService
                 }
             });
         }
-        return $query->with($relations)->get();
+        return $query
+            ->withCount('users')
+            ->with('users')->get();
 
     }
 
