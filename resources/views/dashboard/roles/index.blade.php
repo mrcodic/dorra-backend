@@ -26,9 +26,15 @@
   <!-- Header actions -->
   <div class="d-flex gap-1 align-items-center flex-wrap mb-2">
     <div class="col-12 col-md-8">
-      <input type="text" class="form-control" placeholder="Search here">
+
+        <form id="searchForm" action="{{ url()->current() }}" method="get" style="display:none">
+            <input type="text" name="search" class="form-control" placeholder="Search here">
+        </form>
+
+        <input type="text" id="searchInput" class="form-control" placeholder="Search here">
+
     </div>
-    <a class="btn btn-outline-primary col-12 col-md-3" href="/roles/create">
+    <a class="btn btn-outline-primary col-12 col-md-3" href="{{ route("roles.create") }}">
       <i data-feather="plus"></i> Add New Role
     </a>
   </div>
@@ -102,4 +108,32 @@
 </script>
 <script src="{{ asset(mix('js/scripts/pages/modal-add-role.js')) }}"></script>
 <script src="{{ asset(mix('js/scripts/pages/app-access-roles.js')) }}"></script>
+<script>
+    (function () {
+        let t;
+        const $input = $('#searchInput');
+
+        $input.on('input', function () {
+            clearTimeout(t);
+            const q = $(this).val();
+
+            // small debounce
+            t = setTimeout(() => {
+                $.ajax({
+                    url: "{{ request()->url() }}",
+                    method: "GET",
+                    data: { search: q },
+
+                    success: function (res) {
+
+                    },
+                    error: function (xhr) {
+                        console.error('Search failed', xhr.responseText);
+                    }
+                });
+            }, 300);
+        });
+    })();
+</script>
+
 @endsection
