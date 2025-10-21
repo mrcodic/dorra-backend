@@ -101,8 +101,11 @@
                                     @php
                                         $actionKey = Str::snake(Str::lower($action));
                                         $permName = "{$groupKey}_{$actionKey}";
-
-                                        $isAvailable = $groupPermissionNames->contains($permName);
+                                 $supportedActions = $groupPermissions->pluck('name')->map(fn ($n) => Str::afterLast($n, '_'))
+                                          ->unique()
+                                          ->values()
+                                          ->all();
+                                        $isAvailable = collect($supportedActions)->contains(strtolower($action));
                                         $isChecked = $rolePermissionNames->contains($permName);
                                     @endphp
 
@@ -130,7 +133,8 @@
                 <!-- Permission table -->
             </div>
             <div class="d-flex justify-content-between mt-2">
-                <button type="button" data-bs-toggle="modal" data-bs-target="#deleteRoleModal" class="btn btn-outline-danger">Delete
+                <button type="button" data-bs-toggle="modal" data-bs-target="#deleteRoleModal"
+                        class="btn btn-outline-danger">Delete
                 </button>
                 <div class="d-flex gap-1">
                     <button type="reset" class="btn btn-outline-secondary">Cancel</button>
@@ -140,12 +144,12 @@
         </form>
         <!--/ Add role form -->
     </div>
-        @include('modals.delete',[
-         'id' => 'deleteRoleModal',
-        'formId' => 'deleteRoleForm',
-        'title' => 'Delete Role',
-        'action' => route('roles.destroy', $model),
-    ])
+    @include('modals.delete',[
+     'id' => 'deleteRoleModal',
+    'formId' => 'deleteRoleForm',
+    'title' => 'Delete Role',
+    'action' => route('roles.destroy', $model),
+])
 @endsection
 
 @section('vendor-script')
@@ -179,7 +183,7 @@
 
             }
         })
-        handleAjaxFormSubmit("#deleteRoleForm",{
+        handleAjaxFormSubmit("#deleteRoleForm", {
             successMessage: "Role deleted successfully",
             onSuccess: function () {
                 location.replace('/roles');
