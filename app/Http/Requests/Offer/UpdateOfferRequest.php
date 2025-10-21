@@ -50,7 +50,8 @@ class UpdateOfferRequest extends BaseRequest
                 function ($attribute, $value, $fail)  use($id){
                     $overlaps = Product::whereKey($value)
                         ->whereHas('offers', function ($q) use ($id) {
-                            $q->where('offers.id', '!=', $id);
+                            $q->where('offers.id', '!=', $id)
+                                ->where('offers.end_at', '<=', now());
                         })
                         ->exists();
                     if ($overlaps) {
@@ -63,7 +64,7 @@ class UpdateOfferRequest extends BaseRequest
             'category_ids.*' => ['integer', 'exists:categories,id',function ($attribute, $value, $fail) use ($id) {
                 $overlaps = Category::whereKey($value)
                     ->whereHas('offers', function ($q) use ($id) {
-                        $q->where('offers.id', '!=', $id);
+                        $q->where('offers.id', '!=', $id)->where('offers.end_at', '<=', now());
                     })
                     ->exists();
                 if ($overlaps) {
