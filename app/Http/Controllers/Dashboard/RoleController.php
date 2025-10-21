@@ -28,6 +28,9 @@ class RoleController extends DashboardController
             'create' => [
                 'permissions' => $this->permissionRepository->query()->get()->groupBy('group'),
             ],
+            'edit' => [
+                'permissions' => $this->permissionRepository->query()->get()->groupBy('group'),
+            ],
             'index' => [
                 'roles' => $this->roleRepository->query()
                     ->withCount('users')
