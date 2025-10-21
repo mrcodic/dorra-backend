@@ -73,7 +73,7 @@
                                            ->unique()
                                            ->values()
                                            ->all();
-                                        dump($currentActions);
+                                        dump($currentActions,$model->permissions->pluck('name'));
                                          $isAvailable = collect($supportedActions)->contains(strtolower($action));
                                          $isChecked = collect($currentActions)->contains(strtolower($action));
 
