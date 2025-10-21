@@ -53,8 +53,7 @@
                         <tbody>
 
                         @php
-                            use Illuminate\Support\Str;
-
+                        
                             // Lowercased list of the role's permission names (e.g. posts_update, users_create)
                             $rolePermissionNames = $model->permissions
                                 ->pluck('name')
