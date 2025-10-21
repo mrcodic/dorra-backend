@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts/contentLayoutMaster')
 @section('title', 'Edit Role')
 @section('main-page', 'Roles')
@@ -68,7 +69,6 @@
                                            ->unique()
                                            ->values()
                                            ->all();
-    //                                        $permissionKey = strtolower($group) . '_' . strtolower($action);
                                          $isAvailable = collect($supportedActions)->contains(strtolower($action));
                                          $permissionIds   = $model->permissions->pluck('id');
                                          $groupIds  = $groupPermissions->pluck('id');
