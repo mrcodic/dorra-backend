@@ -225,7 +225,7 @@ Route::middleware('auth')->group(function () {
     });
     Route::apiResource('/jobs',JobTicketController::class);
 
-    Route::get('board', BoardController::class)->name('board');
+    Route::get('board', BoardController::class)->name('board.show');
     Route::view('/scan', 'dashboard.scan.kiosk')->name('scan.kiosk');
     Route::post('/scan', [JobTicketController::class, 'scan'])
         ->middleware('throttle:60,1')
