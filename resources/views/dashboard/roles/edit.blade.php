@@ -1,8 +1,10 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts/contentLayoutMaster')
 @section('title', 'Edit Role')
 @section('main-page', 'Roles')
 @section('sub-page', 'Edit Role')
-
+@section('main-page-url', route("roles.index"))
+@section('sub-page-url', route("roles.edit", $model))
 @section('vendor-style')
 <!-- Vendor CSS Files -->
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
@@ -50,32 +52,42 @@
                     </thead>
                     <tbody>
 
-                        @foreach($model->permissions->groupBy('group') as $group => $groupPermissions)
+                    @foreach($model->permissions->groupBy('group') as $group => $groupPermissions)
                         <tr>
                             <td>
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input row-checkbox"
-                                        data-group="{{ $group }}" @checked($groupPermissions->count() == 4 )
-                                    />
+                                           data-group="{{ $group }}"/>
+
                                     <span>{{ $group }}</span>
                                 </div>
                             </td>
 
-                            @foreach(['Create', 'Read', 'Update', 'Delete'] as $action)
-                            <td>
-                                <div class="form-check">
+                            @foreach(PermissionAction::values() as $action)
+                                @php
+                                    $supportedActions = $groupPermissions->pluck('name')->map(fn ($n) => Str::afterLast($n, '_'))
+                                       ->unique()
+                                       ->values()
+                                       ->all();
+//                                        $permissionKey = strtolower($group) . '_' . strtolower($action);
+                                     $isAvailable = collect($supportedActions)->contains(strtolower($action));
+                                @endphp
 
-                                    <input type="checkbox"
-                                        class="form-check-input permission-checkbox {{ $group }}-checkbox"
-                                        name="permissions[]" value="{{$group.$action }}" id="{{ $group.$action }}"
-                                        @checked($groupPermissions->contains('name', $group . $action))
+                                <td>
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               class="form-check-input permission-checkbox {{ $group }}-checkbox"
+                                               name="permissions[]"
+{{--                                               @checked($action == )--}}
+                                               value="{{strtolower($group).'_'.strtolower($action) }}"
+                                               id="{{ $group.$action }}" @disabled(!$isAvailable) />
 
-                                    />
-                                </div>
-                            </td>
+                                    </div>
+                                </td>
                             @endforeach
                         </tr>
-                        @endforeach
+                    @endforeach
+
                     </tbody>
                 </table>
             </div>

@@ -3,7 +3,8 @@
 @section('title', 'Add Role')
 @section('main-page', 'Roles')
 @section('sub-page', 'Add New Role')
-
+@section('main-page-url', route("roles.index"))
+@section('sub-page-url', route("roles.create"))
 @section('vendor-style')
     <!-- Vendor CSS Files -->
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
@@ -78,8 +79,7 @@
                                           ->unique()
                                           ->values()
                                           ->all();
-//                                       dump($supportedActions,$action);
-                                        $permissionKey = strtolower($group) . '_' . strtolower($action);
+//                                        $permissionKey = strtolower($group) . '_' . strtolower($action);
                                         $isAvailable = collect($supportedActions)->contains(strtolower($action));
                                     @endphp
 
