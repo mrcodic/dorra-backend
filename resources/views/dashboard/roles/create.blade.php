@@ -134,47 +134,14 @@
                 const isChecked = $(this).is(':checked');
                 $(`.${group}-checkbox`).prop('checked', isChecked);
             });
-            $('#addRoleForm').on('submit', function (e) {
-                e.preventDefault();
 
-                let form = $(this);
-                let formData = new FormData(this);
-
-                $.ajax({
-                    url: form.attr('action'),
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': $('input[name="_token"]').val()
-                    },
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        Toastify({
-                            text: "Role created successfully!",
-                            duration: 3000,
-                            gravity: "top",
-                            backgroundColor: "#28a745",
-                        }).showToast();
-
-                        form.trigger('reset'); // Clear form
-                    },
-                    error: function (xhr) {
-                        let errorMsg = 'Something went wrong.';
-                        if (xhr.responseJSON && xhr.responseJSON.errors) {
-                            errorMsg = Object.values(xhr.responseJSON.errors).flat().join('\n');
-                        }
-
-                        Toastify({
-                            text: errorMsg,
-                            duration: 4000,
-                            gravity: "top",
-                            backgroundColor: "#dc3545",
-                        }).showToast();
-                    }
-                });
-            });
         });
+        handleAjaxFormSubmit("#addRoleForm",{
+            successMessage: "Role added successfully",
+            onSuccess: function () {
+                location.replace('/roles');
+            }
+        })
     </script>
 
 @endsection

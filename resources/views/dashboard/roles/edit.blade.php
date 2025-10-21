@@ -158,5 +158,12 @@
                 $(`.${group}-checkbox`).prop('checked', isChecked);
             });
         });
+        handleAjaxFormSubmit("#editRoleForm",{
+            successMessage: "Role updated successfully",
+            onSuccess: function () {
+                location.replace('/roles');
+
+            }
+        })
     </script>
 @endsection
