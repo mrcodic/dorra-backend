@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
+use App\Http\Resources\RoleResource;
 use App\Repositories\Interfaces\PermissionRepositoryInterface;
 use App\Repositories\Interfaces\RoleRepositoryInterface;
 use App\Http\Requests\Role\{StoreRoleRequest, UpdateRoleRequest};
@@ -24,6 +25,7 @@ class RoleController extends DashboardController
         $this->editView = 'roles.edit';
         $this->showView = 'roles.show';
         $this->usePagination = true;
+        $this->resourceClass = RoleResource::class;
         $this->assoiciatedData = [
             'create' => [
                 'permissions' => $this->permissionRepository->query()->get()->groupBy('group'),
