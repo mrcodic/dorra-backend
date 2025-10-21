@@ -106,46 +106,55 @@
 
         const $input = $('#searchInput');
         const $grid  = $('#rolesGrid');
+        const editBase = "{{ url('/roles') }}";          // -> /roles/{id}/edit
+        const LOCALE  = "{{ app()->getLocale() }}";      // 'en' or 'ar'
 
-        const editBase = "{{ url('/roles') }}"; // we'll build /roles/{id}/edit
-
+        // small escape to avoid injecting HTML
         function esc(str) {
-            // very small escape to avoid accidental HTML injection in names
             return String(str ?? '').replace(/[&<>"']/g, s => ({
                 '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
             }[s]));
         }
 
-        function renderRoles(data) {
-            if (!data || !data.length) {
+        // pick value from {en, ar} object or fallback
+        function pickLocale(val) {
+            if (val == null) return '';
+            if (typeof val === 'object') {
+                return val[LOCALE] ?? Object.values(val).find(Boolean) ?? '';
+            }
+            return String(val);
+        }
+
+        function renderRolesFromApi(payload) {
+            const ok = payload && payload.success !== false && (payload.status === undefined || payload.status === 200);
+            const list = ok ? (payload.data || []) : [];
+
+            if (!list.length) {
                 $grid.html('<div class="col-12 text-center text-muted py-5">No roles found.</div>');
                 return;
             }
 
-            const html = data.map(r => {
-                const avatars = (r.users || []).map(u => `
-          <li data-bs-toggle="tooltip" data-bs-placement="top" title="${esc(u.name || 'User')}"
-              class="avatar avatar-sm pull-up">
-            <img class="rounded-circle" src="${esc(u.avatar)}" alt="Avatar">
-          </li>
-        `).join('');
+            const html = list.map(r => {
+                const name = esc(pickLocale(r.name));
+                const desc = esc(pickLocale(r.description));
+                const created = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
 
                 return `
           <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card">
               <div class="card-body">
                 <div class="d-flex justify-content-between">
-                  <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                    ${avatars}
-                  </ul>
-                  <span>${r.users_count} Users</span>
+                  <span class="text-muted small">${created}</span>
                 </div>
+
                 <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
                   <div class="role-heading">
-                    <h4>${esc(r.name)}</h4>
+                    <h4 class="mb-25">${name}</h4>
+                    ${desc ? `<div class="text-muted small mb-50">${desc}</div>` : ''}
                     <a href="${editBase}/${encodeURIComponent(r.id)}/edit" class="role-edit-modal">Edit Role</a>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>`;
@@ -153,11 +162,8 @@
 
             $grid.html(html);
 
-            // Re-init tooltips & feather if you use them
             if (window.feather) window.feather.replace();
-            $('[data-bs-toggle="tooltip"]').each(function () {
-                if (!this._tooltip) { this._tooltip = new bootstrap.Tooltip(this); }
-            });
+            // (Tooltips only if you add any in this markup)
         }
 
         function setLoading() {
@@ -171,7 +177,7 @@
             t = setTimeout(() => {
                 if (xhr && xhr.readyState !== 4) xhr.abort();
 
-                // Update URL (?search=) without reload
+                // keep ?search= in URL without reload
                 const urlObj = new URL(window.location.href);
                 if (q) urlObj.searchParams.set('search', q);
                 else   urlObj.searchParams.delete('search');
@@ -184,9 +190,7 @@
                     method: "GET",
                     dataType: "json",
                     data: { search: q },
-                    success: function (res) {
-                        renderRoles(res.data || []);
-                    },
+                    success: renderRolesFromApi,
                     error: function (xhr) {
                         if (xhr.statusText === 'abort') return;
                         console.error('Search failed', xhr.responseText);
@@ -197,6 +201,7 @@
         });
     })();
 </script>
+
 
 
 @endsection
