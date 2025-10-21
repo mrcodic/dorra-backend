@@ -29,7 +29,7 @@ class RoleController extends DashboardController
         $this->assoiciatedData = [
 
             'shared' => [
-                'permissions' => $this->permissionRepository->query()->get()->groupBy('group'),
+                'permissions' => $this->permissionRepository->query()->get()->groupBy('group_key'),
             ],
             'index' => [
                 'roles' => $this->roleRepository->query()

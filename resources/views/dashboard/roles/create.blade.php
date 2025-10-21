@@ -80,7 +80,6 @@
                                           ->unique()
                                           ->values()
                                           ->all();
-//                                        $permissionKey = strtolower($group) . '_' . strtolower($action);
                                         $isAvailable = collect($supportedActions)->contains(strtolower($action));
                                     @endphp
 
