@@ -124,7 +124,6 @@
                 <!-- Permission table -->
             </div>
             <div class="d-flex justify-content-between mt-2">
-                <button type="submit" class="btn btn-outline-danger">Delete</button>
                 <div class="d-flex gap-1">
                     <button type="submit" class="btn btn-outline-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
