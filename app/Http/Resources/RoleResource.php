@@ -19,6 +19,7 @@ class RoleResource extends JsonResource
             'name' =>$this->name,
             'description' =>$this->description,
             'users' => AdminResource::collection($this->whenLoaded('users')),
+            'users_count' => $this->users_count,
         ];
     }
 }
