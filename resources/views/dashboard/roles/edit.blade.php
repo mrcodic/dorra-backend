@@ -16,11 +16,19 @@
         <form id="editRoleForm" class="row" method="post" action="{{ route('roles.update', $model->id) }}">
             @csrf
             @method("PUT")
-            <div class="col-12">
-                <label class="form-label" for="modalRoleName">Role Name</label>
-                <input type="text" id="modalRoleName" name="role" value="{{ $model->name }}" class="form-control"
-                       placeholder="Enter role name" tabindex="-1" data-msg="Please enter role name"/>
+            <div class="col-md-6 mb-1">
+                <label class="form-label" for="modalRoleName">Role Name (EN)</label>
+                <input type="text" id="modalRoleName" name="name[en]" class="form-control"
+                       value="{{ $model->getTranslation('name','en') }}"
+                       placeholder="Enter role name in english" tabindex="-1" data-msg="Please enter role name"/>
             </div>
+            <div class="col-md-6 mb-1">
+                <label class="form-label" for="modalRoleName">Role Name (Ar)</label>
+                <input type="text" id="modalRoleName" name="name[ar]" class="form-control"
+                       value="{{ $model->getTranslation('name','ar') }}"
+                       placeholder="Enter role name in arabic" tabindex="-1" data-msg="Please enter role name"/>
+            </div>
+
 
             <!-- New Role Description field -->
             <div class="col-12 mt-1">
