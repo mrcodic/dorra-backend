@@ -184,7 +184,7 @@
         <table class="admin-list-table table">
             <thead class="table-light">
                 <tr>
-                    @can('admins_bulk_delete')
+                    @can('admins_delete')
                     <th>
                         <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                     </th>
