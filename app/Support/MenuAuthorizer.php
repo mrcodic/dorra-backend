@@ -86,25 +86,46 @@ class MenuAuthorizer
      *        - if in a parent childrenMap, use that child permission's group
      *        - otherwise, use the first URL segment as group (e.g., '/admins' => 'admins')
      */
-    private static function granted(?string $required, string $url, array $childrenMap, array $userPerms): bool
+    private static function granted(string|array|null $required, string $url, array $childrenMap, array $userPerms): bool
     {
-        // If we have an explicit permission, check its group directly
-        if ($required) {
+        // 1) Explicit requirements from ACL
+        if (is_string($required)) {
+            // exact match OR any CRUD for that permission's group
             $group = self::groupFromPermission($required);
-            return self::hasAnyCrudForGroup($userPerms, $group);
+            return in_array($required, $userPerms, true) || self::hasAnyCrudForGroup($userPerms, $group);
         }
 
-        // No explicit permission: figure out group
-        // 1) If this URL exists in childrenMap, use that mapping’s group (handles 'settings-details', 'product-templates', etc.)
-        if (isset($childrenMap[$url]) && is_string($childrenMap[$url])) {
-            $group = self::groupFromPermission($childrenMap[$url]);
-            return self::hasAnyCrudForGroup($userPerms, $group);
+        if (is_array($required)) {
+            // any of the listed perms OR any CRUD for the group of the first listed perm
+            if (self::hasAny($userPerms, $required)) {
+                return true;
+            }
+            $first = $required[0] ?? null;
+            if (is_string($first)) {
+                $group = self::groupFromPermission($first);
+                return self::hasAnyCrudForGroup($userPerms, $group);
+            }
+            return false;
         }
 
-        // 2) Fallback: infer from URL (first segment)
+        // 2) No explicit requirement: resolve via children map or URL
+        if (array_key_exists($url, $childrenMap)) {
+            $childReq = $childrenMap[$url];
+            // could be string or array
+            return self::granted($childReq, $url, [], $userPerms);
+        }
+
+        // 3) Fallback: infer group from URL (first segment)
         $group = self::groupFromUrl($url);
         return $group ? self::hasAnyCrudForGroup($userPerms, $group) : false;
     }
+
+    private static function hasAny(array $userPerms, array $requiredList): bool
+    {
+        // true if user has at least one of $requiredList
+        return (bool) array_intersect($userPerms, $requiredList);
+    }
+
 
     private static function hasAnyCrudForGroup(array $userPerms, string $group): bool
     {

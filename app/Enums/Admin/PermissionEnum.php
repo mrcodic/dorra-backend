@@ -89,7 +89,6 @@ enum PermissionEnum: string
 
     // Invoices (kept no create)
     case SHOW_INVOICES = 'invoices_show';
-    case UPDATE_INVOICES = 'invoices_update';
     case DELETE_INVOICES = 'invoices_delete';
 
     // Logistics

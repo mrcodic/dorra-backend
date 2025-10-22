@@ -24,9 +24,9 @@ class MenuServiceProvider extends ServiceProvider
             $horizontalMenuData = json_decode($horizontalMenuJson);
 
             // Filter by current user's permissions
-//            $user = auth()->user();
-//            $verticalMenuData   = MenuAuthorizer::filter($verticalMenuData, $user);
-//            $horizontalMenuData = MenuAuthorizer::filter($horizontalMenuData, $user); // optional
+            $user = auth()->user();
+            $verticalMenuData   = MenuAuthorizer::filter($verticalMenuData, $user);
+            $horizontalMenuData = MenuAuthorizer::filter($horizontalMenuData, $user); // optional
 
             // Share same variable name/shape used by your Blade
             $view->with('menuData', [$verticalMenuData, $horizontalMenuData]);
