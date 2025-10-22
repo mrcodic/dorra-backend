@@ -35,7 +35,7 @@ use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\AutoCheckPermission;
 use Illuminate\Support\Facades\Route;
 
-//Route::middleware(AutoCheckPermission::class)->group(function () {
+Route::middleware(AutoCheckPermission::class)->group(function () {
 
     Route::view('/login/social', 'dashboard.auth.social-login');
     Route::view('confirm-password', 'dashboard.auth.confirm-password');
@@ -310,4 +310,4 @@ use Illuminate\Support\Facades\Route;
 
     });
 
-//});
+});
