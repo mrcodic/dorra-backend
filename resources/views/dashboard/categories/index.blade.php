@@ -169,6 +169,7 @@
                 </div>
 
                 {{-- Add Button - 20% on md+, full width on xs --}}
+                @can("categories_create")
                 <div class="col-12 col-md-3">
                     <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
                         data-bs-target="#categoryModal">
@@ -176,7 +177,7 @@
                         Add New Product
                     </a>
                 </div>
-
+                @endcan
             </div>
 
 

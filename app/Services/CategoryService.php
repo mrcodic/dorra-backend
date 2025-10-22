@@ -374,6 +374,9 @@ class CategoryService extends BaseService
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('categories') ?: asset("images/default-user.png");
             })
+            ->order(function ($query) {
+                $query->latest('id');
+            })
             ->make(true);
     }
 
