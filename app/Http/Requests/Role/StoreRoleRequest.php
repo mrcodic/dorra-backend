@@ -38,7 +38,7 @@ class StoreRoleRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
-            'permissions' => ['nullable', 'array'],
+            'permissions' => ['required', 'array'],
             'permissions.*' => ['string', Rule::exists('permissions', 'name')],
         ];
     }
