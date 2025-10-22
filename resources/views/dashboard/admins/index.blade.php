@@ -173,10 +173,11 @@
                         <option value="1">Active</option>
                     </select>
                 </div>
-                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                    data-bs-target="#addAdminModal">
-                    Add New Admin
-                </button>
+                @can('admins_create')
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addAdminModal">
+                        Add New Admin
+                    </button>
+                @endcan
             </div>
         </div>
 
@@ -200,7 +201,7 @@
                 <!-- DataTable will populate this dynamically -->
             </tbody>
         </table>
-
+        @can('admins_bulk_delete')
         <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
             <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
                 style="z-index: 10;">
@@ -214,8 +215,10 @@
                 </form>
             </div>
         </div>
+        @endcan
     </div>
 
+    </div>
     @include('modals/admins/add-admin')
     @include('modals/admins/edit-admin')
 
@@ -230,8 +233,6 @@
     'title' => 'Delete Admins',
     'confirmText' => 'Are you sure you want to delete this items?',
     ])
-
-    </div>
     <!-- list and filter end -->
 </section>
 <!-- users list ends -->
