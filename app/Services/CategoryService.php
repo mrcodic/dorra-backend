@@ -373,6 +373,12 @@ class CategoryService extends BaseService
             })
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('categories') ?: asset("images/default-user.png");
+            })->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('categories_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('categories_update'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('categories_delete'),
+                ];
             })
             ->make(true);
     }

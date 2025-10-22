@@ -35,7 +35,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         `;
             }
         },
-        { data: "name",            name: "name" },
+        {data: "name"},
 
         {data: "sub_categories"},
         {
@@ -78,29 +78,32 @@ const dt_user_table = $(".category-list-table").DataTable({
 
             searchable: false,
             render: function (data, type, row) {
-                console.log(row.is_has_category)
-                return `
-        <div class="d-flex gap-1">
-                                <a href="#" class="view-details"
-                                       data-action="${row.is_has_category ? 'modal' : 'redirect'}"
-                                    data-url="/categories/${data}"
-                                   data-id="${data}"
-                                   data-name_ar="${row.name_ar}"
-                                   data-name_en="${row.name_en}"
-                                   data-image="${row.image}"
-                                   data-image_id="${row.imageId}"
-                                   data-description_en="${row.description_en}"
-                                   data-description_ar="${row.description_ar}"
-                                   data-subcategories="${row.children.map(
-                    (child) => child.name
-                )}"
-                                   data-products="${row.no_of_products}"
-                                   data-showdate="${row.show_date}">
-                                                <i data-feather="eye"></i>
-                                </a>
+                const canShow   = row?.action?.can_show   ?? false;
+                const canEdit   = row?.action?.can_edit   ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
+                const btns = [];
 
-
-            <a href="#" class="edit-details"
+                if (canShow) {
+                    btns.push(`<a href="#" class="view-details"
+                                              data-action="${row.is_has_category ? 'modal' : 'redirect'}"
+                                              data-url="/categories/${data}"
+                                              data-id="${data}"
+                                              data-name_ar="${row.name_ar}"
+                                              data-name_en="${row.name_en}"
+                                              data-image="${row.image}"
+                                              data-image_id="${row.imageId}"
+                                              data-description_en="${row.description_en}"
+                                              data-description_ar="${row.description_ar}"
+                                              data-subcategories="${row.children.map(
+                        (child) => child.name
+                    )}"
+                                              data-products="${row.no_of_products}"
+                                              data-showdate="${row.show_date}">
+                    <i data-feather="eye"></i>
+                </a>`);
+                }
+                if (canEdit) {
+                btns.push(` <a href="#" class="edit-details"
    data-id="${data}"
    data-name_ar="${row.name_ar}"
    data-name_en="${row.name_en}"
@@ -116,20 +119,23 @@ const dt_user_table = $(".category-list-table").DataTable({
        >
 
    <i data-feather="edit-3"></i>
-</a>
+</a>`);
+                }
+                if (canDelete) {
 
-
-      <a href="#" class="text-danger  open-delete-category-modal"
+                    btns.push(`  <a href="#" class="text-danger  open-delete-category-modal"
    data-id="${data}"
    data-name="${row.name}"
    data-action="/categories/${data}"
    data-bs-toggle="modal"
    data-bs-target="#deleteCategoryModal">
    <i data-feather="trash-2"></i>
-</a>
+</a>`)
+                }
 
-          </div>
-        `;
+
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
             },
         },
     ],
