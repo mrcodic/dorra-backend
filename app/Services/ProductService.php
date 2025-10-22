@@ -91,9 +91,9 @@ class ProductService extends BaseService
             })
             ->addColumn('action', function () {
                 return [
-                    'can_show' => (bool) auth()->user()->hasPermissionTo('produccts_show'),
-                    'can_edit' => (bool) auth()->user()->hasPermissionTo('produccts_update'),
-                    'can_delete' => (bool) auth()->user()->hasPermissionTo('produccts_delete'),
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('products_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('products_update'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('products_delete'),
                 ];
             })->make();
     }
