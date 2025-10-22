@@ -1,64 +1,57 @@
 <?php
 // config/menu_acl.php
 return [
-    // leaves (no submenu), keyed by URL
-    '/'                  => 'dashboards_show',
-    '/admins'            => 'admins_index',
-    '/users'             => 'users_index',
-    '/product-templates' => 'templates_index',
-    '/flags'             => 'flags_index',
-    '/mockups'           => 'mockups_index',
-    '/orders'            => 'orders_index',
-    '/invoices'          => 'invoices_index',
-    '/roles'             => 'roles_index',
+    // Leaves (no submenu), keyed by URL
+    '/'                  => 'dashboard_show',
+    '/admins'             => 'admins_show',
+    '/users'             => 'users_show',
+    '/product-templates' => 'product-templates_show',
+    '/flags'             => 'flags_show',
+    '/mockups'           => 'mockups_show',
+    '/orders'            => 'orders_show',
+    '/invoices'          => 'invoices_show',
+    '/roles'             => 'roles_show',
 
-    // parents keyed by their "name" in JSON; children by URL
+    // Parents keyed by their "name" (exactly as in verticalMenu.json); children keyed by URL
     'Products' => [
-        // parent permission optional; null => show if any child is visible
-        'permission' => null,
         'children' => [
-            '/categories'     => 'categories_index',
-            '/sub-categories' => 'subproducts_index',
-            '/products'       => 'products_index',
-            '/tags'           => 'tags_index',
+            '/categories'     => 'categories_show',
+            '/sub-categories' => 'sub-categories_show',
+            '/products'       => 'products_show',
+            '/tags'           => 'tags_show',
         ],
     ],
     'Marketing' => [
-        'permission' => null,
         'children' => [
-            '/discount-codes' => 'discountcodes_index',
-            '/offers'         => 'offers_index',
+            '/discount-codes' => 'discount-codes_show',
+            '/offers'         => 'offers_show',
         ],
     ],
     'Logistics' => [
-        'permission' => null,
         'children' => [
-            '/logistics' => 'locations_index',
+            '/logistics' => 'locations_show',
         ],
     ],
     'FAQs & Help' => [
-        'permission' => null,
         'children' => [
-            '/faqs'     => 'faqs_index',
-            '/messages' => 'messages_index',
+            '/faqs'     => 'faqs_show',
+            '/messages' => 'messages_show',
         ],
     ],
     'Settings' => [
-        'permission' => null,
         'children' => [
-            '/settings/details'        => 'settings_details',
-            '/settings/payments'       => 'settings_payments',
-            '/settings/notifications'  => 'settings_notifications',
-            '/settings/website'        => 'settings_website',
+            '/settings/details'        => 'settings-details_show',
+            '/settings/payments'       => 'settings-payments_show',
+            '/settings/notifications'  => 'settings-notifications_show',
+            '/settings/website'        => 'settings-website_show',
         ],
     ],
     'Print command' => [
-        'permission' => null,
         'children' => [
-            '/jobs'             => 'jobs_index',
-            '/board'            => 'board_index',
-            '/inventories'      => 'inventories_index',
-            '/station-statuses' => 'station_statuses_index',
+            '/jobs'             => 'jobs_show',
+            '/board'            => 'board_show',
+            '/inventories'      => 'inventories_show',
+            '/station-statuses' => 'station-statuses_show',
         ],
     ],
 ];
