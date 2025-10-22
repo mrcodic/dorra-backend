@@ -12,7 +12,6 @@ enum PermissionEnum: string
     // Admins
     case INDEX_ADMINS = 'admins_index';
     case CREATE_ADMINS = 'admins_create';
-    case SHOW_ADMINS = 'admins_show';
     case UPDATE_ADMINS = 'admins_update';
     case DELETE_ADMINS = 'admins_delete';
 
