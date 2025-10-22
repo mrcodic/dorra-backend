@@ -183,7 +183,7 @@
         })
     </script>
     <script>
-        
+
         // ✅ Keep the rest of your code; just ensure every bulk op ignores disabled
         // Global "Select All"
         $(document).on('change', '#selectAllGlobal', function () {
