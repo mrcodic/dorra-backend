@@ -82,7 +82,7 @@ var dt_user_table = $(".user-list-table").DataTable({
 
                 if (canShow) {
                     btns.push(`
-        <a href="/users/${data}" class="text-body" aria-label="View user">
+        <a href="/users/${data}" class="" aria-label="View user">
           <i data-feather="eye"></i>
         </a>
       `);
@@ -90,7 +90,7 @@ var dt_user_table = $(".user-list-table").DataTable({
 
                 if (canEdit) {
                     btns.push(`
-        <a href="/users/${data}/edit" class="text-body" aria-label="Edit user">
+        <a href="/users/${data}/edit" class="" aria-label="Edit user">
           <i data-feather="edit-3"></i>
         </a>
       `);
@@ -112,7 +112,7 @@ var dt_user_table = $(".user-list-table").DataTable({
                 if (!btns.length) return ''; // no permissions -> empty cell
                 return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
             },
-        },
+        }
 
     ],
     order: [[1, "asc"]],
