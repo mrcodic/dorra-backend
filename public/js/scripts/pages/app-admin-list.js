@@ -72,8 +72,8 @@ const dt_user_table = $(".admin-list-table").DataTable({
             orderable: false,
             searchable: false,
             render: function (data, type, row) {
-                const canEdit = !!row.action.can_edit;
-                const canDelete = !!row.action.can_delete;
+                const canEdit   = row?.action?.can_edit   ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
                 console.log(canEdit,canDelete)
                 const editBtn = canEdit ? `
       <a href="#" class="edit-details"
