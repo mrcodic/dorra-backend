@@ -22,8 +22,10 @@ const dt_user_table = $(".category-list-table").DataTable({
         {
             data: null,
             searchable: false,
-            render: function (data) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
+            render: function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
             },
         },
         {

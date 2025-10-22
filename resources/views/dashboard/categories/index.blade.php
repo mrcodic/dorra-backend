@@ -185,7 +185,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('categories_delete'))>
                         </th>
                         <th>IMAGE</th>
                         <th>Name</th>
