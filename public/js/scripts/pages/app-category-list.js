@@ -35,7 +35,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         `;
             }
         },
-        {data: "name"},
+        { data: "name",            name: "name" },
 
         {data: "sub_categories"},
         {
