@@ -128,6 +128,11 @@
     <script src="{{ asset(mix('js/scripts/pages/modal-add-role.js')) }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-access-roles.js')) }}"></script>
     <script>
+        $(document).on('click', '#selectAllGlobal', function () {
+            // clicking it should never leave it indeterminate
+            $(this).prop('indeterminate', false);
+        });
+
         handleAjaxFormSubmit("#addRoleForm",{
             successMessage: "Role added successfully",
             onSuccess: function () {
@@ -136,21 +141,22 @@
         })
         // ✅ Keep the rest of your code; just ensure every bulk op ignores disabled
         // Global "Select All"
-        $('#selectAllGlobal').on('change', function () {
+        $(document).on('change', '#selectAllGlobal', function () {
             const isChecked = $(this).is(':checked');
+
+            // only toggle enabled permissions
             $('.permission-checkbox:not(:disabled)').prop('checked', isChecked);
 
+            // sync each row's group checkbox
             $('.row-checkbox').each(function () {
-                const group = $(this).data('group');
+                const group    = $(this).data('group');
                 const $enabled = $(`.${group}-checkbox:not(:disabled)`);
                 if ($enabled.length) {
                     $(this).prop('checked', isChecked).prop('indeterminate', false);
                 } else {
-                    $(this).prop('checked', false).prop('indeterminate', false);
+                    $(this).prop({ checked: false, indeterminate: false });
                 }
             });
-        });
-
         // Row-level "Select All"
         $(document).on('change', '.row-checkbox', function () {
             const group     = $(this).data('group');
