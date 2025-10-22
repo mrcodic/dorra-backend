@@ -24,7 +24,9 @@ const dt_user_table = $(".admin-list-table").DataTable({
             orderable: false,
             searchable: false,
             render: function (data) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
+                return data.action.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
             }
         },
         {data: "id"},
@@ -70,33 +72,32 @@ const dt_user_table = $(".admin-list-table").DataTable({
             orderable: false,
             searchable: false,
             render: function (data, type, row) {
-                console.log(row)
-                return `
+                const canEdit = !!row.action.can_edit;
+                const canDelete = !!row.action.can_delete;
+             
+                const editBtn = canEdit ? `
+      <a href="#" class="edit-details"
+         data-bs-toggle="modal"
+         data-bs-target="#editAdminModal"
+         data-image="${row.image ? row.image : ''}"
+         data-image-id="${row.image_id ? row.image_id : ''}"
+         data-id="${data}"
+         data-first-name="${row.first_name || ''}"
+         data-last-name="${row.last_name || ''}"
+         data-email="${row.email || ''}"
+         data-phone-number="${row.phone_number || ''}"
+         data-role-id="${row.roles && row.roles.length > 0 ? row.roles[0].id : ''}"
+         data-status="${row.status_value}">
+        <i data-feather="edit-3"></i>
+      </a>` : '';
 
-         <a href="#" class="edit-details"
-           data-bs-toggle="modal"
-           data-bs-target="#editAdminModal"
-           data-image="${row.image ? row.image : ''}"
-           data-image-id="${row.image_id ? row.image_id : ''}"
-           data-id="${data}"
-           data-first-name="${row.first_name}"
-           data-last-name="${row.last_name}"
-           data-email="${row.email}"
-           data-phone-number="${row.phone_number}"
-           data-role-id="${row.roles && row.roles.length > 0 ? row.roles[0].id : ''}"
-           data-status="${row.status_value}">
+                const delBtn = canDelete ? `
+      <a href="#" class="text-danger open-delete-admin-modal" data-id="${data}"
+         data-bs-toggle="modal" data-bs-target="#deleteAdminModal">
+         <i data-feather="trash-2"></i>
+      </a>` : '';
 
-                <i data-feather="edit-3"></i>
-              </a>
-
-        <a href="#" class=" text-danger open-delete-admin-modal" data-id="${data}"
-                data-bs-toggle="modal"
-                data-bs-target="#deleteAdminModal" >
-                <i data-feather="trash-2"></i>
-              </a>
-
-          </div>
-        `;
+                return `${editBtn} ${delBtn}`;
             }
         }
     ],

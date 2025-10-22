@@ -31,7 +31,7 @@ class AdminService extends BaseService
             Media::where('id', $validatedData['image_id'])
                 ->update([
                     'model_type' => get_class($model),
-                    'model_id'   => $model->id,
+                    'model_id' => $model->id,
                     'collection_name' => 'admins',
                 ]);
         }
@@ -55,7 +55,6 @@ class AdminService extends BaseService
         }
 
 
-
         if (empty($validatedData['image_id'])) {
             $model->clearMediaCollection('admins');
 
@@ -65,7 +64,7 @@ class AdminService extends BaseService
             Media::where('id', $validatedData['image_id'])
                 ->update([
                     'model_type' => get_class($model),
-                    'model_id'   => $model->id,
+                    'model_id' => $model->id,
                     'collection_name' => 'admins',
                 ]);
         }
@@ -82,15 +81,15 @@ class AdminService extends BaseService
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
-                $words = preg_split('/\s+/', $search);
-                $query->where(function ($query) use ($words) {
-                    foreach ($words as $word) {
-                        $query->where(function ($q) use ($word) {
-                            $q->where('first_name', 'like', '%' . $word . '%')
-                                ->orWhere('last_name', 'like', '%' . $word . '%');
-                        });
-                    }
-                });
+                    $words = preg_split('/\s+/', $search);
+                    $query->where(function ($query) use ($words) {
+                        foreach ($words as $word) {
+                            $query->where(function ($q) use ($word) {
+                                $q->where('first_name', 'like', '%' . $word . '%')
+                                    ->orWhere('last_name', 'like', '%' . $word . '%');
+                            });
+                        }
+                    });
                 } else {
                     $query->whereRaw('1 = 0');
                 }
@@ -113,7 +112,7 @@ class AdminService extends BaseService
                 return $admin->created_at->format('d/m/Y');
             })
             ->addColumn('role', function ($admin) {
-                return $admin->roles->first()?->getTranslation('name',app()->getLocale()) ?? '-';
+                return $admin->roles->first()?->getTranslation('name', app()->getLocale()) ?? '-';
             })
             ->editColumn('status', function ($admin) {
                 return $admin->status == 1 ? "active" : "blocked";
@@ -125,6 +124,12 @@ class AdminService extends BaseService
             })
             ->addColumn('status_value', function ($admin) {
                 return $admin->status;
+            })
+            ->addColumn('action', function ($admin) {
+                return [
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('admins_update'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('admins_delete'),
+                ];
             })
             ->make();
     }
