@@ -184,11 +184,11 @@
         <table class="admin-list-table table">
             <thead class="table-light">
                 <tr>
-                    @can('admins_delete')
+
                     <th>
-                        <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                        <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('admins_delete'))>
                     </th>
-                    @endcan
+
                     <th>ID</th>
                     <th>IMAGE</th>
                     <th>Name</th>
