@@ -128,7 +128,14 @@
     <script src="{{ asset(mix('js/scripts/pages/modal-add-role.js')) }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-access-roles.js')) }}"></script>
     <script>
-       
+        $(document).ready(function () {
+            $('.row-checkbox').on('change', function () {
+                const group = $(this).data('group');
+                const isChecked = $(this).is(':checked');
+                $(`.${group}-checkbox`).prop('checked', isChecked);
+            });
+
+        });
         handleAjaxFormSubmit("#addRoleForm",{
             successMessage: "Role added successfully",
             onSuccess: function () {
