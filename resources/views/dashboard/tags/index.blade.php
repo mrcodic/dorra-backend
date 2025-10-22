@@ -165,6 +165,7 @@
                 </div>
 
                 {{-- Add Button --}}
+                @can("tags_create")
                 <div class="col-12 col-md-3 text-md-end">
                     <a class="btn btn-outline-primary w-100 w-md-auto d-flex align-items-center justify-content-center "
                         data-bs-toggle="modal" data-bs-target="#addTagModal">
@@ -172,7 +173,7 @@
                         Add New Tag
                     </a>
                 </div>
-
+                @endcan
             </div>
 
 
@@ -180,7 +181,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('tags_delete'))>
                         </th>
                         <th>Name</th>
                         <th>NO.of Categories</th>

@@ -72,23 +72,34 @@ var dt_user_table = $(".product-list-table").DataTable({
             data: "id",
             orderable: false,
             render: function (data, type, row, meta) {
-                return `
-        <div class="d-flex gap-1">
-             <a href="/products/${data}" class="">
-                <i data-feather="eye"></i>
-              </a>
-              <a href="/products/${data}/edit" class="">
-                <i data-feather="edit-3"></i>
-              </a>
+                const canShow   = row?.action?.can_show   ?? false;
+                const canEdit   = row?.action?.can_edit   ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
+                const btns = [];
 
-              <a href="#" class=" text-danger open-delete-product-modal" data-id="${data}"
+                if (canShow) {
+                    btns.push(`<a href="/products/${data}" class="">
+                <i data-feather="eye"></i>
+              </a>`);
+                }
+                if (canEdit) {
+                    btns.push(`   <a href="/products/${data}/edit" class="">
+                <i data-feather="edit-3"></i>
+              </a>`);
+                }
+                if (canDelete) {
+
+                    btns.push(`     <a href="#" class=" text-danger open-delete-product-modal" data-id="${data}"
                 data-bs-toggle="modal"
                 data-bs-target="#deleteProductModal" >
                 <i data-feather="trash-2"></i>
-              </a>
+              </a>`)
+                }
 
-          </div>
-        `;
+
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
+
             }
         }
     ],

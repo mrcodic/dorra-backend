@@ -181,12 +181,13 @@
                         </select>
                     </div>
                 </div>
-
+                @can("products_create")
                 <div class="col-12 col-md-3 text-md-end">
                     <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route('products.create') }}">
                         Add New Category
                     </a>
                 </div>
+                @endcan
             </div>
 
 
@@ -194,7 +195,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('products_delete'))>
                         </th>
                         <th>Image</th>
                         <th>Name</th>

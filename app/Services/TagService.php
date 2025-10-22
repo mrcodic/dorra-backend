@@ -106,6 +106,13 @@ class TagService extends BaseService
             })
             ->addColumn('no_of_templates', function ($tag) {
                 return $tag->templates_count;
+            })
+            ->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('tags_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('tags_update'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('tags_delete'),
+                ];
             })->make();
     }
 
