@@ -23,9 +23,11 @@ var dt_user_table = $(".product-list-table").DataTable({
             data: null,
             defaultContent: "",
             orderable: false,
-            render: function (data, type, row, meta) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            }
+            render: function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
+            },
         },
 
         {

@@ -19,9 +19,12 @@ var dt_user_table = $('.tag-list-table').DataTable({
         }
     },
     columns: [
-        { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            } },
+        { data: null, defaultContent: "", orderable: false,
+            render: function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
+            }, },
         {data: 'name', orderable: false},
         {data: 'no_of_products', orderable: false},
         {data: 'categories_count', orderable: false},
