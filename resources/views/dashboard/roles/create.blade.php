@@ -128,28 +128,18 @@
     <script src="{{ asset(mix('js/scripts/pages/modal-add-role.js')) }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-access-roles.js')) }}"></script>
     <script>
-        $(document).ready(function () {
-            $('.row-checkbox').on('change', function () {
-                const group = $(this).data('group');
-                const isChecked = $(this).is(':checked');
-                $(`.${group}-checkbox`).prop('checked', isChecked);
-            });
-
-        });
         handleAjaxFormSubmit("#addRoleForm",{
             successMessage: "Role added successfully",
             onSuccess: function () {
                 location.replace('/roles');
             }
         })
-        // Global "Select All" (top-left)
+        // ✅ Keep the rest of your code; just ensure every bulk op ignores disabled
+        // Global "Select All"
         $('#selectAllGlobal').on('change', function () {
             const isChecked = $(this).is(':checked');
-
-            // Only affect enabled permission checkboxes
             $('.permission-checkbox:not(:disabled)').prop('checked', isChecked);
 
-            // Sync each row's group checkbox (ignore groups with no enabled items)
             $('.row-checkbox').each(function () {
                 const group = $(this).data('group');
                 const $enabled = $(`.${group}-checkbox:not(:disabled)`);
@@ -161,34 +151,30 @@
             });
         });
 
-        // Row-level "Select All" for a specific group
+        // Row-level "Select All"
         $(document).on('change', '.row-checkbox', function () {
             const group     = $(this).data('group');
             const isChecked = $(this).is(':checked');
 
-            // Only affect enabled boxes within that group
+            // ✅ Only toggle enabled inputs
             $(`.${group}-checkbox:not(:disabled)`).prop('checked', isChecked);
 
-            // Update global indeterminate/checked state
             updateGlobalToggle();
         });
 
-        // Individual permission checkbox clicked -> keep row/global states accurate
+        // Individual checkbox click
         $(document).on('change', '.permission-checkbox', function () {
-            const idParts = this.id.split('_'); // optional; or derive group from classes
-            // If you used class "<group>-checkbox", get group from class:
             const group = (this.className.match(/(^|\s)([A-Za-z0-9\-]+)-checkbox(\s|$)/) || [])[2];
             if (group) updateGroupToggle(group);
             updateGlobalToggle();
         });
 
-        // Helpers
         function updateGroupToggle(group) {
             const $all        = $(`.${group}-checkbox`);
             const $enabled    = $all.filter(':not(:disabled)');
             const $enabledOn  = $enabled.filter(':checked');
+            const $rowToggle  = $(`.row-checkbox[data-group="${group}"]`);
 
-            const $rowToggle = $(`.row-checkbox[data-group="${group}"]`);
             if (!$enabled.length) {
                 $rowToggle.prop({ checked: false, indeterminate: false });
                 return;
@@ -219,16 +205,12 @@
             }
         }
 
-        // On page load, initialize correct states
+        // Initialize correct states on load
         $(function () {
-            // initialize each group’s row toggle
-            $('.row-checkbox').each(function () {
-                updateGroupToggle($(this).data('group'));
-            });
-            // initialize global toggle
+            $('.row-checkbox').each(function () { updateGroupToggle($(this).data('group')); });
             updateGlobalToggle();
         });
-
     </script>
+
 
 @endsection
