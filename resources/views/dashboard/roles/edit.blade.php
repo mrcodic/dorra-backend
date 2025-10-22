@@ -56,8 +56,6 @@
                                     <label class="form-check-label" for="selectAllGlobal">Permission</label>
                                 </div>
                             </th>
-
-                            <th>Index</th>
                             <th>Create</th>
                             <th>Read</th>
                             <th>Update</th>

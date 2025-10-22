@@ -54,7 +54,7 @@
                                 </div>
                             </th>
 
-                            <th>Index</th>
+
                             <th>Create</th>
                             <th>Read</th>
                             <th>Update</th>
