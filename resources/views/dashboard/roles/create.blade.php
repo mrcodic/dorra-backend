@@ -128,10 +128,6 @@
     <script src="{{ asset(mix('js/scripts/pages/modal-add-role.js')) }}"></script>
     <script src="{{ asset(mix('js/scripts/pages/app-access-roles.js')) }}"></script>
     <script>
-        $(document).on('click', '#selectAllGlobal', function () {
-            // clicking it should never leave it indeterminate
-            $(this).prop('indeterminate', false);
-        });
 
         handleAjaxFormSubmit("#addRoleForm",{
             successMessage: "Role added successfully",
@@ -215,6 +211,7 @@
         $(function () {
             $('.row-checkbox').each(function () { updateGroupToggle($(this).data('group')); });
             updateGlobalToggle();
+        });
         });
     </script>
 
