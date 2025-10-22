@@ -32,6 +32,7 @@ class UserService extends BaseService
         }
         return $model->load($relationsToLoad);
     }
+
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
@@ -84,7 +85,15 @@ class UserService extends BaseService
             })
             ->addColumn('joined_date', function ($user) {
                 return $user->created_at?->format('j/n/Y');
-            })->make();
+            })
+            ->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('users_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('users_update'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('users_delete'),
+                ];
+            })
+            ->make();
     }
 
     public function changePassword($request, $id): bool

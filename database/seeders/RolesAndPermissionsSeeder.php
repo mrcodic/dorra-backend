@@ -20,7 +20,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 ['name' => $permissionEnum->value],
             [
                 'group_key' => $permissionEnum->group()['key'],
-                'group' => $permissionEnum->group()['key'],
+                'group' => $permissionEnum->group()['value'],
                 'guard_name' => 'web',
                 'routes' => $permissionEnum->routes(),
             ]);

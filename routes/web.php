@@ -27,7 +27,8 @@ use App\Http\Controllers\Dashboard\{AdminController,
     SubCategoryController,
     TagController,
     TemplateController,
-    UserController};
+    UserController
+};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Controllers\Shared\LibraryAssetController;
@@ -41,8 +42,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
     Route::middleware('auth')->group(function () {
         Route::get('states', [MainController::class, 'states'])->name('states');
-        Route::get('/', [StatisticsController::class,'index'])->name('dashboard');
-
+        Route::get('/dashboard', [StatisticsController::class, 'index'])->name('dashboard');
+        Route::view('/', 'dashboard.welcome');
         Route::group(['prefix' => 'users', 'as' => 'users.', 'controller' => UserController::class,], function () {
             Route::get('/data', 'getData')->name('data');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
@@ -67,8 +68,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
 
         });
-        Route::post('/without-categories', [CategoryController::class,'storeProductWithoutCategories'])->name('product-without-categories.store');
-        Route::put('/without-categories/{id}', [CategoryController::class,'updateProductWithoutCategories'])->name('product-without-categories.update');
+        Route::post('/without-categories', [CategoryController::class, 'storeProductWithoutCategories'])->name('product-without-categories.store');
+        Route::put('/without-categories/{id}', [CategoryController::class, 'updateProductWithoutCategories'])->name('product-without-categories.update');
 
         Route::delete('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('bulk-delete');
 
@@ -121,7 +122,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('/download/{id}', [InvoiceController::class, 'download'])->name('download');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         });
-        Route::resource('/invoices', InvoiceController::class)->only(['show','destroy','index']);
+        Route::resource('/invoices', InvoiceController::class)->only(['show', 'destroy', 'index']);
 
         Route::group(['prefix' => 'faqs', 'as' => 'faqs.', 'controller' => FaqController::class,], function () {
             Route::get('/data', [FaqController::class, 'getData'])->name('data');
@@ -149,7 +150,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         });
         Route::resource('/logistics', LocationController::class)->except('show');
-        Route::get('/logistics/dashboard', [LocationController::class,'dashboard']);
+        Route::get('/logistics/dashboard', [LocationController::class, 'dashboard']);
 
         Route::group(['prefix' => 'discount-codes', 'as' => 'discount-codes.', 'controller' => DiscountCodeController::class,], function () {
             Route::get('/data', [DiscountCodeController::class, 'getData'])->name('data');
@@ -166,7 +167,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::resource('/flags', FlagController::class);
 
         Route::group(['prefix' => 'station-statuses', 'as' => 'station-statuses.', 'controller' => StationStatusController::class,], function () {
-            Route::get('/data',  'getData')->name('data');
+            Route::get('/data', 'getData')->name('data');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         });
         Route::resource('/station-statuses', StationStatusController::class);
@@ -186,7 +187,6 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
 
         Route::resource('/profile', ProfileController::class)->only(['index', 'update']);
-
 
 
         Route::controller(SettingController::class)->prefix('settings')->group(function () {
@@ -225,7 +225,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('/data', 'getData')->name('data');
             Route::get('/{jobTicket}/pdf', 'pdf')->name('pdf');
         });
-        Route::apiResource('/jobs',JobTicketController::class);
+        Route::apiResource('/jobs', JobTicketController::class);
 
         Route::get('board', BoardController::class)->name('board.show');
         Route::view('/scan', 'dashboard.scan.kiosk')->name('scan.kiosk');
@@ -234,7 +234,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             ->name('scan.submit');
 
         Route::group(['prefix' => 'inventories', 'as' => 'inventories.', 'controller' => InventoryController::class,], function () {
-            Route::get('/data','getData')->name('data');
+            Route::get('/data', 'getData')->name('data');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
             Route::get('/{parent}/available-places', 'availablePlaces')
                 ->name('availablePlaces');
@@ -276,8 +276,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post("step6", 'storeStep6')->name('step6');
             Route::put('orders/{order}/edit-shipping-addresses', 'editShippingAddresses')->name('edit-shipping-addresses');
             Route::delete('orders/{orderId}/designs/{designId}', 'deleteDesign')->name('designs.delete');
-            Route::get('/print/{order}','print')->name('printOrder');
-            Route::get('/print','printNewOrders')->name('print');
+            Route::get('/print/{order}', 'print')->name('printOrder');
+            Route::get('/print', 'printNewOrders')->name('print');
         });
         Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'destroy']);
         Route::patch('templates/{template}', [TemplateController::class, 'updateEditorData']);

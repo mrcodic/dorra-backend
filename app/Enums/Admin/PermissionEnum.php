@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 enum PermissionEnum: string
 {
     // Dashboards
-    case DASHBOARDS = 'dashboards_show';
+    case DASHBOARDS = 'dashboard_show';
 
     // Admins
     case INDEX_ADMINS = 'admins_index';
@@ -172,7 +172,7 @@ enum PermissionEnum: string
     private function groupLabel(): string
     {
         return match ($this->groupKey()) {
-            'dashboards'          => 'Dashboards',
+            'dashboard'          => 'Dashboards',
             'admins'              => 'Admins',
             'users'               => 'Users',
             'products'            => 'Products',

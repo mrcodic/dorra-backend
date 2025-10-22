@@ -24,8 +24,10 @@ var dt_user_table = $(".user-list-table").DataTable({
             data: null,
             defaultContent: "",
             orderable: false,
-            render: function (data) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
+            render: function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
             },
         },
         { data: "name" },
@@ -72,27 +74,46 @@ var dt_user_table = $(".user-list-table").DataTable({
             data: "id",
             orderable: false,
             render: function (data, type, row, meta) {
-                return `
-        <div class="d-flex gap-1">
-             <a href="/users/${data}" class="">
-                <i data-feather="eye"></i>
-              </a>
-              <a href="/users/${data}/edit" class="">
-                <i data-feather="edit-3"></i>
-              </a>
+                const canShow   = row?.action?.can_show   ?? false;
+                const canEdit   = row?.action?.can_edit   ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
 
-              <a href="#" class="text-danger  open-delete-user-modal"
-               data-id="${data}"
-               data-action="/users/${data}"
-               data-bs-toggle="modal"
-               data-bs-target="#deleteUserModal">
-               <i data-feather="trash-2"></i>
-</a>
+                const btns = [];
 
-          </div>
-        `;
+                if (canShow) {
+                    btns.push(`
+        <a href="/users/${data}" class="text-body" aria-label="View user">
+          <i data-feather="eye"></i>
+        </a>
+      `);
+                }
+
+                if (canEdit) {
+                    btns.push(`
+        <a href="/users/${data}/edit" class="text-body" aria-label="Edit user">
+          <i data-feather="edit-3"></i>
+        </a>
+      `);
+                }
+
+                if (canDelete) {
+                    btns.push(`
+        <a href="#" class="text-danger open-delete-user-modal"
+           data-id="${data}"
+           data-action="/users/${data}"
+           data-bs-toggle="modal"
+           data-bs-target="#deleteUserModal"
+           aria-label="Delete user">
+          <i data-feather="trash-2"></i>
+        </a>
+      `);
+                }
+
+                if (!btns.length) return ''; // no permissions -> empty cell
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
             },
         },
+
     ],
     order: [[1, "asc"]],
     dom:
