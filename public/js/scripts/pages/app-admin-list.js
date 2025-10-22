@@ -23,8 +23,8 @@ const dt_user_table = $(".admin-list-table").DataTable({
             data: null,
             orderable: false,
             searchable: false,
-            render: function (data) {
-                return data.action.can_delete
+            render: function (data, type, row) {
+                return row?.action?.can_delete
                     ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
                     : '';
             }
