@@ -48,18 +48,21 @@ $side => [
 
             </div>
             <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
+                @can('mockups_create')
                 <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"
                     data-images="{{ json_encode($images) }}" data-colors="{{ json_encode($mockup->colors) }}"
                     data-bs-toggle="modal" data-bs-target="#showMockupModal">Show
                 </button>
-
+                @endcan
+                    @can('mockups_create')
                 <button type="button" class="btn btn-outline-secondary flex-fill edit-mockup-btn" data-bs-toggle="modal"
                     data-bs-target="#editMockupModal" data-id="{{ $mockup->id }}" data-name="{{ $mockup->name }}"
                     data-types="{{ $mockup->types?->pluck(" id") }}" data-product-id="{{ $mockup->product?->id }}"
                     data-colors="{{ json_encode($mockup?->colors) }}"
                     data-images="{{ json_encode($mockup->getMedia('mockups')) }}">Edit
                 </button>
-
+                    @endcan
+                    @can('mockups_create')
                 <button class="btn btn-outline-danger flex-fill open-delete-mockup-modal" data-id="{{ $mockup->id }}"
                     data-bs-toggle="modal" data-bs-target="#deleteMockupModal">
                     <i data-feather="trash-2"></i> Delete
