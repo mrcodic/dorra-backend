@@ -129,6 +129,13 @@ class OrderService extends BaseService
             ->addColumn('added_date', function ($order) {
                 return $order->created_at ? $order->created_at->format('d/m/Y') : '-';
             })
+            ->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('orders_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('orders_update'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('orders_delete'),
+                ];
+            })
             ->make();
     }
 
