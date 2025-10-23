@@ -316,6 +316,8 @@ class CategoryService extends BaseService
 
     public function getData(): JsonResponse
     {
+        dd(auth()->user()->permissions);
+        
         $locale = app()->getLocale();
         $categories = $this->repository
             ->query(['id', 'name', 'description', 'created_at', 'is_has_category'])
