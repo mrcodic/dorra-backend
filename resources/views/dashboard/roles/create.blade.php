@@ -135,83 +135,10 @@
                 location.replace('/roles');
             }
         })
-        // ✅ Keep the rest of your code; just ensure every bulk op ignores disabled
-        // Global "Select All"
-        $(document).on('change', '#selectAllGlobal', function () {
+        $('.row-checkbox').on('change', function () {
+            const group = $(this).data('group');
             const isChecked = $(this).is(':checked');
-
-            // only toggle enabled permissions
-            $('.permission-checkbox:not(:disabled)').prop('checked', isChecked);
-
-            // sync each row's group checkbox
-            $('.row-checkbox').each(function () {
-                const group    = $(this).data('group');
-                const $enabled = $(`.${group}-checkbox:not(:disabled)`);
-                if ($enabled.length) {
-                    $(this).prop('checked', isChecked).prop('indeterminate', false);
-                } else {
-                    $(this).prop({ checked: false, indeterminate: false });
-                }
-            });
-        // Row-level "Select All"
-        $(document).on('change', '.row-checkbox', function () {
-            const group     = $(this).data('group');
-            const isChecked = $(this).is(':checked');
-
-            // ✅ Only toggle enabled inputs
-            $(`.${group}-checkbox:not(:disabled)`).prop('checked', isChecked);
-
-            updateGlobalToggle();
-        });
-
-        // Individual checkbox click
-        $(document).on('change', '.permission-checkbox', function () {
-            const group = (this.className.match(/(^|\s)([A-Za-z0-9\-]+)-checkbox(\s|$)/) || [])[2];
-            if (group) updateGroupToggle(group);
-            updateGlobalToggle();
-        });
-
-        function updateGroupToggle(group) {
-            const $all        = $(`.${group}-checkbox`);
-            const $enabled    = $all.filter(':not(:disabled)');
-            const $enabledOn  = $enabled.filter(':checked');
-            const $rowToggle  = $(`.row-checkbox[data-group="${group}"]`);
-
-            if (!$enabled.length) {
-                $rowToggle.prop({ checked: false, indeterminate: false });
-                return;
-            }
-            if ($enabledOn.length === 0) {
-                $rowToggle.prop({ checked: false, indeterminate: false });
-            } else if ($enabledOn.length === $enabled.length) {
-                $rowToggle.prop({ checked: true, indeterminate: false });
-            } else {
-                $rowToggle.prop({ checked: false, indeterminate: true });
-            }
-        }
-
-        function updateGlobalToggle() {
-            const $allEnabled = $('.permission-checkbox:not(:disabled)');
-            const $onEnabled  = $allEnabled.filter(':checked');
-
-            if ($allEnabled.length === 0) {
-                $('#selectAllGlobal').prop({ checked: false, indeterminate: false });
-                return;
-            }
-            if ($onEnabled.length === 0) {
-                $('#selectAllGlobal').prop({ checked: false, indeterminate: false });
-            } else if ($onEnabled.length === $allEnabled.length) {
-                $('#selectAllGlobal').prop({ checked: true, indeterminate: false });
-            } else {
-                $('#selectAllGlobal').prop({ checked: false, indeterminate: true });
-            }
-        }
-
-        // Initialize correct states on load
-        $(function () {
-            $('.row-checkbox').each(function () { updateGroupToggle($(this).data('group')); });
-            updateGlobalToggle();
-        });
+            $(`.${group}-checkbox`).prop('checked', isChecked);
         });
     </script>
 
