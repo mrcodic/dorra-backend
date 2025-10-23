@@ -64,14 +64,14 @@
                         <tbody>
 
                         @foreach($associatedData['permissions'] as $group => $groupPermissions)
-                            @dump($group, $groupPermissions)
+
                             <tr>
                                 <td>
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input row-checkbox"
                                                data-group="{{ $group }}"/>
 
-                                        <span>{{ $group }}</span>
+{{--                                        <span>{{ $group }}</span>--}}
                                     </div>
                                 </td>
 
