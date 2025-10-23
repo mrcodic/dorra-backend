@@ -167,7 +167,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"  @disabled(!auth()->user()->hasPermissionTo('faq_delete'))>
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"  @disabled(!auth()->user()->hasPermissionTo('faqs_delete'))>
                         </th>
                         <th>Question</th>
                         <th>Added Date</th>
