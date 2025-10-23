@@ -68,7 +68,6 @@ class TagService extends BaseService
 
     public function getData(): JsonResponse
     {
-        dd(auth()->user()->permissions);
         $locale = app()->getLocale();
         $tags = $this->repository
             ->query(['id', 'name', 'created_at'])
@@ -110,9 +109,9 @@ class TagService extends BaseService
             })
             ->addColumn('action', function () {
                 return [
-                    'can_show' => (bool) auth()->user()->hasPermissionTo('tags_show'),
-                    'can_edit' => (bool) auth()->user()->hasPermissionTo('tags_update'),
-                    'can_delete' => (bool) auth()->user()->hasPermissionTo('tags_delete'),
+                    'can_show' => (bool) auth()->user()->can('tags_show'),
+                    'can_edit' => (bool) auth()->user()->can('tags_update'),
+                    'can_delete' => (bool) auth()->user()->can('tags_delete'),
                 ];
             })->make();
     }
