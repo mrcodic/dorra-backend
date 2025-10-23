@@ -165,9 +165,8 @@
             <table class="code-list-table table">
                 <thead class="table-light">
                     <tr>
-                        @can('discount-codes_delete')
-                        <th><input type="checkbox" id="select-all-checkbox" class="form-check-input"></th>
-                        @endcan
+                        <th><input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('discount-codes_delete'))></th>
+
                         <th>Code Name</th>
                         <th>Type</th>
                         <th>Restrictions</th>

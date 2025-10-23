@@ -25,7 +25,7 @@ const dt_user_table = $(".code-list-table").DataTable({
                 return row?.action?.can_delete
                     ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
                     : '';
-            },
+            }
         },
         { data: "code" },
         { data: "type" },
