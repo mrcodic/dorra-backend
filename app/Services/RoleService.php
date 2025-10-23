@@ -46,8 +46,9 @@ class RoleService extends BaseService
     {
         $model = $this->repository->update($validatedData,$id);
         $model->load($relationsToLoad);
+        dd($validatedData['permissions'], $model->syncPermissions($validatedData['permissions']));
         if (isset($validatedData['permissions'])) {
-            $model->syncPermissions($validatedData['permissions'] );
+            $model->syncPermissions($validatedData['permissions']);
         }
         return $model->load($relationsToLoad);
     }
