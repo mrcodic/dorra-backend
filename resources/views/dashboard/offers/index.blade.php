@@ -170,7 +170,7 @@
 
                     </select>
                 </div>
-
+             @can('offers_create')
                 {{-- Add Button - 20% on md+, full width on xs --}}
                 <div class="col-12 col-md-3 text-md-end">
                     <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
@@ -179,6 +179,7 @@
                         Add New Offer
                     </a>
                 </div>
+                @endcan
 
             </div>
 
@@ -187,7 +188,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"  @disabled(!auth()->user()->hasPermissionTo('offers_delete'))>
                         </th>
                         <th>Offer Name</th>
                         <th>Type</th>

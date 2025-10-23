@@ -55,6 +55,12 @@ class OfferService extends BaseService
                 return $offer->start_at->format('d/m/Y');
             })->editColumn('end_at', function ($offer) {
                 return $offer->end_at->format('d/m/Y');
+            })->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->can('tags_show'),
+                    'can_edit' => (bool) auth()->user()->can('tags_update'),
+                    'can_delete' => (bool) auth()->user()->can('tags_delete'),
+                ];
             })->make();
     }
 
