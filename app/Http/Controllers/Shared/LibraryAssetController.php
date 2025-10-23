@@ -34,7 +34,9 @@ class LibraryAssetController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['file' => ['required','file']]);
+        $request->validate(['file' => ['required','file',  'mimetypes:image/jpeg,image/png,image/svg+xml',
+            'mimes:jpg,jpeg,png,svg',
+            ]]);
         $media = handleMediaUploads($request->file('file'),Admin::find(1) ?? Admin::find(7),"web_assets");
 //        $media = handleMediaUploads($request->file('file'),auth($this->activeGuard)->user(),"{$this->activeGuard}_assets");
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
