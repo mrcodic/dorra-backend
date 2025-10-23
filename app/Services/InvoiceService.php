@@ -50,7 +50,13 @@ class InvoiceService extends BaseService
         })
         ->addColumn('issued_date', function ($invoice) {
             return $invoice->issued_date;
-        })
+        })->addColumn('action', function () {
+                 return [
+                     'can_show' => (bool) auth()->user()->can('invoices_show'),
+                     'can_edit' => (bool) auth()->user()->can('invoices_update'),
+                     'can_delete' => (bool) auth()->user()->can('invoices_delete'),
+                 ];
+             })
         ->make(true);
     }
     public function export(): \Symfony\Component\HttpFoundation\BinaryFileResponse

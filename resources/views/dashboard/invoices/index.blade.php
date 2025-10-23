@@ -234,7 +234,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"  @disabled(!auth()->user()->hasPermissionTo('invoices_delete'))>
                         </th>
                         <th>Invoice Number</th>
                         <th>Client</th>
