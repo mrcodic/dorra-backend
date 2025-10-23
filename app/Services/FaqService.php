@@ -50,6 +50,12 @@ class FaqService extends BaseService
             ->editColumn('created_at', function ($faq) {
                 return $faq->created_at->format('d/m/Y') ;
             })
+            ->addColumn('action', function () {
+                return [
+                    'can_edit' => (bool) auth()->user()->can('faqs_update'),
+                    'can_delete' => (bool) auth()->user()->can('faqs_delete'),
+                ];
+            })
             ->make();
     }
 

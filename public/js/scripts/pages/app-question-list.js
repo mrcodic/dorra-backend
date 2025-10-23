@@ -32,11 +32,12 @@ const dt_user_table = $(".faq-list-table").DataTable({
             data: "id",
             orderable: false,
             searchable: false,
-            render: function (data, type, row) {
-
-                return `
-
-         <a href="#" class="edit-details"
+            render: function (data, type, row, meta) {
+                const canEdit = row?.action?.can_edit ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
+                const btns = [];
+                if (canEdit) {
+                    btns.push(`<a href="#" class="edit-details"
            data-bs-toggle="modal"
            data-bs-target="#editQuestionModal"
               data-question_ar="${row.question_ar}"
@@ -47,16 +48,20 @@ const dt_user_table = $(".faq-list-table").DataTable({
 
                 <i data-feather="edit-3"></i>
               </a>
-
-        <a href="#" class=" text-danger open-delete-faq-modal" data-id="${data}"
+`);
+                }
+                if (canDelete) {
+                    btns.push(`<a href="#" class=" text-danger open-delete-faq-modal" data-id="${data}"
                 data-bs-toggle="modal"
                 data-bs-target="#deleteFaqModal" >
                 <i data-feather="trash-2"></i>
               </a>
+`);
+                }
 
-          </div>
-        `;
-            }
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
+            },
         }
     ],
     order: [[1, "asc"]],

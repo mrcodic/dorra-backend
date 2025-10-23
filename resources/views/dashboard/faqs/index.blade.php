@@ -155,17 +155,19 @@
                         <option value="desc">Newest</option>
                     </select>
                 </div>
+                @can('faqs_create')
                 <button type="button" class="btn btn-outline-primary col-12 col-md-2" data-bs-toggle="modal"
                     data-bs-target="#addQuestionModal">
                     Add New Question
                 </button>
+                @endcan
             </div>
 
             <table class="faq-list-table table">
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"  @disabled(!auth()->user()->hasPermissionTo('faq_delete'))>
                         </th>
                         <th>Question</th>
                         <th>Added Date</th>
