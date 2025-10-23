@@ -131,7 +131,7 @@ enum PermissionEnum: string
     // Inventories
     case SHOW_INVENTORIES = 'inventories_show';
     case CREATE_INVENTORIES = 'inventories_create';
-    case UPDATE_INVENTORIES = 'inventories_update';
+
     case DELETE_INVENTORIES = 'inventories_delete';
 
     // Station Statuses

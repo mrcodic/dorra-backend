@@ -36,8 +36,8 @@ class InventoryService extends BaseService
             })
             ->addColumn('action', function () {
                 return [
-                    'can_show' => (bool) auth()->user()->hasPermissionTo('discount-codes_show'),
-                    'can_delete' => (bool) auth()->user()->hasPermissionTo('discount-codes_delete'),
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('inventories_show'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('inventories_delete'),
                 ];
             })
             ->make(true);
