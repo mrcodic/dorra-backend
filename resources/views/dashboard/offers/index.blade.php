@@ -188,7 +188,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"  @disabled(!auth()->user()->hasPermissionTo('offers_delete'))>
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"@disabled(!auth()->user()->hasPermissionTo('offers_delete'))>
                         </th>
                         <th>Offer Name</th>
                         <th>Type</th>
