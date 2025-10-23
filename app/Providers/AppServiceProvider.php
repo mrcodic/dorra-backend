@@ -31,8 +31,8 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
-    {  Fortify::authenticateUsing(function (Request $request) {
-        // Optional: validate format first
+    {
+        Fortify::authenticateUsing(function (Request $request) {
         $request->validate([
             'email'    => ['required','email'],
             'password' => ['required','string','min:6'],
@@ -44,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
             // Email doesn’t exist
             throw ValidationException::withMessages([
                 'email' => trans('auth.user_not_found'),
+            ]);
+        }
+        if (!$user->roles) {
+            throw ValidationException::withMessages([
+                'role' => 'contact administrator your role deleted',
             ]);
         }
 
