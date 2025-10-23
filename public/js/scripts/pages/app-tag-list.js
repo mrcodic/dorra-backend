@@ -35,9 +35,12 @@ var dt_user_table = $('.tag-list-table').DataTable({
             data: 'id',
             orderable: false,
             render: function (data, type, row, meta) {
-                return `
-        <div class="d-flex gap-1">
-                                <a href="#" class="view-details"
+                const canShow   = row?.action?.can_show   ?? false;
+                const canEdit   = row?.action?.can_edit   ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
+                const btns = [];
+                if (canShow){
+                        btns.push(`<a href="#" class="view-details"
                                    data-bs-toggle="modal"
                                      data-bs-target="#showTagModal"
                                      data-id="${data}"
@@ -48,9 +51,10 @@ var dt_user_table = $('.tag-list-table').DataTable({
                                      data-templates="${row.no_of_templates}"
                                      data-showdate="${row.show_date}">
                                      <i data-feather="eye"></i>
-                                </a>
-
-                          <a href="#" class="edit-details"
+                                </a>`);
+                }
+                if (canEdit){
+                    btns.push(`<a href="#" class="edit-details"
                            data-bs-toggle="modal"
                            data-bs-target="#editTagModal"
                              data-id="${data}"
@@ -59,9 +63,10 @@ var dt_user_table = $('.tag-list-table').DataTable({
                              data-products="${row.no_of_products}"
                              data-showdate="${row.show_date}">
                             <i data-feather="edit-3"></i>
-                       </a>
-
-      <a href="#" class="text-danger open-delete-tag-modal"
+                       </a>`);
+                }
+                if (canDelete){
+                    btns.push(`<a href="#" class="text-danger open-delete-tag-modal"
    data-id="${data}"
    data-name="${row.name}"
    data-action="/categories/${data}"
@@ -69,9 +74,11 @@ var dt_user_table = $('.tag-list-table').DataTable({
    data-bs-target="#deleteTagModal">
    <i data-feather="trash-2"></i>
 </a>
-
-          </div>
-        `;
+`);
+                }
+          
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
             }
         }
     ],
