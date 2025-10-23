@@ -2,10 +2,13 @@
 
 namespace App\Enums\Admin;
 
+use App\Helpers\EnumHelpers;
 use Illuminate\Support\Str;
 
 enum PermissionEnum: string
 {
+    use EnumHelpers;
+
     // Dashboards
     case DASHBOARDS = 'dashboard_show';
 

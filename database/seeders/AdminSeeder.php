@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Admin\PermissionEnum;
 use App\Models\Admin;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class AdminSeeder extends Seeder
 {
@@ -13,7 +15,7 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        Admin::query()->create([
+      $admin =  Admin::query()->create([
             'first_name' =>'super',
             'last_name' => 'admin',
             'email' => 'super@admin.com',
@@ -21,5 +23,11 @@ class AdminSeeder extends Seeder
                 'password' => 123456789,
             'status' => 1,
         ]);
+        $role = Role::query()->firstOrCreate([
+                'name' => 'super admin',
+               'guard_name' => 'web',
+            ]);
+        $role->syncPermissions(PermissionEnum::values());
+        $admin->assignRole($role);
     }
 }
