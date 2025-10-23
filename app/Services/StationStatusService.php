@@ -47,6 +47,7 @@ class StationStatusService extends BaseService
             ->addColumn('action', function () {
                 return [
                     'can_show' => (bool) auth()->user()->hasPermissionTo('station-statuses_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('station-statuses_update'),
                     'can_delete' => (bool) auth()->user()->hasPermissionTo('station-statuses_delete'),
                 ];
             })
