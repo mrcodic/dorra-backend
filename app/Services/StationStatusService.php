@@ -44,6 +44,12 @@ class StationStatusService extends BaseService
             })
             ->latest();
         return DataTables::of($stationStatuses)
+            ->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('station-statuses_show'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('station-statuses_delete'),
+                ];
+            })
             ->make();
     }
 

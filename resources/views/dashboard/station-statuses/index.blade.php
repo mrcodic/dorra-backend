@@ -4,276 +4,286 @@
 @section('main-page', 'Custom Statuses')
 
 @section('vendor-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
-<style>
-    .status-card.selected {
-        border-color: #24B094 !important;
-        background: #E0F4F0;
-    }
-</style>
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+    <style>
+        .status-card.selected {
+            border-color: #24B094 !important;
+            background: #E0F4F0;
+        }
+    </style>
 
-<!-- SweetAlert2 CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-<!-- SweetAlert2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
 
 @section('page-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 
-<style>
-    /* Responsive table accordion styles */
-    @media (max-width: 768px) {
+    <style>
+        /* Responsive table accordion styles */
+        @media (max-width: 768px) {
 
-        /* Hide the last column on mobile */
-        .status-list-table th:nth-child(4),
-        .status-list-table th:nth-child(5) {
-            display: none !important;
-        }
-
-        .status-list-table tbody tr:not(.details-row) td:nth-child(4),
-        .status-list-table tbody tr:not(.details-row) td:nth-child(5) {
-            display: none !important;
-        }
-
-        /* Style for clickable rows */
-        .status-list-table tbody tr:not(.details-row) {
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        /* Add expand indicator to the role column */
-        .status-list-table tbody tr:not(.details-row) td:nth-child(1) {
-            position: relative;
-            padding-left: 20px !important;
-        }
-
-        .expand-icon {
-            position: absolute;
-            left: 70%;
-            top: 50%;
-            transform: translateY(-50%);
-            transition: transform 0.3s ease;
-            color: #666;
-            font-size: 14px;
-            pointer-events: none;
-        }
-
-        .expand-icon.expanded {
-            transform: translateY(-50%) rotate(180deg);
-        }
-
-        /* Details row styling */
-        .details-row {
-            background-color: #F9FDFC !important;
-            display: none;
-        }
-
-        .details-row.show {
-            display: table-row !important;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
+            /* Hide the last column on mobile */
+            .status-list-table th:nth-child(4),
+            .status-list-table th:nth-child(5) {
+                display: none !important;
             }
 
-            to {
-                opacity: 1;
+            .status-list-table tbody tr:not(.details-row) td:nth-child(4),
+            .status-list-table tbody tr:not(.details-row) td:nth-child(5) {
+                display: none !important;
+            }
+
+            /* Style for clickable rows */
+            .status-list-table tbody tr:not(.details-row) {
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+
+            /* Add expand indicator to the role column */
+            .status-list-table tbody tr:not(.details-row) td:nth-child(1) {
+                position: relative;
+                padding-left: 20px !important;
+            }
+
+            .expand-icon {
+                position: absolute;
+                left: 70%;
+                top: 50%;
+                transform: translateY(-50%);
+                transition: transform 0.3s ease;
+                color: #666;
+                font-size: 14px;
+                pointer-events: none;
+            }
+
+            .expand-icon.expanded {
+                transform: translateY(-50%) rotate(180deg);
+            }
+
+            /* Details row styling */
+            .details-row {
+                background-color: #F9FDFC !important;
+                display: none;
+            }
+
+            .details-row.show {
+                display: table-row !important;
+                animation: slideDown 0.3s ease;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 5px 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .detail-row:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+                font-size: 14px;
+            }
+
+            .detail-value {
+                color: #212529;
+                font-size: 14px;
             }
         }
 
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
+        /* Ensure normal behavior on desktop */
+        @media (min-width: 769px) {
+            .details-row {
+                display: none !important;
+            }
 
-        .detail-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
+            .expand-icon {
+                display: none !important;
+            }
         }
-
-        .detail-label {
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-        }
-
-        .detail-value {
-            color: #212529;
-            font-size: 14px;
-        }
-    }
-
-    /* Ensure normal behavior on desktop */
-    @media (min-width: 769px) {
-        .details-row {
-            display: none !important;
-        }
-
-        .expand-icon {
-            display: none !important;
-        }
-    }
-</style>
+    </style>
 @endsection
 
 @section('content')
-<div class=" card p-1">
+    <div class=" card p-1">
 
 
-    <!-- users list start -->
-    <section class="app-user-list">
+        <!-- users list start -->
+        <section class="app-user-list">
 
-        <!-- list and filter start -->
-        <div class="card">
-            <div class="card-body">
+            <!-- list and filter start -->
+            <div class="card">
+                <div class="card-body">
 
-                <div class="row">
-                    <div class="col-md-4 user_role"></div>
-                    <div class="col-md-4 user_plan"></div>
-                    <div class="col-md-4 user_status"></div>
+                    <div class="row">
+                        <div class="col-md-4 user_role"></div>
+                        <div class="col-md-4 user_plan"></div>
+                        <div class="col-md-4 user_status"></div>
+                    </div>
                 </div>
-            </div>
-            <div class="card-datatable table-responsive pt-0">
-                {{-- Search and Select Options --}}
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-1">
-                    <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-4 search-form">
-                        <i data-feather="search"
-                            class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
+                <div class="card-datatable table-responsive pt-0">
+                    {{-- Search and Select Options --}}
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-1">
+                        <form action="" method="get"
+                              class="position-relative flex-grow-1 me-1 col-12 col-md-4 search-form">
+                            <i data-feather="search"
+                               class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
 
-                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                            id="search-status-form" placeholder="Search status..." style="height: 38px;">
+                            <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
+                                   id="search-status-form" placeholder="Search status..." style="height: 38px;">
 
-                        <!-- Clear button -->
-                        <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                            <!-- Clear button -->
+                            <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                    background: transparent; border: none; font-weight: bold;
                    color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
-                            &times;
-                        </button>
-                    </form>
+                                &times;
+                            </button>
+                        </form>
 
 
-                    {{-- Filter Select - 10% on md+, half width on sm --}}
-                    <div class="col-12 col-md-2">
-                        <select name="created_at" class="form-select filter-date">
-                            <option value="" disabled selected>Date</option>
-                            <option value="desc">Newest</option>
-                            <option value="asc">Oldest</option>
-                        </select>
+                        {{-- Filter Select - 10% on md+, half width on sm --}}
+                        <div class="col-12 col-md-2">
+                            <select name="created_at" class="form-select filter-date">
+                                <option value="" disabled selected>Date</option>
+                                <option value="desc">Newest</option>
+                                <option value="asc">Oldest</option>
+                            </select>
+                        </div>
+
+                        @can('station-statuses_create')
+                            <div class="col-12 col-md-4 col-lg-2">
+                                <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
+                                   data-bs-target="#addStatusModal">
+                                    <i data-feather="plus"></i>
+                                    Add New Status
+                                </a>
+                            </div>
+                        @endcan
+
                     </div>
 
-
-                    <div class="col-12 col-md-4 col-lg-2">
-                        <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                            data-bs-target="#addStatusModal">
-                            <i data-feather="plus"></i>
-                            Add New Status
-                        </a>
-                    </div>
-
-                </div>
-
-                <table class="status-list-table table">
-                    <thead class="table-light">
+                    <table class="status-list-table table">
+                        <thead class="table-light">
                         <tr>
                             <th>
-                                <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                                <input type="checkbox" id="select-all-checkbox"
+                                       class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('station-statuses_delete'))>
                             </th>
                             <th>Name</th>
                             <th>Station</th>
                             <th>Product/Category</th>
                             <th>Actions</th>
                         </tr>
-                    </thead>
-                </table>
-                <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                    <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                        style="z-index: 10;">
-                        <p id="selected-count-text">0 custom statuses are selected</p>
+                        </thead>
+                    </table>
+                    <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                        <div
+                            class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                            style="z-index: 10;">
+                            <p id="selected-count-text">0 custom statuses are selected</p>
 
-                        <!-- Keep the hidden form but DO NOT submit on this button -->
-                        <form id="bulk-delete-form" method="POST" action="{{ route('station-statuses.bulk-delete') }}">
-                            @csrf
-                            <!-- This opens the modal -->
-                            <button type="button" id="open-bulk-delete-modal"
-                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
-                                <i data-feather="trash-2"></i> Delete Selected
-                            </button>
-                        </form>
+                            <!-- Keep the hidden form but DO NOT submit on this button -->
+                            <form id="bulk-delete-form" method="POST"
+                                  action="{{ route('station-statuses.bulk-delete') }}">
+                                @csrf
+                                <!-- This opens the modal -->
+                                <button type="button" id="open-bulk-delete-modal"
+                                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1">
+                                    <i data-feather="trash-2"></i> Delete Selected
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </div>
 
 
-                @include('modals.delete', [
-                'id' => 'deleteStatusModal',
-                'formId' => 'deleteStatusForm',
-                'title' => 'Delete Status',
-                'message' => 'Are you sure you want to delete this status? This action cannot be undone.',
-                'confirmText' => 'Yes, Delete Status'
-                ])
+                    @include('modals.delete', [
+                    'id' => 'deleteStatusModal',
+                    'formId' => 'deleteStatusForm',
+                    'title' => 'Delete Status',
+                    'message' => 'Are you sure you want to delete this status? This action cannot be undone.',
+                    'confirmText' => 'Yes, Delete Status'
+                    ])
 
-                @include('modals.delete',[
-                'id' => 'deleteStatusesModal',
-                'formId' => 'bulk-delete-form',
-                'title' => 'Delete Statuses',
-                'buttonId' => 'confirm-bulk-delete',
+                    @include('modals.delete',[
+                    'id' => 'deleteStatusesModal',
+                    'formId' => 'bulk-delete-form',
+                    'title' => 'Delete Statuses',
+                    'buttonId' => 'confirm-bulk-delete',
 
-                'confirmText' => 'Are you sure you want to delete this items?',
-                ])
-                @include('modals.station-statuses.show-status')
-                @include('modals.station-statuses.edit-status')
-                @include('modals.station-statuses.add-status')
-                @endsection
+                    'confirmText' => 'Are you sure you want to delete this items?',
+                    ])
+                    @include('modals.station-statuses.show-status')
+                    @include('modals.station-statuses.edit-status')
+                    @include('modals.station-statuses.add-status')
+                    @endsection
 
-                @section('vendor-script')
-                {{-- Vendor js files --}}
-                <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-                <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
-                @endsection
+                    @section('vendor-script')
+                        {{-- Vendor js files --}}
+                        <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+                        <script
+                            src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+                        <script
+                            src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+                        <script
+                            src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+                        <script
+                            src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+                        <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+                    @endsection
 
-                @section('page-script')
-                <link rel="stylesheet"
-                    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
-                <script>
-                    const stationStatusesDataUrl = "{{ route('station-statuses.data') }}";
+                    @section('page-script')
+                        <link rel="stylesheet"
+                              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"/>
+                        <script>
+                            const stationStatusesDataUrl = "{{ route('station-statuses.data') }}";
                             const locale = "{{ app()->getLocale() }}"
 
-                </script>
-                    <script>
-                        // Blade will output the route with a placeholder you can replace at runtime
-                        const PRODUCT_CATEGORIES_URL = "{{ route('products.categories', ['category_ids' => ':id']) }}";
-                    </script>
+                        </script>
+                        <script>
+                            // Blade will output the route with a placeholder you can replace at runtime
+                            const PRODUCT_CATEGORIES_URL = "{{ route('products.categories', ['category_ids' => ':id']) }}";
+                        </script>
 
-                {{-- Page js files --}}
-                <script src="{{ asset('js/scripts/pages/app-station-status-list.js') }}?v={{ time() }}"></script>
-                <script src="https://unpkg.com/feather-icons"></script>
-                <script>
-                    $(document).ready(function () {
+                        {{-- Page js files --}}
+                        <script
+                            src="{{ asset('js/scripts/pages/app-station-status-list.js') }}?v={{ time() }}"></script>
+                        <script src="https://unpkg.com/feather-icons"></script>
+                        <script>
+                            $(document).ready(function () {
                                 setupClearInput('roleSelect', 'clearRoleFilter');
 
                                 // Select all toggle
@@ -405,10 +415,10 @@
                                     initAccordion();
                                 }, 500);
                             });
-                </script>
+                        </script>
 
-                <script>
-                    // Backup accordion handler in case the main one doesn't work
+                        <script>
+                            // Backup accordion handler in case the main one doesn't work
                             $(document).ready(function () {
                                 // Alternative click handler
                                 $(document).off('click.accordion').on('click.accordion', '.status-list-table tbody tr:not(.details-row)', function (e) {
@@ -441,6 +451,6 @@
                                     }
                                 });
                             });
-                </script>
+                        </script>
 
-                @endsection
+@endsection

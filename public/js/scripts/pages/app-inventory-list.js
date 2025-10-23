@@ -22,9 +22,11 @@ var dt_user_table = $(".inventory-list-table").DataTable({
             data: null,
             defaultContent: "",
             orderable: false,
-            render: function (data, type, row, meta) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            }
+            render: function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
+            },
         },
         {data: "name"},
         {data: "number"},
@@ -36,16 +38,7 @@ var dt_user_table = $(".inventory-list-table").DataTable({
                 const canShow = row?.action?.can_show ?? false;
                 const canDelete = row?.action?.can_delete ?? false;
                 const btns = [];
-                if (canDelete) {
-                    btns.push(`<a href="#" class="text-danger open-delete-order-modal"
-               data-id="${data}"
-               data-action="/inventories/${data}"
-               data-bs-toggle="modal"
-               data-bs-target="#deleteInventoryModal">
-               <i data-feather="trash-2"></i>
-            </a>
-`);
-                }
+
                 if (canShow) {
                     btns.push(`<a href="#" class="view-details"
                                    data-bs-toggle="modal"
@@ -59,6 +52,17 @@ var dt_user_table = $(".inventory-list-table").DataTable({
                                      <i data-feather="eye"></i>
                                 </a>
 
+`);
+                }
+
+                if (canDelete) {
+                    btns.push(`<a href="#" class="text-danger open-delete-order-modal"
+               data-id="${data}"
+               data-action="/inventories/${data}"
+               data-bs-toggle="modal"
+               data-bs-target="#deleteInventoryModal">
+               <i data-feather="trash-2"></i>
+            </a>
 `);
                 }
 

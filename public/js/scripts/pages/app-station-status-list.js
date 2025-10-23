@@ -21,7 +21,11 @@ const dt = $('.status-list-table').DataTable({
         {
             data: null,
             orderable: false,
-            render: (data) => `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`
+            render: function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
+            },
         },
         { data: 'name', orderable: false },
         {
@@ -50,17 +54,22 @@ const dt = $('.status-list-table').DataTable({
 
                 const mode = isProduct ? 'with' : 'without';
 
-                return `
-      <div class="d-flex gap-1">
-        <a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showStatusModal"
+                const canShow   = row?.action?.can_show   ?? false;
+                const canEdit   = row?.action?.can_edit   ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
+                const btns = [];
+
+                if (canShow) {
+                    btns.push(`<a href="#" class="view-details" data-bs-toggle="modal" data-bs-target="#showStatusModal"
            data-id="${id}"
            data-name="${row.name ?? ''}"
            data-station="${row.station?.name ?? ''}"
            data-resource="${resourceName}">
            <i data-feather="eye"></i>
-        </a>
-
-        <a href="#" class="edit-details" data-bs-toggle="modal" data-bs-target="#editStatusModal"
+        </a>`);
+                }
+                if (canEdit) {
+                    btns.push(`<a href="#" class="edit-details" data-bs-toggle="modal" data-bs-target="#editStatusModal"
            data-id="${id}"
            data-name="${row.name ?? ''}"
            data-station-id="${row.station?.id ?? ''}"
@@ -72,15 +81,21 @@ const dt = $('.status-list-table').DataTable({
            data-parent-label="${parentName}">
            <i data-feather="edit-3"></i>
         </a>
-
-        <a href="#" class="text-danger open-delete-offer-modal"
+`);
+                }
+                if (canDelete) {
+                    btns.push(`<a href="#" class="text-danger open-delete-offer-modal"
            data-id="${id}" data-action="/station-statuses/${id}"
            data-bs-toggle="modal" data-bs-target="#deleteStatusModal">
            <i data-feather="trash-2"></i>
-        </a>
-      </div>
-    `;
-            }
+        </a>`)
+                }
+
+
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
+
+       }
         }
 
 
