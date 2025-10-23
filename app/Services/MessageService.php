@@ -35,6 +35,11 @@ class MessageService extends BaseService
         return DataTables::of($messages)
             ->editColumn('created_at', function ($message) {
                 return $message->created_at->format('d/m/Y') ;
+            })->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->can('messages_show'),
+                    'can_delete' => (bool) auth()->user()->can('messages_delete'),
+                ];
             })
             ->make();
     }
