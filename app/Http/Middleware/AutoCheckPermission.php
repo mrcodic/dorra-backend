@@ -19,6 +19,7 @@ class AutoCheckPermission
         $routeName = $request->route()->getName();
         $permission = Permission::query()->whereJsonContains('routes', $routeName)->first();
         if ($permission) {
+            dd($permission);
             if ($request->user()->cannot($permission->name)) {
                 abort(403);
             }
