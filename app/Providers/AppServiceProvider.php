@@ -46,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
                 'email' => trans('auth.user_not_found'),
             ]);
         }
-        if (!$user->roles) {
+        if ($user->roles->isEmpty()) {
             throw ValidationException::withMessages([
                 'role' => 'contact administrator your role deleted',
             ]);
