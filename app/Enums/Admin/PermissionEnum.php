@@ -27,17 +27,17 @@ enum PermissionEnum: string
 
     // Products
 
-    case CREATE_PRODUCTS = 'categories_create';
-    case SHOW_PRODUCTS = 'categories_show';
-    case UPDATE_PRODUCTS = 'categories_update';
-    case DELETE_PRODUCTS = 'categories_delete';
+    case CREATE_PRODUCTS = 'products_create';
+    case SHOW_PRODUCTS = 'products_show';
+    case UPDATE_PRODUCTS = 'products_update';
+    case DELETE_PRODUCTS = 'products_delete';
 
     // Categories
 
-    case CREATE_CATEGORIES = 'products_create';
-    case SHOW_CATEGORIES = 'products_show';
-    case UPDATE_CATEGORIES = 'products_update';
-    case DELETE_CATEGORIES = 'products_delete';
+    case CREATE_CATEGORIES = 'categories_create';
+    case SHOW_CATEGORIES = 'categories_show';
+    case UPDATE_CATEGORIES = 'categories_update';
+    case DELETE_CATEGORIES ='categories_delete';
 
     // SubCategories
 
