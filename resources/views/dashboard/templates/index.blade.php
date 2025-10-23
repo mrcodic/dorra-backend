@@ -81,10 +81,12 @@
                     </div>
 
                     {{-- create template button --}}
+                    @can('product-templates_create')
                     <a class="btn btn-primary col-12 col-md-3 col-lg-2" href="{{ route('product-templates.create') }}">
                         <i data-feather="plus"></i>
                         Create Template
                     </a>
+                    @endcan
                 </div>
 
                 {{-- Divider --}}
