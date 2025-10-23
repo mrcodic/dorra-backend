@@ -292,12 +292,14 @@
                             Printing New orders
                         </button>
                     </div>
+                    @can('orders_create')
                     <div class="col-12 col-md-2">
                         <a class="btn btn-outline-primary w-100 w-md-auto" href="{{ route('orders.create') }}">
                             <i data-feather="plus"></i>
                             Add New Order
                         </a>
                     </div>
+                    @endcan
 
                 </div>
 

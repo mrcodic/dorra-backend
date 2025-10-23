@@ -22,8 +22,10 @@ var dt_user_table = $(".order-list-table").DataTable({
             data: null,
             defaultContent: "",
             orderable: false,
-            render: function (data, type, row, meta) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
+            render: function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
             }
         },
         { data: "order_number" },
@@ -80,27 +82,38 @@ var dt_user_table = $(".order-list-table").DataTable({
         {
             data: "id",
             orderable: false,
-           render: function(data, type, row) {
-    return `
-        <div class="d-flex gap-1">
-
-               <a href="/orders/${data}" class="">
+            render: function (data, type, row, meta) {
+                const canShow   = row?.action?.can_show   ?? false;
+                const canEdit   = row?.action?.can_edit   ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
+                const btns = [];
+                if (canShow){
+                    btns.push(`<a href="/orders/${data}" class="">
                 <i data-feather="eye"></i>
             </a>
-            <a href="/orders/${data}/edit" class="">
+
+`);
+                }
+                if (canEdit){
+                    btns.push(`<a href="/orders/${data}/edit" class="">
                 <i data-feather="edit"></i>
-            </a>
-            <a href="#" class="text-danger open-delete-order-modal"
+            </a>`);
+                }
+                if (canDelete){
+                    btns.push(`<a href="#" class="text-danger open-delete-order-modal"
                data-id="${data}"
                data-name="${row.order_number}"
                data-action="/orders/${data}"
                data-bs-toggle="modal"
                data-bs-target="#deleteOrderModal">
                <i data-feather="trash-2"></i>
-            </a>
-        </div>
-    `;
-},
+            </a>`);
+                }
+
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
+            },
+
         },
     ],
     order: [[1, "asc"]],
