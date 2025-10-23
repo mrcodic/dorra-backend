@@ -364,7 +364,7 @@
         const count = selectedCheckboxes.length;
 
         if (count > 0) {
-            $('#selected-count-text').text(`${count} User${count > 1 ? 's are' : ' is'} selected`);
+            $('#selected-count-text').text(`${count} Discount Code${count > 1 ? 's are' : ' is'} selected`);
             $('#bulk-delete-container').show();
         } else {
             $('#bulk-delete-container').hide();
