@@ -21,9 +21,11 @@ const dt_user_table = $(".faq-list-table").DataTable({
             data: null,
             orderable: false,
             searchable: false,
-            render: function (data) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            }
+            render: function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
+            },
         },
 
         {data: "question"},
@@ -33,6 +35,7 @@ const dt_user_table = $(".faq-list-table").DataTable({
             orderable: false,
             searchable: false,
             render: function (data, type, row, meta) {
+                const canShow = row?.action?.can_show ?? false;
                 const canEdit = row?.action?.can_edit ?? false;
                 const canDelete = row?.action?.can_delete ?? false;
                 const btns = [];

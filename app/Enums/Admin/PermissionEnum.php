@@ -107,7 +107,6 @@ enum PermissionEnum: string
 
     // FAQs
     case CREATE_FAQS = 'faqs_create';
-    case SHOW_FAQS = 'faqs_show';
     case UPDATE_FAQS = 'faqs_update';
     case DELETE_FAQS = 'faqs_delete';
 
