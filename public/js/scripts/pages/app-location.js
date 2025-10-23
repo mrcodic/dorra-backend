@@ -35,7 +35,7 @@ const dt_user_table = $(".location-list-table").DataTable({
             orderable: false,
             searchable: false,
             render: function (data, type, row, meta) {
-                const canEdit = row?.action?.can_update ?? false;
+                const canEdit = row?.action?.can_edit ?? false;
                 const canDelete = row?.action?.can_delete ?? false;
                 const btns = [];
                 if (canEdit) {

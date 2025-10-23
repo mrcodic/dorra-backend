@@ -96,7 +96,6 @@ enum PermissionEnum: string
 
     // Locations
     case CREATE_LOCATIONS = 'locations_create';
-    case SHOW_LOCATIONS = 'locations_show';
     case UPDATE_LOCATIONS = 'locations_update';
     case DELETE_LOCATIONS = 'locations_delete';
 
