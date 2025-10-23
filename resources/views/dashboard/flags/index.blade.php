@@ -165,13 +165,15 @@
                 </div>
 
                 {{-- Add Button --}}
+                @can('flags_create')
                 <div class="col-12 col-md-3 text-md-end">
-                    <a class="btn btn-outline-primary w-100 w-md-auto d-flex align-items-center justify-content-center "
+                    <a class="btn btn-outline-primary w-100 w-md-auto d-flex align-items-center justify-content-center"
                         data-bs-toggle="modal" data-bs-target="#addFlagModal">
                         <i data-feather="plus"></i>
                         Add New Flag
                     </a>
                 </div>
+                @endcan
 
             </div>
 

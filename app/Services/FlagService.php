@@ -87,6 +87,12 @@ class FlagService extends BaseService
             })
             ->addColumn('no_of_templates', function ($tag) {
                 return $tag->templates_count;
+            })->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->can('tags_show'),
+                    'can_edit' => (bool) auth()->user()->can('tags_update'),
+                    'can_delete' => (bool) auth()->user()->can('tags_delete'),
+                ];
             })->make();
     }
 
