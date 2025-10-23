@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\Interfaces\RoleRepositoryInterface;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleService extends BaseService
 {
@@ -47,6 +48,7 @@ class RoleService extends BaseService
         $model = $this->repository->update($validatedData,$id);
         $model->load($relationsToLoad);
         if (isset($validatedData['permissions'])) {
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
             $model->syncPermissions($validatedData['permissions']);
         }
         return $model->load($relationsToLoad);
