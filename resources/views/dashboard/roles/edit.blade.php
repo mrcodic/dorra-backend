@@ -91,7 +91,8 @@
                                             class="form-check-input row-checkbox"
                                             data-group="{{ $groupKey }}"
                                         />
-                                        <span>{{ $group }}</span>
+                                        <span>{{ $groupPermissions[0]->group }}</span>
+
                                     </div>
                                 </td>
 
