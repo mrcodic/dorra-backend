@@ -64,7 +64,7 @@
                         <tbody>
 
                         @foreach($associatedData['permissions'] as $group => $groupPermissions)
-                            @dd($group)
+                            @dump($group)
                             <tr>
                                 <td>
                                     <div class="form-check">
