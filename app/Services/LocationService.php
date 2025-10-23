@@ -51,6 +51,12 @@ class LocationService extends BaseService
             ->addColumn('country', function ($location) {
                 return optional($location->state?->country)->name ?? '-';
             })
+            ->addColumn('action', function () {
+                return [
+                    'can_edit' => (bool) auth()->user()->can('locations_update'),
+                    'can_delete' => (bool) auth()->user()->can('locations_delete'),
+                ];
+            })
             ->make(true);
     }
 

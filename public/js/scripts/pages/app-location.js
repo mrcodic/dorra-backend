@@ -21,41 +21,46 @@ const dt_user_table = $(".location-list-table").DataTable({
             data: null,
             orderable: false,
             searchable: false,
-            render: function (data) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
+            render: function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
             },
         },
-        { data: "name" },
-        { data: "country" },
-        { data: "state" },
+        {data: "name"},
+        {data: "country"},
+        {data: "state"},
         {
             data: "id",
             orderable: false,
             searchable: false,
-            render: function (data, type, row) {
-                return `
-        <div class="d-flex gap-1">
-
-
-
-              <a href="#" class="edit-details"
+            render: function (data, type, row, meta) {
+                const canEdit = row?.action?.can_update ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
+                const btns = [];
+                if (canEdit) {
+                    btns.push(`<a href="#" class="edit-details"
                data-bs-toggle="modal"
                                    data-bs-target="#editLocationModal"
                                    data-bs-toggle="modal"
                                    data-id="${data}"
                                   >
                 <i data-feather="edit-3"></i>
-              </a>
-      <a href="#" class="text-danger open-delete-location-modal"
+              </a>`);
+                }
+                if (canDelete) {
+                    btns.push(`<a href="#" class="text-danger open-delete-location-modal"
    data-id="${data}"
    data-action="/logistics/${data}"
    data-bs-toggle="modal"
    data-bs-target="#deleteLocationModal">
    <i data-feather="trash-2"></i>
 </a>
+`);
+                }
 
-          </div>
-        `;
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
             },
         },
     ],
@@ -260,9 +265,9 @@ $(document).ready(function () {
         $("#add-image-details").hide(); // hide file details
     });
 });
-handleAjaxFormSubmit("#deleteLocationForm",{
+handleAjaxFormSubmit("#deleteLocationForm", {
     successMessage: "Location deleted successfully",
-    onSuccess:function () {
+    onSuccess: function () {
         $('#deleteLocationModal').modal('hide');
         location.reload()
     }

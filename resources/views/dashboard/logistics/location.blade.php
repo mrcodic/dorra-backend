@@ -153,6 +153,7 @@
 
 
                 {{-- Add Button - 20% on md+, full width on xs --}}
+                @can('locations_create')
                 <div class="col-12 col-md-3 text-md-end">
                     <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
                         data-bs-target="#addLocationModal">
@@ -160,6 +161,7 @@
                         Add New Location
                     </a>
                 </div>
+                @endcan
             </div>
 
 
@@ -167,7 +169,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"  @disabled(!auth()->user()->hasPermissionTo('locations_delete'))>
                         </th>
                         <th>Name</th>
                         <th>Country</th>
