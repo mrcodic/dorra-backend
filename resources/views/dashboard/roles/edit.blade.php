@@ -131,9 +131,11 @@
                 <!-- Permission table -->
             </div>
             <div class="d-flex justify-content-between mt-2">
+                @can('roles_delete')
                 <button type="button" data-bs-toggle="modal" data-bs-target="#deleteRoleModal"
                         class="btn btn-outline-danger">Delete
                 </button>
+                @endcan
                 <div class="d-flex gap-1">
                     <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
