@@ -34,6 +34,12 @@ class InventoryService extends BaseService
             ->addColumn('available_places_count', function ($inventory) {
                 return $inventory->children()->available()->count();
             })
+            ->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('discount-codes_show'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('discount-codes_delete'),
+                ];
+            })
             ->make(true);
     }
 

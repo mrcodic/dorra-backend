@@ -180,7 +180,7 @@
                         </select>
                     </div>
 
-
+                     @can("inventories_create")
                     <div class="col-12 col-md-4 col-lg-2">
                         <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
                             data-bs-target="#addInventoryModal">
@@ -188,7 +188,7 @@
                             Add New Inventory
                         </a>
                     </div>
-
+                    @endcan
                 </div>
 
                 <table class="inventory-list-table table">

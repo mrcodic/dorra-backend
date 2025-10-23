@@ -31,11 +31,23 @@ var dt_user_table = $(".inventory-list-table").DataTable({
         {
             data: "id",
             orderable: false,
-            render: function (data, type, row) {
-                return `
-        <div class="d-flex gap-1">
 
-                            <a href="#" class="view-details"
+            render: function (data, type, row, meta) {
+                const canShow = row?.action?.can_show ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
+                const btns = [];
+                if (canDelete) {
+                    btns.push(`<a href="#" class="text-danger open-delete-order-modal"
+               data-id="${data}"
+               data-action="/inventories/${data}"
+               data-bs-toggle="modal"
+               data-bs-target="#deleteInventoryModal">
+               <i data-feather="trash-2"></i>
+            </a>
+`);
+                }
+                if (canShow) {
+                    btns.push(`<a href="#" class="view-details"
                                    data-bs-toggle="modal"
                                      data-bs-target="#showInventoryModal"
                                      data-id="${data}"
@@ -47,16 +59,11 @@ var dt_user_table = $(".inventory-list-table").DataTable({
                                      <i data-feather="eye"></i>
                                 </a>
 
+`);
+                }
 
-            <a href="#" class="text-danger open-delete-order-modal"
-               data-id="${data}"
-               data-action="/inventories/${data}"
-               data-bs-toggle="modal"
-               data-bs-target="#deleteInventoryModal">
-               <i data-feather="trash-2"></i>
-            </a>
-        </div>
-    `;
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
             },
         },
     ],
