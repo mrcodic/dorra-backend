@@ -154,16 +154,20 @@
                 <button id="export-excel" type="button" class="btn btn-secondary fs-16 px-2">
                     Export
                 </button>
+                @can('discount-codes_create')
                 <button type="button" class="btn btn-outline-secondary fs-16 px-1" style="width: 126px;"
                     data-bs-toggle="modal" data-bs-target="#createCodeTemplateModal">
                     Generate Code
                 </button>
+                @endcan
             </div>
 
             <table class="code-list-table table">
                 <thead class="table-light">
                     <tr>
+                        @can('discount-codes_delete')
                         <th><input type="checkbox" id="select-all-checkbox" class="form-check-input"></th>
+                        @endcan
                         <th>Code Name</th>
                         <th>Type</th>
                         <th>Restrictions</th>

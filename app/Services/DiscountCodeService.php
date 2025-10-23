@@ -46,6 +46,12 @@ class DiscountCodeService extends BaseService
             })
             ->addColumn('expired_date', function ($discountCode) {
                 return Carbon::parse($discountCode->expired_at)->format('m/d/Y');
+            })->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('discount-codes_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('discount-codes_update'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('discount-codes_delete'),
+                ];
             })
             ->make();
     }
