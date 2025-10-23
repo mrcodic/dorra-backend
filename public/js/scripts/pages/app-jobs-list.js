@@ -86,15 +86,15 @@ const dt_user_table = $(".job-list-table").DataTable({
         { data: "due_at" },
 
 
-
         {
             data: "id",
             orderable: false,
-            render: function (id, type, row) {
-                return `
-          <div class="d-flex gap-1">
-            <a href="jobs/${id}" class="view-details"><i data-feather="eye"></i></a>
-            <a href="#" class="edit-details"
+            render: function (data, type, row, meta) {
+                const canShow = row?.action?.can_show ?? false;
+                const canEdit = row?.action?.can_edit ?? false;
+                const btns = [];
+                if (canEdit) {
+                    btns.push(`<a href="#" class="edit-details"
                data-id="${id}"
                data-station="${row.station_id}"
                data-priority="${row.priority}"
@@ -103,10 +103,18 @@ const dt_user_table = $(".job-list-table").DataTable({
                data-action="jobs/${id}">
                <i data-feather="edit-3"></i>
             </a>
-          </div>
-        `;
+`);
+                }
+                if (canShow) {
+                    btns.push(`<a href="jobs/${id}" class="view-details"><i data-feather="eye"></i></a>
+
+`);
+                }
+
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
             },
-        },
+        }
     ],
     order: [[1, "asc"]],
     dom:

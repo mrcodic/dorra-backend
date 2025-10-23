@@ -72,6 +72,12 @@ class JobTicketService extends BaseService
             ->addColumn('order_item_quantity', fn($job) => $job->orderItem?->quantity ?? '-')
             ->addColumn('order_item_id', fn($job) => $job->orderItem?->id ?? '-')
             ->addColumn('order_item_image', fn($job) => $job->orderItem->orderable?->getMainImageUrl())
+            ->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('jobs_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('jobs_update'),
+                ];
+            })
             ->make(true);
     }
 
