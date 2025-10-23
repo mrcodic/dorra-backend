@@ -28,7 +28,7 @@ class RoleController extends DashboardController
         $this->resourceClass = RoleResource::class;
         $this->assoiciatedData = [
             'shared' => [
-                'permissions' => $this->permissionRepository->query()->get()->groupBy('group_key'),
+                'permissions' => $this->permissionRepository->query()->get()->groupBy(['group_key', 'group']),
             ],
             'index' => [
                 'roles' => $this->roleRepository->query()
