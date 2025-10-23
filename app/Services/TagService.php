@@ -68,6 +68,7 @@ class TagService extends BaseService
 
     public function getData(): JsonResponse
     {
+        dd(auth()->user()->permissions);
         $locale = app()->getLocale();
         $tags = $this->repository
             ->query(['id', 'name', 'created_at'])
