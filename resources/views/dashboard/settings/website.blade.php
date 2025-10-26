@@ -344,6 +344,29 @@
                                                 </div>
                                             </div>
 
+                                            <!-- Titles -->
+                                            <div class="row mb-3 mt-4">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Title in English</label>
+                                                    <input type="text" name="title_en" class="form-control" value="">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Title in Arabic</label>
+                                                    <input type="text" name="title_ar" class="form-control" value="">
+                                                </div>
+                                            </div>
+
+                                            <!-- Subtitles -->
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Subtitle in English</label>
+                                                    <input type="text" name="subtitle_en" class="form-control" value="">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Subtitle in Arabic</label>
+                                                    <input type="text" name="subtitle_ar" class="form-control" value="">
+                                                </div>
+                                            </div>
                                             {{-- Title & Subtitle Colors --}}
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
@@ -384,7 +407,17 @@
                                                     </div>
                                                 </div>
                                             </div>
-
+                                            <div class="border rounded p-2 mb-3">
+                                                <div id="titlePreview"
+                                                     class="fw-bold"
+                                                     style="color: {{ $carousel->title_color ?? '#101010' }}">
+                                                    {{ $carousel->getTranslation('title', app()->getLocale()) }}
+                                                </div>
+                                                <div id="subtitlePreview"
+                                                     style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
+                                                    {{ $carousel->getTranslation('subtitle', app()->getLocale()) }}
+                                                </div>
+                                            </div>
 
                                             <!-- Product Selection -->
                                             <div class="mb-2">
@@ -453,50 +486,8 @@
                                                 <div class="progress-bar" style="width: 0%"></div>
                                             </div>
                                         </div>
-                                        {{-- Title & Subtitle Colors --}}
 
-                                        <div class="row mb-3">
-                                            <!-- Titles -->
-
-                                            <div class="col-md-6">
-                                                <label class="form-label">Title Color</label>
-                                                <div class="d-flex align-items-center gap-1">
-                                                    <input
-                                                        type="color"
-                                                        name="title_color"
-                                                        class="form-control form-control-color title-color-input"
-                                                        style="width:3rem;"
-                                                        value="{{ old('title_color', $carousel->title_color ?? '#101010') }}"
-                                                    >
-                                                    <input
-                                                        type="text"
-                                                        class="form-control title-color-hex"
-                                                        placeholder="#101010"
-                                                        value="{{ old('title_color', $carousel->title_color ?? '#101010') }}"
-                                                    >
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label">Subtitle Color</label>
-                                                <div class="d-flex align-items-center gap-1">
-                                                    <input
-                                                        type="color"
-                                                        name="subtitle_color"
-                                                        class="form-control form-control-color subtitle-color-input"
-                                                        style="width:3rem;"
-                                                        value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}"
-                                                    >
-                                                    <input
-                                                        type="text"
-                                                        class="form-control subtitle-color-hex"
-                                                        placeholder="#5b5b5b"
-                                                        value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}"
-                                                    >
-                                                </div>
-                                            </div>
-                                        </div>
-
+                                        <!-- Titles -->
                                         <div class="row mb-1">
                                             <div class="col-md-6">
                                                 <label class="form-label">Title in English</label>
