@@ -44,6 +44,13 @@ const dt_user_table = $(".location-list-table").DataTable({
                                    data-bs-target="#editLocationModal"
                                    data-bs-toggle="modal"
                                    data-id="${data}"
+                                   data-name="${row.name}"
+                                   data-address="${row.address_line}"
+                                   data-address-link="${row.link}"
+                                   data-state-id="${row.state.id}"
+                                   data-countory-id="${row.state.countory.id}"
+                                   data-days="${row.days}"
+                                   data-available-time="${row.available_time}"
                                   >
                 <i data-feather="edit-3"></i>
               </a>`);

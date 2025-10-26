@@ -29,7 +29,7 @@ class LocationService extends BaseService
     {
         $locations = $this->repository
             ->query()
-            ->with($this->relations)
+            ->with(['state.country'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
