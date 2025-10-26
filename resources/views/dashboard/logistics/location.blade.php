@@ -202,6 +202,7 @@
             'id' => 'deleteLocationsModal',
             'formId' => 'bulk-delete-form',
             'title' => 'Delete Locations',
+            'buttonId' => 'delete-selected-btn',
             'confirmText' => 'Are you sure you want to delete this items?',
             ])
             @include('modals.location.edit-location')
