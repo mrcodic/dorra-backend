@@ -54,7 +54,7 @@ return [
     // Parents keyed by their "name" (exactly as in verticalMenu.json); children keyed by URL
     'Products' => [
         'children' => [
-            '/categories' => [
+            '/products' => [
                 'categories_show',
                 'categories_create',
                 'categories_update',
@@ -66,7 +66,7 @@ return [
                 'sub-categories_update',
                 'sub-categories_delete',
             ],
-            '/products' => [
+            '/categories' => [
                 'products_show',
                 'products_create',
                 'products_update',
