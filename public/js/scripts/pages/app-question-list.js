@@ -173,7 +173,6 @@ dt_user_table.on("draw", function () {
 
 $(document).ready(function () {
     $(document).on("click", ".edit-details", function (e) {
-        console.log("Dsfs")
         const $button = $(this);
 
         const faqId = $button.data('id') || '';

@@ -184,6 +184,23 @@ dt_user_table.on("draw", function () {
 });
 
 $(document).ready(function () {
+    $(document).on("click",".edit-details",function (){
+        const $button = $(this);
+
+        const locationId = $button.data('id') || '';
+        const name = $button.data('name') || '';
+        const addressLink = $button.data('address-link') || '';
+
+        const address = $button.data('address') || '';
+        const days = $button.data('days') || '';
+        // Populate modal
+        $("#editLocationModal #editLocationName").val(name);
+        $("#editLocationModal #editAddressLine").val(address);
+        $("#editLocationModal #editAddressLink").val(addressLink);
+
+        $('#editLocationForm').attr('action', `locations/${locationId}`);
+    })
+
     $(document).on("click", ".open-delete-location-modal", function () {
         const locationAction = $(this).data("action");
         $("#deleteLocationForm").attr("action", locationAction);
@@ -245,42 +262,6 @@ $(document).ready(function () {
         });
     });
 
-    // Delete the selected image
-    $("#delete-image-button").on("click", function () {
-        $("#edit-image-upload").val(""); // clear the file input
-        $("#edit-image-preview-container").hide(); // hide preview container
-        $("#edit-image-preview").attr("src", ""); // clear the img src
-        $("#edit-image-details").hide(); // hide file details
-    });
-
-    $("#add-image-upload").on("change", function (event) {
-        const file = event.target.files[0];
-
-        if (file) {
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
-                $("#add-image-preview").attr("src", e.target.result);
-                $("#add-image-preview-container").show();
-
-                // Show file name and size
-                const fileSize = (file.size / 1024).toFixed(2); // size in KB
-                $("#add-image-details")
-                    .text(`${file.name} • ${fileSize} KB`)
-                    .show();
-            };
-
-            reader.readAsDataURL(file); // Read the file as DataURL for preview
-        }
-    });
-
-    // Delete the selected image
-    $("#delete-image").on("click", function () {
-        $("#add-image-upload").val(""); // clear the file input
-        $("#add-image-preview-container").hide(); // hide preview container
-        $("#add-image-preview").attr("src", ""); // clear the img src
-        $("#add-image-details").hide(); // hide file details
-    });
 });
 handleAjaxFormSubmit("#deleteLocationForm", {
     successMessage: "Location deleted successfully",
