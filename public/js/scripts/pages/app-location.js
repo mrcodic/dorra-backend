@@ -39,22 +39,15 @@ const dt_user_table = $(".location-list-table").DataTable({
                 const canDelete = row?.action?.can_delete ?? false;
                 const btns = [];
                 if (canEdit) {
-                    btns.push(`
-    <a href="#" class="edit-details"
-       data-bs-toggle="modal"
-       data-bs-target="#editLocationModal"
-       data-id="${row.id}"
-       data-name="${_.escape(row.name)}"
-       data-country_id="${row.country_id || ''}"
-       data-state_id="${row.state_id || ''}"
-       data-address_line="${_.escape(row.address_line || '')}"
-       data-link="${_.escape(row.link || '')}"
-       data-days='${JSON.stringify(row.days || [])}'
-       data-available_time="${row.available_time || ''}">
-       <i data-feather="edit-3"></i>
-    </a>`);
+                    btns.push(`<a href="#" class="edit-details"
+               data-bs-toggle="modal"
+                                   data-bs-target="#editLocationModal"
+                                   data-bs-toggle="modal"
+                                   data-id="${data}"
+                                  >
+                <i data-feather="edit-3"></i>
+              </a>`);
                 }
-
                 if (canDelete) {
                     btns.push(`<a href="#" class="text-danger open-delete-location-modal"
    data-id="${data}"
@@ -274,9 +267,6 @@ $(document).ready(function () {
         $("#add-image-preview").attr("src", ""); // clear the img src
         $("#add-image-details").hide(); // hide file details
     });
-
-
-
 });
 handleAjaxFormSubmit("#deleteLocationForm", {
     successMessage: "Location deleted successfully",
