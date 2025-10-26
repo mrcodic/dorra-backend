@@ -289,22 +289,16 @@
                                             </div>
 
                                             {{-- Live preview (classes, not IDs) --}}
-                                            <div class="border rounded p-2 mb-3">
-                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
-                                                    {{ $carousel->getTranslation('title','en') }}
-                                                </div>
-                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
-                                                    {{ $carousel->getTranslation('subtitle','en') }}
-                                                </div>
+                                            {{-- In the hidden template used by data-repeater-item (display:none; block) --}}
+                                            <div class="live-preview border rounded p-2 mb-3 d-none">
+                                                <div class="titlePreview fw-bold" style="color:#101010">Title preview</div>
+                                                <div class="subtitlePreview" style="color:#5b5b5b">Subtitle preview</div>
                                             </div>
-                                            <div class="border rounded p-2 mb-3" dir="rtl">
-                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
-                                                    {{ $carousel->getTranslation('title', 'ar') }}
-                                                </div>
-                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
-                                                    {{ $carousel->getTranslation('subtitle', 'ar') }}
-                                                </div>
+                                            <div class="live-preview border rounded p-2 mb-3 d-none" dir="rtl">
+                                                <div class="titlePreview fw-bold" style="color:#101010">عنوان معاينة</div>
+                                                <div class="subtitlePreview" style="color:#5b5b5b">معاينة العنوان الفرعي</div>
                                             </div>
+
 
 
                                             {{-- Product Selection --}}
@@ -2078,7 +2072,24 @@
                         $('[data-repeater-item]').each(function () {
                             initCarouselDropzone($(this));
                         });
-                        $('.invoice-repeater').repeater({
+            function bindPreviewAutoShow($item) {
+                const $form = $item.find('.carousel-form');
+                const toggle = () => {
+                    const hasTitle = $.trim($form.find('input[name="title_en"]').val() || $form.find('input[name="title_ar"]').val() || '') !== '';
+                    const hasSub   = $.trim($form.find('input[name="subtitle_en"]').val() || $form.find('input[name="subtitle_ar"]').val() || '') !== '';
+                    // Show preview only if something is filled
+                    $form.find('.live-preview').toggleClass('d-none', !(hasTitle || hasSub));
+                };
+
+                // Bind inputs to toggle preview visibility
+                $form.on('input', 'input[name="title_en"], input[name="title_ar"], input[name="subtitle_en"], input[name="subtitle_ar"]', toggle);
+                $form.on('input', '.title-color-input, .subtitle-color-input, .title-color-hex, .subtitle-color-hex', toggle);
+
+                // Init state
+                toggle();
+            }
+
+            $('.invoice-repeater').repeater({
                             show: function () {
                                 $(this).find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
 
@@ -2093,6 +2104,8 @@
                                     // Hide delete button if it's the only one
                                     $(this).find('[data-repeater-delete]').toggle(items.length > 1);
                                 });
+
+                                bindPreviewAutoShow($item);
                             },
                             hide: function (deleteElement) {
                                 const repeater = $(this).closest('.invoice-repeater');
