@@ -49,7 +49,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                                @foreach($role->load('users')->users as $user)
+                                @foreach($role->users as $user)
                                     <li data-bs-toggle="tooltip" data-bs-placement="top"
                                         title="{{ $user->name ?? 'User' }}" class="avatar avatar-sm pull-up">
                                         <img class="rounded-circle"
