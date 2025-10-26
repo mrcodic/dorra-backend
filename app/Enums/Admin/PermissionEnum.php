@@ -16,6 +16,7 @@ enum PermissionEnum: string
 
     case CREATE_ADMINS = 'admins_create';
     case UPDATE_ADMINS = 'admins_update';
+    case SHOW_ADMINS = 'admins_show';
     case DELETE_ADMINS = 'admins_delete';
 
     // Users
@@ -100,6 +101,7 @@ enum PermissionEnum: string
     // Locations
     case CREATE_LOCATIONS = 'locations_create';
     case UPDATE_LOCATIONS = 'locations_update';
+    case SHOW_LOCATIONS = 'locations_show';
     case DELETE_LOCATIONS = 'locations_delete';
 
     // Roles
@@ -111,6 +113,7 @@ enum PermissionEnum: string
     // FAQs
     case CREATE_FAQS = 'faqs_create';
     case UPDATE_FAQS = 'faqs_update';
+    case SHOW_FAQS = 'faqs_show';
     case DELETE_FAQS = 'faqs_delete';
 
     // Messages
