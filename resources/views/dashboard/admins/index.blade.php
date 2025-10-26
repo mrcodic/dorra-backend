@@ -203,7 +203,7 @@
                 <!-- DataTable will populate this dynamically -->
             </tbody>
         </table>
-        @can('admins_bulk_delete')
+{{--        @can('admins_bulk_delete')--}}
         <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
             <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
                 style="z-index: 10;">
@@ -217,9 +217,8 @@
                 </form>
             </div>
         </div>
-        @endcan
+{{--    @endcan--}}
     </div>
-
     </div>
     @include('modals/admins/add-admin')
     @include('modals/admins/edit-admin')
