@@ -120,7 +120,7 @@
             "slug": "",
             "submenu": [
                 {
-                    "url": "/logistics",
+                    "url": "/locations",
                     "name": "Locations",
                     "icon": "circle",
                     "slug": "app-user-list"
