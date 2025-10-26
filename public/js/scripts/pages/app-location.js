@@ -103,7 +103,10 @@ $("#search-location-form").on("keyup", function () {
 $(".filter-date").on("change", function () {
     dt_user_table.draw();
 });
-
+$('#clear-search').on('click', function () {
+    $('#search-location-form').val('');  // clear input
+    dt_user_table.search('').draw();  // reset DataTable search
+});
 // Checkbox select all
 $("#select-all-checkbox").on("change", function () {
     $(".category-checkbox").prop("checked", this.checked);
