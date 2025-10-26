@@ -297,7 +297,7 @@
                                                     {{ $carousel->getTranslation('subtitle','en') }}
                                                 </div>
                                             </div>
-                                            <div class="border rounded p-2 mb-3">
+                                            <div class="border rounded p-2 mb-3" dir="rtl">
                                                 <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
                                                     {{ $carousel->getTranslation('title', 'ar') }}
                                                 </div>
@@ -305,6 +305,7 @@
                                                     {{ $carousel->getTranslation('subtitle', 'ar') }}
                                                 </div>
                                             </div>
+
 
                                             {{-- Product Selection --}}
                                             <div class="mb-2">
@@ -1138,49 +1139,60 @@
     @endsection
 
     @section('page-script')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test((v||'').trim());
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test((v||'').trim());
 
-                function bindForm(form) {
-                    const titleColor    = form.querySelector('.title-color-input');
-                    const titleHex      = form.querySelector('.title-color-hex');
-                    const subtitleColor = form.querySelector('.subtitle-color-input');
-                    const subtitleHex   = form.querySelector('.subtitle-color-hex');
-                    const titlePrev     = form.querySelector('.titlePreview');
-                    const subPrev       = form.querySelector('.subtitlePreview');
+                    function bindForm(form) {
+                        const titleColor    = form.querySelector('.title-color-input');
+                        const titleHex      = form.querySelector('.title-color-hex');
+                        const subtitleColor = form.querySelector('.subtitle-color-input');
+                        const subtitleHex   = form.querySelector('.subtitle-color-hex');
 
-                    const bind = (colorInput, hexInput, previewEl, fallback) => {
-                        if (!colorInput || !hexInput) return;
-                        const apply = (val) => {
-                            hexInput.value = val;
-                            if (previewEl) previewEl.style.color = val;
-                        };
-                        colorInput.addEventListener('input', e => {
-                            const v = e.target.value;
-                            if (isHex(v)) apply(v);
-                        });
-                        hexInput.addEventListener('input', e => {
-                            const v = e.target.value.trim();
-                            if (isHex(v)) { colorInput.value = v; apply(v); }
-                        });
-                        apply(colorInput.value || fallback);
-                    };
+                        // ⬇️ grab *all* previews (EN & AR)
+                        const titlePreviews = form.querySelectorAll('.titlePreview');
+                        const subPreviews   = form.querySelectorAll('.subtitlePreview');
 
-                    bind(titleColor, titleHex, titlePrev, '#101010');
-                    bind(subtitleColor, subtitleHex, subPrev, '#5b5b5b');
-                }
+                        function applyColor(previews, val) {
+                            previews.forEach(el => { el.style.color = val; });
+                        }
 
-                document.querySelectorAll('.carousel-form').forEach(bindForm);
+                        function bind(colorInput, hexInput, previews, fallback) {
+                            if (!colorInput || !hexInput) return;
+                            const setVal = (val) => {
+                                hexInput.value = val;
+                                applyColor(previews, val);
+                            };
 
-                // If your repeater adds new items dynamically, re-bind after create:
-                $(document).on('click', '[data-repeater-create]', function () {
-                    setTimeout(() => {
-                        document.querySelectorAll('.carousel-form').forEach(bindForm);
-                    }, 0);
+                            colorInput.addEventListener('input', e => {
+                                const v = e.target.value;
+                                if (isHex(v)) setVal(v);
+                            });
+
+                            hexInput.addEventListener('input', e => {
+                                const v = e.target.value.trim();
+                                if (isHex(v)) { colorInput.value = v; setVal(v); }
+                            });
+
+                            setVal(colorInput.value || fallback);
+                        }
+
+                        bind(titleColor,   titleHex,   titlePreviews, '#101010');
+                        bind(subtitleColor, subtitleHex, subPreviews, '#5b5b5b');
+                    }
+
+                    // bind all existing forms (scoped per-repeater item)
+                    document.querySelectorAll('.carousel-form').forEach(bindForm);
+
+                    // re-bind after adding new repeater items
+                    $(document).on('click', '[data-repeater-create]', function () {
+                        setTimeout(() => {
+                            document.querySelectorAll('.carousel-form').forEach(bindForm);
+                        }, 0);
+                    });
                 });
-            });
-        </script>
+            </script>
+
 
 
         <script>

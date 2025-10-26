@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('carousels', function (Blueprint $table) {
             $table->id();
-            $table->json('title');
+            $table->json('title')->nullable();
             $table->json('subtitle')->nullable();
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->timestamps();
