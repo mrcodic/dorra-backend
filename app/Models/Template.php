@@ -33,6 +33,8 @@ class Template extends Model implements HasMedia
         'colors',
         'orientation',
         'dimension_id',
+        'safety_area',
+        'border',
     ];
     protected $casts = [
         'status' => StatusEnum::class,

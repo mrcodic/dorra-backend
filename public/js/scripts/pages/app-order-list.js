@@ -88,6 +88,8 @@ var dt_user_table = $(".order-list-table").DataTable({
                 const canDelete = row?.action?.can_delete ?? false;
                 const btns = [];
                 if (canShow){
+                    console.log("DFgfd")
+
                     btns.push(`<a href="/orders/${data}" class="">
                 <i data-feather="eye"></i>
             </a>
@@ -95,6 +97,7 @@ var dt_user_table = $(".order-list-table").DataTable({
 `);
                 }
                 if (canEdit){
+                    console.log("DFgfd")
                     btns.push(`<a href="/orders/${data}/edit" class="">
                 <i data-feather="edit"></i>
             </a>`);

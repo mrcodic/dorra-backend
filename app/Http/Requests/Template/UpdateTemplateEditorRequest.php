@@ -48,7 +48,8 @@ class UpdateTemplateEditorRequest extends BaseRequest
             'colors' => ['sometimes', 'array'],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
-
+            'safety_area' => ['required', 'numeric'],
+            'border' => ['required', 'numeric'],
         ];
     }
 
