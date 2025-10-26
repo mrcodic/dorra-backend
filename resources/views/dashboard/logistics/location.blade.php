@@ -178,31 +178,41 @@
                     </tr>
                 </thead>
             </table>
-            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                     style="z-index: 10;">
-                    <p id="selected-count-text">0 locations are selected</p>
-                    <form  method="POST" action="">
-                        @csrf
-                        <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                                data-bs-target="#deleteLocationsModal"
-                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                            <i data-feather="trash-2"></i> Delete Selected
-                        </button>
-                    </form>
+            {{-- Bulk delete bar --}}
+            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display:none;">
+                <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between">
+                    <p id="selected-count-text">0 locations selected</p>
+
+                    {{-- Trigger only (no submit here) --}}
+                    <button type="button"
+                            id="delete-selected-btn"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteLocationsModal">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
                 </div>
             </div>
+
+            {{-- Confirm Modal --}}
+            @include('modals.delete', [
+              'id' => 'deleteLocationsModal',
+              'formId' => 'bulk-delete-form',
+              'title' => 'Delete Locations',
+              'confirmText' => 'Are you sure you want to delete the selected locations?',
+            ])
+
+            {{-- Inside your modal.blade (form wrapper) make sure it looks like this: --}}
+            <form id="bulk-delete-form" method="POST" action="{{ route('locations.bulk-delete') }}">
+                @csrf
+                <div id="bulk-delete-ids"></div> {{-- JS will inject hidden inputs here --}}
+                {{-- modal body/footer/confirm button… --}}
+            </form>
 
             @include('modals.delete',[
             'id' => 'deleteLocationModal',
             'formId' => 'deleteLocationForm',
             'title' => 'Delete Location',
-            ])
-            @include('modals.delete',[
-            'id' => 'deleteLocationsModal',
-            'formId' => 'bulk-delete-form',
-            'title' => 'Delete Locations',
-            'confirmText' => 'Are you sure you want to delete this items?',
             ])
             @include('modals.location.edit-location')
             @include('modals.location.add-location')
