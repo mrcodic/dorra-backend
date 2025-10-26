@@ -42,7 +42,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
     Route::middleware('auth')->group(function () {
         Route::get('states', [MainController::class, 'states'])->name('states');
-        Route::get('/dashboard', [StatisticsController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [StatisticsController::class, 'index'])->name('dashboard.index');
         Route::view('/', 'dashboard.welcome');
         Route::group(['prefix' => 'users', 'as' => 'users.', 'controller' => UserController::class,], function () {
             Route::get('/data', 'getData')->name('data');
