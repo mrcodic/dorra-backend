@@ -453,8 +453,50 @@
                                                 <div class="progress-bar" style="width: 0%"></div>
                                             </div>
                                         </div>
+                                        {{-- Title & Subtitle Colors --}}
 
-                                        <!-- Titles -->
+                                        <div class="row mb-3">
+                                            <!-- Titles -->
+
+                                            <div class="col-md-6">
+                                                <label class="form-label">Title Color</label>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <input
+                                                        type="color"
+                                                        name="title_color"
+                                                        class="form-control form-control-color title-color-input"
+                                                        style="width:3rem;"
+                                                        value="{{ old('title_color', $carousel->title_color ?? '#101010') }}"
+                                                    >
+                                                    <input
+                                                        type="text"
+                                                        class="form-control title-color-hex"
+                                                        placeholder="#101010"
+                                                        value="{{ old('title_color', $carousel->title_color ?? '#101010') }}"
+                                                    >
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label">Subtitle Color</label>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <input
+                                                        type="color"
+                                                        name="subtitle_color"
+                                                        class="form-control form-control-color subtitle-color-input"
+                                                        style="width:3rem;"
+                                                        value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}"
+                                                    >
+                                                    <input
+                                                        type="text"
+                                                        class="form-control subtitle-color-hex"
+                                                        placeholder="#5b5b5b"
+                                                        value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}"
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="row mb-1">
                                             <div class="col-md-6">
                                                 <label class="form-label">Title in English</label>
