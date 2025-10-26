@@ -29,11 +29,11 @@ const dt_user_table = $(".location-list-table").DataTable({
         },
         {data: "name"},
         {data: "country",render: function (data, type, row) {
-                return row?.state?.country.name
+                return row?.state?.country.name.locale
 
             }},
         {data: "state",render: function (data, type, row) {
-                return row?.state?.name
+                return row?.state?.name.locale
 
             },},
         {

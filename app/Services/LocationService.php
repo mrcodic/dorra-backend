@@ -44,7 +44,7 @@ class LocationService extends BaseService
             ->addColumn('name', function ($location) {
                 return $location->name ?? '-';
             })
-         
+
             ->addColumn('action', function () {
                 return [
                     'can_edit' => (bool) auth()->user()->can('locations_update'),

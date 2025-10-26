@@ -393,6 +393,7 @@
 <script src="{{ asset('js/scripts/pages/app-location.js') }}?v={{ time() }}"></script>
 
 <script>
+    const locale = "{{ app()->getLocale() }}"
     // Backup accordion handler in case the main one doesn't work
 $(document).ready(function() {
     // Alternative click handler
