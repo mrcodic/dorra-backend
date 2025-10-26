@@ -1134,49 +1134,39 @@
     @section('page-script')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const titleColor   = document.querySelector('.title-color-input');
-                const titleHex     = document.querySelector('.title-color-hex');
-                const subtitleColor= document.querySelector('.subtitle-color-input');
-                const subtitleHex  = document.querySelector('.subtitle-color-hex');
+                const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test((v||'').trim());
 
-                const titlePreview = document.getElementById('titlePreview');
-                const subPreview   = document.getElementById('subtitlePreview');
+                document.querySelectorAll('.carousel-form').forEach(form => {
+                    const titleColor   = form.querySelector('.title-color-input');
+                    const titleHex     = form.querySelector('.title-color-hex');
+                    const subtitleColor= form.querySelector('.subtitle-color-input');
+                    const subtitleHex  = form.querySelector('.subtitle-color-hex');
+                    const titlePreview = form.querySelector('#titlePreview');
+                    const subPreview   = form.querySelector('#subtitlePreview');
 
-                const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim());
-
-                function bind(colorInput, hexInput, previewEl) {
-                    if (!colorInput || !hexInput) return;
-
-                    const apply = (val) => {
-                        hexInput.value = val;
-                        if (previewEl) previewEl.style.color = val;
+                    const bind = (colorInput, hexInput, previewEl) => {
+                        if (!colorInput || !hexInput) return;
+                        const apply = (val) => {
+                            hexInput.value = val;
+                            if (previewEl) previewEl.style.color = val;
+                        };
+                        colorInput.addEventListener('input', e => {
+                            const v = e.target.value; if (isHex(v)) apply(v);
+                        });
+                        hexInput.addEventListener('input', e => {
+                            const v = e.target.value.trim(); if (isHex(v)) { colorInput.value = v; apply(v); }
+                        });
+                        apply(colorInput.value || '#101010');
                     };
 
-                    // color → hex + preview
-                    colorInput.addEventListener('input', (e) => {
-                        const v = e.target.value;
-                        if (isHex(v)) apply(v);
-                    });
-
-                    // hex → color + preview (only if valid hex)
-                    hexInput.addEventListener('input', (e) => {
-                        const v = e.target.value.trim();
-                        if (isHex(v)) {
-                            colorInput.value = v;
-                            if (previewEl) previewEl.style.color = v;
-                        }
-                    });
-
-                    // init
-                    apply(colorInput.value);
-                }
-
-                bind(titleColor, titleHex, titlePreview);
-                bind(subtitleColor, subtitleHex, subPreview);
+                    bind(titleColor, titleHex, titlePreview);
+                    bind(subtitleColor, subtitleHex, subPreview);
+                });
             });
         </script>
 
-    <script>
+
+        <script>
         Dropzone.autoDiscover = false;
 
             let partnerDropzone = new Dropzone("#partner-dropzone", {
