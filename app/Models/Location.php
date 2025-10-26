@@ -2,12 +2,9 @@
 
 namespace App\Models;
 
-use App\Enums\Location\DayEnum;
-use App\Models\State;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Laravel\Sanctum\Guard;
-use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
 class Location extends Model
 {
     protected $fillable = [

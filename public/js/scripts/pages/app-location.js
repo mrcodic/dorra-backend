@@ -39,15 +39,22 @@ const dt_user_table = $(".location-list-table").DataTable({
                 const canDelete = row?.action?.can_delete ?? false;
                 const btns = [];
                 if (canEdit) {
-                    btns.push(`<a href="#" class="edit-details"
-               data-bs-toggle="modal"
-                                   data-bs-target="#editLocationModal"
-                                   data-bs-toggle="modal"
-                                   data-id="${data}"
-                                  >
-                <i data-feather="edit-3"></i>
-              </a>`);
+                    btns.push(`
+    <a href="#" class="edit-details"
+       data-bs-toggle="modal"
+       data-bs-target="#editLocationModal"
+       data-id="${row.id}"
+       data-name="${_.escape(row.name)}"
+       data-country_id="${row.country_id || ''}"
+       data-state_id="${row.state_id || ''}"
+       data-address_line="${_.escape(row.address_line || '')}"
+       data-link="${_.escape(row.link || '')}"
+       data-days='${JSON.stringify(row.days || [])}'
+       data-available_time="${row.available_time || ''}">
+       <i data-feather="edit-3"></i>
+    </a>`);
                 }
+
                 if (canDelete) {
                     btns.push(`<a href="#" class="text-danger open-delete-location-modal"
    data-id="${data}"
@@ -231,42 +238,110 @@ $(document).ready(function () {
         });
     });
 
-    // Delete the selected image
-    $("#delete-image-button").on("click", function () {
-        $("#edit-image-upload").val(""); // clear the file input
-        $("#edit-image-preview-container").hide(); // hide preview container
-        $("#edit-image-preview").attr("src", ""); // clear the img src
-        $("#edit-image-details").hide(); // hide file details
-    });
+    const updateEditTimeHidden = () => {
+        const s = $("#edit_start_time").val();
+        const e = $("#edit_end_time").val();
+        $("#edit_available_time").val(s && e ? `${s} - ${e}` : "");
+    };
 
-    $("#add-image-upload").on("change", function (event) {
-        const file = event.target.files[0];
+    $(document).on("change", "#edit_start_time, #edit_end_time", updateEditTimeHidden);
 
-        if (file) {
-            const reader = new FileReader();
+    function fillEditFormFromData(loc) {
+        $("#editLocationName").val(loc.name || "");
+        $("#editAddressLine").val(loc.address_line || "");
+        $("#editAddressLink").val(loc.link || "");
 
-            reader.onload = function (e) {
-                $("#add-image-preview").attr("src", e.target.result);
-                $("#add-image-preview-container").show();
+        // Days (array of enum names)
+        const days = Array.isArray(loc.days) ? loc.days : [];
+        $("#editDays").val(days).trigger("change");
 
-                // Show file name and size
-                const fileSize = (file.size / 1024).toFixed(2); // size in KB
-                $("#add-image-details")
-                    .text(`${file.name} • ${fileSize} KB`)
-                    .show();
+        // Time "HH:MM - HH:MM"
+        const rng = (loc.available_time || "").split("-").map(s => s.trim());
+        if (rng.length === 2) {
+            $("#edit_start_time").val(rng[0] || "");
+            $("#edit_end_time").val(rng[1] || "");
+        } else {
+            $("#edit_start_time").val("");
+            $("#edit_end_time").val("");
+        }
+        updateEditTimeHidden();
+
+        // Country -> States cascade
+        const countryId = String(loc.country_id || "");
+        const stateId = String(loc.state_id || "");
+
+        $("#editCountry").val(countryId);
+
+        if (countryId) {
+            const url = $("#state-url").data("url");
+            $.get(url, { "filter[country_id]": countryId })
+                .done(resp => {
+                    const $st = $("#editState").empty().append('<option value="">Select State</option>');
+                    (resp.data || []).forEach(st => {
+                        $st.append(`<option value="${st.id}">${st.name}</option>`);
+                    });
+                    $("#editState").val(stateId);
+                })
+                .fail(() => {
+                    $("#editState").empty().append('<option value="">Error loading states</option>');
+                });
+        } else {
+            $("#editState").empty().append('<option value="">Select State</option>');
+        }
+    }
+
+    function setEditFormAction(id) {
+        // if your route is locations.update:
+        const url = `/locations/${id}`; // or use `{{ url('locations') }}/${id}`
+        $("#editLocationForm").attr("action", url);
+    }
+
+    $(document).on("click", ".edit-details", function (e) {
+        e.preventDefault();
+
+        // Prefer pulling the whole row from DataTables:
+        let rowData = null;
+        try {
+            rowData = dt_user_table.row($(this).closest("tr")).data();
+        } catch (_) {}
+
+        const id = rowData?.id || $(this).data("id");
+
+        // Fallback: use data-* attributes if rowData lacks fields
+        const candidate = rowData && (rowData.name || rowData.country_id || rowData.days)
+            ? rowData
+            : {
+                id,
+                name: $(this).data("name"),
+                country_id: $(this).data("country_id"),
+                state_id: $(this).data("state_id"),
+                address_line: $(this).data("address_line"),
+                link: $(this).data("link"),
+                days: $(this).data("days"),
+                available_time: $(this).data("available_time"),
             };
 
-            reader.readAsDataURL(file); // Read the file as DataURL for preview
+        // If still missing critical fields, fetch one record via show endpoint
+        if (!candidate || candidate.name === undefined) {
+            $.getJSON(`/locations/${id}`)
+                .done(loc => {
+                    setEditFormAction(id);
+                    fillEditFormFromData(loc.data || loc);
+                    $("#editLocationModal").modal("show");
+                })
+                .fail(() => {
+                    Toastify({ text: "Failed to load location", duration: 2000 }).showToast();
+                });
+        } else {
+            setEditFormAction(id);
+            fillEditFormFromData(candidate);
+            $("#editLocationModal").modal("show");
         }
     });
 
-    // Delete the selected image
-    $("#delete-image").on("click", function () {
-        $("#add-image-upload").val(""); // clear the file input
-        $("#add-image-preview-container").hide(); // hide preview container
-        $("#add-image-preview").attr("src", ""); // clear the img src
-        $("#add-image-details").hide(); // hide file details
-    });
+
+
+
 });
 handleAjaxFormSubmit("#deleteLocationForm", {
     successMessage: "Location deleted successfully",
