@@ -16,7 +16,9 @@ class Carousel extends Model implements HasMedia
     protected $fillable =[
         'title',
         'subtitle',
-        'product_id'
+        'product_id',
+        'title_color',
+        'subtitle_color'
     ];
 
     public function product(): BelongsTo
