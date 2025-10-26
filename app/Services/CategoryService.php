@@ -421,7 +421,15 @@ class CategoryService extends BaseService
             })
             ->addColumn('no_of_products', function ($category) {
                 return $category->products_count;
-            })->make();
+            })
+            ->addColumn('action', function () {
+                return [
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('sub-categories_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('sub-categories_update'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('sub-categories_delete'),
+                ];
+            })
+            ->make();
     }
 
     public function search($request)
