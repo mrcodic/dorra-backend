@@ -388,6 +388,7 @@
     }, 500);
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js" integrity="sha384-oYBYcE3w1p9wQGvZgE9F2jD3v8c6Rk+v8nCzH8p3nE/99xM2x8oSkA2J6qlryZqD" crossorigin="anonymous"></script>
 
 {{-- Page js files --}}
 <script src="{{ asset('js/scripts/pages/app-location.js') }}?v={{ time() }}"></script>
