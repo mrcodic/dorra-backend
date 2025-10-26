@@ -27,9 +27,12 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
             data: "id",
             orderable: false,
             render: function (data, type, row, meta) {
-                return `
-        <div class="d-flex gap-1">
-                                <a href="#" class="view-details"
+                const canShow = row?.action?.can_show ?? false;
+                const canEdit = row?.action?.can_edit ?? false;
+                const canDelete = row?.action?.can_delete ?? false;
+                const btns = [];
+                if (canShow) {
+                    btns.push(`<a href="#" class="view-details"
                                    data-bs-toggle="modal"
                                     data-bs-target="#showSubCategoryModal"
                                      data-id="${data}"
@@ -40,10 +43,10 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
                                      data-parent="${row.parent_name}"
                                      data-parent_id="${row.parent.id}">
                                                 <i data-feather="eye"></i>
-                                </a>
-
-
-              <a href="#" class="edit-details"
+                                </a>`);
+                }
+                if (canEdit) {
+                    btns.push(`<a href="#" class="edit-details"
                data-bs-toggle="modal"
                data-bs-target="#editSubCategoryModal"
                data-id="${data}"
@@ -55,9 +58,10 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
                data-parent_id="${row.parent.id}">
 
                 <i data-feather="edit-3"></i>
-              </a>
-
-      <a href="#" class="text-danger open-delete-sub-category-modal"
+              </a>`);
+                }
+                if (canDelete) {
+                    btns.push(`<a href="#" class="text-danger open-delete-sub-category-modal"
        data-id="${data}"
        data-name="${row.name}"
        data-action="/sub-categories/${data}"
@@ -65,9 +69,11 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
        data-bs-target="#deleteSubCategoryModal">
    <i data-feather="trash-2"></i>
 </a>
+`);
+                }
 
-          </div>
-        `;
+                if (!btns.length) return '';
+                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
 
             },
         },
