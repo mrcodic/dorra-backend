@@ -84,8 +84,8 @@ class SettingController extends Controller
                         'en' => $carouselData['subtitle_en'],
                         'ar' => $carouselData['subtitle_ar'],
                     ],
-                    'title_color'    => $carouselData['title_color'],
-                    'subtitle_color' => $carouselData['subtitle_color'],
+                    'title_color'    => Arr::get($carouselData, 'title_color'),
+                    'subtitle_color'    => Arr::get($carouselData, 'subtitle_color'),
                     'product_id' => $carouselData['product_id'],
                 ]
             );
