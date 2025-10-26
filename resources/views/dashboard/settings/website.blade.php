@@ -10,7 +10,10 @@
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
-
+<style>
+    /* ensure native color control is visible even with global resets */
+    input[type="color"] { appearance:auto; -webkit-appearance:auto; padding:0; }
+</style>
 
 <!-- SweetAlert2 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -183,259 +186,135 @@
                         </div>
                     </form>
                 </div>
-
                 <div class="invoice-repeater">
+                    <div data-repeater-list="carousels">
+                        @forelse($carousels as $carousel)
+                            @php
+                                $modalId = "deleteCarouselModal-{$carousel->id}";
+                            @endphp
 
-
-                    <div class="invoice-repeater">
-
-                        <div data-repeater-list="carousels">
-                            @forelse($carousels as $carousel)
-                            @include('modals.delete',[
-                            'id' => 'deleteCarouselModal',
-                            'formId' => 'deleteCarouselForm',
-                            'title' => 'Delete Carousel',
-                            'action' => route("carousels.remove",$carousel->id),
+                            @include('modals.delete', [
+                              'id'     => $modalId,
+                              'formId' => "deleteCarouselForm-{$carousel->id}",
+                              'title'  => 'Delete Carousel',
+                              'action' => route('carousels.remove', $carousel->id),
                             ])
-                            <div data-repeater-item>
 
-                                <div class="col-md-12 mb-2">
-                                    <div class="card p-1 mb-4 border rounded-md shadow-sm">
-                                        <form action="{{ route('carousels.update') }}" method="POST"
-                                            enctype="multipart/form-data" class="carousel">
-                                            @csrf
-                                            @method("PUT")
-
-                                            <input type="hidden" name="carousels[{{ $loop->index }}][id]"
-                                                value="{{ $carousel->id }}">
-                                            <!-- will be filled dynamically -->
-                                            <div class="website-media-ids"></div>
-                                            <div class="mobile-media-ids"></div>
-                                            <!-- Website Image Upload -->
-                                            <label class="form-label">Website Image</label>
-                                            <div class="dropzone website-dropzone"></div>
-
-                                            <small class="text d-block mb-2">Recommended: 1920*520 px, max 2 MB</small>
-
-                                            <div class="upload-wrapper">
-                                                <div
-                                                    class="uploaded-image {{ $carousel->getFirstMediaUrl('carousels') ? '': 'd-none' }}  mt-2">
-                                                    <img src="{{ $carousel->getFirstMediaUrl('carousels') }}"
-                                                        class="img-fluid rounded"
-                                                        style="width: 50px; height: 50px; object-fit: cover;">
-                                                </div>
-                                                <div class="progress upload-progress d-none">
-                                                    <div class="progress-bar" style="width: 0%"></div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Mobile Image Upload -->
-                                            <label class="form-label mt-1">Mobile Image</label>
-                                            <div class="dropzone mobile-dropzone"></div>
-
-                                            <small class="text d-block mb-1">Recommended: 375×672 px, max 2 MB</small>
-
-                                            <div class="upload-wrapper">
-                                                <div
-                                                    class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels') ? '':'d-none' }} mt-2">
-                                                    <img src="{{ $carousel->getFirstMediaUrl('mobile_carousels') }}"
-                                                        class="img-fluid rounded"
-                                                        style="width: 50px; height: 50px; object-fit: cover;">
-                                                </div>
-                                                <div class="progress upload-progress d-none">
-                                                    <div class="progress-bar" style="width: 0%"></div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Titles -->
-                                            <div class="row mb-3 mt-4">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Title in English</label>
-                                                    <input type="text" name="title_en" class="form-control"
-                                                        value="{{ $carousel->getTranslation('title', 'en') }}">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Title in Arabic</label>
-                                                    <input type="text" name="title_ar" class="form-control"
-                                                        value="{{ $carousel->getTranslation('title', 'ar') }}">
-                                                </div>
-                                            </div>
-
-                                            <!-- Subtitles -->
-                                            <div class="row mb-2">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Subtitle in English</label>
-                                                    <input type="text" name="subtitle_en" class="form-control"
-                                                        value="{{ $carousel->getTranslation('subtitle', 'en') }}">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Subtitle in Arabic</label>
-                                                    <input type="text" name="subtitle_ar" class="form-control"
-                                                        value="{{ $carousel->getTranslation('subtitle', 'ar') }}">
-                                                </div>
-                                            </div>
-
-                                            <!-- Product Selection -->
-                                            <div class="mb-2">
-                                                <label class="form-label">Select Product</label>
-                                                <select name="product_id" class="form-select">
-                                                    <option disabled>Select a product</option>
-                                                    @foreach($products as $product)
-                                                    <option value="{{ $product->id }}" {{ $carousel->product_id ==
-                                                        $product->id ? 'selected' : '' }}>
-                                                        {{ $product->name }}
-                                                    </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-
-                                            <!-- Action Buttons -->
-                                            <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
-                                                <button type="button"
-                                                    class="btn btn-outline-danger open-delete-carousel-modal"
-                                                    data-bs-toggle="modal" data-bs-target="#deleteCarouselModal">
-                                                    <i data-feather="x" class="me-1"></i> Delete
-                                                </button>
-                                                <button type="submit" class="btn btn-primary">
-                                                    <i data-feather="save" class="me-1"></i> Save Changes
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            @empty
                             <div data-repeater-item>
                                 <div class="col-md-12 mb-2">
                                     <div class="card p-2 mb-4 border rounded shadow-sm">
-                                        <form action="{{ route('carousels.update', null) }}" method="POST"
-                                            enctype="multipart/form-data" class="carousel">
+                                        <form action="{{ route('carousels.update') }}" method="POST" enctype="multipart/form-data" class="carousel-form">
                                             @csrf
-                                            @method("PUT")
+                                            @method('PUT')
+
+                                            {{-- IMPORTANT: Repeater will nest this as carousels[index][id] --}}
+                                            <input type="hidden" name="id" value="{{ $carousel->id }}">
+
+                                            {{-- will be filled dynamically by your uploader --}}
                                             <div class="website-media-ids"></div>
                                             <div class="mobile-media-ids"></div>
-                                            <input type="hidden" name="carousels[0][id]" value="">
-                                            <!-- Website Image Upload -->
+
+                                            {{-- Website Image Upload --}}
                                             <label class="form-label">Website Image</label>
                                             <div class="dropzone website-dropzone"></div>
-                                            <small class="text d-block mb-2">Recommended: 1920*520 px, max 2 MB</small>
+                                            <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+
                                             <div class="upload-wrapper">
-                                                <div class="uploaded-image d-none  mt-2">
-                                                    <img src="" class="img-fluid rounded"
-                                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                                <div class="uploaded-image {{ $carousel->getFirstMediaUrl('carousels') ? '' : 'd-none' }} mt-2">
+                                                    <img src="{{ $carousel->getFirstMediaUrl('carousels') }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
                                                 </div>
                                                 <div class="progress upload-progress d-none">
-                                                    <div class="progress-bar" style="width: 0%"></div>
+                                                    <div class="progress-bar" style="width:0%"></div>
                                                 </div>
                                             </div>
 
-                                            <!-- Mobile Image Upload -->
-                                            <!-- Mobile Image Upload -->
-                                            <label class="form-label mt-3">Mobile Image</label>
+                                            {{-- Mobile Image Upload --}}
+                                            <label class="form-label mt-1">Mobile Image</label>
                                             <div class="dropzone mobile-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+
                                             <div class="upload-wrapper">
-                                                <div class="uploaded-image d-none mt-2">
-                                                    <img src="" class="img-fluid rounded"
-                                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                                <div class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels') ? '' : 'd-none' }} mt-2">
+                                                    <img src="{{ $carousel->getFirstMediaUrl('mobile_carousels') }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
                                                 </div>
                                                 <div class="progress upload-progress d-none">
-                                                    <div class="progress-bar" style="width: 0%"></div>
+                                                    <div class="progress-bar" style="width:0%"></div>
                                                 </div>
                                             </div>
 
-                                            <!-- Titles -->
+                                            {{-- Titles --}}
                                             <div class="row mb-3 mt-4">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Title in English</label>
-                                                    <input type="text" name="title_en" class="form-control" value="">
+                                                    <input type="text" name="title_en" class="form-control" value="{{ $carousel->getTranslation('title','en') }}">
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Title in Arabic</label>
-                                                    <input type="text" name="title_ar" class="form-control" value="">
+                                                    <input type="text" name="title_ar" class="form-control" value="{{ $carousel->getTranslation('title','ar') }}">
                                                 </div>
                                             </div>
 
-                                            <!-- Subtitles -->
-                                            <div class="row mb-3">
+                                            {{-- Subtitles --}}
+                                            <div class="row mb-2">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Subtitle in English</label>
-                                                    <input type="text" name="subtitle_en" class="form-control" value="">
+                                                    <input type="text" name="subtitle_en" class="form-control" value="{{ $carousel->getTranslation('subtitle','en') }}">
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Subtitle in Arabic</label>
-                                                    <input type="text" name="subtitle_ar" class="form-control" value="">
+                                                    <input type="text" name="subtitle_ar" class="form-control" value="{{ $carousel->getTranslation('subtitle','ar') }}">
                                                 </div>
                                             </div>
+
                                             {{-- Title & Subtitle Colors --}}
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Title Color</label>
                                                     <div class="d-flex align-items-center gap-1">
-                                                        <input
-                                                            type="color"
-                                                            name="title_color"
-                                                            class="form-control form-control-color title-color-input"
-                                                            style="width:3rem;"
-                                                            value="{{ old('title_color', $carousel->title_color ?? '#101010') }}"
-                                                        >
-                                                        <input
-                                                            type="text"
-                                                            class="form-control title-color-hex"
-                                                            placeholder="#101010"
-                                                            value="{{ old('title_color', $carousel->title_color ?? '#101010') }}"
-                                                        >
+                                                        <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;"
+                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}">
+                                                        <input type="text" class="form-control title-color-hex" placeholder="#101010"
+                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}">
                                                     </div>
                                                 </div>
-
                                                 <div class="col-md-6">
                                                     <label class="form-label">Subtitle Color</label>
                                                     <div class="d-flex align-items-center gap-1">
-                                                        <input
-                                                            type="color"
-                                                            name="subtitle_color"
-                                                            class="form-control form-control-color subtitle-color-input"
-                                                            style="width:3rem;"
-                                                            value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}"
-                                                        >
-                                                        <input
-                                                            type="text"
-                                                            class="form-control subtitle-color-hex"
-                                                            placeholder="#5b5b5b"
-                                                            value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}"
-                                                        >
+                                                        <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;"
+                                                               value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
+                                                        <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b"
+                                                               value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {{-- Live preview (classes, not IDs) --}}
                                             <div class="border rounded p-2 mb-3">
-                                                <div id="titlePreview"
-                                                     class="fw-bold"
-                                                     style="color: {{ $carousel->title_color ?? '#101010' }}">
+                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
                                                     {{ $carousel->getTranslation('title', app()->getLocale()) }}
                                                 </div>
-                                                <div id="subtitlePreview"
-                                                     style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
+                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
                                                     {{ $carousel->getTranslation('subtitle', app()->getLocale()) }}
                                                 </div>
                                             </div>
 
-                                            <!-- Product Selection -->
+                                            {{-- Product Selection --}}
                                             <div class="mb-2">
                                                 <label class="form-label">Select Product</label>
                                                 <select name="product_id" class="form-select">
-                                                    <option disabled selected>Select a product</option>
+                                                    <option disabled>Select a product</option>
                                                     @foreach($products as $product)
-                                                    <option value="{{ $product->id }}">
-                                                        {{ $product->name }}
-                                                    </option>
+                                                        <option value="{{ $product->id }}" {{ $carousel->product_id == $product->id ? 'selected' : '' }}>
+                                                            {{ $product->name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
 
-                                            <!-- Action Buttons -->
+                                            {{-- Actions --}}
                                             <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
-                                                <button type="button" data-repeater-delete
-                                                    class="btn btn-outline-danger">
+                                                <button type="button" class="btn btn-outline-danger open-delete-carousel-modal"
+                                                        data-bs-toggle="modal" data-bs-target="#{{ $modalId }}">
                                                     <i data-feather="x" class="me-1"></i> Delete
                                                 </button>
                                                 <button type="submit" class="btn btn-primary">
@@ -446,99 +325,220 @@
                                     </div>
                                 </div>
                             </div>
-                            @endforelse
-                        </div>
+                        @empty
+                            {{-- one blank repeater item when empty --}}
+                            <div data-repeater-item>
+                                <div class="col-md-12 mb-2">
+                                    <div class="card p-2 mb-4 border rounded shadow-sm">
+                                        <form action="{{ route('carousels.update') }}" method="POST" enctype="multipart/form-data" class="carousel-form">
+                                            @csrf
+                                            @method('PUT')
 
-                        {{-- Hidden template for new carousel --}}
-                        <div data-repeater-item style="display: none;">
-                            <div class="col-md-12 mb-2">
-                                <div class="card p-4 mb-4 border rounded shadow-sm">
-                                    <form method="POST" action="{{ route('carousels.update') }}"
-                                        enctype="multipart/form-data" class="carousel">
-                                        @csrf
-                                        <div class="website-media-ids"></div>
-                                        <div class="mobile-media-ids"></div>
+                                            {{-- IDs & media holders --}}
+                                            <input type="hidden" name="id" value="">
+                                            <div class="website-media-ids"></div>
+                                            <div class="mobile-media-ids"></div>
 
-                                        <!-- Website Image Upload -->
-                                        <label class="form-label">Website Image</label>
-                                        <div class="dropzone website-dropzone"></div>
-                                        <small class="text d-block mb-1">Recommended: 1920*520 px, max 2 MB</small>
-                                        <div class="upload-wrapper">
-                                            <div class="uploaded-image d-none mt-2">
-                                                <img src="" class="img-fluid rounded"
-                                                    style="width: 50px; height: 50px; object-fit: cover;">
+                                            <label class="form-label">Website Image</label>
+                                            <div class="dropzone website-dropzone"></div>
+                                            <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                            <div class="upload-wrapper">
+                                                <div class="uploaded-image d-none mt-2">
+                                                    <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                </div>
+                                                <div class="progress upload-progress d-none">
+                                                    <div class="progress-bar" style="width:0%"></div>
+                                                </div>
                                             </div>
-                                            <div class="progress upload-progress d-none">
-                                                <div class="progress-bar" style="width: 0%"></div>
-                                            </div>
-                                        </div>
 
-                                        <!-- Mobile Image Upload -->
-                                        <label class="form-label mt-1">Mobile Image</label>
-                                        <div class="dropzone mobile-dropzone"></div>
-                                        <small class="text-muted d-block mb-1">Recommended: 375×672 px, max 2 MB</small>
-                                        <div class="upload-wrapper">
-                                            <div class="uploaded-image d-none mt-1">
-                                                <img src="" class="img-fluid rounded"
-                                                    style="width: 50px; height: 50px; object-fit: cover;">
+                                            <label class="form-label mt-3">Mobile Image</label>
+                                            <div class="dropzone mobile-dropzone"></div>
+                                            <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+                                            <div class="upload-wrapper">
+                                                <div class="uploaded-image d-none mt-2">
+                                                    <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                </div>
+                                                <div class="progress upload-progress d-none">
+                                                    <div class="progress-bar" style="width:0%"></div>
+                                                </div>
                                             </div>
-                                            <div class="progress upload-progress d-none">
-                                                <div class="progress-bar" style="width: 0%"></div>
-                                            </div>
-                                        </div>
 
-                                        <!-- Titles -->
-                                        <div class="row mb-1">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Title in English</label>
-                                                <input type="text" name="title_en" class="form-control">
+                                            {{-- Titles --}}
+                                            <div class="row mb-3 mt-4">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Title in English</label>
+                                                    <input type="text" name="title_en" class="form-control">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Title in Arabic</label>
+                                                    <input type="text" name="title_ar" class="form-control">
+                                                </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Title in Arabic</label>
-                                                <input type="text" name="title_ar" class="form-control">
-                                            </div>
-                                        </div>
 
-                                        <!-- Subtitles -->
-                                        <div class="row mb-1">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Subtitle in English</label>
-                                                <input type="text" name="subtitle_en" class="form-control">
+                                            {{-- Subtitles --}}
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Subtitle in English</label>
+                                                    <input type="text" name="subtitle_en" class="form-control">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Subtitle in Arabic</label>
+                                                    <input type="text" name="subtitle_ar" class="form-control">
+                                                </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Subtitle in Arabic</label>
-                                                <input type="text" name="subtitle_ar" class="form-control">
+
+                                            {{-- Colors --}}
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Title Color</label>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;" value="#101010">
+                                                        <input type="text" class="form-control title-color-hex" placeholder="#101010" value="#101010">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Subtitle Color</label>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;" value="#5b5b5b">
+                                                        <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b" value="#5b5b5b">
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <!-- Product Selection -->
-                                        <div class="mb-1">
-                                            <label class="form-label">Select Product</label>
-                                            <select name="product_id" class="form-select">
-                                                <option disabled selected>Select a product</option>
-                                                @foreach($products as $product)
-                                                <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                            <div class="border rounded p-2 mb-3">
+                                                <div class="titlePreview fw-bold" style="color:#101010">Title preview</div>
+                                                <div class="subtitlePreview" style="color:#5b5b5b">Subtitle preview</div>
+                                            </div>
 
-                                        <!-- Action Buttons -->
-                                        <div class="d-flex justify-content-between mt-2">
-                                            <button type="button" data-repeater-delete class="btn btn-outline-danger">
-                                                <i data-feather="x" class="me-25"></i> Delete
-                                            </button>
-                                            <button type="submit" class="btn btn-primary save-carousel-btn">
-                                                <i data-feather="save" class="me-25"></i> Save Changes
-                                            </button>
-                                        </div>
-                                    </form>
+                                            {{-- Product --}}
+                                            <div class="mb-2">
+                                                <label class="form-label">Select Product</label>
+                                                <select name="product_id" class="form-select">
+                                                    <option disabled selected>Select a product</option>
+                                                    @foreach($products as $product)
+                                                        <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
+                                                <button type="button" data-repeater-delete class="btn btn-outline-danger">
+                                                    <i data-feather="x" class="me-1"></i> Delete
+                                                </button>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i data-feather="save" class="me-1"></i> Save Changes
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-
+                        @endforelse
                     </div>
-                    {{-- Add button --}}
+
+                    {{-- Hidden template for adding new items --}}
+                    <div data-repeater-item style="display:none;">
+                        <div class="col-md-12 mb-2">
+                            <div class="card p-2 mb-4 border rounded shadow-sm">
+                                <form method="POST" action="{{ route('carousels.update') }}" enctype="multipart/form-data" class="carousel-form">
+                                    @csrf
+                                    @method('PUT')
+
+                                    <input type="hidden" name="id" value="">
+                                    <div class="website-media-ids"></div>
+                                    <div class="mobile-media-ids"></div>
+
+                                    <label class="form-label">Website Image</label>
+                                    <div class="dropzone website-dropzone"></div>
+                                    <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                    <div class="upload-wrapper">
+                                        <div class="uploaded-image d-none mt-2">
+                                            <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                        </div>
+                                        <div class="progress upload-progress d-none">
+                                            <div class="progress-bar" style="width:0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <label class="form-label mt-1">Mobile Image</label>
+                                    <div class="dropzone mobile-dropzone"></div>
+                                    <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+                                    <div class="upload-wrapper">
+                                        <div class="uploaded-image d-none mt-2">
+                                            <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                        </div>
+                                        <div class="progress upload-progress d-none">
+                                            <div class="progress-bar" style="width:0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3 mt-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Title in English</label>
+                                            <input type="text" name="title_en" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Title in Arabic</label>
+                                            <input type="text" name="title_ar" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Subtitle in English</label>
+                                            <input type="text" name="subtitle_en" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Subtitle in Arabic</label>
+                                            <input type="text" name="subtitle_ar" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Title Color</label>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;" value="#101010">
+                                                <input type="text" class="form-control title-color-hex" placeholder="#101010" value="#101010">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Subtitle Color</label>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;" value="#5b5b5b">
+                                                <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b" value="#5b5b5b">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="border rounded p-2 mb-3">
+                                        <div class="titlePreview fw-bold" style="color:#101010">Title preview</div>
+                                        <div class="subtitlePreview" style="color:#5b5b5b">Subtitle preview</div>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <label class="form-label">Select Product</label>
+                                        <select name="product_id" class="form-select">
+                                            <option disabled selected>Select a product</option>
+                                            @foreach($products as $product)
+                                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <button type="button" data-repeater-delete class="btn btn-outline-danger">
+                                            <i data-feather="x" class="me-25"></i> Delete
+                                        </button>
+                                        <button type="submit" class="btn btn-primary save-carousel-btn">
+                                            <i data-feather="save" class="me-25"></i> Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="text-start d-flex justify-content-end mb-2">
                         <button type="button" data-repeater-create class="btn btn-primary">
                             <i data-feather="plus"></i> Add Carousel
@@ -546,8 +546,6 @@
                     </div>
                 </div>
 
-
-            </div>
 
             <!-- tab3 -->
             <div class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
@@ -1136,31 +1134,42 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test((v||'').trim());
 
-                document.querySelectorAll('.carousel-form').forEach(form => {
-                    const titleColor   = form.querySelector('.title-color-input');
-                    const titleHex     = form.querySelector('.title-color-hex');
-                    const subtitleColor= form.querySelector('.subtitle-color-input');
-                    const subtitleHex  = form.querySelector('.subtitle-color-hex');
-                    const titlePreview = form.querySelector('#titlePreview');
-                    const subPreview   = form.querySelector('#subtitlePreview');
+                function bindForm(form) {
+                    const titleColor    = form.querySelector('.title-color-input');
+                    const titleHex      = form.querySelector('.title-color-hex');
+                    const subtitleColor = form.querySelector('.subtitle-color-input');
+                    const subtitleHex   = form.querySelector('.subtitle-color-hex');
+                    const titlePrev     = form.querySelector('.titlePreview');
+                    const subPrev       = form.querySelector('.subtitlePreview');
 
-                    const bind = (colorInput, hexInput, previewEl) => {
+                    const bind = (colorInput, hexInput, previewEl, fallback) => {
                         if (!colorInput || !hexInput) return;
                         const apply = (val) => {
                             hexInput.value = val;
                             if (previewEl) previewEl.style.color = val;
                         };
                         colorInput.addEventListener('input', e => {
-                            const v = e.target.value; if (isHex(v)) apply(v);
+                            const v = e.target.value;
+                            if (isHex(v)) apply(v);
                         });
                         hexInput.addEventListener('input', e => {
-                            const v = e.target.value.trim(); if (isHex(v)) { colorInput.value = v; apply(v); }
+                            const v = e.target.value.trim();
+                            if (isHex(v)) { colorInput.value = v; apply(v); }
                         });
-                        apply(colorInput.value || '#101010');
+                        apply(colorInput.value || fallback);
                     };
 
-                    bind(titleColor, titleHex, titlePreview);
-                    bind(subtitleColor, subtitleHex, subPreview);
+                    bind(titleColor, titleHex, titlePrev, '#101010');
+                    bind(subtitleColor, subtitleHex, subPrev, '#5b5b5b');
+                }
+
+                document.querySelectorAll('.carousel-form').forEach(bindForm);
+
+                // If your repeater adds new items dynamically, re-bind after create:
+                $(document).on('click', '[data-repeater-create]', function () {
+                    setTimeout(() => {
+                        document.querySelectorAll('.carousel-form').forEach(bindForm);
+                    }, 0);
                 });
             });
         </script>
