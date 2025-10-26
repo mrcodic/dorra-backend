@@ -198,7 +198,7 @@ enum PermissionEnum: string
         return match (true) {
             str_contains($this->value, '_create') => [$resource . '.create', $resource . '.store'],
             str_contains($this->value, '_update') => [$resource . '.edit', $resource . '.update'],
-            str_contains($this->value, '_show')   => [$resource . '.show'],
+            str_contains($this->value, '_show')   => [$resource . '.index', $resource . '.show'],
             str_contains($this->value, '_delete') => [$resource . '.destroy', $resource . '.bulk-delete'],
             default                               => [],
         };
