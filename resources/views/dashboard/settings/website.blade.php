@@ -289,16 +289,22 @@
                                             </div>
 
                                             {{-- Live preview (classes, not IDs) --}}
-                                            {{-- In the hidden template used by data-repeater-item (display:none; block) --}}
-                                            <div class="live-preview border rounded p-2 mb-3 d-none">
-                                                <div class="titlePreview fw-bold" style="color:#101010">Title preview</div>
-                                                <div class="subtitlePreview" style="color:#5b5b5b">Subtitle preview</div>
+                                            <div class="border rounded p-2 mb-3">
+                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
+                                                    {{ $carousel->getTranslation('title','en') }}
+                                                </div>
+                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
+                                                    {{ $carousel->getTranslation('subtitle','en') }}
+                                                </div>
                                             </div>
-                                            <div class="live-preview border rounded p-2 mb-3 d-none" dir="rtl">
-                                                <div class="titlePreview fw-bold" style="color:#101010">عنوان معاينة</div>
-                                                <div class="subtitlePreview" style="color:#5b5b5b">معاينة العنوان الفرعي</div>
+                                            <div class="border rounded p-2 mb-3" dir="rtl">
+                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
+                                                    {{ $carousel->getTranslation('title', 'ar') }}
+                                                </div>
+                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
+                                                    {{ $carousel->getTranslation('subtitle', 'ar') }}
+                                                </div>
                                             </div>
-
 
 
                                             {{-- Product Selection --}}
