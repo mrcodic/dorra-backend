@@ -33,6 +33,9 @@ class UpdateCarouselRequest extends BaseRequest
             'carousels.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'carousels.*.website_media_ids' => ['sometimes','exists:media,id'],
             'carousels.*.mobile_media_ids' => ['sometimes','exists:media,id',],
+            'carousels.*.title_color'    => ['nullable','regex:/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/'],
+            'carousels.*.subtitle_color' => ['nullable','regex:/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/'],
+
         ];
     }
     public function messages(): array

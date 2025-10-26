@@ -344,29 +344,47 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Titles -->
-                                            <div class="row mb-3 mt-4">
+                                            {{-- Title & Subtitle Colors --}}
+                                            <div class="row mb-3">
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Title in English</label>
-                                                    <input type="text" name="title_en" class="form-control" value="">
+                                                    <label class="form-label">Title Color</label>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <input
+                                                            type="color"
+                                                            name="title_color"
+                                                            class="form-control form-control-color title-color-input"
+                                                            style="width:3rem;"
+                                                            value="{{ old('title_color', $carousel->title_color ?? '#101010') }}"
+                                                        >
+                                                        <input
+                                                            type="text"
+                                                            class="form-control title-color-hex"
+                                                            placeholder="#101010"
+                                                            value="{{ old('title_color', $carousel->title_color ?? '#101010') }}"
+                                                        >
+                                                    </div>
                                                 </div>
+
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Title in Arabic</label>
-                                                    <input type="text" name="title_ar" class="form-control" value="">
+                                                    <label class="form-label">Subtitle Color</label>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <input
+                                                            type="color"
+                                                            name="subtitle_color"
+                                                            class="form-control form-control-color subtitle-color-input"
+                                                            style="width:3rem;"
+                                                            value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}"
+                                                        >
+                                                        <input
+                                                            type="text"
+                                                            class="form-control subtitle-color-hex"
+                                                            placeholder="#5b5b5b"
+                                                            value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}"
+                                                        >
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Subtitles -->
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Subtitle in English</label>
-                                                    <input type="text" name="subtitle_en" class="form-control" value="">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Subtitle in Arabic</label>
-                                                    <input type="text" name="subtitle_ar" class="form-control" value="">
-                                                </div>
-                                            </div>
 
                                             <!-- Product Selection -->
                                             <div class="mb-2">
@@ -1081,6 +1099,49 @@
     @endsection
 
     @section('page-script')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const titleColor   = document.querySelector('.title-color-input');
+                const titleHex     = document.querySelector('.title-color-hex');
+                const subtitleColor= document.querySelector('.subtitle-color-input');
+                const subtitleHex  = document.querySelector('.subtitle-color-hex');
+
+                const titlePreview = document.getElementById('titlePreview');
+                const subPreview   = document.getElementById('subtitlePreview');
+
+                const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim());
+
+                function bind(colorInput, hexInput, previewEl) {
+                    if (!colorInput || !hexInput) return;
+
+                    const apply = (val) => {
+                        hexInput.value = val;
+                        if (previewEl) previewEl.style.color = val;
+                    };
+
+                    // color → hex + preview
+                    colorInput.addEventListener('input', (e) => {
+                        const v = e.target.value;
+                        if (isHex(v)) apply(v);
+                    });
+
+                    // hex → color + preview (only if valid hex)
+                    hexInput.addEventListener('input', (e) => {
+                        const v = e.target.value.trim();
+                        if (isHex(v)) {
+                            colorInput.value = v;
+                            if (previewEl) previewEl.style.color = v;
+                        }
+                    });
+
+                    // init
+                    apply(colorInput.value);
+                }
+
+                bind(titleColor, titleHex, titlePreview);
+                bind(subtitleColor, subtitleHex, subPreview);
+            });
+        </script>
 
     <script>
         Dropzone.autoDiscover = false;
