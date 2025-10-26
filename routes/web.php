@@ -149,8 +149,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('/search', 'search')->name('search');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         });
-        Route::resource('/logistics', LocationController::class)->except('show');
-        Route::get('/logistics/dashboard', [LocationController::class, 'dashboard']);
+        Route::resource('/locations', LocationController::class)->except('show');
+        Route::get('/locations/dashboard', [LocationController::class, 'dashboard']);
 
         Route::group(['prefix' => 'discount-codes', 'as' => 'discount-codes.', 'controller' => DiscountCodeController::class,], function () {
             Route::get('/data', [DiscountCodeController::class, 'getData'])->name('data');
