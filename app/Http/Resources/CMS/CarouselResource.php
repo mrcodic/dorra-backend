@@ -28,6 +28,8 @@ class CarouselResource extends JsonResource
             'site_image' => $this->getFirstMediaUrl("carousels"),
             'mobile_image' => $this->getFirstMediaUrl("mobile_carousels"),
             'product' => ProductResource::make($this->whenLoaded('product')),
+            'title_color'=>$this->title_color,
+            'subtitle_color'=>$this->subtitle_color,
         ];
 
     }
