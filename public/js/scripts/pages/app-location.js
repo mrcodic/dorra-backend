@@ -29,7 +29,7 @@ const dt_user_table = $(".location-list-table").DataTable({
         },
         {data: "name"},
         {data: "country",render: function (data, type, row) {
-                console.log(row?.state?.country)
+                console.log(row?.state?.country.name[locale])
                 return row?.state?.country.name.locale
 
             }},
