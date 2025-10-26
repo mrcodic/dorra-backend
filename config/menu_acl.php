@@ -55,10 +55,10 @@ return [
     'Products' => [
         'children' => [
             '/categories' => [
-                'products_show',
-                'products_create',
-                'products_update',
-                'products_delete',
+                'categories_show',
+                'categories_create',
+                'categories_update',
+                'categories_delete',
             ],
             '/sub-categories' => [
                 'sub-categories_show',
@@ -67,10 +67,10 @@ return [
                 'sub-categories_delete',
             ],
             '/products' => [
-                'categories_show',
-                'categories_create',
-                'categories_update',
-                'categories_delete',
+                'products_show',
+                'products_create',
+                'products_update',
+                'products_delete',
             ],
             '/tags' => [
                 'tags_show',
