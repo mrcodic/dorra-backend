@@ -49,7 +49,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                                @foreach($role->users as $user)
+                                @foreach($role->load('users')->users as $user)
                                     <li data-bs-toggle="tooltip" data-bs-placement="top"
                                         title="{{ $user->name ?? 'User' }}" class="avatar avatar-sm pull-up">
                                         <img class="rounded-circle"
@@ -65,8 +65,8 @@
                                 <h4 class="">{{ is_array($role->name) ? ($role->name[app()->getLocale()] ?? reset($role->name)) : $role->name }}</h4>
                              @can('roles_update')
                                 <a href="{{ route('roles.edit',$role->id) }}" class="role-edit-modal">Edit Role</a>
-                         @endcan-
-                            </div>
+                          @endcan
+                              </div>
                         </div>
                     </div>
                 </div>
