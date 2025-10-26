@@ -86,24 +86,39 @@ class MenuAuthorizer
      *        - if in a parent childrenMap, use that child permission's group
      *        - otherwise, use the first URL segment as group (e.g., '/admins' => 'admins')
      */
+// App\Support\MenuAuthorizer
+
     private static function granted(string|array|null $required, string $url, array $childrenMap, array $userPerms): bool
     {
         // 1) Explicit requirements from ACL
         if (is_string($required)) {
-            // exact match OR any CRUD for that permission's group
             $group = self::groupFromPermission($required);
-            return in_array($required, $userPerms, true) || self::hasAnyCrudForGroup($userPerms, $group);
+
+            // If config asked specifically for a *_show permission, require it exactly
+            if (str_ends_with($required, '_show')) {
+                return in_array($required, $userPerms, true);
+            }
+
+            // Otherwise (create/update/delete/etc.), still allow if user has the exact perm
+            // OR at least the group's *_show to render the menu entry.
+            return in_array($required, $userPerms, true) || self::hasShowForGroup($userPerms, $group);
         }
 
         if (is_array($required)) {
-            // any of the listed perms OR any CRUD for the group of the first listed perm
+            // If any explicit *_show is listed, require possessing at least one of them
+            $showNames = array_values(array_filter($required, fn ($p) => is_string($p) && str_ends_with($p, '_show')));
+            if (!empty($showNames)) {
+                return self::hasAny($userPerms, $showNames);
+            }
+
+            // Otherwise, allow if user has any of the listed perms OR the group's *_show
             if (self::hasAny($userPerms, $required)) {
                 return true;
             }
             $first = $required[0] ?? null;
             if (is_string($first)) {
                 $group = self::groupFromPermission($first);
-                return self::hasAnyCrudForGroup($userPerms, $group);
+                return self::hasShowForGroup($userPerms, $group);
             }
             return false;
         }
@@ -111,48 +126,38 @@ class MenuAuthorizer
         // 2) No explicit requirement: resolve via children map or URL
         if (array_key_exists($url, $childrenMap)) {
             $childReq = $childrenMap[$url];
-            // could be string or array
             return self::granted($childReq, $url, [], $userPerms);
         }
 
-        // 3) Fallback: infer group from URL (first segment)
+        // 3) Fallback: infer group from URL and require <group>_show
         $group = self::groupFromUrl($url);
-        return $group ? self::hasAnyCrudForGroup($userPerms, $group) : false;
+        return $group ? self::hasShowForGroup($userPerms, $group) : false;
     }
 
     private static function hasAny(array $userPerms, array $requiredList): bool
     {
-        // true if user has at least one of $requiredList
         return (bool) array_intersect($userPerms, $requiredList);
     }
 
-
-    private static function hasAnyCrudForGroup(array $userPerms, string $group): bool
+    private static function hasShowForGroup(array $userPerms, string $group): bool
     {
-        // Check if user has ANY permission that starts with "<group>_"
-        $prefix = $group . '_';
-        foreach ($userPerms as $p) {
-            if (str_starts_with($p, $prefix)) {
-                return true;
-            }
-        }
-        return false;
+        // Only consider the *_show permission as the gate for visibility
+        $show = $group . '_show';
+        return in_array($show, $userPerms, true);
     }
 
     private static function groupFromPermission(string $permission): string
     {
-        // group is everything before the first underscore (can contain hyphens)
         $pos = strpos($permission, '_');
         return $pos === false ? $permission : substr($permission, 0, $pos);
     }
 
     private static function groupFromUrl(string $url): ?string
     {
-        // '/settings/details' -> 'settings-details' only if you need that;
-        // By default, first segment: '/product-templates' -> 'product-templates'
         $path = ltrim($url, '/');
         if ($path === '') return 'dashboard';
         $first = explode('/', $path, 2)[0];
         return $first ?: null;
     }
+
 }
