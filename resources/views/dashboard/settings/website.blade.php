@@ -2073,68 +2073,146 @@
 
     <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
 
-    <script>
-        $(document).ready(function () {
-                        $('[data-repeater-item]').each(function () {
-                            initCarouselDropzone($(this));
-                        });
-            function bindPreviewAutoShow($item) {
-                const $form = $item.find('.carousel-form');
-                const toggle = () => {
-                    const hasTitle = $.trim($form.find('input[name="title_en"]').val() || $form.find('input[name="title_ar"]').val() || '') !== '';
-                    const hasSub   = $.trim($form.find('input[name="subtitle_en"]').val() || $form.find('input[name="subtitle_ar"]').val() || '') !== '';
-                    // Show preview only if something is filled
-                    $form.find('.live-preview').toggleClass('d-none', !(hasTitle || hasSub));
-                };
-
-                // Bind inputs to toggle preview visibility
-                $form.on('input', 'input[name="title_en"], input[name="title_ar"], input[name="subtitle_en"], input[name="subtitle_ar"]', toggle);
-                $form.on('input', '.title-color-input, .subtitle-color-input, .title-color-hex, .subtitle-color-hex', toggle);
-
-                // Init state
-                toggle();
-            }
-
-            $('.invoice-repeater').repeater({
-                            show: function () {
-                                $(this).find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
-
-                                $(this).slideDown();
-                                feather && feather.replace();
-                                let $newItem = $(this);
-                                setTimeout(function () {
-                                    initCarouselDropzone($newItem);
-                                }, 100);
-                                const items = $(this).closest('.invoice-repeater').find('[data-repeater-item]');
-                                items.each(function (index) {
-                                    // Hide delete button if it's the only one
-                                    $(this).find('[data-repeater-delete]').toggle(items.length > 1);
-                                });
-
-                                bindPreviewAutoShow($item);
-                            },
-                            hide: function (deleteElement) {
-                                const repeater = $(this).closest('.invoice-repeater');
-                                const items = repeater.find('[data-repeater-item]');
-
-                                // Prevent deleting if it's the only one
-                                if (items.length === 1) {
-                                    alert("At least one item is required.");
-                                    return;
-                                }
-
-                                $(this).slideUp(deleteElement, function () {
-                                    $(this).remove();
-
-                                    const remainingItems = repeater.find('[data-repeater-item]');
-                                    remainingItems.each(function (index) {
-                                        $(this).find('[data-repeater-delete]').toggle(remainingItems.length > 1);
-                                    });
-                                });
-                            }
-                        });
+            <script>
+                $(document).ready(function () {
+                    // init dropzones for already-rendered items
+                    $('[data-repeater-item]').each(function () {
+                        initCarouselDropzone($(this));
                     });
-    </script>
+
+                    // util: basic hex check
+                    const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test((v||'').trim());
+
+                    // Bind preview show/hide + color apply for ONE repeater item
+                    function bindPreviewAutoShow($item) {
+                        const $form = $item.find('.carousel-form');
+                        if (!$form.length) return;
+
+                        const $titleColor    = $form.find('.title-color-input');
+                        const $subtitleColor = $form.find('.subtitle-color-input');
+                        const $titleHex      = $form.find('.title-color-hex');
+                        const $subtitleHex   = $form.find('.subtitle-color-hex');
+
+                        const $titlePreviews = $form.find('.titlePreview');     // EN + AR
+                        const $subPreviews   = $form.find('.subtitlePreview');  // EN + AR
+
+                        // show/hide previews only when something is filled
+                        const toggleVisibility = () => {
+                            const hasTitle = $.trim(
+                                ($form.find('input[name="title_en"]').val() || '') +
+                                ($form.find('input[name="title_ar"]').val() || '')
+                            ) !== '';
+
+                            const hasSub = $.trim(
+                                ($form.find('input[name="subtitle_en"]').val() || '') +
+                                ($form.find('input[name="subtitle_ar"]').val() || '')
+                            ) !== '';
+
+                            $form.find('.live-preview, .border.rounded.p-2.mb-3') // your preview wrappers
+                                .toggleClass('d-none', !(hasTitle || hasSub));
+                        };
+
+                        // apply color to all previews of the same type
+                        const applyTitleColor = (val) => { $titlePreviews.css('color', val); };
+                        const applySubColor   = (val) => { $subPreviews.css('color', val); };
+
+                        // sync color <-> hex and apply
+                        const bindColor = ($color, $hex, applyFn, fallback) => {
+                            if ($color.length && !$color.val()) $color.val(fallback);
+
+                            // color -> hex + apply
+                            $color.on('input', function () {
+                                const v = $(this).val();
+                                if (isHex(v)) {
+                                    if ($hex.length) $hex.val(v);
+                                    applyFn(v);
+                                    toggleVisibility();
+                                }
+                            });
+
+                            // hex -> color + apply
+                            $hex.on('input', function () {
+                                const v = $(this).val().trim();
+                                if (isHex(v)) {
+                                    if ($color.length) $color.val(v);
+                                    applyFn(v);
+                                    toggleVisibility();
+                                }
+                            });
+
+                            // init
+                            const initVal = $color.val() || fallback;
+                            if (isHex(initVal)) {
+                                if ($hex.length) $hex.val(initVal);
+                                applyFn(initVal);
+                            }
+                        };
+
+                        // bind inputs that affect visibility
+                        $form.on('input', 'input[name="title_en"], input[name="title_ar"], input[name="subtitle_en"], input[name="subtitle_ar"]', toggleVisibility);
+
+                        // bind color fields
+                        bindColor($titleColor, $titleHex, applyTitleColor, '#101010');
+                        bindColor($subtitleColor, $subtitleHex, applySubColor, '#5b5b5b');
+
+                        // init visibility state (existing items may already have values)
+                        toggleVisibility();
+                    }
+
+                    // Bind for items already on the page
+                    $('[data-repeater-item]').each(function () {
+                        bindPreviewAutoShow($(this));
+                    });
+
+                    // Repeater init
+                    $('.invoice-repeater').repeater({
+                        show: function () {
+                            const $item = $(this);
+
+                            // reset uploaded thumbnail box
+                            $item.find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
+
+                            // keep previews hidden for brand-new items (until user types)
+                            $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
+
+                            // insert (avoid slideDown if you don't want animation)
+                            $item.show();
+
+                            // icons & dropzones
+                            if (window.feather) feather.replace();
+                            setTimeout(function () { initCarouselDropzone($item); }, 100);
+
+                            // toggle delete if only one item
+                            const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
+                            $items.each(function () {
+                                $(this).find('[data-repeater-delete]').toggle($items.length > 1);
+                            });
+
+                            // ✅ FIX: bind for the newly added item using the correct var
+                            bindPreviewAutoShow($item);
+                        },
+
+                        hide: function (deleteElement) {
+                            const $repeater = $(this).closest('.invoice-repeater');
+                            const $items = $repeater.find('[data-repeater-item]');
+
+                            if ($items.length === 1) {
+                                alert('At least one item is required.');
+                                return;
+                            }
+
+                            $(this).slideUp(deleteElement, function () {
+                                $(this).remove();
+                                const $remaining = $repeater.find('[data-repeater-item]');
+                                $remaining.each(function () {
+                                    $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
+                                });
+                            });
+                        }
+                    });
+                });
+            </script>
+
     <script>
         $(document).on('click', '.remove-category', function (e) {
                         e.preventDefault();
