@@ -291,10 +291,18 @@
                                             {{-- Live preview (classes, not IDs) --}}
                                             <div class="border rounded p-2 mb-3">
                                                 <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
-                                                    {{ $carousel->getTranslation('title', app()->getLocale()) }}
+                                                    {{ $carousel->getTranslation('title','en') }}
                                                 </div>
                                                 <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
-                                                    {{ $carousel->getTranslation('subtitle', app()->getLocale()) }}
+                                                    {{ $carousel->getTranslation('subtitle','en') }}
+                                                </div>
+                                            </div>
+                                            <div class="border rounded p-2 mb-3">
+                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
+                                                    {{ $carousel->getTranslation('title', 'ar') }}
+                                                </div>
+                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
+                                                    {{ $carousel->getTranslation('subtitle', 'ar') }}
                                                 </div>
                                             </div>
 
