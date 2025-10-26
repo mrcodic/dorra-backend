@@ -41,7 +41,7 @@ class UpdateRoleRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
-            'permissions' => ['nullable', 'array'],
+            'permissions' => ['required', 'array'],
             'permissions.*' => [Rule::exists('permissions', 'name')],
         ];
     }
