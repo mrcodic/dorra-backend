@@ -1411,6 +1411,7 @@
 
     </script>
     <script !src="">
+        handleAjaxFormSubmit(".carousel-form")
         handleAjaxFormSubmit("#deleteCarouselForm", {
                         successMessage: "Carousel removed Successfully",
                         onSuccess: function () {
