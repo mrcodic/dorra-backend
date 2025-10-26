@@ -255,7 +255,7 @@
 
 <script>
     const categoriesDataUrl = "{{ route('locations.data') }}";
-    const categoriesCreateUrl = "{{ route('logistics.create') }}";
+    const categoriesCreateUrl = "{{ route('locations.create') }}";
     const locale = "{{ app()->getLocale() }}";
 </script>
 
