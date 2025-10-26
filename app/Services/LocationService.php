@@ -27,15 +27,13 @@ class LocationService extends BaseService
 
     public function getData()
     {
-        $locale = app()->getLocale();
         $locations = $this->repository
             ->query()
             ->with($this->relations)
-            ->when(request()->filled('search_value'), function ($query) use ($locale) {
+            ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
-                    $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                        '%' . strtolower(request('search_value')) . '%'
-                    ]);
+                    $search = request('search_value');
+                    $query->where("name", 'LIKE', "%{$search}%");
                 } else {
                     $query->whereRaw('1 = 0');
                 }
