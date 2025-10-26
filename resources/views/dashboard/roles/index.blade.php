@@ -63,9 +63,9 @@
                         <div class="d-flex justify-content-between align-items-end mt-1 pt-25">
                             <div class="role-heading">
                                 <h4 class="">{{ is_array($role->name) ? ($role->name[app()->getLocale()] ?? reset($role->name)) : $role->name }}</h4>
-                                @can('roles_update')
+{{--                                @can('roles_update')--}}
                                 <a href="{{ route('roles.edit',$role->id) }}" class="role-edit-modal">Edit Role</a>
-                                @endcan
+{{--                                @endcan--}}
                             </div>
                         </div>
                     </div>
