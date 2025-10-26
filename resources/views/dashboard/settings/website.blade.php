@@ -482,7 +482,19 @@
                                             <input type="text" name="title_ar" class="form-control">
                                         </div>
                                     </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <label class="form-label">Title Color</label>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <input type="color" name="title_color"
+                                                       class="form-control form-control-color title-color-input"
+                                                       style="width:3rem;" value="#101010">
+                                                <input type="text" class="form-control title-color-hex"
+                                                       placeholder="#101010" value="#101010">
+                                            </div>
+                                        </div>
 
+                                    </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <label class="form-label">Subtitle in English</label>
@@ -495,11 +507,14 @@
                                     </div>
 
                                     <div class="row mb-3">
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <label class="form-label">Title Color</label>
                                             <div class="d-flex align-items-center gap-1">
-                                                <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;" value="#101010">
-                                                <input type="text" class="form-control title-color-hex" placeholder="#101010" value="#101010">
+                                                <input type="color" name="title_color"
+                                                       class="form-control form-control-color title-color-input"
+                                                       style="width:3rem;" value="#101010">
+                                                <input type="text" class="form-control title-color-hex"
+                                                       placeholder="#101010" value="#101010">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
