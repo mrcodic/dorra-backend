@@ -29,7 +29,7 @@ class LocationService extends BaseService
     {
         $locations = $this->repository
             ->query()
-            ->with(['state.country'])
+            ->with($this->relations)
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
@@ -44,12 +44,7 @@ class LocationService extends BaseService
             ->addColumn('name', function ($location) {
                 return $location->name ?? '-';
             })
-            ->addColumn('state', function ($location) {
-                return optional($location->state)->name ?? '-';
-            })
-            ->addColumn('country', function ($location) {
-                return optional($location->state?->country)->name ?? '-';
-            })
+         
             ->addColumn('action', function () {
                 return [
                     'can_edit' => (bool) auth()->user()->can('locations_update'),

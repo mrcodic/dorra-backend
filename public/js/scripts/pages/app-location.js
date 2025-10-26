@@ -28,8 +28,14 @@ const dt_user_table = $(".location-list-table").DataTable({
             },
         },
         {data: "name"},
-        {data: "country"},
-        {data: "state"},
+        {data: "country",render: function (data, type, row) {
+                return row?.state?.country.name
+
+            }},
+        {data: "state",render: function (data, type, row) {
+                return row?.state?.name
+
+            },},
         {
             data: "id",
             orderable: false,

@@ -17,6 +17,7 @@ class Location extends Model
         'days',
         'available_time',
     ];
+
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class);
