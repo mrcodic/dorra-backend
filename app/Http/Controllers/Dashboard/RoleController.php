@@ -33,7 +33,7 @@ class RoleController extends DashboardController
             'index' => [
                 'roles' => $this->roleRepository->query()
                     ->withCount('users')
-                    ->with(['users.media','users'])
+                    ->with(['users.media'])
                     ->get(columns: ['id', 'name']),
             ],
         ];
