@@ -55,16 +55,16 @@ return [
     'Products' => [
         'children' => [
             '/categories' => [
-            'categories_show',
-            'categories_create',
-            'categories_update',
-            'categories_delete',
-        ],
-            '/products' => [
                 'products_show',
                 'products_create',
                 'products_update',
                 'products_delete',
+        ],
+            '/products' => [
+                'categories_show',
+                'categories_create',
+                'categories_update',
+                'categories_delete',
             ],
             '/sub-categories' => [
                 'sub-categories_show',
