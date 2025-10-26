@@ -11,7 +11,7 @@ const dt_user_table = $(".location-list-table").DataTable({
         url: categoriesDataUrl,
         type: "GET",
         data: function (d) {
-            d.search_value = $("#search-category-form").val(); // get from input
+            d.search_value = $("#search-location-form").val(); // get from input
             d.created_at = $(".filter-date").val();
             return d;
         },
@@ -91,7 +91,7 @@ const dt_user_table = $(".location-list-table").DataTable({
 
 // Custom search with debounce
 let searchTimeout;
-$("#search-category-form").on("keyup", function () {
+$("#search-location-form").on("keyup", function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         dt_user_table.draw();

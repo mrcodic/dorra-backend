@@ -142,7 +142,7 @@
                 <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-8">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                        id="search-category-form" placeholder="Search category..." style="height: 38px;">
+                        id="search-location-form" placeholder="Search location..." style="height: 38px;">
                     <button type="button" id="clearRoleFilter"
                         class="position-absolute top-50 translate-middle-y text-muted"
                         style="margin-right: 5px; right: 0; background: transparent; border: none; font-weight: bold; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;"
@@ -202,11 +202,10 @@
               'confirmText' => 'Are you sure you want to delete the selected locations?',
             ])
 
-            {{-- Inside your modal.blade (form wrapper) make sure it looks like this: --}}
             <form id="bulk-delete-form" method="POST" action="{{ route('locations.bulk-delete') }}">
                 @csrf
-                <div id="bulk-delete-ids"></div> {{-- JS will inject hidden inputs here --}}
-                {{-- modal body/footer/confirm button… --}}
+                <div id="bulk-delete-ids"></div>
+
             </form>
 
             @include('modals.delete',[
