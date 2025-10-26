@@ -158,7 +158,7 @@
                         <option value="desc">Newest</option>
                     </select>
                 </div>
-
+                @can('sub-categories_create')
                 {{-- Add Button - 20% on md+, full width on xs --}}
                 <div class="col-12 col-md-4 text-md-end">
                     <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
@@ -168,7 +168,7 @@
                     </a>
                 </div>
             </div>
-
+            @endcan
         </div>
 
 
@@ -176,7 +176,7 @@
             <thead class="table-light">
                 <tr>
                     <th>
-                        <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                        <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('sub-categories_delete'))>
                     </th>
                     <th>Name</th>
                     <th>NO.of Categories</th>

@@ -16,9 +16,11 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
         }
     },
     columns: [
-        { data: null, defaultContent: "", orderable: false, render: function (data, type, row, meta) {
-                return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${data.id}">`;
-            } },
+        { data: null, defaultContent: "", orderable: false, render:  function (data, type, row) {
+                return row?.action?.can_delete
+                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+                    : '';
+            }, },
         { data: "name", orderable: false },
         { data: "sub_category_products_count" , orderable: false},
         { data: "added_date" , orderable: false},
