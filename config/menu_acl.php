@@ -59,12 +59,6 @@ return [
                 'products_create',
                 'products_update',
                 'products_delete',
-        ],
-            '/products' => [
-                'categories_show',
-                'categories_create',
-                'categories_update',
-                'categories_delete',
             ],
             '/sub-categories' => [
                 'sub-categories_show',
@@ -72,7 +66,12 @@ return [
                 'sub-categories_update',
                 'sub-categories_delete',
             ],
-
+            '/products' => [
+                'categories_show',
+                'categories_create',
+                'categories_update',
+                'categories_delete',
+            ],
             '/tags' => [
                 'tags_show',
                 'tags_create',
