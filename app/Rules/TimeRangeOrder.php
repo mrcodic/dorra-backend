@@ -21,13 +21,11 @@ class TimeRangeOrder implements ValidationRule
         $s = ((int) $h1) * 60 + (int) $i1;
         $e = ((int) $h2) * 60 + (int) $i2;
 
-        // Validate hours and minutes range
         if ($h1 > 23 || $h2 > 23 || $i1 > 59 || $i2 > 59) {
             $fail('Invalid hour or minute values.');
             return;
         }
 
-        // Reject reversed or equal times (unless you allow overnight ranges)
         if ($s >= $e) {
             $fail('Start time must be before end time.');
         }

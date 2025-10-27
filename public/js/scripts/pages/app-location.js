@@ -65,7 +65,7 @@ const dt_user_table = $(".location-list-table").DataTable({
                 if (canDelete) {
                     btns.push(`<a href="#" class="text-danger open-delete-location-modal"
    data-id="${data}"
-   data-action="/logistics/${data}"
+   data-action="/locations/${data}"
    data-bs-toggle="modal"
    data-bs-target="#deleteLocationModal">
    <i data-feather="trash-2"></i>
