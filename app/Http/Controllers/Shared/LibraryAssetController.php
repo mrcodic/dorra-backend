@@ -7,6 +7,7 @@ use App\Http\Resources\MediaResource;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Validation\Rule;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 
@@ -37,8 +38,13 @@ class LibraryAssetController extends Controller
         $request->validate(['file' => ['required','file',
             'mimetypes:image/jpeg,image/png,image/svg+xml',
             'mimes:jpg,jpeg,png,svg',
-            'regex:/\.svg$/i',
-            'not_regex:/\.svgz(\.|$)/i',
+            Rule::when(function () {
+                $f = $this->file('file');
+                return $f && $f->getMimeType() === 'image/svg+xml';
+            }, [
+                'regex:/\.svg$/i',
+                'not_regex:/\.svgz(\.|$)/i',
+            ]),
             ]]);
         $media = handleMediaUploads($request->file('file'),Admin::find(1) ?? Admin::find(7),"web_assets");
 //        $media = handleMediaUploads($request->file('file'),auth($this->activeGuard)->user(),"{$this->activeGuard}_assets");
