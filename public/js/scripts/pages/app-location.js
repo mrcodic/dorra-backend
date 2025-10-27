@@ -237,7 +237,7 @@ $(document).ready(function () {
         } else if (avail) {
             $("#edit_available_time").val(avail);
         }
-
+        console.log(countryId)
         // 5) الدولة → حمّل الولايات → اختَر الولاية
         $("#editCountry").val(countryId).trigger('change');
 
