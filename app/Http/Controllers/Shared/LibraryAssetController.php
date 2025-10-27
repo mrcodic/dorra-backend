@@ -38,8 +38,8 @@ class LibraryAssetController extends Controller
         $request->validate(['file' => ['required','file',
             'mimetypes:image/jpeg,image/png,image/svg+xml',
             'mimes:jpg,jpeg,png,svg',
-            Rule::when(function () {
-                $f = $this->file('file');
+            Rule::when(function () use ($request){
+                $f = $request->file('file');
                 return $f && $f->getMimeType() === 'image/svg+xml';
             }, [
                 'regex:/\.svg$/i',
