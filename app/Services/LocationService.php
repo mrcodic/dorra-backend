@@ -105,6 +105,7 @@ class LocationService extends BaseService
         return $location;
     }
 
+
     /**
      * Extract latitude and longitude from various map link formats
      */

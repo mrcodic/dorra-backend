@@ -22,7 +22,25 @@ class UpdateLocationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'string', 'max:255'],
+            'country_id' => ['required', 'exists:countries,id'],
+            'state_id' => ['required', 'exists:states,id'],
+            'address_line' => ['required', 'string', 'max:255'],
+            'link' => [
+                'required',
+                'string',
+                'max:2048',
+                'url',
+                'link' => [
+                    'required', 'string', 'max:2048', 'url',
+                    'regex:~^https?://(?:(?:www\.)?google\.[^/]+/maps(?:[/?#]|$)|maps\.google\.[^/]+/|goo\.gl/maps/|maps\.app\.goo\.gl/|g\.page/)~i',
+                ],
+
+            ],
+
+            'days' => ['required', 'array', 'min:1'],
+            'days.*' => ['int'],
+            'available_time' => ['required', 'regex:/^\d{2}:\d{2}\s?-\s?\d{2}:\d{2}$/'],
         ];
     }
 }
