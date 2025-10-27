@@ -44,11 +44,10 @@ class LocationService extends BaseService
             ->addColumn('name', function ($location) {
                 return $location->name ?? '-';
             })
-
             ->addColumn('action', function () {
                 return [
-                    'can_edit' => (bool) auth()->user()->can('locations_update'),
-                    'can_delete' => (bool) auth()->user()->can('locations_delete'),
+                    'can_edit' => (bool)auth()->user()->can('locations_update'),
+                    'can_delete' => (bool)auth()->user()->can('locations_delete'),
                 ];
             })
             ->make(true);
@@ -105,7 +104,6 @@ class LocationService extends BaseService
         return $location;
     }
 
-
     /**
      * Extract latitude and longitude from various map link formats
      */
@@ -153,15 +151,25 @@ class LocationService extends BaseService
         return $coordinates;
     }
 
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        if (isset($validatedData['link'])) {
+            $coordinates = $this->extractCoordinatesFromLink($validatedData['link']);
+            if ($coordinates) {
+                $validatedData['latitude'] = $coordinates['latitude'];
+                $validatedData['longitude'] = $coordinates['longitude'];
+            }
+        }
+        return $this->repository->update($validatedData, $id);
 
-
+    }
 
     public function search($request)
     {
-        $queryString = (string) $request->search;
-        $lat   = $request->float('latitude');
-        $lng   = $request->float('longitude');
-        $radiusKm = (int) $request->input('radius', 10); // default 10km
+        $queryString = (string)$request->search;
+        $lat = $request->float('latitude');
+        $lng = $request->float('longitude');
+        $radiusKm = (int)$request->input('radius', 10); // default 10km
 
         // base query
         $q = $this->repository->query()
@@ -190,17 +198,17 @@ class LocationService extends BaseService
             $latDelta = $radiusKm / 111.32; // ~km per degree latitude
             $lngDelta = $radiusKm / (111.32 * max(cos(deg2rad(max(min($lat, 89.9), -89.9))), 0.0001));
 
-            $q->whereBetween('latitude',  [$lat - $latDelta, $lat + $latDelta])
+            $q->whereBetween('latitude', [$lat - $latDelta, $lat + $latDelta])
                 ->whereBetween('longitude', [$lng - $lngDelta, $lng + $lngDelta])
                 ->select('*')
                 ->selectRaw("$haversine AS distance_km", [$lat, $lng, $lat])
-                ->when($radiusKm > 0, fn ($qq) => $qq->having('distance_km', '<=', $radiusKm))
+                ->when($radiusKm > 0, fn($qq) => $qq->having('distance_km', '<=', $radiusKm))
                 ->orderBy('distance_km');
         }
 
         // Optional: allow limiting results
         if ($request->filled('take')) {
-            $q->limit((int) $request->input('take'));
+            $q->limit((int)$request->input('take'));
         }
 
         return $q->get();

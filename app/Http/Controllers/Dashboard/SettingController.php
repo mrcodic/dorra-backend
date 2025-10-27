@@ -11,6 +11,7 @@ use App\Models\Review;
 use App\Repositories\Interfaces\CarouselRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\LandingReviewRepositoryInterface;
+use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
@@ -41,9 +42,10 @@ class SettingController extends Controller
         return view("dashboard.settings.notifications");
     }
 
-    public function payments()
+    public function payments(PaymentMethodRepositoryInterface $paymentMethodRepository)
     {
-        return view("dashboard.settings.payments");
+        $paymentMethods = $paymentMethodRepository->all();
+        return view("dashboard.settings.payments",get_defined_vars());
     }
 
     public function website(CategoryRepositoryInterface      $repository,
