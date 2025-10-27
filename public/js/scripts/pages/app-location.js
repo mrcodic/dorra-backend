@@ -261,13 +261,13 @@ $(document).ready(function () {
         const stateId     = String($btn.data('state-id') || '');
         console.log(stateId)
         const countryId   = String($btn.data('country-id') || '');
-        const daysRaw     = $btn.data('days');
-        const days        = parseDaysAttr(daysRaw);
+        // const daysRaw     = $btn.data('days');
+        // const days        = parseDaysAttr(daysRaw);
         const avail       = $btn.data('available-time') || '';
         console.log(days, daysRaw)
 
         $("#editLocationForm")[0].reset();
-        $("#editDays").val(null).trigger('change');
+        // $("#editDays").val(null).trigger('change');
         $("#editCountry").val('').trigger('change');
         $("#editState").empty().append('<option value="">Select a State</option>').val('').trigger('change');
 
@@ -277,7 +277,9 @@ $(document).ready(function () {
         $("#editAddressLink").val(addressLink);
 
 
-        $("#editDays").val(days).trigger('change');
+        const days = JSON.parse(daysRaw || "[]"); // مثال: "[2]" -> [2]
+        $("#editDays").val(days.map(String)).trigger("change"); // Select2 عايز سترينج
+
 
 
         if (avail.includes('-')) {
