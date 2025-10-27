@@ -198,6 +198,41 @@ $(document).ready(function () {
         }
         return [];
     }
+    async function loadStates(countryId, selectedStateId = "") {
+        const statesUrl = $("#state-url").data("url");
+        const $state = $("#editState");
+
+        $state.empty().append('<option value="">Select a State</option>');
+        if (!countryId || !statesUrl) return;
+
+        try {
+            const resp = await $.getJSON(statesUrl, { country_id: countryId });
+
+            // ادعم أشكال متعددة للـpayload
+            const items =
+                Array.isArray(resp) ? resp :
+                    Array.isArray(resp?.data) ? resp.data :
+                        Array.isArray(resp?.states) ? resp.states :
+                            [];
+
+            if (!Array.isArray(items)) {
+                console.error("Unexpected states payload:", resp);
+                return;
+            }
+
+            items.forEach((s) => {
+                // استخدم s.id و s.name (مش s.data.id)
+                $state.append(`<option value="${s.id}">${s.name}</option>`);
+            });
+
+            if (selectedStateId) {
+                $state.val(String(selectedStateId)).trigger("change");
+            }
+        } catch (err) {
+            console.error("Failed to load states", err);
+        }
+    }
+
 
     $(document).on("click", ".edit-details", async function (e) {
         const $btn = $(this);
@@ -246,17 +281,7 @@ $(document).ready(function () {
         const statesUrl = $("#editState").data('url'); // route('states')
 
         if (countryId && statesUrl) {
-            try {
-                const resp = await $.getJSON(statesUrl, { country_id: countryId });
-                console.log(resp)
-                // توقع resp: [{id:1, name:"..."}, ...]
-                const $state = $("#editState");
-                $state.empty().append('<option value="">Select a State</option>');
-                resp.forEach(s => $state.append(`<option value="${s.data.id}">${s.data.name}</option>`));
-                if (stateId) $state.val(stateId).trigger('change');
-            } catch (err) {
-                console.error('Failed to load states', err);
-            }
+            loadStates(countryId,stateId)
         }
 
         // 6) الفورم أكشن
