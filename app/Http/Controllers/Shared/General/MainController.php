@@ -231,7 +231,11 @@ class MainController extends Controller
             $q->where(function ($qq) use ($terms, $nameExprs) {
                 foreach ($nameExprs as $expr) {
                     foreach ($terms as $w) {
-                        $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
+                        if (hasMeaningfulSearch(request('search_value'))) {
+                            $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
+                        } else {
+                            $qq->whereRaw('1 = 0');
+                        }
                     }
                 }
             });
