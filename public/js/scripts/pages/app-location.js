@@ -186,7 +186,6 @@ async function loadStates(countryId, selectedStateId = "") {
     const $state = $("#editState");
     const statesUrl =$state.data("url");
 
-    console.log(selectedStateId,countryId,statesUrl)
     $state.empty().append('<option value="">Select a State</option>');
     if (!countryId || !statesUrl) return;
 
@@ -213,7 +212,7 @@ async function loadStates(countryId, selectedStateId = "") {
 
         if (selectedStateId) {
             console.log(selectedStateId)
-            $state.val(String(selectedStateId)).trigger("change");
+            $state.val(selectedStateId).trigger("change");
         }
     } catch (err) {
         console.error("Failed to load states", err);
