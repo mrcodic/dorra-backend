@@ -48,7 +48,6 @@ class RoleService extends BaseService
         $model = $this->repository->update($validatedData,$id);
         $model->load($relationsToLoad);
         if (isset($validatedData['permissions'])) {
-            app(PermissionRegistrar::class)->forgetCachedPermissions();
             $model->syncPermissions($validatedData['permissions']);
         }
         return $model->load($relationsToLoad);
