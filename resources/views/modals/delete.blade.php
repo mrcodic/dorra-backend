@@ -1,7 +1,7 @@
 <div class="modal fade" id="{{ $id ?? 'deleteModal' }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-edit-user">
         <div class="add-new-user modal-content pt-0 pb-1">
-            <form id="{{ $formId ?? 'deleteForm' }}" method="POST" action="{{ $action ?? '' }}">
+            <form id="{{ $formId ?? 'deleteForm' }}" method="POST" action="{{ $action ?? '' }}" class="{{ $class ?? 'deleteClassForm' }}">
                 @csrf
                 @method('DELETE')
                 <div class="modal-header">
