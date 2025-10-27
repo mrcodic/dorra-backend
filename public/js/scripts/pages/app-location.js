@@ -182,6 +182,7 @@ dt_user_table.on("draw", function () {
     $("#bulk-delete-container").hide();
 });
 async function loadStates(countryId, selectedStateId = "") {
+    console.log("FDgff")
     const statesUrl = $("#state-url").data("url");
     const $state = $("#editState");
 
@@ -282,7 +283,6 @@ $(document).ready(function () {
         const statesUrl = $("#editState").data('url'); // route('states')
 
         if (countryId && statesUrl) {
-            console.log(stateId)
             loadStates(countryId,stateId)
         }
 
