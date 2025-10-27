@@ -211,7 +211,7 @@ $(document).ready(function () {
         const daysRaw     = $btn.data('days');
         const days        = parseDaysAttr(daysRaw);
         const avail       = $btn.data('available-time') || '';
-        console.log(days, daysRaw)
+        console.log(days, daysRaw,countryId)
         // 1) نظّف قيم سابقة
         $("#editLocationForm")[0].reset();
         $("#editDays").val(null).trigger('change');
@@ -237,7 +237,7 @@ $(document).ready(function () {
         } else if (avail) {
             $("#edit_available_time").val(avail);
         }
-        console.log(countryId)
+
         // 5) الدولة → حمّل الولايات → اختَر الولاية
         $("#editCountry").val(countryId).trigger('change');
 
