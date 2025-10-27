@@ -281,6 +281,7 @@ $(document).ready(function () {
         $("#editAddressLink").val(addressLink);
 
         const days = safeParseDays(daysRaw);
+        console.log(days)
         $("#editDays").val(days.map(String)).trigger("change");
 
 
