@@ -207,6 +207,7 @@ $(document).ready(function () {
         const address     = $btn.data('address') || '';
         const addressLink = $btn.data('address-link') || '';
         const stateId     = String($btn.data('state-id') || '');
+        console.log(stateId)
         const countryId   = String($btn.data('country-id') || '');
         const daysRaw     = $btn.data('days');
         const days        = parseDaysAttr(daysRaw);
@@ -243,10 +244,11 @@ $(document).ready(function () {
 
         // لو عندك endpoint لجلب الولايات حسب الدولة:
         const statesUrl = $("#editState").data('url'); // route('states')
-        console.log(statesUrl)
+
         if (countryId && statesUrl) {
             try {
                 const resp = await $.getJSON(statesUrl, { country_id: countryId });
+                console.log(resp)
                 // توقع resp: [{id:1, name:"..."}, ...]
                 const $state = $("#editState");
                 $state.empty().append('<option value="">Select a State</option>');
