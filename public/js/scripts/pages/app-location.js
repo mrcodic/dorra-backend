@@ -189,7 +189,7 @@ async function loadStates(countryId, selectedStateId = "") {
     console.log(selectedStateId,countryId,statesUrl)
     $state.empty().append('<option value="">Select a State</option>');
     if (!countryId || !statesUrl) return;
-    console.log("state",selectedStateId)
+
     try {
         const resp = await $.getJSON(statesUrl, { country_id: countryId });
 
@@ -212,6 +212,7 @@ async function loadStates(countryId, selectedStateId = "") {
 
 
         if (selectedStateId) {
+            console.log(selectedStateId)
             $state.val(String(selectedStateId)).trigger("change");
         }
     } catch (err) {
