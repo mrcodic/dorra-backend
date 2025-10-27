@@ -211,7 +211,6 @@ async function loadStates(countryId, selectedStateId = "") {
 
 
         if (selectedStateId) {
-            console.log(selectedStateId)
             $state.val(selectedStateId).trigger("change");
         }
     } catch (err) {
@@ -278,7 +277,7 @@ $(document).ready(function () {
         }
 
         // 5) الدولة → حمّل الولايات → اختَر الولاية
-        $("#editCountry").val(countryId).trigger('change');
+        $("#editCountry").val(countryId);
 
         // لو عندك endpoint لجلب الولايات حسب الدولة:
         const statesUrl = $("#editState").data('url'); // route('states')
