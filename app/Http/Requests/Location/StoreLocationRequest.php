@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Location;
 
 use App\Http\Requests\Base\BaseRequest;
+use App\Rules\TimeRangeOrder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreLocationRequest extends BaseRequest
@@ -41,9 +42,8 @@ class StoreLocationRequest extends BaseRequest
 
             'days' => ['required', 'array', 'min:1'],
             'days.*' => ['string'],
-            'available_time' => ['required', 'regex:/^\d{2}:\d{2}\s?-\s?\d{2}:\d{2}$/'],
-            'edit_start_time' =>['sometimes','date_format:H:i','before:edit_end_time'],
-            'edit_end_time' =>['sometimes','date_format:H:i','after:edit_start_time'],
+            'available_time' => ['required', 'regex:/^\d{2}:\d{2}\s?-\s?\d{2}:\d{2}$/', new TimeRangeOrder(),],
+
         ];
 
     }

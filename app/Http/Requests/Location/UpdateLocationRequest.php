@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Location;
 
+use App\Rules\TimeRangeOrder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateLocationRequest extends FormRequest
@@ -40,9 +41,8 @@ class UpdateLocationRequest extends FormRequest
 
             'days' => ['required', 'array', 'min:1'],
             'days.*' => ['int'],
-            'available_time' => ['required', 'regex:/^\d{2}:\d{2}\s?-\s?\d{2}:\d{2}$/'],
-            'edit_start_time' =>['sometimes','date_format:H:i','before:edit_end_time'],
-            'edit_end_time' =>['sometimes','date_format:H:i','after:edit_start_time'],
+            'available_time' => ['required', 'regex:/^\d{2}:\d{2}\s?-\s?\d{2}:\d{2}$/', new TimeRangeOrder(),],
+
         ];
     }
 }
