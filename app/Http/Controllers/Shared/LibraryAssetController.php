@@ -37,12 +37,7 @@ class LibraryAssetController extends Controller
        return Response::api(data: MediaResource::collection($media)->response()->getData(true));
    }
 
-
-    use Enshrined\SvgSanitizer\Sanitizer;
-    use Illuminate\Http\Request;
-    use Illuminate\Http\UploadedFile;
-    use Illuminate\Support\Facades\Storage;
-    use Illuminate\Support\Str;
+   
 
     public function store(Request $request)
     {
