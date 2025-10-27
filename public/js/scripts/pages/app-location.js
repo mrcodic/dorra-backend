@@ -224,9 +224,9 @@ $(document).ready(function () {
                 // استخدم s.id و s.name (مش s.data.id)
                 $state.append(`<option value="${s.id}">${s.name}</option>`);
             });
+            console.log("state",selectedStateId)
 
             if (selectedStateId) {
-                console.log("state",selectedStateId)
                 $state.val(String(selectedStateId)).trigger("change");
             }
         } catch (err) {
