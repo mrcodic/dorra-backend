@@ -252,7 +252,7 @@ $(document).ready(function () {
                 // توقع resp: [{id:1, name:"..."}, ...]
                 const $state = $("#editState");
                 $state.empty().append('<option value="">Select a State</option>');
-                resp.forEach(s => $state.append(`<option value="${s.id}">${s.name}</option>`));
+                resp.forEach(s => $state.append(`<option value="${s.data.id}">${s.data.name}</option>`));
                 if (stateId) $state.val(stateId).trigger('change');
             } catch (err) {
                 console.error('Failed to load states', err);
