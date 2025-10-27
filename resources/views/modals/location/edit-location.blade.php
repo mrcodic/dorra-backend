@@ -31,11 +31,11 @@
 
                         <div class="col-12 col-md-6">
                             <label class="form-label">State</label>
-                            <select id="editState" name="state_id" class="form-select address-state-select" data-url ="{{ route("states") }}">
+                            <select id="editState" name="state_id" class="form-select address-state-select"data-url="{{ route('states') }}">
                                 <option value="">Select a State</option>
                             </select>
                             <div class="invalid-feedback" id="state_id-error"></div>
-                            <div id="state-url" data-url="{{ route('states') }}"></div>
+                            <div id="state-url" ></div>
                         </div>
                     </div>
 

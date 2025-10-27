@@ -242,7 +242,8 @@ $(document).ready(function () {
         $("#editCountry").val(countryId).trigger('change');
 
         // لو عندك endpoint لجلب الولايات حسب الدولة:
-        const statesUrl = $("#state-url").data('url'); // route('states')
+        const statesUrl = $("#editState").data('url'); // route('states')
+
         if (countryId && statesUrl) {
             try {
                 const resp = await $.getJSON(statesUrl, { country_id: countryId });
