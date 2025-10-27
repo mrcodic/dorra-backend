@@ -60,7 +60,7 @@ public function store(Request $request)
         data: [
             'location' => $location->id,
             'name' => $location->name,
-            'redirect_url' => route('logistics.index', $location->id)
+            'redirect_url' => route('locations.index', $location->id)
         ]
     );
 }
