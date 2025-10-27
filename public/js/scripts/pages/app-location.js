@@ -208,10 +208,10 @@ $(document).ready(function () {
         const addressLink = $btn.data('address-link') || '';
         const stateId     = String($btn.data('state-id') || '');
         const countryId   = String($btn.data('country-id') || '');
-        const daysRaw     = $btn.data('days');               // ممكن تكون JSON string
-        const days        = parseDaysAttr(daysRaw);          // مصفوفة قيم سترنج
+        const daysRaw     = $btn.data('days');
+        const days        = parseDaysAttr(daysRaw);
         const avail       = $btn.data('available-time') || '';
-
+        console.log(days)
         // 1) نظّف قيم سابقة
         $("#editLocationForm")[0].reset();
         $("#editDays").val(null).trigger('change');
