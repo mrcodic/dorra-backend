@@ -15,12 +15,12 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-      $admin =  Admin::query()->create([
+      $admin =  Admin::query()->firstOrCreate([
             'first_name' =>'super',
             'last_name' => 'admin',
             'email' => 'super@admin.com',
             'phone_number' => '+201503464414',
-                'password' => 123456789,
+            'password' => 123456789,
             'status' => 1,
         ]);
         $role = Role::query()->firstOrCreate([
