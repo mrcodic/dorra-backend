@@ -174,7 +174,7 @@
                             <p>Clients</p>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="number">{{ \App\Models\Invoice::clientCount() }}</span>
+                            <span class="number">{{ \App\Models\Invoice::totalClients() }}</span>
                             <span class="text">Clients</span>
                         </div>
                     </div>

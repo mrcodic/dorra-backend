@@ -17,16 +17,24 @@ class Invoice extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function client(): Attribute
+    public static function totalClients(): int
     {
-        return Attribute::get(fn () => $this->order?->user ?? $this->order?->guest);
+        return (int) static::query()
+            ->join('orders', 'orders.id', '=', 'invoices.order_id')
+            ->where(function ($q) {
+                $q->whereNotNull('orders.user_id')
+                    ->orWhereNotNull('orders.guest_id');
+            })
+            ->selectRaw("
+                COUNT(DISTINCT
+                    CASE
+                        WHEN orders.user_id IS NOT NULL THEN CONCAT('u:', orders.user_id)
+                        ELSE CONCAT('g:', orders.guest_id)
+                    END
+                ) AS cnt
+            ")
+            ->value('cnt');
     }
-
-    public function clientCount(): int
-    {
-        return $this->order?->user_id || $this->order?->guest_id ? 1 : 0;
-    }
-
     public function designs(): \Illuminate\Database\Eloquent\Relations\MorphToMany
     {
         return $this->morphToMany(Design::class, 'designable');
