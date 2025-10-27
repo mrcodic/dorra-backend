@@ -56,7 +56,7 @@ const dt_user_table = $(".location-list-table").DataTable({
                                    data-address-link="${row.link}"
                                    data-state-id="${row.state.id}"
                                    data-countory-id="${row.state.country.id}"
-                                   data-days="${row.days}"
+                                    data-days='${JSON.stringify(row.days)}'
                                    data-available-time="${row.available_time}"
                                   >
                 <i data-feather="edit-3"></i>
@@ -72,7 +72,6 @@ const dt_user_table = $(".location-list-table").DataTable({
 </a>
 `);
                 }
-
                 if (!btns.length) return '';
                 return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
             },
@@ -184,22 +183,89 @@ dt_user_table.on("draw", function () {
 });
 
 $(document).ready(function () {
-    $(document).on("click",".edit-details",function (){
-        const $button = $(this);
+// Helper: parse days سواء JSON أو CSV أو Array
+    function parseDaysAttr(val) {
+        if (Array.isArray(val)) return val.map(String);
+        if (typeof val === 'string') {
+            const trimmed = val.trim();
+            if (trimmed.startsWith('[')) {
+                try { return JSON.parse(trimmed).map(String); } catch(e) {}
+            }
+            return trimmed.split(',').map(s => s.trim()).filter(Boolean);
+        }
+        if (val && typeof val === 'object') {
+            return Object.values(val).map(String);
+        }
+        return [];
+    }
 
-        const locationId = $button.data('id') || '';
-        const name = $button.data('name') || '';
-        const addressLink = $button.data('address-link') || '';
+    $(document).on("click", ".edit-details", async function (e) {
+        const $btn = $(this);
 
-        const address = $button.data('address') || '';
-        const days = $button.data('days') || '';
-        // Populate modal
-        $("#editLocationModal #editLocationName").val(name);
-        $("#editLocationModal #editAddressLine").val(address);
-        $("#editLocationModal #editAddressLink").val(addressLink);
+        const locationId  = $btn.data('id') || '';
+        const name        = $btn.data('name') || '';
+        const address     = $btn.data('address') || '';
+        const addressLink = $btn.data('address-link') || '';
+        const stateId     = String($btn.data('state-id') || '');
+        const countryId   = String($btn.data('country-id') || '');
+        const daysRaw     = $btn.data('days');               // ممكن تكون JSON string
+        const days        = parseDaysAttr(daysRaw);          // مصفوفة قيم سترنج
+        const avail       = $btn.data('available-time') || '';
 
+        // 1) نظّف قيم سابقة
+        $("#editLocationForm")[0].reset();
+        $("#editDays").val(null).trigger('change');
+        $("#editCountry").val('').trigger('change');
+        $("#editState").empty().append('<option value="">Select a State</option>').val('').trigger('change');
+
+        // 2) عبّي الحقول النصية
+        $("#editLocationName").val(name);
+        $("#editAddressLine").val(address);
+        $("#editAddressLink").val(addressLink);
+
+        // 3) عبّي الأيام (Select2 متعدد)
+        // قيم الخيارات لازم تطابق values بـ DayEnum::cases() -> name
+        // لو إنت بتخزن أرقام 1..7، تأكد options قيمتها أرقام/سترج متوافقة
+        $("#editDays").val(days).trigger('change'); // Select2 هيتعامل
+
+        // 4) الوقت المتاح: لو مخزّن "HH:MM - HH:MM" قصّه
+        if (avail.includes('-')) {
+            const [start, end] = avail.split('-').map(s => s.trim());
+            $("#edit_start_time").val(start);
+            $("#edit_end_time").val(end);
+            $("#edit_available_time").val(avail);
+        } else if (avail) {
+            $("#edit_available_time").val(avail);
+        }
+
+        // 5) الدولة → حمّل الولايات → اختَر الولاية
+        $("#editCountry").val(countryId).trigger('change');
+
+        // لو عندك endpoint لجلب الولايات حسب الدولة:
+        const statesUrl = $("#state-url").data('url'); // route('states')
+        if (countryId && statesUrl) {
+            try {
+                const resp = await $.getJSON(statesUrl, { country_id: countryId });
+                // توقع resp: [{id:1, name:"..."}, ...]
+                const $state = $("#editState");
+                $state.empty().append('<option value="">Select a State</option>');
+                resp.forEach(s => $state.append(`<option value="${s.id}">${s.name}</option>`));
+                if (stateId) $state.val(stateId).trigger('change');
+            } catch (err) {
+                console.error('Failed to load states', err);
+            }
+        }
+
+        // 6) الفورم أكشن
         $('#editLocationForm').attr('action', `locations/${locationId}`);
-    })
+    });
+
+// اجمع available_time من حقول time قبل الإرسال
+    $("#edit_start_time, #edit_end_time").on('change', function () {
+        const s = $("#edit_start_time").val();
+        const e = $("#edit_end_time").val();
+        $("#edit_available_time").val(s && e ? `${s} - ${e}` : '');
+    });
 
     $(document).on("click", ".open-delete-location-modal", function () {
         const locationAction = $(this).data("action");

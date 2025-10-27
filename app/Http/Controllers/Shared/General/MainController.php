@@ -227,7 +227,7 @@ class MainController extends Controller
 
 
         $applyContainsAnyLocale = function ($q) use ($terms, $nameExprs) {
-            if ($terms->isEmpty()) return; // no search terms -> don't add filters
+            if ($terms->isEmpty()) return;
             $q->where(function ($qq) use ($terms, $nameExprs) {
                 foreach ($nameExprs as $expr) {
                     foreach ($terms as $w) {

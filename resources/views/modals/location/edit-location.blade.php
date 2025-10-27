@@ -47,7 +47,7 @@
                     <div class="mb-1">
                         <label class="form-label" for="editAddressLink">Address Link</label>
                         <div class="input-group">
-                            <span class="input-group-text">https://</span>
+{{--                            <span class="input-group-text">https://</span>--}}
                             <input type="text" class="form-control" id="editAddressLink" name="link" placeholder="example.com/location">
                         </div>
                     </div>
@@ -84,3 +84,17 @@
         </div>
     </div>
 </div>
+<script !src="">
+    $(function () {
+        $('#editDays').select2({
+            width: '100%',
+            placeholder: 'Select Available Days',
+            dropdownParent: $('#editLocationModal')
+        });
+        $('#editCountry, #editState').select2({
+            width: '100%',
+            dropdownParent: $('#editLocationModal')
+        });
+    });
+
+</script>

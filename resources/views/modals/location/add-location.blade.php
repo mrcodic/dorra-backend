@@ -46,7 +46,7 @@
                     <div class="mb-1">
                         <label for="addressLink" class="form-label">Address Link</label>
                         <div class="input-group">
-                            <span class="input-group-text">https://</span>
+{{--                            <span class="input-group-text">https://</span>--}}
                             <input type="text" class="form-control" id="addressLink" name="link"
                                 placeholder="example.com/location">
                         </div>
