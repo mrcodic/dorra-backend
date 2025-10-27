@@ -349,8 +349,19 @@
                                             <div class="website-media-ids"></div>
                                             <div class="mobile-media-ids"></div>
 
-                                            <label class="form-label">Website Image</label>
+                                            <label class="form-label">Website Image En</label>
                                             <div class="dropzone website-dropzone"></div>
+                                            <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                            <div class="upload-wrapper">
+                                                <div class="uploaded-image d-none mt-2">
+                                                    <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                </div>
+                                                <div class="progress upload-progress d-none">
+                                                    <div class="progress-bar" style="width:0%"></div>
+                                                </div>
+                                            </div>
+                                            <label class="form-label">Website Image Ar</label>
+                                            <div class="dropzone website-ar-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
                                             <div class="upload-wrapper">
                                                 <div class="uploaded-image d-none mt-2">
@@ -456,6 +467,7 @@
 
                                     <input type="hidden" name="id" value="">
                                     <div class="website-media-ids"></div>
+                                    <div class="website-ar-media-ids"></div>
                                     <div class="mobile-media-ids"></div>
 
                                     <label class="form-label">Website Image</label>
@@ -1311,6 +1323,7 @@
                     }
 
                     let websiteEl = $item.find('.website-dropzone')[0];
+                    let websiteElAr = $item.find('.website-ar-dropzone')[0];
                     if (websiteEl && !websiteEl.dropzone) {
                         new Dropzone(websiteEl, {
                             url: "{{ route('media.store') }}",
@@ -1344,6 +1357,67 @@
 
                                 hidden.value = response.data.id;
                                 $item.find('.website-media-ids').append(hidden);
+
+                                // Keep reference for removal later
+                                file._hiddenInput = hidden;
+                            },
+
+                            removedfile: function (file) {
+                                if (file.previewElement != null) {
+                                    file.previewElement.parentNode.removeChild(file.previewElement);
+                                }
+                                if (file._hiddenInput) {
+                                    file._hiddenInput.remove();
+                                }
+
+                                if (file.xhr) {
+                                    let response = JSON.parse(file.xhr.response);
+
+                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                        }
+                                    });
+                                }
+
+                            }
+
+                        });
+                    }
+                    if (websiteElAr && !websiteElAr.dropzone) {
+                        new Dropzone(websiteElAr, {
+                            url: "{{ route('media.store') }}",
+                            maxFilesize: 2,
+                            maxFiles: 1,
+                            dictDefaultMessage: "Drag images here to upload",
+                            acceptedFiles: ".jpeg,.jpg,.png,.svg",
+                            addRemoveLinks: true,
+                            init: function () {
+                                this.on("maxfilesexceeded", function (file) {
+                                    this.removeAllFiles();  // remove old one
+                                    this.addFile(file);     // add the new one
+                                });
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            success: function (file, response) {
+                                let hidden = document.createElement('input');
+                                hidden.type = "hidden";
+
+                                // Find the repeater index (example: carousels[0])
+                                let baseName = $item.find('input[name*="[id]"]').attr('name');
+                                if (baseName) {
+                                    let prefix = baseName.replace(/\[id\]$/, ''); // remove trailing [id]
+                                    hidden.name = prefix + '[website_ar_media_ids][]';
+                                } else {
+                                    // fallback (if not found)
+                                    hidden.name = 'carousels[0][website_ar_media_ids][]';
+                                }
+
+                                hidden.value = response.data.id;
+                                $item.find('.website-ar-media-ids').append(hidden);
 
                                 // Keep reference for removal later
                                 file._hiddenInput = hidden;
