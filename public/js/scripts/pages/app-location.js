@@ -226,7 +226,7 @@ $(document).ready(function () {
         // 3) عبّي الأيام (Select2 متعدد)
         // قيم الخيارات لازم تطابق values بـ DayEnum::cases() -> name
         // لو إنت بتخزن أرقام 1..7، تأكد options قيمتها أرقام/سترج متوافقة
-        $("#editDays").val(days).trigger('change'); // Select2 هيتعامل
+        $("#editDays").val(daysRaw).trigger('change'); // Select2 هيتعامل
 
         // 4) الوقت المتاح: لو مخزّن "HH:MM - HH:MM" قصّه
         if (avail.includes('-')) {
