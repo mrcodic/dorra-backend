@@ -38,13 +38,13 @@ class LibraryAssetController extends Controller
         $request->validate(['file' => ['required','file',
             'mimetypes:image/jpeg,image/png,image/svg+xml',
             'mimes:jpg,jpeg,png,svg',
-            Rule::when(function () use ($request){
-                $f = $request->file('file');
-                return $f && $f->getMimeType() === 'image/svg+xml';
-            }, [
-                'regex:/\.svg$/i',
-                'not_regex:/\.svgz(\.|$)/i',
-            ]),
+//            Rule::when(function () use ($request){
+//                $f = $request->file('file');
+//                return $f && $f->getMimeType() === 'image/svg+xml';
+//            }, [
+//                'regex:/\.svg$/i',
+//                'not_regex:/\.svgz(\.|$)/i',
+//            ]),
             ]]);
         $media = handleMediaUploads($request->file('file'),Admin::find(1) ?? Admin::find(7),"web_assets");
 //        $media = handleMediaUploads($request->file('file'),auth($this->activeGuard)->user(),"{$this->activeGuard}_assets");
