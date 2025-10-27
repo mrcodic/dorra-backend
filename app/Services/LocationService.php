@@ -153,6 +153,27 @@ class LocationService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+        if (isset($validatedData['days']) && is_array($validatedData['days'])) {
+            $dayValues = [];
+
+            foreach ($validatedData['days'] as $day) {
+                if (is_string($day)) {
+                    // Convert string day name to enum case
+                    $enumCase = collect(DayEnum::cases())->firstWhere('name', strtoupper($day));
+                    if ($enumCase) {
+                        $dayValues[] = $enumCase->value;
+                    }
+                } elseif (is_int($day)) {
+                    // Validate integer is a valid enum value
+                    $enumCase = DayEnum::tryFrom($day);
+                    if ($enumCase) {
+                        $dayValues[] = $day;
+                    }
+                }
+            }
+
+            $validatedData['days'] = json_encode($dayValues);
+        }
         if (isset($validatedData['link'])) {
             $coordinates = $this->extractCoordinatesFromLink($validatedData['link']);
             if ($coordinates) {
