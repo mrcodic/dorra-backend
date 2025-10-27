@@ -181,6 +181,41 @@ $(document).on("change", ".category-checkbox", function () {
 dt_user_table.on("draw", function () {
     $("#bulk-delete-container").hide();
 });
+async function loadStates(countryId, selectedStateId = "") {
+    const statesUrl = $("#state-url").data("url");
+    const $state = $("#editState");
+
+    $state.empty().append('<option value="">Select a State</option>');
+    if (!countryId || !statesUrl) return;
+    console.log("state",selectedStateId)
+    try {
+        const resp = await $.getJSON(statesUrl, { country_id: countryId });
+
+        // ادعم أشكال متعددة للـpayload
+        const items =
+            Array.isArray(resp) ? resp :
+                Array.isArray(resp?.data) ? resp.data :
+                    Array.isArray(resp?.states) ? resp.states :
+                        [];
+
+        if (!Array.isArray(items)) {
+            console.error("Unexpected states payload:", resp);
+            return;
+        }
+
+        items.forEach((s) => {
+            // استخدم s.id و s.name (مش s.data.id)
+            $state.append(`<option value="${s.id}">${s.name}</option>`);
+        });
+
+
+        if (selectedStateId) {
+            $state.val(String(selectedStateId)).trigger("change");
+        }
+    } catch (err) {
+        console.error("Failed to load states", err);
+    }
+}
 
 $(document).ready(function () {
 // Helper: parse days سواء JSON أو CSV أو Array
@@ -197,41 +232,6 @@ $(document).ready(function () {
             return Object.values(val).map(String);
         }
         return [];
-    }
-    async function loadStates(countryId, selectedStateId = "") {
-        const statesUrl = $("#state-url").data("url");
-        const $state = $("#editState");
-
-        $state.empty().append('<option value="">Select a State</option>');
-        if (!countryId || !statesUrl) return;
-        console.log("state",selectedStateId)
-        try {
-            const resp = await $.getJSON(statesUrl, { country_id: countryId });
-
-            // ادعم أشكال متعددة للـpayload
-            const items =
-                Array.isArray(resp) ? resp :
-                    Array.isArray(resp?.data) ? resp.data :
-                        Array.isArray(resp?.states) ? resp.states :
-                            [];
-
-            if (!Array.isArray(items)) {
-                console.error("Unexpected states payload:", resp);
-                return;
-            }
-
-            items.forEach((s) => {
-                // استخدم s.id و s.name (مش s.data.id)
-                $state.append(`<option value="${s.id}">${s.name}</option>`);
-            });
-
-
-            if (selectedStateId) {
-                $state.val(String(selectedStateId)).trigger("change");
-            }
-        } catch (err) {
-            console.error("Failed to load states", err);
-        }
     }
 
 
@@ -282,6 +282,7 @@ $(document).ready(function () {
         const statesUrl = $("#editState").data('url'); // route('states')
 
         if (countryId && statesUrl) {
+            console.log(stateId)
             loadStates(countryId,stateId)
         }
 
