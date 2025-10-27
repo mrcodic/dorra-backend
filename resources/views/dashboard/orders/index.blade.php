@@ -306,11 +306,11 @@
                 <table class="order-list-table table">
                     <thead class="table-light">
                         <tr>
-                            @can('orders_delete')
+
                             <th>
-                                <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                                <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('orders_delete'))>
                             </th>
-                            @endcan
+
                             <th>Order Number</th>
                             <th>Customer</th>
                             <th>Items</th>
