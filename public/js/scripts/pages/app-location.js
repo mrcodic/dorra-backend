@@ -220,20 +220,35 @@ async function loadStates(countryId, selectedStateId = "") {
 
 $(document).ready(function () {
 // Helper: parse days سواء JSON أو CSV أو Array
-    function parseDaysAttr(val) {
-        if (Array.isArray(val)) return val.map(String);
-        if (typeof val === 'string') {
-            const trimmed = val.trim();
-            if (trimmed.startsWith('[')) {
-                try { return JSON.parse(trimmed).map(String); } catch(e) {}
+    function parseDaysAttr(raw) {
+        if (Array.isArray(raw)) return raw.map(String);
+
+        if (typeof raw === "string") {
+            const s = raw.trim();
+            // جرّب JSON أولًا
+            if ((s.startsWith("[") && s.endsWith("]")) || (s.startsWith('["') && s.endsWith('"]'))) {
+                try {
+                    const j = JSON.parse(s);
+                    if (Array.isArray(j)) return j.map(String);
+                } catch (e) { /* ignore */ }
             }
-            return trimmed.split(',').map(s => s.trim()).filter(Boolean);
+            // fallback: CSV
+            return s
+                .split(/[,\s]+/)        // يفصل بفواصل أو مسافات
+                .map(v => v.trim())
+                .filter(Boolean);
         }
-        if (val && typeof val === 'object') {
-            return Object.values(val).map(String);
+
+        // بعض الأحيان jQuery.data بيرجع object {0:"MONDAY",1:"TUESDAY",...}
+        if (raw && typeof raw === "object") {
+            try {
+                return Object.values(raw).map(String);
+            } catch { /* ignore */ }
         }
+
         return [];
     }
+
 
 
     $(document).on("click", ".edit-details", async function (e) {
@@ -250,23 +265,21 @@ $(document).ready(function () {
         const days        = parseDaysAttr(daysRaw);
         const avail       = $btn.data('available-time') || '';
         console.log(days, daysRaw)
-        // 1) نظّف قيم سابقة
+
         $("#editLocationForm")[0].reset();
         $("#editDays").val(null).trigger('change');
         $("#editCountry").val('').trigger('change');
         $("#editState").empty().append('<option value="">Select a State</option>').val('').trigger('change');
 
-        // 2) عبّي الحقول النصية
+
         $("#editLocationName").val(name);
         $("#editAddressLine").val(address);
         $("#editAddressLink").val(addressLink);
 
-        // 3) عبّي الأيام (Select2 متعدد)
-        // قيم الخيارات لازم تطابق values بـ DayEnum::cases() -> name
-        // لو إنت بتخزن أرقام 1..7، تأكد options قيمتها أرقام/سترج متوافقة
-        $("#editDays").val(daysRaw).trigger('change'); // Select2 هيتعامل
 
-        // 4) الوقت المتاح: لو مخزّن "HH:MM - HH:MM" قصّه
+        $("#editDays").val(daysRaw).trigger('change');
+
+
         if (avail.includes('-')) {
             const [start, end] = avail.split('-').map(s => s.trim());
             $("#edit_start_time").val(start);
@@ -276,21 +289,20 @@ $(document).ready(function () {
             $("#edit_available_time").val(avail);
         }
 
-        // 5) الدولة → حمّل الولايات → اختَر الولاية
+
         $("#editCountry").val(countryId).trigger('change');
 
-        // لو عندك endpoint لجلب الولايات حسب الدولة:
-        const statesUrl = $("#editState").data('url'); // route('states')
+
+        const statesUrl = $("#editState").data('url');
 
         if (countryId && statesUrl) {
             loadStates(countryId,stateId)
         }
 
-        // 6) الفورم أكشن
+
         $('#editLocationForm').attr('action', `locations/${locationId}`);
     });
 
-// اجمع available_time من حقول time قبل الإرسال
     $("#edit_start_time, #edit_end_time").on('change', function () {
         const s = $("#edit_start_time").val();
         const e = $("#edit_end_time").val();
