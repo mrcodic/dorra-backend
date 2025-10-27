@@ -38,6 +38,12 @@ class LibraryAssetController extends Controller
    }
 
 
+    use Enshrined\SvgSanitizer\Sanitizer;
+    use Illuminate\Http\Request;
+    use Illuminate\Http\UploadedFile;
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+
     public function store(Request $request)
     {
         $request->validate([
@@ -50,46 +56,54 @@ class LibraryAssetController extends Controller
 
         $file = $request->file('file');
         $mime = $file->getMimeType();
-        $model = \App\Models\Admin::find(1) ?? \App\Models\Admin::find(7); // حسب منطقك
+        $model = \App\Models\Admin::find(1) ?? \App\Models\Admin::find(7);
 
         if ($mime === 'image/svg+xml') {
-            // 1) عقّم SVG
-            $original = file_get_contents($file->getRealPath()) ?: '';
-            $sanitizer = new Sanitizer();
-            $clean = $sanitizer->sanitize($original) ?? '';
+            // 1) sanitize
+            $original   = file_get_contents($file->getRealPath()) ?: '';
+            $sanitizer  = new Sanitizer();
+            $clean      = $sanitizer->sanitize($original) ?? '';
 
             if (! str_contains(strtolower($clean), '<svg')) {
                 return response()->json(['message' => 'الملف بعد التعقيم لم يعد SVG صالحاً.'], 422);
             }
 
-            // 2) اكتب إلى ملف مؤقت داخل storage/app/tmp
-            $tmpDir = 'tmp/svg';
-            $filename = Str::uuid().'.svg';
-            $relativePath = $tmpDir.'/'.$filename;                 // داخل storage/app
-            Storage::put($relativePath, $clean);
+            // 2) اكتب على disk local (وليس الافتراضي)
+            $tmpDir       = 'tmp/svg';
+            Storage::disk('local')->makeDirectory($tmpDir);
+            $filename     = Str::uuid().'.svg';
+            $relativePath = $tmpDir.'/'.$filename;
 
-            $absolutePath = storage_path('app/'.$relativePath);
+            // مهم: disk local
+            Storage::disk('local')->put($relativePath, $clean);
 
-            // 3) لفّه كـ UploadedFile علشان أي هيلبر عندك يتعامل معاه بسهولة
-            $uploaded = new UploadedFile(
-                $absolutePath,
-                $filename,
-                'image/svg+xml',
-                null,
-                true // test mode: يمنع move_uploaded_file errors
-            );
+            // 3) هات absolute path الصحيح من نفس الـdisk
+            $absolutePath = Storage::disk('local')->path($relativePath);
 
-            // 4) استخدم نفس الهيلبر بتاعك (لو بيقبل UploadedFile)
-            $media = handleMediaUploads($uploaded, $model, 'web_assets');
+            try {
+                // لو عندك هيلبرك
+                // لفّه كـ UploadedFile (المسار لازم يكون موجود فعلاً)
+                $uploaded = new UploadedFile(
+                    $absolutePath,
+                    $filename,
+                    'image/svg+xml',
+                    null,
+                    true // test mode
+                );
 
-            // 5) نظّف الملف المؤقت
-            Storage::delete($relativePath);
+                $media = handleMediaUploads($uploaded, $model, 'web_assets');
+
+            } finally {
+                // 4) احذف المؤقت بعد المحاولة (حتى لو فشلت)
+                Storage::disk('local')->delete($relativePath);
+            }
         } else {
-            // صور عادية: سلّم الملف زي ما هو
+            // صور عادية
             $media = handleMediaUploads($file, $model, 'web_assets');
         }
 
         return Response::api(data: \App\Http\Resources\MediaResource::make($media)->response()->getData(true));
     }
+
 
 }
