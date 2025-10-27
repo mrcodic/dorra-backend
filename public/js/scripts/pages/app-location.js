@@ -277,7 +277,7 @@ $(document).ready(function () {
         $("#editAddressLink").val(addressLink);
 
 
-        $("#editDays").val(daysRaw).trigger('change');
+        $("#editDays").val(days).trigger('change');
 
 
         if (avail.includes('-')) {
