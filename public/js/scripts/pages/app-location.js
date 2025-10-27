@@ -183,8 +183,9 @@ dt_user_table.on("draw", function () {
 });
 async function loadStates(countryId, selectedStateId = "") {
 
-    const statesUrl = $("#state-url").data("url");
     const $state = $("#editState");
+    const statesUrl =$state.data("url");
+
     console.log(selectedStateId,countryId,statesUrl)
     $state.empty().append('<option value="">Select a State</option>');
     if (!countryId || !statesUrl) return;
