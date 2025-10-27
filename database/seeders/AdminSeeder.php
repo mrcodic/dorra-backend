@@ -4,9 +4,9 @@ namespace Database\Seeders;
 
 use App\Enums\Admin\PermissionEnum;
 use App\Models\Admin;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
+
 
 class AdminSeeder extends Seeder
 {
@@ -32,7 +32,7 @@ class AdminSeeder extends Seeder
                'guard_name' => 'web',
             ]);
         $admin->assignRole($role->id);
-        
+
         $role->syncPermissions(PermissionEnum::values());
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
