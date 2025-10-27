@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shared;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MediaResource;
 use App\Models\Admin;
+use enshrined\svgSanitize\Sanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
@@ -46,7 +47,16 @@ class LibraryAssetController extends Controller
 //                'not_regex:/\.svgz(\.|$)/i',
 //            ]),
             ]]);
-        $media = handleMediaUploads($request->file('file'),Admin::find(1) ?? Admin::find(7),"web_assets");
+        $file = $request->file('file');
+        $original = file_get_contents($file->getRealPath()) ?: '';
+
+        // شغّل السانيتيزر (بيشيل سكريبتات وروابط خارجية..إلخ)
+        $sanitizer = new Sanitizer();
+        // (اختياري) تقدر تعدّل allowlist:
+        // $sanitizer->minify(true); // يقلل الحجم بدون ما يبوّظ المحتوى
+
+        $clean = $sanitizer->sanitize($original) ?? '';
+        $media = handleMediaUploads($clean,Admin::find(1) ?? Admin::find(7),"web_assets");
 //        $media = handleMediaUploads($request->file('file'),auth($this->activeGuard)->user(),"{$this->activeGuard}_assets");
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
 
