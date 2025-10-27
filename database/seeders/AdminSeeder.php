@@ -24,7 +24,7 @@ class AdminSeeder extends Seeder
             'status' => 1,
         ]);
         $role = Role::query()->firstOrCreate([
-                'name' => 'super admin',
+                'name' => json_encode('super admin'),
                'guard_name' => 'web',
             ]);
         $role->syncPermissions(PermissionEnum::values());
