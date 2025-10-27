@@ -261,7 +261,7 @@ $(document).ready(function () {
         const stateId     = String($btn.data('state-id') || '');
         console.log(stateId)
         const countryId   = String($btn.data('country-id') || '');
-        // const daysRaw     = $btn.data('days');
+        const daysRaw     = $btn.data('days');
         // const days        = parseDaysAttr(daysRaw);
         const avail       = $btn.data('available-time') || '';
         console.log(days, daysRaw)
