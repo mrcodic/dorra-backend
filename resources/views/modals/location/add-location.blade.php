@@ -129,7 +129,7 @@
                     method: "GET",
                     data: { "filter[country_id]": countryId },
                     success: function (response) {
-                        // stateSelect.empty().append('<option value="">Select State</option>');
+                        stateSelect.empty().append('<option value="">Select State</option>');
                         $.each(response.data, function (index, state) {
                             stateSelect.append(`<option value="${state.id}">${state.name}</option>`);
                         });
