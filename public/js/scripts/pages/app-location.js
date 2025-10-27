@@ -217,37 +217,41 @@ async function loadStates(countryId, selectedStateId = "") {
         console.error("Failed to load states", err);
     }
 }
+function safeParseDays(raw) {
+    // 1) null/undefined → []
+    if (raw == null) return [];
+
+    // 2) لو جاي Array بالفعل
+    if (Array.isArray(raw)) return raw;
+
+    // 3) لو جاي object زي {0:"2",1:"3"} من jQuery.data
+    if (typeof raw === 'object') {
+        try { return Object.values(raw); } catch { return []; }
+    }
+
+    // 4) سترينج
+    if (typeof raw === 'string') {
+        const s = raw.trim();
+        // محاولة JSON أولاً: "[2]" / "[\"MONDAY\"]"
+        if (s.startsWith('[') && s.endsWith(']')) {
+            try {
+                const j = JSON.parse(s);
+                return Array.isArray(j) ? j : [];
+            } catch {
+                // لو بايظ نكمّل
+            }
+        }
+        // fallback: CSV "2,3" أو "MONDAY,TUESDAY"
+        return s.split(/[,|\s]+/).map(v => v.trim()).filter(Boolean);
+    }
+
+    // 5) رقم/قيمة مفردة
+    return [raw];
+}
 
 $(document).ready(function () {
 // Helper: parse days سواء JSON أو CSV أو Array
-    function parseDaysAttr(raw) {
-        if (Array.isArray(raw)) return raw.map(String);
 
-        if (typeof raw === "string") {
-            const s = raw.trim();
-            // جرّب JSON أولًا
-            if ((s.startsWith("[") && s.endsWith("]")) || (s.startsWith('["') && s.endsWith('"]'))) {
-                try {
-                    const j = JSON.parse(s);
-                    if (Array.isArray(j)) return j.map(String);
-                } catch (e) { /* ignore */ }
-            }
-            // fallback: CSV
-            return s
-                .split(/[,\s]+/)        // يفصل بفواصل أو مسافات
-                .map(v => v.trim())
-                .filter(Boolean);
-        }
-
-        // بعض الأحيان jQuery.data بيرجع object {0:"MONDAY",1:"TUESDAY",...}
-        if (raw && typeof raw === "object") {
-            try {
-                return Object.values(raw).map(String);
-            } catch { /* ignore */ }
-        }
-
-        return [];
-    }
 
 
 
@@ -276,9 +280,9 @@ $(document).ready(function () {
         $("#editAddressLine").val(address);
         $("#editAddressLink").val(addressLink);
 
-
-        const days = JSON.parse(daysRaw || "[]"); // مثال: "[2]" -> [2]
-        $("#editDays").val(days.map(String)).trigger("change"); // Select2 عايز سترينج
+        const days = safeParseDays(daysRaw);        // مثال: "[2]" → [2]
+        const daysStr = days.map(String);           // Select2 عايز strings
+        $("#editDays").val(daysStr).trigger("change");
 
 
 
