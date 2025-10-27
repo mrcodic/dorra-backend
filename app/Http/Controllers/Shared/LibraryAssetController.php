@@ -7,7 +7,10 @@ use App\Http\Resources\MediaResource;
 use App\Models\Admin;
 use enshrined\svgSanitize\Sanitizer;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -34,31 +37,59 @@ class LibraryAssetController extends Controller
        return Response::api(data: MediaResource::collection($media)->response()->getData(true));
    }
 
+
     public function store(Request $request)
     {
-        $request->validate(['file' => ['required','file',
-            'mimetypes:image/jpeg,image/png,image/svg+xml',
-            'mimes:jpg,jpeg,png,svg',
-//            Rule::when(function () use ($request){
-//                $f = $request->file('file');
-//                return $f && $f->getMimeType() === 'image/svg+xml';
-//            }, [
-//                'regex:/\.svg$/i',
-//                'not_regex:/\.svgz(\.|$)/i',
-//            ]),
-            ]]);
+        $request->validate([
+            'file' => [
+                'required','file','max:4096',
+                'mimetypes:image/jpeg,image/png,image/svg+xml',
+                'mimes:jpg,jpeg,png,svg',
+            ],
+        ]);
+
         $file = $request->file('file');
-        $original = file_get_contents($file->getRealPath()) ?: '';
+        $mime = $file->getMimeType();
+        $model = \App\Models\Admin::find(1) ?? \App\Models\Admin::find(7); // حسب منطقك
 
-        // شغّل السانيتيزر (بيشيل سكريبتات وروابط خارجية..إلخ)
-        $sanitizer = new Sanitizer();
-        // (اختياري) تقدر تعدّل allowlist:
-        // $sanitizer->minify(true); // يقلل الحجم بدون ما يبوّظ المحتوى
+        if ($mime === 'image/svg+xml') {
+            // 1) عقّم SVG
+            $original = file_get_contents($file->getRealPath()) ?: '';
+            $sanitizer = new Sanitizer();
+            $clean = $sanitizer->sanitize($original) ?? '';
 
-        $clean = $sanitizer->sanitize($original) ?? '';
-        $media = handleMediaUploads($clean,Admin::find(1) ?? Admin::find(7),"web_assets");
-//        $media = handleMediaUploads($request->file('file'),auth($this->activeGuard)->user(),"{$this->activeGuard}_assets");
-        return Response::api(data: MediaResource::make($media)->response()->getData(true));
+            if (! str_contains(strtolower($clean), '<svg')) {
+                return response()->json(['message' => 'الملف بعد التعقيم لم يعد SVG صالحاً.'], 422);
+            }
 
-   }
+            // 2) اكتب إلى ملف مؤقت داخل storage/app/tmp
+            $tmpDir = 'tmp/svg';
+            $filename = Str::uuid().'.svg';
+            $relativePath = $tmpDir.'/'.$filename;                 // داخل storage/app
+            Storage::put($relativePath, $clean);
+
+            $absolutePath = storage_path('app/'.$relativePath);
+
+            // 3) لفّه كـ UploadedFile علشان أي هيلبر عندك يتعامل معاه بسهولة
+            $uploaded = new UploadedFile(
+                $absolutePath,
+                $filename,
+                'image/svg+xml',
+                null,
+                true // test mode: يمنع move_uploaded_file errors
+            );
+
+            // 4) استخدم نفس الهيلبر بتاعك (لو بيقبل UploadedFile)
+            $media = handleMediaUploads($uploaded, $model, 'web_assets');
+
+            // 5) نظّف الملف المؤقت
+            Storage::delete($relativePath);
+        } else {
+            // صور عادية: سلّم الملف زي ما هو
+            $media = handleMediaUploads($file, $model, 'web_assets');
+        }
+
+        return Response::api(data: \App\Http\Resources\MediaResource::make($media)->response()->getData(true));
+    }
+
 }
