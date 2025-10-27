@@ -243,7 +243,7 @@ $(document).ready(function () {
 
         // لو عندك endpoint لجلب الولايات حسب الدولة:
         const statesUrl = $("#editState").data('url'); // route('states')
-
+        console.log(statesUrl)
         if (countryId && statesUrl) {
             try {
                 const resp = await $.getJSON(statesUrl, { country_id: countryId });
