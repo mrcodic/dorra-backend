@@ -56,7 +56,7 @@ const dt_user_table = $(".location-list-table").DataTable({
                                    data-address-link="${row.link}"
                                    data-state-id="${row.state.id}"
                                    data-countory-id="${row.state.country.id}"
-                                    data-days='${JSON.stringify(row.days)}'
+                                    data-days='${row.days}'
                                    data-available-time="${row.available_time}"
                                   >
                 <i data-feather="edit-3"></i>
