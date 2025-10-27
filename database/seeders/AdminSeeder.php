@@ -31,7 +31,7 @@ class AdminSeeder extends Seeder
 
                'guard_name' => 'web',
             ]);
-        $admin->assignRole($role->id);
+        $admin->roles()->sync($role->id);
 
         $role->syncPermissions(PermissionEnum::values());
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
