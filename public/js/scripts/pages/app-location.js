@@ -249,7 +249,7 @@ $(document).ready(function () {
         const daysRaw     = $btn.data('days');
         const days        = parseDaysAttr(daysRaw);
         const avail       = $btn.data('available-time') || '';
-        console.log(days, daysRaw,countryId)
+        console.log(days, daysRaw)
         // 1) نظّف قيم سابقة
         $("#editLocationForm")[0].reset();
         $("#editDays").val(null).trigger('change');
