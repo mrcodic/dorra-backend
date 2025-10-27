@@ -31,7 +31,10 @@ class AdminSeeder extends Seeder
 
                'guard_name' => 'web',
             ]);
-        $admin->roles()->sync($role->id);
+        $admin->roles()->sync([
+            $role->id => ['model_type' => $admin->getMorphClass()]
+        ]);
+
 
         $role->syncPermissions(PermissionEnum::values());
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
