@@ -264,7 +264,7 @@ $(document).ready(function () {
         const daysRaw     = $btn.data('days');
         // const days        = parseDaysAttr(daysRaw);
         const avail       = $btn.data('available-time') || '';
-        console.log(days, daysRaw)
+
 
         $("#editLocationForm")[0].reset();
         // $("#editDays").val(null).trigger('change');
