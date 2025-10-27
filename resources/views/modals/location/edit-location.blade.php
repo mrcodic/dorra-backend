@@ -57,7 +57,7 @@
                         <label class="form-label" for="editDays">Select Available Days</label>
                         <select class="select2 form-select" id="editDays" name="days[]" multiple>
                             @foreach(DayEnum::cases() as $day)
-                                <option value="{{ $day->value }}" data-code="{{ $day->value }}">
+                                <option value="{{ $day->name }}" data-code="{{ $day->value }}">
                                     {{ $day->label() }}
                                 </option>
                             @endforeach
