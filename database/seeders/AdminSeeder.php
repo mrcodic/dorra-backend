@@ -24,10 +24,16 @@ class AdminSeeder extends Seeder
             'status' => 1,
         ]);
         $role = Role::query()->firstOrCreate([
-                'name' => json_encode('super admin'),
+            'name' => [
+                'en' => 'Super Admin',
+                'ar' => 'مشرف عام',
+            ],
+
                'guard_name' => 'web',
             ]);
+        $admin->assignRole($role->id);
+        
         $role->syncPermissions(PermissionEnum::values());
-        $admin->assignRole($role);
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }
