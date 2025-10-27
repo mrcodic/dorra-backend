@@ -198,6 +198,7 @@
                               'formId' => "deleteCarouselForm-{$carousel->id}",
                               'title'  => 'Delete Carousel',
                               'action' => route('carousels.remove', $carousel->id),
+                              'class' => 'deleteCarousel',
                             ])
 
                             <div data-repeater-item>
@@ -1140,6 +1141,12 @@
 
     @section('page-script')
             <script>
+                handleAjaxFormSubmit(".deleteCarousel",{
+                    successMessage: "Carousel deleted successfully",
+                    onSuccess: function (){
+                        location.reload()
+                    }
+                })
                 document.addEventListener('DOMContentLoaded', function () {
                     const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test((v||'').trim());
 
