@@ -277,7 +277,7 @@ $(document).ready(function () {
         }
 
         // 5) الدولة → حمّل الولايات → اختَر الولاية
-        $("#editCountry").val(countryId);
+        $("#editCountry").val(countryId).trigger('change');
 
         // لو عندك endpoint لجلب الولايات حسب الدولة:
         const statesUrl = $("#editState").data('url'); // route('states')
