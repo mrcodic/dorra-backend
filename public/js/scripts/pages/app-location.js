@@ -190,7 +190,7 @@ async function loadStates(countryId, selectedStateId = "") {
     if (!countryId || !statesUrl) return;
 
     try {
-        const resp = await $.getJSON(statesUrl, { country_id: countryId });
+        const resp = await $.getJSON(statesUrl, { "filter[country_id]": countryId });
 
         // ادعم أشكال متعددة للـpayload
         const items =
