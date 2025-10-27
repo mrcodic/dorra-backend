@@ -280,9 +280,18 @@ $(document).ready(function () {
         $("#editAddressLine").val(address);
         $("#editAddressLink").val(addressLink);
 
-        const days = safeParseDays(daysRaw);
-        console.log(days)
-        $("#editDays").val(days.map(String)).trigger("change");
+        const daysNums = safeParseDays(daysRaw)          // "[2]" -> [2]
+            .map(Number)
+            .filter(n => !Number.isNaN(n));
+
+        const dayNames = daysNums
+            .map(n => $("#editDays option[data-code='"+ n +"']").val())
+            .filter(Boolean);
+
+// مهم: reset للـselect المتعدد بالطريقة الصح
+        $("#editDays").val([]).trigger("change");
+        $("#editDays").val(dayNames).trigger("change");
+
 
 
 
