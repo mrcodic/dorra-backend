@@ -15,7 +15,7 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-      $admin =  Admin::query()->firstOrCreate([
+      $admin =  Admin::query()->firstOrCreate([ 'email' => 'super@admin.com'],[
             'first_name' =>'super',
             'last_name' => 'admin',
             'email' => 'super@admin.com',
