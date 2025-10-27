@@ -280,9 +280,8 @@ $(document).ready(function () {
         $("#editAddressLine").val(address);
         $("#editAddressLink").val(addressLink);
 
-        const days = safeParseDays(daysRaw);        // مثال: "[2]" → [2]
-        const daysStr = days.map(String);           // Select2 عايز strings
-        $("#editDays").val(daysStr).trigger("change");
+        const days = safeParseDays(daysRaw);
+        $("#editDays").val(days.map(String)).trigger("change");
 
 
 
