@@ -33,10 +33,29 @@ if (!function_exists('handleMediaUploads')) {
             // remove existing media in this collection before uploading new
             $modelData->clearMediaCollection($collectionName);
         }
+        $makeNames = static function ($originalName) {
 
-        $uploaded = collect($files)->map(function ($file) use ($modelData, $collectionName, $customProperties) {
+            $base = pathinfo($originalName, PATHINFO_FILENAME);
+            $ext  = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+
+            $slug = Str::slug($base);
+            if ($slug === '' || $slug === null) {
+                $slug = (string) Str::uuid();
+            }
+
+            $safeFileName = $slug . ($ext ? ".{$ext}" : '');
+            $humanName = $base ?: $slug;
+
+            return [$humanName, $safeFileName, $ext];
+        };
+        $uploaded = collect($files)->map(function ($file) use ($modelData, $collectionName, $customProperties,$makeNames) {
+            [$humanName, $safeFileName, $ext] = $makeNames($file->getClientOriginalName());
             if ($modelData) {
-                $mediaAdder = $modelData->addMedia($file);
+                $mediaAdder = $modelData->addMedia($file)
+                    ->usingName($humanName)
+                ->usingFileName($safeFileName);   
+                ;
                 if (!empty($customProperties)) {
                     $mediaAdder->withCustomProperties($customProperties);
                 }
@@ -50,7 +69,7 @@ if (!function_exists('handleMediaUploads')) {
                 // create media db record first
                 $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::create([
                     'collection_name'       => $collectionName,
-                    'name'                  => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                    'name'                  => $humanName,
                     'file_name'             => $file->getClientOriginalName(),
                     'mime_type'             => $file->getClientMimeType(),
                     'disk'                  => 'public',
