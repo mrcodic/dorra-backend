@@ -63,7 +63,7 @@ class SettingController extends Controller
 
     {
         $validatedData = $request->validated();
-dd($validatedData);
+
         collect($validatedData['carousels'])->each(function ($carouselData) use ($carouselRepository) {
 
             // Create or update carousel
