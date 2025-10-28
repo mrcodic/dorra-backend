@@ -397,7 +397,7 @@ class CategoryService extends BaseService
     {
         $locale = app()->getLocale();
         $categories = $this->repository
-            ->query(['id', 'name', 'parent_id', 'created_at'])
+            ->query(['id', 'name', 'description','parent_id', 'created_at'])
             ->with(['parent'])
             ->withCount(['subCategoryProducts'])
             ->whereNotNull('parent_id')
