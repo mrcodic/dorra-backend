@@ -133,12 +133,8 @@ class TemplateService extends BaseService
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
             $model->types()->sync($validatedData['types']);
-            if (!empty($validatedData['tags'])) {
-                $model->tags()->sync($validatedData['tags']);
-            }
-            if (!empty($validatedData['flags'])) {
-                $model->flags()->sync($validatedData['flags']);
-            }
+            $model->tags()->sync($validatedData['tags'] ?? []);
+            $model->flags()->sync($validatedData['flags'] ?? []);
             return $model->refresh();
         });
 
