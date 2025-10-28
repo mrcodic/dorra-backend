@@ -108,7 +108,7 @@ class SettingController extends Controller
                     ->update([
                         'model_type' => Carousel::class,
                         'model_id' => $carousel->id,
-                        'collection_name' => 'website_ar_carousels',
+                        'collection_name' => 'carousels_ar',
                     ]);
             }
 
@@ -128,7 +128,7 @@ class SettingController extends Controller
                     ->update([
                         'model_type' => Carousel::class,
                         'model_id' => $carousel->id,
-                        'collection_name' => 'mobile_ar_carousels',
+                        'collection_name' => 'mobile_carousels_ar',
                     ]);
             }
         });
