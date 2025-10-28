@@ -95,7 +95,7 @@ class SettingController extends Controller
                     ]);
             }
             if (Arr::get($carouselData, 'website_ar_media_ids')) {
-                $carousel->clearMediaCollection('carousels');
+                $carousel->clearMediaCollection('carousels_ar');
                 Media::whereIn('id', $carouselData['website_ar_media_ids'])
                     ->update([
                         'model_type' => Carousel::class,
