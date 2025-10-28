@@ -536,7 +536,7 @@
                                                     <label class="form-label">Select Product</label>
                                                     <select name="category_id" class="form-select">
                                                         <option  >Select a product</option>
-                                                        @foreach($categories as $category)
+                                                        @foreach($categoriesCarousels as $category)
                                                             <option
                                                                 value="{{ $category->id }}">{{ $category->name }}</option>
                                                         @endforeach

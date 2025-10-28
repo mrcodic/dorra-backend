@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\User\CMS;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CMS\CarouselResource;
 use App\Http\Resources\CMS\LandingReviewResource;
 use App\Http\Resources\FaqResource;
@@ -12,7 +11,6 @@ use App\Models\Carousel;
 use App\Repositories\Interfaces\FaqRepositoryInterface;
 use App\Repositories\Interfaces\LandingReviewRepositoryInterface;
 use App\Services\CategoryService;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
