@@ -395,7 +395,7 @@
                                                 <div class="mb-2">
                                                     <label class="form-label">Select Product</label>
                                                     <select name="product_id" class="form-select">
-                                                        <option disabled selected>Select a product</option>
+                                                        <option disabled>Select a product</option>
                                                         @foreach($categories as $category)
                                                             <option
                                                                 value="{{ $category->id }}">{{ $category->name }}</option>
