@@ -496,7 +496,11 @@
                     window.location.href = '/product-templates';
                 }, 1000);
 
-                console.log('Form inputs updated with new data.');
+                if (response.data.editor_url)
+                {
+                    window.open(response.data.editor_url, '_blank');
+
+                }
             }
         });
 

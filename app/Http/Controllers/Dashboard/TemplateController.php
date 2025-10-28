@@ -107,35 +107,17 @@ class TemplateController extends DashboardController
                 config('services.editor_url') . 'templates/' . $template->id . '?is_clear'
         ]);
     }
-
-
     public function update(Request $request, string $id)
     {
-        // Validate (this will throw a 422 JSON if the client sends Accept: application/json)
-        $rules     = $this->updateRequestClass->rules($id);
+        $rules = $this->updateRequestClass->rules($id);
         $validated = Validator::make($request->all(), $rules)->validate();
-       // Save/update
         $model = $this->service->updateResource($validated, $id);
-
-        // If the caller clicked “Save & Edit”
         if ($request->boolean('go_to_editor')) {
-            $editorUrl = config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1';
-
-            // ✅ For normal form submit: do an HTTP redirect (302 is expected)
-            return redirect($editorUrl);
+            return Response::api(data: ['editor_url' => config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1']);
         }
-
-        // Normal JSON response
-        if ($request->wantsJson() || $request->ajax()) {
             return Response::api(data: $this->resourceClass::make($model));
-        }
 
-        // Or normal web flow (no redirect away)
-        return redirect()
-            ->route('templates.edit', $model->id)
-            ->with('status', 'Saved!');
     }
-
 
     public function updateEditorData(UpdateTemplateEditorRequest $request, $id)
     {
