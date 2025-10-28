@@ -191,10 +191,6 @@
                         @forelse($carousels as $carousel)
                             @php
                                 $modalId = "deleteCarouselModal-{$carousel->id}";
-                                $websiteEnUrl = $carousel->getFirstMediaUrl('carousels');
-                                $websiteArUrl = $carousel->getFirstMediaUrl('carousels_ar');
-                                $mobileEnUrl  = $carousel->getFirstMediaUrl('mobile_carousels');
-                                $mobileArUrl  = $carousel->getFirstMediaUrl('mobile_carousels_ar');
                             @endphp
 
                             @include('modals.delete', [
@@ -202,173 +198,334 @@
                               'formId' => "deleteCarouselForm-{$carousel->id}",
                               'title'  => 'Delete Carousel',
                               'action' => route('carousels.remove', $carousel->id),
-                              'class'  => 'deleteCarousel',
+                              'class' => 'deleteCarousel',
                             ])
 
-                            <div data-repeater-item>
-                                <div class="col-md-12 mb-2">
-                                    <div class="card p-2 mb-4 border rounded shadow-sm">
-                                        <form action="{{ route('carousels.update') }}" method="POST" enctype="multipart/form-data" class="carousel-form">
-                                            @csrf
-                                            @method('PUT')
+                            <div class="invoice-repeater">
+                                <div data-repeater-list="carousels">
+                                    @forelse($carousels as $carousel)
+                                        @php
+                                            $modalId = "deleteCarouselModal-{$carousel->id}";
+                                            $websiteEnUrl = $carousel->getFirstMediaUrl('carousels');
+                                            $websiteArUrl = $carousel->getFirstMediaUrl('carousels_ar');
+                                            $mobileEnUrl  = $carousel->getFirstMediaUrl('mobile_carousels');
+                                            $mobileArUrl  = $carousel->getFirstMediaUrl('mobile_carousels_ar');
+                                        @endphp
 
-                                            {{-- مهم: الـ repeater هيحوّل ده لـ carousels[index][id] --}}
-                                            <input type="hidden" name="id" value="{{ $carousel->id }}">
+                                        @include('modals.delete', [
+                                          'id'     => $modalId,
+                                          'formId' => "deleteCarouselForm-{$carousel->id}",
+                                          'title'  => 'Delete Carousel',
+                                          'action' => route('carousels.remove', $carousel->id),
+                                          'class'  => 'deleteCarousel',
+                                        ])
 
-                                            {{-- هيتم تعبئتها أوتوماتيك من Dropzone --}}
-                                            <div class="website-media-ids"></div>
-                                            <div class="website-ar-media-ids"></div>
-                                            <div class="mobile-media-ids"></div>
-                                            <div class="mobile-ar-media-ids"></div>
+                                        <div data-repeater-item>
+                                            <div class="col-md-12 mb-2">
+                                                <div class="card p-2 mb-4 border rounded shadow-sm">
+                                                    <form action="{{ route('carousels.update') }}" method="POST" enctype="multipart/form-data" class="carousel-form">
+                                                        @csrf
+                                                        @method('PUT')
 
-                                            {{-- Website EN --}}
-                                            <label class="form-label">Website Image (EN)</label>
-                                            <div class="dropzone website-en-dropzone"></div>
-                                            <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
-                                            <div class="upload-wrapper">
-                                                <div class="uploaded-image {{ $websiteEnUrl ? '' : 'd-none' }} mt-2">
-                                                    <img src="{{ $websiteEnUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                </div>
-                                                <div class="progress upload-progress d-none">
-                                                    <div class="progress-bar" style="width:0%"></div>
+                                                        {{-- مهم: الـ repeater هيحوّل ده لـ carousels[index][id] --}}
+                                                        <input type="hidden" name="id" value="{{ $carousel->id }}">
+
+                                                        {{-- هيتم تعبئتها أوتوماتيك من Dropzone --}}
+                                                        <div class="website-media-ids"></div>
+                                                        <div class="website-ar-media-ids"></div>
+                                                        <div class="mobile-media-ids"></div>
+                                                        <div class="mobile-ar-media-ids"></div>
+
+                                                        {{-- Website EN --}}
+                                                        <label class="form-label">Website Image (EN)</label>
+                                                        <div class="dropzone website-en-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                                        <div class="upload-wrapper">
+                                                            <div class="uploaded-image {{ $websiteEnUrl ? '' : 'd-none' }} mt-2">
+                                                                <img src="{{ $websiteEnUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                            </div>
+                                                            <div class="progress upload-progress d-none">
+                                                                <div class="progress-bar" style="width:0%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Website AR --}}
+                                                        <label class="form-label mt-2">Website Image (AR)</label>
+                                                        <div class="dropzone website-ar-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                                        <div class="upload-wrapper">
+                                                            <div class="uploaded-image {{ $websiteArUrl ? '' : 'd-none' }} mt-2">
+                                                                <img src="{{ $websiteArUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                            </div>
+                                                            <div class="progress upload-progress d-none">
+                                                                <div class="progress-bar" style="width:0%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Mobile EN --}}
+                                                        <label class="form-label mt-2">Mobile Image (EN)</label>
+                                                        <div class="dropzone mobile-en-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+                                                        <div class="upload-wrapper">
+                                                            <div class="uploaded-image {{ $mobileEnUrl ? '' : 'd-none' }} mt-2">
+                                                                <img src="{{ $mobileEnUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                            </div>
+                                                            <div class="progress upload-progress d-none">
+                                                                <div class="progress-bar" style="width:0%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Mobile AR --}}
+                                                        <label class="form-label mt-2">Mobile Image (AR)</label>
+                                                        <div class="dropzone mobile-ar-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+                                                        <div class="upload-wrapper">
+                                                            <div class="uploaded-image {{ $mobileArUrl ? '' : 'd-none' }} mt-2">
+                                                                <img src="{{ $mobileArUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                            </div>
+                                                            <div class="progress upload-progress d-none">
+                                                                <div class="progress-bar" style="width:0%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- العناوين --}}
+                                                        <div class="row mb-3 mt-4">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Title in English</label>
+                                                                <input type="text" name="title_en" class="form-control" value="{{ $carousel->getTranslation('title','en') }}">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Title in Arabic</label>
+                                                                <input type="text" name="title_ar" class="form-control" value="{{ $carousel->getTranslation('title','ar') }}">
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Subtitles --}}
+                                                        <div class="row mb-2">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Subtitle in English</label>
+                                                                <input type="text" name="subtitle_en" class="form-control" value="{{ $carousel->getTranslation('subtitle','en') }}">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Subtitle in Arabic</label>
+                                                                <input type="text" name="subtitle_ar" class="form-control" value="{{ $carousel->getTranslation('subtitle','ar') }}">
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Colors --}}
+                                                        <div class="row mb-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Title Color</label>
+                                                                <div class="d-flex align-items-center gap-1">
+                                                                    <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;"
+                                                                           value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
+                                                                    <input type="text" class="form-control title-color-hex" placeholder="#101010"
+                                                                           value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Subtitle Color</label>
+                                                                <div class="d-flex align-items-center gap-1">
+                                                                    <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;"
+                                                                           value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
+                                                                    <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b"
+                                                                           value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Preview EN --}}
+                                                        <div class="border rounded p-2 mb-3">
+                                                            <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
+                                                                {{ $carousel->getTranslation('title','en') }}
+                                                            </div>
+                                                            <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
+                                                                {{ $carousel->getTranslation('subtitle','en') }}
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Preview AR --}}
+                                                        <div class="border rounded p-2 mb-3" dir="rtl">
+                                                            <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
+                                                                {{ $carousel->getTranslation('title', 'ar') }}
+                                                            </div>
+                                                            <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
+                                                                {{ $carousel->getTranslation('subtitle', 'ar') }}
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Product --}}
+                                                        <div class="mb-2">
+                                                            <label class="form-label">Select Product</label>
+                                                            <select name="product_id" class="form-select">
+                                                                <option disabled>Select a product</option>
+                                                                @foreach($products as $product)
+                                                                    <option value="{{ $product->id }}" {{ $carousel->product_id == $product->id ? 'selected' : '' }}>
+                                                                        {{ $product->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        {{-- Actions --}}
+                                                        <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
+                                                            <button type="button" class="btn btn-outline-danger open-delete-carousel-modal"
+                                                                    data-bs-toggle="modal" data-bs-target="#{{ $modalId }}">
+                                                                <i data-feather="x" class="me-1"></i> Delete
+                                                            </button>
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i data-feather="save" class="me-1"></i> Save Changes
+                                                            </button>
+                                                        </div>
+
+                                                    </form>
                                                 </div>
                                             </div>
+                                        </div>
+                                    @empty
+                                        {{-- عنصر فاضي لما مفيش داتا --}}
+                                        <div data-repeater-item>
+                                            <div class="col-md-12 mb-2">
+                                                <div class="card p-2 mb-4 border rounded shadow-sm">
+                                                    <form action="{{ route('carousels.update') }}" method="POST" enctype="multipart/form-data" class="carousel-form">
+                                                        @csrf
+                                                        @method('PUT')
 
-                                            {{-- Website AR --}}
-                                            <label class="form-label mt-2">Website Image (AR)</label>
-                                            <div class="dropzone website-ar-dropzone"></div>
-                                            <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
-                                            <div class="upload-wrapper">
-                                                <div class="uploaded-image {{ $websiteArUrl ? '' : 'd-none' }} mt-2">
-                                                    <img src="{{ $websiteArUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                </div>
-                                                <div class="progress upload-progress d-none">
-                                                    <div class="progress-bar" style="width:0%"></div>
+                                                        <input type="hidden" name="id" value="">
+                                                        <div class="website-media-ids"></div>
+                                                        <div class="website-ar-media-ids"></div>
+                                                        <div class="mobile-media-ids"></div>
+                                                        <div class="mobile-ar-media-ids"></div>
+
+                                                        <label class="form-label">Website Image (EN)</label>
+                                                        <div class="dropzone website-en-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                                        <div class="upload-wrapper">
+                                                            <div class="uploaded-image d-none mt-2">
+                                                                <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                            </div>
+                                                            <div class="progress upload-progress d-none">
+                                                                <div class="progress-bar" style="width:0%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <label class="form-label mt-1">Website Image (AR)</label>
+                                                        <div class="dropzone website-ar-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                                        <div class="upload-wrapper">
+                                                            <div class="uploaded-image d-none mt-2">
+                                                                <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                            </div>
+                                                            <div class="progress upload-progress d-none">
+                                                                <div class="progress-bar" style="width:0%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <label class="form-label mt-3">Mobile Image (EN)</label>
+                                                        <div class="dropzone mobile-en-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+                                                        <div class="upload-wrapper">
+                                                            <div class="uploaded-image d-none mt-2">
+                                                                <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                            </div>
+                                                            <div class="progress upload-progress d-none">
+                                                                <div class="progress-bar" style="width:0%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <label class="form-label mt-1">Mobile Image (AR)</label>
+                                                        <div class="dropzone mobile-ar-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+                                                        <div class="upload-wrapper">
+                                                            <div class="uploaded-image d-none mt-2">
+                                                                <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                            </div>
+                                                            <div class="progress upload-progress d-none">
+                                                                <div class="progress-bar" style="width:0%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- باقي الحقول (title/subtitle/colors/product)... زي فوق --}}
+                                                        <div class="row mb-3 mt-4">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Title in English</label>
+                                                                <input type="text" name="title_en" class="form-control">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Title in Arabic</label>
+                                                                <input type="text" name="title_ar" class="form-control">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row mb-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Subtitle in English</label>
+                                                                <input type="text" name="subtitle_en" class="form-control">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Subtitle in Arabic</label>
+                                                                <input type="text" name="subtitle_ar" class="form-control">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row mb-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Title Color</label>
+                                                                <div class="d-flex align-items-center gap-1">
+                                                                    <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;" value="#101010">
+                                                                    <input type="text" class="form-control title-color-hex" placeholder="#101010" value="#101010">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">Subtitle Color</label>
+                                                                <div class="d-flex align-items-center gap-1">
+                                                                    <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;" value="#5b5b5b">
+                                                                    <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b" value="#5b5b5b">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="border rounded p-2 mb-3">
+                                                            <div class="titlePreview fw-bold" style="color:#101010">Title preview</div>
+                                                            <div class="subtitlePreview" style="color:#5b5b5b">Subtitle preview</div>
+                                                        </div>
+
+                                                        <div class="mb-2">
+                                                            <label class="form-label">Select Product</label>
+                                                            <select name="product_id" class="form-select">
+                                                                <option disabled selected>Select a product</option>
+                                                                @foreach($products as $product)
+                                                                    <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
+                                                            <button type="button" data-repeater-delete class="btn btn-outline-danger">
+                                                                <i data-feather="x" class="me-1"></i> Delete
+                                                            </button>
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i data-feather="save" class="me-1"></i> Save Changes
+                                                            </button>
+                                                        </div>
+
+                                                    </form>
                                                 </div>
                                             </div>
+                                        </div>
+                                    @endforelse
+                                </div>
 
-                                            {{-- Mobile EN --}}
-                                            <label class="form-label mt-2">Mobile Image (EN)</label>
-                                            <div class="dropzone mobile-en-dropzone"></div>
-                                            <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
-                                            <div class="upload-wrapper">
-                                                <div class="uploaded-image {{ $mobileEnUrl ? '' : 'd-none' }} mt-2">
-                                                    <img src="{{ $mobileEnUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                </div>
-                                                <div class="progress upload-progress d-none">
-                                                    <div class="progress-bar" style="width:0%"></div>
-                                                </div>
-                                            </div>
-
-                                            {{-- Mobile AR --}}
-                                            <label class="form-label mt-2">Mobile Image (AR)</label>
-                                            <div class="dropzone mobile-ar-dropzone"></div>
-                                            <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
-                                            <div class="upload-wrapper">
-                                                <div class="uploaded-image {{ $mobileArUrl ? '' : 'd-none' }} mt-2">
-                                                    <img src="{{ $mobileArUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                </div>
-                                                <div class="progress upload-progress d-none">
-                                                    <div class="progress-bar" style="width:0%"></div>
-                                                </div>
-                                            </div>
-
-                                            {{-- العناوين --}}
-                                            <div class="row mb-3 mt-4">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Title in English</label>
-                                                    <input type="text" name="title_en" class="form-control" value="{{ $carousel->getTranslation('title','en') }}">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Title in Arabic</label>
-                                                    <input type="text" name="title_ar" class="form-control" value="{{ $carousel->getTranslation('title','ar') }}">
-                                                </div>
-                                            </div>
-
-                                            {{-- Subtitles --}}
-                                            <div class="row mb-2">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Subtitle in English</label>
-                                                    <input type="text" name="subtitle_en" class="form-control" value="{{ $carousel->getTranslation('subtitle','en') }}">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Subtitle in Arabic</label>
-                                                    <input type="text" name="subtitle_ar" class="form-control" value="{{ $carousel->getTranslation('subtitle','ar') }}">
-                                                </div>
-                                            </div>
-
-                                            {{-- Colors --}}
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Title Color</label>
-                                                    <div class="d-flex align-items-center gap-1">
-                                                        <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;"
-                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
-                                                        <input type="text" class="form-control title-color-hex" placeholder="#101010"
-                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Subtitle Color</label>
-                                                    <div class="d-flex align-items-center gap-1">
-                                                        <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;"
-                                                               value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
-                                                        <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b"
-                                                               value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {{-- Preview EN --}}
-                                            <div class="border rounded p-2 mb-3">
-                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
-                                                    {{ $carousel->getTranslation('title','en') }}
-                                                </div>
-                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
-                                                    {{ $carousel->getTranslation('subtitle','en') }}
-                                                </div>
-                                            </div>
-
-                                            {{-- Preview AR --}}
-                                            <div class="border rounded p-2 mb-3" dir="rtl">
-                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
-                                                    {{ $carousel->getTranslation('title', 'ar') }}
-                                                </div>
-                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
-                                                    {{ $carousel->getTranslation('subtitle', 'ar') }}
-                                                </div>
-                                            </div>
-
-                                            {{-- Product --}}
-                                            <div class="mb-2">
-                                                <label class="form-label">Select Product</label>
-                                                <select name="product_id" class="form-select">
-                                                    <option disabled>Select a product</option>
-                                                    @foreach($products as $product)
-                                                        <option value="{{ $product.id }}" {{ $carousel->product_id == $product->id ? 'selected' : '' }}>
-                                                            {{ $product->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-
-                                            {{-- Actions --}}
-                                            <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
-                                                <button type="button" class="btn btn-outline-danger open-delete-carousel-modal"
-                                                        data-bs-toggle="modal" data-bs-target="#{{ $modalId }}">
-                                                    <i data-feather="x" class="me-1"></i> Delete
-                                                </button>
-                                                <button type="submit" class="btn btn-primary">
-                                                    <i data-feather="save" class="me-1"></i> Save Changes
-                                                </button>
-                                            </div>
-
-                                        </form>
-                                    </div>
+                                {{-- زر إضافة عنصر --}}
+                                <div class="text-start d-flex justify-content-end mb-2">
+                                    <button type="button" data-repeater-create class="btn btn-primary">
+                                        <i data-feather="plus"></i> Add Carousel
+                                    </button>
                                 </div>
                             </div>
+
                         @empty
-                            {{-- عنصر فاضي لما مفيش داتا --}}
+                            {{-- one blank repeater item when empty --}}
                             <div data-repeater-item>
                                 <div class="col-md-12 mb-2">
                                     <div class="card p-2 mb-4 border rounded shadow-sm">
@@ -376,14 +533,13 @@
                                             @csrf
                                             @method('PUT')
 
+                                            {{-- IDs & media holders --}}
                                             <input type="hidden" name="id" value="">
                                             <div class="website-media-ids"></div>
-                                            <div class="website-ar-media-ids"></div>
                                             <div class="mobile-media-ids"></div>
-                                            <div class="mobile-ar-media-ids"></div>
 
-                                            <label class="form-label">Website Image (EN)</label>
-                                            <div class="dropzone website-en-dropzone"></div>
+                                            <label class="form-label">Website Image En</label>
+                                            <div class="dropzone website-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
                                             <div class="upload-wrapper">
                                                 <div class="uploaded-image d-none mt-2">
@@ -393,8 +549,7 @@
                                                     <div class="progress-bar" style="width:0%"></div>
                                                 </div>
                                             </div>
-
-                                            <label class="form-label mt-1">Website Image (AR)</label>
+                                            <label class="form-label">Website Image Ar</label>
                                             <div class="dropzone website-ar-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
                                             <div class="upload-wrapper">
@@ -406,8 +561,8 @@
                                                 </div>
                                             </div>
 
-                                            <label class="form-label mt-3">Mobile Image (EN)</label>
-                                            <div class="dropzone mobile-en-dropzone"></div>
+                                            <label class="form-label mt-3">Mobile Image</label>
+                                            <div class="dropzone mobile-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
                                             <div class="upload-wrapper">
                                                 <div class="uploaded-image d-none mt-2">
@@ -418,19 +573,7 @@
                                                 </div>
                                             </div>
 
-                                            <label class="form-label mt-1">Mobile Image (AR)</label>
-                                            <div class="dropzone mobile-ar-dropzone"></div>
-                                            <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
-                                            <div class="upload-wrapper">
-                                                <div class="uploaded-image d-none mt-2">
-                                                    <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                </div>
-                                                <div class="progress upload-progress d-none">
-                                                    <div class="progress-bar" style="width:0%"></div>
-                                                </div>
-                                            </div>
-
-                                            {{-- باقي الحقول (title/subtitle/colors/product)... زي فوق --}}
+                                            {{-- Titles --}}
                                             <div class="row mb-3 mt-4">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Title in English</label>
@@ -442,6 +585,7 @@
                                                 </div>
                                             </div>
 
+                                            {{-- Subtitles --}}
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Subtitle in English</label>
@@ -453,6 +597,7 @@
                                                 </div>
                                             </div>
 
+                                            {{-- Colors --}}
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Title Color</label>
@@ -475,6 +620,7 @@
                                                 <div class="subtitlePreview" style="color:#5b5b5b">Subtitle preview</div>
                                             </div>
 
+                                            {{-- Product --}}
                                             <div class="mb-2">
                                                 <label class="form-label">Select Product</label>
                                                 <select name="product_id" class="form-select">
@@ -493,7 +639,6 @@
                                                     <i data-feather="save" class="me-1"></i> Save Changes
                                                 </button>
                                             </div>
-
                                         </form>
                                     </div>
                                 </div>
@@ -501,7 +646,110 @@
                         @endforelse
                     </div>
 
-                    {{-- زر إضافة عنصر --}}
+                    {{-- Hidden template for adding new items --}}
+                    <div data-repeater-item style="display:none;">
+                        <div class="col-md-12 mb-2">
+                            <div class="card p-2 mb-4 border rounded shadow-sm">
+                                <form method="POST" action="{{ route('carousels.update') }}" enctype="multipart/form-data" class="carousel-form">
+                                    @csrf
+                                    @method('PUT')
+
+                                    <input type="hidden" name="id" value="">
+                                    <div class="website-media-ids"></div>
+                                    <div class="website-ar-media-ids"></div>
+                                    <div class="mobile-media-ids"></div>
+
+                                    <label class="form-label">Website Image</label>
+                                    <div class="dropzone website-dropzone"></div>
+                                    <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                    <div class="upload-wrapper">
+                                        <div class="uploaded-image d-none mt-2">
+                                            <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                        </div>
+                                        <div class="progress upload-progress d-none">
+                                            <div class="progress-bar" style="width:0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <label class="form-label mt-1">Mobile Image</label>
+                                    <div class="dropzone mobile-dropzone"></div>
+                                    <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+                                    <div class="upload-wrapper">
+                                        <div class="uploaded-image d-none mt-2">
+                                            <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                        </div>
+                                        <div class="progress upload-progress d-none">
+                                            <div class="progress-bar" style="width:0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3 mt-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Title in English</label>
+                                            <input type="text" name="title_en" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Title in Arabic</label>
+                                            <input type="text" name="title_ar" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Subtitle in English</label>
+                                            <input type="text" name="subtitle_en" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Subtitle in Arabic</label>
+                                            <input type="text" name="subtitle_ar" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Title Color</label>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;" value="#101010">
+                                                <input type="text" class="form-control title-color-hex" placeholder="#101010" value="#101010">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Subtitle Color</label>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;" value="#5b5b5b">
+                                                <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b" value="#5b5b5b">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="border rounded p-2 mb-3">
+                                        <div class="titlePreview fw-bold" style="color:#101010">Title preview</div>
+                                        <div class="subtitlePreview" style="color:#5b5b5b">Subtitle preview</div>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <label class="form-label">Select Product</label>
+                                        <select name="product_id" class="form-select">
+                                            <option disabled selected>Select a product</option>
+                                            @foreach($products as $product)
+                                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <button type="button" data-repeater-delete class="btn btn-outline-danger">
+                                            <i data-feather="x" class="me-25"></i> Delete
+                                        </button>
+                                        <button type="submit" class="btn btn-primary save-carousel-btn">
+                                            <i data-feather="save" class="me-25"></i> Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="text-start d-flex justify-content-end mb-2">
                         <button type="button" data-repeater-create class="btn btn-primary">
                             <i data-feather="plus"></i> Add Carousel
