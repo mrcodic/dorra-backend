@@ -33,8 +33,8 @@ class UpdateCarouselRequest extends BaseRequest
             'carousels.*.subtitle_ar' => ['nullable', 'string', 'max:255'],
             'carousels.*.product_id' => [ 'required_without:carousels.*.category_id',
                 'integer', 'exists:products,id'],
-//            'carousels.*.category_id' => [ 'required_without:carousels.*.product_id',
-//                'integer', 'exists:categories,id'],
+            'carousels.*.category_id' => [ 'required_without:carousels.*.product_id',
+                'integer', 'exists:categories,id'],
             'carousels.*.website_media_ids' => ['sometimes','exists:media,id'],
             'carousels.*.website_ar_media_ids' => ['sometimes','exists:media,id',],
             'carousels.*.mobile_media_ids' => ['sometimes','exists:media,id',],
@@ -80,22 +80,22 @@ class UpdateCarouselRequest extends BaseRequest
             'carousels.*.mobile_image.mimes' => 'The mobile image must be a file of type: jpeg, png, jpg, svg.',
         ];
     }
-//    public function withValidator(Validator $validator): void
-//    {
-//        $validator->after(function (Validator $v) {
-//            $rows = (array) $this->input('carousels', []);
-//            foreach ($rows as $i => $row) {
-//                $hasProduct  = !empty($row['product_id']);
-//                $hasCategory = !empty($row['category_id']);
-//
-//                if ($hasProduct && $hasCategory) {
-//                    $v->errors()->add("carousels.$i.product_id",  'Choose either a product OR a category, not both.');
-//                    $v->errors()->add("carousels.$i.category_id", 'Choose either a product OR a category, not both.');
-//                }
-//
-//            }
-//        });
-//    }
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $v) {
+            $rows = (array) $this->input('carousels', []);
+            foreach ($rows as $i => $row) {
+                $hasProduct  = !empty($row['product_id']);
+                $hasCategory = !empty($row['category_id']);
+
+                if ($hasProduct && $hasCategory) {
+                    $v->errors()->add("carousels.$i.product_id",  'Choose either a product OR a category, not both.');
+                    $v->errors()->add("carousels.$i.category_id", 'Choose either a product OR a category, not both.');
+                }
+
+            }
+        });
+    }
 
 
 }
