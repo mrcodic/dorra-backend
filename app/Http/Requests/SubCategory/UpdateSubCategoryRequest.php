@@ -41,7 +41,7 @@ class UpdateSubCategoryRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
-            'image_id' => ['required','exists:media,id'],
+            'sub_image_id' => ['required','exists:media,id'],
             'parent_id' => ['sometimes', 'integer', 'exists:categories,id'],
         ];
     }
