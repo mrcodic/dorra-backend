@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
 <style>
     /* ensure native color control is visible even with global resets */
-    input[type="color"] { appearance:auto; -webkit-appearance:auto; padding:0; }
+    /*input[type="color"] { appearance:auto; -webkit-appearance:auto; padding:0; }*/
 </style>
 
 <!-- SweetAlert2 CSS -->
@@ -213,6 +213,7 @@
 
                                             {{-- will be filled dynamically by your uploader --}}
                                             <div class="website-media-ids"></div>
+                                            <div class="website-ar-media-ids"></div>
                                             <div class="mobile-media-ids"></div>
 
                                             {{-- Website Image Upload --}}
@@ -230,7 +231,7 @@
                                             </div>
 
                                             <label class="form-label">Website Image Ar</label>
-                                            <div class="dropzone website-dropzone"></div>
+                                            <div class="dropzone website-ar-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
                                             <div class="upload-wrapper">
                                                 <div class="uploaded-image d-none mt-2">
@@ -358,6 +359,7 @@
                                             {{-- IDs & media holders --}}
                                             <input type="hidden" name="id" value="">
                                             <div class="website-media-ids"></div>
+                                            <div class="website-ar-media-ids"></div>
                                             <div class="mobile-media-ids"></div>
 
                                             <label class="form-label">Website Image En</label>
