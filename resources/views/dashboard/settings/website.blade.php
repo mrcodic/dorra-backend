@@ -201,329 +201,140 @@
                               'class' => 'deleteCarousel',
                             ])
 
-                            <div class="invoice-repeater">
-                                <div data-repeater-list="carousels">
-                                    @forelse($carousels as $carousel)
-                                        @php
-                                            $modalId = "deleteCarouselModal-{$carousel->id}";
-                                            $websiteEnUrl = $carousel->getFirstMediaUrl('carousels');
-                                            $websiteArUrl = $carousel->getFirstMediaUrl('carousels_ar');
-                                            $mobileEnUrl  = $carousel->getFirstMediaUrl('mobile_carousels');
-                                            $mobileArUrl  = $carousel->getFirstMediaUrl('mobile_carousels_ar');
-                                        @endphp
+                            <div data-repeater-item>
+                                <div class="col-md-12 mb-2">
+                                    <div class="card p-2 mb-4 border rounded shadow-sm">
+                                        <form action="{{ route('carousels.update') }}" method="POST" enctype="multipart/form-data" class="carousel-form">
+                                            @csrf
+                                            @method('PUT')
 
-                                        @include('modals.delete', [
-                                          'id'     => $modalId,
-                                          'formId' => "deleteCarouselForm-{$carousel->id}",
-                                          'title'  => 'Delete Carousel',
-                                          'action' => route('carousels.remove', $carousel->id),
-                                          'class'  => 'deleteCarousel',
-                                        ])
+                                            {{-- IMPORTANT: Repeater will nest this as carousels[index][id] --}}
+                                            <input type="hidden" name="id" value="{{ $carousel->id }}">
 
-                                        <div data-repeater-item>
-                                            <div class="col-md-12 mb-2">
-                                                <div class="card p-2 mb-4 border rounded shadow-sm">
-                                                    <form action="{{ route('carousels.update') }}" method="POST" enctype="multipart/form-data" class="carousel-form">
-                                                        @csrf
-                                                        @method('PUT')
+                                            {{-- will be filled dynamically by your uploader --}}
+                                            <div class="website-media-ids"></div>
+                                            <div class="mobile-media-ids"></div>
 
-                                                        {{-- مهم: الـ repeater هيحوّل ده لـ carousels[index][id] --}}
-                                                        <input type="hidden" name="id" value="{{ $carousel->id }}">
+                                            {{-- Website Image Upload --}}
+                                            <label class="form-label">Website Image</label>
+                                            <div class="dropzone website-dropzone"></div>
+                                            <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
 
-                                                        {{-- هيتم تعبئتها أوتوماتيك من Dropzone --}}
-                                                        <div class="website-media-ids"></div>
-                                                        <div class="website-ar-media-ids"></div>
-                                                        <div class="mobile-media-ids"></div>
-                                                        <div class="mobile-ar-media-ids"></div>
-
-                                                        {{-- Website EN --}}
-                                                        <label class="form-label">Website Image (EN)</label>
-                                                        <div class="dropzone website-en-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
-                                                        <div class="upload-wrapper">
-                                                            <div class="uploaded-image {{ $websiteEnUrl ? '' : 'd-none' }} mt-2">
-                                                                <img src="{{ $websiteEnUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                            </div>
-                                                            <div class="progress upload-progress d-none">
-                                                                <div class="progress-bar" style="width:0%"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- Website AR --}}
-                                                        <label class="form-label mt-2">Website Image (AR)</label>
-                                                        <div class="dropzone website-ar-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
-                                                        <div class="upload-wrapper">
-                                                            <div class="uploaded-image {{ $websiteArUrl ? '' : 'd-none' }} mt-2">
-                                                                <img src="{{ $websiteArUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                            </div>
-                                                            <div class="progress upload-progress d-none">
-                                                                <div class="progress-bar" style="width:0%"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- Mobile EN --}}
-                                                        <label class="form-label mt-2">Mobile Image (EN)</label>
-                                                        <div class="dropzone mobile-en-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
-                                                        <div class="upload-wrapper">
-                                                            <div class="uploaded-image {{ $mobileEnUrl ? '' : 'd-none' }} mt-2">
-                                                                <img src="{{ $mobileEnUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                            </div>
-                                                            <div class="progress upload-progress d-none">
-                                                                <div class="progress-bar" style="width:0%"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- Mobile AR --}}
-                                                        <label class="form-label mt-2">Mobile Image (AR)</label>
-                                                        <div class="dropzone mobile-ar-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
-                                                        <div class="upload-wrapper">
-                                                            <div class="uploaded-image {{ $mobileArUrl ? '' : 'd-none' }} mt-2">
-                                                                <img src="{{ $mobileArUrl }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                            </div>
-                                                            <div class="progress upload-progress d-none">
-                                                                <div class="progress-bar" style="width:0%"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- العناوين --}}
-                                                        <div class="row mb-3 mt-4">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Title in English</label>
-                                                                <input type="text" name="title_en" class="form-control" value="{{ $carousel->getTranslation('title','en') }}">
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Title in Arabic</label>
-                                                                <input type="text" name="title_ar" class="form-control" value="{{ $carousel->getTranslation('title','ar') }}">
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- Subtitles --}}
-                                                        <div class="row mb-2">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Subtitle in English</label>
-                                                                <input type="text" name="subtitle_en" class="form-control" value="{{ $carousel->getTranslation('subtitle','en') }}">
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Subtitle in Arabic</label>
-                                                                <input type="text" name="subtitle_ar" class="form-control" value="{{ $carousel->getTranslation('subtitle','ar') }}">
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- Colors --}}
-                                                        <div class="row mb-3">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Title Color</label>
-                                                                <div class="d-flex align-items-center gap-1">
-                                                                    <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;"
-                                                                           value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
-                                                                    <input type="text" class="form-control title-color-hex" placeholder="#101010"
-                                                                           value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Subtitle Color</label>
-                                                                <div class="d-flex align-items-center gap-1">
-                                                                    <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;"
-                                                                           value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
-                                                                    <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b"
-                                                                           value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- Preview EN --}}
-                                                        <div class="border rounded p-2 mb-3">
-                                                            <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
-                                                                {{ $carousel->getTranslation('title','en') }}
-                                                            </div>
-                                                            <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
-                                                                {{ $carousel->getTranslation('subtitle','en') }}
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- Preview AR --}}
-                                                        <div class="border rounded p-2 mb-3" dir="rtl">
-                                                            <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
-                                                                {{ $carousel->getTranslation('title', 'ar') }}
-                                                            </div>
-                                                            <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
-                                                                {{ $carousel->getTranslation('subtitle', 'ar') }}
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- Product --}}
-                                                        <div class="mb-2">
-                                                            <label class="form-label">Select Product</label>
-                                                            <select name="product_id" class="form-select">
-                                                                <option disabled>Select a product</option>
-                                                                @foreach($products as $product)
-                                                                    <option value="{{ $product->id }}" {{ $carousel->product_id == $product->id ? 'selected' : '' }}>
-                                                                        {{ $product->name }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-
-                                                        {{-- Actions --}}
-                                                        <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
-                                                            <button type="button" class="btn btn-outline-danger open-delete-carousel-modal"
-                                                                    data-bs-toggle="modal" data-bs-target="#{{ $modalId }}">
-                                                                <i data-feather="x" class="me-1"></i> Delete
-                                                            </button>
-                                                            <button type="submit" class="btn btn-primary">
-                                                                <i data-feather="save" class="me-1"></i> Save Changes
-                                                            </button>
-                                                        </div>
-
-                                                    </form>
+                                            <div class="upload-wrapper">
+                                                <div class="uploaded-image {{ $carousel->getFirstMediaUrl('carousels') ? '' : 'd-none' }} mt-2">
+                                                    <img src="{{ $carousel->getFirstMediaUrl('carousels') }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                </div>
+                                                <div class="progress upload-progress d-none">
+                                                    <div class="progress-bar" style="width:0%"></div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @empty
-                                        {{-- عنصر فاضي لما مفيش داتا --}}
-                                        <div data-repeater-item>
-                                            <div class="col-md-12 mb-2">
-                                                <div class="card p-2 mb-4 border rounded shadow-sm">
-                                                    <form action="{{ route('carousels.update') }}" method="POST" enctype="multipart/form-data" class="carousel-form">
-                                                        @csrf
-                                                        @method('PUT')
 
-                                                        <input type="hidden" name="id" value="">
-                                                        <div class="website-media-ids"></div>
-                                                        <div class="website-ar-media-ids"></div>
-                                                        <div class="mobile-media-ids"></div>
-                                                        <div class="mobile-ar-media-ids"></div>
+                                            {{-- Mobile Image Upload --}}
+                                            <label class="form-label mt-1">Mobile Image</label>
+                                            <div class="dropzone mobile-dropzone"></div>
+                                            <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
 
-                                                        <label class="form-label">Website Image (EN)</label>
-                                                        <div class="dropzone website-en-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
-                                                        <div class="upload-wrapper">
-                                                            <div class="uploaded-image d-none mt-2">
-                                                                <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                            </div>
-                                                            <div class="progress upload-progress d-none">
-                                                                <div class="progress-bar" style="width:0%"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        <label class="form-label mt-1">Website Image (AR)</label>
-                                                        <div class="dropzone website-ar-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
-                                                        <div class="upload-wrapper">
-                                                            <div class="uploaded-image d-none mt-2">
-                                                                <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                            </div>
-                                                            <div class="progress upload-progress d-none">
-                                                                <div class="progress-bar" style="width:0%"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        <label class="form-label mt-3">Mobile Image (EN)</label>
-                                                        <div class="dropzone mobile-en-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
-                                                        <div class="upload-wrapper">
-                                                            <div class="uploaded-image d-none mt-2">
-                                                                <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                            </div>
-                                                            <div class="progress upload-progress d-none">
-                                                                <div class="progress-bar" style="width:0%"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        <label class="form-label mt-1">Mobile Image (AR)</label>
-                                                        <div class="dropzone mobile-ar-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
-                                                        <div class="upload-wrapper">
-                                                            <div class="uploaded-image d-none mt-2">
-                                                                <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                                            </div>
-                                                            <div class="progress upload-progress d-none">
-                                                                <div class="progress-bar" style="width:0%"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- باقي الحقول (title/subtitle/colors/product)... زي فوق --}}
-                                                        <div class="row mb-3 mt-4">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Title in English</label>
-                                                                <input type="text" name="title_en" class="form-control">
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Title in Arabic</label>
-                                                                <input type="text" name="title_ar" class="form-control">
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="row mb-3">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Subtitle in English</label>
-                                                                <input type="text" name="subtitle_en" class="form-control">
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Subtitle in Arabic</label>
-                                                                <input type="text" name="subtitle_ar" class="form-control">
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="row mb-3">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Title Color</label>
-                                                                <div class="d-flex align-items-center gap-1">
-                                                                    <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;" value="#101010">
-                                                                    <input type="text" class="form-control title-color-hex" placeholder="#101010" value="#101010">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Subtitle Color</label>
-                                                                <div class="d-flex align-items-center gap-1">
-                                                                    <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;" value="#5b5b5b">
-                                                                    <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b" value="#5b5b5b">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="border rounded p-2 mb-3">
-                                                            <div class="titlePreview fw-bold" style="color:#101010">Title preview</div>
-                                                            <div class="subtitlePreview" style="color:#5b5b5b">Subtitle preview</div>
-                                                        </div>
-
-                                                        <div class="mb-2">
-                                                            <label class="form-label">Select Product</label>
-                                                            <select name="product_id" class="form-select">
-                                                                <option disabled selected>Select a product</option>
-                                                                @foreach($products as $product)
-                                                                    <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-
-                                                        <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
-                                                            <button type="button" data-repeater-delete class="btn btn-outline-danger">
-                                                                <i data-feather="x" class="me-1"></i> Delete
-                                                            </button>
-                                                            <button type="submit" class="btn btn-primary">
-                                                                <i data-feather="save" class="me-1"></i> Save Changes
-                                                            </button>
-                                                        </div>
-
-                                                    </form>
+                                            <div class="upload-wrapper">
+                                                <div class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels') ? '' : 'd-none' }} mt-2">
+                                                    <img src="{{ $carousel->getFirstMediaUrl('mobile_carousels') }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                </div>
+                                                <div class="progress upload-progress d-none">
+                                                    <div class="progress-bar" style="width:0%"></div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @endforelse
-                                </div>
 
-                                {{-- زر إضافة عنصر --}}
-                                <div class="text-start d-flex justify-content-end mb-2">
-                                    <button type="button" data-repeater-create class="btn btn-primary">
-                                        <i data-feather="plus"></i> Add Carousel
-                                    </button>
+                                            {{-- Titles --}}
+                                            <div class="row mb-3 mt-4">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Title in English</label>
+                                                    <input type="text" name="title_en" class="form-control" value="{{ $carousel->getTranslation('title','en') }}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Title in Arabic</label>
+                                                    <input type="text" name="title_ar" class="form-control" value="{{ $carousel->getTranslation('title','ar') }}">
+                                                </div>
+                                            </div>
+
+                                            {{-- Subtitles --}}
+                                            <div class="row mb-2">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Subtitle in English</label>
+                                                    <input type="text" name="subtitle_en" class="form-control" value="{{ $carousel->getTranslation('subtitle','en') }}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Subtitle in Arabic</label>
+                                                    <input type="text" name="subtitle_ar" class="form-control" value="{{ $carousel->getTranslation('subtitle','ar') }}">
+                                                </div>
+                                            </div>
+
+                                            {{-- Title & Subtitle Colors --}}
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Title Color</label>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;"
+                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
+                                                        <input type="text" class="form-control title-color-hex" placeholder="#101010"
+                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Subtitle Color</label>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;"
+                                                               value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
+                                                        <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b"
+                                                               value="{{ old('subtitle_color', $carousel->subtitle_color ?? '#5b5b5b') }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Live preview (classes, not IDs) --}}
+                                            <div class="border rounded p-2 mb-3">
+                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
+                                                    {{ $carousel->getTranslation('title','en') }}
+                                                </div>
+                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
+                                                    {{ $carousel->getTranslation('subtitle','en') }}
+                                                </div>
+                                            </div>
+                                            <div class="border rounded p-2 mb-3" dir="rtl">
+                                                <div class="titlePreview fw-bold" style="color: {{ $carousel->title_color ?? '#101010' }}">
+                                                    {{ $carousel->getTranslation('title', 'ar') }}
+                                                </div>
+                                                <div class="subtitlePreview" style="color: {{ $carousel->subtitle_color ?? '#5b5b5b' }}">
+                                                    {{ $carousel->getTranslation('subtitle', 'ar') }}
+                                                </div>
+                                            </div>
+
+
+                                            {{-- Product Selection --}}
+                                            <div class="mb-2">
+                                                <label class="form-label">Select Product</label>
+                                                <select name="product_id" class="form-select">
+                                                    <option disabled>Select a product</option>
+                                                    @foreach($products as $product)
+                                                        <option value="{{ $product->id }}" {{ $carousel->product_id == $product->id ? 'selected' : '' }}>
+                                                            {{ $product->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            {{-- Actions --}}
+                                            <div class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
+                                                <button type="button" class="btn btn-outline-danger open-delete-carousel-modal"
+                                                        data-bs-toggle="modal" data-bs-target="#{{ $modalId }}">
+                                                    <i data-feather="x" class="me-1"></i> Delete
+                                                </button>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i data-feather="save" class="me-1"></i> Save Changes
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
-
                         @empty
                             {{-- one blank repeater item when empty --}}
                             <div data-repeater-item>
@@ -647,108 +458,7 @@
                     </div>
 
                     {{-- Hidden template for adding new items --}}
-                    <div data-repeater-item style="display:none;">
-                        <div class="col-md-12 mb-2">
-                            <div class="card p-2 mb-4 border rounded shadow-sm">
-                                <form method="POST" action="{{ route('carousels.update') }}" enctype="multipart/form-data" class="carousel-form">
-                                    @csrf
-                                    @method('PUT')
-
-                                    <input type="hidden" name="id" value="">
-                                    <div class="website-media-ids"></div>
-                                    <div class="website-ar-media-ids"></div>
-                                    <div class="mobile-media-ids"></div>
-
-                                    <label class="form-label">Website Image</label>
-                                    <div class="dropzone website-dropzone"></div>
-                                    <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
-                                    <div class="upload-wrapper">
-                                        <div class="uploaded-image d-none mt-2">
-                                            <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                        </div>
-                                        <div class="progress upload-progress d-none">
-                                            <div class="progress-bar" style="width:0%"></div>
-                                        </div>
-                                    </div>
-
-                                    <label class="form-label mt-1">Mobile Image</label>
-                                    <div class="dropzone mobile-dropzone"></div>
-                                    <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
-                                    <div class="upload-wrapper">
-                                        <div class="uploaded-image d-none mt-2">
-                                            <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
-                                        </div>
-                                        <div class="progress upload-progress d-none">
-                                            <div class="progress-bar" style="width:0%"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3 mt-4">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Title in English</label>
-                                            <input type="text" name="title_en" class="form-control">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Title in Arabic</label>
-                                            <input type="text" name="title_ar" class="form-control">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Subtitle in English</label>
-                                            <input type="text" name="subtitle_en" class="form-control">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Subtitle in Arabic</label>
-                                            <input type="text" name="subtitle_ar" class="form-control">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Title Color</label>
-                                            <div class="d-flex align-items-center gap-1">
-                                                <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;" value="#101010">
-                                                <input type="text" class="form-control title-color-hex" placeholder="#101010" value="#101010">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Subtitle Color</label>
-                                            <div class="d-flex align-items-center gap-1">
-                                                <input type="color" name="subtitle_color" class="form-control form-control-color subtitle-color-input" style="width:3rem;" value="#5b5b5b">
-                                                <input type="text" class="form-control subtitle-color-hex" placeholder="#5b5b5b" value="#5b5b5b">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="border rounded p-2 mb-3">
-                                        <div class="titlePreview fw-bold" style="color:#101010">Title preview</div>
-                                        <div class="subtitlePreview" style="color:#5b5b5b">Subtitle preview</div>
-                                    </div>
-
-                                    <div class="mb-2">
-                                        <label class="form-label">Select Product</label>
-                                        <select name="product_id" class="form-select">
-                                            <option disabled selected>Select a product</option>
-                                            @foreach($products as $product)
-                                                <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between mt-2">
-                                        <button type="button" data-repeater-delete class="btn btn-outline-danger">
-                                            <i data-feather="x" class="me-25"></i> Delete
-                                        </button>
-                                        <button type="submit" class="btn btn-primary save-carousel-btn">
-                                            <i data-feather="save" class="me-25"></i> Save Changes
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                
 
                     <div class="text-start d-flex justify-content-end mb-2">
                         <button type="button" data-repeater-create class="btn btn-primary">
@@ -1488,146 +1198,219 @@
             });
     </script>
 
-            <script>
-                Dropzone.autoDiscover = false;
+    <script>
+        Dropzone.autoDiscover = false; // 🔑 prevents Dropzone from auto-binding
 
-                (function () {
-                    const CSRF = document.querySelector('meta[name="csrf-token"]').content;
-                    const UPLOAD_URL = "{{ route('media.store') }}";
-                    const DELETE_URL = "{{ url('api/v1/media') }}/"; // + id
+                document.addEventListener("DOMContentLoaded", function () {
+                    @foreach($carousels as $index => $carousel)
+                    initCarouselDropzone({{ $index }});
+                    @endforeach
 
-                    // يبني Dropzone لأي عنصر + يضيف input مخفي داخل container المحدد
-                    function buildDZ($item, boxSelector, idsContainerSelector, fieldSuffix) {
-                        const el = $item.find(boxSelector)[0];
-                        if (!el || el.dropzone) return; // متعملش bind تاني
+                    @if($carousels->isEmpty())
+                    initCarouselDropzone(0);
+                    @endif
+                });
+                function initCarouselDropzone($item) {
+                    $item = $($item);
 
-                        // تأكيد وجود الحاوية
-                        if ($item.find(idsContainerSelector).length === 0) {
-                            $item.append(`<div class="${idsContainerSelector.replace('.', '')}"></div>`);
-                        }
+                    // ensure containers exist
+                    if ($item.find('.website-media-ids').length === 0) {
+                        $item.append('<div class="website-media-ids"></div>');
+                    }
+                    if ($item.find('.mobile-media-ids').length === 0) {
+                        $item.append('<div class="mobile-media-ids"></div>');
+                    }
 
-                        new Dropzone(el, {
-                            url: UPLOAD_URL,
-                            maxFilesize: 2,              // MB
+                    let websiteEl = $item.find('.website-dropzone')[0];
+                    let websiteElAr = $item.find('.website-ar-dropzone')[0];
+                    if (websiteEl && !websiteEl.dropzone) {
+                        new Dropzone(websiteEl, {
+                            url: "{{ route('media.store') }}",
+                            maxFilesize: 2,
+                            maxFiles: 1,
+                            dictDefaultMessage: "Drag images here to upload",
+                            acceptedFiles: ".jpeg,.jpg,.png,.svg",
+                            addRemoveLinks: true,
+                            init: function () {
+                                this.on("maxfilesexceeded", function (file) {
+                                    this.removeAllFiles();  // remove old one
+                                    this.addFile(file);     // add the new one
+                                });
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            success: function (file, response) {
+                                let hidden = document.createElement('input');
+                                hidden.type = "hidden";
+
+                                // Find the repeater index (example: carousels[0])
+                                let baseName = $item.find('input[name*="[id]"]').attr('name');
+                                if (baseName) {
+                                    let prefix = baseName.replace(/\[id\]$/, ''); // remove trailing [id]
+                                    hidden.name = prefix + '[website_media_ids][]';
+                                } else {
+                                    // fallback (if not found)
+                                    hidden.name = 'carousels[0][website_media_ids][]';
+                                }
+
+                                hidden.value = response.data.id;
+                                $item.find('.website-media-ids').append(hidden);
+
+                                // Keep reference for removal later
+                                file._hiddenInput = hidden;
+                            },
+
+                            removedfile: function (file) {
+                                if (file.previewElement != null) {
+                                    file.previewElement.parentNode.removeChild(file.previewElement);
+                                }
+                                if (file._hiddenInput) {
+                                    file._hiddenInput.remove();
+                                }
+
+                                if (file.xhr) {
+                                    let response = JSON.parse(file.xhr.response);
+
+                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                        }
+                                    });
+                                }
+
+                            }
+
+                        });
+                    }
+                    if (websiteElAr && !websiteElAr.dropzone) {
+                        new Dropzone(websiteElAr, {
+                            url: "{{ route('media.store') }}",
+                            maxFilesize: 2,
+                            maxFiles: 1,
+                            dictDefaultMessage: "Drag images here to upload",
+                            acceptedFiles: ".jpeg,.jpg,.png,.svg",
+                            addRemoveLinks: true,
+                            init: function () {
+                                this.on("maxfilesexceeded", function (file) {
+                                    this.removeAllFiles();  // remove old one
+                                    this.addFile(file);     // add the new one
+                                });
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            success: function (file, response) {
+                                let hidden = document.createElement('input');
+                                hidden.type = "hidden";
+
+                                // Find the repeater index (example: carousels[0])
+                                let baseName = $item.find('input[name*="[id]"]').attr('name');
+                                if (baseName) {
+                                    let prefix = baseName.replace(/\[id\]$/, ''); // remove trailing [id]
+                                    hidden.name = prefix + '[website_ar_media_ids][]';
+                                } else {
+                                    // fallback (if not found)
+                                    hidden.name = 'carousels[0][website_ar_media_ids][]';
+                                }
+
+                                hidden.value = response.data.id;
+                                $item.find('.website-ar-media-ids').append(hidden);
+
+                                // Keep reference for removal later
+                                file._hiddenInput = hidden;
+                            },
+
+                            removedfile: function (file) {
+                                if (file.previewElement != null) {
+                                    file.previewElement.parentNode.removeChild(file.previewElement);
+                                }
+                                if (file._hiddenInput) {
+                                    file._hiddenInput.remove();
+                                }
+
+                                if (file.xhr) {
+                                    let response = JSON.parse(file.xhr.response);
+
+                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                        }
+                                    });
+                                }
+
+                            }
+
+                        });
+                    }
+
+                    let mobileEl = $item.find('.mobile-dropzone')[0];
+                    if (mobileEl && !mobileEl.dropzone) {
+                        new Dropzone(mobileEl, {
+                            url: "{{ route('media.store') }}",
+                            maxFilesize: 2,
                             maxFiles: 1,
                             acceptedFiles: ".jpeg,.jpg,.png,.svg",
                             addRemoveLinks: true,
                             dictDefaultMessage: "Drag images here to upload",
-                            headers: { 'X-CSRF-TOKEN': CSRF },
+
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
 
                             init: function () {
                                 this.on("maxfilesexceeded", function (file) {
-                                    this.removeAllFiles();
-                                    this.addFile(file);
+                                    this.removeAllFiles();  // remove old one
+                                    this.addFile(file);     // add the new one
                                 });
                             },
-
                             success: function (file, response) {
-                                // استخرج اسم الـ prefix من input بينتهي بـ [id]
-                                let baseName = $item.find('input[name*="[id]"]').attr('name');
                                 let hidden = document.createElement('input');
                                 hidden.type = "hidden";
 
+                                let baseName = $item.find('input[name*="[id]"]').attr('name');
                                 if (baseName) {
-                                    let prefix = baseName.replace(/\[id\]$/, ''); // شيل [id]
-                                    hidden.name = `${prefix}${fieldSuffix}[]`;
+                                    let prefix = baseName.replace(/\[id\]$/, '');
+                                    hidden.name = prefix + '[mobile_media_ids][]';
                                 } else {
-                                    // fallback
-                                    hidden.name = `carousels[0]${fieldSuffix}[]`;
+                                    hidden.name = 'carousels[0][mobile_media_ids][]';
                                 }
 
                                 hidden.value = response.data.id;
-                                $item.find(idsContainerSelector).append(hidden);
-                                file._hiddenInput = hidden; // مرجع للإزالة
+                                $item.find('.mobile-media-ids').append(hidden);
+
+                                file._hiddenInput = hidden;
                             },
 
                             removedfile: function (file) {
-                                if (file.previewElement) file.previewElement.remove();
-                                if (file._hiddenInput) file._hiddenInput.remove();
+                                if (file.previewElement != null) {
+                                    file.previewElement.parentNode.removeChild(file.previewElement);
+                                }
+                                if (file._hiddenInput) {
+                                    file._hiddenInput.remove();
+                                }
 
-                                // لو الرفع نجح، غالباً عندنا xhr بالـ response نقدر نمسح به الميديا
-                                try {
-                                    if (file.xhr) {
-                                        let res = JSON.parse(file.xhr.response);
-                                        if (res?.data?.id) {
-                                            fetch(DELETE_URL + res.data.id, {
-                                                method: "DELETE",
-                                                headers: { 'X-CSRF-TOKEN': CSRF }
-                                            });
+                                if (file.xhr) {
+                                    let response = JSON.parse(file.xhr.response);
+
+                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                                         }
-                                    }
-                                } catch (e) {}
-                            }
-                        });
-                    }
+                                    });
+                                }
 
-                    // يهيّأ الـ Dropzones الأربع داخل item واحد
-                    function initCarouselDropzone($item) {
-                        // Website EN
-                        buildDZ($item, '.website-en-dropzone', '.website-en-media-ids', '[website_media_ids]');
-                        // Website AR
-                        buildDZ($item, '.website-ar-dropzone', '.website-ar-media-ids', '[website_ar_media_ids]');
-                        // Mobile EN
-                        buildDZ($item, '.mobile-en-dropzone', '.mobile-en-media-ids', '[mobile_media_ids]');
-                        // Mobile AR
-                        buildDZ($item, '.mobile-ar-dropzone', '.mobile-ar-media-ids', '[mobile_ar_media_ids]');
-                    }
-
-                    // تهيئة الـ repeater مرّة واحدة (شلت التكرار اللي كان عندك)
-                    $('.invoice-repeater').repeater({
-                        show: function () {
-                            const $item = $(this);
-
-                            // reset بعض الـ UI حسب رغبتك
-                            $item.find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
-                            $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
-
-                            $item.show();
-
-                            if (window.feather) feather.replace();
-
-                            // لازم ندي وقت صغير لبناء DOM جوه العنصر بعد العرض
-                            setTimeout(function () { initCarouselDropzone($item); }, 50);
-
-                            // إظهار زر الحذف لو أكتر من عنصر
-                            const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
-                            $items.each(function () {
-                                $(this).find('[data-repeater-delete]').toggle($items.length > 1);
-                            });
-
-                            // لو عندك دوال تانية لربط معاينات… نادِها هنا
-                            if (typeof bindPreviewAutoShow === 'function') bindPreviewAutoShow($item);
-                        },
-
-                        hide: function (deleteElement) {
-                            const $repeater = $(this).closest('.invoice-repeater');
-                            const $items = $repeater.find('[data-repeater-item]');
-
-                            if ($items.length === 1) {
-                                alert('At least one item is required.');
-                                return;
                             }
 
-                            $(this).slideUp(deleteElement, function () {
-                                $(this).remove();
-                                const $remaining = $repeater.find('[data-repeater-item]');
-                                $remaining.each(function () {
-                                    $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
-                                });
-                            });
-                        }
-                    });
-
-                    // بعد تحميل الصفحة: فعّل DZ لكل العناصر الموجودة مسبقاً
-                    document.addEventListener("DOMContentLoaded", function () {
-                        $('[data-repeater-item]').each(function () {
-                            initCarouselDropzone($(this));
                         });
-                    });
-                })();
-            </script>
+                    }
+                }
 
-            <script !src="">
+    </script>
+    <script !src="">
         handleAjaxFormSubmit(".carousel-form",{
             successMessage: "Done",
             onSuccess:function (){
