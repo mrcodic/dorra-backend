@@ -394,7 +394,7 @@
                                                 </div>
                                                 <div class="mb-2">
                                                     <label class="form-label">Select Product</label>
-                                                    <select name="product_id" class="form-select">
+                                                    <select name="category_id" class="form-select">
                                                         <option disabled>Select a product</option>
                                                         @foreach($categories as $category)
                                                             <option
@@ -534,7 +534,7 @@
                                                 </div>
                                                 <div class="mb-2">
                                                     <label class="form-label">Select Product</label>
-                                                    <select name="product_id" class="form-select">
+                                                    <select name="category_id" class="form-select">
                                                         <option disabled >Select a product</option>
                                                         @foreach($categories as $category)
                                                             <option
