@@ -301,9 +301,9 @@
                                                     <label class="form-label">Title Color</label>
                                                     <div class="d-flex align-items-center gap-1">
                                                         <input type="color" name="title_color" class="form-control form-control-color title-color-input" style="width:3rem;"
-                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
+                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}">
                                                         <input type="text" class="form-control title-color-hex" placeholder="#101010"
-                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}" disabled>
+                                                               value="{{ old('title_color', $carousel->title_color ?? '#101010') }}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
