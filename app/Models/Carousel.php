@@ -17,6 +17,7 @@ class Carousel extends Model implements HasMedia
         'title',
         'subtitle',
         'product_id',
+        'category_id',
         'title_color',
         'subtitle_color'
     ];
@@ -24,5 +25,10 @@ class Carousel extends Model implements HasMedia
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 }

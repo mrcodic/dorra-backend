@@ -514,12 +514,22 @@
 
                                                 {{-- Product --}}
                                                 <div class="mb-2">
-                                                    <label class="form-label">Select Product</label>
+                                                    <label class="form-label">Select Category</label>
                                                     <select name="product_id" class="form-select">
-                                                        <option disabled selected>Select a product</option>
+                                                        <option disabled selected>Select a category</option>
                                                         @foreach($products as $product)
                                                             <option
                                                                 value="{{ $product->id }}">{{ $product->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label">Select Product</label>
+                                                    <select name="product_id" class="form-select">
+                                                        <option disabled selected>Select a product</option>
+                                                        @foreach($categories as $category)
+                                                            <option
+                                                                value="{{ $category->id }}">{{ $category->name }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
