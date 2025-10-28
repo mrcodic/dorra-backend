@@ -380,28 +380,28 @@
 
 
                                                 {{-- Product Selection --}}
-                                                <div class="mb-2">
-                                                    <label class="form-label">Select Category</label>
-                                                    <select name="product_id" class="form-select">
-                                                        <option >Select a category</option>
-                                                        @foreach($products as $product)
-                                                            <option
-                                                                value="{{ $product->id }}" {{ $carousel->product_id == $product->id ? 'selected' : '' }}>
-                                                                {{ $product->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="mb-2">
-                                                    <label class="form-label">Select Product</label>
-                                                    <select name="category_id" class="form-select">
-                                                        <option >Select a product</option>
-                                                        @foreach($categories as $category)
-                                                            <option
-                                                                value="{{ $category->id }}">{{ $category->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                                                    <div class="mb-2">
+                                                        <label class="form-label">Categories</label>
+                                                        <select name="product_id" class="form-select">
+                                                            <option disabled>Select a category</option>
+                                                            @foreach($products as $product)
+                                                                <option
+                                                                    value="{{ $product->id }}" {{ $carousel->product_id == $product->id ? 'selected' : '' }}>
+                                                                    {{ $product->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="form-label">Product Without Categories</label>
+                                                        <select name="category_id" class="form-select">
+                                                            <option disabled>Select a product</option>
+                                                            @foreach($categories as $category)
+                                                                <option
+                                                                    value="{{ $category->id }}">{{ $category->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
                                                 {{-- Actions --}}
                                                 <div
                                                     class="d-flex flex-wrap-reverse gap-1 justify-content-between mt-1">
@@ -525,7 +525,7 @@
                                                 <div class="mb-2">
                                                     <label class="form-label">Select Category</label>
                                                     <select name="product_id" class="form-select">
-                                                        <option  >Select a category</option>
+                                                        <option  disabled>Select a category</option>
                                                         @foreach($products as $product)
                                                             <option
                                                                 value="{{ $product->id }}">{{ $product->name }}</option>
@@ -535,7 +535,7 @@
                                                 <div class="mb-2">
                                                     <label class="form-label">Select Product</label>
                                                     <select name="category_id" class="form-select">
-                                                        <option  >Select a product</option>
+                                                        <option  disabled>Select a product</option>
                                                         @foreach($categoriesCarousels as $category)
                                                             <option
                                                                 value="{{ $category->id }}">{{ $category->name }}</option>
@@ -1168,6 +1168,57 @@
             @endsection
 
             @section('page-script')
+                <script>
+                    // لما يختار Product → صفّر Category (والعكس)
+                    $(document).on('change', '.carousel-form .js-product-select', function () {
+                        const $form = $(this).closest('.carousel-form');
+                        const hasValue = $(this).val() && String($(this).val()).trim() !== '';
+
+                        // صفّر التاني وفعّل/عطّل حسب الحاجة (اختياري)
+                        const $cat = $form.find('.js-category-select');
+                        if (hasValue) {
+                            $cat.val('').trigger('change');
+                            // $cat.prop('disabled', true); // لو عايز تمنعه بعد الاختيار
+                        } else {
+                            // $cat.prop('disabled', false);
+                        }
+                    });
+
+                    $(document).on('change', '.carousel-form .js-category-select', function () {
+                        const $form = $(this).closest('.carousel-form');
+                        const hasValue = $(this).val() && String($(this).val()).trim() !== '';
+
+                        const $prod = $form.find('.js-product-select');
+                        if (hasValue) {
+                            $prod.val('').trigger('change');
+                            // $prod.prop('disabled', true); // لو عايز تمنعه بعد الاختيار
+                        } else {
+                            // $prod.prop('disabled', false);
+                        }
+                    });
+
+                    // تهيئة الحالة عند التحميل (لكل عنصر)
+                    $(function () {
+                        $('.carousel-form').each(function () {
+                            const $form = $(this);
+                            const $prod = $form.find('.js-product-select');
+                            const $cat  = $form.find('.js-category-select');
+
+                            const hasProd = $prod.val() && String($prod.val()).trim() !== '';
+                            const hasCat  = $cat.val() && String($cat.val()).trim() !== '';
+
+                            if (hasProd && hasCat) {
+                                // لو الاتنين موجودين (حالة قديمة)، خلّي أولوية للـ product وصفّر category
+                                $cat.val('').trigger('change');
+                            } else if (hasProd) {
+                                // $cat.prop('disabled', true);
+                            } else if (hasCat) {
+                                // $prod.prop('disabled', true);
+                            }
+                        });
+                    });
+                </script>
+
                 <script>
                     handleAjaxFormSubmit(".deleteCarousel", {
                         successMessage: "Carousel deleted successfully",
