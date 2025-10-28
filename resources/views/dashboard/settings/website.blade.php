@@ -397,7 +397,7 @@
                                                     <label class="form-label">Product Without Categories</label>
                                                     <select name="category_id" class="form-select js-category-select">
                                                         <option value="" disabled>— Select a product —</option>
-                                                        @foreach($categories as $category)
+                                                        @foreach($categoriesCarousels as $category)
                                                             <option value="{{ $category->id }}" {{ (isset($carousel) && $carousel->category_id == $category->id) ? 'selected' : '' }}>
                                                                 {{ $category->name }}
                                                             </option>
@@ -541,7 +541,7 @@
                                                     <label class="form-label">Product Without Categories</label>
                                                     <select name="category_id" class="form-select js-category-select">
                                                         <option value="" disabled>— Select a product —</option>
-                                                        @foreach($categories as $category)
+                                                        @foreach($categoriesCarousels as $category)
                                                             <option value="{{ $category->id }}" {{ (isset($carousel) && $carousel->category_id == $category->id) ? 'selected' : '' }}>
                                                                 {{ $category->name }}
                                                             </option>
