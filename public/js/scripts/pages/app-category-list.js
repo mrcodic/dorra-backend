@@ -21,6 +21,7 @@ const dt_user_table = $(".category-list-table").DataTable({
     columns: [
         {
             data: "id",
+            name: "categories.id",
             searchable: false,
             render: function (data, type, row) {
                 return row?.action?.can_delete
