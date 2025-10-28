@@ -23,7 +23,7 @@
                                 <span>Drop photo here or click to upload</span>
                             </div>
                         </div>
-                        <input type="hidden" name="image_id" id="editUploadedImage">
+                        <input type="hidden" name="sub_image_id" id="editUploadedImage">
                     </div>
                     <span class="image-hint small">
                             Max size: 1MB | Dimensions: 512x512 px
@@ -111,7 +111,7 @@
             this.on("success", function (file, response) {
                 if (response.success && response.data) {
                     file._hiddenInputId = response.data.id;
-                    $("#editUploadedImage").val(response.data.id); // store image_id
+                    $("#editUploadedImage").val(response.data.id); // store sub_image_id
                     $("#edit-preview-image").attr("src", response.data.url);
                 }
 
