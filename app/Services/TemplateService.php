@@ -194,13 +194,7 @@ class TemplateService extends BaseService
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
         }
-        if ($validatedData['go_to_editor']) {
-            $editorUrl = config('services.editor_url')
-                . 'templates/' . $model->id
-                . '?is_clear';
 
-            return redirect()->away($editorUrl);
-        }
         return $model->load($relationsToLoad);
     }
 

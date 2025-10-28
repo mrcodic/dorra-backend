@@ -107,6 +107,16 @@ class TemplateController extends DashboardController
                 config('services.editor_url') . 'templates/' . $template->id . '?is_clear'
         ]);
     }
+    public function update(Request $request, string $id)
+    {
+        $model = $this->service->updateResource($request->validated(), $id);
+        if ($request->boolean('go_to_editor')) {
+            $editorUrl = config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1';
+            return redirect()->away($editorUrl);
+        }
+            return Response::api(data: $this->resourceClass::make($model));
+
+    }
 
     public function updateEditorData(UpdateTemplateEditorRequest $request, $id)
     {
