@@ -278,7 +278,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+
                                                 <div class="col-12 col-md-6">
                                                     {{-- Mobile Image Ar Upload --}}
                                                     <label class="form-label mt-1">Mobile Image Ar</label>
@@ -298,6 +298,7 @@
                                                             <div class="progress-bar" style="width:0%"></div>
                                                         </div>
                                                     </div>
+                                                </div>
                                                 </div>
                                                 {{-- Titles --}}
                                                 <div class="row mb-3 mt-4">
