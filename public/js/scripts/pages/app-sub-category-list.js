@@ -223,7 +223,7 @@ $(document).ready(function () {
         $("#editSubCategoryModal #edit-sub-category-name-en").val(categoryNameEn);
         $("#showSubCategoryModal #edit-sub-category-description-ar").val(categoryDescriptionAR);
         $("#showSubCategoryModal #edit-sub-category-description-en").val(categoryDescriptionEn);
-        $("#editSubCategoryModal #edit-preview-image").src(categoryImage);
+        // $("#editSubCategoryModal #edit-preview-image").src(categoryImage);
         $("#editSubCategoryModal #edit-sub-category-date").val(addedDate);
         $("#editSubCategoryModal #edit-sub-category-parent-id").val(id);
         $("#editSubCategoryModal select[name='parent_id']").val(parentId);
