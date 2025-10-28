@@ -114,7 +114,7 @@ class TemplateController extends DashboardController
         // Validate (this will throw a 422 JSON if the client sends Accept: application/json)
         $rules     = $this->updateRequestClass->rules($id);
         $validated = Validator::make($request->all(), $rules)->validate();
-
+dd($validated);
         // Save/update
         $model = $this->service->updateResource($validated, $id);
 
