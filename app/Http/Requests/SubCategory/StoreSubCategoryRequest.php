@@ -37,6 +37,9 @@ class StoreSubCategoryRequest extends BaseRequest
                 'max:255',
 //                Rule::unique('categories', 'name->ar'),
             ],
+            'description.en' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
+            'image_id' => ['required','exists:media,id'],
             'parent_id' => ['required', 'integer', 'exists:categories,id'],
         ];
 

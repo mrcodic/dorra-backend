@@ -11,36 +11,36 @@
                 </div>
                 <div class="modal-body flex-grow-1">
 
-                    <!-- Image Upload -->
-                    <div class="mb-1">
-                        <label class="form-label label-text">Image*</label>
-                        <div id="edit-category-dropzone"
-                            class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center"
-                            style="border: 2px dashed rgba(0, 0, 0, 0.3);">
-                            <div class="dz-message" data-dz-message>
-                                <span>Drop photo here or click to upload</span>
+                        <!-- Image Upload -->
+                        <div class="mb-1">
+                            <label class="form-label label-text">Image*</label>
+                            <div id="edit-category-dropzone"
+                                class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center"
+                                style="border: 2px dashed rgba(0, 0, 0, 0.3);">
+                                <div class="dz-message" data-dz-message>
+                                    <span>Drop photo here or click to upload</span>
+                                </div>
                             </div>
+                            <input type="hidden" name="image_id" id="editUploadedImage">
                         </div>
-                        <input type="hidden" name="image_id" id="editUploadedImage">
-                    </div>
-                    <span class="image-hint small">
-                        Max size: 1MB | Dimensions: 512x512 px
-                    </span>
+                        <span class="image-hint small">
+                            Max size: 1MB | Dimensions: 512x512 px
+                        </span>
 
-                    <!-- Upload Progress -->
-                    <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                    </div>
-
-                    <!-- Uploaded Image Preview -->
-                    <div id="edit-uploaded-image"
-                        class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                        <img src="" id="edit-preview-image" alt="Uploaded" class="img-fluid rounded"
-                            style="width: 50px; height: 50px; object-fit: cover;">
-                        <div id="edit-file-details" class="file-details">
-                            <div class="file-name fw-bold"></div>
-                            <div class="file-size text-muted small"></div>
+                        <!-- Upload Progress -->
+                        <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                         </div>
+
+                        <!-- Uploaded Image Preview -->
+                        <div id="edit-uploaded-image"
+                            class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
+                            <img src="" id="edit-preview-image" alt="Uploaded" class="img-fluid rounded"
+                                style="width: 50px; height: 50px; object-fit: cover;">
+                            <div id="edit-file-details" class="file-details">
+                                <div class="file-name fw-bold"></div>
+                                <div class="file-size text-muted small"></div>
+                            </div>
                     </div>
                     <!-- Name and Description Fields -->
                     <div class="row my-1">

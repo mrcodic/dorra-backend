@@ -39,6 +39,9 @@ class UpdateSubCategoryRequest extends BaseRequest
                 'max:255',
 //                Rule::unique('categories', 'name->ar')->ignore($id),
             ],
+            'description.en' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
+            'image_id' => ['required','exists:media,id'],
             'parent_id' => ['sometimes', 'integer', 'exists:categories,id'],
         ];
     }

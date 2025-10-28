@@ -54,8 +54,8 @@ if (!function_exists('handleMediaUploads')) {
             if ($modelData) {
                 $mediaAdder = $modelData->addMedia($file)
                     ->usingName($humanName)
-                ->usingFileName($safeFileName);   
-                ;
+                ->usingFileName($safeFileName);
+
                 if (!empty($customProperties)) {
                     $mediaAdder->withCustomProperties($customProperties);
                 }

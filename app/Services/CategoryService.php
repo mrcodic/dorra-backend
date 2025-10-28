@@ -306,6 +306,15 @@ class CategoryService extends BaseService
                     'collection_name' => 'categories',
                 ]);
         }
+        if (Arr::has($validatedData, 'sub_image_id') && !is_null($validatedData['sub_image_id'])) {
+            $model->clearMediaCollection('categories');
+            Media::where('id', $validatedData['sub_image_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'sub-categories',
+                ]);
+        }
         return $model->load($relationsToLoad);
     }
 
