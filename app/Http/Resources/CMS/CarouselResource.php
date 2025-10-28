@@ -34,7 +34,6 @@ class CarouselResource extends JsonResource
             'product' =>$this->category_id
                 ? CategoryResource::make($this->whenLoaded('category'))
                 :ProductResource::make($this->whenLoaded('product')) ,
-            'category' => CategoryResource::make($this->whenLoaded('category')),
             'title_color'=>$this->title_color,
             'subtitle_color'=>$this->subtitle_color,
         ];
