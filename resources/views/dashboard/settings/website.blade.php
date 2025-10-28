@@ -215,8 +215,9 @@
                                             <div class="website-media-ids"></div>
                                             <div class="website-ar-media-ids"></div>
                                             <div class="mobile-media-ids"></div>
+                                            <div class="mobile-ar-media-ids"></div>
 
-                                            {{-- Website Image Upload --}}
+                                            {{-- Website Image En Upload --}}
                                             <label class="form-label">Website Image En</label>
                                             <div class="dropzone website-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
@@ -229,7 +230,7 @@
                                                     <div class="progress-bar" style="width:0%"></div>
                                                 </div>
                                             </div>
-
+                                            {{-- Website Image Ar Upload --}}
                                             <label class="form-label">Website Image Ar</label>
                                             <div class="dropzone website-ar-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
@@ -241,14 +242,29 @@
                                                     <div class="progress-bar" style="width:0%"></div>
                                                 </div>
                                             </div>
-                                            {{-- Mobile Image Upload --}}
-                                            <label class="form-label mt-1">Mobile Image</label>
+
+                                            {{-- Mobile Image En Upload --}}
+                                            <label class="form-label mt-1">Mobile Image En</label>
                                             <div class="dropzone mobile-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
 
                                             <div class="upload-wrapper">
                                                 <div class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels') ? '' : 'd-none' }} mt-2">
                                                     <img src="{{ $carousel->getFirstMediaUrl('mobile_carousels') }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                </div>
+                                                <div class="progress upload-progress d-none">
+                                                    <div class="progress-bar" style="width:0%"></div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Mobile Image Ar Upload --}}
+                                            <label class="form-label mt-1">Mobile Image Ar</label>
+                                            <div class="dropzone mobile-ar-dropzone"></div>
+                                            <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+
+                                            <div class="upload-wrapper">
+                                                <div class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels_ar') ? '' : 'd-none' }} mt-2">
+                                                    <img src="{{ $carousel->getFirstMediaUrl('mobile_carousels_ar') }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
                                                 </div>
                                                 <div class="progress upload-progress d-none">
                                                     <div class="progress-bar" style="width:0%"></div>
@@ -1387,6 +1403,68 @@
                                     hidden.name = prefix + '[mobile_media_ids][]';
                                 } else {
                                     hidden.name = 'carousels[0][mobile_media_ids][]';
+                                }
+
+                                hidden.value = response.data.id;
+                                $item.find('.mobile-media-ids').append(hidden);
+
+                                file._hiddenInput = hidden;
+                            },
+
+                            removedfile: function (file) {
+                                if (file.previewElement != null) {
+                                    file.previewElement.parentNode.removeChild(file.previewElement);
+                                }
+                                if (file._hiddenInput) {
+                                    file._hiddenInput.remove();
+                                }
+
+                                if (file.xhr) {
+                                    let response = JSON.parse(file.xhr.response);
+
+                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                        }
+                                    });
+                                }
+
+                            }
+
+                        });
+                    }
+
+                    let mobileArEl = $item.find('.mobile-ar-dropzone')[0];
+                    if (mobileArEl && !mobileArEl.dropzone) {
+                        new Dropzone(mobileArEl, {
+                            url: "{{ route('media.store') }}",
+                            maxFilesize: 2,
+                            maxFiles: 1,
+                            acceptedFiles: ".jpeg,.jpg,.png,.svg",
+                            addRemoveLinks: true,
+                            dictDefaultMessage: "Drag images here to upload",
+
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+
+                            init: function () {
+                                this.on("maxfilesexceeded", function (file) {
+                                    this.removeAllFiles();  // remove old one
+                                    this.addFile(file);     // add the new one
+                                });
+                            },
+                            success: function (file, response) {
+                                let hidden = document.createElement('input');
+                                hidden.type = "hidden";
+
+                                let baseName = $item.find('input[name*="[id]"]').attr('name');
+                                if (baseName) {
+                                    let prefix = baseName.replace(/\[id\]$/, '');
+                                    hidden.name = prefix + '[mobile_ar_media_ids][]';
+                                } else {
+                                    hidden.name = 'carousels[0][mobile_ar_media_ids][]';
                                 }
 
                                 hidden.value = response.data.id;
