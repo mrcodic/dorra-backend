@@ -30,7 +30,6 @@ class CarouselResource extends JsonResource
             'mobile_image' => $this->getFirstMediaUrl("mobile_carousels"),
             'site_image_ar' => $this->getFirstMediaUrl("carousels_ar"),
             'mobile_image_ar' => $this->getFirstMediaUrl("mobile_carousels_ar"),
-            'type' => $this->category_id ? 'category' : 'product',
             'product' =>$this->category_id
                 ? CategoryResource::make($this->whenLoaded('category'))
                 :ProductResource::make($this->whenLoaded('product')) ,
