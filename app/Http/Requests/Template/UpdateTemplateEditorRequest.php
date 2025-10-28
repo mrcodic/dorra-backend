@@ -50,6 +50,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
             'safety_area' => ['required', 'numeric'],
             'border' => ['required', 'numeric'],
+            'go_to_editor' => ['sometimes', 'boolean'],
         ];
     }
 

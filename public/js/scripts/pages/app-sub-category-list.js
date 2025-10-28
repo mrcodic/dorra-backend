@@ -186,6 +186,8 @@ $(document).ready(function () {
     $(document).on("click", ".view-details", function (e) {
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
+        const categoryDescriptionAR = $(this).data("description_ar");
+        const categoryDescriptionEn = $(this).data("description_en");
         const products = $(this).data("products");
         const addedDate = $(this).data("showdate");
         const id = $(this).data("id");
@@ -194,6 +196,8 @@ $(document).ready(function () {
         // Populate modal
         $("#showSubCategoryModal #sub-category-name-ar").val(categoryNameAR);
         $("#showSubCategoryModal #sub-category-name-en").val(categoryNameEn);
+        $("#showSubCategoryModal #sub-category-description-ar").val(categoryDescriptionAR);
+        $("#showSubCategoryModal #sub-category-description-en").val(categoryDescriptionEn);
         $("#showSubCategoryModal #sub-category-products").val(products);
         $("#showSubCategoryModal #sub-category-date").val(addedDate);
         $("#showSubCategoryModal #sub-category-id").val(id);
@@ -206,6 +210,9 @@ $(document).ready(function () {
     $(document).on("click", ".edit-details", function (e) {
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
+        const categoryDescriptionAR = $(this).data("description_ar");
+        const categoryDescriptionEn = $(this).data("description_en");
+        const categoryImage = $(this).data("image");
         const products = $(this).data("products");
         const addedDate = $(this).data("showdate");
         const id = $(this).data("id");
@@ -214,7 +221,9 @@ $(document).ready(function () {
         // Populate modal
         $("#editSubCategoryModal #edit-sub-category-name-ar").val(categoryNameAR);
         $("#editSubCategoryModal #edit-sub-category-name-en").val(categoryNameEn);
-        $("#editSubCategoryModal #edit-sub-category-products").val(products);
+        $("#showSubCategoryModal #sub-category-description-ar").val(categoryDescriptionAR);
+        $("#showSubCategoryModal #sub-category-description-en").val(categoryDescriptionEn);
+        $("#editSubCategoryModal #").src(categoryImage);
         $("#editSubCategoryModal #edit-sub-category-date").val(addedDate);
         $("#editSubCategoryModal #edit-sub-category-id").val(id);
         $("#editSubCategoryModal select[name='parent_id']").val(parentId);
