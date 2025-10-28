@@ -30,7 +30,9 @@ class CarouselResource extends JsonResource
             'mobile_image' => $this->getFirstMediaUrl("mobile_carousels"),
             'site_image_ar' => $this->getFirstMediaUrl("carousels_ar"),
             'mobile_image_ar' => $this->getFirstMediaUrl("mobile_carousels_ar"),
-            'product' => ProductResource::make($this->whenLoaded('product')) ?? CategoryResource::make($this->whenLoaded('category')),
+            'type' => $this->category_id ? 'category' : 'product',
+            'product' => ProductResource::make($this->whenLoaded('product')),
+            'category' => CategoryResource::make($this->whenLoaded('category')),
             'title_color'=>$this->title_color,
             'subtitle_color'=>$this->subtitle_color,
         ];
