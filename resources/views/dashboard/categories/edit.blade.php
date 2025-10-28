@@ -1,11 +1,11 @@
 @extends('layouts/contentLayoutMaster')
 @php
-//    $dimensions = \App\Models\Dimension::query()
-//    ->where('is_custom', false)
-//    ->orWhereHas('categories', function ($q) use ($model) {
-//    $q->where('dimensionable_id', $model->id)->where('dimensionable_type', get_class($model));
-//    })
-//    ->get(['id', 'name']);
+    $dimensions = \App\Models\Dimension::query()
+    ->where('is_custom', false)
+    ->orWhereHas('categories', function ($q) use ($model) {
+    $q->where('dimensionable_id', $model->id)->where('dimensionable_type', get_class($model));
+    })
+    ->get(['id', 'name']);
 
 
 @endphp
