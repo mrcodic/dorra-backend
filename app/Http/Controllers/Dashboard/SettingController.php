@@ -4,33 +4,24 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Carousel\UpdateCarouselRequest;
-use App\Http\Requests\Template\UpdateTemplateRequest;
-use App\Models\Carousel;
-use App\Models\GlobalAsset;
-use App\Models\Review;
-use App\Repositories\Interfaces\CarouselRepositoryInterface;
-use App\Repositories\Interfaces\CategoryRepositoryInterface;
-use App\Repositories\Interfaces\LandingReviewRepositoryInterface;
-use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
-use App\Repositories\Interfaces\ProductRepositoryInterface;
-use App\Repositories\Interfaces\SettingRepositoryInterface;
-use App\Repositories\Interfaces\TemplateRepositoryInterface;
+use App\Models\{Carousel,GlobalAsset};
+use App\Repositories\Interfaces\{CarouselRepositoryInterface,
+    CategoryRepositoryInterface,
+    LandingReviewRepositoryInterface,
+    PaymentMethodRepositoryInterface,
+    SettingRepositoryInterface,
+    ProductRepositoryInterface,
+    TemplateRepositoryInterface,
+};
 use App\Traits\HandlesTryCatch;
-use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class SettingController extends Controller
 {
     use HandlesTryCatch;
-
-    public function __construct()
-    {
-
-    }
 
     public function details()
     {

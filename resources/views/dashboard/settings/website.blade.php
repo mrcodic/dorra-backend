@@ -1488,144 +1488,68 @@
             });
     </script>
 
-            <script>
-                Dropzone.autoDiscover = false;
+            function initCarouselDropzone($item) {
+            // Website EN
+            buildDZ($item, '.website-en-dropzone', '.website-en-media-ids', '[website_media_ids]');
+            // Website AR
+            buildDZ($item, '.website-ar-dropzone', '.website-ar-media-ids', '[website_ar_media_ids]');
+            // Mobile EN
+            buildDZ($item, '.mobile-en-dropzone', '.mobile-en-media-ids', '[mobile_media_ids]');
+            // Mobile AR
+            buildDZ($item, '.mobile-ar-dropzone', '.mobile-ar-media-ids', '[mobile_ar_media_ids]');
+            }
 
-                (function () {
-                    const CSRF = document.querySelector('meta[name="csrf-token"]').content;
-                    const UPLOAD_URL = "{{ route('media.store') }}";
-                    const DELETE_URL = "{{ url('api/v1/media') }}/"; // + id
+            // تهيئة الـ repeater مرّة واحدة (شلت التكرار اللي كان عندك)
+            $('.invoice-repeater').repeater({
+            show: function () {
+            const $item = $(this);
 
-                    // يبني Dropzone لأي عنصر + يضيف input مخفي داخل container المحدد
-                    function buildDZ($item, boxSelector, idsContainerSelector, fieldSuffix) {
-                        const el = $item.find(boxSelector)[0];
-                        if (!el || el.dropzone) return; // متعملش bind تاني
+            // reset بعض الـ UI حسب رغبتك
+            $item.find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
+            $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
 
-                        // تأكيد وجود الحاوية
-                        if ($item.find(idsContainerSelector).length === 0) {
-                            $item.append(`<div class="${idsContainerSelector.replace('.', '')}"></div>`);
-                        }
+            $item.show();
 
-                        new Dropzone(el, {
-                            url: UPLOAD_URL,
-                            maxFilesize: 2,              // MB
-                            maxFiles: 1,
-                            acceptedFiles: ".jpeg,.jpg,.png,.svg",
-                            addRemoveLinks: true,
-                            dictDefaultMessage: "Drag images here to upload",
-                            headers: { 'X-CSRF-TOKEN': CSRF },
+            if (window.feather) feather.replace();
 
-                            init: function () {
-                                this.on("maxfilesexceeded", function (file) {
-                                    this.removeAllFiles();
-                                    this.addFile(file);
-                                });
-                            },
+            // لازم ندي وقت صغير لبناء DOM جوه العنصر بعد العرض
+            setTimeout(function () { initCarouselDropzone($item); }, 50);
 
-                            success: function (file, response) {
-                                // استخرج اسم الـ prefix من input بينتهي بـ [id]
-                                let baseName = $item.find('input[name*="[id]"]').attr('name');
-                                let hidden = document.createElement('input');
-                                hidden.type = "hidden";
+            // إظهار زر الحذف لو أكتر من عنصر
+            const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
+            $items.each(function () {
+            $(this).find('[data-repeater-delete]').toggle($items.length > 1);
+            });
 
-                                if (baseName) {
-                                    let prefix = baseName.replace(/\[id\]$/, ''); // شيل [id]
-                                    hidden.name = `${prefix}${fieldSuffix}[]`;
-                                } else {
-                                    // fallback
-                                    hidden.name = `carousels[0]${fieldSuffix}[]`;
-                                }
+            // لو عندك دوال تانية لربط معاينات… نادِها هنا
+            if (typeof bindPreviewAutoShow === 'function') bindPreviewAutoShow($item);
+            },
 
-                                hidden.value = response.data.id;
-                                $item.find(idsContainerSelector).append(hidden);
-                                file._hiddenInput = hidden; // مرجع للإزالة
-                            },
+            hide: function (deleteElement) {
+            const $repeater = $(this).closest('.invoice-repeater');
+            const $items = $repeater.find('[data-repeater-item]');
 
-                            removedfile: function (file) {
-                                if (file.previewElement) file.previewElement.remove();
-                                if (file._hiddenInput) file._hiddenInput.remove();
+            if ($items.length === 1) {
+            alert('At least one item is required.');
+            return;
+            }
 
-                                // لو الرفع نجح، غالباً عندنا xhr بالـ response نقدر نمسح به الميديا
-                                try {
-                                    if (file.xhr) {
-                                        let res = JSON.parse(file.xhr.response);
-                                        if (res?.data?.id) {
-                                            fetch(DELETE_URL + res.data.id, {
-                                                method: "DELETE",
-                                                headers: { 'X-CSRF-TOKEN': CSRF }
-                                            });
-                                        }
-                                    }
-                                } catch (e) {}
-                            }
-                        });
-                    }
+            $(this).slideUp(deleteElement, function () {
+            $(this).remove();
+            const $remaining = $repeater.find('[data-repeater-item]');
+            $remaining.each(function () {
+            $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
+            });
+            });
+            }
+            });
 
-                    // يهيّأ الـ Dropzones الأربع داخل item واحد
-                    function initCarouselDropzone($item) {
-                        // Website EN
-                        buildDZ($item, '.website-en-dropzone', '.website-en-media-ids', '[website_media_ids]');
-                        // Website AR
-                        buildDZ($item, '.website-ar-dropzone', '.website-ar-media-ids', '[website_ar_media_ids]');
-                        // Mobile EN
-                        buildDZ($item, '.mobile-en-dropzone', '.mobile-en-media-ids', '[mobile_media_ids]');
-                        // Mobile AR
-                        buildDZ($item, '.mobile-ar-dropzone', '.mobile-ar-media-ids', '[mobile_ar_media_ids]');
-                    }
-
-                    // تهيئة الـ repeater مرّة واحدة (شلت التكرار اللي كان عندك)
-                    $('.invoice-repeater').repeater({
-                        show: function () {
-                            const $item = $(this);
-
-                            // reset بعض الـ UI حسب رغبتك
-                            $item.find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
-                            $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
-
-                            $item.show();
-
-                            if (window.feather) feather.replace();
-
-                            // لازم ندي وقت صغير لبناء DOM جوه العنصر بعد العرض
-                            setTimeout(function () { initCarouselDropzone($item); }, 50);
-
-                            // إظهار زر الحذف لو أكتر من عنصر
-                            const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
-                            $items.each(function () {
-                                $(this).find('[data-repeater-delete]').toggle($items.length > 1);
-                            });
-
-                            // لو عندك دوال تانية لربط معاينات… نادِها هنا
-                            if (typeof bindPreviewAutoShow === 'function') bindPreviewAutoShow($item);
-                        },
-
-                        hide: function (deleteElement) {
-                            const $repeater = $(this).closest('.invoice-repeater');
-                            const $items = $repeater.find('[data-repeater-item]');
-
-                            if ($items.length === 1) {
-                                alert('At least one item is required.');
-                                return;
-                            }
-
-                            $(this).slideUp(deleteElement, function () {
-                                $(this).remove();
-                                const $remaining = $repeater.find('[data-repeater-item]');
-                                $remaining.each(function () {
-                                    $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
-                                });
-                            });
-                        }
-                    });
-
-                    // بعد تحميل الصفحة: فعّل DZ لكل العناصر الموجودة مسبقاً
-                    document.addEventListener("DOMContentLoaded", function () {
-                        $('[data-repeater-item]').each(function () {
-                            initCarouselDropzone($(this));
-                        });
-                    });
-                })();
-            </script>
+            // بعد تحميل الصفحة: فعّل DZ لكل العناصر الموجودة مسبقاً
+            document.addEventListener("DOMContentLoaded", function () {
+            $('[data-repeater-item]').each(function () {
+            initCarouselDropzone($(this));
+            });
+            });
 
             <script !src="">
         handleAjaxFormSubmit(".carousel-form",{
@@ -2362,51 +2286,51 @@
                     });
 
                     // Repeater init
-                    $('.invoice-repeater').repeater({
-                        show: function () {
-                            const $item = $(this);
-
-                            // reset uploaded thumbnail box
-                            $item.find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
-
-                            // keep previews hidden for brand-new items (until user types)
-                            $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
-
-                            // insert (avoid slideDown if you don't want animation)
-                            $item.show();
-
-                            // icons & dropzones
-                            if (window.feather) feather.replace();
-                            setTimeout(function () { initCarouselDropzone($item); }, 100);
-
-                            // toggle delete if only one item
-                            const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
-                            $items.each(function () {
-                                $(this).find('[data-repeater-delete]').toggle($items.length > 1);
-                            });
-
-                            // ✅ FIX: bind for the newly added item using the correct var
-                            bindPreviewAutoShow($item);
-                        },
-
-                        hide: function (deleteElement) {
-                            const $repeater = $(this).closest('.invoice-repeater');
-                            const $items = $repeater.find('[data-repeater-item]');
-
-                            if ($items.length === 1) {
-                                alert('At least one item is required.');
-                                return;
-                            }
-
-                            $(this).slideUp(deleteElement, function () {
-                                $(this).remove();
-                                const $remaining = $repeater.find('[data-repeater-item]');
-                                $remaining.each(function () {
-                                    $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
-                                });
-                            });
-                        }
-                    });
+                    // $('.invoice-repeater').repeater({
+                    //     show: function () {
+                    //         const $item = $(this);
+                    //
+                    //         // reset uploaded thumbnail box
+                    //         $item.find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
+                    //
+                    //         // keep previews hidden for brand-new items (until user types)
+                    //         $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
+                    //
+                    //         // insert (avoid slideDown if you don't want animation)
+                    //         $item.show();
+                    //
+                    //         // icons & dropzones
+                    //         if (window.feather) feather.replace();
+                    //         setTimeout(function () { initCarouselDropzone($item); }, 100);
+                    //
+                    //         // toggle delete if only one item
+                    //         const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
+                    //         $items.each(function () {
+                    //             $(this).find('[data-repeater-delete]').toggle($items.length > 1);
+                    //         });
+                    //
+                    //         // ✅ FIX: bind for the newly added item using the correct var
+                    //         bindPreviewAutoShow($item);
+                    //     },
+                    //
+                    //     hide: function (deleteElement) {
+                    //         const $repeater = $(this).closest('.invoice-repeater');
+                    //         const $items = $repeater.find('[data-repeater-item]');
+                    //
+                    //         if ($items.length === 1) {
+                    //             alert('At least one item is required.');
+                    //             return;
+                    //         }
+                    //
+                    //         $(this).slideUp(deleteElement, function () {
+                    //             $(this).remove();
+                    //             const $remaining = $repeater.find('[data-repeater-item]');
+                    //             $remaining.each(function () {
+                    //                 $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
+                    //             });
+                    //         });
+                    //     }
+                    // });
                 });
             </script>
 
