@@ -155,7 +155,7 @@
                                         <option value="" selected disabled>Select Size</option>
                                     </select>
                                     <small class="form-text text-muted">
-                                        If no size is selected, the default 620×620 will be applied.
+                                        If no size is selected, the default 650×650 will be applied.
                                     </small>
                                 </div>
 
