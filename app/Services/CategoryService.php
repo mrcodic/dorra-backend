@@ -296,6 +296,7 @@ class CategoryService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+        dd($validatedData);
         $model = $this->repository->update($validatedData, $id);
         if (Arr::has($validatedData, 'image_id') && !is_null($validatedData['image_id'])) {
             $model->clearMediaCollection('categories');

@@ -16,7 +16,6 @@ class SubCategoryController extends DashboardController
     public function __construct(public CategoryService             $categoryService,
                                 public CategoryRepositoryInterface $categoryRepository,)
     {
-
         parent::__construct($categoryService);
         $this->storeRequestClass = new StoreSubCategoryRequest();
         $this->updateRequestClass = new UpdateSubCategoryRequest();
