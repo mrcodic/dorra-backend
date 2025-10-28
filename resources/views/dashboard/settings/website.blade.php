@@ -216,7 +216,7 @@
                                             <div class="mobile-media-ids"></div>
 
                                             {{-- Website Image Upload --}}
-                                            <label class="form-label">Website Image</label>
+                                            <label class="form-label">Website Image En</label>
                                             <div class="dropzone website-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
 
@@ -229,6 +229,17 @@
                                                 </div>
                                             </div>
 
+                                            <label class="form-label">Website Image Ar</label>
+                                            <div class="dropzone website-dropzone"></div>
+                                            <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                            <div class="upload-wrapper">
+                                                <div class="uploaded-image d-none mt-2">
+                                                    <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                </div>
+                                                <div class="progress upload-progress d-none">
+                                                    <div class="progress-bar" style="width:0%"></div>
+                                                </div>
+                                            </div>
                                             {{-- Mobile Image Upload --}}
                                             <label class="form-label mt-1">Mobile Image</label>
                                             <div class="dropzone mobile-dropzone"></div>
@@ -457,8 +468,6 @@
                         @endforelse
                     </div>
 
-                    {{-- Hidden template for adding new items --}}
-                
 
                     <div class="text-start d-flex justify-content-end mb-2">
                         <button type="button" data-repeater-create class="btn btn-primary">
