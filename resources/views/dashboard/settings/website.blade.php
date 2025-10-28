@@ -279,26 +279,26 @@
                                                         </div>
                                                     </div>
 
-                                                <div class="col-12 col-md-6">
-                                                    {{-- Mobile Image Ar Upload --}}
-                                                    <label class="form-label mt-1">Mobile Image Ar</label>
-                                                    <div class="dropzone mobile-ar-dropzone"></div>
-                                                    <small class="text d-block mb-2">Recommended: 375×672 px, max 2
-                                                        MB</small>
+                                                    <div class="col-12 col-md-6">
+                                                        {{-- Mobile Image Ar Upload --}}
+                                                        <label class="form-label mt-1">Mobile Image Ar</label>
+                                                        <div class="dropzone mobile-ar-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2
+                                                            MB</small>
 
-                                                    <div class="upload-wrapper">
-                                                        <div
-                                                            class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels_ar') ? '' : 'd-none' }} mt-2">
-                                                            <img
-                                                                src="{{ $carousel->getFirstMediaUrl('mobile_carousels_ar') }}"
-                                                                class="img-fluid rounded"
-                                                                style="width:50px;height:50px;object-fit:cover;">
-                                                        </div>
-                                                        <div class="progress upload-progress d-none">
-                                                            <div class="progress-bar" style="width:0%"></div>
+                                                        <div class="upload-wrapper">
+                                                            <div
+                                                                class="uploaded-image {{ $carousel->getFirstMediaUrl('mobile_carousels_ar') ? '' : 'd-none' }} mt-2">
+                                                                <img
+                                                                    src="{{ $carousel->getFirstMediaUrl('mobile_carousels_ar') }}"
+                                                                    class="img-fluid rounded"
+                                                                    style="width:50px;height:50px;object-fit:cover;">
+                                                            </div>
+                                                            <div class="progress upload-progress d-none">
+                                                                <div class="progress-bar" style="width:0%"></div>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
                                                 </div>
                                                 {{-- Titles --}}
                                                 <div class="row mb-3 mt-4">
@@ -426,32 +426,33 @@
                                                 <div class="mobile-media-ids"></div>
                                                 <div class="mobile-ar-media-ids"></div>
                                                 <div class="row g-3 align-items-start">
-                                                {{-- Website Image En Upload --}}
-                                                <label class="form-label">Website Image En</label>
-                                                <div class="dropzone website-dropzone"></div>
-                                                <small class="text d-block mb-2">Recommended: 1920×520 px, max 2
-                                                    MB</small>
                                                     <div class="col-12 col-md-6">
-
-                                                {{-- Website Image Ar Upload --}}
-                                                <label class="form-label">Website Image Ar</label>
-                                                <div class="dropzone website-ar-dropzone"></div>
-                                                <small class="text d-block mb-2">Recommended: 1920×520 px, max 2
-                                                    MB</small>
+                                                        {{-- Website Image En Upload --}}
+                                                        <label class="form-label">Website Image En</label>
+                                                        <div class="dropzone website-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2
+                                                            MB</small>
                                                     </div>
                                                     <div class="col-12 col-md-6">
-                                                {{-- Mobile Image En Upload --}}
-                                                <label class="form-label mt-1">Mobile Image En</label>
-                                                <div class="dropzone mobile-dropzone"></div>
-                                                <small class="text d-block mb-2">Recommended: 375×672 px, max 2
-                                                    MB</small>
+                                                        {{-- Website Image Ar Upload --}}
+                                                        <label class="form-label">Website Image Ar</label>
+                                                        <div class="dropzone website-ar-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 1920×520 px, max 2
+                                                            MB</small>
                                                     </div>
                                                     <div class="col-12 col-md-6">
-                                                {{-- Mobile Image Ar Upload --}}
-                                                <label class="form-label mt-1">Mobile Image Ar</label>
-                                                <div class="dropzone mobile-ar-dropzone"></div>
-                                                <small class="text d-block mb-2">Recommended: 375×672 px, max 2
-                                                    MB</small>
+                                                        {{-- Mobile Image En Upload --}}
+                                                        <label class="form-label mt-1">Mobile Image En</label>
+                                                        <div class="dropzone mobile-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2
+                                                            MB</small>
+                                                    </div>
+                                                    <div class="col-12 col-md-6">
+                                                        {{-- Mobile Image Ar Upload --}}
+                                                        <label class="form-label mt-1">Mobile Image Ar</label>
+                                                        <div class="dropzone mobile-ar-dropzone"></div>
+                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2
+                                                            MB</small>
                                                     </div>
                                                 </div>
                                                 {{-- Titles --}}
