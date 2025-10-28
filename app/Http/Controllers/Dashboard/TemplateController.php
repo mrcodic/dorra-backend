@@ -107,8 +107,7 @@ class TemplateController extends DashboardController
                 config('services.editor_url') . 'templates/' . $template->id . '?is_clear'
         ]);
     }
-    use Illuminate\Http\Request;
-    use Illuminate\Support\Facades\Validator;
+
 
     public function update(Request $request, string $id)
     {
