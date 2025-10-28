@@ -383,7 +383,7 @@
                                                 <div class="mb-2">
                                                     <label class="form-label">Select Category</label>
                                                     <select name="product_id" class="form-select">
-                                                        <option disabled>Select a category</option>
+                                                        <option >Select a category</option>
                                                         @foreach($products as $product)
                                                             <option
                                                                 value="{{ $product->id }}" {{ $carousel->product_id == $product->id ? 'selected' : '' }}>
@@ -395,7 +395,7 @@
                                                 <div class="mb-2">
                                                     <label class="form-label">Select Product</label>
                                                     <select name="category_id" class="form-select">
-                                                        <option disabled>Select a product</option>
+                                                        <option >Select a product</option>
                                                         @foreach($categories as $category)
                                                             <option
                                                                 value="{{ $category->id }}">{{ $category->name }}</option>
@@ -525,7 +525,7 @@
                                                 <div class="mb-2">
                                                     <label class="form-label">Select Category</label>
                                                     <select name="product_id" class="form-select">
-                                                        <option disabled >Select a category</option>
+                                                        <option  >Select a category</option>
                                                         @foreach($products as $product)
                                                             <option
                                                                 value="{{ $product->id }}">{{ $product->name }}</option>
@@ -535,7 +535,7 @@
                                                 <div class="mb-2">
                                                     <label class="form-label">Select Product</label>
                                                     <select name="category_id" class="form-select">
-                                                        <option disabled >Select a product</option>
+                                                        <option  >Select a product</option>
                                                         @foreach($categories as $category)
                                                             <option
                                                                 value="{{ $category->id }}">{{ $category->name }}</option>
