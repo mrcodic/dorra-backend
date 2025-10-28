@@ -161,7 +161,6 @@ class TemplateService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        dd($validatedData);
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
             $model = $this->repository->update($validatedData, $id);
             if (!empty($validatedData['types'])) {
