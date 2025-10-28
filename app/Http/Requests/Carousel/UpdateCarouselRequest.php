@@ -32,7 +32,9 @@ class UpdateCarouselRequest extends BaseRequest
             'carousels.*.subtitle_ar' => ['nullable', 'string', 'max:255'],
             'carousels.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'carousels.*.website_media_ids' => ['sometimes','exists:media,id'],
+            'carousels.*.website_ar_media_ids' => ['sometimes','exists:media,id',],
             'carousels.*.mobile_media_ids' => ['sometimes','exists:media,id',],
+            'carousels.*.mobile_ar_media_ids' => ['sometimes','exists:media,id',],
             'carousels.*.title_color' => ['nullable', 'starts_with:#', 'regex:/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/'],
             'carousels.*.subtitle_color' => ['nullable', 'starts_with:#', 'regex:/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/'],
 
