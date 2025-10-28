@@ -53,7 +53,19 @@
                         <label for="edit-sub-category-name-ar" class="form-label label-text">Name (AR)</label>
                         <input type="text" class="form-control" id="edit-sub-category-name-ar" name="name[ar]">
                     </div>
-
+                    <!-- Description in Arabic and English -->
+                    <div class="row mb-1">
+                        <div class="col-lg-6">
+                            <label class="form-label label-text">Description (EN)</label>
+                            <textarea class="form-control" id="add-category-description-en"
+                                      placeholder="Enter Description Name(En)" name="description[en]" rows="2"></textarea>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label label-text">Description (AR)</label>
+                            <textarea class="form-control" id="add-category-description-ar"
+                                      placeholder="Enter Description Name(Ar)" name="description[ar]" rows="2"></textarea>
+                        </div>
+                    </div>
                     <div class="mb-1">
                         <label for="edit-sub-category-parent-id" class="form-label label-text">Main Product</label>
                         <select name="parent_id" class="form-select">

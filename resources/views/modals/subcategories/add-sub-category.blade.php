@@ -52,8 +52,7 @@
                     </div>
                 </div>
 
-                    <div class="row mb-3">
-                        <div class="col-12">
+                <div class="mb-1">
                             <label class="form-label label-text">Product</label>
                             <select name="parent_id" class="form-select" id="">
                                 <option value="" disabled selected>Choose Main Product</option>
@@ -63,9 +62,7 @@
                                 @endforeach
 
                             </select>
-                        </div>
-                    </div>
-
+                   
                 </div>
 
                 <div class="modal-footer border-top-0">
