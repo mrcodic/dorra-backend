@@ -114,16 +114,15 @@ class TemplateController extends DashboardController
         // Validate (this will throw a 422 JSON if the client sends Accept: application/json)
         $rules     = $this->updateRequestClass->rules($id);
         $validated = Validator::make($request->all(), $rules)->validate();
-dd($validated);
-        // Save/update
+       // Save/update
         $model = $this->service->updateResource($validated, $id);
 
         // If the caller clicked “Save & Edit”
         if ($request->boolean('go_to_editor')) {
             $editorUrl = config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1';
-            dd($editorUrl);
+
             // ✅ For normal form submit: do an HTTP redirect (302 is expected)
-            return redirect()->away($editorUrl);
+            return redirect($editorUrl);
         }
 
         // Normal JSON response
