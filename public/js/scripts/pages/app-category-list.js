@@ -623,7 +623,7 @@ $(document).ready(function () {
                     duration: 1500,
                     gravity: "top",
                     position: "right",
-                    backgroundColor: "#28a745",
+                    backgroundColor: "#EA5455",
                     close: true,
                 }).showToast();
 
