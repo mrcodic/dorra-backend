@@ -20,7 +20,7 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     TemplateRepositoryInterface};
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Cache, Response};
+use Illuminate\Support\Facades\{Cache, Response, Validator};
 
 
 class TemplateController extends DashboardController
@@ -109,7 +109,9 @@ class TemplateController extends DashboardController
     }
     public function update(Request $request, string $id)
     {
-        $model = $this->service->updateResource($this->updateRequestClass->rules($id), $id);
+        $rules = $this->updateRequestClass->rules($id);
+        $validated = Validator::make($request->all(), $rules)->validate();
+        $model = $this->service->updateResource($validated, $id);
         if ($request->boolean('go_to_editor')) {
             $editorUrl = config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1';
             return redirect()->away($editorUrl);

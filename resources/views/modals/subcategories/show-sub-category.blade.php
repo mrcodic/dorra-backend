@@ -21,7 +21,19 @@
                 </div>
 
 
-                <!-- Subcategories -->
+                <!-             <!-- Description in Arabic and English -->
+                <div class="row mb-1">
+                    <div class="col-lg-6">
+                        <label class="form-label label-text">Description (EN)</label>
+                        <textarea class="form-control" id="edit-category-description-en"
+                                  placeholder="Enter Description Name(En)" name="description[en]" rows="2"></textarea>
+                    </div>
+                    <div class="col-lg-6">
+                        <label class="form-label label-text">Description (AR)</label>
+                        <textarea class="form-control" id="edit-category-description-ar"
+                                  placeholder="Enter Description Name(Ar)" name="description[ar]" rows="2"></textarea>
+                    </div>
+                </div>- Subcategories -->
                 <div class="mb-1">
                     <label class="form-label label-text" for="parent-name">Main Product</label>
                     <input type="text" class="form-control" id="parent-name" disabled />

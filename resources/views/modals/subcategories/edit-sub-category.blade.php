@@ -57,12 +57,12 @@
                     <div class="row mb-1">
                         <div class="col-lg-6">
                             <label class="form-label label-text">Description (EN)</label>
-                            <textarea class="form-control" id="add-category-description-en"
+                            <textarea class="form-control" id="sub-category-description-en"
                                       placeholder="Enter Description Name(En)" name="description[en]" rows="2"></textarea>
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label label-text">Description (AR)</label>
-                            <textarea class="form-control" id="add-category-description-ar"
+                            <textarea class="form-control" id="sub-category-description-ar"
                                       placeholder="Enter Description Name(Ar)" name="description[ar]" rows="2"></textarea>
                         </div>
                     </div>

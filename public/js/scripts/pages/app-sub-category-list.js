@@ -221,11 +221,11 @@ $(document).ready(function () {
         // Populate modal
         $("#editSubCategoryModal #edit-sub-category-name-ar").val(categoryNameAR);
         $("#editSubCategoryModal #edit-sub-category-name-en").val(categoryNameEn);
-        $("#showSubCategoryModal #sub-category-description-ar").val(categoryDescriptionAR);
-        $("#showSubCategoryModal #sub-category-description-en").val(categoryDescriptionEn);
+        $("#showSubCategoryModal #edit-sub-category-description-ar").val(categoryDescriptionAR);
+        $("#showSubCategoryModal #edit-sub-category-description-en").val(categoryDescriptionEn);
         $("#editSubCategoryModal #edit-preview-image").src(categoryImage);
         $("#editSubCategoryModal #edit-sub-category-date").val(addedDate);
-        $("#editSubCategoryModal #edit-sub-category-id").val(id);
+        $("#editSubCategoryModal #edit-sub-category-parent-id").val(id);
         $("#editSubCategoryModal select[name='parent_id']").val(parentId);
 
         // Show modal
