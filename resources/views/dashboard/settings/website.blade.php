@@ -470,8 +470,12 @@
                                     <div class="website-ar-media-ids"></div>
                                     <div class="mobile-media-ids"></div>
 
-                                    <label class="form-label">Website Image</label>
-                                    <div class="dropzone website-dropzone"></div>
+                                    <!-- Website EN -->
+                                    <div class="mb-2">
+                                        <label class="form-label">Website Image (EN)</label>
+                                        <div class="website-en-dropzone dropzone border rounded p-2"></div>
+                                        <div class="website-en-media-ids"></div>
+                                    </div>
                                     <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
                                     <div class="upload-wrapper">
                                         <div class="uploaded-image d-none mt-2">
@@ -482,8 +486,28 @@
                                         </div>
                                     </div>
 
-                                    <label class="form-label mt-1">Mobile Image</label>
-                                    <div class="dropzone mobile-dropzone"></div>
+                                    <!-- Website AR -->
+                                    <div class="mb-2">
+                                        <label class="form-label">Website Image (AR)</label>
+                                        <div class="website-ar-dropzone dropzone border rounded p-2"></div>
+                                        <div class="website-ar-media-ids"></div>
+                                    </div>
+                                    <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                    <div class="upload-wrapper">
+                                        <div class="uploaded-image d-none mt-2">
+                                            <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                        </div>
+                                        <div class="progress upload-progress d-none">
+                                            <div class="progress-bar" style="width:0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mobile EN -->
+                                    <div class="mb-2">
+                                        <label class="form-label">Mobile Image (EN)</label>
+                                        <div class="mobile-en-dropzone dropzone border rounded p-2"></div>
+                                        <div class="mobile-en-media-ids"></div>
+                                    </div>
                                     <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
                                     <div class="upload-wrapper">
                                         <div class="uploaded-image d-none mt-2">
@@ -494,6 +518,22 @@
                                         </div>
                                     </div>
 
+                                    <!-- Mobile AR -->
+                                    <div class="mb-2">
+                                        <label class="form-label">Mobile Image (AR)</label>
+                                        <div class="mobile-ar-dropzone dropzone border rounded p-2"></div>
+                                        <div class="mobile-ar-media-ids"></div>
+                                    </div>
+
+                                    <small class="text d-block mb-2">Recommended: 375×672 px, max 2 MB</small>
+                                    <div class="upload-wrapper">
+                                        <div class="uploaded-image d-none mt-2">
+                                            <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                        </div>
+                                        <div class="progress upload-progress d-none">
+                                            <div class="progress-bar" style="width:0%"></div>
+                                        </div>
+                                    </div>
                                     <div class="row mb-3 mt-4">
                                         <div class="col-md-6">
                                             <label class="form-label">Title in English</label>
@@ -1299,219 +1339,146 @@
             });
     </script>
 
-    <script>
-        Dropzone.autoDiscover = false; // 🔑 prevents Dropzone from auto-binding
+            <script>
+                Dropzone.autoDiscover = false;
 
-                document.addEventListener("DOMContentLoaded", function () {
-                    @foreach($carousels as $index => $carousel)
-                    initCarouselDropzone({{ $index }});
-                    @endforeach
+                (function () {
+                    const CSRF = document.querySelector('meta[name="csrf-token"]').content;
+                    const UPLOAD_URL = "{{ route('media.store') }}";
+                    const DELETE_URL = "{{ url('api/v1/media') }}/"; // + id
 
-                    @if($carousels->isEmpty())
-                    initCarouselDropzone(0);
-                    @endif
-                });
-                function initCarouselDropzone($item) {
-                    $item = $($item);
+                    // يبني Dropzone لأي عنصر + يضيف input مخفي داخل container المحدد
+                    function buildDZ($item, boxSelector, idsContainerSelector, fieldSuffix) {
+                        const el = $item.find(boxSelector)[0];
+                        if (!el || el.dropzone) return; // متعملش bind تاني
 
-                    // ensure containers exist
-                    if ($item.find('.website-media-ids').length === 0) {
-                        $item.append('<div class="website-media-ids"></div>');
-                    }
-                    if ($item.find('.mobile-media-ids').length === 0) {
-                        $item.append('<div class="mobile-media-ids"></div>');
-                    }
+                        // تأكيد وجود الحاوية
+                        if ($item.find(idsContainerSelector).length === 0) {
+                            $item.append(`<div class="${idsContainerSelector.replace('.', '')}"></div>`);
+                        }
 
-                    let websiteEl = $item.find('.website-dropzone')[0];
-                    let websiteElAr = $item.find('.website-ar-dropzone')[0];
-                    if (websiteEl && !websiteEl.dropzone) {
-                        new Dropzone(websiteEl, {
-                            url: "{{ route('media.store') }}",
-                            maxFilesize: 2,
-                            maxFiles: 1,
-                            dictDefaultMessage: "Drag images here to upload",
-                            acceptedFiles: ".jpeg,.jpg,.png,.svg",
-                            addRemoveLinks: true,
-                            init: function () {
-                                this.on("maxfilesexceeded", function (file) {
-                                    this.removeAllFiles();  // remove old one
-                                    this.addFile(file);     // add the new one
-                                });
-                            },
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            success: function (file, response) {
-                                let hidden = document.createElement('input');
-                                hidden.type = "hidden";
-
-                                // Find the repeater index (example: carousels[0])
-                                let baseName = $item.find('input[name*="[id]"]').attr('name');
-                                if (baseName) {
-                                    let prefix = baseName.replace(/\[id\]$/, ''); // remove trailing [id]
-                                    hidden.name = prefix + '[website_media_ids][]';
-                                } else {
-                                    // fallback (if not found)
-                                    hidden.name = 'carousels[0][website_media_ids][]';
-                                }
-
-                                hidden.value = response.data.id;
-                                $item.find('.website-media-ids').append(hidden);
-
-                                // Keep reference for removal later
-                                file._hiddenInput = hidden;
-                            },
-
-                            removedfile: function (file) {
-                                if (file.previewElement != null) {
-                                    file.previewElement.parentNode.removeChild(file.previewElement);
-                                }
-                                if (file._hiddenInput) {
-                                    file._hiddenInput.remove();
-                                }
-
-                                if (file.xhr) {
-                                    let response = JSON.parse(file.xhr.response);
-
-                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
-                                        method: "DELETE",
-                                        headers: {
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                        }
-                                    });
-                                }
-
-                            }
-
-                        });
-                    }
-                    if (websiteElAr && !websiteElAr.dropzone) {
-                        new Dropzone(websiteElAr, {
-                            url: "{{ route('media.store') }}",
-                            maxFilesize: 2,
-                            maxFiles: 1,
-                            dictDefaultMessage: "Drag images here to upload",
-                            acceptedFiles: ".jpeg,.jpg,.png,.svg",
-                            addRemoveLinks: true,
-                            init: function () {
-                                this.on("maxfilesexceeded", function (file) {
-                                    this.removeAllFiles();  // remove old one
-                                    this.addFile(file);     // add the new one
-                                });
-                            },
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            success: function (file, response) {
-                                let hidden = document.createElement('input');
-                                hidden.type = "hidden";
-
-                                // Find the repeater index (example: carousels[0])
-                                let baseName = $item.find('input[name*="[id]"]').attr('name');
-                                if (baseName) {
-                                    let prefix = baseName.replace(/\[id\]$/, ''); // remove trailing [id]
-                                    hidden.name = prefix + '[website_ar_media_ids][]';
-                                } else {
-                                    // fallback (if not found)
-                                    hidden.name = 'carousels[0][website_ar_media_ids][]';
-                                }
-
-                                hidden.value = response.data.id;
-                                $item.find('.website-ar-media-ids').append(hidden);
-
-                                // Keep reference for removal later
-                                file._hiddenInput = hidden;
-                            },
-
-                            removedfile: function (file) {
-                                if (file.previewElement != null) {
-                                    file.previewElement.parentNode.removeChild(file.previewElement);
-                                }
-                                if (file._hiddenInput) {
-                                    file._hiddenInput.remove();
-                                }
-
-                                if (file.xhr) {
-                                    let response = JSON.parse(file.xhr.response);
-
-                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
-                                        method: "DELETE",
-                                        headers: {
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                        }
-                                    });
-                                }
-
-                            }
-
-                        });
-                    }
-
-                    let mobileEl = $item.find('.mobile-dropzone')[0];
-                    if (mobileEl && !mobileEl.dropzone) {
-                        new Dropzone(mobileEl, {
-                            url: "{{ route('media.store') }}",
-                            maxFilesize: 2,
+                        new Dropzone(el, {
+                            url: UPLOAD_URL,
+                            maxFilesize: 2,              // MB
                             maxFiles: 1,
                             acceptedFiles: ".jpeg,.jpg,.png,.svg",
                             addRemoveLinks: true,
                             dictDefaultMessage: "Drag images here to upload",
-
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
+                            headers: { 'X-CSRF-TOKEN': CSRF },
 
                             init: function () {
                                 this.on("maxfilesexceeded", function (file) {
-                                    this.removeAllFiles();  // remove old one
-                                    this.addFile(file);     // add the new one
+                                    this.removeAllFiles();
+                                    this.addFile(file);
                                 });
                             },
+
                             success: function (file, response) {
+                                // استخرج اسم الـ prefix من input بينتهي بـ [id]
+                                let baseName = $item.find('input[name*="[id]"]').attr('name');
                                 let hidden = document.createElement('input');
                                 hidden.type = "hidden";
 
-                                let baseName = $item.find('input[name*="[id]"]').attr('name');
                                 if (baseName) {
-                                    let prefix = baseName.replace(/\[id\]$/, '');
-                                    hidden.name = prefix + '[mobile_media_ids][]';
+                                    let prefix = baseName.replace(/\[id\]$/, ''); // شيل [id]
+                                    hidden.name = `${prefix}${fieldSuffix}[]`;
                                 } else {
-                                    hidden.name = 'carousels[0][mobile_media_ids][]';
+                                    // fallback
+                                    hidden.name = `carousels[0]${fieldSuffix}[]`;
                                 }
 
                                 hidden.value = response.data.id;
-                                $item.find('.mobile-media-ids').append(hidden);
-
-                                file._hiddenInput = hidden;
+                                $item.find(idsContainerSelector).append(hidden);
+                                file._hiddenInput = hidden; // مرجع للإزالة
                             },
 
                             removedfile: function (file) {
-                                if (file.previewElement != null) {
-                                    file.previewElement.parentNode.removeChild(file.previewElement);
-                                }
-                                if (file._hiddenInput) {
-                                    file._hiddenInput.remove();
-                                }
+                                if (file.previewElement) file.previewElement.remove();
+                                if (file._hiddenInput) file._hiddenInput.remove();
 
-                                if (file.xhr) {
-                                    let response = JSON.parse(file.xhr.response);
-
-                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
-                                        method: "DELETE",
-                                        headers: {
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                // لو الرفع نجح، غالباً عندنا xhr بالـ response نقدر نمسح به الميديا
+                                try {
+                                    if (file.xhr) {
+                                        let res = JSON.parse(file.xhr.response);
+                                        if (res?.data?.id) {
+                                            fetch(DELETE_URL + res.data.id, {
+                                                method: "DELETE",
+                                                headers: { 'X-CSRF-TOKEN': CSRF }
+                                            });
                                         }
-                                    });
-                                }
-
+                                    }
+                                } catch (e) {}
                             }
-
                         });
                     }
-                }
 
-    </script>
-    <script !src="">
+                    // يهيّأ الـ Dropzones الأربع داخل item واحد
+                    function initCarouselDropzone($item) {
+                        // Website EN
+                        buildDZ($item, '.website-en-dropzone', '.website-en-media-ids', '[website_media_ids]');
+                        // Website AR
+                        buildDZ($item, '.website-ar-dropzone', '.website-ar-media-ids', '[website_ar_media_ids]');
+                        // Mobile EN
+                        buildDZ($item, '.mobile-en-dropzone', '.mobile-en-media-ids', '[mobile_media_ids]');
+                        // Mobile AR
+                        buildDZ($item, '.mobile-ar-dropzone', '.mobile-ar-media-ids', '[mobile_ar_media_ids]');
+                    }
+
+                    // تهيئة الـ repeater مرّة واحدة (شلت التكرار اللي كان عندك)
+                    $('.invoice-repeater').repeater({
+                        show: function () {
+                            const $item = $(this);
+
+                            // reset بعض الـ UI حسب رغبتك
+                            $item.find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
+                            $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
+
+                            $item.show();
+
+                            if (window.feather) feather.replace();
+
+                            // لازم ندي وقت صغير لبناء DOM جوه العنصر بعد العرض
+                            setTimeout(function () { initCarouselDropzone($item); }, 50);
+
+                            // إظهار زر الحذف لو أكتر من عنصر
+                            const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
+                            $items.each(function () {
+                                $(this).find('[data-repeater-delete]').toggle($items.length > 1);
+                            });
+
+                            // لو عندك دوال تانية لربط معاينات… نادِها هنا
+                            if (typeof bindPreviewAutoShow === 'function') bindPreviewAutoShow($item);
+                        },
+
+                        hide: function (deleteElement) {
+                            const $repeater = $(this).closest('.invoice-repeater');
+                            const $items = $repeater.find('[data-repeater-item]');
+
+                            if ($items.length === 1) {
+                                alert('At least one item is required.');
+                                return;
+                            }
+
+                            $(this).slideUp(deleteElement, function () {
+                                $(this).remove();
+                                const $remaining = $repeater.find('[data-repeater-item]');
+                                $remaining.each(function () {
+                                    $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
+                                });
+                            });
+                        }
+                    });
+
+                    // بعد تحميل الصفحة: فعّل DZ لكل العناصر الموجودة مسبقاً
+                    document.addEventListener("DOMContentLoaded", function () {
+                        $('[data-repeater-item]').each(function () {
+                            initCarouselDropzone($(this));
+                        });
+                    });
+                })();
+            </script>
+
+            <script !src="">
         handleAjaxFormSubmit(".carousel-form",{
             successMessage: "Done",
             onSuccess:function (){

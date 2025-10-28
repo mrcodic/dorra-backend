@@ -102,6 +102,15 @@ class SettingController extends Controller
                         'collection_name' => 'carousels',
                     ]);
             }
+            if (Arr::get($carouselData, 'website_ar_media_ids')) {
+                $carousel->clearMediaCollection('carousels');
+                Media::whereIn('id', $carouselData['website_ar_media_ids'])
+                    ->update([
+                        'model_type' => Carousel::class,
+                        'model_id' => $carousel->id,
+                        'collection_name' => 'website_ar_carousels',
+                    ]);
+            }
 
             // Attach mobile media
             if (Arr::get($carouselData, 'mobile_media_ids')) {
@@ -111,6 +120,15 @@ class SettingController extends Controller
                         'model_type' => Carousel::class,
                         'model_id' => $carousel->id,
                         'collection_name' => 'mobile_carousels',
+                    ]);
+            }
+            if (Arr::get($carouselData, 'mobile_ar_media_ids')) {
+                $carousel->clearMediaCollection('mobile_carousels');
+                Media::whereIn('id', $carouselData['mobile_ar_media_ids'])
+                    ->update([
+                        'model_type' => Carousel::class,
+                        'model_id' => $carousel->id,
+                        'collection_name' => 'mobile_ar_carousels',
                     ]);
             }
         });
