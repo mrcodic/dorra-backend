@@ -208,6 +208,7 @@ $(document).ready(function () {
     });
 
     $(document).on("click", ".edit-details", function (e) {
+
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
         const categoryDescriptionAR = $(this).data("description_ar");
@@ -226,6 +227,7 @@ $(document).ready(function () {
         // $("#editSubCategoryModal #edit-preview-image").src(categoryImage);
         $("#editSubCategoryModal #edit-sub-category-date").val(addedDate);
         $("#editSubCategoryModal #edit-sub-category-parent-id").val(id);
+        $("#editSubCategoryModal #editSubCategoryForm").action(`sub-categories/${id}`);
         $("#editSubCategoryModal select[name='parent_id']").val(parentId);
 
         // Show modal
