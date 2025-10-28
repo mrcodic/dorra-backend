@@ -234,8 +234,8 @@
                                             <div class="dropzone website-ar-dropzone"></div>
                                             <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
                                             <div class="upload-wrapper">
-                                                <div class="uploaded-image d-none mt-2">
-                                                    <img src="" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
+                                                <div class="uploaded-image {{ $carousel->getFirstMediaUrl('carousels_ar') ? '' : 'd-none' }} mt-2">
+                                                    <img src="{{ $carousel->getFirstMediaUrl('carousels_ar') }}" class="img-fluid rounded" style="width:50px;height:50px;object-fit:cover;">
                                                 </div>
                                                 <div class="progress upload-progress d-none">
                                                     <div class="progress-bar" style="width:0%"></div>
