@@ -172,17 +172,10 @@ class TemplateService extends BaseService
                 $model->types()->sync($validatedData['types']);
             }
             $model->products()->sync($validatedData['product_ids'] ?? []);
-            if (!empty($validatedData['category_ids'])) {
-                $model->categories()->sync($validatedData['category_ids']);
-            }
-            if (!empty($validatedData['tags']) ) {
-                $model->tags()->sync($validatedData['tags']);
-            }else{
-                $model->tags()->sync([]);
-            }
-            if (!empty($validatedData['flags'])) {
-                $model->flags()->sync($validatedData['flags']);
-            }
+            $model->categories()->sync($validatedData['category_ids'] ?? []);
+            $model->tags()->sync($validatedData['tags'] ?? []);
+            $model->flags()->sync($validatedData['flags'] ?? []);
+
             if (!empty($validatedData['template_image_id'])) {
                 $model->getMedia('template_model_image')
                     ->where('id', '!=', $validatedData['template_image_id'])
