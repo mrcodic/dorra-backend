@@ -81,7 +81,8 @@ class SettingController extends Controller
                     ],
                     'title_color'    => Arr::get($carouselData, 'title_color'),
                     'subtitle_color'    => Arr::get($carouselData, 'subtitle_color'),
-                    'product_id' => $carouselData['product_id'],
+                    'product_id' => Arr::get($carouselData, 'product_id'),
+                    'category_id' => Arr::get($carouselData, 'category_id'),
                 ]
             );
 
