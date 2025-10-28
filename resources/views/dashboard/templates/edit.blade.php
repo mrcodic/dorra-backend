@@ -189,13 +189,15 @@
                         <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
                             <button type="reset" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
                             <div class="d-flex gap-1">
-                                <button type="submit"
-                                        name="go_to_editor"
-                                        value="1"
-                                        class="btn btn-outline-secondary fs-5">
-                                    <i data-feather="edit-3"></i>
-                                    <span>Save & Edit Design</span>
+                                {{-- default: don't go to editor --}}
+                                <input type="hidden" name="go_to_editor" value="0" id="goToEditorFlag">
+
+
+
+                                <button type="submit" class="btn btn-outline-secondary fs-5 js-go-editor">
+                                    <i data-feather="edit-3"></i> <span>Save & Edit Design</span>
                                 </button>
+
                                 <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
                                     id="SaveChangesButton">
                                     <span>Save Changes</span>
@@ -220,6 +222,23 @@
 
 
 @section('page-script')
+    <script>
+        document.addEventListener('click', function (e) {
+            const submitBtn = e.target.closest('button[type="submit"]');
+            if (!submitBtn) return;
+
+            const form = submitBtn.closest('form');
+            const flag = form.querySelector('input[name="go_to_editor"]');
+
+            // if the clicked submit has the "go editor" class → set 1, otherwise 0
+            if (submitBtn.classList.contains('js-go-editor')) {
+                flag.value = '1';
+            } else {
+                flag.value = '0';
+            }
+        });
+    </script>
+
     <script>
         // Build parallel arrays from current UI selections
         function buildDimensionPayloadFromUI() {
