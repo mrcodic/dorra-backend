@@ -425,35 +425,35 @@
                                                 <div class="website-ar-media-ids"></div>
                                                 <div class="mobile-media-ids"></div>
                                                 <div class="mobile-ar-media-ids"></div>
-
+                                                <div class="row g-3 align-items-start">
                                                 {{-- Website Image En Upload --}}
                                                 <label class="form-label">Website Image En</label>
                                                 <div class="dropzone website-dropzone"></div>
                                                 <small class="text d-block mb-2">Recommended: 1920×520 px, max 2
                                                     MB</small>
-
+                                                    <div class="col-12 col-md-6">
 
                                                 {{-- Website Image Ar Upload --}}
                                                 <label class="form-label">Website Image Ar</label>
                                                 <div class="dropzone website-ar-dropzone"></div>
                                                 <small class="text d-block mb-2">Recommended: 1920×520 px, max 2
                                                     MB</small>
-
-
+                                                    </div>
+                                                    <div class="col-12 col-md-6">
                                                 {{-- Mobile Image En Upload --}}
                                                 <label class="form-label mt-1">Mobile Image En</label>
                                                 <div class="dropzone mobile-dropzone"></div>
                                                 <small class="text d-block mb-2">Recommended: 375×672 px, max 2
                                                     MB</small>
-
-
+                                                    </div>
+                                                    <div class="col-12 col-md-6">
                                                 {{-- Mobile Image Ar Upload --}}
                                                 <label class="form-label mt-1">Mobile Image Ar</label>
                                                 <div class="dropzone mobile-ar-dropzone"></div>
                                                 <small class="text d-block mb-2">Recommended: 375×672 px, max 2
                                                     MB</small>
-
-
+                                                    </div>
+                                                </div>
                                                 {{-- Titles --}}
                                                 <div class="row mb-3 mt-4">
                                                     <div class="col-md-6">
