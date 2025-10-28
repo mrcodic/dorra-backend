@@ -106,8 +106,6 @@
         addRemoveLinks: true,
         dictDefaultMessage: "Drop image here or click to upload",
         init: function () {
-
-
             this.on("success", function (file, response) {
                 if (response.success && response.data) {
                     file._hiddenInputId = response.data.id;
