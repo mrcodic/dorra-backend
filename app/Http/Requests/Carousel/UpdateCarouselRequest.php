@@ -80,22 +80,22 @@ class UpdateCarouselRequest extends BaseRequest
             'carousels.*.mobile_image.mimes' => 'The mobile image must be a file of type: jpeg, png, jpg, svg.',
         ];
     }
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $v) {
-            $rows = (array) $this->input('carousels', []);
-            foreach ($rows as $i => $row) {
-                $hasProduct  = !empty($row['product_id']);
-                $hasCategory = !empty($row['category_id']);
-
-                if ($hasProduct && $hasCategory) {
-                    $v->errors()->add("carousels.$i.product_id",  'Choose either a product OR a category, not both.');
-                    $v->errors()->add("carousels.$i.category_id", 'Choose either a product OR a category, not both.');
-                }
-
-            }
-        });
-    }
+//    public function withValidator(Validator $validator): void
+//    {
+//        $validator->after(function (Validator $v) {
+//            $rows = (array) $this->input('carousels', []);
+//            foreach ($rows as $i => $row) {
+//                $hasProduct  = !empty($row['product_id']);
+//                $hasCategory = !empty($row['category_id']);
+//
+//                if ($hasProduct && $hasCategory) {
+//                    $v->errors()->add("carousels.$i.product_id",  'Choose either a product OR a category, not both.');
+//                    $v->errors()->add("carousels.$i.category_id", 'Choose either a product OR a category, not both.');
+//                }
+//
+//            }
+//        });
+//    }
 
 
 }
