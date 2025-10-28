@@ -3,7 +3,7 @@
     $dimensions = \App\Models\Dimension::query()
     ->where('is_custom', false)
     ->orWhereHas('categories', function ($q) use ($model) {
-    $q->where('dimensionable_id', $model->id)->where('dimensionable_type', get_class($model));
+    $q->where('dimensionable_id', $model?->id)->where('dimensionable_type', get_class($model));
     })
     ->get(['id', 'name']);
 
@@ -73,14 +73,14 @@
 
                             <ul class="nav nav-tabs mb-4 w-100 d-flex justify-content-center" id="formTabs">
                                 <li class="nav-item" style="width: 30%;">
-                                    <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Category
+                                    <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Product
                                         Details</a>
                                 </li>
                                 <li class="nav-item" style="width: 30%;">
                                     <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity & Price</a>
                                 </li>
                                 <li class="nav-item" style="width: 30%;">
-                                    <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Category Specs</a>
+                                    <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Product Specs</a>
                                 </li>
                             </ul>
 
