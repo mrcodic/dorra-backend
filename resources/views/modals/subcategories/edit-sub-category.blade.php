@@ -23,11 +23,11 @@
                                 <span>Drop photo here or click to upload</span>
                             </div>
                         </div>
-                        <input type="hidden" name="sub_image_id" id="editUploadedImage">
+                        <input type="hidden" name="image_id" id="editUploadedImage">
                     </div>
                     <span class="image-hint small">
-                        Max size: 1MB | Dimensions: 512x512 px
-                    </span>
+                            Max size: 1MB | Dimensions: 512x512 px
+                        </span>
 
                     <!-- Upload Progress -->
                     <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
@@ -42,7 +42,8 @@
                         <div id="edit-file-details" class="file-details">
                             <div class="file-name fw-bold"></div>
                             <div class="file-size text-muted small"></div>
-                            </div>
+                        </div>
+                    </div>
                     <div class="mb-1">
                         <label for="edit-sub-category-name-en" class="form-label label-text">Name (EN)</label>
                         <input type="text" class="form-control" id="edit-sub-category-name-en" name="name[en]">
@@ -98,7 +99,7 @@
             this.on("success", function (file, response) {
                 if (response.success && response.data) {
                     file._hiddenInputId = response.data.id;
-                    $("#editUploadedImage").val(response.data.id); // store sub_image_id
+                    $("#editUploadedImage").val(response.data.id); // store image_id
                     $("#edit-preview-image").attr("src", response.data.url);
                 }
 
@@ -121,4 +122,83 @@
         },
     });
 
+</script>
+<script>
+    $(document).ready(function () {
+        const input = $('#edit-category-image');
+        const uploadArea = $('#edit-upload-area');
+        const progressBar = $('#edit-upload-progress .progress-bar');
+        const progressContainer = $('#edit-upload-progress');
+        const uploadedImage = $('#edit-uploaded-image');
+        const imgPreview = $('#edit-preview-image');
+        const fileNameDisplay = $('#edit-file-details .file-name');
+        const fileSizeDisplay = $('#edit-file-details .file-size');
+        const removeBtn = $('#edit-remove-image');
+
+        // Click upload area to open file input
+        uploadArea.on('click', function () {
+            input.click();
+        });
+
+        // Drag over styles
+        uploadArea.on('dragover', function (e) {
+            e.preventDefault();
+            uploadArea.addClass('dragover');
+        });
+
+        uploadArea.on('dragleave', function (e) {
+            e.preventDefault();
+            uploadArea.removeClass('dragover');
+        });
+
+        uploadArea.on('drop', function (e) {
+            e.preventDefault();
+            uploadArea.removeClass('dragover');
+            const files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) handleFile(files[0]);
+        });
+
+        // File input change
+        input.on('change', function (e) {
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) return;
+
+            const fileSizeKB = (file.size / 1024).toFixed(2) + ' KB';
+            progressContainer.removeClass('d-none');
+            progressBar.css('width', '0%');
+
+            let progress = 0;
+            const interval = setInterval(function () {
+                progress += 10;
+                progressBar.css('width', progress + '%');
+                if (progress >= 100) {
+                    clearInterval(interval);
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imgPreview.attr('src', e.target.result);
+                        fileNameDisplay.text(file.name);
+                        fileSizeDisplay.text(fileSizeKB);
+                        uploadedImage.removeClass('d-none');
+                        progressContainer.addClass('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }, 100);
+        }
+
+        // Remove image
+        removeBtn.on('click', function () {
+            imgPreview.attr('src', '');
+            fileNameDisplay.text('');
+            fileSizeDisplay.text('');
+            uploadedImage.addClass('d-none');
+            input.val('');
+        });
+
+        feather.replace();
+    });
 </script>
