@@ -121,7 +121,7 @@ class TemplateController extends DashboardController
     public function updateEditorData(UpdateTemplateEditorRequest $request, $id)
     {
 
-        $template = $this->templateService->updateResource($request->validated(), $id);
+        $template = $this->templateService->updateResource($this->updateRequestClass->rules($id), $id);
         return Response::api(data: $this->resourceClass::make($template));
     }
     public function show($id)
