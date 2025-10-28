@@ -121,17 +121,7 @@ dd($validated);
         // If the caller clicked “Save & Edit”
         if ($request->boolean('go_to_editor')) {
             $editorUrl = config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1';
-
-            // ✅ For AJAX/JSON callers: return 200 with the URL (no 302)
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'data' => [
-                        'model'      => $this->resourceClass::make($model),
-                        'editor_url' => $editorUrl,
-                    ]
-                ], 200);
-            }
-
+            dd($editorUrl);
             // ✅ For normal form submit: do an HTTP redirect (302 is expected)
             return redirect()->away($editorUrl);
         }
