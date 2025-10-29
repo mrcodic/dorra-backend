@@ -21,7 +21,8 @@ enum SafetyAreaEnum: int
         $dpi = 300;
         $cm  = self::pxToCm($this->value, $dpi);
 
-        return $this->value.' Px'. (sprintf('%s cm', $cm));
+        return $this->value.' Px'. "($cm Cm)";
+
     }
 
     public static function pxToCm(int $px, int $dpi = 96, int $precision = 2): string
