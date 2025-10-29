@@ -6,7 +6,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 
 class AclNavigator
 {
-    public function firstAllowedUrl(Authenticatable $user): ?string
+    public function firstAllowedUrl($user): ?string
     {
         $map = config('menu_acl', []);
 
