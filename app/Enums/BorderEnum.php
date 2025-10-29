@@ -20,7 +20,7 @@ enum BorderEnum : int
         $dpi = 300;
         $cm  = self::pxToCm($this->value, $dpi);
 
-        return $this->value.' Px'. "($cm Cm)";
+        return $this->value.' Px '. "($cm Cm)";
     }
 
     public static function pxToCm(int $px, int $dpi = 96, int $precision = 2): string

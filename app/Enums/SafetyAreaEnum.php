@@ -21,7 +21,7 @@ enum SafetyAreaEnum: int
         $dpi = 300;
         $cm  = self::pxToCm($this->value, $dpi);
 
-        return $this->value.' Px'. "($cm Cm)";
+        return $this->value.' Px '. "($cm Cm)";
 
     }
 
