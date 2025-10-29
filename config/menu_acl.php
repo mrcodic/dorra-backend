@@ -2,7 +2,7 @@
 // config/menu_acl.php
 return [
     // Leaves (no submenu), keyed by URL
-    '/' => [
+    '/dashboard' => [
         'dashboard_show'
     ],
     '/admins' => [
