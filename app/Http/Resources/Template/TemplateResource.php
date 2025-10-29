@@ -50,7 +50,8 @@ class TemplateResource extends JsonResource
                 'label' => $this->orientation?->label(),
             ],
             'dimension' => DimensionResource::make($this->whenLoaded('dimension')),
-            'has_corner' => $this->has_corner ?? 0,
+            'has_corner' => $this->has_corner ,
+            'has_safety_area' => $this->has_safety_area,
             'safety_area' =>$this->safety_area,
             'border' => $this->border,
 
