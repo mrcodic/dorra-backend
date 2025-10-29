@@ -453,7 +453,7 @@
             try { types = JSON.parse($('#dimensionResourceTypes').val() || '[]'); } catch {}
             // return { resource_ids: ids, resource_types: types ,has_corner: has_corner};
             return { resource_ids: ids, resource_types: types };
-            
+
         }
 
         // Fetch & render sizes

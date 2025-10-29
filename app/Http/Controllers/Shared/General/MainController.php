@@ -309,7 +309,7 @@ class MainController extends Controller
             'resource_ids.*' => ['required', 'integer'],
             'resource_types' => ['required', 'array'],
             'resource_types.*' => ['required', 'in:product,category'],
-            'has_corner' => ['required', 'in:0,1'],
+            'has_corner' => ['nullable', 'in:0,1'],
         ]);
 
         // Ensure parallel arrays align
