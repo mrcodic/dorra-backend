@@ -33,6 +33,7 @@ class Template extends Model implements HasMedia
         'colors',
         'orientation',
         'dimension_id',
+        'has_corner',
         'safety_area',
         'border',
     ];
