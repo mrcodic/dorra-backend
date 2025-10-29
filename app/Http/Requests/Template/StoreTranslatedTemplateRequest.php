@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Template;
 
+use App\Enums\BorderEnum;
 use App\Enums\OrientationEnum;
 use App\Enums\Product\UnitEnum;
+use App\Enums\SafetyAreaEnum;
 use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Rules\DimensionWithinUnitRange;
@@ -53,7 +55,9 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'source_design_svg' => ['nullable', 'file'],
             'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
-
+            'has_corner' => ['required', 'in:0,1'],
+            'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
+            'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
         ];
 
     }
