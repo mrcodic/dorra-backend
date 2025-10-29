@@ -366,10 +366,12 @@ class MainController extends Controller
         $hasCorner = $request->has_corner;
 
         if (!$hasCorner) {
-dd($hasCorner);
-            $dimensions = $dimensions
+            dd();
+
+            $fdimensions = $dimensions
                 ->filter(fn($d) =>$d->height == $d->width)
                 ->values();
+            dd($fdimensions,$dimensions);
         }
 
         return DimensionResource::collection($dimensions);
