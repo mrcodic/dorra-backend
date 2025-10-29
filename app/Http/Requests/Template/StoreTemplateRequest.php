@@ -6,6 +6,7 @@ use App\Enums\OrientationEnum;
 use App\Enums\Product\UnitEnum;
 use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Dimension;
 use App\Rules\DimensionWithinUnitRange;
 use Illuminate\Validation\Rule;
 

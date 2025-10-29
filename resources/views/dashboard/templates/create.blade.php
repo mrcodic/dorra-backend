@@ -158,8 +158,28 @@
                                         If no size is selected, the default 650×650 will be applied.
                                     </small>
                                 </div>
+                                <div class="form-group mb-2">
+                                    <label class="label-text mb-1">Shape</label>
+                                    <div class="d-flex gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="has_corner" id="shape_circle" value="0">
+                                            <label class="form-check-label" for="shape_circle">Circle</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="has_corner" id="shape_other" value="1" checked>
+                                            <label class="form-check-label" for="shape_other">Other</label>
+                                        </div>
+                                    </div>
+                                </div>
 
-
+                                <div class="form-group mb-2 d-none" id="cornersBox">
+                                    <label for="cornersSelect" class="label-text mb-1">Corners</label>
+                                    <select id="cornersSelect" class="form-select select2" name="border">
+                                        @foreach(\App\Enums\BorderEnum::cases() as $border)
+                                        <option value="{{ $border->value }}">{{$border->label()}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -192,6 +212,28 @@
 
 @endsection
 @section('vendor-script')
+    <script>
+        $(function () {
+            const $cornersBox = $('#cornersBox');
+            const $corners    = $('#cornersSelect');
+            const $radios     = $('input[name="has_corner"]'); // 0 = circle, 1 = other
+
+            function syncCornersVisibility() {
+                const val = $radios.filter(':checked').val();
+                if (val === '1') {
+                    $cornersBox.removeClass('d-none');
+                } else {
+                    $cornersBox.addClass('d-none');
+                    // clear selection when hidden
+                    $corners.val(null).trigger('change');
+                }
+            }
+
+            $radios.on('change', syncCornersVisibility);
+            syncCornersVisibility(); // initial state on page load
+        });
+    </script>
+
     <script>
         // Build parallel arrays from current UI selections
         function buildDimensionPayloadFromUI() {
@@ -269,10 +311,12 @@
         function buildDimensionPayloadFromHidden() {
             let ids   = [];
             let types = [];
+            let has_corner = 0;
             try { ids   = JSON.parse($('#dimensionResourceIds').val()   || '[]'); } catch {}
             try { types = JSON.parse($('#dimensionResourceTypes').val() || '[]'); } catch {}
+            try { has_corner = $('#cornersSelect').val() || 0; } catch {}
 
-            return { resource_ids: ids, resource_types: types };
+            return { resource_ids: ids, resource_types: types,has_corner: has_corner };
         }
 
         function refreshSizes() {

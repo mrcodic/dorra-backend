@@ -24,7 +24,8 @@ use App\Http\Resources\{CategoryResource,
     TagResource,
     TeamResource,
     Template\TemplateResource,
-    Template\TypeResource};
+    Template\TypeResource
+};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
@@ -304,16 +305,17 @@ class MainController extends Controller
     {
         // 1) Validate input
         $data = $request->validate([
-            'resource_ids'     => ['required', 'array', 'min:1'],
-            'resource_ids.*'   => ['required', 'integer'],
-            'resource_types'   => ['required', 'array'],
+            'resource_ids' => ['required', 'array', 'min:1'],
+            'resource_ids.*' => ['required', 'integer'],
+            'resource_types' => ['required', 'array'],
             'resource_types.*' => ['required', 'in:product,category'],
+            'has_corner' => ['required', 'boolean'],
         ]);
 
         // Ensure parallel arrays align
         if (count($data['resource_ids']) !== count($data['resource_types'])) {
             throw ValidationException::withMessages([
-                'resource_ids'   => 'resource_ids and resource_types must be the same length.',
+                'resource_ids' => 'resource_ids and resource_types must be the same length.',
                 'resource_types' => 'resource_ids and resource_types must be the same length.',
             ]);
         }
@@ -322,7 +324,7 @@ class MainController extends Controller
         $idsByType = ['product' => [], 'category' => []];
         foreach ($data['resource_ids'] as $i => $id) {
             $type = $data['resource_types'][$i];
-            $idsByType[$type][] = (int) $id;
+            $idsByType[$type][] = (int)$id;
         }
 
         // 3) Batch fetch with dimensions (avoid N+1)
@@ -336,12 +338,12 @@ class MainController extends Controller
 
         // 4) Validate existence against request (nice error messages)
         $missing = [];
-        $foundProducts   = $products->pluck('id')->all();
+        $foundProducts = $products->pluck('id')->all();
         $foundCategories = $categories->pluck('id')->all();
 
         foreach ($data['resource_ids'] as $i => $id) {
             $type = $data['resource_types'][$i];
-            if ($type === 'product'  && !in_array((int)$id, $foundProducts, true)) {
+            if ($type === 'product' && !in_array((int)$id, $foundProducts, true)) {
                 $missing["resource_ids.$i"] = "Product not found: $id";
             }
             if ($type === 'category' && !in_array((int)$id, $foundCategories, true)) {
@@ -353,14 +355,25 @@ class MainController extends Controller
             throw ValidationException::withMessages($missing);
         }
 
-        // 5) Flatten & dedupe dimensions
+// 5) Flatten & dedupe dimensions
         $dimensions = collect()
             ->merge($products->flatMap->dimensions)
             ->merge($categories->flatMap->dimensions)
             ->unique('id')
             ->values();
 
+
+        $hasCorner = $request->boolean('has_corner');
+
+        if (!$hasCorner) {
+
+            $dimensions = $dimensions
+                ->filter(fn($d) => (float)$d->height === (float)$d->width)
+                ->values();
+        }
+
         return DimensionResource::collection($dimensions);
+
     }
 
 
