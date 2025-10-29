@@ -363,7 +363,7 @@ class MainController extends Controller
             ->values();
 
 
-        $hasCorner = $request->boolean('has_corner');
+        $hasCorner = $request->has_corner;
 
         if (!$hasCorner) {
 
