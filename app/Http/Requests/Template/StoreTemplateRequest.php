@@ -51,7 +51,6 @@ class StoreTemplateRequest extends BaseRequest
             'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
 
-
         ];
     }
 

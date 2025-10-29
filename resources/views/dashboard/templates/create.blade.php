@@ -148,19 +148,40 @@
                                 {{-- Persisted resources (used on submit) --}}
                                 <input type="hidden" name="dimension_resource_ids"   id="dimensionResourceIds">
                                 <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
-                                <div class="form-group mb-2">
-                                    <label class="label-text mb-1">Shape</label>
-                                    <div class="d-flex gap-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="has_corner" id="shape_circle" value="0">
-                                            <label class="form-check-label" for="shape_circle">Circle</label>
+                                <div class="row mb-2">
+                                    {{-- Shape (col-6) --}}
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-2">
+                                            <label class="label-text mb-1">Shape</label>
+                                            <div class="d-flex gap-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="has_corner" id="shape_circle" value="0">
+                                                    <label class="form-check-label" for="shape_circle">Circle</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="has_corner" id="shape_other" value="1" checked>
+                                                    <label class="form-check-label" for="shape_other">Other</label>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="has_corner" id="shape_other" value="1" checked>
-                                            <label class="form-check-label" for="shape_other">Other</label>
+                                    </div>
+
+                                    {{-- Safety Area (col-6) --}}
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-2">
+                                            <label for="safetyAreaSelect" class="label-text mb-1">Safety Area</label>
+                                            <select id="safetyAreaSelect" class="form-select select2" name="safety_area">
+                                                @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                    <option value="{{ $area->value }}">
+                                                        {{ $area->label() }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <small class="form-text text-muted">Padding inside the design area.</small>
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <div class="form-group mb-2 d-none" id="cornersBox">
                                     <label for="cornersSelect" class="label-text mb-1">Corners</label>
