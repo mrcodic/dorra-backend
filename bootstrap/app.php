@@ -2,6 +2,7 @@
 
 use App\Enums\HttpEnum;
 use App\Models\Cart;
+use App\Support\AclNavigator;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -33,7 +34,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/v1/user/payment/callback',
         ]);
         $middleware->encryptCookies(['dorra_auth_token','dorra_auth_cookie_id']);
-        $middleware->redirectUsersTo('/');
+        $middleware->redirectUsersTo(function ($request){
+            $url = app(AclNavigator::class)->firstAllowedUrl($request->user());
+            return $url ?? '/';
+        });
         $middleware->api([EnsureFrontendRequestsAreStateful::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
