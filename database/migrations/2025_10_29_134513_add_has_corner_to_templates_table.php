@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('templates', function (Blueprint $table) {
             $table->dropColumn('has_corner');
-            $table->dropColumn('has_safety_area');
+//            $table->dropColumn('has_safety_area');
         });
     }
 };
