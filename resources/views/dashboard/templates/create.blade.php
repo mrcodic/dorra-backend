@@ -429,12 +429,13 @@
         function buildDimensionPayloadFromHidden() {
             let ids   = [];
             let types = [];
-            const has_corner = $('input[name="has_corner"]:checked').val() === '1' ? 1 : 0;
+            // const has_corner = $('input[name="has_corner"]:checked').val() === '1' ? 1 : 0;
             try { ids   = JSON.parse($('#dimensionResourceIds').val()   || '[]'); } catch {}
             try { types = JSON.parse($('#dimensionResourceTypes').val() || '[]'); } catch {}
 
 
-            return { resource_ids: ids, resource_types: types,has_corner: has_corner };
+            // return { resource_ids: ids, resource_types: types,has_corner: has_corner };
+            return { resource_ids: ids, resource_types: types };
         }
 
         function refreshSizes() {

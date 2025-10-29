@@ -40,9 +40,7 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
                                      data-id="${data}"
                                      data-name_ar="${row.name_ar}"
                                      data-name_en="${row.name_en}"
-                                      data-description_en="${row.description_en}"
-                                     data-description_ar="${row.description_ar}"
-                                    data-products="${row.sub_category_products_count}"
+                                     data-products="${row.sub_category_products_count}"
                                      data-showdate="${row.show_date}"
                                      data-parent="${row.parent_name}"
                                      data-parent_id="${row.parent.id}">
@@ -56,9 +54,6 @@ var dt_user_table = $(".sub-category-list-table").DataTable({
                data-id="${data}"
                data-name_ar="${row.name_ar}"
                data-name_en="${row.name_en}"
-               data-image="${row.image}"
-                data-description_en="${row.description_en}"
-                 data-description_ar="${row.description_ar}"
                data-products="${row.sub_category_products_count}"
                data-showdate="${row.show_date}"
                data-parent="${row.parent_name}"
@@ -186,8 +181,6 @@ $(document).ready(function () {
     $(document).on("click", ".view-details", function (e) {
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
-        const categoryDescriptionAR = $(this).data("description_ar");
-        const categoryDescriptionEn = $(this).data("description_en");
         const products = $(this).data("products");
         const addedDate = $(this).data("showdate");
         const id = $(this).data("id");
@@ -196,8 +189,6 @@ $(document).ready(function () {
         // Populate modal
         $("#showSubCategoryModal #sub-category-name-ar").val(categoryNameAR);
         $("#showSubCategoryModal #sub-category-name-en").val(categoryNameEn);
-        $("#showSubCategoryModal #sub-category-description-ar").val(categoryDescriptionAR);
-        $("#showSubCategoryModal #sub-category-description-en").val(categoryDescriptionEn);
         $("#showSubCategoryModal #sub-category-products").val(products);
         $("#showSubCategoryModal #sub-category-date").val(addedDate);
         $("#showSubCategoryModal #sub-category-id").val(id);
@@ -208,12 +199,8 @@ $(document).ready(function () {
     });
 
     $(document).on("click", ".edit-details", function (e) {
-
         const categoryNameAR = $(this).data("name_ar");
         const categoryNameEn = $(this).data("name_en");
-        const categoryDescriptionAR = $(this).data("description_ar");
-        const categoryDescriptionEn = $(this).data("description_en");
-        const categoryImage = $(this).data("image");
         const products = $(this).data("products");
         const addedDate = $(this).data("showdate");
         const id = $(this).data("id");
@@ -222,12 +209,9 @@ $(document).ready(function () {
         // Populate modal
         $("#editSubCategoryModal #edit-sub-category-name-ar").val(categoryNameAR);
         $("#editSubCategoryModal #edit-sub-category-name-en").val(categoryNameEn);
-        $("#showSubCategoryModal #edit-sub-category-description-ar").val(categoryDescriptionAR);
-        $("#showSubCategoryModal #edit-sub-category-description-en").val(categoryDescriptionEn);
-        // $("#editSubCategoryModal #edit-preview-image").src(categoryImage);
+        $("#editSubCategoryModal #edit-sub-category-products").val(products);
         $("#editSubCategoryModal #edit-sub-category-date").val(addedDate);
-        $("#editSubCategoryModal #edit-sub-category-parent-id").val(id);
-        $("#editSubCategoryModal #editSubCategoryForm").action(`sub-categories/${id}`);
+        $("#editSubCategoryModal #edit-sub-category-id").val(id);
         $("#editSubCategoryModal select[name='parent_id']").val(parentId);
 
         // Show modal
