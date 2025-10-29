@@ -26,16 +26,12 @@
     /* Responsive table accordion styles */
     @media (max-width: 768px) {
 
-        /* Hide the last 2 columns on mobile */
-        .industry-list-table th:nth-child(4),
-        .industry-list-table th:nth-child(5),
-        .industry-list-table th:nth-child(6) {
+        /* Hide the last 1 columns on mobile */
+        .industry-list-table th:nth-child(4) {
             display: none !important;
         }
 
-        .industry-list-table tbody tr:not(.details-row) td:nth-child(4),
-        .industry-list-table tbody tr:not(.details-row) td:nth-child(5),
-        .industry-list-table tbody tr:not(.details-row) td:nth-child(6) {
+        .industry-list-table tbody tr:not(.details-row) td:nth-child(4) {
             display: none !important;
         }
 
@@ -181,7 +177,8 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('industries_delete'))>
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"
+                                @disabled(!auth()->user()->hasPermissionTo('industries_delete'))>
                         </th>
                         <th>Name</th>
                         <th>Added Date</th>
@@ -328,23 +325,13 @@
                 $row.find('td:nth-child(1)').append('<span class="expand-icon"><i class="fa-solid fa-angle-down"></i></span>');
 
                 // Get data for details
-                const noOfTemp = $row.find('td:nth-child(4)').html() || '';
-                const addedDate = $row.find('td:nth-child(5)').html() || '';
-                const actions = $row.find('td:nth-child(6)').html() || '';
+                const actions = $row.find('td:nth-child(4)').html() || '';
 
                 // Create details row
                 const detailsHtml = `
                     <tr class="details-row">
                         <td colspan="3">
                             <div class="details-content">
-                                <div class="detail-row">
-                                    <span class="detail-label">No. Of Templates:</span>
-                                    <span class="detail-value">${noOfTemp}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Added Date:</span>
-                                    <span class="detail-value">${addedDate}</span>
-                                </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Actions:</span>
                                     <span class="detail-value">${actions}</span>
