@@ -187,6 +187,8 @@
                             </div>
                         </form>
                     </div>
+
+
                     <div class="invoice-repeater">
                         <div data-repeater-list="carousels">
                             @forelse($carousels as $carousel)
@@ -575,574 +577,572 @@
                         </div>
                     </div>
 
-
-                    <!-- tab3 -->
-                    <div class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show products</span>
-                            <!-- Toggle Switch -->
-                            <form id="categorySectionForm" action="{{ route('landing-sections.update') }}"
-                                  method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="categories_section">
-                                <input type="hidden" name="value" value="{{ setting('categories_section') ? 1 : 0 }}"
-                                       id="categorySectionValue">
-
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input toggle-switch" type="checkbox"
-                                           id="categorySectionToggle" {{
-                                setting('categories_section') ? 'checked' : '' }}>
-                                </div>
-                            </form>
-
-                        </div>
-
-                    </div>
-
-                    <!-- tab4 -->
-                    <div class="tab-pane fade" id="tab4" role="tabpanel" aria-labelledby="tab4-tab">
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show designs</span>
-                            <!-- Toggle Switch -->
-                            <form id="productSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="designs_section">
-                                <input type="hidden" name="value" value="{{ setting('designs_section') ? 1 : 0 }}"
-                                       id="productSectionValue">
-
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input toggle-switch" type="checkbox"
-                                           id="productSectionToggle" {{
-                                setting('designs_section') ? 'checked' : '' }}>
-                                </div>
-                            </form>
-
-                        </div>
-                        <div class=" d-flex flex-row align-items-center p-1 mb-2"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: none;">
-                            <span class="fw-semibold text-black fs-4">You can add up to </span><span
-                                class="fw-semibold fs-4 ms-1" style="color: #24B094;">8 designs</span>
-                        </div>
-                        <p class="fw-semibold text-black fs-4">Design Name</p>
-                        <div class="position-relative">
-                            <div class="row g-2 mb-2">
-                                <div class="col-md-9">
-                                    <input type="text" id="design-search" class="form-control"
-                                           placeholder="Enter design name">
-                                </div>
-                                <div class="col-md-3">
-                                    <button class="btn btn-primary w-100">Add Design</button>
-                                </div>
-                            </div>
-                            <div id="search-suggestions" class="list-group position-absolute w-100"
-                                 style="z-index: 1000;">
-                            </div>
-                        </div>
-
-                        <p class="fw-semibold text-black fs-16">Added Designs</p>
-                        <div class="row">
-                            <!-- Product Card -->
-                            @forelse($templates as $template)
-                                <!-- Product Card -->
-                                <div class="col-12 col-md-6 mb-2">
-                                    <div class="p-1 d-flex flex-row align-items-center"
-                                         style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                                        <!-- Image -->
-                                        <img src="{{ $template->getFirstMediaUrl('templates')  }}" alt="Product"
-                                             class="me-1 rounded" style="width: 60px; height: 60px; object-fit: cover;">
-
-                                        <!-- Details -->
-                                        <div class="flex-grow-1">
-                                            <div class="fw-semibold text-black">{{ $template->name }}</div>
-                                        </div>
-
-                                        <!-- Remove Button -->
-                                        <button class="btn btn-outline-secondary btn-sm ms-1 remove-template"
-                                                data-id="{{ $template->id }}">
-                                            Remove
-                                        </button>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="col-12 text-center my-5">
-                                    <div class="mt-3 text-muted fs-5">No designs added yet.</div>
-                                </div>
-                            @endforelse
-                        </div>
-
-                    </div>
-
-                    <!-- tab5 -->
-
-                    <div class="tab-pane fade" id="tab5" role="tabpanel" aria-labelledby="tab5-tab">
-                        <!-- Header with toggle -->
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-1"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show statistics section</span>
-
-                            <form id="statisticsSectionForm" action="{{ route('landing-sections.update') }}"
-                                  method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="statistics_section">
-                                <input type="hidden" name="value" value="{{ setting('statistics_section') ? 1 : 0 }}"
-                                       id="statisticsSectionValue">
-
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input toggle-switch" type="checkbox"
-                                           id="statisticsSectionToggle"
-                                        {{ setting('statistics_section') ? 'checked' : '' }}>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Form Inputs & Save Button -->
-                        <form id="updateStatisticsForm" action="{{ route('statistics-section.update') }}" method="POST">
+                </div>
+                <!-- tab3 -->
+                <div class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show products</span>
+                        <!-- Toggle Switch -->
+                        <form id="categorySectionForm" action="{{ route('landing-sections.update') }}"
+                              method="POST">
                             @csrf
                             @method('PUT')
+                            <input type="hidden" name="key" value="categories_section">
+                            <input type="hidden" name="value" value="{{ setting('categories_section') ? 1 : 0 }}"
+                                   id="categorySectionValue">
 
-                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                                <div class="flex-grow-1">
-                                    <div class="mb-1">
-                                        <label class="form-label fw-semibold">Customers</label>
-                                        <input type="number" class="form-control" name="customers"
-                                               placeholder="Enter customers number" value="{{ setting('customers') }}">
-                                    </div>
-                                    <div class="mb-1">
-                                        <label class="form-label fw-semibold">Orders</label>
-                                        <input type="number" class="form-control" name="orders"
-                                               placeholder="Enter orders number" value="{{ setting('orders') }}">
-                                    </div>
-                                    <div class="mb-1">
-                                        <label class="form-label fw-semibold">Rate</label>
-                                        <input type="number" step="0.1" class="form-control" name="rate"
-                                               placeholder="Enter rate" value="{{ setting('rate') }}">
-                                    </div>
-                                </div>
-
-
+                            <div class="form-check form-switch">
+                                <input class="form-check-input toggle-switch" type="checkbox"
+                                       id="categorySectionToggle" {{
+                                setting('categories_section') ? 'checked' : '' }}>
                             </div>
-                            <div class="text-end ">
-                                <button type="submit" class=" btn btn-primary">
-                                    <i data-feather="save" class="me-1"></i> Save Changes
-                                </button>
+                        </form>
+
+                    </div>
+
+                </div>
+
+                <!-- tab4 -->
+                <div class="tab-pane fade" id="tab4" role="tabpanel" aria-labelledby="tab4-tab">
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show designs</span>
+                        <!-- Toggle Switch -->
+                        <form id="productSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="designs_section">
+                            <input type="hidden" name="value" value="{{ setting('designs_section') ? 1 : 0 }}"
+                                   id="productSectionValue">
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input toggle-switch" type="checkbox"
+                                       id="productSectionToggle" {{
+                                setting('designs_section') ? 'checked' : '' }}>
+                            </div>
+                        </form>
+
+                    </div>
+                    <div class=" d-flex flex-row align-items-center p-1 mb-2"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: none;">
+                        <span class="fw-semibold text-black fs-4">You can add up to </span><span
+                            class="fw-semibold fs-4 ms-1" style="color: #24B094;">8 designs</span>
+                    </div>
+                    <p class="fw-semibold text-black fs-4">Design Name</p>
+                    <div class="position-relative">
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-9">
+                                <input type="text" id="design-search" class="form-control"
+                                       placeholder="Enter design name">
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100">Add Design</button>
+                            </div>
+                        </div>
+                        <div id="search-suggestions" class="list-group position-absolute w-100"
+                             style="z-index: 1000;">
+                        </div>
+                    </div>
+
+                    <p class="fw-semibold text-black fs-16">Added Designs</p>
+                    <div class="row">
+                        <!-- Product Card -->
+                        @forelse($templates as $template)
+                            <!-- Product Card -->
+                            <div class="col-12 col-md-6 mb-2">
+                                <div class="p-1 d-flex flex-row align-items-center"
+                                     style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                    <!-- Image -->
+                                    <img src="{{ $template->getFirstMediaUrl('templates')  }}" alt="Product"
+                                         class="me-1 rounded" style="width: 60px; height: 60px; object-fit: cover;">
+
+                                    <!-- Details -->
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold text-black">{{ $template->name }}</div>
+                                    </div>
+
+                                    <!-- Remove Button -->
+                                    <button class="btn btn-outline-secondary btn-sm ms-1 remove-template"
+                                            data-id="{{ $template->id }}">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-12 text-center my-5">
+                                <div class="mt-3 text-muted fs-5">No designs added yet.</div>
+                            </div>
+                        @endforelse
+                    </div>
+
+                </div>
+
+                <!-- tab5 -->
+
+                <div class="tab-pane fade" id="tab5" role="tabpanel" aria-labelledby="tab5-tab">
+                    <!-- Header with toggle -->
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-1"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show statistics section</span>
+
+                        <form id="statisticsSectionForm" action="{{ route('landing-sections.update') }}"
+                              method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="statistics_section">
+                            <input type="hidden" name="value" value="{{ setting('statistics_section') ? 1 : 0 }}"
+                                   id="statisticsSectionValue">
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input toggle-switch" type="checkbox"
+                                       id="statisticsSectionToggle"
+                                    {{ setting('statistics_section') ? 'checked' : '' }}>
                             </div>
                         </form>
                     </div>
 
-                    <!-- tab6 -->
-                    <div class="tab-pane fade" id="tab6" role="tabpanel" aria-labelledby="tab6-tab">
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show logo section</span>
+                    <!-- Form Inputs & Save Button -->
+                    <form id="updateStatisticsForm" action="{{ route('statistics-section.update') }}" method="POST">
+                        @csrf
+                        @method('PUT')
 
-                            <form id="logoSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="logo_section">
-                                <input type="hidden" name="value" value="{{ setting('logo_section') ? 1 : 0 }}"
-                                       id="logoSectionValue">
-
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input toggle-switch" type="checkbox" id="logoSectionToggle" {{
-                                setting('logo_section') ? 'checked' : '' }}>
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                            <div class="flex-grow-1">
+                                <div class="mb-1">
+                                    <label class="form-label fw-semibold">Customers</label>
+                                    <input type="number" class="form-control" name="customers"
+                                           placeholder="Enter customers number" value="{{ setting('customers') }}">
                                 </div>
-                            </form>
-                        </div>
+                                <div class="mb-1">
+                                    <label class="form-label fw-semibold">Orders</label>
+                                    <input type="number" class="form-control" name="orders"
+                                           placeholder="Enter orders number" value="{{ setting('orders') }}">
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label fw-semibold">Rate</label>
+                                    <input type="number" step="0.1" class="form-control" name="rate"
+                                           placeholder="Enter rate" value="{{ setting('rate') }}">
+                                </div>
+                            </div>
 
+
+                        </div>
+                        <div class="text-end ">
+                            <button type="submit" class=" btn btn-primary">
+                                <i data-feather="save" class="me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- tab6 -->
+                <div class="tab-pane fade" id="tab6" role="tabpanel" aria-labelledby="tab6-tab">
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show logo section</span>
+
+                        <form id="logoSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="logo_section">
+                            <input type="hidden" name="value" value="{{ setting('logo_section') ? 1 : 0 }}"
+                                   id="logoSectionValue">
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input toggle-switch" type="checkbox" id="logoSectionToggle" {{
+                                setting('logo_section') ? 'checked' : '' }}>
+                            </div>
+                        </form>
                     </div>
 
-                    <!-- tab7 -->
+                </div>
 
-                    <div class="tab-pane fade" id="tab7" role="tabpanel" aria-labelledby="tab7-tab">
-                        <!-- Header with toggle -->
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show Testimonials Section</span>
+                <!-- tab7 -->
 
-                            <form id="testimonialSectionForm" action="{{ route('landing-sections.update') }}"
-                                  method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="testimonials_section">
-                                <input type="hidden" name="value" value="{{ setting('testimonials_section') ? 1 : 0 }}"
-                                       id="testimonialSectionValue">
+                <div class="tab-pane fade" id="tab7" role="tabpanel" aria-labelledby="tab7-tab">
+                    <!-- Header with toggle -->
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show Testimonials Section</span>
 
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input toggle-switch" type="checkbox"
-                                           id="testimonialSectionToggle"
-                                        {{ setting('testimonials_section') ? 'checked' : '' }}>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="card mb-1">
-                            {{-- <div class="card-body border rounded">--}}
-                            {{-- <p class="fs-4 text-black ">Reviews With Images</p>--}}
-                            {{--
-                            <!-- Header with toggle -->--}}
-                            {{-- <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-1" --}}
-                            {{-- style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">--}}
-                            {{-- <span class="fw-semibold text-black fs-4">Show Reviews With Images Section</span>--}}
-                            {{--
-                            <!-- Toggle Switch -->--}}
-                            {{-- <form id="reviewsWithImagesSectionForm" action="{{ route('landing-sections.update') }}"
-                                --}} {{-- method="POST">--}}
-                            {{-- @csrf--}}
-                            {{-- @method('PUT')--}}
-                            {{-- <input type="hidden" name="key" value="reviews_with_images_section">--}}
-                            {{-- <input type="hidden" name="value" --}} {{--
+                        <form id="testimonialSectionForm" action="{{ route('landing-sections.update') }}"
+                              method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="testimonials_section">
+                            <input type="hidden" name="value" value="{{ setting('testimonials_section') ? 1 : 0 }}"
+                                   id="testimonialSectionValue">
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input toggle-switch" type="checkbox"
+                                       id="testimonialSectionToggle"
+                                    {{ setting('testimonials_section') ? 'checked' : '' }}>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card mb-1">
+                        {{-- <div class="card-body border rounded">--}}
+                        {{-- <p class="fs-4 text-black ">Reviews With Images</p>--}}
+                        {{--
+                        <!-- Header with toggle -->--}}
+                        {{-- <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-1" --}}
+                        {{-- style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">--}}
+                        {{-- <span class="fw-semibold text-black fs-4">Show Reviews With Images Section</span>--}}
+                        {{--
+                        <!-- Toggle Switch -->--}}
+                        {{-- <form id="reviewsWithImagesSectionForm" action="{{ route('landing-sections.update') }}"
+                            --}} {{-- method="POST">--}}
+                        {{-- @csrf--}}
+                        {{-- @method('PUT')--}}
+                        {{-- <input type="hidden" name="key" value="reviews_with_images_section">--}}
+                        {{-- <input type="hidden" name="value" --}} {{--
                                     value="{{ setting('reviews_with_images_section') ? 1 : 0 }}" --}} {{--
                                     id="reviewsWithImagesSectionValue">--}}
 
-                            {{-- <div class="form-check form-switch">--}}
-                            {{-- <input class="form-check-input toggle-switch" type="checkbox" --}} {{--
+                        {{-- <div class="form-check form-switch">--}}
+                        {{-- <input class="form-check-input toggle-switch" type="checkbox" --}} {{--
                                         id="reviewsWithImagesSectionToggle" {{
                                         setting('reviews_with_images_section')--}} {{-- ? 'checked' : '' }}>--}}
-                            {{-- </div>--}}
-                            {{-- </form>--}}
+                        {{-- </div>--}}
+                        {{-- </form>--}}
 
-                            {{--
-                        </div>--}}
+                        {{--
+                    </div>--}}
 
 
-                            {{--
-                            <!-- Review Form -->--}}
-                            {{-- <form id="reviews-images" action="{{ route('reviews-images.create') }}" method="post" --}}
-                            {{-- enctype="multipart/form-data">--}}
-                            {{-- @csrf--}}
-                            {{-- <div class="row mb-1">--}}
-                            {{-- <div class="col-md-4">--}}
-                            {{-- <label>Customer</label>--}}
-                            {{-- <input type="text" class="form-control" name="customer"
-                                placeholder="Enter name">--}}
-                            {{-- </div>--}}
-                            {{-- <div class="col-md-4">--}}
-                            {{-- <label>Rate</label>--}}
-                            {{-- <select name="rate" class="form-select">--}}
-                            {{-- <option value="" selected disabled>Select rate</option>--}}
-                            {{-- @for($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }} ★</option>
-                                --}}
-                            {{-- @endfor--}}
-                            {{-- </select>--}}
-                            {{-- </div>--}}
-                            {{-- <div class="col-md-4">--}}
-                            {{-- <label>Date</label>--}}
-                            {{-- <input type="date" name="date" class="form-control">--}}
-                            {{-- </div>--}}
-                            {{-- </div>--}}
+                        {{--
+                        <!-- Review Form -->--}}
+                        {{-- <form id="reviews-images" action="{{ route('reviews-images.create') }}" method="post" --}}
+                        {{-- enctype="multipart/form-data">--}}
+                        {{-- @csrf--}}
+                        {{-- <div class="row mb-1">--}}
+                        {{-- <div class="col-md-4">--}}
+                        {{-- <label>Customer</label>--}}
+                        {{-- <input type="text" class="form-control" name="customer"
+                            placeholder="Enter name">--}}
+                        {{-- </div>--}}
+                        {{-- <div class="col-md-4">--}}
+                        {{-- <label>Rate</label>--}}
+                        {{-- <select name="rate" class="form-select">--}}
+                        {{-- <option value="" selected disabled>Select rate</option>--}}
+                        {{-- @for($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }} ★</option>
+                            --}}
+                        {{-- @endfor--}}
+                        {{-- </select>--}}
+                        {{-- </div>--}}
+                        {{-- <div class="col-md-4">--}}
+                        {{-- <label>Date</label>--}}
+                        {{-- <input type="date" name="date" class="form-control">--}}
+                        {{-- </div>--}}
+                        {{-- </div>--}}
 
-                            {{-- <div class="mb-1">--}}
-                            {{-- <label>Review</label>--}}
-                            {{-- <textarea name="review" class="form-control"
-                                placeholder="Add review"></textarea>--}}
-                            {{-- </div>--}}
+                        {{-- <div class="mb-1">--}}
+                        {{-- <label>Review</label>--}}
+                        {{-- <textarea name="review" class="form-control"
+                            placeholder="Add review"></textarea>--}}
+                        {{-- </div>--}}
 
-                            {{--
-                            <!-- Upload Photo (Drag and Drop Area) -->--}}
-                            {{-- <div class="mb-1">--}}
-                            {{-- <label>Photo</label>--}}
+                        {{--
+                        <!-- Upload Photo (Drag and Drop Area) -->--}}
+                        {{-- <div class="mb-1">--}}
+                        {{-- <label>Photo</label>--}}
 
-                            {{--
-                            <!-- Dropzone Container -->--}}
-                            {{-- <div id="review-image-dropzone" --}} {{--
+                        {{--
+                        <!-- Dropzone Container -->--}}
+                        {{-- <div id="review-image-dropzone" --}} {{--
                                     class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center col-12 mb-1"
                                     --}} {{-- style="border: 2px dashed rgba(0, 0, 0, 0.3);">--}}
-                            {{-- <div class="dz-message" data-dz-message>--}}
-                            {{-- <i data-feather="upload" class="mb-2"></i>--}}
-                            {{-- <p>Drag image here or click to upload</p>--}}
-                            {{-- </div>--}}
-                            {{-- </div>--}}
+                        {{-- <div class="dz-message" data-dz-message>--}}
+                        {{-- <i data-feather="upload" class="mb-2"></i>--}}
+                        {{-- <p>Drag image here or click to upload</p>--}}
+                        {{-- </div>--}}
+                        {{-- </div>--}}
 
-                            {{--
-                            <!-- Hidden input to store uploaded media id -->--}}
-                            {{-- <input type="hidden" name="image_id" id="uploadedImage">--}}
+                        {{--
+                        <!-- Hidden input to store uploaded media id -->--}}
+                        {{-- <input type="hidden" name="image_id" id="uploadedImage">--}}
 
-                            {{-- <div>--}}
+                        {{-- <div>--}}
 
 
 
-                            {{-- <input type="hidden" name="type" value="with_image">--}}
-                            {{-- <div class="text-end">--}}
-                            {{-- <button type="submit" class="btn btn-primary mt-2">Add Review</button>--}}
-                            {{-- </div>--}}
-                            {{-- </div>--}}
-                            {{--
-                        </div>--}}
-                            {{--
-                        </form>--}}
+                        {{-- <input type="hidden" name="type" value="with_image">--}}
+                        {{-- <div class="text-end">--}}
+                        {{-- <button type="submit" class="btn btn-primary mt-2">Add Review</button>--}}
+                        {{-- </div>--}}
+                        {{-- </div>--}}
+                        {{--
+                    </div>--}}
+                        {{--
+                    </form>--}}
 
-                            {{--
-                            <!-- Added Products List -->--}}
-                            {{-- <div class="mt-2">--}}
-                            {{-- <h5 class="text-black fs-16">Added Reviews</h5>--}}
-                            {{-- <div class="row">--}}
-                            {{-- @foreach($reviewsWithImages as $review)--}}
-                            {{-- <div class="col-md-6 mb-1" --}} {{--
+                        {{--
+                        <!-- Added Products List -->--}}
+                        {{-- <div class="mt-2">--}}
+                        {{-- <h5 class="text-black fs-16">Added Reviews</h5>--}}
+                        {{-- <div class="row">--}}
+                        {{-- @foreach($reviewsWithImages as $review)--}}
+                        {{-- <div class="col-md-6 mb-1" --}} {{--
                                     style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">--}}
-                            {{-- <div class="p-1 d-flex">--}}
-                            {{-- <img src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
-                                --}} {{-- class="rounded me-1"
+                        {{-- <div class="p-1 d-flex">--}}
+                        {{-- <img src="{{ asset($review->getFirstMediaUrl('reviews_landing_images')) }}"
+                            --}} {{-- class="rounded me-1"
                                             style="width: 60px; height: 60px; object-fit: cover;">--}}
-                            {{-- <div>--}}
-                            {{-- <strong>{{ $review->customer }}</strong>--}}
-                            {{-- <div class="text-warning">--}}
+                        {{-- <div>--}}
+                        {{-- <strong>{{ $review->customer }}</strong>--}}
+                        {{-- <div class="text-warning">--}}
 
-                            {{-- @for ($i = 1; $i <= 5; $i++) @if ($i <=$review->rate)--}}
-                            {{-- <i class="fas fa-star text-warning"></i> --}}{{-- filled --}}
-                            {{-- @else--}}
-                            {{-- <i class="far fa-star text-muted"></i> --}}{{-- empty --}}
-                            {{-- @endif--}}
-                            {{-- @endfor--}}
-
-
+                        {{-- @for ($i = 1; $i <= 5; $i++) @if ($i <=$review->rate)--}}
+                        {{-- <i class="fas fa-star text-warning"></i> --}}{{-- filled --}}
+                        {{-- @else--}}
+                        {{-- <i class="far fa-star text-muted"></i> --}}{{-- empty --}}
+                        {{-- @endif--}}
+                        {{-- @endfor--}}
 
 
 
-                            {{-- </div>--}}
-                            {{-- <small class="text-muted">{{--}}
-                            {{-- \Carbon\Carbon::parse($review->date)->format('d/m/Y')
-                            }}</small>--}}
-                            {{-- <p class="mb-1 text-break">{{ $review->review }}</p>--}}
-                            {{-- <form class="remove-review"
-                                action="{{route('reviews.remove',$review->id)}}" method="POST">--}}
-                            {{-- @csrf--}}
-                            {{-- @method('DELETE')--}}
-                            {{-- <button type="submit" class="btn btn-sm btn-outline-danger">--}}
-                            {{-- Remove--}}
-                            {{-- </button>--}}
-                            {{-- </form>--}}
-                            {{-- </div>--}}
-                            {{-- </div>--}}
-                            {{-- </div>--}}
-                            {{-- @endforeach--}}
-                            {{-- </div>--}}
-                            {{-- </div>--}}
 
 
-                            {{--
-                        </div>--}}
+                        {{-- </div>--}}
+                        {{-- <small class="text-muted">{{--}}
+                        {{-- \Carbon\Carbon::parse($review->date)->format('d/m/Y')
+                        }}</small>--}}
+                        {{-- <p class="mb-1 text-break">{{ $review->review }}</p>--}}
+                        {{-- <form class="remove-review"
+                            action="{{route('reviews.remove',$review->id)}}" method="POST">--}}
+                        {{-- @csrf--}}
+                        {{-- @method('DELETE')--}}
+                        {{-- <button type="submit" class="btn btn-sm btn-outline-danger">--}}
+                        {{-- Remove--}}
+                        {{-- </button>--}}
+                        {{-- </form>--}}
+                        {{-- </div>--}}
+                        {{-- </div>--}}
+                        {{-- </div>--}}
+                        {{-- @endforeach--}}
+                        {{-- </div>--}}
+                        {{-- </div>--}}
 
-                            <div class="card mt-2 border rounded">
 
-                                <div class="card-body">
-                                    <p class="fs-4 text-black">Words of Praise</p>
-                                    <!-- Header with toggle -->
-                                    {{-- <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
-                                        --}} {{--
+                        {{--
+                    </div>--}}
+
+                        <div class="card mt-2 border rounded">
+
+                            <div class="card-body">
+                                <p class="fs-4 text-black">Words of Praise</p>
+                                <!-- Header with toggle -->
+                                {{-- <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-2"
+                                    --}} {{--
                                 style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">--}}
-                                    {{-- <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>--}}
-                                    {{--
-                                    <!-- Toggle Switch -->--}}
-                                    {{-- <form id="reviewsWithoutImagesSectionForm" --}} {{--
+                                {{-- <span class="fw-semibold text-black fs-4">Show Words of Praise Section</span>--}}
+                                {{--
+                                <!-- Toggle Switch -->--}}
+                                {{-- <form id="reviewsWithoutImagesSectionForm" --}} {{--
                                     action="{{ route('landing-sections.update') }}" method="POST">--}}
-                                    {{-- @csrf--}}
-                                    {{-- @method('PUT')--}}
-                                    {{-- <input type="hidden" name="key" value="reviews_without_images_section">--}}
-                                    {{-- <input type="hidden" name="value" --}} {{--
+                                {{-- @csrf--}}
+                                {{-- @method('PUT')--}}
+                                {{-- <input type="hidden" name="key" value="reviews_without_images_section">--}}
+                                {{-- <input type="hidden" name="value" --}} {{--
                                         value="{{ setting('reviews_without_images_section') ? 1 : 0 }}" --}} {{--
                                         id="reviewsWithoutImagesSectionValue">--}}
 
-                                    {{-- <div class="form-check form-switch">--}}
-                                    {{-- <input class="form-check-input toggle-switch" type="checkbox" --}} {{--
+                                {{-- <div class="form-check form-switch">--}}
+                                {{-- <input class="form-check-input toggle-switch" type="checkbox" --}} {{--
                                             id="reviewsWithoutImagesSectionToggle" {{--}} {{--
                                             setting('reviews_without_images_section') ? 'checked' : '' }}>--}}
-                                    {{-- </div>--}}
-                                    {{-- </form>--}}
+                                {{-- </div>--}}
+                                {{-- </form>--}}
 
-                                    {{--
-                                </div>--}}
+                                {{--
+                            </div>--}}
 
-                                    <!-- Review Form -->
-                                    <form id="reviews" action="{{ route('reviews.create') }}" method="POST"
-                                          enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="row mb-3">
-                                            <div class="col-md-4">
-                                                <label>Customer</label>
-                                                <input type="text" class="form-control" name="customer"
-                                                       placeholder="Enter name">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>Rate</label>
-                                                <select name="rate" class="form-select">
-                                                    <option value="">Select rate</option>
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        <option value="{{ $i }}">{{ $i }} ★</option>
-                                                    @endfor
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>Date</label>
-                                                <input type="date" name="date" class="form-control">
-                                            </div>
+                                <!-- Review Form -->
+                                <form id="reviews" action="{{ route('reviews.create') }}" method="POST"
+                                      enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label>Customer</label>
+                                            <input type="text" class="form-control" name="customer"
+                                                   placeholder="Enter name">
                                         </div>
-
-                                        <div class="mb-1">
-                                            <label>Review</label>
-                                            <textarea name="review" class="form-control"
-                                                      placeholder="Add review"></textarea>
+                                        <div class="col-md-4">
+                                            <label>Rate</label>
+                                            <select name="rate" class="form-select">
+                                                <option value="">Select rate</option>
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <option value="{{ $i }}">{{ $i }} ★</option>
+                                                @endfor
+                                            </select>
                                         </div>
-                                        <input type="hidden" name="type" value="without_image">
-
-                                        <div class="text-end">
-                                            <button type="submit" class="btn btn-primary ">Add Review</button>
-                                        </div>
-                                    </form>
-                                    <!-- Added Products List -->
-                                    <div class="mt-2">
-                                        <h5 class="text-black fs-16">Added Reviews</h5>
-                                        <div class="row">
-                                            @foreach($reviewsWithoutImages as $review)
-                                                <div class="col-md-6 mb-2"
-                                                     style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">
-
-                                                    <div class="p-1 d-flex">
-                                                        <div>
-                                                            <strong>{{ $review->customer }}</strong>
-                                                            <div class="text-warning">
-                                                                @for($i = 1; $i <= 5; $i++)
-                                                                    <i
-                                                                        class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
-                                                                @endfor
-                                                            </div>
-                                                            <small class="text-muted">{{
-                                                    \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
-                                                            <p class="mb-1 text-break">{{ $review->review }}</p>
-                                                            <form class="remove-review"
-                                                                  action="{{ route('reviews.remove',$review->id) }}"
-                                                                  method="POST">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                        class="btn btn-sm btn-outline-danger">
-                                                                    Remove
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                        {{-- <small class="text-muted">{{
-                                                            \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
-                                                        <p class="mb-1">{{ $review->review }}</p> --}}
-
-                                                    </div>
-
-                                                </div>
-                                            @endforeach
+                                        <div class="col-md-4">
+                                            <label>Date</label>
+                                            <input type="date" name="date" class="form-control">
                                         </div>
                                     </div>
 
-                                </div>
-                            </div>
-                        </div>
+                                    <div class="mb-1">
+                                        <label>Review</label>
+                                        <textarea name="review" class="form-control"
+                                                  placeholder="Add review"></textarea>
+                                    </div>
+                                    <input type="hidden" name="type" value="without_image">
 
-
-                    </div>
-
-
-                    <!-- tab8 -->
-                    <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-1"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show partners section</span>
-
-                            <form id="partnerSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="partners_section">
-                                <input type="hidden" name="value" value="{{ setting('partners_section') ? 1 : 0 }}"
-                                       id="partnerSectionValue">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input toggle-switch" type="checkbox"
-                                           id="partnerSectionToggle" {{
-                                setting('partners_section') ? 'checked' : '' }}>
-                                </div>
-                            </form>
-                        </div>
-
-                        <p class="fw-semibold text-black fs-4">Photo</p>
-                        <div class="position-relative">
-                            <div class="row g-2 mb-1">
-                                <div class="col-12">
-                                    <form id="createPartner" action="{{ route('partners.create') }}" method="post">
-                                        @csrf
-
-                                        <!-- Dropzone area -->
-                                        <div class="dropzone" id="partner-dropzone"></div>
-
-                                        <!-- Hidden field to store uploaded media ID -->
-                                        <input type="hidden" name="media_id" id="media_id">
-
-                                        <div class="row d-flex justify-content-end">
-                                            <button type="submit" class="col-5 col-md-3 btn btn-primary mt-1 mb-1">
-                                                Add Partner
-                                            </button>
-                                        </div>
-                                    </form>
-
-                                    <p class="fw-semibold text-black fs-16">Added Partners</p>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary ">Add Review</button>
+                                    </div>
+                                </form>
+                                <!-- Added Products List -->
+                                <div class="mt-2">
+                                    <h5 class="text-black fs-16">Added Reviews</h5>
                                     <div class="row">
-                                        <!-- Product Card -->
-                                        @forelse($partners as $partner)
-                                            <!-- Product Card -->
-                                            <div class="col-md-6 mb-1">
-                                                <div
-                                                    class="p-2 d-flex flex-row align-items-center justify-content-between"
-                                                    style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
-                                                    <!-- Image -->
-                                                    <img src="{{ $partner->getUrl() }}" alt="Product"
-                                                         class="me-3 rounded"
-                                                         style="width: 80px; height: 80px; object-fit: cover;">
+                                        @foreach($reviewsWithoutImages as $review)
+                                            <div class="col-md-6 mb-2"
+                                                 style="box-shadow: 6px 4px 6px 4px #4247460F; border-radius: 10px;">
 
-                                                    <!-- Remove Button -->
-                                                    <form id="remove-partner"
-                                                          action="{{ route('partners.remove',$partner->id) }}"
-                                                          method="POST">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button class="btn btn-outline-secondary btn-sm ms-2"
-                                                                data-id="{{ $partner->id }}">
-                                                            Remove
-                                                        </button>
-                                                    </form>
+                                                <div class="p-1 d-flex">
+                                                    <div>
+                                                        <strong>{{ $review->customer }}</strong>
+                                                        <div class="text-warning">
+                                                            @for($i = 1; $i <= 5; $i++)
+                                                                <i
+                                                                    class="fas fa-star{{ $i > $review->rate ? '-o' : '' }}"></i>
+                                                            @endfor
+                                                        </div>
+                                                        <small class="text-muted">{{
+                                                    \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                        <p class="mb-1 text-break">{{ $review->review }}</p>
+                                                        <form class="remove-review"
+                                                              action="{{ route('reviews.remove',$review->id) }}"
+                                                              method="POST">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-sm btn-outline-danger">
+                                                                Remove
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                    {{-- <small class="text-muted">{{
+                                                        \Carbon\Carbon::parse($review->date)->format('d/m/Y') }}</small>
+                                                    <p class="mb-1">{{ $review->review }}</p> --}}
+
                                                 </div>
+
                                             </div>
-                                        @empty
-                                            <div class="col-12 text-center my-2">
-                                                <div class="mt-3 text-muted fs-5">No partners added yet.</div>
-                                            </div>
-                                        @endforelse
+                                        @endforeach
                                     </div>
-
                                 </div>
-                            </div>
 
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+                <!-- tab8 -->
+                <div class="tab-pane fade" id="tab8" role="tabpanel" aria-labelledby="tab8-tab">
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-1"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show partners section</span>
+
+                        <form id="partnerSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="partners_section">
+                            <input type="hidden" name="value" value="{{ setting('partners_section') ? 1 : 0 }}"
+                                   id="partnerSectionValue">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input toggle-switch" type="checkbox"
+                                       id="partnerSectionToggle" {{
+                                setting('partners_section') ? 'checked' : '' }}>
+                            </div>
+                        </form>
+                    </div>
+
+                    <p class="fw-semibold text-black fs-4">Photo</p>
+                    <div class="position-relative">
+                        <div class="row g-2 mb-1">
+                            <div class="col-12">
+                                <form id="createPartner" action="{{ route('partners.create') }}" method="post">
+                                    @csrf
+
+                                    <!-- Dropzone area -->
+                                    <div class="dropzone" id="partner-dropzone"></div>
+
+                                    <!-- Hidden field to store uploaded media ID -->
+                                    <input type="hidden" name="media_id" id="media_id">
+
+                                    <div class="row d-flex justify-content-end">
+                                        <button type="submit" class="col-5 col-md-3 btn btn-primary mt-1 mb-1">
+                                            Add Partner
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <p class="fw-semibold text-black fs-16">Added Partners</p>
+                                <div class="row">
+                                    <!-- Product Card -->
+                                    @forelse($partners as $partner)
+                                        <!-- Product Card -->
+                                        <div class="col-md-6 mb-1">
+                                            <div
+                                                class="p-2 d-flex flex-row align-items-center justify-content-between"
+                                                style="box-shadow: 0px 4px 6px 0px #4247460F; border-radius: 10px;">
+                                                <!-- Image -->
+                                                <img src="{{ $partner->getUrl() }}" alt="Product"
+                                                     class="me-3 rounded"
+                                                     style="width: 80px; height: 80px; object-fit: cover;">
+
+                                                <!-- Remove Button -->
+                                                <form id="remove-partner"
+                                                      action="{{ route('partners.remove',$partner->id) }}"
+                                                      method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-outline-secondary btn-sm ms-2"
+                                                            data-id="{{ $partner->id }}">
+                                                        Remove
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="col-12 text-center my-2">
+                                            <div class="mt-3 text-muted fs-5">No partners added yet.</div>
+                                        </div>
+                                    @endforelse
+                                </div>
+
+                            </div>
                         </div>
 
                     </div>
 
-                    <!-- tab9 -->
-                    <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
-                        <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
-                             style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
-                            <span class="fw-semibold text-black fs-4">Show faq section</span>
+                </div>
 
-                            <form id="faqSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="key" value="faq_section">
-                                <input type="hidden" name="value" value="{{ setting('faq_section') ? 1 : 0 }}"
-                                       id="faqSectionValue">
+                <!-- tab9 -->
+                <div class="tab-pane fade" id="tab9" role="tabpanel" aria-labelledby="tab9-tab">
+                    <div class="card d-flex flex-row align-items-center justify-content-between p-1 mb-3"
+                         style="background-color: #F4F6F6; border-radius: 10px; border: 1px solid #CED5D4;">
+                        <span class="fw-semibold text-black fs-4">Show faq section</span>
 
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input toggle-switch" type="checkbox" id="faqSectionToggle" {{
+                        <form id="faqSectionForm" action="{{ route('landing-sections.update') }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="key" value="faq_section">
+                            <input type="hidden" name="value" value="{{ setting('faq_section') ? 1 : 0 }}"
+                                   id="faqSectionValue">
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input toggle-switch" type="checkbox" id="faqSectionToggle" {{
                                 setting('faq_section') ? 'checked' : '' }}>
-                                </div>
-                            </form>
-                        </div>
-
+                            </div>
+                        </form>
                     </div>
 
                 </div>

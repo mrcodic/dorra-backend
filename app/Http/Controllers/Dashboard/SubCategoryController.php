@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Services\CategoryService;
-use Illuminate\Support\Facades\Response;
+
 use App\Http\Requests\SubCategory\{StoreSubCategoryRequest, UpdateSubCategoryRequest};
 use Illuminate\Http\JsonResponse;
-use \Illuminate\Http\Request;
+
 
 class SubCategoryController extends DashboardController
 {

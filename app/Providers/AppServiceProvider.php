@@ -47,9 +47,9 @@ class AppServiceProvider extends ServiceProvider
             ]);
         }
         if ($user->roles->isEmpty()) {
-            throw ValidationException::withMessages([
-                'role' => 'contact administrator your role deleted',
-            ]);
+//            throw ValidationException::withMessages([
+//                'role' => 'contact administrator your role deleted',
+//            ]);
         }
 
         if (! Hash::check($request->password, $user->password)) {

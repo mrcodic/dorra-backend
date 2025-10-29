@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     DiscountCodeController,
     FaqController,
     FlagController,
+    IndustryController,
     InventoryController,
     InvoiceController,
     JobTicketController,
@@ -25,10 +26,10 @@ use App\Http\Controllers\Dashboard\{AdminController,
     StationStatusController,
     StatisticsController,
     SubCategoryController,
+    SubIndustryController,
     TagController,
     TemplateController,
-    UserController
-};
+    UserController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Controllers\Shared\LibraryAssetController;
@@ -172,6 +173,17 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         });
         Route::resource('/station-statuses', StationStatusController::class);
 
+        Route::group(['prefix' => 'industries', 'as' => 'industries.', 'controller' => IndustryController::class,], function () {
+            Route::get('/data', [IndustryController::class, 'getData'])->name('data');
+            Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        });
+        Route::resource('/industries', IndustryController::class);
+
+        Route::group(['prefix' => 'sub-industries', 'as' => 'sub-industries.', 'controller' => SubIndustryController::class,], function () {
+            Route::get('/data', [ SubIndustryController::class, 'getData'])->name('data');
+            Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        });
+        Route::resource('/sub-industries', SubIndustryController::class);
 
         Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
             Route::get('/data', [TemplateController::class, 'getData'])->name('data');

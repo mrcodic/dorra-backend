@@ -146,6 +146,16 @@ enum PermissionEnum: string
     case DELETE_STATION_STATUSES = 'station-statuses_delete';
     case UPDATE_STATION_STATUSES = 'station-statuses_update';
 
+    // Industries
+    case SHOW_INDUSTRIES = 'industries_show';
+    case CREATE_INDUSTRIES = 'industries_create';
+    case DELETE_INDUSTRIES = 'industries_delete';
+    case UPDATE_INDUSTRIES = 'industries_update';
+    case SHOW_SUB_INDUSTRIES = 'sub-industries_show';
+    case CREATE_SUB_INDUSTRIES = 'sub-industries_create';
+    case DELETE_SUB_INDUSTRIES = 'sub-industries_delete';
+    case UPDATE_SUB_INDUSTRIES = 'sub-industries_update';
+
 
     public function group(): array
     {

@@ -77,8 +77,25 @@ return [
                 'tags_create',
                 'tags_update',
                 'tags_delete',
-            ],
+            ]
+
         ],
+    ],
+    'Industries' =>[
+        'children' => [
+            '/industries' => [
+                'industries_show',
+                'industries_create',
+                'industries_update',
+                'industries_delete',
+            ],
+            '/sub-industries' => [
+                'sub-industries_show',
+                'sub-industries_create',
+                'sub-industries_update',
+                'sub-industries_delete',
+            ]
+            ]
     ],
     'Marketing' => [
         'children' => [
