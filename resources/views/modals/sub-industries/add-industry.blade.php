@@ -29,7 +29,7 @@
                             <label class="form-label label-text">Industry</label>
                             <select name="parent_id" class="form-select" id="">
                                 <option value="" disabled selected>Choose Main Industry</option>
-                                @foreach($associatedData['industries'] as $industry)
+                                @foreach($assoicatedData['industries'] as $industry)
                                 <option value="{{ $industry->id }}"> {{
                                     $industry->getTranslation('name',app()->getLocale()) }}</option>
                                 @endforeach

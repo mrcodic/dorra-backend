@@ -49,7 +49,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
             'safety_area' => ['required', 'numeric'],
-            'border' => ['required', 'numeric'],
+            'border' => ['sometimes', 'numeric'],
             'go_to_editor' => ['sometimes', 'boolean'],
         ];
     }

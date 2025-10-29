@@ -225,9 +225,9 @@
             'title' => 'Delete Sub Industries',
             'confirmText' => 'Are you sure you want to delete this items?',
             ])
-            @include('modals.Sub sub-industries.add-industry')
-            @include('modals.Sub sub-industries.show-industry')
-            @include('modals.Sub sub-industries.edit-industry')
+            @include('modals.sub-industries.add-industry')
+            @include('modals.sub-industries.show-industry')
+            @include('modals.sub-industries.edit-industry')
 
 
         </div>
