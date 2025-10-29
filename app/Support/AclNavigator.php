@@ -24,9 +24,10 @@ class AclNavigator
                 return url($url);
             }
 
-            if ($permissions->some(fn($p) => $user->can($p))) {
+            if ($permissions->contains(fn($p) => $user->can($p))) {
                 return url($url);
             }
+
         }
 
         return null;

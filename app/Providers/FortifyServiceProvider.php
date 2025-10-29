@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Http\Responses\LoginResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -31,14 +32,15 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::requestPasswordResetLinkView(function () {
             return view('dashboard.auth.forgot-password');
         });
-    
+
         Fortify::resetPasswordView(function ($request) {
             return view('dashboard.auth.reset-password', ['request' => $request]);
         });
         Fortify::confirmPasswordView(function () {
             return view('dashboard.auth.confirm-password');
         });
-        
+        $this->app->singleton(LoginResponse::class, \App\Http\Responses\LoginResponse::class);
+
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
