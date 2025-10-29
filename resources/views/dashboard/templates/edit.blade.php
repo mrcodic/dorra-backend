@@ -334,6 +334,37 @@
     </script>
 
     <script>
+        $(function () {
+            const $toggle = $('#hasSafetyArea');
+            const $box    = $('#safetyAreaBox');
+            const $select = $('#safetyAreaSelect');
+
+            function syncSafetyArea() {
+                if ($toggle.is(':checked')) {
+                    $box.removeClass('d-none');
+                } else {
+                    $box.addClass('d-none');
+                    // Clear value when hidden (so backend gets null/empty)
+                    $select.val(null).trigger('change');
+                }
+                // If sizes depend on safety area, refresh:
+                // if (typeof refreshSizes === 'function') refreshSizes();
+            }
+
+            // init select2 if not already
+            if ($select.length && !$select.data('select2')) {
+                $select.select2({
+                    placeholder: "Safety Area",
+                    allowClear: true,
+                    minimumResultsForSearch: Infinity
+                });
+            }
+
+            $toggle.on('change', syncSafetyArea);
+            syncSafetyArea(); // initial state
+        });
+    </script>
+    <script>
         document.addEventListener('click', function (e) {
             const submitBtn = e.target.closest('button[type="submit"]');
             if (!submitBtn) return;
