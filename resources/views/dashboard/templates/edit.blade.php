@@ -195,7 +195,7 @@
                                         <div class="form-group mb-2">
                                             <div class="form-check mb-1">
                                                 {{-- send 0 when unchecked --}}
-                                                <input type="hidden" name="has_safety_area" value="0">
+{{--                                                <input type="hidden" name="has_safety_area" value="0">--}}
                                                 <input class="form-check-input" type="checkbox" id="hasSafetyArea" name="has_safety_area"
                                                        value="1" {{ old('has_safety_area') ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="hasSafetyArea">Enable Safety Area</label>
