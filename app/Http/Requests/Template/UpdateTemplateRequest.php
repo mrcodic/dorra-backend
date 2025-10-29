@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Template;
 
+use App\Enums\BorderEnum;
 use App\Enums\OrientationEnum;
+use App\Enums\SafetyAreaEnum;
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
@@ -66,6 +68,9 @@ class UpdateTemplateRequest extends BaseRequest
             'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
             'go_to_editor' => ['sometimes', 'boolean'],
+            'has_corner' => ['required', 'in:0,1'],
+            'border' => ['required', 'in:' . BorderEnum::getValuesAsString()],
+            'safety_area' => ['required', 'in:' . SafetyAreaEnum::getValuesAsString()],
 
         ];
     }
