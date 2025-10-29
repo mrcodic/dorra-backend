@@ -69,8 +69,8 @@ class UpdateTemplateRequest extends BaseRequest
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
             'go_to_editor' => ['sometimes', 'boolean'],
             'has_corner' => ['required', 'in:0,1'],
-            'border' => ['required', 'in:' . BorderEnum::getValuesAsString()],
-            'safety_area' => ['required', 'in:' . SafetyAreaEnum::getValuesAsString()],
+            'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
+            'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
 
         ];
     }

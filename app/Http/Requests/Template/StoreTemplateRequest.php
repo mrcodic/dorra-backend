@@ -48,8 +48,8 @@ class StoreTemplateRequest extends BaseRequest
             'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
             'has_corner' => ['required', 'in:0,1'],
-            'border' => ['required', 'in:' . BorderEnum::getValuesAsString()],
-            'safety_area' => ['required', 'in:' . SafetyAreaEnum::getValuesAsString()],
+            'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
+            'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
 
 
         ];
