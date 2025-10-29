@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Enums\HttpEnum;
 use App\Models\Admin;
 use App\Models\Product;
+use App\Support\AclNavigator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
@@ -53,15 +54,13 @@ class AppServiceProvider extends ServiceProvider
         }
 
         if (! Hash::check($request->password, $user->password)) {
-            // Password wrong
             throw ValidationException::withMessages([
                 'password' => trans('auth.password_incorrect'),
             ]);
         }
 
-
-
-        return $user;
+            $url = app(AclNavigator::class)->firstAllowedUrl($request->user());
+            return $url ?? '/';
     });
 
         Fortify::loginView(fn () => view('dashboard.auth.login'));

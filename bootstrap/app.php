@@ -36,7 +36,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(['dorra_auth_token','dorra_auth_cookie_id']);
         $middleware->redirectUsersTo(function ($request){
             $url = app(AclNavigator::class)->firstAllowedUrl($request->user());
-            dd($url);
             return $url ?? '/';
         });
         $middleware->api([EnsureFrontendRequestsAreStateful::class]);
