@@ -19,7 +19,7 @@ class AclNavigator
 
             $preferred = $permissions->first(fn($p) => str_ends_with($p, '_show')) ?? $permissions->first();
 
-dd($preferred,$url);
+
             if ($preferred && $user->can($preferred)) {
                 return url($url);
             }
