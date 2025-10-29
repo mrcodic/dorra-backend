@@ -34,9 +34,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/v1/user/payment/callback',
         ]);
         $middleware->encryptCookies(['dorra_auth_token','dorra_auth_cookie_id']);
-        $middleware->redirectUsersTo(function ($request){
-            $url = app(AclNavigator::class)->firstAllowedUrl($request->user());
-            return $url ?? '/';
+        $middleware->redirectUsersTo(function ($request) {
+            $user = $request->user();
+            if (! $user) return '/login';
+            return app(\App\Support\AclNavigator::class)->firstAllowedUrl($user) ?? '/';
         });
         $middleware->api([EnsureFrontendRequestsAreStateful::class]);
     })
