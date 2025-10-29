@@ -21,7 +21,7 @@ enum SafetyAreaEnum: int
         $dpi = config('printing.dpi', 96);
         $cm  = self::pxToCm($this->value, $dpi);
 
-        return sprintf('%s cm', $cm);
+        return "$cm cm ($this->value px)";
     }
 
     public static function pxToCm(int $px, int $dpi = 96, int $precision = 2): string
