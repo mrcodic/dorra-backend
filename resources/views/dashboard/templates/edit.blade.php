@@ -289,6 +289,19 @@
             const $other  = $('#shape_other');  // value="1"
             const $hidden = $('#has_corner_hidden');
 
+            // NEW: refs for corners UI
+            const $cornersBox   = $('#cornersBox');
+            const $cornersSelect = $('#cornersSelect');
+
+            // (optional) init select2 for corners once
+            if ($cornersSelect.length && !$cornersSelect.data('select2')) {
+                $cornersSelect.select2({
+                    placeholder: "Corners",
+                    allowClear: true,
+                    minimumResultsForSearch: Infinity
+                });
+            }
+
             function updateHidden() {
                 if ($circle.is(':checked')) return $hidden.val('0');
                 if ($other.is(':checked'))  return $hidden.val('1');
@@ -296,19 +309,25 @@
             }
 
             function syncState() {
-                // If exactly one is checked, disable the other; otherwise enable both
+                // Mutual exclusivity + disable other
                 if ($circle.is(':checked') && !$other.is(':checked')) {
                     $other.prop('checked', false).prop('disabled', true);
                 } else if ($other.is(':checked') && !$circle.is(':checked')) {
                     $circle.prop('checked', false).prop('disabled', true);
                 } else {
-                    // none or both -> allow user to choose; uncheck "both" case
-                    if ($circle.is(':checked') && $other.is(':checked')) {
-                        // If both became checked somehow, prefer the last clicked; we'll handle below
-                    }
                     $circle.prop('disabled', false);
                     $other.prop('disabled', false);
                 }
+
+                // NEW: show/hide corners when "Other" is selected
+                if ($other.is(':checked')) {
+                    $cornersBox.removeClass('d-none');
+                } else {
+                    $cornersBox.addClass('d-none');
+                    // optional: clear border when hidden
+                    $cornersSelect.val(null).trigger('change');
+                }
+
                 updateHidden();
             }
 
@@ -326,12 +345,13 @@
             // Ensure consistent initial state based on server-rendered checks
             syncState();
 
-            // Optional: just before submit, re-sync to be extra safe
-            $('#addTemplateForm').on('submit', function () {
+            // Safety: resync on submit
+            $('#editTemplateForm').on('submit', function () {
                 syncState();
             });
         });
     </script>
+
 
     <script>
         $(function () {
