@@ -19,22 +19,22 @@ enum SafetyAreaEnum: int
     public function label(): string
     {
         $dpi = 300;
-        $cm  = self::pxToCm($this->value, $dpi);
+        $cm  = self::pxToCm($this->value);
 
         return $this->value.' Px '. "($cm Cm)";
 
     }
 
-    public static function pxToCm(int $px, int $dpi = 96, int $precision = 2): string
+    public static function pxToCm(int $px, int $precision = 2): string
     {
 
-        $cm = $px * 2.54 / max(1, $dpi);
+        $cm = $px * 2.54;
         return number_format($cm, $precision, '.', '');
     }
 
 
     public static function cmToPx(float $cm, int $dpi = 96): int
     {
-        return (int) round($cm * $dpi / 2.54);
+        return (int) round($cm / 2.54);
     }
 }

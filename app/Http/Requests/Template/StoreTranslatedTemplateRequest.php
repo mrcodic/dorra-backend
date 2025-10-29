@@ -52,6 +52,7 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'source_design_svg' => ['nullable', 'file'],
             'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
+            'has_safety_area' => ['sometimes', 'in:0,1'],
             'has_corner' => ['required', 'in:0,1'],
             'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],

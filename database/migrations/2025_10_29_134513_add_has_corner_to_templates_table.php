@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('templates', function (Blueprint $table) {
             $table->boolean('has_corner')->nullable()->default(false)->after('border');
+            $table->boolean('has_safety_area')->nullable()->default(false)->after('has_corner');
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('templates', function (Blueprint $table) {
             $table->dropColumn('has_corner');
+            $table->dropColumn('has_safety_area');
         });
     }
 };

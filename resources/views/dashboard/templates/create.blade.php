@@ -152,14 +152,16 @@
                                     {{-- Shape (col-6) --}}
                                     <div class="col-md-6">
                                         <div class="form-group mb-2">
+                                            <input type="hidden" name="has_corner" id="has_corner_hidden"
+                                                   value="{{ old('has_corner') }}">
                                             <label class="label-text mb-1">Shape</label>
                                             <div class="d-flex gap-3">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="has_corner" id="shape_circle" value="0">
+                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_circle" value="0">
                                                     <label class="form-check-label" for="shape_circle">Circle</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="has_corner" id="shape_other" value="1" checked>
+                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_other" value="1" >
                                                     <label class="form-check-label" for="shape_other">Other</label>
                                                 </div>
                                             </div>
@@ -169,17 +171,29 @@
                                     {{-- Safety Area (col-6) --}}
                                     <div class="col-md-6">
                                         <div class="form-group mb-2">
-                                            <label for="safetyAreaSelect" class="label-text mb-1">Safety Area</label>
-                                            <select id="safetyAreaSelect" class="form-select select2" name="safety_area">
-                                                @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                    <option value="{{ $area->value }}">
-                                                        {{ $area->label() }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <small class="form-text text-muted">Padding inside the design area.</small>
+                                            <div class="form-check mb-1">
+                                                {{-- send 0 when unchecked --}}
+                                                <input type="hidden" name="has_safety_area" value="0">
+                                                <input class="form-check-input" type="checkbox" id="hasSafetyArea" name="has_safety_area"
+                                                       value="1" {{ old('has_safety_area') ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="hasSafetyArea">Enable Safety Area</label>
+                                            </div>
+
+                                            <div id="safetyAreaBox" class="{{ old('has_safety_area') ? '' : 'd-none' }}">
+                                                <label for="safetyAreaSelect" class="label-text mb-1">Safety Area</label>
+                                                <select id="safetyAreaSelect" class="form-select select2" name="safety_area">
+                                                    @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                        <option value="{{ $area->value }}"
+                                                            {{ (string)old('safety_area') === (string)$area->value ? 'selected' : '' }}>
+                                                            {{ $area->label() }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Padding inside the design area.</small>
+                                            </div>
                                         </div>
                                     </div>
+
                                 </div>
 
 
@@ -233,6 +247,89 @@
 
 @endsection
 @section('vendor-script')
+    <script>
+        $(function () {
+            const $circle = $('#shape_circle'); // value="0"
+            const $other  = $('#shape_other');  // value="1"
+            const $hidden = $('#has_corner_hidden');
+
+            function updateHidden() {
+                if ($circle.is(':checked')) return $hidden.val('0');
+                if ($other.is(':checked'))  return $hidden.val('1');
+                $hidden.val(''); // none selected
+            }
+
+            function syncState() {
+                // If exactly one is checked, disable the other; otherwise enable both
+                if ($circle.is(':checked') && !$other.is(':checked')) {
+                    $other.prop('checked', false).prop('disabled', true);
+                } else if ($other.is(':checked') && !$circle.is(':checked')) {
+                    $circle.prop('checked', false).prop('disabled', true);
+                } else {
+                    // none or both -> allow user to choose; uncheck "both" case
+                    if ($circle.is(':checked') && $other.is(':checked')) {
+                        // If both became checked somehow, prefer the last clicked; we'll handle below
+                    }
+                    $circle.prop('disabled', false);
+                    $other.prop('disabled', false);
+                }
+                updateHidden();
+            }
+
+            // When one is checked, uncheck the other then sync
+            $circle.on('change', function () {
+                if (this.checked) $other.prop('checked', false);
+                syncState();
+            });
+
+            $other.on('change', function () {
+                if (this.checked) $circle.prop('checked', false);
+                syncState();
+            });
+
+            // Ensure consistent initial state based on server-rendered checks
+            syncState();
+
+            // Optional: just before submit, re-sync to be extra safe
+            $('#addTemplateForm').on('submit', function () {
+                syncState();
+            });
+        });
+    </script>
+
+
+    <script>
+        $(function () {
+            const $toggle = $('#hasSafetyArea');
+            const $box    = $('#safetyAreaBox');
+            const $select = $('#safetyAreaSelect');
+
+            function syncSafetyArea() {
+                if ($toggle.is(':checked')) {
+                    $box.removeClass('d-none');
+                } else {
+                    $box.addClass('d-none');
+                    // Clear value when hidden (so backend gets null/empty)
+                    $select.val(null).trigger('change');
+                }
+                // If sizes depend on safety area, refresh:
+                // if (typeof refreshSizes === 'function') refreshSizes();
+            }
+
+            // init select2 if not already
+            if ($select.length && !$select.data('select2')) {
+                $select.select2({
+                    placeholder: "Safety Area",
+                    allowClear: true,
+                    minimumResultsForSearch: Infinity
+                });
+            }
+
+            $toggle.on('change', syncSafetyArea);
+            syncSafetyArea(); // initial state
+        });
+    </script>
+
     <script>
         $(function () {
             const $cornersBox = $('#cornersBox');
