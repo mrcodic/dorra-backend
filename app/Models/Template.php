@@ -105,7 +105,7 @@ class Template extends Model implements HasMedia
     }
     public function industries()
     {
-        return $this->morphToMany(Tag::class, 'industryable')->withTimestamps();
+        return $this->morphToMany(Industry::class, 'industryable', 'industryables')->withTimestamps();
     }
 
     public function flags()
