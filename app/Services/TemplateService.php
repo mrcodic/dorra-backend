@@ -38,21 +38,21 @@ class TemplateService extends BaseService
         $productId = request('product_id');
         $categoryId = request('product_without_category_id');
         $locale = app()->getLocale();
-        $search =request('search');
+        $search = request('search');
         $query = $this->repository
             ->query()->with([
-            'products:id,name',
-            'tags' => function ($q) use ($locale, $search) {
+                'products:id,name',
+                'tags' => function ($q) use ($locale, $search) {
 
-                if ($search !== '') {
-                    $q->whereRaw(
-                        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
-                        ["%{$search}%"]
-                    );
-                }
-            },
-            'types',
-        ])->when(request()->filled('search_value'), function ($q)use ($locale) {
+                    if ($search !== '') {
+                        $q->whereRaw(
+                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
+                            ["%{$search}%"]
+                        );
+                    }
+                },
+                'types',
+            ])->when(request()->filled('search_value'), function ($q) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
 
                     $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
@@ -71,7 +71,7 @@ class TemplateService extends BaseService
                     $q->whereHas('categories', function ($q) use ($categoryId) {
                         $q->where('categories.id', $categoryId);
                     })
-                    ->orwhereHas('products.category', function ($q) use ($categoryId) {
+                        ->orwhereHas('products.category', function ($q) use ($categoryId) {
                             $q->where('categories.id', $categoryId);
                         });
                 });
@@ -83,7 +83,7 @@ class TemplateService extends BaseService
                 });
             })
             ->when(request('search'), function ($q) use ($locale) {
-                $q->whereHas('tags', function ($q) use ($locale){
+                $q->whereHas('tags', function ($q) use ($locale) {
                     $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
                         '%' . strtolower(request('search')) . '%'
                     ]);
@@ -103,7 +103,7 @@ class TemplateService extends BaseService
                     $q->whereIn('industries.id', is_array($industries) ? $industries : [$industries]);
                 });
             })
-            ->when(request()->filled('orientation'),function ($q){
+            ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
             })
             ->latest();
@@ -192,6 +192,23 @@ class TemplateService extends BaseService
             }
             return $model;
         });
+        if (isset($validatedData['base64_preview_image'])) {
+            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'templates');
+        }
+        if (isset($validatedData['back_base64_preview_image'])) {
+            ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
+        }
+        if (request()->allFiles()) {
+            handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
+        }
+
+        return $model->load($relationsToLoad);
+    }
+
+    public function updateEditorData($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->repository->update($validatedData, $id);
+
         if (isset($validatedData['base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'templates');
         }
