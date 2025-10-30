@@ -164,7 +164,8 @@ $(document).ready(function () {
         $('#editSubIndustryModal #edit-tag-name-en').val(tagNameEn);
         $('#editSubIndustryModal #edit-tag-id').val(tagId);
         $('#editSubIndustryModal #parent-id').val(parentId);
-        $('#editSubIndustryModal #editSubIndustryForm').action(`sub-industries/${tagId}`);
+        $('#editSubIndustryForm').attr('action', `/sub-industries/${tagId}`);
+
 
         // Show modal
         $('#editSubIndustryModal').modal('show');
