@@ -42,6 +42,8 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'flags.*' => ['integer', 'exists:flags,id'],
             'types' => ['required', 'array'],
             'types.*' => ['integer', 'exists:types,id'],
+            'industry_ids' => ['nullable', 'array'],
+            'industry_ids.*' => ['integer', 'exists:industries,id'],
             'template_image_id' => ['required','exists:media,id'],
             'design_data' => ['sometimes', 'json'],
             'design_back_data' => ['sometimes', 'json'],

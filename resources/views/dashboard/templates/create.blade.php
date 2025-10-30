@@ -149,7 +149,7 @@
                                     </div>
                                     <div class="col-md-6 form-group mb-2">
                                         <label for="subIndustriesSelect" class="label-text mb-1">Sub Industries</label>
-                                        <select id="subIndustriesSelect" class="form-select select2" name="industries[]"
+                                        <select id="subIndustriesSelect" class="form-select select2" name="industry_ids[]"
                                                 multiple>
                                             @foreach($associatedData['sub_industries'] as $industry)
                                                 <option value="{{ $industry->id }}">

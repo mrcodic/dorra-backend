@@ -28,6 +28,8 @@ class StoreTemplateRequest extends BaseRequest
             'description.ar' => ['nullable', 'string'],
             'type' => ['sometimes', 'in:' . TypeEnum::getValuesAsString()],
             'product_ids' => ['nullable','required_with:product_with_category', 'array'],
+            'industry_ids' => ['nullable', 'array'],
+            'industry_ids.*' => ['integer', 'exists:industries,id'],
             'product_ids.*' => ['integer', 'exists:products,id'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],

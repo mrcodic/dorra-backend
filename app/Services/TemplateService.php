@@ -136,7 +136,7 @@ class TemplateService extends BaseService
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $model = $this->repository->create($validatedData);
             $model->products()->sync($validatedData['product_ids'] ?? []);
-            $model->industries()->sync($validatedData['industries'] ?? []);
+            $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
             $model->types()->sync($validatedData['types']);
             $model->tags()->sync($validatedData['tags'] ?? []);
