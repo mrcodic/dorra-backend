@@ -48,30 +48,20 @@ class ProductResource extends JsonResource
                 return TagResource::collection($tags);
             }),
             'template_industries' => $this->whenLoaded('templates', function () {
-                // Ensure we can access parents of subs
                 $this->templates->loadMissing('industries.parent');
-
-                // All industries attached to these templates (parents + subs)
                 $all = $this->templates->pluck('industries')->flatten();
-
-                // Unique by id
                 $unique = $all->unique('id')->values();
-
-                // Build a parent collection (if item is sub -> use its parent; if parent -> itself)
                 $parents = $unique
                     ->map(fn ($ind) => $ind->parent_id ? $ind->parent : $ind)
-                    ->filter() // in case some parent is missing
+                    ->filter()
                     ->unique('id')
                     ->values();
 
-                // For each parent, attach ONLY the subs that are in the selected set
                 $parents = $parents->map(function ($parent) use ($unique) {
                     $children = $unique
-                        ->where('parent_id', $parent->id) // only subs of this parent present in the set
+                        ->where('parent_id', $parent->id)
                         ->values();
 
-                    // Important: only set children if there are any subs in the selection.
-                    // If you also want to include direct parent (with no subs), keep empty collection.
                     $parent->setRelation('children', $children);
 
                     return $parent;
