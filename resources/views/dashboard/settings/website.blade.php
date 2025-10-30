@@ -2430,14 +2430,20 @@
                                     return;
                                 }
 
-                                $(this).slideUp(deleteElement, function () {
-                                    $(this).remove();
+                                // animate, then let repeater delete and reindex
+                                $(this).slideUp(200, function () {
+                                    deleteElement(); // ✅ correct way to remove
+
+                                    // update delete button visibility on remaining items
                                     const $remaining = $repeater.find('[data-repeater-item]');
                                     $remaining.each(function () {
-                                        $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
+                                        $(this)
+                                            .find('[data-repeater-delete]')
+                                            .toggle($remaining.length > 1);
                                     });
                                 });
                             }
+
                         });
                     });
                 </script>

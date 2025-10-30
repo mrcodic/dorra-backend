@@ -37,6 +37,7 @@ class ProductResource extends JsonResource
             'all_product_images' => $this->whenLoaded('media', function () {
                 return MediaResource::collection($this->getAllProductImages());
             }),
+
             'template_tags' => $this->whenLoaded('templates', function () {
                 $this->templates->loadMissing('tags');
                 $tags = $this->templates
@@ -69,7 +70,6 @@ class ProductResource extends JsonResource
 
                 return IndustryResource::collection($parents);
             }),
-
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
             'offer' => OfferResource::make($this->whenLoaded('lastOffer')),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
