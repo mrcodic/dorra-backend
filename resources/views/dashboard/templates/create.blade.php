@@ -138,7 +138,7 @@
 
                                     <div class="col-md-6 form-group mb-2">
                                         <label for="industriesSelect" class="label-text mb-1">Industries</label>
-                                        <select id="industriesSelect" class="form-select select2" name=""
+                                        <select id="industriesSelect" class="form-select select2" name="industry_ids[]"
                                                 multiple>
                                             @foreach($associatedData['industries'] as $industry)
                                                 <option value="{{ $industry->id }}">
