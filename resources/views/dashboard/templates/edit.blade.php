@@ -189,11 +189,11 @@
                                 <div class="form-group mb-2">
                                     <label for="orientation" class="label-text mb-1">Orientation</label>
                                     <select id="orientation" class="form-select" name="orientation" disabled>
-                                        <option value="" selected disabled>
+                                        <option value=""  disabled>
                                             chooese orientation
                                         </option>
                                         @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                            <option value="{{ $orientation->value }}" disabled>
+                                            <option value="{{ $orientation->value }}" @selected($orientation->value == $model->orientation) disabled>
                                                 {{$orientation->label()}}
                                             </option>
                                         @endforeach
