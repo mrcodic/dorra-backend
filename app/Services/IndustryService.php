@@ -108,11 +108,19 @@ class IndustryService extends BaseService
             })->make();
     }
 
-    public function getSubIndustries($request)
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
         return $this->repository->query()
             ->withCount(['templates'])
             ->whereNull('parent_id')
+           ->latest()->get();
+    }
+
+    public function getSubIndustries($request)
+    {
+        return $this->repository->query()
+            ->withCount(['templates'])
+            ->whereNotNull('parent_id')
             ->when($request->filled('industry_id'), function ($query) use ($request) {
                 return $query->where('parent_id', $request->industry_id);
             })->latest()->get();

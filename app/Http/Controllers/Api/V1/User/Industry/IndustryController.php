@@ -23,6 +23,7 @@ class IndustryController extends Controller
         return Response::api(data: IndustryResource::collection($industries));
     }
 
+
     public function getSubIndustries(Request $request)
     {
         $industries = $this->industryService->getSubIndustries($request);
