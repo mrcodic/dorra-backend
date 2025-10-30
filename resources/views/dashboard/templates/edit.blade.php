@@ -99,19 +99,8 @@
                                             placeholder="Template Description in English">{{ $model->getTranslation('description','en') }}</textarea>
                                     </div>
                                 </div>
-                                <div class="form-group mb-2">
-                                    <label for="orientation" class="label-text mb-1">Orientation</label>
-                                    <select id="orientation" class="form-select" name="orientation">
-                                        <option value="" selected disabled>
-                                            chooese orientation
-                                        </option>
-                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                            <option value="{{ $orientation->value }}" @selected($orientation == $model->orientation)>
-                                                {{$orientation->label()}}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+
+                                <hr>
 
                                 <div class="row mb-2">
 
@@ -152,6 +141,9 @@
                                         @endforeach
                                     </select>
                                 </div>
+
+                                <hr>
+
                                 <div class="row mb-2">
 
                                     <div class="col-md-6 form-group mb-2">
@@ -189,74 +181,92 @@
                                         @endforeach
                                     </select>
                                 </div>
+
+                                <hr>
                                 {{-- Persisted resources (used on submit / ajax) --}}
                                 <input type="hidden" name="dimension_resource_ids"   id="dimensionResourceIds">
                                 <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
-{{--                                <div class="row mb-2">--}}
-{{--                                    --}}{{-- Shape (col-6) --}}
-{{--                                    <div class="col-md-6">--}}
-{{--                                        <div class="form-group mb-2">--}}
-{{--                                            <label class="label-text mb-1">Shape</label>--}}
-{{--                                            <input type="hidden" name="has_corner" id="has_corner_hidden"--}}
-{{--                                                   value="{{ old('has_corner', $model->has_corner ?? '') }}">--}}
+                                <div class="form-group mb-2">
+                                    <label for="orientation" class="label-text mb-1">Orientation</label>
+                                    <select id="orientation" class="form-select" name="orientation" disabled>
+                                        <option value="" selected disabled>
+                                            chooese orientation
+                                        </option>
+                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
+                                            <option value="{{ $orientation->value }}" disabled>
+                                                {{$orientation->label()}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="row mb-2">
 
-{{--                                            <div class="d-flex gap-3">--}}
-{{--                                                <div class="form-check">--}}
-{{--                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_circle" value="0"--}}
-{{--                                                    @checked($model->has_corner == 0)--}}
-{{--                                                    >--}}
-{{--                                                    <label class="form-check-label" for="shape_circle">Circle</label>--}}
-{{--                                                </div>--}}
-{{--                                                <div class="form-check">--}}
-{{--                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_other" value="1"  @checked($model->has_corner == 1)>--}}
-{{--                                                    <label class="form-check-label" for="shape_other">Other</label>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-2">
+                                            <label class="label-text mb-1">Shape</label>
+                                            <input type="hidden" name="has_corner" id="has_corner_hidden"
+                                                   value="{{ old('has_corner', $model->has_corner ?? '') }}" disabled>
 
-{{--                                    --}}{{-- Safety Area (col-6) --}}
-{{--                                    <div class="col-md-6">--}}
-{{--                                        <div class="form-group mb-2">--}}
-{{--                                            <div class="form-check mb-1">--}}
-{{--                                                --}}{{-- send 0 when unchecked --}}
-{{--                                                <input type="hidden" name="has_safety_area" value="0">--}}
-{{--                                                <input class="form-check-input" type="checkbox" id="hasSafetyArea" name="has_safety_area"--}}
-{{--                                                       value="1" {{ $model->has_safety_area ? 'checked' : '' }}>--}}
-{{--                                                <label class="form-check-label" for="hasSafetyArea">Enable Safety Area</label>--}}
-{{--                                            </div>--}}
-
-{{--                                            <div id="safetyAreaBox" class="{{ old('has_safety_area') ? '' : 'd-none' }}">--}}
-{{--                                                <label for="safetyAreaSelect" class="label-text mb-1">Safety Area</label>--}}
-{{--                                                <select id="safetyAreaSelect" class="form-select select2" name="safety_area">--}}
-{{--                                                    @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)--}}
-{{--                                                        <option value="{{ $area->value }}"--}}
-{{--                                                            @selected($area->value == $model->safety_area)>--}}
-{{--                                                            {{ $area->label() }}--}}
-{{--                                                        </option>--}}
-{{--                                                    @endforeach--}}
-{{--                                                </select>--}}
-{{--                                                <small class="form-text text-muted">Padding inside the design area.</small>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
+                                            <div class="d-flex gap-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_circle" value="0"
+                                                    @checked($model->has_corner == 0)
+                                                    disabled >
+                                                    <label class="form-check-label" for="shape_circle">Circle</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_other" value="1"
+                                                        @checked($model->has_corner == 1)
+                                                        disabled
+                                                    >
+                                                    <label class="form-check-label" for="shape_other">Other</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
 
-{{--                                <div class="form-group mb-2 d-none" id="cornersBox">--}}
-{{--                                    <label for="cornersSelect" class="label-text mb-1">Corners</label>--}}
-{{--                                    <select id="cornersSelect" class="form-select select2" name="border">--}}
-{{--                                        @foreach(\App\Enums\BorderEnum::cases() as $border)--}}
-{{--                                            <option value="{{ $border->value }}"--}}
-{{--                                                @selected($border->value == $model->border)>--}}
-{{--                                                {{$border->label()}}--}}
-{{--                                            </option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
-{{--                                </div>--}}
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-2">
+                                            <div class="form-check mb-1">
+                                                 send 0 when unchecked
+                                                <input type="hidden" name="has_safety_area" value="0">
+                                                <input class="form-check-input" type="checkbox" id="hasSafetyArea" name="has_safety_area"
+                                                       value="1" {{ $model->has_safety_area ? 'checked' : '' }} disabled>
+                                                <label class="form-check-label" for="hasSafetyArea">Enable Safety Area</label>
+                                            </div>
+
+                                            <div id="safetyAreaBox" class="{{ old('has_safety_area') ? '' : 'd-none' }}">
+                                                <label for="safetyAreaSelect" class="label-text mb-1">Safety Area</label>
+                                                <select id="safetyAreaSelect" class="form-select select2" name="safety_area" disabled>
+                                                    @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                        <option value="{{ $area->value }}"
+                                                            @selected($area->value == $model->safety_area) disabled>
+                                                            {{ $area->label() }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Padding inside the design area.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group mb-2 d-none" id="cornersBox">
+                                    <label for="cornersSelect" class="label-text mb-1">Corners</label>
+                                    <select id="cornersSelect" class="form-select select2" name="border">
+                                        @foreach(\App\Enums\BorderEnum::cases() as $border)
+                                            <option value="{{ $border->value }}"
+                                                @selected($border->value == $model->border) disabled>
+                                                {{$border->label()}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="form-group mb-2">
                                     <label for="sizesSelect" class="label-text mb-1">Sizes</label>
-                                    <select id="sizesSelect" class="form-select" name="dimension_id">
+                                    <select id="sizesSelect" class="form-select" name="dimension_id" disabled>
                                         <option value="" disabled>Select Size</option>
                                     </select>
                                     <small class="form-text text-muted">

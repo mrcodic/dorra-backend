@@ -86,19 +86,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group mb-2">
-                                    <label for="orientation" class="label-text mb-1">Orientation</label>
-                                    <select id="orientation" class="form-select" name="orientation">
-                                        <option value="" selected disabled>
-                                            chooese orientation
-                                        </option>
-                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                            <option value="{{ $orientation->value }}">
-                                                {{$orientation->label()}}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <hr>
 
                                 <div class="row mb-2">
 
@@ -134,6 +122,8 @@
                                     </select>
                                 </div>
 
+                                <hr>
+
                                 <div class="row mb-2">
 
                                     <div class="col-md-6 form-group mb-2">
@@ -167,6 +157,20 @@
                                         @foreach($associatedData['tags'] as $tag)
                                             <option value="{{ $tag->id }}">
                                                 {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <hr>
+                                <div class="form-group mb-2">
+                                    <label for="orientation" class="label-text mb-1">Orientation</label>
+                                    <select id="orientation" class="form-select" name="orientation">
+                                        <option value="" selected disabled>
+                                            chooese orientation
+                                        </option>
+                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
+                                            <option value="{{ $orientation->value }}">
+                                                {{$orientation->label()}}
                                             </option>
                                         @endforeach
                                     </select>
