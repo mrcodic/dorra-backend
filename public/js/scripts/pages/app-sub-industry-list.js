@@ -155,6 +155,7 @@ $(document).ready(function () {
         const tagNameAR = $(this).data('name_ar');
         const tagNameEn = $(this).data('name_en');
         const tagId = $(this).data('id');
+        console.log(tagId)
         const parentId = $(this).data('parent_id');
 
 
