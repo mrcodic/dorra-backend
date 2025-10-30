@@ -2297,77 +2297,64 @@
                 <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
 
                 <script>
-                    $(document).ready(function () {
+                    $(function () {
                         // init dropzones for already-rendered items
-                        $('[data-repeater-item]').each(function () {
-                            initCarouselDropzone($(this));
-                        });
+                        $('[data-repeater-item]').each(function () { initCarouselDropzone($(this)); });
 
                         // util: basic hex check
                         const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test((v || '').trim());
+
+                        // helper: row is unsaved if hidden input id is empty
+                        const isUnsaved = ($item) => !$.trim($item.find('input[name="id"]').val());
 
                         // Bind preview show/hide + color apply for ONE repeater item
                         function bindPreviewAutoShow($item) {
                             const $form = $item.find('.carousel-form');
                             if (!$form.length) return;
 
-                            const $titleColor = $form.find('.title-color-input');
-                            const $subtitleColor = $form.find('.subtitle-color-input');
-                            const $titleHex = $form.find('.title-color-hex');
-                            const $subtitleHex = $form.find('.subtitle-color-hex');
+                            const $titleColor   = $form.find('.title-color-input');
+                            const $subtitleColor= $form.find('.subtitle-color-input');
+                            const $titleHex     = $form.find('.title-color-hex');
+                            const $subtitleHex  = $form.find('.subtitle-color-hex');
 
-                            const $titlePreviews = $form.find('.titlePreview');     // EN + AR
-                            const $subPreviews = $form.find('.subtitlePreview');  // EN + AR
+                            const $titlePreviews= $form.find('.titlePreview');    // EN + AR
+                            const $subPreviews  = $form.find('.subtitlePreview'); // EN + AR
 
-                            // show/hide previews only when something is filled
                             const toggleVisibility = () => {
                                 const hasTitle = $.trim(
                                     ($form.find('input[name="title_en"]').val() || '') +
-                                    ($form.find('input[name="title_ar"]').val() || '')
+                                    ($form.find('input[name="title_ar"]').val()  || '')
                                 ) !== '';
-
                                 const hasSub = $.trim(
                                     ($form.find('input[name="subtitle_en"]').val() || '') +
-                                    ($form.find('input[name="subtitle_ar"]').val() || '')
+                                    ($form.find('input[name="subtitle_ar"]').val()  || '')
                                 ) !== '';
-
-                                $form.find('.live-preview, .border.rounded.p-2.mb-3') // your preview wrappers
+                                $form.find('.live-preview, .border.rounded.p-2.mb-3')
                                     .toggleClass('d-none', !(hasTitle || hasSub));
                             };
 
-                            // apply color to all previews of the same type
-                            const applyTitleColor = (val) => {
-                                $titlePreviews.css('color', val);
-                            };
-                            const applySubColor = (val) => {
-                                $subPreviews.css('color', val);
-                            };
+                            const applyTitleColor = (val) => { $titlePreviews.css('color', val); };
+                            const applySubColor   = (val) => { $subPreviews.css('color', val); };
 
-                            // sync color <-> hex and apply
                             const bindColor = ($color, $hex, applyFn, fallback) => {
                                 if ($color.length && !$color.val()) $color.val(fallback);
 
-                                // color -> hex + apply
                                 $color.on('input', function () {
                                     const v = $(this).val();
                                     if (isHex(v)) {
                                         if ($hex.length) $hex.val(v);
-                                        applyFn(v);
-                                        toggleVisibility();
+                                        applyFn(v); toggleVisibility();
                                     }
                                 });
 
-                                // hex -> color + apply
                                 $hex.on('input', function () {
                                     const v = $(this).val().trim();
                                     if (isHex(v)) {
                                         if ($color.length) $color.val(v);
-                                        applyFn(v);
-                                        toggleVisibility();
+                                        applyFn(v); toggleVisibility();
                                     }
                                 });
 
-                                // init
                                 const initVal = $color.val() || fallback;
                                 if (isHex(initVal)) {
                                     if ($hex.length) $hex.val(initVal);
@@ -2375,20 +2362,33 @@
                                 }
                             };
 
-                            // bind inputs that affect visibility
-                            $form.on('input', 'input[name="title_en"], input[name="title_ar"], input[name="subtitle_en"], input[name="subtitle_ar"]', toggleVisibility);
+                            $form.on('input',
+                                'input[name="title_en"], input[name="title_ar"], input[name="subtitle_en"], input[name="subtitle_ar"]',
+                                toggleVisibility
+                            );
 
-                            // bind color fields
-                            bindColor($titleColor, $titleHex, applyTitleColor, '#101010');
-                            bindColor($subtitleColor, $subtitleHex, applySubColor, '#5b5b5b');
+                            bindColor($titleColor,   $titleHex,   applyTitleColor, '#101010');
+                            bindColor($subtitleColor,$subtitleHex,applySubColor,   '#5b5b5b');
 
-                            // init visibility state (existing items may already have values)
                             toggleVisibility();
                         }
 
-                        // Bind for items already on the page
-                        $('[data-repeater-item]').each(function () {
-                            bindPreviewAutoShow($(this));
+                        // initial bind for rendered items
+                        $('[data-repeater-item]').each(function () { bindPreviewAutoShow($(this)); });
+
+                        // DELETE BEHAVIOR:
+                        // - For existing items: delete button opens modal (your current markup).
+                        // - For new/empty items: no modal; use data-repeater-delete directly.
+
+                        // If a modal-type delete button is clicked on an UNSAVED row, intercept and delete silently
+                        $(document).on('click', '.open-delete-carousel-modal', function (e) {
+                            const $item = $(this).closest('[data-repeater-item]');
+                            if (isUnsaved($item)) {
+                                e.preventDefault();
+                                const $repDelete = $item.find('[data-repeater-delete]').first();
+                                if ($repDelete.length) $repDelete.trigger('click');
+                            }
+                            // else: allow Bootstrap to open the modal for existing items
                         });
 
                         // Repeater init
@@ -2402,22 +2402,30 @@
                                 // keep previews hidden for brand-new items (until user types)
                                 $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
 
-                                // insert (avoid slideDown if you don't want animation)
+                                // insert
                                 $item.show();
 
                                 // icons & dropzones
                                 if (window.feather) feather.replace();
-                                setTimeout(function () {
-                                    initCarouselDropzone($item);
-                                }, 100);
+                                setTimeout(function () { initCarouselDropzone($item); }, 100);
 
-                                // toggle delete if only one item
+                                // toggle delete visibility if only one item
                                 const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
                                 $items.each(function () {
                                     $(this).find('[data-repeater-delete]').toggle($items.length > 1);
                                 });
 
-                                // ✅ FIX: bind for the newly added item using the correct var
+                                // ensure delete behavior matches saved/unsaved state
+                                if (isUnsaved($item)) {
+                                    // brand-new row: we want immediate delete (no modal)
+                                    $item.find('.open-delete-carousel-modal').addClass('d-none');
+                                    $item.find('[data-repeater-delete]').removeClass('d-none');
+                                } else {
+                                    // existing row: keep modal button, keep repeater delete hidden
+                                    $item.find('.open-delete-carousel-modal').removeClass('d-none');
+                                    $item.find('[data-repeater-delete]').addClass('d-none');
+                                }
+
                                 bindPreviewAutoShow($item);
                             },
 
@@ -2430,23 +2438,32 @@
                                     return;
                                 }
 
-                                // animate, then let repeater delete and reindex
                                 $(this).slideUp(200, function () {
-                                    deleteElement(); // ✅ correct way to remove
+                                    deleteElement(); // let the plugin remove & reindex
 
                                     // update delete button visibility on remaining items
                                     const $remaining = $repeater.find('[data-repeater-item]');
                                     $remaining.each(function () {
-                                        $(this)
-                                            .find('[data-repeater-delete]')
-                                            .toggle($remaining.length > 1);
+                                        $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
                                     });
                                 });
                             }
+                        });
 
+                        // For pre-rendered rows, ensure the correct delete control is visible
+                        $('[data-repeater-item]').each(function () {
+                            const $item = $(this);
+                            if (isUnsaved($item)) {
+                                $item.find('.open-delete-carousel-modal').addClass('d-none');
+                                $item.find('[data-repeater-delete]').removeClass('d-none');
+                            } else {
+                                $item.find('.open-delete-carousel-modal').removeClass('d-none');
+                                $item.find('[data-repeater-delete]').addClass('d-none');
+                            }
                         });
                     });
                 </script>
+
 
                 <script>
                     $(document).on('click', '.remove-category', function (e) {
