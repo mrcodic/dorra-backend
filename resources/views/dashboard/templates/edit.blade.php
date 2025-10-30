@@ -229,7 +229,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group mb-2">
                                             <div class="form-check mb-1">
-                                                 send 0 when unchecked
+
                                                 <input type="hidden" name="has_safety_area" value="0">
                                                 <input class="form-check-input" type="checkbox" id="hasSafetyArea" name="has_safety_area"
                                                        value="1" {{ $model->has_safety_area ? 'checked' : '' }} disabled>
