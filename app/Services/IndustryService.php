@@ -20,6 +20,7 @@ class IndustryService extends BaseService
         $locale = app()->getLocale();
         $tags = $this->repository
             ->query(['id', 'name', 'created_at'])
+            ->whereNull('parent_id')
             ->withCount(['templates'])
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
