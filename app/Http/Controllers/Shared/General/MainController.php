@@ -232,11 +232,11 @@ class MainController extends Controller
             $q->where(function ($qq) use ($terms, $nameExprs) {
                 foreach ($nameExprs as $expr) {
                     foreach ($terms as $w) {
-//                        if (hasMeaningfulSearch(request('search_value'))) {
+                        if (hasMeaningfulSearch($w)) {
                             $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
-//                        } else {
-//                            $qq->whereRaw('1 = 0');
-//                        }
+                        } else {
+                            $qq->whereRaw('1 = 0');
+                        }
                     }
                 }
             });
