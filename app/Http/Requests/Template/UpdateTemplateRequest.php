@@ -52,6 +52,8 @@ class UpdateTemplateRequest extends BaseRequest
             'product_ids.*' => ['integer', 'exists:products,id'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],
+            'industry_ids' => ['nullable', 'array'],
+            'industry_ids.*' => ['integer', 'exists:industries,id'],
             'template_image_id' => ['required','exists:media,id'],
 
             'design_data' => ['sometimes', 'json'],
