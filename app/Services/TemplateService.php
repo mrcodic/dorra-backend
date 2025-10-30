@@ -97,6 +97,11 @@ class TemplateService extends BaseService
                 $q->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
                 });
+            })->when(request()->filled('industries'), function ($q) {
+                $industries = request('industries');
+                $q->whereHas('industries', function ($q) use ($industries) {
+                    $q->whereIn('industries.id', is_array($industries) ? $industries : [$industries]);
+                });
             })
             ->when(request()->filled('orientation'),function ($q){
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
