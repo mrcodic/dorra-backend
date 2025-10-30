@@ -18,7 +18,7 @@ class IndustryResource extends JsonResource
             : $this->children()->withCount('templates')->get()->sum('templates_count')
         );
 
-        $effectiveCount = $direct > 0 && !$this->children->inNotEmpty() ? $direct : $childrenSum;
+        $effectiveCount = $direct > 0 && !$this->children->isNotEmpty() ? $direct : $childrenSum;
 
         return [
             'id'               => $this->id,
