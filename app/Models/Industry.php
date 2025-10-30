@@ -19,7 +19,7 @@ class Industry extends Model
     ];
     public function templates(): MorphToMany
     {
-        return $this->morphedByMany(Template::class,'industryable');
+        return $this->morphedByMany(Template::class,'industryable','industryables');
     }
 
     public function parent(): BelongsTo
