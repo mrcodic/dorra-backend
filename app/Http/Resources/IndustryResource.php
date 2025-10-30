@@ -19,7 +19,6 @@ class IndustryResource extends JsonResource
             'name' => $this->getTranslation('name',app()->getLocale()),
             'sub-industries' => IndustryResource::collection($this->whenLoaded('children')),
             'templates_count' => $this->templates_count,
-
         ];
     }
 }
