@@ -21,14 +21,7 @@
                         @method("PUT")
                         <div class="flex-grow-1">
                             <div class="">
-                                <div class="position-relative mt-3 text-center">
-                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                    <span
-                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                        style="color: #24B094">
-                                        Template Details
-                                    </span>
-                                </div>
+
                                 <div class="form-group mb-2">
                                     <label class="label-text mb-1">Template Image</label>
 
@@ -43,7 +36,14 @@
                                     <!-- Hidden input for uploaded file id -->
                                     <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
                                 </div>
-
+                                <div class="position-relative mt-3 text-center">
+                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                    <span
+                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                        style="color: #24B094">
+                                        Template Details
+                                    </span>
+                                </div>
                                 <div class="form-group mb-2">
                                     <label class="label-text mb-1">Template Type</label>
                                     <div class="row">
