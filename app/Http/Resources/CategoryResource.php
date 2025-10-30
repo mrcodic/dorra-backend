@@ -56,6 +56,17 @@ class CategoryResource extends JsonResource
 
                 return TagResource::collection($tags);
             }),
+            'template_industries' => $this->whenLoaded('templates', function () {
+                $this->templates->loadMissing('industries');
+
+                $industries = $this->templates
+                    ->pluck('industries')
+                    ->flatten()
+                    ->unique('id')
+                    ->values();
+
+                return IndustryResource::collection($industries);
+            }),
 
 
             'is_has_category' => $this->is_has_category,
