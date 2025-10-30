@@ -172,6 +172,7 @@ class TemplateService extends BaseService
             if (!empty($validatedData['types'])) {
                 $model->types()->sync($validatedData['types']);
             }
+            $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
             $model->tags()->sync($validatedData['tags'] ?? []);
