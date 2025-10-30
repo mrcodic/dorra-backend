@@ -112,7 +112,8 @@ class IndustryService extends BaseService
         return $this->repository->query()
                 ->with([
                     'children' => function ($q) {
-                        $q->withCount('templates');
+                        $q->whereDoesntHave('children')
+                        ->withCount('templates');
                     }
                 ])
             ->withCount(['templates'])

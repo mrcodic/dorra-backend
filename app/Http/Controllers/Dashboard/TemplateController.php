@@ -7,7 +7,6 @@ use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Models\Template;
 use App\Http\Requests\Template\{StoreTemplateRequest,
-    StoreTranslatedTemplateRequest,
     UpdateTemplateEditorRequest,
     UpdateTemplateRequest
 };
@@ -103,7 +102,7 @@ class TemplateController extends DashboardController
         return view("dashboard.templates.index", get_defined_vars());
     }
 
-    public function storeAndRedirect(StoreTranslatedTemplateRequest $request)
+    public function storeAndRedirect(StoreTemplateRequest $request)
     {
         $template = $this->templateService->storeResource($request->validated());
         return Response::api(data: [

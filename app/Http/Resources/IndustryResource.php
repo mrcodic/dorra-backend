@@ -13,7 +13,7 @@ class IndustryResource extends JsonResource
 
 
         $childrenSum = (int) (
-        $this->children
+        $this->relationLoaded('children')
             ? $this->children->sum('templates_count')
             : $this->children()->withCount('templates')->get()->sum('templates_count')
         );
