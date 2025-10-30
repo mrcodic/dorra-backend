@@ -56,7 +56,29 @@ class CategoryResource extends JsonResource
 
                 return TagResource::collection($tags);
             }),
+            'template_industries' => $this->whenLoaded('templates', function () {
+                $this->templates->loadMissing('industries.parent');
+                $all = $this->templates->pluck('industries')->flatten();
+                $unique = $all->unique('id')->values();
 
+                $parents = $unique
+                    ->map(fn ($ind) => $ind->parent_id ? $ind->parent : $ind)
+                    ->filter()
+                    ->unique('id')
+                    ->values();
+
+                $parents = $parents->map(function ($parent) use ($unique) {
+                    $children = $unique
+                        ->where('parent_id', $parent->id)
+                        ->values();
+
+                    $parent->setRelation('children', $children);
+
+                    return $parent;
+                });
+
+                return IndustryResource::collection($parents);
+            }),
 
             'is_has_category' => $this->is_has_category,
             'show_add_cart_btn' => $this->show_add_cart_btn,

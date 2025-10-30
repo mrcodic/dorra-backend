@@ -7,6 +7,7 @@ return [
     "Jobs" => "Jobs",
     "Print command" => "Print Command",
     "Industries" => "Industries",
+    "SubIndustries" => "Sub Industries",
     "Custom Statuses" => "Custom Statuses",
     "Inventory" => "Inventory",
     "Board" => "Board",

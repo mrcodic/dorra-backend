@@ -232,7 +232,7 @@ class MainController extends Controller
             $q->where(function ($qq) use ($terms, $nameExprs) {
                 foreach ($nameExprs as $expr) {
                     foreach ($terms as $w) {
-                        if (hasMeaningfulSearch(request('search_value'))) {
+                        if (hasMeaningfulSearch($w)) {
                             $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
                         } else {
                             $qq->whereRaw('1 = 0');
@@ -250,11 +250,13 @@ class MainController extends Controller
                 'products.media',
                 'media',
 
-
                 'templates.tags' => function ($query) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($query);
                 },
 
+                'templates.industries' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
+                },
 
                 'products.templates.tags' => function ($query) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($query);
