@@ -10,9 +10,6 @@
                 </div>
                 <div class="modal-body flex-grow-1">
                     <input type="hidden" id="edit-tag-id">
-
-
-
                     <!-- Name in Arabic and English -->
                     <div class="row mb-1">
                         <div class="col-md-6">
@@ -24,25 +21,25 @@
                             <input type="text" class="form-control" id="edit-tag-name-ar" name="name[ar]" />
                         </div>
                     </div>
-                </div>
-                <div class="mb-1">
-                    <label class="form-label label-text">Industry</label>
-                    <select name="parent_id" class="form-select" id="parent-id">
-                        <option value="" disabled selected>Choose Main Industry</option>
-                        @foreach($associatedData['industries'] as $industry)
+
+                    <div class="mb-1">
+                        <label class="form-label label-text">Industry</label>
+                        <select name="parent_id" class="form-select" id="parent-id">
+                            <option value="" disabled selected>Choose Main Industry</option>
+                            @foreach($associatedData['industries'] as $industry)
                             <option value="{{ $industry->id }}"> {{
-                                    $industry->getTranslation('name',app()->getLocale()) }}</option>
-                        @endforeach
-
-                    </select>
-
+                                $industry->getTranslation('name',app()->getLocale()) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
+
                 <div class="modal-footer border-top-0">
                     <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary  saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Save Changes</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                              aria-hidden="true"></span>
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </form>

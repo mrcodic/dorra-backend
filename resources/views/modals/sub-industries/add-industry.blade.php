@@ -15,27 +15,27 @@
                         <div class="col-md-6">
                             <label class="form-label label-text">Name (EN)</label>
                             <input type="text" class="form-control" placeholder="Enter Industry Name(En)"
-                                   id="add-category-name-en" name="name[en]"/>
+                                id="add-category-name-en" name="name[en]" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label label-text">Name (AR)</label>
                             <input type="text" class="form-control" placeholder="Enter Industry Name(Ar)"
-                                   id="add-category-name-ar" name="name[ar]"/>
+                                id="add-category-name-ar" name="name[ar]" />
                         </div>
                     </div>
-                </div>
 
-                <div class="mb-1">
-                    <label class="form-label label-text">Industry</label>
-                    <select name="parent_id" class="form-select" id="">
-                        <option value="" disabled selected>Choose Main Industry</option>
-                        @foreach($associatedData['industries'] as $industry)
+
+                    <div class="mb-1">
+                        <label class="form-label label-text">Industry</label>
+                        <select name="parent_id" class="form-select" id="">
+                            <option value="" disabled selected>Choose Main Industry</option>
+                            @foreach($associatedData['industries'] as $industry)
                             <option value="{{ $industry->id }}"> {{
-                                    $industry->getTranslation('name',app()->getLocale()) }}</option>
-                        @endforeach
+                                $industry->getTranslation('name',app()->getLocale()) }}</option>
+                            @endforeach
 
-                    </select>
-
+                        </select>
+                    </div>
                 </div>
 
                 <div class="modal-footer border-top-0">
@@ -43,7 +43,7 @@
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Save</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                              aria-hidden="true"></span>
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </form>
