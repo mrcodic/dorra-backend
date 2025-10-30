@@ -111,7 +111,7 @@ class IndustryService extends BaseService
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
         return $this->repository->query()
-            ->with(['children'])
+                ->with(['children'])
             ->withCount(['templates'])
             ->whereNull('parent_id')
            ->latest()->get();
