@@ -709,6 +709,14 @@
 
 <script>
     $(document).ready(function () {
+        $('#industriesSelect').select2({
+            placeholder: "Choose Industries",
+            allowClear: true
+        });
+        $('#subIndustriesSelect').select2({
+            placeholder: "Choose Sub Industries",
+            allowClear: true
+        });
         $('#productsSelect').select2({
             placeholder: "Choose Categories",
             allowClear: true
