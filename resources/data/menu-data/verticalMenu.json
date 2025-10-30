@@ -57,6 +57,28 @@
             "modalTarget": ""
 
         },
+
+        {
+            "name": "Industries",
+            "icon": "idustry.svg",
+            "slug": "",
+            "submenu": [
+                {
+                    "url": "/industries",
+                    "name": "All",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/sub-industries",
+                    "name": "SubIndustries",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                }
+            ],
+            "modalTarget": ""
+
+        },
         {
             "name": "Templates",
             "icon": "Templates.svg",
