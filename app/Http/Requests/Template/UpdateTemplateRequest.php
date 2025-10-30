@@ -68,7 +68,7 @@ class UpdateTemplateRequest extends BaseRequest
             'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
             'go_to_editor' => ['sometimes', 'boolean'],
-            'has_corner' => ['required', 'in:0,1'],
+            'has_corner' => ['sometimes', 'in:0,1'],
             'has_safety_area' => ['sometimes', 'in:0,1'],
             'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
