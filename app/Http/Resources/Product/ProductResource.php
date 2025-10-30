@@ -4,6 +4,7 @@ namespace App\Http\Resources\Product;
 
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DimensionResource;
+use App\Http\Resources\IndustryResource;
 use App\Http\Resources\MediaResource;
 use App\Http\Resources\OfferResource;
 use App\Http\Resources\TagResource;
@@ -45,6 +46,17 @@ class ProductResource extends JsonResource
                     ->values();
 
                 return TagResource::collection($tags);
+            }),
+            'template_industries' => $this->whenLoaded('templates', function () {
+                $this->templates->loadMissing('industries');
+
+                $industries = $this->templates
+                    ->pluck('industries')
+                    ->flatten()
+                    ->unique('id')
+                    ->values();
+
+                return IndustryResource::collection($industries);
             }),
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
             'offer' => OfferResource::make($this->whenLoaded('lastOffer')),

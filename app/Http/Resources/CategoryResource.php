@@ -67,8 +67,6 @@ class CategoryResource extends JsonResource
 
                 return IndustryResource::collection($industries);
             }),
-
-
             'is_has_category' => $this->is_has_category,
             'show_add_cart_btn' => $this->show_add_cart_btn,
             'show_customize_design_btn' => $this->show_customize_design_btn,
