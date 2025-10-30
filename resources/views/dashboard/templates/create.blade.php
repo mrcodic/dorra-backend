@@ -26,15 +26,21 @@
 
                                     <!-- Dropzone Container -->
                                     <div id="template-dropzone" class="dropzone border rounded p-3"
-                                         style="cursor:pointer; min-height:150px;">
+                                        style="cursor:pointer; min-height:150px;">
                                         <div class="dz-message" data-dz-message>
                                             <span>Drop image here or click to upload</span>
-                                        </div>       <!-- Hidden input for uploaded file ID -->
+                                        </div> <!-- Hidden input for uploaded file ID -->
                                         <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
                                     </div>
+                                </div>
 
-
-
+                                <div class="position-relative mt-3 text-center">
+                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                    <span
+                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                        style="color: #24B094">
+                                        Template Details
+                                    </span>
                                 </div>
 
                                 <div class="form-group mb-2">
@@ -86,65 +92,80 @@
                                     </div>
                                 </div>
 
-                                <hr>
-
-                                <div class="row mb-2">
-
-                                <div class="col-md-6 form-group mb-2">
-                                    <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
-                                    <select id="categoriesSelect" class="form-select select2" name="product_with_category"
-                                            multiple>
-                                        @foreach($associatedData['product_with_categories'] as $category)
-                                            <option value="{{ $category->id }}">
-                                                {{ $category->getTranslation('name', app()->getLocale()) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                <div class="position-relative mt-3 text-center">
+                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                    <span
+                                        class="d-none d-md-flex position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4"
+                                        style="color: #24B094;">
+                                        Products & Categories
+                                    </span>
                                 </div>
-                                <div class="col-md-6 form-group mb-2">
-                                    <label for="productsSelect" class="label-text mb-1">Categories</label>
-                                    <select id="productsSelect" class="form-select select2" name="product_ids[]"
-                                            multiple>
-
-                                    </select>
-                                </div>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products Without Categories</label>
-                                    <select id="productsWithoutCategoriesSelect" class="form-select select2" name="category_ids[]"
-                                            multiple>
-                                        @foreach($associatedData['product_without_categories'] as $category)
-                                            <option value="{{ $category->id }}">
-                                                {{ $category->getTranslation('name', app()->getLocale()) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <hr>
 
                                 <div class="row mb-2">
 
                                     <div class="col-md-6 form-group mb-2">
+                                        <label for="categoriesSelect" class="label-text mb-1">Products With
+                                            Categories</label>
+                                        <select id="categoriesSelect" class="form-select select2"
+                                            name="product_with_category" multiple>
+                                            @foreach($associatedData['product_with_categories'] as $category)
+                                            <option value="{{ $category->id }}">
+                                                {{ $category->getTranslation('name', app()->getLocale()) }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 form-group mb-2">
+                                        <label for="productsSelect" class="label-text mb-1">Categories</label>
+                                        <select id="productsSelect" class="form-select select2" name="product_ids[]"
+                                            multiple>
+
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-2">
+                                    <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products
+                                        Without Categories</label>
+                                    <select id="productsWithoutCategoriesSelect" class="form-select select2"
+                                        name="category_ids[]" multiple>
+                                        @foreach($associatedData['product_without_categories'] as $category)
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->getTranslation('name', app()->getLocale()) }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="position-relative mt-3 text-center">
+                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                    <span
+                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                        style="color: #24B094;">
+                                        Industry
+                                    </span>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col-md-6 form-group mb-2">
                                         <label for="industriesSelect" class="label-text mb-1">Industries</label>
                                         <select id="industriesSelect" class="form-select select2" name="industry_ids[]"
-                                                multiple>
+                                            multiple>
                                             @foreach($associatedData['industries'] as $industry)
-                                                <option value="{{ $industry->id }}">
-                                                    {{ $industry->getTranslation('name', app()->getLocale()) }}
-                                                </option>
+                                            <option value="{{ $industry->id }}">
+                                                {{ $industry->getTranslation('name', app()->getLocale()) }}
+                                            </option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-6 form-group mb-2">
                                         <label for="subIndustriesSelect" class="label-text mb-1">Sub Industries</label>
-                                        <select id="subIndustriesSelect" class="form-select select2" name="industry_ids[]"
-                                                multiple>
+                                        <select id="subIndustriesSelect" class="form-select select2"
+                                            name="industry_ids[]" multiple>
                                             @foreach($associatedData['sub_industries'] as $industry)
-                                                <option value="{{ $industry->id }}">
-                                                    {{ $industry->getTranslation('name', app()->getLocale()) }}
-                                                </option>
+                                            <option value="{{ $industry->id }}">
+                                                {{ $industry->getTranslation('name', app()->getLocale()) }}
+                                            </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -155,13 +176,21 @@
                                     <label for="tagsSelect" class="label-text mb-1">Tags</label>
                                     <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
                                         @foreach($associatedData['tags'] as $tag)
-                                            <option value="{{ $tag->id }}">
-                                                {{ $tag->getTranslation('name', app()->getLocale()) }}
-                                            </option>
+                                        <option value="{{ $tag->id }}">
+                                            {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <hr>
+
+                                <div class="position-relative mt-3 text-center">
+                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                    <span
+                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                        style="color: #24B094;">
+                                        Design Specifications
+                                    </span>
+                                </div>
                                 <div class="form-group mb-2">
                                     <label for="orientation" class="label-text mb-1">Orientation</label>
                                     <select id="orientation" class="form-select" name="orientation">
@@ -169,29 +198,31 @@
                                             chooese orientation
                                         </option>
                                         @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                            <option value="{{ $orientation->value }}">
-                                                {{$orientation->label()}}
-                                            </option>
+                                        <option value="{{ $orientation->value }}">
+                                            {{$orientation->label()}}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
                                 {{-- Persisted resources (used on submit) --}}
-                                <input type="hidden" name="dimension_resource_ids"   id="dimensionResourceIds">
+                                <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
                                 <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
                                 <div class="row mb-2">
                                     {{-- Shape (col-6) --}}
                                     <div class="col-md-6">
                                         <div class="form-group mb-2">
                                             <input type="hidden" name="has_corner" id="has_corner_hidden"
-                                                   value="{{ old('has_corner') }}">
+                                                value="{{ old('has_corner') }}">
                                             <label class="label-text mb-1">Shape</label>
                                             <div class="d-flex gap-3">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_circle" value="0">
+                                                    <input class="form-check-input" type="checkbox" name="has_corner"
+                                                        id="shape_circle" value="0">
                                                     <label class="form-check-label" for="shape_circle">Circle</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_other" value="1" >
+                                                    <input class="form-check-input" type="checkbox" name="has_corner"
+                                                        id="shape_other" value="1">
                                                     <label class="form-check-label" for="shape_other">Other</label>
                                                 </div>
                                             </div>
@@ -204,22 +235,29 @@
                                             <div class="form-check mb-1">
                                                 {{-- send 0 when unchecked --}}
                                                 <input type="hidden" name="has_safety_area" value="0">
-                                                <input class="form-check-input" type="checkbox" id="hasSafetyArea" name="has_safety_area"
-                                                       value="1" {{ old('has_safety_area') ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="hasSafetyArea">Enable Safety Area</label>
+                                                <input class="form-check-input" type="checkbox" id="hasSafetyArea"
+                                                    name="has_safety_area" value="1" {{ old('has_safety_area')
+                                                    ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="hasSafetyArea">Enable Safety
+                                                    Area</label>
                                             </div>
 
-                                            <div id="safetyAreaBox" class="{{ old('has_safety_area') ? '' : 'd-none' }}">
-                                                <label for="safetyAreaSelect" class="label-text mb-1">Safety Area</label>
-                                                <select id="safetyAreaSelect" class="form-select select2" name="safety_area">
+                                            <div id="safetyAreaBox"
+                                                class="{{ old('has_safety_area') ? '' : 'd-none' }}">
+                                                <label for="safetyAreaSelect" class="label-text mb-1">Safety
+                                                    Area</label>
+                                                <select id="safetyAreaSelect" class="form-select select2"
+                                                    name="safety_area">
                                                     @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                        <option value="{{ $area->value }}"
-                                                            {{ (string)old('safety_area') === (string)$area->value ? 'selected' : '' }}>
-                                                            {{ $area->label() }}
-                                                        </option>
+                                                    <option value="{{ $area->value }}" {{
+                                                        (string)old('safety_area')===(string)$area->value ? 'selected' :
+                                                        '' }}>
+                                                        {{ $area->label() }}
+                                                    </option>
                                                     @endforeach
                                                 </select>
-                                                <small class="form-text text-muted">Padding inside the design area.</small>
+                                                <small class="form-text text-muted">Padding inside the design
+                                                    area.</small>
                                             </div>
                                         </div>
                                     </div>
@@ -231,7 +269,7 @@
                                     <label for="cornersSelect" class="label-text mb-1">Corners</label>
                                     <select id="cornersSelect" class="form-select select2" name="border">
                                         @foreach(\App\Enums\BorderEnum::cases() as $border)
-                                            <option value="{{ $border->value }}">{{$border->label()}}</option>
+                                        <option value="{{ $border->value }}">{{$border->label()}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -277,8 +315,8 @@
 
 @endsection
 @section('vendor-script')
-    <script>
-        $(function () {
+<script>
+    $(function () {
             const $circle = $('#shape_circle'); // value="0"
             const $other  = $('#shape_other');  // value="1"
             const $hidden = $('#has_corner_hidden');
@@ -325,11 +363,11 @@
                 syncState();
             });
         });
-    </script>
+</script>
 
 
-    <script>
-        $(function () {
+<script>
+    $(function () {
             const $toggle = $('#hasSafetyArea');
             const $box    = $('#safetyAreaBox');
             const $select = $('#safetyAreaSelect');
@@ -358,10 +396,10 @@
             $toggle.on('change', syncSafetyArea);
             syncSafetyArea(); // initial state
         });
-    </script>
+</script>
 
-    <script>
-        $(function () {
+<script>
+    $(function () {
             const $cornersBox = $('#cornersBox');
             const $corners    = $('#cornersSelect');
             const $radios     = $('input[name="has_corner"]'); // 0 = circle, 1 = other
@@ -380,10 +418,10 @@
             $radios.on('change', syncCornersVisibility);
             syncCornersVisibility(); // initial state on page load
         });
-    </script>
+</script>
 
-    <script>
-        // Build parallel arrays from current UI selections
+<script>
+    // Build parallel arrays from current UI selections
         function buildDimensionPayloadFromUI() {
             // Right: CATEGORIES of "Products With Categories"
             const categoryIds = ($('#productsSelect').val() || []).map(String);
@@ -409,9 +447,9 @@
             $('#dimensionResourceIds').val(JSON.stringify(resource_ids));
             $('#dimensionResourceTypes').val(JSON.stringify(resource_types));
         }
-    </script>
-    <script>
-        // Safe numeric parser
+</script>
+<script>
+    // Safe numeric parser
         function asNum(x) {
             const n = Number(x);
             return Number.isFinite(n) ? n : null;
@@ -439,10 +477,10 @@
             return src.name || src.label || `#${item.id ?? ''}`.trim();
         }
 
-    </script>
+</script>
 
-    <script>
-        // Human-readable label for each dimension option
+<script>
+    // Human-readable label for each dimension option
         function dimensionLabel(d) {
             const name   = d.name ?? d.label ?? null;
             const width  = d.width ?? d.w ?? null;
@@ -505,9 +543,9 @@
                 }
             });
         }
-    </script>
-    <script>
-        // After “Products With Categories (left)” changes we fetch its categories (right), then sync + refresh
+</script>
+<script>
+    // After “Products With Categories (left)” changes we fetch its categories (right), then sync + refresh
         $('#categoriesSelect').on('change', function () {
             const selectedIds = $(this).val();
             if (selectedIds && selectedIds.length > 0) {
@@ -565,9 +603,9 @@
         $(document).ready(function () {
             syncSelectedResourcesToHiddenInputs();
         });
-    </script>
+</script>
 
-    <script !src="">
+<script !src="">
     $(document).ready(function () {
             $('#cancelButton').on('click', function (e) {
                 e.preventDefault();
@@ -641,8 +679,8 @@
 @endsection
 
 @section('page-script')
-    <script>
-        Dropzone.autoDiscover = false;
+<script>
+    Dropzone.autoDiscover = false;
 
         const templateDropzone = new Dropzone("#template-dropzone", {
             url: "{{ route('media.store') }}", // your Laravel media upload route
@@ -683,9 +721,9 @@
             document.getElementById("uploadedTemplateImage").value = "";
             document.getElementById("uploaded-template-preview").classList.add("d-none");
         });
-    </script>
+</script>
 
-    <script>
+<script>
     document.addEventListener('DOMContentLoaded', function () {
             const checkboxes = document.querySelectorAll('.type-checkbox');
 
