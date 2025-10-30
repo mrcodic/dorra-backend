@@ -193,7 +193,7 @@
                                             chooese orientation
                                         </option>
                                         @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                            <option value="{{ $orientation->value }}" @selected($orientation->value == $model->orientation) disabled>
+                                            <option value="{{ $orientation->value }}" @selected($orientation == $model->orientation) disabled>
                                                 {{$orientation->label()}}
                                             </option>
                                         @endforeach
