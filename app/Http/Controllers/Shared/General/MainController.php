@@ -355,7 +355,7 @@ class MainController extends Controller
             throw ValidationException::withMessages($missing);
         }
 
-// 5) Flatten & dedupe dimensions
+        // 5) Flatten & dedupe dimensions
         $dimensions = collect()
             ->merge($products->flatMap->dimensions)
             ->merge($categories->flatMap->dimensions)

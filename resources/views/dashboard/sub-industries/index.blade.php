@@ -27,26 +27,26 @@
     @media (max-width: 768px) {
 
         /* Hide the last 2 columns on mobile */
-        .industry-list-table th:nth-child(4),
-        .industry-list-table th:nth-child(5),
-        .industry-list-table th:nth-child(6) {
+        .sub-industry-list-table th:nth-child(4),
+        .sub-industry-list-table th:nth-child(5),
+        .sub-industry-list-table th:nth-child(6) {
             display: none !important;
         }
 
-        .industry-list-table tbody tr:not(.details-row) td:nth-child(4),
-        .industry-list-table tbody tr:not(.details-row) td:nth-child(5),
-        .industry-list-table tbody tr:not(.details-row) td:nth-child(6) {
+        .sub-industry-list-table tbody tr:not(.details-row) td:nth-child(4),
+        .sub-industry-list-table tbody tr:not(.details-row) td:nth-child(5),
+        .sub-industry-list-table tbody tr:not(.details-row) td:nth-child(6) {
             display: none !important;
         }
 
         /* Style for clickable rows */
-        .industry-list-table tbody tr:not(.details-row) {
+        .sub-industry-list-table tbody tr:not(.details-row) {
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
 
         /* Add expand indicator to the role column */
-        .industry-list-table tbody tr:not(.details-row) td:nth-child(1) {
+        .sub-industry-list-table tbody tr:not(.details-row) td:nth-child(1) {
             position: relative;
             padding-left: 20px !important;
         }
@@ -145,7 +145,7 @@
                 <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                        id="search-industry-form" placeholder="Search industry..." style="height: 38px;">
+                        id="search-sub-industry-form" placeholder="Search sub industry..." style="height: 38px;">
                     <!-- Clear button -->
                     <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                    background: transparent; border: none; font-weight: bold;
@@ -177,13 +177,14 @@
             </div>
 
 
-            <table class="industry-list-table table">
+            <table class="sub-industry-list-table table">
                 <thead class="table-light">
                     <tr>
                         <th>
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('sub-industries_delete'))>
                         </th>
                         <th>Name</th>
+                        <th>Industry</th>
                         <th>NO.of templates</th>
                         <th>Added Date</th>
                         <th>Actions</th>
@@ -196,7 +197,7 @@
                     style="z-index: 10;">
                     <p id="selected-count-text">0 Sub Industries are selected</p>
                     <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                        data-bs-target="#deleteSubindustriesModal"
+                        data-bs-target="#deleteSubIndustriesModal"
                         class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                         <i data-feather="trash-2"></i> Delete Selected
                     </button>
@@ -204,7 +205,7 @@
                         action="{{ route('sub-industries.bulk-delete') }}">
                         @csrf
                         <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                            data-bs-target="#deleteSub IndustriesModal"
+                            data-bs-target="#deleteSubIndustriesModal"
                             class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                             <i data-feather="trash-2"></i> Delete Selected
                         </button>
@@ -304,7 +305,7 @@
     }
 
     // Accordion click handler with event delegation
-    $(document).on('click.accordion', '.industry-list-table tbody tr:not(.details-row)', function(e) {
+    $(document).on('click.accordion', '.sub-industry-list-table tbody tr:not(.details-row)', function(e) {
         // Prevent accordion when clicking interactive elements
         if ($(e.target).is('input, button, a, .btn') ||
             $(e.target).closest('input, button, a, .btn').length > 0) {
@@ -318,7 +319,7 @@
     // Initialize accordion after DataTable draw
     function initAccordion() {
         if ($(window).width() <= 768) {
-            $('.industry-list-table tbody tr:not(.details-row)').each(function() {
+            $('.sub-industry-list-table tbody tr:not(.details-row)').each(function() {
                 const $row = $(this);
 
                 // Remove existing details and icons first
@@ -370,7 +371,7 @@
     });
 
     // On DataTable events
-    $(document).on('draw.dt', '.industry-list-table', function () {
+    $(document).on('draw.dt', '.sub-industry-list-table', function () {
         $('#bulk-delete-container').hide();
         $('#select-all-checkbox').prop('checked', false);
 
@@ -391,7 +392,7 @@
         const count = selectedCheckboxes.length;
 
         if (count > 0) {
-            $('#selected-count-text').text(`${count} Industry${count > 1 ? 's are' : ' is'} selected`);
+            $('#selected-count-text').text(`${count} Sub Industr${count > 1 ? 'ies are' : 'y is'} selected`);
             $('#bulk-delete-container').show();
         } else {
             $('#bulk-delete-container').hide();
@@ -405,13 +406,13 @@
 });
 </script>
 {{-- Page js files --}}
-<script src="{{ asset('js/scripts/pages/app-industry-list.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/scripts/pages/app-sub-industry-list.js') }}?v={{ time() }}"></script>
 
 <script>
     // Backup accordion handler in case the main one doesn't work
 $(document).ready(function() {
     // Alternative click handler
-    $(document).off('click.accordion').on('click.accordion', '.industry-list-table tbody tr:not(.details-row)', function(e) {
+    $(document).off('click.accordion').on('click.accordion', '.sub-industry-list-table tbody tr:not(.details-row)', function(e) {
         console.log('Accordion clicked'); // Debug log
 
         if ($(window).width() <= 768) {

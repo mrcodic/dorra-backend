@@ -67,6 +67,7 @@ class IndustryService extends BaseService
         $tags = $this->repository
             ->query(['id', 'name','parent_id', 'created_at'])
             ->withCount(['templates'])
+            ->whereNotNull('parent_id')
             ->with(['parent'])
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
@@ -95,9 +96,6 @@ class IndustryService extends BaseService
             })
             ->addColumn('show_date', function ($tag) {
                 return $tag->created_at?->format('Y-m-d');
-            })
-            ->addColumn('no_of_templates', function ($tag) {
-                return $tag->templates_count;
             })
             ->addColumn('action', function () {
                 return [
