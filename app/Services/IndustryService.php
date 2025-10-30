@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\Template\StatusEnum;
-use App\Models\Category;
-use App\Models\Product;
+
 use App\Repositories\Interfaces\IndustryRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Yajra\DataTables\DataTables;
@@ -110,5 +108,14 @@ class IndustryService extends BaseService
             })->make();
     }
 
+    public function getSubIndustries($request)
+    {
+        return $this->repository->query()
+            ->withCount(['templates'])
+            ->whereNull('parent_id')
+            ->when($request->filled('industry_id'), function ($query) use ($request) {
+                return $query->where('parent_id', $request->industry_id);
+            })->latest()->get();
+    }
 
 }

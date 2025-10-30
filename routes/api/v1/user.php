@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     CMS\LandingController,
     Design\DesignController,
     Folder\FolderController,
+    Industry\IndustryController,
     Invitation\InvitationController,
     Order\OrderController,
     Payment\PaymentController,
@@ -23,8 +24,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     ShippingAddress\ShippingAddressController,
     Team\TeamController,
     Template\TemplateController,
-    Review\ReviewController
-};
+    Review\ReviewController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use Illuminate\Support\Facades\Route;
@@ -185,7 +185,8 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('flags', [MainController::class, 'flags'])->name('flags');
     Route::get('dimensions', [MainController::class, 'dimensions'])->name('dimensions');
 
-
+    Route::get('industries',[IndustryController::class,'index'])->name('industries');
+    Route::get('sub-industries',[IndustryController::class,'getSubIndustries'])->name('sub-industries');
 
 });
 
