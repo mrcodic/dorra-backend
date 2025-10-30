@@ -159,7 +159,7 @@
                                         <select id="industriesSelect" class="form-select select2" name="industry_ids[]"
                                                 multiple>
                                             @foreach($associatedData['industries'] as $industry)
-                                                <option value="{{ $industry->id }}" @selected($model->industries->contains($industry->id))>
+                                                <option value="{{ $industry->id }}" @selected($model->industries->contains($industry))>
                                                     {{ $industry->getTranslation('name', app()->getLocale()) }}
                                                 </option>
                                             @endforeach
@@ -170,7 +170,7 @@
                                         <select id="subIndustriesSelect" class="form-select select2" name="industry_ids[]"
                                                 multiple>
                                             @foreach($associatedData['sub_industries'] as $industry)
-                                                <option value="{{ $industry->id }}" @selected($model->industries->contains($industry->id))>
+                                                <option value="{{ $industry->id }}" @selected($model->industries->contains($industry))>
                                                     {{ $industry->getTranslation('name', app()->getLocale()) }}
                                                 </option>
                                             @endforeach
