@@ -177,7 +177,7 @@ class TemplateController extends DashboardController
     public function changeStatus(Request $request, $id)
     {
         $request->validate(['status' => 'required', 'in:' . StatusEnum::getValuesAsString()]);
-        $template = $this->templateService->updateResource(['status' => $request->status], $id);
+        $template = $this->templateService->updateEditorData(['status' => $request->status], $id);
         return Response::api(data: TemplateResource::make($template));
     }
 

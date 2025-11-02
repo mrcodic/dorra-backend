@@ -156,6 +156,7 @@ enum PermissionEnum: string
     case DELETE_SUB_INDUSTRIES = 'sub-industries_delete';
     case UPDATE_SUB_INDUSTRIES = 'sub-industries_update';
 
+    case TEMPLATES_CHANGE_STATUS_SHOW = 'product-templates.change-status_show';
 
     public function group(): array
     {

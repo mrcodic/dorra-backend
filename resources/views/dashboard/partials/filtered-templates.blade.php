@@ -28,6 +28,7 @@
                             </a>
                         </li>
                     @endcan
+                        <li>
                     <form class="change-status-form"
                           action="{{ route('product-templates.change-status',$template->id) }}"
                           method="post">
