@@ -58,52 +58,40 @@ class CategoryResource extends JsonResource
                 return TagResource::collection($tags);
             }),
             'template_industries' => $this->whenLoaded('templates', function () {
-//                $this->templates->loadMissing('industries.parent');
-                $all = $this->templates->pluck('industries')->flatten();
-                $unique = $all->unique('id')->values();
-                $parents = $unique
-//                    ->map(fn ($ind) => $ind->parent_id ? $ind->parent : $ind)
-                    ->filter(function ($ind) {
-                        return $ind->parent == null;
-                    })
-                    ->unique('id')
+
+                $this->loadMissing('templates.industries.parent');
+
+                $industries = $this->templates
+                    ->flatMap->industries
+                    ->filter()
+                    ->unique('id');
+
+                $subs = $industries->filter(fn ($i) => !is_null($i->parent_id));
+
+                if ($subs->isNotEmpty()) {
+                    return IndustryResource::collection(collect());
+                }
+
+                $parents = $industries
+                    ->filter(fn ($i) => is_null($i->parent_id))
                     ->values();
-
-                $parents = $parents->map(function ($parent) use ($unique) {
-//                    $children = $unique
-//                        ->where('parent_id', $parent->id)
-//                        ->values();
-
-//                    $parent->setRelation('children', $children);
-
-                    return $parent;
-                });
 
                 return IndustryResource::collection($parents);
             }),
+
             'template_sub_industries' => $this->whenLoaded('templates', function () {
-//                $this->templates->loadMissing('industries.parent');
-                $all = $this->templates->pluck('industries')->flatten();
-                $unique = $all->unique('id')->values();
-                $parents = $unique
-//                    ->map(fn ($ind) => $ind->parent_id ? $ind->parent : $ind)
-                    ->filter(function ($ind) {
-                        return $ind->parent !== null;
-                    })
-                    ->unique('id')
+                $this->loadMissing('templates.industries.parent');
+
+                $industries = $this->templates
+                    ->flatMap->industries
+                    ->filter()
+                    ->unique('id');
+
+                $subs = $industries
+                    ->filter(fn ($i) => !is_null($i->parent_id))
                     ->values();
 
-                $parents = $parents->map(function ($parent) use ($unique) {
-//                    $children = $unique
-//                        ->where('parent_id', $parent->id)
-//                        ->values();
-
-//                    $parent->setRelation('children', $children);
-
-                    return $parent;
-                });
-
-                return IndustryResource::collection($parents);
+                return IndustryResource::collection($subs);
             }),
 
             'is_has_category' => $this->is_has_category,
