@@ -8,6 +8,7 @@ use App\Http\Resources\IndustryResource;
 use App\Http\Resources\MediaResource;
 use App\Http\Resources\OfferResource;
 use App\Http\Resources\TagResource;
+use App\Models\Industry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,6 +21,14 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $parentsWithoutChildren = Industry::query()
+            ->whereNull('parent_id')
+            ->whereDoesntHave('children')
+            ->whereHas('templates', function ($q) {
+                $q->whereIn('templates.id', $this->templates->pluck('id'));
+            })
+            ->get();
+
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -48,28 +57,35 @@ class ProductResource extends JsonResource
 
                 return TagResource::collection($tags);
             }),
-            'template_industries' => $this->whenLoaded('templates', function () {
-                $this->templates->loadMissing('industries.parent');
-                $all = $this->templates->pluck('industries')->flatten();
-                $unique = $all->unique('id')->values();
-                $parents = $unique
-                    ->map(fn ($ind) => $ind->parent_id ? $ind->parent : $ind)
+            'template_industries' => IndustryResource::collection($parentsWithoutChildren),
+// In your Resource array:
+            'template_sub_industries' => $this->whenLoaded('templates', function () {
+                // Avoid N+1s
+                $this->loadMissing('templates.industries.children', 'templates.industries.parent');
+
+                // All industries attached to these templates (flatten + dedupe)
+                $industries = $this->templates
+                    ->flatMap->industries
                     ->filter()
+                    ->unique('id');
+
+                // A) Children coming from parents' children relation
+                $childrenFromRelation = $industries
+                    ->flatMap(fn ($parent) => ($parent->relationLoaded('children') ? $parent->children : collect()))
+                    ->filter();
+
+                // B) Industries that are themselves children (attached directly)
+                $directChildren = $industries->filter(fn ($ind) => !is_null($ind->parent_id));
+
+                // Union, dedupe, return as resources
+                $subIndustries = $childrenFromRelation
+                    ->merge($directChildren)
                     ->unique('id')
                     ->values();
 
-                $parents = $parents->map(function ($parent) use ($unique) {
-                    $children = $unique
-                        ->where('parent_id', $parent->id)
-                        ->values();
-
-                    $parent->setRelation('children', $children);
-
-                    return $parent;
-                });
-
-                return IndustryResource::collection($parents);
+                return IndustryResource::collection($subIndustries);
             }),
+
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
             'offer' => OfferResource::make($this->whenLoaded('lastOffer')),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
