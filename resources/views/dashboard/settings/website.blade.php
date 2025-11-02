@@ -1175,21 +1175,21 @@
             @endsection
 
             @section('page-script')
-{{--                <script !src="">--}}
-{{--                    // If the delete button belongs to a saved carousel → keep modal.--}}
-{{--                    // If it's an unsaved (no id) item (shouldn't have modal btn normally), just remove instantly.--}}
-{{--                    $(document).on('click', '.open-delete-carousel-modal', function (e) {--}}
-{{--                        const $item = $(this).closest('[data-repeater-item]');--}}
-{{--                        const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;--}}
+                <script !src="">
+                    // If the delete button belongs to a saved carousel → keep modal.
+                    // If it's an unsaved (no id) item (shouldn't have modal btn normally), just remove instantly.
+                    $(document).on('click', '.open-delete-carousel-modal', function (e) {
+                        const $item = $(this).closest('[data-repeater-item]');
+                        const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
 
-{{--                        if (!hasId) {--}}
-{{--                            e.preventDefault();--}}
-{{--                            e.stopPropagation();--}}
-{{--                            $item.find('[data-repeater-delete]').first().trigger('click');--}}
-{{--                        }--}}
-{{--                    });--}}
+                        if (!hasId) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            $item.find('[data-repeater-delete]').first().trigger('click');
+                        }
+                    });
 
-{{--                </script>--}}
+                </script>
 
                 <script>
                     // لما يختار Product → صفّر Category (والعكس)
@@ -2406,13 +2406,19 @@
                         $('[data-repeater-item]').each(function () {
                             bindPreviewAutoShow($(this));
                         });
+                        function itemHasId($item) {
+                            const $id = $item.find('input[name="id"], input[name$="[id]"]');
+                            const val = ($id.val() ?? '').toString().trim();
+                            // treat empty/undefined as unsaved. Adjust if "0" is a valid id in your system.
+                            return val !== '';
+                        }
 
                         // Repeater init
                         $('.invoice-repeater').repeater({
                             show: function () {
                                 const $item = $(this);
 
-                                // your existing show logic...
+                                // ... your existing show logic ...
                                 $item.find('.uploaded-image').addClass('d-none').find('img').attr('src','');
                                 $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
                                 $item.show();
@@ -2420,28 +2426,24 @@
                                 setTimeout(() => initCarouselDropzone($item), 100);
                                 bindPreviewAutoShow($item);
 
-                                // ✅ strip modal only when UNSAVED (no id value)
-                                const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
-                                if (!hasId) {
+                                // ✅ If UNSAVED, convert modal delete -> repeater delete
+                                if (!itemHasId($item)) {
                                     const $btn = $item.find('.open-delete-carousel-modal');
                                     $btn.removeAttr('data-bs-toggle data-bs-target')
                                         .removeClass('open-delete-carousel-modal')
-                                        .attr('data-repeater-delete','') // become plain delete
-                                        .off('click'); // remove any modal click handlers
+                                        .attr('data-repeater-delete', '')
+                                        .off('click');
                                 }
                             },
 
                             hide: function (deleteElement) {
                                 const $item = $(this);
-                                const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
-
-                                // block removing the last persisted record (business rule)
-                                const $rep = $item.closest('.invoice-repeater');
+                                const $rep  = $item.closest('.invoice-repeater');
                                 const persistedCount = $rep.find('[data-repeater-item]').filter(function () {
-                                    return $.trim($(this).find('input[name="id"]').val() || '').length > 0;
+                                    return itemHasId($(this));
                                 }).length;
 
-                                if (hasId && persistedCount === 1) {
+                                if (itemHasId($item) && persistedCount === 1) {
                                     alert('At least one item is required.');
                                     return;
                                 }
@@ -2449,6 +2451,7 @@
                                 $item.slideUp(deleteElement, function () { $(this).remove(); });
                             }
                         });
+
 
 
 
@@ -2460,12 +2463,11 @@
                         if (!$trigger || !$trigger.length) return;
 
                         const $item = $trigger.closest('[data-repeater-item]');
-                        const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
-
-                        if (!hasId) {
-                            e.preventDefault(); // no modal for unsaved
+                        if ($item.length && !itemHasId($item)) {
+                            e.preventDefault(); // block modal for unsaved rows only
                         }
                     });
+
 
 
                 </script>
