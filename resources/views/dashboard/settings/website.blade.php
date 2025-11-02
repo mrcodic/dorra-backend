@@ -2424,41 +2424,60 @@
                                 $item.show();
                                 if (window.feather) feather.replace();
                                 setTimeout(() => initCarouselDropzone($item), 100);
-
-                                // show the plain delete button on all repeater-created (unsaved) items
-                                const $rep = $item.closest('.invoice-repeater');
-                                const $items = $rep.find('[data-repeater-item]');
-                                $items.each(function () {
-                                    $(this).find('[data-repeater-delete]').toggle(true);
-                                });
-
                                 bindPreviewAutoShow($item);
+
+                                // 🔑 If no id, convert the modal delete button -> simple repeater delete
+                                const hasId = !!$item.find('input[name="id"]').val();
+                                if (!hasId) {
+                                    const $modalBtn = $item.find('.open-delete-carousel-modal');
+
+                                    if ($modalBtn.length) {
+                                        // remove bootstrap modal triggers
+                                        $modalBtn.removeAttr('data-bs-toggle data-bs-target')
+                                            .removeClass('open-delete-carousel-modal')
+                                            .attr('data-repeater-delete', '');
+
+                                        // optional: keep the same look
+                                        // $modalBtn.addClass('btn-outline-danger').prop('type','button');
+
+                                        // ensure no leftover click handlers
+                                        $modalBtn.off('click');
+                                    }
+                                }
                             },
 
                             hide: function (deleteElement) {
                                 const $item = $(this);
-                                const $rep  = $item.closest('.invoice-repeater');
+                                const isPersisted = !!$item.find('input[name="id"]').val();
 
-                                const $items = $rep.find('[data-repeater-item]');
-                                const persistedCount = $items.filter(function () {
+                                // only block deleting the last persisted item
+                                const $rep = $item.closest('.invoice-repeater');
+                                const persistedCount = $rep.find('[data-repeater-item]').filter(function () {
                                     return !!$(this).find('input[name="id"]').val();
                                 }).length;
 
-                                const isPersisted = !!$item.find('input[name="id"]').val();
-
-                                // Only block if it's the last persisted record
                                 if (isPersisted && persistedCount === 1) {
                                     alert('At least one item is required.');
                                     return;
                                 }
 
-                                $item.slideUp(deleteElement, function () {
-                                    $(this).remove();
-                                });
+                                $item.slideUp(deleteElement, function () { $(this).remove(); });
                             }
                         });
 
+
                     });
+                    // Cancel any modal open coming from an UNSAVED repeater item
+                    $(document).on('show.bs.modal', function (e) {
+                        const $trigger = $(e.relatedTarget); // element that had data-bs-toggle="modal"
+                        if (!$trigger || !$trigger.length) return;
+
+                        const $item = $trigger.closest('[data-repeater-item]');
+                        if ($item.length && !$item.find('input[name="id"]').val()) {
+                            e.preventDefault(); // stop Bootstrap from opening the modal
+                        }
+                    });
+
                 </script>
 
                 <script>
