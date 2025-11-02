@@ -2453,19 +2453,7 @@
 
 
                     });
-                    // Cancel any modal open coming from an UNSAVED repeater item
-                    // Only block modal for UNSAVED items
-                    $(document).on('show.bs.modal', function (e) {
-                        const $trigger = $(e.relatedTarget);
-                        if (!$trigger || !$trigger.length) return;
-
-                        const $item = $trigger.closest('[data-repeater-item]');
-                        const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
-
-                        if (!hasId) {
-                            e.preventDefault(); // no modal for unsaved
-                        }
-                    });
+                
 
 
                 </script>
