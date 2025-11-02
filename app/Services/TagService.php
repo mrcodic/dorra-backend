@@ -46,14 +46,14 @@ class TagService extends BaseService
 
         if ($taggableType && $taggableId && isset($mapModels[$taggableType]) && $relation) {
             $query->whereHas('templates', function ($t) use ($relation, $taggableId) {
-                $t->whereStatus(StatusEnum::LIVE)
-                    ->whereHas($relation, fn ($r) => $r->where("{$relation}.id", $taggableId));
+//                $t->whereStatus(StatusEnum::LIVE)
+                $t->whereHas($relation, fn ($r) => $r->where("{$relation}.id", $taggableId));
             });
 
             $query->withCount([
                 'templates as templates_count' => function ($t) use ($relation, $taggableId) {
-                    $t->whereStatus(StatusEnum::LIVE)
-                        ->whereHas($relation, fn ($r) => $r->where("{$relation}.id", $taggableId));
+//                    $t->whereStatus(StatusEnum::LIVE)
+                         $t->whereHas($relation, fn ($r) => $r->where("{$relation}.id", $taggableId));
                 },
             ]);
         } else {
