@@ -4,8 +4,8 @@
              style="box-shadow: 0px 4px 6px 0px #4247460F;border:1px solid #CED5D4;border-radius:12px;">
             <!-- Checkbox -->
             @can('product-templates_delete')
-            <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
-                   value="{{ $template->id }}" name="selected_templates[]" >
+                <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
+                       value="{{ $template->id }}" name="selected_templates[]">
             @endcan
             <!-- Action Icon with Dropdown (Top Right) -->
             <div class="dropdown position-absolute top-0 end-0 m-1">
@@ -28,62 +28,68 @@
                             </a>
                         </li>
                     @endcan
+                    @can('product-templates.change-status.publish_show')
                         <li>
-                    <form class="change-status-form"
-                          action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value]) }}"
-                          method="post">
-                        @csrf
-                        @method("PUT")
-                        <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}">
+                            <form class="change-status-form"
+                                  action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value]) }}"
+                                  method="post">
+                                @csrf
+                                @method("PUT")
+                                <input type="hidden" name="status"
+                                       value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}">
 
-                        <button
-                            class="dropdown-item change-status-btn w-100
+                                <button
+                                    class="dropdown-item change-status-btn w-100
                                 {{ (!empty($template->design_data) && $template->status !== \App\Enums\Template\StatusEnum::PUBLISHED) ? '' : 'disabled' }}   ">
-                            <i data-feather="send" class="me-1">
+                                    <i data-feather="send" class="me-1">
 
-                            </i>Publish
-                        </button>
-                    </form>
-                    </li>
-
-
-                    <li>
-                        <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
+                                    </i>Publish
+                                </button>
+                            </form>
+                        </li>
+                    @endcan
+                    @can('product-templates.change-status.draft_show')
+                        <li>
+                            <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
-                            @csrf
-                            @method("PUT")
-                            <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}">
-                            <button
-                                class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}">
-                                <i data-feather="file" class="me-1">
-                                </i>Draft
-                            </button>
-                        </form>
-                    </li>
-                    <li>
-                        <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
+                                @csrf
+                                @method("PUT")
+                                <input type="hidden" name="status"
+                                       value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}">
+                                <button
+                                    class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}">
+                                    <i data-feather="file" class="me-1">
+                                    </i>Draft
+                                </button>
+                            </form>
+                        </li>
+                    @endcan
+                    @can('product-templates.change-status.live_show')
+                        <li>
+                            <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
-                            @csrf
-                            @method("PUT")
-                            <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::LIVE }}">
-                            <button
-                                class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}">
-                                <i data-feather="radio" class="me-1">
+                                @csrf
+                                @method("PUT")
+                                <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::LIVE }}">
+                                <button
+                                    class="dropdown-item change-status-btn w-100 {{ $template->design_data && $template->status !== \App\Enums\Template\StatusEnum::DRAFTED ? '' : 'disabled' }}">
+                                    <i data-feather="radio" class="me-1">
 
-                                </i>Live
+                                    </i>Live
+                                </button>
+                            </form>
+                        </li>
+                    @endcan
+                    @can('product-templates_delete')
+                        <li>
+                            <button class="dropdown-item text-danger open-delete-template-modal w-100"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteTemplateModal" data-id="{{$template->id}}"><i
+                                    data-feather="trash-2"
+                                    class="me-1 text-danger"></i>Delete
                             </button>
-                        </form>
-                    </li>
-                        @can('product-templates_delete')
-                    <li>
-                        <button class="dropdown-item text-danger open-delete-template-modal w-100"
-                                data-bs-toggle="modal"
-                                data-bs-target="#deleteTemplateModal" data-id="{{$template->id}}"><i
-                                data-feather="trash-2"
-                                class="me-1 text-danger"></i>Delete
-                        </button>
-                    </li>
-                        @endcan
+                        </li>
+                    @endcan
                 </ul>
             </div>
             <div style="background-color: #F4F6F6;height:200px;border-radius:12px">
