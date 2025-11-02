@@ -19,7 +19,7 @@ class StatisticsController extends Controller
       $totalOrdersPries = Order::sum('total_price');
       $categoriesCount = Category::count();
       $templatesCount = Template::count();
-      $totalVisits = visits('site')->count();
+//      $totalVisits = visits('site')->count();
       return view('dashboard.index',get_defined_vars());
   }
 }
