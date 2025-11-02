@@ -72,6 +72,30 @@ class ProductResource extends JsonResource
 
                 return IndustryResource::collection($parents);
             }),
+            'template_sub_industries' => $this->whenLoaded('templates', function () {
+//                $this->templates->loadMissing('industries.parent');
+                $all = $this->templates->pluck('industries')->flatten();
+                $unique = $all->unique('id')->values();
+                $parents = $unique
+//                    ->map(fn ($ind) => $ind->parent_id ? $ind->parent : $ind)
+                    ->filter(function ($ind) {
+                        return $ind->parent !== null;
+                    })
+                    ->unique('id')
+                    ->values();
+
+                $parents = $parents->map(function ($parent) use ($unique) {
+//                    $children = $unique
+//                        ->where('parent_id', $parent->id)
+//                        ->values();
+
+//                    $parent->setRelation('children', $children);
+
+                    return $parent;
+                });
+
+                return IndustryResource::collection($parents);
+            }),
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
             'offer' => OfferResource::make($this->whenLoaded('lastOffer')),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
