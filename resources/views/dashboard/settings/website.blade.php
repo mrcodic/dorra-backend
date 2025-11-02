@@ -1180,21 +1180,15 @@
                     // If it's an unsaved (no id) item (shouldn't have modal btn normally), just remove instantly.
                     $(document).on('click', '.open-delete-carousel-modal', function (e) {
                         const $item = $(this).closest('[data-repeater-item]');
-                        const hasId = !!$item.find('input[name="id"]').val();
+                        const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
 
                         if (!hasId) {
-                            // safety: in case markup changes and a modal button appears on an unsaved row
                             e.preventDefault();
                             e.stopPropagation();
-                            const $simpleBtn = $item.find('[data-repeater-delete]');
-                            if ($simpleBtn.length) {
-                                $simpleBtn.trigger('click'); // uses the repeater hide()
-                            } else {
-                                // fallback: remove directly
-                                $item.slideUp(200, function () { $(this).remove(); });
-                            }
+                            $item.find('[data-repeater-delete]').first().trigger('click');
                         }
                     });
+
                 </script>
 
                 <script>
@@ -2419,44 +2413,35 @@
                                 const $item = $(this);
 
                                 // your existing show logic...
-                                $item.find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
+                                $item.find('.uploaded-image').addClass('d-none').find('img').attr('src','');
                                 $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
                                 $item.show();
                                 if (window.feather) feather.replace();
                                 setTimeout(() => initCarouselDropzone($item), 100);
                                 bindPreviewAutoShow($item);
 
-                                // 🔑 If no id, convert the modal delete button -> simple repeater delete
-                                const hasId = !!$item.find('input[name="id"]').val();
+                                // ✅ strip modal only when UNSAVED (no id value)
+                                const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
                                 if (!hasId) {
-                                    const $modalBtn = $item.find('.open-delete-carousel-modal');
-
-                                    if ($modalBtn.length) {
-                                        // remove bootstrap modal triggers
-                                        $modalBtn.removeAttr('data-bs-toggle data-bs-target')
-                                            .removeClass('open-delete-carousel-modal')
-                                            .attr('data-repeater-delete', '');
-
-                                        // optional: keep the same look
-                                        // $modalBtn.addClass('btn-outline-danger').prop('type','button');
-
-                                        // ensure no leftover click handlers
-                                        $modalBtn.off('click');
-                                    }
+                                    const $btn = $item.find('.open-delete-carousel-modal');
+                                    $btn.removeAttr('data-bs-toggle data-bs-target')
+                                        .removeClass('open-delete-carousel-modal')
+                                        .attr('data-repeater-delete','') // become plain delete
+                                        .off('click'); // remove any modal click handlers
                                 }
                             },
 
                             hide: function (deleteElement) {
                                 const $item = $(this);
-                                const isPersisted = !!$item.find('input[name="id"]').val();
+                                const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
 
-                                // only block deleting the last persisted item
+                                // block removing the last persisted record (business rule)
                                 const $rep = $item.closest('.invoice-repeater');
                                 const persistedCount = $rep.find('[data-repeater-item]').filter(function () {
-                                    return !!$(this).find('input[name="id"]').val();
+                                    return $.trim($(this).find('input[name="id"]').val() || '').length > 0;
                                 }).length;
 
-                                if (isPersisted && persistedCount === 1) {
+                                if (hasId && persistedCount === 1) {
                                     alert('At least one item is required.');
                                     return;
                                 }
@@ -2466,17 +2451,22 @@
                         });
 
 
+
                     });
                     // Cancel any modal open coming from an UNSAVED repeater item
+                    // Only block modal for UNSAVED items
                     $(document).on('show.bs.modal', function (e) {
-                        const $trigger = $(e.relatedTarget); // element that had data-bs-toggle="modal"
+                        const $trigger = $(e.relatedTarget);
                         if (!$trigger || !$trigger.length) return;
 
                         const $item = $trigger.closest('[data-repeater-item]');
-                        if ($item.length && !$item.find('input[name="id"]').val()) {
-                            e.preventDefault(); // stop Bootstrap from opening the modal
+                        const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
+
+                        if (!hasId) {
+                            e.preventDefault(); // no modal for unsaved
                         }
                     });
+
 
                 </script>
 
