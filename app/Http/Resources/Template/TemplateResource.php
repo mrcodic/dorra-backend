@@ -35,6 +35,8 @@ class TemplateResource extends JsonResource
             'status' => $this->when(isset($this->status), [
                 'value' => $this->status?->value,
                 'label' => $this->status?->label(),
+                'bgHex' => $this->status?->bgHex(),
+                'textHex' => $this->status?->textHex(),
             ]),
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),

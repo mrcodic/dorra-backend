@@ -194,12 +194,18 @@
                 const templateId = response.data.id;
                 const status = response.data.status.value; // assuming this contains status enum value
                 const statusLabel = response.data.status.label;
+                const bg = response.data.status.bgHex;
+                const color = response.data.status.color;
                 const designData = response.data.design_data; // assuming design_data returned from server
 
                 // Update status label text
                 const $statusLabel = $('.template-status-label[data-template-id="' + templateId + '"]');
                 if ($statusLabel.length) {
-                    $statusLabel.text(statusLabel);
+                    $statusLabel.text(statusLabel)
+                        .css({
+                            backgroundColor: bg,
+                            color: color,
+                        });
                 }
 
                 // Find the template card div by data-template-id
