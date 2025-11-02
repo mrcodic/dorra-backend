@@ -1175,6 +1175,28 @@
             @endsection
 
             @section('page-script')
+                <script !src="">
+                    // If the delete button belongs to a saved carousel → keep modal.
+                    // If it's an unsaved (no id) item (shouldn't have modal btn normally), just remove instantly.
+                    $(document).on('click', '.open-delete-carousel-modal', function (e) {
+                        const $item = $(this).closest('[data-repeater-item]');
+                        const hasId = !!$item.find('input[name="id"]').val();
+
+                        if (!hasId) {
+                            // safety: in case markup changes and a modal button appears on an unsaved row
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const $simpleBtn = $item.find('[data-repeater-delete]');
+                            if ($simpleBtn.length) {
+                                $simpleBtn.trigger('click'); // uses the repeater hide()
+                            } else {
+                                // fallback: remove directly
+                                $item.slideUp(200, function () { $(this).remove(); });
+                            }
+                        }
+                    });
+                </script>
+
                 <script>
                     // لما يختار Product → صفّر Category (والعكس)
                     $(document).on('change', '.carousel-form .js-product-select', function () {
@@ -2396,49 +2418,46 @@
                             show: function () {
                                 const $item = $(this);
 
-                                // reset uploaded thumbnail box
+                                // your existing show logic...
                                 $item.find('.uploaded-image').addClass('d-none').find('img').attr('src', '');
-
-                                // keep previews hidden for brand-new items (until user types)
                                 $item.find('.live-preview, .border.rounded.p-2.mb-3').addClass('d-none');
-
-                                // insert (avoid slideDown if you don't want animation)
                                 $item.show();
-
-                                // icons & dropzones
                                 if (window.feather) feather.replace();
-                                setTimeout(function () {
-                                    initCarouselDropzone($item);
-                                }, 100);
+                                setTimeout(() => initCarouselDropzone($item), 100);
 
-                                // toggle delete if only one item
-                                const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
+                                // show the plain delete button on all repeater-created (unsaved) items
+                                const $rep = $item.closest('.invoice-repeater');
+                                const $items = $rep.find('[data-repeater-item]');
                                 $items.each(function () {
-                                    $(this).find('[data-repeater-delete]').toggle($items.length > 1);
+                                    $(this).find('[data-repeater-delete]').toggle(true);
                                 });
 
-                                // ✅ FIX: bind for the newly added item using the correct var
                                 bindPreviewAutoShow($item);
                             },
 
                             hide: function (deleteElement) {
-                                const $repeater = $(this).closest('.invoice-repeater');
-                                const $items = $repeater.find('[data-repeater-item]');
+                                const $item = $(this);
+                                const $rep  = $item.closest('.invoice-repeater');
 
-                                if ($items.length === 1) {
+                                const $items = $rep.find('[data-repeater-item]');
+                                const persistedCount = $items.filter(function () {
+                                    return !!$(this).find('input[name="id"]').val();
+                                }).length;
+
+                                const isPersisted = !!$item.find('input[name="id"]').val();
+
+                                // Only block if it's the last persisted record
+                                if (isPersisted && persistedCount === 1) {
                                     alert('At least one item is required.');
                                     return;
                                 }
 
-                                $(this).slideUp(deleteElement, function () {
+                                $item.slideUp(deleteElement, function () {
                                     $(this).remove();
-                                    const $remaining = $repeater.find('[data-repeater-item]');
-                                    $remaining.each(function () {
-                                        $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
-                                    });
                                 });
                             }
                         });
+
                     });
                 </script>
 
