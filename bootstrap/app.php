@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\HttpEnum;
+use App\Http\Middleware\CountSiteVisitsMiddleware;
 use App\Models\Cart;
 use App\Support\AclNavigator;
 use Illuminate\Console\Scheduling\Schedule;
@@ -34,7 +35,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/v1/user/payment/callback',
         ]);
         $middleware->encryptCookies(['dorra_auth_token','dorra_auth_cookie_id']);
-        $middleware->api([EnsureFrontendRequestsAreStateful::class]);
+        $middleware->api([
+            EnsureFrontendRequestsAreStateful::class,
+            CountSiteVisitsMiddleware::class,
+            ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (Illuminate\Auth\AuthenticationException $e, $request) {
