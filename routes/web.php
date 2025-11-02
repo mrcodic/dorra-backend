@@ -30,6 +30,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     TagController,
     TemplateController,
     UserController};
+use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Controllers\Shared\LibraryAssetController;
@@ -193,10 +194,9 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/landing/remove-category', 'removeFromLanding')->name('landing.remove');
         });
         Route::post('/store-templates', [TemplateController::class, 'storeAndRedirect'])->name('templates.redirect.store');
-        Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status.publish.show");
-
-        Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status.draft.show");
-        Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status.live.show");
+        Route::put('/product-templates/{id}/change-status/{status}', [TemplateController::class, 'changeStatus'])
+            ->whereIn('status', StatusEnum::values())
+            ->name('product-templates.change-status.show');
         Route::resource('/product-templates', TemplateController::class);
 
 

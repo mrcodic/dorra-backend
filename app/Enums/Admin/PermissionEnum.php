@@ -157,8 +157,9 @@ enum PermissionEnum: string
     case UPDATE_SUB_INDUSTRIES = 'sub-industries_update';
 
     case TEMPLATES_PUBLISHED_SHOW = 'product-templates.change-status.publish_show';
-    case TEMPLATES_DRAFTED_SHOW = 'product-templates.change-status.draft_show';
-    case TEMPLATES_LIVE_SHOW = 'product-templates.change-status.live_show';
+    case TEMPLATES_DRAFTED_SHOW   = 'product-templates.change-status.draft_show';
+    case TEMPLATES_LIVE_SHOW      = 'product-templates.change-status.live_show';
+
 
     public function group(): array
     {
