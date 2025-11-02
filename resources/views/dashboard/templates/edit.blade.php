@@ -81,16 +81,16 @@
                                 </div>
 
 
-                                <div class="form-group mb-2">
-                                    <label for="statusSelect" class="label-text mb-1">Status</label>
-                                    <select id="statusSelect" name="status" class="form-select select2">
-                                        <option value="" disabled selected>Choose status</option>
-                                        @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
-                                        <option value="{{ $status->value }}" @selected($status==$model->status)>{{
-                                            $status->label() }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+{{--                                <div class="form-group mb-2">--}}
+{{--                                    <label for="statusSelect" class="label-text mb-1">Status</label>--}}
+{{--                                    <select id="statusSelect" name="status" class="form-select select2">--}}
+{{--                                        <option value="" disabled selected>Choose status</option>--}}
+{{--                                        @foreach(\App\Enums\Template\StatusEnum::cases() as $status)--}}
+{{--                                        <option value="{{ $status->value }}" @selected($status==$model->status)>{{--}}
+{{--                                            $status->label() }}</option>--}}
+{{--                                        @endforeach--}}
+{{--                                    </select>--}}
+{{--                                </div>--}}
                                 <div class="row mb-2">
                                     <div class="col-md-6">
                                         <label for="templateDescription" class="label-text mb-1">Description

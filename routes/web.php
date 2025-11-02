@@ -194,7 +194,9 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         });
         Route::post('/store-templates', [TemplateController::class, 'storeAndRedirect'])->name('templates.redirect.store');
 
-        Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status");
+        Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status.draft.show");
+        Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status.publish.show");
+        Route::put('/product-templates/change-status/{id}', [TemplateController::class, 'changeStatus'])->name("product-templates.change-status.live.show");
         Route::resource('/product-templates', TemplateController::class);
 
 

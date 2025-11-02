@@ -156,7 +156,9 @@ enum PermissionEnum: string
     case DELETE_SUB_INDUSTRIES = 'sub-industries_delete';
     case UPDATE_SUB_INDUSTRIES = 'sub-industries_update';
 
-    case TEMPLATES_CHANGE_STATUS_SHOW = 'product-templates.change-status_show';
+    case TEMPLATES_PUBLISHED_SHOW = 'product-templates.change-status.publish_show';
+    case TEMPLATES_DRAFTED_SHOW = 'product-templates.change-status.draft_show';
+    case TEMPLATES_LIVE_SHOW = 'product-templates.change-status.live_show';
 
     public function group(): array
     {
@@ -183,6 +185,9 @@ enum PermissionEnum: string
             'tags'                => 'Tags',
             'flags'               => 'Flags',
             'product-templates'   => 'Templates',
+            'product-templates.change-status.publish'=> 'Publish Templates',
+            'product-templates.change-status.draft'=> 'Draft Templates',
+            'product-templates.change-status.live'=> 'Live Templates',
             'mockups'             => 'Mockups',
             'orders'              => 'Orders',
             'discount-codes'      => 'Discount Codes',
