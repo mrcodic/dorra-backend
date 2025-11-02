@@ -195,7 +195,7 @@
                 const status = response.data.status.value; // assuming this contains status enum value
                 const statusLabel = response.data.status.label;
                 const bg = response.data.status.bgHex;
-                const color = response.data.status.color;
+                const color = response.data.status.textHex;
                 const designData = response.data.design_data; // assuming design_data returned from server
 
                 // Update status label text
