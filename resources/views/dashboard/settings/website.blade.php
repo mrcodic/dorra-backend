@@ -2411,80 +2411,37 @@
                                     initCarouselDropzone($item);
                                 }, 100);
 
-                                const $repeater = $item.closest('.invoice-repeater');
-                                const updateDeleteVisibility = () => {
-                                    const $items = $repeater.find('[data-repeater-item]');
-                                    const persistedCount = $items.filter(function () {
-                                        return !!$(this).find('input[name="id"]').val();
-                                    }).length;
+                                // toggle delete if only one item
+                                const $items = $item.closest('.invoice-repeater').find('[data-repeater-item]');
+                                $items.each(function () {
+                                    $(this).find('[data-repeater-delete]').toggle($items.length > 1);
+                                });
 
-                                    // Show data-repeater-delete on:
-                                    // - any unsaved item
-                                    // - any item when total items > 1
-                                    $items.each(function () {
-                                        const $it = $(this);
-                                        const isPersisted = !!$it.find('input[name="id"]').val();
-                                        const showBtn = !isPersisted || $items.length > 1;
-                                        $it.find('[data-repeater-delete]').toggle(showBtn);
-                                    });
-                                };
-
-                                updateDeleteVisibility();
-                                $repeater.data('updateDeleteVisibility', updateDeleteVisibility);
                                 // ✅ FIX: bind for the newly added item using the correct var
                                 bindPreviewAutoShow($item);
                             },
 
                             hide: function (deleteElement) {
-                                const $item = $(this);
-                                const $repeater = $item.closest('.invoice-repeater');
-                                const isPersisted = !!$item.find('input[name="id"]').val();
-
+                                const $repeater = $(this).closest('.invoice-repeater');
                                 const $items = $repeater.find('[data-repeater-item]');
-                                const persistedCount = $items.filter(function () {
-                                    return !!$(this).find('input[name="id"]').val();
-                                }).length;
 
-                                // Block only if this is the last persisted item
-                                if (isPersisted && persistedCount === 1) {
+                                if ($items.length === 1) {
                                     alert('At least one item is required.');
                                     return;
                                 }
 
-                                // Proceed with removal
-                                $item.slideUp(deleteElement, function () {
+                                $(this).slideUp(deleteElement, function () {
                                     $(this).remove();
-                                    const updater = $repeater.data('updateDeleteVisibility');
-                                    if (typeof updater === 'function') updater();
+                                    const $remaining = $repeater.find('[data-repeater-item]');
+                                    $remaining.each(function () {
+                                        $(this).find('[data-repeater-delete]').toggle($remaining.length > 1);
+                                    });
                                 });
                             }
                         });
                     });
                 </script>
-                <script !src="">
-                    // 2) Skip modal for unsaved rows even if someone clicks the modal-based delete button
-                    // (safety net in case markup changes or buttons get mixed)
-                    $(document).on('click', '.open-delete-carousel-modal', function (e) {
-                        const $item = $(this).closest('[data-repeater-item]');
-                        if (!$item.length) return;
 
-                        const hasId = !!$item.find('input[name="id"]').val();
-                        if (!hasId) {
-                            // Unsaved item → don't open modal, just remove
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            // mimic repeater hide behavior
-                            const $repeater = $item.closest('.invoice-repeater');
-                            $item.slideUp(200, function () {
-                                $(this).remove();
-                                const updater = $repeater.data('updateDeleteVisibility');
-                                if (typeof updater === 'function') updater();
-                            });
-                        }
-                    });
-
-                </script>
                 <script>
                     $(document).on('click', '.remove-category', function (e) {
                         e.preventDefault();
