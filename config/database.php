@@ -167,6 +167,12 @@ return [
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
+        'laravel-visits' => [
+            'host'     => env('VISITS_REDIS_HOST', env('REDIS_HOST', '127.0.0.1')),
+            'password' => env('VISITS_REDIS_PASSWORD', env('REDIS_PASSWORD', null)),
+            'port'     => env('VISITS_REDIS_PORT', env('REDIS_PORT', 6379)),
+            'database' => env('VISITS_REDIS_DB', 2), // use a separate index
+        ],
 
     ],
 
