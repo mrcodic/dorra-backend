@@ -1175,21 +1175,21 @@
             @endsection
 
             @section('page-script')
-{{--                <script !src="">--}}
-{{--                    // If the delete button belongs to a saved carousel → keep modal.--}}
-{{--                    // If it's an unsaved (no id) item (shouldn't have modal btn normally), just remove instantly.--}}
-{{--                    $(document).on('click', '.open-delete-carousel-modal', function (e) {--}}
-{{--                        const $item = $(this).closest('[data-repeater-item]');--}}
-{{--                        const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;--}}
+                <script !src="">
+                    // If the delete button belongs to a saved carousel → keep modal.
+                    // If it's an unsaved (no id) item (shouldn't have modal btn normally), just remove instantly.
+                    $(document).on('click', '.open-delete-carousel-modal', function (e) {
+                        const $item = $(this).closest('[data-repeater-item]');
+                        const hasId = $.trim($item.find('input[name="id"]').val() || '').length > 0;
+                        console.log(hasId)
+                        if (!hasId) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            $item.find('[data-repeater-delete]').first().trigger('click');
+                        }
+                    });
 
-{{--                        if (!hasId) {--}}
-{{--                            e.preventDefault();--}}
-{{--                            e.stopPropagation();--}}
-{{--                            $item.find('[data-repeater-delete]').first().trigger('click');--}}
-{{--                        }--}}
-{{--                    });--}}
-
-{{--                </script>--}}
+                </script>
 
                 <script>
                     // لما يختار Product → صفّر Category (والعكس)
