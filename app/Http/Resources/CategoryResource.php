@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Http\Resources\Product\ProductPriceResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductSpecificationResource;
+use App\Models\Industry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,6 +18,13 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $parentsWithoutChildren = Industry::query()
+            ->whereNull('parent_id')
+            ->whereDoesntHave('children')
+            ->whereHas('templates', function ($q) {
+                $q->whereIn('templates.id', $this->templates->pluck('id'));
+            })
+            ->get();
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
