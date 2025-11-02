@@ -30,7 +30,7 @@
                     @endcan
                         <li>
                     <form class="change-status-form"
-                          action="{{ route('product-templates.change-status.show',$template->id, $template->status->value) }}"
+                          action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value]) }}"
                           method="post">
                         @csrf
                         @method("PUT")
@@ -48,7 +48,7 @@
 
 
                     <li>
-                        <form class="change-status-form" action="{{ route('product-templates.change-status.show',$template->id, $template->status->value)
+                        <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
                             @csrf
                             @method("PUT")
@@ -61,7 +61,7 @@
                         </form>
                     </li>
                     <li>
-                        <form class="change-status-form" action="{{ route('product-templates.change-status.show',$template->id, $template->status->value)
+                        <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
                             @csrf
                             @method("PUT")
