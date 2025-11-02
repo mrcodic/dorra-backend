@@ -78,7 +78,11 @@ $discountTypes = [
                         </div>
                         <p class="text-black fs-4 mb-0">Visits</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{  visits('site')?->count() }}</span></h2>
+                    @php
+                        // If auto-discovery/aliases are fine
+                        $totalVisits = \Awssat\Visits\Facades\Visits::make('site')->count();
+                    @endphp
+                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{  $totalVisits }}</span></h2>
                     <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
                                 class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
