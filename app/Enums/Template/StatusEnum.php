@@ -25,8 +25,8 @@ enum StatusEnum : int
     {
         return match ($this) {
             self::DRAFTED   => '#F3F4F6', // gray-100
-            self::PUBLISHED => '#DCFCE7', // green-100
-            self::LIVE      => '#FEF3C7', // amber-100
+            self::LIVE => '#DCFCE7', // green-100
+            self::PUBLISHED      => '#FEF3C7', // amber-100
         };
     }
 
@@ -35,8 +35,8 @@ enum StatusEnum : int
     {
         return match ($this) {
             self::DRAFTED   => '#374151', // gray-700
-            self::PUBLISHED => '#065F46', // green-800
-            self::LIVE      => '#92400E', // amber-800
+            self::LIVE => '#065F46', // green-800
+            self::PUBLISHED      => '#92400E', // amber-800
         };
     }
 

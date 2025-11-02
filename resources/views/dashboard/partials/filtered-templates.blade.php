@@ -140,7 +140,7 @@
                                  style="width: 24px; height: 24px; background-color: {{$color}};"></div>
                         @endforeach
                     </div>
-                    <span class="badge text-dark p-75 px-2 template-status-label"  data-template-id="{{ $template->id }}"
+                    <span class="badge p-75 px-2 template-status-label"  data-template-id="{{ $template->id }}"
 
                           style="background-color: {{ $template->status->bgHex() }};color: {{ $template->status->textHex() }}">
                     {{ $template->status->label() }}
