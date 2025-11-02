@@ -49,7 +49,7 @@ class ProductResource extends JsonResource
                 return TagResource::collection($tags);
             }),
             'template_industries' => $this->whenLoaded('templates', function () {
-                $this->templates->loadMissing('industries.parent');
+//                $this->templates->loadMissing('industries.parent');
                 $all = $this->templates->pluck('industries')->flatten();
                 $unique = $all->unique('id')->values();
                 $parents = $unique
