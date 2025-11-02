@@ -39,7 +39,7 @@ class StoreSubCategoryRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
-            'sub_image_id' => ['required','exists:media,id'],
+//            'sub_image_id' => ['required','exists:media,id'],
             'parent_id' => ['required', 'integer', 'exists:categories,id'],
         ];
 
