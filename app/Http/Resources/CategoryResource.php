@@ -18,13 +18,6 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $parentsWithoutChildren = Industry::query()
-            ->whereNull('parent_id')
-            ->whereDoesntHave('children')
-            ->whereHas('templates', function ($q) {
-                $q->whereIn('templates.id', $this->templates->pluck('id'));
-            })
-            ->get();
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -64,7 +57,26 @@ class CategoryResource extends JsonResource
 
                 return TagResource::collection($tags);
             }),
-            'template_industries' => IndustryResource::collection($parentsWithoutChildren),
+            'template_industries' => $this->whenLoaded('templates', function () {
+                // Make sure we have the ids we need
+                $templateIds = $this->templates->pluck('id')->filter()->values();
+
+                if ($templateIds->isEmpty()) {
+                    return collect(); // nothing to return
+                }
+
+                // If your relation names are 'children' and 'templates' on Industry, this works:
+                $parentsWithoutChildren = Industry::query()
+                    ->whereNull('parent_id')          // top-level parents only
+                    ->whereDoesntHave('children')     // with NO children
+                    ->whereHas('templates', function ($q) use ($templateIds) {
+                        $q->whereIn('templates.id', $templateIds);
+                    })
+                    ->get();
+
+                return IndustryResource::collection($parentsWithoutChildren);
+            }),
+
 // In your Resource array:
             'template_sub_industries' => $this->whenLoaded('templates', function () {
                 // Avoid N+1s
