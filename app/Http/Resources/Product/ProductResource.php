@@ -60,15 +60,20 @@ class ProductResource extends JsonResource
                     ->filter()
                     ->unique('id');
 
-                $subs = $industries->filter(fn ($i) => !is_null($i->parent_id));
-
-                if ($subs->isNotEmpty()) {
-                    return IndustryResource::collection(collect());
-                }
+                $subs = $industries->filter(fn($i) => !is_null($i->parent_id));
 
                 $parents = $industries
-                    ->filter(fn ($i) => is_null($i->parent_id))
+                    ->filter(fn($i) => is_null($i->parent_id))
                     ->values();
+
+                if ($subs->isNotEmpty()) {
+                    $parents = $parents
+                        ->merge($subs->pluck('parent')->filter())
+                        ->unique('id')
+                        ->values();
+                }
+
+
 
                 return IndustryResource::collection($parents);
             }),
