@@ -23,7 +23,7 @@ class CategoryResource extends JsonResource
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
             'description' => $this->description,
-            'has_custom_prices' =>$this->has_custom_prices,
+            'has_custom_prices' => $this->has_custom_prices,
             'base_price' => $this->base_price,
             'custom_prices' => ProductPriceResource::collection($this->whenLoaded('prices')),
             'image' => $this->whenLoaded('media', fn() => $this->getFirstMediaUrl("categories")),
@@ -51,7 +51,7 @@ class CategoryResource extends JsonResource
                 $this->templates->loadMissing('tags');
 
                 $tags = $this->templates
-//                    ->whereStatus(StatusEnum::LIVE)
+                    ->filter(fn($t) => $t->status === StatusEnum::LIVE)
                     ->pluck('tags')
                     ->flatten()
                     ->unique('id')
@@ -68,14 +68,14 @@ class CategoryResource extends JsonResource
                     ->filter()
                     ->unique('id');
 
-                $subs = $industries->filter(fn ($i) => !is_null($i->parent_id));
+                $subs = $industries->filter(fn($i) => !is_null($i->parent_id));
 
                 if ($subs->isNotEmpty()) {
                     return IndustryResource::collection(collect());
                 }
 
                 $parents = $industries
-                    ->filter(fn ($i) => is_null($i->parent_id))
+                    ->filter(fn($i) => is_null($i->parent_id))
                     ->values();
 
                 return IndustryResource::collection($parents);
@@ -90,7 +90,7 @@ class CategoryResource extends JsonResource
                     ->unique('id');
 
                 $subs = $industries
-                    ->filter(fn ($i) => !is_null($i->parent_id))
+                    ->filter(fn($i) => !is_null($i->parent_id))
                     ->values();
 
                 return IndustryResource::collection($subs);
