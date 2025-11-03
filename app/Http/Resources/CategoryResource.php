@@ -47,6 +47,7 @@ class CategoryResource extends JsonResource
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'category_products' => ProductResource::collection($this->whenLoaded('landingProducts')),
             'offer' => OfferResource::make($this->whenLoaded('lastOffer')),
+
             'template_tags' => $this->whenLoaded('templates', function () {
                 $this->templates->loadMissing('tags');
 
@@ -80,7 +81,6 @@ class CategoryResource extends JsonResource
 
                 return IndustryResource::collection($parents);
             }),
-
             'template_sub_industries' => $this->whenLoaded('templates', function () {
                 $this->loadMissing('templates.industries.parent');
 

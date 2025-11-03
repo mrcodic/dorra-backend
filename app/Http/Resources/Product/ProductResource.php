@@ -50,6 +50,7 @@ class ProductResource extends JsonResource
 
                 return TagResource::collection($tags);
             }),
+
             'template_industries' => $this->whenLoaded('templates', function () {
 
                 $this->loadMissing('templates.industries.parent');
@@ -59,11 +60,11 @@ class ProductResource extends JsonResource
                     ->filter()
                     ->unique('id');
 
-                $subs = $industries->filter(fn ($i) => !is_null($i->parent_id));
+//                $subs = $industries->filter(fn ($i) => !is_null($i->parent_id));
 
-                if ($subs->isNotEmpty()) {
-                    return IndustryResource::collection(collect());
-                }
+//                if ($subs->isNotEmpty()) {
+//                    return IndustryResource::collection(collect());
+//                }
 
                 $parents = $industries
                     ->filter(fn ($i) => is_null($i->parent_id))
@@ -71,7 +72,6 @@ class ProductResource extends JsonResource
 
                 return IndustryResource::collection($parents);
             }),
-
             'template_sub_industries' => $this->whenLoaded('templates', function () {
                 $this->loadMissing('templates.industries.parent');
 
