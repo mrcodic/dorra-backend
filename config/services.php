@@ -67,6 +67,12 @@ return [
     'google_maps' => [
         'key' => env('GOOGLE_MAPS_KEY'),
     ],
+    'shipblu' => [
+        'key'  => env('SHIPBLU_API_KEY'),
+        'base' => rtrim(env('SHIPBLU_BASE_URL', 'https://api.shipblu.com'), '/'),
+        'webhook_secret' => env('SHIPBLU_WEBHOOK_SECRET'),
+    ],
+
 
 
 ];
