@@ -249,20 +249,19 @@ class MainController extends Controller
                 },
                 'products.media',
                 'media',
-
                 'templates.tags' => function ($query) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($query);
                 },
-
+                'products.templates.tags' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
+                },
                 'templates.industries' => function ($query) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($query);
                 },
-
-                'products.templates.tags' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },'products.templates.industries' => function ($query) use ($applyContainsAnyLocale) {
+                'products.templates.industries' => function ($query) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($query);
                 },
+
             ])
             ->where(function ($query) use ($applyContainsAnyLocale) {
                 $applyContainsAnyLocale($query);

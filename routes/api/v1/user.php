@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Profile\UserNotificationTypeController,
     SavedItems\SaveController,
     ShippingAddress\ShippingAddressController,
+    ShippingAddress\ShippingController,
     Team\TeamController,
     Template\TemplateController,
     Review\ReviewController};
@@ -192,11 +193,13 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
 
 Route::get('locations', [OrderController::class,'searchLocations'])->name('locations.nearby');
-Route::get('test', function () {
-return \Illuminate\Support\Facades\Http::withHeaders([
-    'Authorization' => 'Api-Key '.'zRhxYbmc.UgGUTNVDruRfYv2sNw7ye0KmpuFMSsDC'
-])->get('https://api.shipblu.com/api/v1/governorates/');
+
+Route::prefix('shipblu/')->controller(ShippingController::class)->group(function () {
+    Route::get('governorates', 'governorates');
+    Route::get('cities/{governorateId}', 'cities');
+    Route::get('zones/{cityId}', 'cities');
 });
+
 Route::get('test2', function () {
 return \Illuminate\Support\Facades\Http::withHeaders([
     'Authorization' => 'Api-Key '.'zRhxYbmc.UgGUTNVDruRfYv2sNw7ye0KmpuFMSsDC'

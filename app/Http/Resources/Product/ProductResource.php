@@ -56,6 +56,7 @@ class ProductResource extends JsonResource
                 $this->loadMissing('templates.industries.parent');
 
                 $industries = $this->templates
+                    ->filter(fn($t) => $t->status === StatusEnum::LIVE)
                     ->flatMap->industries
                     ->filter()
                     ->unique('id');
@@ -82,6 +83,7 @@ class ProductResource extends JsonResource
                 $this->loadMissing('templates.industries.parent');
 
                 $industries = $this->templates
+                    ->filter(fn($t) => $t->status === StatusEnum::LIVE)
                     ->flatMap->industries
                     ->filter()
                     ->unique('id');
