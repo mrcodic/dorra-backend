@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Product;
 
+use App\Enums\Template\StatusEnum;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DimensionResource;
 use App\Http\Resources\IndustryResource;
@@ -41,6 +42,7 @@ class ProductResource extends JsonResource
             'template_tags' => $this->whenLoaded('templates', function () {
                 $this->templates->loadMissing('tags');
                 $tags = $this->templates
+                    ->whereStatus(StatusEnum::LIVE)
                     ->pluck('tags')
                     ->flatten()
                     ->unique('id')
