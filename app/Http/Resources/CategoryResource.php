@@ -50,7 +50,7 @@ class CategoryResource extends JsonResource
             'template_tags' => $this->whenLoaded('templates', function () {
                 $this->templates->loadMissing('tags');
 
-                $tags = $this->templates
+                $tags = $this->templates()
                     ->whereStatus(StatusEnum::LIVE)
                     ->pluck('tags')
                     ->flatten()
