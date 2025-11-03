@@ -260,6 +260,8 @@ class MainController extends Controller
 
                 'products.templates.tags' => function ($query) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($query);
+                },'products.templates.industries' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
                 },
             ])
             ->where(function ($query) use ($applyContainsAnyLocale) {
