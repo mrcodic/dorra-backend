@@ -41,8 +41,8 @@ class ProductResource extends JsonResource
 
             'template_tags' => $this->whenLoaded('templates', function () {
                 $this->templates->loadMissing('tags');
-                $tags = $this->templates()
-                    ->whereStatus(StatusEnum::LIVE)
+                $tags = $this->templates
+//                    ->whereStatus(StatusEnum::LIVE)
                     ->pluck('tags')
                     ->flatten()
                     ->unique('id')
