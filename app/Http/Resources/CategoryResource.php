@@ -69,7 +69,8 @@ class CategoryResource extends JsonResource
                     ->filter()
                     ->unique('id');
 
-                $subs = $industries->filter(fn($i) => !is_null($i->parent_id));
+                $subs = $industries->filter(fn($i) => !is_null($i->parent_id)&& $i->isNotEmpty());
+
 
                 $parents = $industries
                     ->filter(fn($i) => is_null($i->parent_id))
