@@ -62,6 +62,7 @@ class ProductResource extends JsonResource
 
                 $subs = $industries->filter(fn($i) => !is_null($i->parent_id)&& $i->children->isNotEmpty());
 
+
                 $parents = $industries
                     ->filter(fn($i) => is_null($i->parent_id))
                     ->values();
