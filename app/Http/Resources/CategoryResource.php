@@ -71,13 +71,18 @@ class CategoryResource extends JsonResource
 
                 $subs = $industries->filter(fn($i) => !is_null($i->parent_id));
 
-                if ($subs->isNotEmpty()) {
-                    return IndustryResource::collection(collect());
-                }
-
                 $parents = $industries
                     ->filter(fn($i) => is_null($i->parent_id))
                     ->values();
+
+                if ($subs->isNotEmpty()) {
+                    $parents = $parents
+                        ->merge($subs->pluck('parent')->filter())
+                        ->unique('id')
+                        ->values();
+                }
+
+
 
                 return IndustryResource::collection($parents);
             }),
