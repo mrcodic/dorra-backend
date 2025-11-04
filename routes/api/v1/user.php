@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Review\ReviewController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -202,4 +203,12 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
     Route::get('zones/{cityId}', 'zones');
 });
 
+Route::get('test2',function(){
+    return Http::withHeaders([
+        'Accept' => 'application/json',
+        'Authorization' => 'Api-Key ' . "zRhxYbmc.UgGUTNVDruRfYv2sNw7ye0KmpuFMSsDC",
+    ])->get("https://api.shipblu.com/api/v1/delivery-orders/?limit=10&offset=10")
+        ->throw()
+        ->json();
+});
 
