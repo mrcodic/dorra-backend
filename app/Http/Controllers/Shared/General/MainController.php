@@ -35,8 +35,8 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     MessageRepositoryInterface,
     ProductRepositoryInterface,
     StateRepositoryInterface,
-    TemplateRepositoryInterface
-};
+    TemplateRepositoryInterface,
+    ZoneRepositoryInterface};
 use App\Services\CategoryService;
 use App\Services\DesignService;
 use App\Services\FolderService;
@@ -66,6 +66,7 @@ class MainController extends Controller
         public TemplateRepositoryInterface  $templateRepository,
         public CategoryRepositoryInterface  $categoryRepository,
         public StationStatusRepository      $stationStatusRepository,
+        public ZoneRepositoryInterface        $zoneRepository,
 
     )
     {
@@ -90,6 +91,10 @@ class MainController extends Controller
     public function states()
     {
         return Response::api(data: StateResource::collection($this->stateRepository->getWithFilters()));
+    }
+    public function zones()
+    {
+        return Response::api(data: StateResource::collection($this->zoneRepository->getWithFilters()));
     }
 
     public function countryCodes()

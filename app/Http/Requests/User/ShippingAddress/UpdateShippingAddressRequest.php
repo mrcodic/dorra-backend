@@ -32,6 +32,7 @@ class UpdateShippingAddressRequest extends BaseRequest
             'label' => ['sometimes', 'string', 'max:255'],
             'line' => ['sometimes', 'string', 'max:500'],
             'state_id' => ['sometimes', 'exists:states,id'],
+            'zone_id' => ['sometimes', 'exists:zones,id'],
             'user_id' => ['nullable', 'exists:users,id'],
         ];
     }

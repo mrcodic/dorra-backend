@@ -102,6 +102,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::get('order-statuses', 'orderStatuses');
     });
     Route::get('states', [MainController::class, 'states']);
+    Route::get('zones', [MainController::class, 'zones']);
     Route::get('countries', [MainController::class, 'countries']);
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
@@ -194,25 +195,10 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
 Route::get('locations', [OrderController::class,'searchLocations'])->name('locations.nearby');
 
-Route::prefix('shipblu/')->controller(ShippingController::class)->group(function () {
+Route::prefix('ship-blu/')->controller(ShippingController::class)->group(function () {
     Route::get('governorates', 'governorates');
     Route::get('cities/{governorateId}', 'cities');
-    Route::get('zones/{cityId}', 'cities');
+    Route::get('zones/{cityId}', 'zones');
 });
 
-Route::get('test2', function () {
-return \Illuminate\Support\Facades\Http::withHeaders([
-    'Authorization' => 'Api-Key '.'zRhxYbmc.UgGUTNVDruRfYv2sNw7ye0KmpuFMSsDC'
-])->get('https://api.shipblu.com/api/v1/governorates/1/cities');
-});
-Route::get('test3', function () {
-return \Illuminate\Support\Facades\Http::withHeaders([
-    'Authorization' => 'Api-Key '.'zRhxYbmc.UgGUTNVDruRfYv2sNw7ye0KmpuFMSsDC'
-])->get('https://api.shipblu.com/api/v1/cities/1/zones/');
-});
 
-Route::get('test4', function () {
-return \Illuminate\Support\Facades\Http::withHeaders([
-    'Authorization' => 'Api-Key '.'zRhxYbmc.UgGUTNVDruRfYv2sNw7ye0KmpuFMSsDC'
-])->get('https://api.shipblu.com/api/v1/delivery-orders/?limit=10');
-});

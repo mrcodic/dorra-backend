@@ -2,28 +2,23 @@
 
 namespace App\Models;
 
-
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Translatable\HasTranslations;
 
-class State extends Model
+class Zone extends Model
 {
     use HasTranslations;
 
-    protected $fillable = ['name', 'code', 'country_id'];
+    protected $fillable = ['name', 'code', 'state_id'];
     public $translatable = ['name'];
-    public function country(): BelongsTo
+
+    public function state(): BelongsTo
     {
-        return $this->belongsTo(Country::class);
+        return $this->belongsTo(State::class);
     }
 
-    public function zones(): HasMany
-    {
-        return $this->hasMany(Zone::class);
-    }
     public function mappings(): MorphMany
     {
         return $this->morphMany(ShippingLocationMapping::class, 'locatable');
