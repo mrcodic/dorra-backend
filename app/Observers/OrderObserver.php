@@ -2,6 +2,8 @@
 
 namespace App\Observers;
 
+use App\DTOs\Shipping\AddressDTO;
+use App\Enums\Order\OrderTypeEnum;
 use App\Jobs\ProcessConfirmedOrderJob;
 
 use App\Models\Admin;
@@ -10,6 +12,7 @@ use App\Models\Inventory;
 use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
+use App\Services\Shipping\ShippingManger;
 
 
 class OrderObserver
@@ -35,7 +38,7 @@ class OrderObserver
     /**
      * Handle the Order "updated" event.
      */
-    public function updated(Order $order): void
+    public function updated(Order $order,ShippingManger $shippingManger): void
     {
         if ($order->wasChanged('inventory_id'))
         {
@@ -43,6 +46,11 @@ class OrderObserver
             $inventory->update(["is_available" => false]);
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
+            if ($order->orderAddress->type == OrderTypeEnum::SHIPPING)
+            {
+                $addressDto = AddressDTO::fromArray($order);
+                $shippingManger->driver('shipblu')->createShipment($addressDto);
+            }
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
         }

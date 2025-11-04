@@ -2,7 +2,7 @@
 namespace App\Services\Shipping\Contracts;
 interface ShippingDriver
 {
-    public function createShipment($payload);
+    public function createShipment($addressDTO);
     public function requestPickup($payload);
 
     public function track($trackingNumber);

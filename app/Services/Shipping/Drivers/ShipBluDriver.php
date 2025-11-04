@@ -2,6 +2,7 @@
 
 namespace App\Services\Shipping\Drivers;
 
+use App\DTOs\Shipping\AddressDTO;
 use App\Services\Shipping\Contracts\LocationsProvider;
 use App\Services\Shipping\Contracts\ShippingDriver;
 use Illuminate\Http\Client\ConnectionException;
@@ -64,12 +65,12 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function createShipment($payload): void
+    public function createShipment($addressDTO): void
     {
         Http::withHeaders([
             'Accept' => 'application/json',
             'Authorization' => 'Api-Key ' . "$this->apiKey",
-        ])->post($this->baseUrl . "api/v1/delivery-orders/", $payload)
+            ])->post($this->baseUrl . "api/v1/delivery-orders/", $addressDTO->toShipBluPayload())
             ->throw()
             ->json();
     }
