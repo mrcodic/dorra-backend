@@ -65,9 +65,9 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function createShipment($addressDTO): void
+    public function createShipment($addressDTO)
     {
-        Http::withHeaders([
+        return Http::withHeaders([
             'Accept' => 'application/json',
             'Authorization' => 'Api-Key ' . "$this->apiKey",
             ])->post($this->baseUrl . "api/v1/delivery-orders/", $addressDTO->toShipBluPayload())
