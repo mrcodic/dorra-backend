@@ -35,7 +35,7 @@ class AddressDTO
                     'zone' =>  (int) $this->providerZoneId($order->orderAddress->shippingAddress->zone_id, 'shipblu'),
                 ],
                 'packages' => [
-                    'package_size' => $order->items->count(),
+                    'package_size' => $order->orderItems->count(),
                 ]
             ]
         ];
