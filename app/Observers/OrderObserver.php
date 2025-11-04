@@ -46,11 +46,11 @@ class OrderObserver
             $inventory->update(["is_available" => false]);
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
-            if ($order->orderAddress->type == OrderTypeEnum::SHIPPING)
-            {
-                $addressDto = AddressDTO::fromArray($order);
-                $shippingManger->driver('shipblu')->createShipment($addressDto);
-            }
+//            if ($order->orderAddress->type == OrderTypeEnum::SHIPPING)
+//            {
+//                $addressDto = AddressDTO::fromArray($order);
+//                $shippingManger->driver('shipblu')->createShipment($addressDto);
+//            }
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
         }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Order;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,8 +20,8 @@ return new class extends Migration
             $t->string('provider_order_id');
             $t->string('tracking_number')->nullable();
             $t->string('status')->nullable();
-            $t->string('label_url')->nullable();
             $t->json('meta')->nullable();
+            $t->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
             $t->timestamps();
 
             $t->unique(['provider','provider_order_id']);

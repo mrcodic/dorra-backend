@@ -3,6 +3,7 @@
 namespace App\Services\Shipping\Drivers;
 
 use App\DTOs\Shipping\AddressDTO;
+use App\Repositories\Interfaces\ShipmentRepositoryInterface;
 use App\Services\Shipping\Contracts\LocationsProvider;
 use App\Services\Shipping\Contracts\ShippingDriver;
 use Illuminate\Http\Client\ConnectionException;
@@ -13,7 +14,8 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
 {
     public function __construct(
         private string $apiKey,
-        private string $baseUrl
+        private string $baseUrl,
+        private ShipmentRepositoryInterface $shipmentRepository,
     )
     {
     }
@@ -67,12 +69,20 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
      */
     public function createShipment($addressDTO)
     {
-        return Http::withHeaders([
+        $result = Http::withHeaders([
             'Accept' => 'application/json',
             'Authorization' => 'Api-Key ' . "$this->apiKey",
             ])->post($this->baseUrl . "api/v1/delivery-orders/", $addressDTO->toShipBluPayload())
             ->throw()
             ->json();
+        $this->shipmentRepository->create([
+            'provider' => config('shipping.default' ?? 'shipblu'),
+            'provider_order_id' => $result['id'],
+            'tracking_number' => $result['tracking_number'],
+            'status' => $result['status'],
+            'order_id' => $addressDTO,
+            'meta' => $result['metadata'],
+        ]);
     }
 
     public function track($trackingNumber)

@@ -11,7 +11,6 @@ class Shipment extends Model
         'provider_order_id',
         'tracking_number',
         'status',
-        'label_url',
         'meta'
     ];
 
