@@ -24,21 +24,7 @@ class AddressDTO
     public function toShipBluPayload(): array
     {
         $order = $this->order;
-        dd([
-            'customer' => [
-                'full_name' => $order->orderAddress->first_name . ' ' . $order->orderAddress->last_name,
-                'email' => $order->orderAddress->email,
-                'phone' => $order->orderAddress->phone,
-                'address' => [
-                    'line_1' => $order->orderAddress->shippingAddress->line,
-                    'line_2' => $order->orderAddress->shippingAddress->line,
-                    'zone' =>  (int) $this->providerZoneId($order->orderAddress->shippingAddress->zone_id, 'shipblu'),
-                ],
-                'packages' => [
-                    'package_size' => (int)$order->orderItems->count(),
-                ]
-            ]
-        ]);
+
         return [
             'customer' => [
                 'full_name' => $order->orderAddress->first_name . ' ' . $order->orderAddress->last_name,
@@ -50,7 +36,7 @@ class AddressDTO
                     'zone' =>  (int) $this->providerZoneId($order->orderAddress->shippingAddress->zone_id, 'shipblu'),
                 ],
                 'packages' => [
-                    'package_size' => (int)$order->orderItems->count(),
+                    ['package_size' => (int)$order->orderItems->count(),]
                 ]
             ]
         ];
