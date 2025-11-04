@@ -19,7 +19,7 @@ class ShippingAddressResource extends JsonResource
             'label' => $this->label,
             'line' => $this->line,
             'state'=> StateResource::make($this->whenLoaded('state')),
-            'zone'=> StateResource::make($this->whenLoaded('zone')),
+            'zone'=> ZoneResource::make($this->whenLoaded('zone')),
         ];
     }
 }
