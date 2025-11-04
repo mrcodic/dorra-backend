@@ -23,8 +23,9 @@ class AddressDTO
 
     public function toShipBluPayload(): array
     {
-        dd($order->orderItems->count());
         $order = $this->order;
+        
+        dd($order->orderItems->count());
         return [
             'customer' => [
                 'full_name' => $order->orderAddress->first_name . ' ' . $order->orderAddress->last_name,
