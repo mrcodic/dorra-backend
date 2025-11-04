@@ -38,7 +38,7 @@ class StoreShippingAddressRequest extends BaseRequest
         return [
             'label' => ['required', 'string','min:3', 'max:255'],
             'line' => ['required', 'string','min:3', 'max:500'],
-            'state_id' => ['required', 'exists:states,id'],
+            'state_id' => ['nullable', 'exists:states,id'],
             'zone_id' => ['required', 'exists:zones,id'],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
