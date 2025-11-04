@@ -67,7 +67,7 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function createShipment($addressDTO)
+    public function createShipment($addressDTO, $orderId)
     {
         $result = Http::withHeaders([
             'Accept' => 'application/json',
@@ -80,7 +80,7 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
             'provider_order_id' => $result['id'],
             'tracking_number' => $result['tracking_number'],
             'status' => $result['status'],
-            'order_id' => $addressDTO,
+            'order_id' => $orderId,
             'meta' => $result['metadata'],
         ]);
     }
