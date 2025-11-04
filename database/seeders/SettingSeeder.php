@@ -12,6 +12,7 @@ class SettingSeeder extends Seeder
         $settings = [
             // General settings
             ['key' => 'delivery', 'value' => 30],
+            ['key' => 'shipping_visibility', 'value' => true, 'group' => 'visibility_sections_landing'],
             ['key' => 'tax', 'value' => 0.1],
 
             // Landing Page Visibility Sections
@@ -31,6 +32,7 @@ class SettingSeeder extends Seeder
             ['key' => 'customers', 'value' => 1200, 'group' => 'statistics_landing'],
             ['key' => 'orders', 'value' => 3400, 'group' => 'statistics_landing'],
             ['key' => 'rate', 'value' => 4.9, 'group' => 'statistics_landing'],
+
         ];
 
         foreach ($settings as $setting) {

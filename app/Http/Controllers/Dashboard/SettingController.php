@@ -143,6 +143,7 @@ class SettingController extends Controller
 
     public function landingSections(Request $request, SettingRepositoryInterface $settingRepository)
     {
+
         $setting = $settingRepository->query()->where('key', $request->input('key'))->firstOrFail();
         $newValue = $setting->value ? 0 : 1;
         $settingRepository->update([

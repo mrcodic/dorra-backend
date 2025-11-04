@@ -185,6 +185,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
     Route::get('tags', [MainController::class, 'tags'])->name('tags');
     Route::get('flags', [MainController::class, 'flags'])->name('flags');
+    Route::get('general-settings', [MainController::class, 'generalSettings'])->name('general-settings');
     Route::get('dimensions', [MainController::class, 'dimensions'])->name('dimensions');
 
     Route::get('industries',[IndustryController::class,'index'])->name('industries');

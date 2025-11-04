@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Settings-Payment')
-@section('main-page', 'Payment')
+@section('main-page', 'Payment & Shipping')
 
 @section('vendor-style')
 {{-- Page Css files --}}
@@ -23,10 +23,7 @@
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 @endsection
-
-@section('content')
-<div class="card p-2">
-    @php
+@php
     // Define label + icons for each row
     $paymentRows = [
     ['label' => 'Aman', 'icons' => ['aman.png']],
@@ -34,33 +31,83 @@
     ['label' => 'Paypal', 'icons' => ['Paypal.png']],
     ['label' => 'Cash on delivery (COD)', 'icons' => ['cash.png']],
     ];
-    @endphp
+@endphp
 
-    @foreach ($paymentRows as $index => $row)
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="d-flex align-items-center gap-3">
+@section('content')
+    <div class="card p-2">
 
-            @foreach ($row['icons'] as $icon)
-            <img src="{{ asset('images/' . $icon) }}" alt="Payment Icon" style="height: 40px; width: auto;">
-            @endforeach
-            <span class="fw-bold text-black">{{ $row['label'] }}</span>
+        {{-- Payment header --}}
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h4 class="mb-0">Payment</h4>
         </div>
 
-        <div>
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="switch-{{ $index }}">
-                <label class="form-check-label" for="switch-{{ $index }}"></label>
+        @php
+            // Define label + icons for each row
+            $paymentRows = [
+              ['label' => 'Aman', 'icons' => ['aman.png']],
+              ['label' => 'Credit/Debit Card', 'icons' => ['Visa.png', 'mastercard.png']],
+              ['label' => 'Paypal', 'icons' => ['Paypal.png']],
+              ['label' => 'Cash on delivery (COD)', 'icons' => ['cash.png']],
+            ];
+        @endphp
+
+        {{-- Payment toggles --}}
+        @foreach ($paymentRows as $index => $row)
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    @foreach ($row['icons'] as $icon)
+                        <img src="{{ asset('images/' . $icon) }}" alt="Payment Icon" style="height: 40px; width: auto;">
+                    @endforeach
+                    <span class="fw-bold text-black">{{ $row['label'] }}</span>
+                </div>
+                <div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="switch-{{ $index }}">
+                        <label class="form-check-label" for="switch-{{ $index }}"></label>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    @endforeach
-    <div class="d-flex justify-content-end mt-2">
-        <button class="btn btn-outline-secondary me-1">Discard Changes</button>
-        <button class="btn btn-primary">Save</button>
-    </div>
-</div>
 
+        @endforeach
+        <div class="d-flex justify-content-end mt-2">
+            <button class="btn btn-outline-secondary me-1" type="reset">Discard Changes</button>
+            <button class="btn btn-primary">Save</button>
+        </div>
+        {{-- Divider between Payment and Shipping --}}
+        <hr class="my-3" />
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h4 class="mb-0">Shipping</h4>
+        </div>
+        <form action="{{ route('landing-sections.update') }}" method="post" id="shippingForm">
+            @csrf
+            @method('PUT')
+
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{{ asset('images/shipping.png') }}" alt="Shipping" style="height: 40px; width: auto;">
+                    <span class="fw-bold text-black">Enable Shipping at Checkout</span>
+                </div>
+                <div class="form-check form-switch">
+                    {{-- NOTE: checkbox has NO name; controller ignores its value --}}
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="shipping-enabled"
+                        data-initial="{{ setting('shipping_visibility') ? '1' : '0' }}"
+                        @checked(setting('shipping_visibility'))
+                    >
+                    <label class="form-check-label" for="shipping-enabled"></label>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-2">
+                <button type="reset" class="btn btn-outline-secondary me-1"  id="discardBtn">Discard Changes</button>
+                <button class="btn btn-primary" type="submit" id="saveBtn" disabled>Save</button>
+            </div>
+        </form>
+    </div>
 @endsection
+
 
 
 @section('vendor-script')
@@ -86,10 +133,66 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
-    const productsDataUrl = "{{ route('products.data') }}";
-    const productsCreateUrl = "{{ route('products.create') }}";
+ handleAjaxFormSubmit("#shippingForm",{
+     successMessage:"Request completed successfully",
+     onSuccess: function () {
+         location.reload()
+     }
+ })
 </script>
+<script>
+    (function () {
+        const form = document.getElementById('shippingForm');
+        const toggle = document.getElementById('shipping-enabled');
+        const saveBtn = document.getElementById('saveBtn');
+        const discardBtn = document.getElementById('discardBtn');
+        const initial = toggle.dataset.initial === '1';
+        const KEY_NAME = 'key';
+        const KEY_VALUE = 'shipping_visibility';
 
+        function ensureKeyInput(present) {
+            let hidden = form.querySelector(`input[name="${KEY_NAME}"]`);
+            if (present) {
+                if (!hidden) {
+                    hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = KEY_NAME;
+                    hidden.value = KEY_VALUE;
+                    form.appendChild(hidden);
+                }
+            } else if (hidden) {
+                hidden.remove();
+            }
+        }
+
+        function syncUI() {
+            const changed = (toggle.checked !== initial);
+            saveBtn.disabled = !changed;
+            ensureKeyInput(changed); // only send `key` when the user actually changed the toggle
+        }
+
+        // init
+        syncUI();
+
+        toggle.addEventListener('change', syncUI);
+
+        // prevent accidental submit with no changes (would 404 in your controller)
+        form.addEventListener('submit', function (e) {
+            if (saveBtn.disabled) {
+                e.preventDefault();
+                if (window.Swal) {
+                    Swal.fire({ icon: 'info', title: 'No changes to save' });
+                }
+            }
+        });
+
+        // discard -> reset to initial state
+        discardBtn?.addEventListener('click', function () {
+            toggle.checked = initial;
+            syncUI();
+        });
+    })();
+</script>
 
 
 

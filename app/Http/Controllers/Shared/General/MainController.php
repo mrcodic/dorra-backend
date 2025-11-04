@@ -19,13 +19,13 @@ use App\Http\Resources\{CategoryResource,
     FolderResource,
     MediaResource,
     Product\ProductResource,
+    SettingResource,
     StateResource,
     StationStatusResource,
     TagResource,
     TeamResource,
     Template\TemplateResource,
-    Template\TypeResource
-};
+    Template\TypeResource};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
@@ -34,6 +34,7 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     DimensionRepositoryInterface,
     MessageRepositoryInterface,
     ProductRepositoryInterface,
+    SettingRepositoryInterface,
     StateRepositoryInterface,
     TemplateRepositoryInterface,
     ZoneRepositoryInterface};
@@ -67,6 +68,7 @@ class MainController extends Controller
         public CategoryRepositoryInterface  $categoryRepository,
         public StationStatusRepository      $stationStatusRepository,
         public ZoneRepositoryInterface        $zoneRepository,
+        public SettingRepositoryInterface      $settingRepository,
 
     )
     {
@@ -388,5 +390,11 @@ class MainController extends Controller
     {
         $statuses = $this->stationStatusRepository->query()->whereStationId($request->station_id)->get();
         return Response::api(data: StationStatusResource::collection($statuses));
+    }
+
+    public function generalSettings()
+    {
+        return Response::api(data: SettingResource::collection($this->settingRepository->query()->whereNull('group')
+            ->get(['id', 'key', 'value'])));
     }
 }

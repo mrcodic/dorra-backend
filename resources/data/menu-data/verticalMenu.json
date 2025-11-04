@@ -191,7 +191,7 @@
                 },
                 {
                     "url": "/settings/payments",
-                    "name": "Payments",
+                    "name": "Payment & Shipping",
                     "icon": "circle",
                     "slug": ""
                 },
