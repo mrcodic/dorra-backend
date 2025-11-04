@@ -39,7 +39,7 @@ class AddressDTO
                 'phone'     => (string) ($addr->phone ?? ''),
                 'address'   => [
                     'line_1' => (string) ($ship->line1 ?? $ship->line ?? ''), // fallback if your column is "line"
-                    'line_2' => (string) ($ship->line2 ?? ''),                // can be empty string
+                    'line_2' => (string) ($ship->line2 ?? $ship->line ?? ''),                // can be empty string
                     'zone'   => (int) $zoneExternal,
                 ],
             ],
