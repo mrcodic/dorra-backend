@@ -23,6 +23,7 @@ class AddressDTO
 
     public function toShipBluPayload(): array
     {
+        dd($order->orderItems->count());
         $order = $this->order;
         return [
             'customer' => [
@@ -35,7 +36,7 @@ class AddressDTO
                     'zone' =>  (int) $this->providerZoneId($order->orderAddress->shippingAddress->zone_id, 'shipblu'),
                 ],
                 'packages' => [
-                    'package_size' => $order->orderItems->count(),
+                    'package_size' => (int)$order->orderItems->count(),
                 ]
             ]
         ];
