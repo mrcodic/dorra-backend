@@ -1,6 +1,7 @@
 <?php
 
 
+use App\DTOs\Shipping\AddressDTO;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\LogoutController,
@@ -203,12 +204,8 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
     Route::get('zones/{cityId}', 'zones');
 });
 
-Route::get('test2',function(){
-    return Http::withHeaders([
-        'Accept' => 'application/json',
-        'Authorization' => 'Api-Key ' . "zRhxYbmc.UgGUTNVDruRfYv2sNw7ye0KmpuFMSsDC",
-    ])->get("https://api.shipblu.com/api/v1/delivery-orders/?limit=10&offset=10")
-        ->throw()
-        ->json();
+Route::get('test2',function(\App\Services\Shipping\ShippingManger $shippingManger){
+    $addressDto = AddressDTO::fromArray(\App\Models\Order::find(114));
+   return $shippingManger->driver('shipblu')->createShipment($addressDto);
 });
 
