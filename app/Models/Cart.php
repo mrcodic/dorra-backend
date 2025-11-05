@@ -22,6 +22,9 @@ class Cart extends Model
     protected $casts = [
         "expires_at" => "datetime",
     ];
+    protected $attributes = [
+        "delivery_amount" => 0,
+    ];
 
     protected static function booted(): void
     {
