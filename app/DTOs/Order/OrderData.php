@@ -18,9 +18,9 @@ class OrderData
             'subtotal' => $subTotal,
             'discount_amount' => getDiscountAmount($discountCode ?? 0, $subTotal),
             'offer_amount' => $cart->items->sum('offer_amount'),
-            'delivery_amount' => setting('delivery') ?? 30,
+            'delivery_amount' => $cart->delivery_amount ?? 0,
             'tax_amount' => getPriceAfterTax(setting('tax'), $subTotal),
-            'total_price' => getTotalPrice($discountCode ?? 0, $subTotal),
+            'total_price' => getTotalPrice($discountCode ?? 0, $subTotal, $cart->delivery_amount),
             'status' => StatusEnum::PENDING,
         ];
     }

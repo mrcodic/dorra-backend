@@ -23,12 +23,12 @@ class CartResource extends JsonResource
             "id" => $this->id,
             "items" => CartItemResource::collection($this->whenLoaded('items')),
             'sub_total' => $subAfter,
-            'total' => getTotalPrice($this->discountCode ?? 0, $subAfter),
+            'total' => getTotalPrice($this->discountCode ?? 0, $subAfter,$this->delivery_amount),
             'tax' => [
                 'ratio' => setting('tax') * 100 . "%",
                 'value' => getPriceAfterTax(setting('tax'), $subAfter),
             ],
-            'delivery' => setting('delivery'),
+            'delivery' => $this->delivery_amount,
             'discount' => [
                 'code' => $this->discountCode?->code,
                 'ratio' => $this->price

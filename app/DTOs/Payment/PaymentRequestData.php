@@ -39,10 +39,10 @@ class PaymentRequestData
 
         $extraItems = [];
 
-        if (setting('delivery') > 0) {
+        if ($this->order->delivery_amount > 0) {
             $extraItems[] = [
                 'name' => Str::limit( 'Delivery Fee', 50, ''),
-                'amount' => (int) round(setting('delivery'))* 100,
+                'amount' => (int) round($this->order->delivery_amount)* 100,
                 'quantity' => 1,
             ];
         }
