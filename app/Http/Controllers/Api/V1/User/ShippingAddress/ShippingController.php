@@ -58,10 +58,10 @@ class ShippingController extends Controller
             $rateQuoteDto = RateQuoteDTO::fromArray($cart,
                 $paymentMethod->code == 'cash_on_delivery',
                 $shippingAddress->zone?->state?->country?->id);
-            $result = $this->shippingManger->driver('shipblu')->getRateQuote($rateQuoteDto, 'delivery');
-            $cart->update([
-                'delivery_amount' => $result['total']
-            ]);
+//            $result = $this->shippingManger->driver('shipblu')->getRateQuote($rateQuoteDto, 'delivery');
+//            $cart->update([
+//                'delivery_amount' => $result['total']
+//            ]);
         } else {
             if ($cart->delivery_amount !== 0) {
                 $cart->update([
@@ -85,12 +85,12 @@ class ShippingController extends Controller
             ->pluck('tracking_number')
             ->toArray();
 
-        $result = $this->shippingManger->driver('shipblu')->requestPickup($trackingNumbers);
-        return$result;
-        $this->shipmentRepository->query()
-            ->whereIn('id', $validatedData['shipment_ids'])->update([
-                'status' => $result["status"]
-            ]);
+//        $result = $this->shippingManger->driver('shipblu')->requestPickup($trackingNumbers);
+
+//        $this->shipmentRepository->query()
+//            ->whereIn('id', $validatedData['shipment_ids'])->update([
+//                'status' => $result[0]["status"]
+//            ]);
         return Response::api();
 
     }

@@ -46,12 +46,12 @@ class OrderObserver
             $inventory->update(["is_available" => false]);
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
-            if ($order->orderAddress->type == OrderTypeEnum::SHIPPING)
-            {
-                $shippingManager = app(ShippingManger::class);
-                $addressDto = AddressDTO::fromArray($order);
-                $shippingManager->driver('shipblu')->createShipment($addressDto, $order->id);
-            }
+//            if ($order->orderAddress->type == OrderTypeEnum::SHIPPING)
+//            {
+//                $shippingManager = app(ShippingManger::class);
+//                $addressDto = AddressDTO::fromArray($order);
+//                $shippingManager->driver('shipblu')->createShipment($addressDto, $order->id);
+//            }
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
         }
