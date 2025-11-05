@@ -83,6 +83,7 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
             'order_id' => $orderId,
             'meta' => $result['metadata'],
         ]);
+        return $result;
     }
 
     public function track($trackingNumber)
