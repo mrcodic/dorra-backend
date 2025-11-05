@@ -22,8 +22,7 @@ class AddressDTO
         $addr  = $order->orderAddress;
         $ship  = $addr->shippingAddress;
 
-
-        $zoneExternal = $this->providerZoneId((int) $ship->zone_id, 'shipblu');
+        $zoneExternal = $this->providerZoneId((int) $ship?->zone_id, 'shipblu');
         if ($zoneExternal === null) {
             throw new InvalidArgumentException('ShipBlu zone mapping not found for zone_id '.$ship->zone_id);
         }
