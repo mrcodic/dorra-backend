@@ -68,7 +68,7 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
      */
     public function getRateQuote($rateQuoteDTO)
     {
-        dd($rateQuoteDTO->toShipBluPayload());
+        dd($rateQuoteDTO->toShipBluPayload(),$this->baseUrl);
         return Http::withHeaders([
             'Accept' => 'application/json',
             'Authorization' => 'Api-Key ' . "$this->apiKey",
