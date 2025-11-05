@@ -207,6 +207,6 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
 
 Route::get('test2',function(\App\Services\Shipping\ShippingManger $shippingManger){
     $addressDto = RateQuoteDTO::fromArray(\App\Models\Cart::find(117),\App\Models\Cart::find(117)->price,1);
-   return $shippingManger->driver('shipblu')->getRateQuote($addressDto);
+   return $shippingManger->driver('shipblu')->getRateQuote($addressDto, 'delivery');
 });
 

@@ -2,7 +2,7 @@
 namespace App\Services\Shipping\Contracts;
 interface ShippingDriver
 {
-    public function getRateQuote($rateQuoteDTO);
+    public function getRateQuote($rateQuoteDTO,$orderType);
     public function createShipment($addressDTO, $orderId);
     public function requestPickup($payload);
 

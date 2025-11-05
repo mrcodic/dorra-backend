@@ -66,12 +66,12 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function getRateQuote($rateQuoteDTO)
+    public function getRateQuote($rateQuoteDTO, $orderType)
     {
         return Http::withHeaders([
             'Accept' => 'application/json',
             'Authorization' => 'Api-Key ' . "$this->apiKey",
-        ])->post($this->baseUrl . "api/v1/pricing/orders/{delivery}/", $rateQuoteDTO->toShipBluPayload())
+        ])->post($this->baseUrl . "api/v1/pricing/orders/$orderType/", $rateQuoteDTO->toShipBluPayload())
             ->throw()
             ->json();
     }
