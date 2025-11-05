@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Cart\CartResource;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
+use App\Repositories\Interfaces\ShipmentRepositoryInterface;
 use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Services\Shipping\ShippingManger;
 use Illuminate\Http\Request;
@@ -19,7 +20,8 @@ class ShippingController extends Controller
     public function __construct(public ShippingManger                     $shippingManger,
                                 public CartRepositoryInterface            $cartRepository,
                                 public ShippingAddressRepositoryInterface $shippingAddressRepository,
-                                public PaymentMethodRepositoryInterface   $paymentMethodRepository
+                                public PaymentMethodRepositoryInterface   $paymentMethodRepository,
+                                public ShipmentRepositoryInterface        $shipmentRepository,
     )
     {
     }
@@ -50,7 +52,7 @@ class ShippingController extends Controller
             'payment_method_id' => ['required', 'integer', 'exists:payment_methods,id'],
         ]);
         $cart = $this->cartRepository->find($validatedData['cart_id']);
-        if (Arr::get($validatedData,'shipping_address_id')) {
+        if (Arr::get($validatedData, 'shipping_address_id')) {
             $shippingAddress = $this->shippingAddressRepository->find($validatedData['shipping_address_id']);
             $paymentMethod = $this->paymentMethodRepository->find($validatedData['payment_method_id']);
             $rateQuoteDto = RateQuoteDTO::fromArray($cart,
@@ -60,9 +62,8 @@ class ShippingController extends Controller
             $cart->update([
                 'delivery_amount' => $result['total']
             ]);
-        }else{
-            if ($cart->delivery_amount !== 0)
-            {
+        } else {
+            if ($cart->delivery_amount !== 0) {
                 $cart->update([
                     'delivery_amount' => 0
                 ]);
@@ -76,8 +77,15 @@ class ShippingController extends Controller
     public function requestPickup(Request $request)
     {
         $validatedData = $request->validate([
-            'shipment_ids' => ['required', 'integer', 'exists:shipments,id']
+            'shipment_ids' => ['required', 'array',],
+            'shipment_ids.*' => ['required', 'integer', 'exists:shipments,id']
         ]);
+        $trackingNumbers = $this->shipmentRepository->query()
+            ->whereIn('id', $validatedData['shipment_ids'])
+            ->pluck('tracking_number')
+            ->toArray();
+
+      return  $this->shippingManger->driver('shipblu')->requestPickup($trackingNumbers);
     }
 
 }
