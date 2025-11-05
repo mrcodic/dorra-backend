@@ -15,7 +15,7 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
     public function __construct(
         private string $apiKey,
         private string $baseUrl,
-        private ShipmentRepositoryInterface $shipmentRepository,
+         ShipmentRepositoryInterface $shipmentRepository,
     )
     {
     }
