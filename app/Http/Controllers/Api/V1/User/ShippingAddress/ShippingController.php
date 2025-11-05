@@ -86,6 +86,7 @@ class ShippingController extends Controller
             ->toArray();
 
         $result = $this->shippingManger->driver('shipblu')->requestPickup($trackingNumbers);
+        return$result;
         $this->shipmentRepository->query()
             ->whereIn('id', $validatedData['shipment_ids'])->update([
                 'status' => $result["status"]
