@@ -48,8 +48,8 @@ class ShippingController extends Controller
             'shipping_address_id' => ['nullable', 'integer', 'exists:shipping_addresses,id'],
             'payment_method_id' => ['required', 'integer', 'exists:payment_methods,id'],
         ]);
+        $cart = $this->cartRepository->find($validatedData['cart_id']);
         if ($validatedData['shipping_address_id']) {
-            $cart = $this->cartRepository->find($validatedData['cart_id']);
             $shippingAddress = $this->shippingAddressRepository->find($validatedData['shipping_address_id']);
             $paymentMethod = $this->paymentMethodRepository->find($validatedData['payment_method_id']);
             $rateQuoteDto = RateQuoteDTO::fromArray($cart,
@@ -58,6 +58,12 @@ class ShippingController extends Controller
             $result = $this->shippingManger->driver('shipblu')->getRateQuote($rateQuoteDto, 'delivery');
             $cart->update([
                 'delivery_amount' => $result['total']
+            ]);
+        }
+        if ($cart->delivery_amount != 0)
+        {
+            $cart->update([
+                'delivery_amount' => 0
             ]);
         }
         return Response::api(data: CartResource::make($cart));
