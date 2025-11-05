@@ -85,7 +85,13 @@ class ShippingController extends Controller
             ->pluck('tracking_number')
             ->toArray();
 
-      return  $this->shippingManger->driver('shipblu')->requestPickup($trackingNumbers);
+        $result = $this->shippingManger->driver('shipblu')->requestPickup($trackingNumbers);
+        $this->shipmentRepository->query()
+            ->whereIn('id', $validatedData['shipment_ids'])->update([
+                'status' => $result["status"]
+            ]);
+        return Response::api();
+
     }
 
 }

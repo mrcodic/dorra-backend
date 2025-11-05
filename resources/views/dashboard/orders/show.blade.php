@@ -27,7 +27,7 @@
             <form action="{{ route('ship-blu.request-pickup') }}" method="post" id="requestPickupForm">
                 @csrf
                 <input type="hidden" name="shipment_ids[]" value="{{ $model->shipment->id }}">
-                <button type="submit" id="print-order" class="btn btn-outline-primary btn-sm">
+                <button type="submit"  class="btn btn-outline-primary btn-sm" @disabled($model->shipment->status == "pickup_requested")>
                     Request To Pickup
                 </button>
             </form>
@@ -218,7 +218,9 @@
 
 @section('page-script')
     <script !src="">
-        handleAjaxFormSubmit("#requestPickupForm")
+        handleAjaxFormSubmit("#requestPickupForm",{
+            successMessage: "Request Pickup done successfully"
+        })
     </script>
     <script>
         $(document).on('click', '#print-order', function () {
