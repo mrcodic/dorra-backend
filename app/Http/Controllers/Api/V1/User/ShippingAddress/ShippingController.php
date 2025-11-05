@@ -45,21 +45,30 @@ class ShippingController extends Controller
     {
         $validatedData = $request->validate([
             'cart_id' => ['required', 'integer', 'exists:carts,id'],
-            'shipping_address_id' => ['required', 'integer', 'exists:shipping_addresses,id'],
+            'shipping_address_id' => ['nullable', 'integer', 'exists:shipping_addresses,id'],
             'payment_method_id' => ['required', 'integer', 'exists:payment_methods,id'],
         ]);
-        $cart = $this->cartRepository->find($validatedData['cart_id']);
-        $shippingAddress = $this->shippingAddressRepository->find($validatedData['shipping_address_id']);
-        $paymentMethod = $this->paymentMethodRepository->find($validatedData['payment_method_id']);
-        $rateQuoteDto = RateQuoteDTO::fromArray($cart,
-            $paymentMethod->code == 'cash_on_delivery',
-            $shippingAddress->zone?->state?->country?->id);
-        $result = $this->shippingManger->driver('shipblu')->getRateQuote($rateQuoteDto, 'delivery');
-        $cart->update([
-            'delivery_amount' => $result['total']
-        ]);
+        if ($validatedData['shipping_address_id']) {
+            $cart = $this->cartRepository->find($validatedData['cart_id']);
+            $shippingAddress = $this->shippingAddressRepository->find($validatedData['shipping_address_id']);
+            $paymentMethod = $this->paymentMethodRepository->find($validatedData['payment_method_id']);
+            $rateQuoteDto = RateQuoteDTO::fromArray($cart,
+                $paymentMethod->code == 'cash_on_delivery',
+                $shippingAddress->zone?->state?->country?->id);
+            $result = $this->shippingManger->driver('shipblu')->getRateQuote($rateQuoteDto, 'delivery');
+            $cart->update([
+                'delivery_amount' => $result['total']
+            ]);
+        }
         return Response::api(data: CartResource::make($cart));
 
+    }
+
+    public function requestPickup(Request $request)
+    {
+        $validatedData = $request->validate([
+            'shipment_ids' => ['required', 'integer', 'exists:shipments,id']
+        ]);
     }
 
 }

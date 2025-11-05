@@ -100,6 +100,21 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
         return $result;
     }
 
+    /**
+     * @throws RequestException
+     * @throws ConnectionException
+     */
+    public function requestPickup($trackingNumbers)
+    {
+        return Http::withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => 'Api-Key ' . "$this->apiKey",
+        ])->post($this->baseUrl . "api/v1/delivery-orders/request-pickup",[
+            'tracking_numbers' => $trackingNumbers
+        ])
+            ->throw()
+            ->json();
+    }
     public function track($trackingNumber)
     {
         // TODO: Implement track() method.
@@ -110,10 +125,7 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
         // TODO: Implement cancel() method.
     }
 
-    public function requestPickup($payload)
-    {
-        // TODO: Implement requestPickup() method.
-    }
+
 
 
 }

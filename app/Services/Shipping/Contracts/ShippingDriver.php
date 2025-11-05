@@ -4,7 +4,7 @@ interface ShippingDriver
 {
     public function getRateQuote($rateQuoteDTO,$orderType);
     public function createShipment($addressDTO, $orderId);
-    public function requestPickup($payload);
+    public function requestPickup($trackingNumbers);
 
     public function track($trackingNumber);
 

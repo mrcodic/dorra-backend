@@ -29,8 +29,10 @@ use App\Http\Controllers\Dashboard\{AdminController,
     SubIndustryController,
     TagController,
     TemplateController,
-    UserController};
+    UserController
+};
 use App\Enums\Template\StatusEnum;
+use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Controllers\Shared\LibraryAssetController;
@@ -181,7 +183,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::resource('/industries', IndustryController::class);
 
         Route::group(['prefix' => 'sub-industries', 'as' => 'sub-industries.', 'controller' => SubIndustryController::class,], function () {
-            Route::get('/data', [ SubIndustryController::class, 'getData'])->name('data');
+            Route::get('/data', [SubIndustryController::class, 'getData'])->name('data');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         });
         Route::resource('/sub-industries', SubIndustryController::class);
@@ -321,7 +323,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);
         Route::post('addMedia', [MainController::class, 'addMedia'])->name("media.store");
         Route::delete('/media/{media}', [MainController::class, 'removeMedia'])->name("media.destroy");
-
+        Route::post('ship-blu/request-pickup', [ShippingController::class, 'requestPickup'])
+            ->name('ship-blu.request-pickup');
     });
 
 });
