@@ -14,6 +14,7 @@ class Cart extends Model
         "guest_id",
         "price",
         "discount_amount",
+        "delivery_amount",
         "discount_code_id",
         "expires_at",
     ];

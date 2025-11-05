@@ -203,6 +203,7 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
     Route::get('governorates', 'governorates');
     Route::get('cities/{governorateId}', 'cities');
     Route::get('zones/{cityId}', 'zones');
+    Route::post('delivery-fee', 'deliveryFee');
 });
 
 Route::get('test2',function(\App\Services\Shipping\ShippingManger $shippingManger){
