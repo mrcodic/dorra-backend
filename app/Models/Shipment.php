@@ -14,4 +14,8 @@ class Shipment extends Model
         'meta'
     ];
 
+  protected  $casts = [
+        'meta' => 'array'
+        ];
+
 }
