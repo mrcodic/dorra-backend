@@ -112,7 +112,7 @@ class OrderController extends DashboardController
             message: "discount code applied successfully",
             data: [
                 "discount_amount" => getDiscountAmount($code, $orderStepData['pricing_details']['sub_total']),
-//                "total" => getTotalPrice($code, $orderStepData['pricing_details']['sub_total'],$orderStepData['pricing_details']['delivery_amount']),
+                "total" => getTotalPrice($code, $orderStepData['pricing_details']['sub_total'],$orderStepData['pricing_details']['delivery']),
             ]
         );
     }

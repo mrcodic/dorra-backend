@@ -665,6 +665,7 @@ class OrderService extends BaseService
             $cart->update([
                 'price' => 0,
                 'discount_amount' => 0,
+                'delivery_amount' => 0,
                 'discount_code_id' => null,
             ]);
             return [
