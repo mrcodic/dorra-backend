@@ -38,7 +38,7 @@ class OrderObserver
     /**
      * Handle the Order "updated" event.
      */
-    public function updated(Order $order,ShippingManger $shippingManger): void
+    public function updated(Order $order): void
     {
         if ($order->wasChanged('inventory_id'))
         {
@@ -48,8 +48,9 @@ class OrderObserver
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
             if ($order->orderAddress->type == OrderTypeEnum::SHIPPING)
             {
+                $shippingManager = app(ShippingManger::class);
                 $addressDto = AddressDTO::fromArray($order);
-                $shippingManger->driver('shipblu')->createShipment($addressDto, $order->id);
+                $shippingManager->driver('shipblu')->createShipment($addressDto, $order->id);
             }
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
