@@ -45,7 +45,7 @@ class ShippingController extends Controller
         ]);
         $cart = $this->cartRepository->find($validatedData['cart_id']);
         $shippingAddress = $this->shippingAddressRepository->find($validatedData['shipping_address_id']);
-        $rateQuoteDto = RateQuoteDTO::fromArray($cart, $validatedData['cod'], $shippingAddress->zone->state->country->id);
+        $rateQuoteDto = RateQuoteDTO::fromArray($cart, $validatedData['cod'], $shippingAddress->zone?->state?->country?->id);
         $result = $this->shippingManger->driver('shipblu')->getRateQuote($rateQuoteDto, 'delivery');
         $cart->update([
             'delivery_amount' => $result['total']
