@@ -30,7 +30,7 @@ class PaymentRequestData
 
     public function toArray(): array
     {
-        $amountCents = (int) ((int)$this->order->total_price * 100);
+        $amountCents = (int) (ceil($this->order->total_price) * 100);
         $baseItems = $this->order->orderItems->map(fn($item) => [
             'name' => Str::limit($item?->itemable->name ?? 'Item', 50, ''),
             'amount' => (int) round($item->sub_total)* 100,
