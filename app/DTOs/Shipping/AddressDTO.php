@@ -44,6 +44,7 @@ class AddressDTO
             'packages' => [
                 ['package_size' => $packageSize],
             ],
+            'cash_amount' => $order->paymentMethod->code == 'cash_on_delivery' ? $order->total_price :0
         ];
     }
 

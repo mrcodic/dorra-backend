@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User\ShippingAddress;
 
 use App\DTOs\Shipping\RateQuoteDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Cart\CartResource;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
 use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
@@ -57,7 +58,7 @@ class ShippingController extends Controller
         $cart->update([
             'delivery_amount' => $result['total']
         ]);
-        return Response::api();
+        return Response::api(data: CartResource::make($cart));
 
     }
 
