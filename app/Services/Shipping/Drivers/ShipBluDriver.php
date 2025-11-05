@@ -15,7 +15,6 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
     public function __construct(
         private string $apiKey,
         private string $baseUrl,
-         ShipmentRepositoryInterface $shipmentRepository,
     )
     {
     }
@@ -75,7 +74,8 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
             ])->post($this->baseUrl . "api/v1/delivery-orders/", $addressDTO->toShipBluPayload())
             ->throw()
             ->json();
-        $this->shipmentRepository->create([
+        $shipmentRepository = app(ShipmentRepositoryInterface::class);
+        $shipmentRepository->create([
             'provider' => config('shipping.default' ?? 'shipblu'),
             'provider_order_id' => $result['id'],
             'tracking_number' => $result['tracking_number'],
