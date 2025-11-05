@@ -49,7 +49,7 @@ class ShippingController extends Controller
         ]);
         $cart = $this->cartRepository->find($validatedData['cart_id']);
         $shippingAddress = $this->shippingAddressRepository->find($validatedData['shipping_address_id']);
-        $paymentMethod = $this->shippingAddressRepository->find($validatedData['payment_method_id']);
+        $paymentMethod = $this->paymentMethodRepository->find($validatedData['payment_method_id']);
         $rateQuoteDto = RateQuoteDTO::fromArray($cart,
             $paymentMethod->code == 'cash_on_delivery',
             $shippingAddress->zone?->state?->country?->id);
