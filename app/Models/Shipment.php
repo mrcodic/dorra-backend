@@ -11,7 +11,8 @@ class Shipment extends Model
         'provider_order_id',
         'tracking_number',
         'status',
-        'meta'
+        'meta',
+        'order_id'
     ];
 
   protected  $casts = [
