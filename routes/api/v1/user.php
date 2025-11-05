@@ -2,6 +2,7 @@
 
 
 use App\DTOs\Shipping\AddressDTO;
+use App\DTOs\Shipping\RateQuoteDTO;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\LogoutController,
@@ -205,7 +206,7 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
 });
 
 Route::get('test2',function(\App\Services\Shipping\ShippingManger $shippingManger){
-    $addressDto = AddressDTO::fromArray(\App\Models\Order::find(114));
-   return $shippingManger->driver('shipblu')->createShipment($addressDto,114);
+    $addressDto = RateQuoteDTO::fromArray(\App\Models\Cart::find(117),\App\Models\Cart::find(117)->price,1);
+   return $shippingManger->driver('shipblu')->getRateQuote($addressDto);
 });
 

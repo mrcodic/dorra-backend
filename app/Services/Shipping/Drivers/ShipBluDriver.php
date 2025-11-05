@@ -62,6 +62,16 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
             ->json();
     }
 
+    public function getRateQuote($rateQuoteDTO)
+    {
+        return Http::withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => 'Api-Key ' . "$this->apiKey",
+        ])->post($this->baseUrl . "api/v1/pricing/orders/delivery", $rateQuoteDTO->toShipBluPayload())
+            ->throw()
+            ->json();
+    }
+
     /**
      * @throws RequestException
      * @throws ConnectionException
@@ -100,4 +110,6 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
     {
         // TODO: Implement requestPickup() method.
     }
+
+
 }
