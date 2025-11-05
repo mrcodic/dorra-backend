@@ -206,6 +206,6 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
 
 Route::get('test2',function(\App\Services\Shipping\ShippingManger $shippingManger){
     $addressDto = AddressDTO::fromArray(\App\Models\Order::find(114));
-   return $shippingManger->driver('shipblu')->createShipment($addressDto);
+   return $shippingManger->driver('shipblu')->createShipment($addressDto,114);
 });
 
