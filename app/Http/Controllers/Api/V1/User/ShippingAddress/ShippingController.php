@@ -60,13 +60,15 @@ class ShippingController extends Controller
             $cart->update([
                 'delivery_amount' => $result['total']
             ]);
+        }else{
+            if ($cart->delivery_amount !== 0)
+            {
+                $cart->update([
+                    'delivery_amount' => 0
+                ]);
+            }
         }
-        if ($cart->delivery_amount != 0)
-        {
-            $cart->update([
-                'delivery_amount' => 0
-            ]);
-        }
+
         return Response::api(data: CartResource::make($cart));
 
     }
