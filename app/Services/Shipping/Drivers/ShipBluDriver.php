@@ -71,7 +71,7 @@ class ShipBluDriver implements ShippingDriver, LocationsProvider
         return Http::withHeaders([
             'Accept' => 'application/json',
             'Authorization' => 'Api-Key ' . "$this->apiKey",
-        ])->post($this->baseUrl . "v1/pricing/orders/delivery/", $rateQuoteDTO->toShipBluPayload())
+        ])->post($this->baseUrl . "api/v1/pricing/orders/{delivery}/", $rateQuoteDTO->toShipBluPayload())
             ->throw()
             ->json();
     }
