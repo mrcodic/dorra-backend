@@ -10,6 +10,7 @@ use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
 use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Services\Shipping\ShippingManger;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response;
 
 
@@ -49,7 +50,7 @@ class ShippingController extends Controller
             'payment_method_id' => ['required', 'integer', 'exists:payment_methods,id'],
         ]);
         $cart = $this->cartRepository->find($validatedData['cart_id']);
-        if ($validatedData['shipping_address_id']) {
+        if (Arr::get($validatedData,'shipping_address_id')) {
             $shippingAddress = $this->shippingAddressRepository->find($validatedData['shipping_address_id']);
             $paymentMethod = $this->paymentMethodRepository->find($validatedData['payment_method_id']);
             $rateQuoteDto = RateQuoteDTO::fromArray($cart,
