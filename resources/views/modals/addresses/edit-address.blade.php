@@ -44,7 +44,9 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label label-text">Zones</label>
-                            <select id="modalAddressZone" name="zone_id" class="form-select address-zone-select">
+                            <select id="modalAddressZone" name="zone_id" class="form-select address-zone-select"
+                                    data-selected-id="{{ $address->zone_id }}"
+                            >
                                 <option value="" disabled selected>Select a Zone</option>
                             </select>
                             <div class="invalid-feedback" id="zone_id-error"></div>
