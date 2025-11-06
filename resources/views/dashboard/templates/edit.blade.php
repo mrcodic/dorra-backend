@@ -356,61 +356,60 @@
             const PRESEL_PARENTS  = @json($preselectedIndustryIds ?? []);
             const PRESEL_SUBS     = @json($preselectedSubIndustryIds ?? []);
 
-            const $inds = $('#industriesSelect');     // left (parents)
-            const $subs = $('#subIndustriesSelect');  // right (subs)
-            const cache = {}; // parent_id -> array of subs
+            const $inds = $('#industriesSelect');     // parents
+            const $subs = $('#subIndustriesSelect');  // subs
 
-            // helper: robust name (supports translatable {ar,en} or plain string)
             const pickName = (item) => {
                 if (item?.name && typeof item.name === 'object' && item.name[LOCALE]) return item.name[LOCALE];
                 return item?.name ?? item?.title ?? `#${item?.id ?? ''}`;
             };
-
-            // helper: unwrap response {data: [...]} or [...]
             const unpack = (resp) => Array.isArray(resp?.data) ? resp.data : (Array.isArray(resp) ? resp : []);
-
-            function fetchSubs(parentId) {
-                if (cache[parentId]) return Promise.resolve(cache[parentId]);
-                return $.getJSON(SUB_ROUTE, { 'industry_ids': [parentId] })
-                    .then(resp => (cache[parentId] = unpack(resp)));
-            }
 
             async function refreshSubs({ preserveSelection = true } = {}) {
                 const selectedParents = $inds.val() || PRESEL_PARENTS || [];
 
-                // clear when no parents selected
                 if (!selectedParents.length) {
                     $subs.empty().trigger('change');
                     return;
                 }
 
-                // fetch all sub lists in parallel, merge & dedupe
-                const lists = await Promise.all(selectedParents.map(fetchSubs));
-                const merged = new Map();
-                lists.flat().forEach(it => { if (it?.id != null) merged.set(String(it.id), it); });
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-                // keep current selection (or fall back to PRESEL_SUBS on first load)
-                const keep = preserveSelection ? (($subs.val() || PRESEL_SUBS || []).map(String)) : [];
-
-                $subs.empty();
-                for (const [id, item] of merged.entries()) {
-                    const isSelected = keep.includes(id);
-                    $subs.append(new Option(pickName(item), id, isSelected, isSelected));
-                }
-                $subs.trigger('change');
+                $.ajax({
+                    url: SUB_ROUTE,
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': token },
+                    // if you prefer JSON, add: contentType: 'application/json', data: JSON.stringify({...})
+                    data: { industry_ids: selectedParents }
+                })
+                    .done((resp) => {
+                        const items = unpack(resp);
+                        // keep current selection or fall back to preselected ones
+                        const keep = preserveSelection ? (($subs.val() || PRESEL_SUBS || []).map(String)) : [];
+                        $subs.empty();
+                        items.forEach(it => {
+                            if (it?.id == null) return;
+                            const id = String(it.id);
+                            const isSelected = keep.includes(id);
+                            $subs.append(new Option(pickName(it), id, isSelected, isSelected));
+                        });
+                        $subs.trigger('change');
+                    })
+                    .fail((xhr) => {
+                        console.error('Failed to load sub-industries:', xhr.responseText);
+                        $subs.empty().trigger('change');
+                    });
             }
 
-            // change handler for parents
             $inds.on('change', () => refreshSubs({ preserveSelection: true }));
 
-            // initial load (in case industries are already selected server-side)
             $(document).ready(() => {
-                // Ensure Select2 placeholders still work
                 if ($inds.data('select2')) $inds.trigger('change.select2');
                 refreshSubs({ preserveSelection: true });
             });
         })();
     </script>
+
 
 
     <script>
