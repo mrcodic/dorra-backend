@@ -35,11 +35,27 @@ class SettingController extends Controller
 
     public function editDetails(Request $request,SettingRepositoryInterface $settingRepository)
     {
-      $validated =   $request->validate([
-            'phone' => ['sometimes'],
-            'store_email' => ['sometimes'],
+        $validated = $request->validate([
+
+            'phone' => [
+                'sometimes',
+                'string',
+                'max:20',
+                'regex:/^\+?[0-9\s().-]{7,20}$/',
+            ],
+
+            'store_email' => [
+                'sometimes',
+                'string',
+                'max:254',
+                'email:rfc',
+            ],
             'order_format' => ['sometimes','string','max:5'],
+        ], [
+            'phone.regex'        => 'Enter a valid phone number (e.g. +201234567890).',
+            'store_email.email'  => 'Enter a valid email address (e.g. support@example.com).',
         ]);
+
         $rows = collect(['phone','store_email','order_format'])
             ->filter(fn ($k) => array_key_exists($k, $validated))
             ->map(fn ($k) => ['key' => $k, 'value' => $validated[$k]])
