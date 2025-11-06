@@ -146,24 +146,35 @@
                     </div>
 
                     <div class="row g-2 mb-1">
-                        <div class="col-md-6">
-                            <label class="form-label">Country</label>
+                        <div class="col-md-4">
+                            <label class="form-label">Governorate</label>
                             <select class="form-select address-country-select" name="country_id" form="addAddressForm">
-                                <option value="">Select Country</option>
+                                <option value="">Select Governorate</option>
                                 @foreach ($associatedData['countries'] as $country)
                                     <option value="{{ $country->id }}">{{ $country->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label label-text">State</label>
+                        <div class="col-md-4">
+                            <label class="form-label label-text">City</label>
                             <select id="modalAddressState" name="state_id"
                                     class="form-select address-state-select" form="addAddressForm">
-                                <option value="">Select a State</option>
+                                <option value="">Select a City</option>
                             </select>
                             <div class="invalid-feedback" id="state_id-error"></div>
                             <div id="state-url" data-url="{{ route('states') }}"></div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label label-text">Zones</label>
+                            <select id="modalAddressZone" name="zone_id" class="form-select address-zone-select"
+                                    data-selected-id="{{ $address->zone_id }}"
+                            >
+                                <option value="" disabled selected>Select a Zone</option>
+                            </select>
+                            <div class="invalid-feedback" id="zone_id-error"></div>
+                            <div id="zone-url" data-url="{{ route('zones') }}"></div>
                         </div>
 
                         <div class="mb-1">

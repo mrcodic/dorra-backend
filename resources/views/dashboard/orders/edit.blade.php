@@ -477,6 +477,30 @@
                     stateSelect.empty().append('<option value="">Select State</option>');
                 }
             });
+            $(document).on("change", ".address-state-select", function () {
+                const stateId    = $(this).val();
+                const zoneSelect = $(".address-zone-select");
+
+                if (stateId) {
+                    $.ajax({
+                        url: "{{ route('zones') }}",
+                        method: "GET",
+                        data: { "filter[state_id]": stateId },
+                        success: function (response) {
+                            zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
+                            $.each(response.data, function (_, zone) {
+                                zoneSelect.append(`<option value="${zone.id}">${zone.name}</option>`);
+                            });
+                        },
+                        error: function () {
+                            zoneSelect.empty().append('<option value="">Error loading zones</option>');
+                        }
+                    });
+                } else {
+                    zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
+                }
+            });
+
 
 
             // Clear validation when modal is closed
