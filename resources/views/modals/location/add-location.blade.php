@@ -15,9 +15,9 @@
 
                     <div class="row mb-2">
                         <div class="col-12 col-md-6">
-                            <label class="form-label">Country</label>
+                            <label class="form-label">Governorate</label>
                             <select class="form-select address-country-select" name="country_id">
-                                <option value="">Select Country</option>
+                                <option value="">Select Governorate</option>
                                 @foreach ($associatedData['countries'] as $country)
                                 <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : ''
                                     }}>
@@ -28,9 +28,9 @@
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label class="form-label label-text">State</label>
+                            <label class="form-label label-text">City</label>
                             <select id="modalAddressState" name="state_id" class="form-select address-state-select">
-                                <option value="">Select a State</option>
+                                <option value="">Select a City</option>
                             </select>
                             <div class="invalid-feedback" id="state_id-error"></div>
                             <div id="state-url" data-url="{{ route('states') }}"></div>
