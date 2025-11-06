@@ -42,7 +42,7 @@ class OrderAddressData
                 : $location?->state->name,
 
             'country' => $type === OrderTypeEnum::SHIPPING
-                ? $shipping?->state->country->name
+                ? $shipping?->zone->state->country->name
                 : $location?->state->country->name,
 
             'first_name' => $request->first_name,
