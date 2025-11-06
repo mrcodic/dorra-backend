@@ -371,7 +371,7 @@
 
             function fetchSubs(parentId) {
                 if (cache[parentId]) return Promise.resolve(cache[parentId]);
-                return $.getJSON(SUB_ROUTE, { 'filter[parent_id]': parentId })
+                return $.getJSON(SUB_ROUTE, { 'industry_ids': [parentId] })
                     .then(resp => (cache[parentId] = unpack(resp)));
             }
 
