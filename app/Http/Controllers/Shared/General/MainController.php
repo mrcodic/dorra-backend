@@ -32,6 +32,7 @@ use App\Models\Type;
 use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     CountryRepositoryInterface,
     DimensionRepositoryInterface,
+    IndustryRepositoryInterface,
     MessageRepositoryInterface,
     ProductRepositoryInterface,
     SettingRepositoryInterface,
@@ -69,6 +70,7 @@ class MainController extends Controller
         public StationStatusRepository      $stationStatusRepository,
         public ZoneRepositoryInterface        $zoneRepository,
         public SettingRepositoryInterface      $settingRepository,
+        public IndustryRepositoryInterface    $industryRepository,
 
     )
     {

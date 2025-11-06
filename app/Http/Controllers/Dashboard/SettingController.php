@@ -4,14 +4,16 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Carousel\UpdateCarouselRequest;
-use App\Models\{Carousel,GlobalAsset};
+use App\Http\Requests\SocialLink\UpdateSocialLinkRequest;
+use App\Models\{Carousel, GlobalAsset};
 use App\Repositories\Interfaces\{CarouselRepositoryInterface,
     CategoryRepositoryInterface,
     LandingReviewRepositoryInterface,
     PaymentMethodRepositoryInterface,
     SettingRepositoryInterface,
     ProductRepositoryInterface,
-    TemplateRepositoryInterface,
+    SocialLinkRepositoryInterface,
+    TemplateRepositoryInterface
 };
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\Request;
@@ -23,9 +25,11 @@ class SettingController extends Controller
 {
     use HandlesTryCatch;
 
-    public function details()
+    public function details(SocialLinkRepositoryInterface $socialLinkRepository)
     {
-        return view("dashboard.settings.details");
+        $socialLinks = $socialLinkRepository->all();
+
+        return view("dashboard.settings.details", get_defined_vars());
     }
 
     public function notifications()
@@ -36,15 +40,16 @@ class SettingController extends Controller
     public function payments(PaymentMethodRepositoryInterface $paymentMethodRepository)
     {
         $paymentMethods = $paymentMethodRepository->all();
-        return view("dashboard.settings.payments",get_defined_vars());
+        return view("dashboard.settings.payments", get_defined_vars());
     }
 
-    public function togglePayments(Request $request,PaymentMethodRepositoryInterface $paymentMethodRepository,$id)
+    public function togglePayments(Request $request, PaymentMethodRepositoryInterface $paymentMethodRepository, $id)
     {
         $validatedData = $request->validate(['active' => 'required|boolean']);
-        $paymentMethodRepository->update($validatedData,$id);
+        $paymentMethodRepository->update($validatedData, $id);
         return Response::api();
-}
+    }
+
     public function website(CategoryRepositoryInterface      $repository,
                             CarouselRepositoryInterface      $carouselRepository,
                             ProductRepositoryInterface       $productRepository,
@@ -53,7 +58,7 @@ class SettingController extends Controller
     )
     {
 
-        $categories = $repository->query()->with(['children','landingProducts'])->whereNull('parent_id')->isLanding()->get();
+        $categories = $repository->query()->with(['children', 'landingProducts'])->whereNull('parent_id')->isLanding()->get();
         $categoriesCarousels = $repository->query()->whereNull('parent_id')->whereIsHasCategory(0)->get();
         $carousels = $carouselRepository->all();
         $products = $productRepository->all(columns: ['id', 'name']);
@@ -78,15 +83,15 @@ class SettingController extends Controller
                 ['id' => $carouselData['id'] ?? null],
                 [
                     'title' => [
-                        'en' =>Arr::get($carouselData, 'title_en'),
+                        'en' => Arr::get($carouselData, 'title_en'),
                         'ar' => Arr::get($carouselData, 'title_ar'),
                     ],
                     'subtitle' => [
-                        'en' =>Arr::get($carouselData, 'subtitle_en'),
+                        'en' => Arr::get($carouselData, 'subtitle_en'),
                         'ar' => Arr::get($carouselData, 'subtitle_ar'),
                     ],
-                    'title_color'    => Arr::get($carouselData, 'title_color'),
-                    'subtitle_color'    => Arr::get($carouselData, 'subtitle_color'),
+                    'title_color' => Arr::get($carouselData, 'title_color'),
+                    'subtitle_color' => Arr::get($carouselData, 'subtitle_color'),
                     'product_id' => Arr::get($carouselData, 'product_id'),
                     'category_id' => Arr::get($carouselData, 'category_id'),
                 ]
@@ -133,6 +138,29 @@ class SettingController extends Controller
             }
         });
 
+        return Response::api();
+    }
+
+    public function socialLinks(UpdateSocialLinkRequest $request, SocialLinkRepositoryInterface $socialLinkRepository)
+
+    {
+        $validatedData = $request->validated();
+        if (!Arr::get($validatedData, 'socials')) {
+            $socialLinkRepository->query()->delete();
+            return Response::api();
+        }
+        collect($validatedData['socials'])->each(function ($socialData) use ($socialLinkRepository) {
+
+            $socialLinkRepository->query()->updateOrCreate(
+                ['id' => $socialData['id'] ?? null],
+                [
+                    'platform' => Arr::get($socialData, 'platform'),
+                    'url' => Arr::get($socialData, 'url'),
+                ]
+            );
+
+
+        });
         return Response::api();
     }
 

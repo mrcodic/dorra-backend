@@ -161,12 +161,7 @@
                                     <div class="col-md-6 form-group mb-2">
                                         <label for="subIndustriesSelect" class="label-text mb-1">Sub Industries</label>
                                         <select id="subIndustriesSelect" class="form-select select2"
-                                            name="industry_ids[]" multiple>
-                                            @foreach($associatedData['sub_industries'] as $industry)
-                                            <option value="{{ $industry->id }}">
-                                                {{ $industry->getTranslation('name', app()->getLocale()) }}
-                                            </option>
-                                            @endforeach
+                                            name="industry_ids[]"  multiple>
                                         </select>
                                     </div>
                                 </div>
@@ -315,6 +310,36 @@
 
 @endsection
 @section('vendor-script')
+    <script !src="">
+        $('#industriesSelect').on('change', function () {
+            const selectedIds = $(this).val();
+            if (selectedIds && selectedIds.length > 0) {
+                $.ajax({
+                    url: "{{ route('sub-industries') }}",
+                    type: "POST",
+                    data: { _token: "{{ csrf_token() }}", industry_ids: selectedIds },
+                    success(response) {
+                        const $right = $('#subIndustriesSelect');
+                        const saved  = $right.val() || [];
+                        (response.data || []).forEach(cat => {
+                            if ($right.find(`option[value="${cat.id}"]`).length === 0) {
+                                $right.append(new Option(cat.name, cat.id, false, false));
+                            }
+                        });
+                        $right.val(saved).trigger('change');
+
+                    },
+                    error(xhr) {
+                        console.error("Error fetching sub industries:", xhr.responseText);
+
+                    }
+                });
+            } else {
+                // Clear right select and sync
+                $('#industriesSelect').empty().trigger('change');
+            }
+        });
+    </script>
 <script>
     $(function () {
             const $circle = $('#shape_circle'); // value="0"

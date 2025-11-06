@@ -20,7 +20,13 @@
 @endsection
 
 @section('page-style')
-{{-- Page Css files --}}
+    <style>
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+        .profile-tab.active { background: var(--bs-primary); color: #fff; }
+    </style>
+
+    {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 @endsection
 
@@ -31,105 +37,124 @@
         aria-orientation="vertical">
         <button class="btn profile-tab active" data-target="tab1">Profile</button>
         <button class="btn profile-tab" data-target="tab2">Social Media Platforms</button>
-        <button class="btn profile-tab" data-target="tab3">Address</button>
         <button class="btn profile-tab" data-target="tab4">Order Format</button>
     </div>
 
     {{-- Right Side: Tab Content --}}
     <div class="tab-content flex-grow-1 p-2" id="v-pills-tabContent">
         <!-- Profile Section -->
-        <div id="tab1">
+        <div id="tab1" class="tab-section">
             <h4 class="mb-2">Profile</h4>
-            <form>
+            <form id="profileSettingsForm" onsubmit="return false;">
+                @csrf
+                @method('PUT')
                 <div class="row mb-2">
                     <div class="col-md-12">
                         <label for="phone" class="form-label">Phone</label>
-                        <input type="text" id="phone" name="phone" class="form-control"
-                            placeholder="Enter phone number" />
+                        <input type="text" id="phone" class="form-control" placeholder="Enter phone number"
+                               value="{{ setting('phone') }}">
                     </div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-md-12">
                         <label for="store_email" class="form-label">Store Contact Email Address</label>
-                        <input type="email" id="store_email" name="store_email" class="form-control"
-                            placeholder="Enter store email" />
+                        <input type="email" id="store_email" class="form-control" placeholder="Enter store email"
+                               value="{{ setting('store_email') }}">
                     </div>
                 </div>
-            </form>
-        </div>
+                <div class="d-flex justify-content-end mt-2">
+                    <button class="btn btn-outline-secondary me-1" type="reset">Discard Changes</button>
+                    <button class="btn btn-primary" id="saveProfileBtn" type="button">Save</button>
+                </div>
+            </form>        </div>
 
-        <hr />
+
 
         <!-- Social Media Platforms -->
-        <div id="tab2">
+        <div id="tab2" class="tab-section">
             <h4 class="mb-2">Social Media Platforms</h4>
-            <!-- Add Social Button at Top -->
-            <button type="button" class="btn btn-outline-primary mb-2" id="add-social">+ Add Social Media</button>
+            <div class="social-repeater">
+                <form action="{{ route("social-links") }}" method="post" id="socialForm">
+                    @csrf
+                <div data-repeater-list="socials">
 
-            <!-- Social Media Input Group -->
-            <div id="social-media-group" class="row social-input-row">
-                <div class="col-12 col-lg-6">
-                    <label for="platform">Platform</label>
-                    <select name="platform[]" class="form-select">
-                        <option value="facebook"> Facebook</option>
-                        <option value="instagram"> Instagram</option>
-                        <option value="twitter"> Twitter</option>
-                        <option value="tiktok"> TikTok</option>
-                    </select>
-                </div>
-                <div class="col-12 col-lg-6 d-flex gap-1">
-                    <div class="col-8">
-                        <label for="social_url">URL</label>
-                        <div class="input-group">
-                            <span class="input-group-text">https://</span>
-                            <input type="text" name="social_url[]" class="form-control" placeholder="yourpage.com" />
+                    @forelse($socialLinks as $socialLink)
+
+                        <div data-repeater-item>
+
+                            <input type="hidden" name="id" value="{{ $socialLink->id }}">
+                            <!-- Social Media Input Group -->
+                            <div id="social-media-group" class="row social-input-row">
+                                <div class="col-12 col-lg-6">
+                                    <label for="platform">Platform</label>
+                                    <input type="text" name="platform" class="form-control" placeholder="ex.Facebook" value="{{ $socialLink->platform }}"/>
+
+                                </div>
+                                <div class="col-12 col-lg-6 d-flex gap-1">
+                                    <div class="col-8">
+                                        <label for="social_url">URL</label>
+                                        <div class="input-group">
+{{--                                            <span class="input-group-text">https://</span>--}}
+                                            <input type="text" name="url" class="form-control" placeholder="yourpage.com" value="{{ $socialLink->url }}" />
+                                        </div>
+                                    </div>
+                                    <div class="col-4 d-flex align-items-end">
+                                        <button type="button" class="btn btn-outline-danger delete-social" data-repeater-delete>Delete</button>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+
                         </div>
-                    </div>
-                    <div class="col-4 d-flex align-items-end">
-                        <button type="button" class="btn btn-outline-danger delete-social">Delete</button>
-                    </div>
+                    @empty
+                        <div data-repeater-item>
+
+                                @csrf
+
+                            <!-- Social Media Input Group -->
+                            <div id="social-media-group" class="row social-input-row">
+                                <div class="col-12 col-lg-6">
+                                    <label for="platform">Platform</label>
+                                    <input type="text" name="platform" class="form-control" placeholder="ex.Facebook" />
+
+                                </div>
+                                <div class="col-12 col-lg-6 d-flex gap-1">
+                                    <div class="col-8">
+                                        <label for="social_url">URL</label>
+                                        <div class="input-group">
+{{--                                            <span class="input-group-text">https://</span>--}}
+                                            <input type="text" name="url" class="form-control" placeholder="yourpage.com" />
+                                        </div>
+                                    </div>
+                                    <div class="col-4 d-flex align-items-end">
+                                        <button type="button" class="btn btn-outline-danger delete-social" data-repeater-delete>Delete</button>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    @endforelse
+
+
                 </div>
+                    <button type="button" class="btn btn-outline-primary mb-2 mt-2" id="add-social" data-repeater-create>+ Add Social Media</button>
+
+                <div class="d-flex justify-content-end mt-2">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+                </form>
             </div>
+
         </div>
 
-        <hr />
-
-        <!-- Address -->
-        <div id="tab3">
-            <h4 class="mb-2">Address</h4>
-            <div class="row mb-2">
-                <div class="col-md-6">
-                    <label for="country" class="form-label">Country</label>
-                    <select id="country" name="country" class="form-select">
-                        <option value="">Select country</option>
-                        <option value="us">United States</option>
-                        <option value="sa">Saudi Arabia</option>
-                        <option value="eg">Egypt</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label for="state" class="form-label">State</label>
-                    <select id="state" name="state" class="form-select">
-                        <option value="">Select state</option>
-                        <option value="cairo">Cairo</option>
-                        <option value="riyadh">Riyadh</option>
-                        <option value="ny">New York</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-md-12">
-                    <label for="address_line" class="form-label">Address Line</label>
-                    <input type="text" id="address_line" name="address_line" class="form-control"
-                        placeholder="Street, building number..." />
-                </div>
-            </div>
-        </div>
-
-        <hr />
 
         <!-- Order Format -->
-        <div id="tab4">
+        <div id="tab4" class="tab-section">
             <h4 class="mb-2">Order Format</h4>
             <div class="row mb-2">
                 <div class="col-md-6">
@@ -137,21 +162,112 @@
                     <input type="text" id="prefix" name="prefix" class="form-control" placeholder="e.g. ORD-" />
                 </div>
             </div>
+            <div class="d-flex justify-content-end mt-2">
+                <button class="btn btn-outline-secondary me-1">Discard Changes</button>
+                <button class="btn btn-primary">Save</button>
+            </div>
         </div>
-        <div class="d-flex justify-content-end mt-2">
-            <button class="btn btn-outline-secondary me-1">Discard Changes</button>
-            <button class="btn btn-primary">Save</button>
-        </div>
+
     </div>
 
 
 </div>
-</div>
+
 
 @endsection
 
 @section('vendor-script')
-{{-- Vendor js files --}}
+
+    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+    <script>
+        // Change this to your existing generic settings route that accepts { key, value }.
+        // If you don't have one, you'll need a backend endpoint that does (the toggle one won't work).
+        const SAVE_KEY_ROUTE = @json(route('landing-sections.update')); // expects POST { key, value }
+
+        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('store_email').value.trim();
+
+            const token = document.querySelector('#profileSettingsForm [name=_token]').value;
+
+            const post = (key, value) =>
+
+                fetch(SAVE_KEY_ROUTE, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json',
+                        'Content-Type': 'application/json' },
+                    body: JSON.stringify({ _method: 'PUT', key, value })
+                }).then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)));
+
+            try {
+                // send sequentially (or Promise.all if your API supports parallel)
+                await post('phone', phone);
+                await post('store_email', email);
+
+                if (window.Toastify) {
+                    Toastify({ text: 'Saved successfully', duration: 2000, gravity: 'top', position: 'right', backgroundColor: '#28a745' }).showToast();
+                }
+            } catch (e) {
+                const msg = e?.message || 'Failed to save';
+                if (window.Toastify) {
+                    Toastify({ text: msg, duration: 3000, gravity: 'top', position: 'right', backgroundColor: '#dc3545' }).showToast();
+                } else alert(msg);
+            }
+        });
+    </script>
+    <!-- 2) Your init code (AFTER the plugin) -->
+    <script>
+        handleAjaxFormSubmit("#socialForm",
+            {
+                successMessage: "Request completed successfully",
+                onSuccess: function () {
+                    location.reload()
+                },
+                resetForm: false,
+            }
+
+        )
+        $(function () {
+            function recalc($wrap) {
+                const $items = $wrap.find('[data-repeater-item]:visible');
+
+            }
+
+            $('.social-repeater').each(function () {
+                const $wrap = $(this);
+
+                $wrap.repeater({
+                    // keep one row on load; set true if you want it empty initially
+                    initEmpty: false,
+                    show: function () {
+
+                        $(this).slideDown(150, function () {
+                            recalc($wrap);
+                        });
+                        if (window.feather) feather.replace();
+                    },
+
+                    hide: function (deleteElement) {
+                        // run animation, then actually delete, then recalc
+                        $(this).slideUp(150, () => {
+                            deleteElement();
+                            recalc($wrap);
+                        });
+                    },
+
+                    ready: function () {
+                        // called after init
+                        recalc($wrap);
+                    }
+                });
+
+                // safety: if ready isn't fired for any reason
+                recalc($wrap);
+            });
+        });
+    </script>
+
+    {{-- Vendor js files --}}
 <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
 <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
@@ -175,6 +291,31 @@
 <script>
     const productsDataUrl = "{{ route('products.data') }}";
     const productsCreateUrl = "{{ route('products.create') }}";
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const buttons  = Array.from(document.querySelectorAll('.profile-tab'));
+        const sections = Array.from(document.querySelectorAll('#v-pills-tabContent > div[id^="tab"]'));
+
+        const show = (id) => {
+            sections.forEach(s => s.classList.toggle('active', s.id === id));
+            buttons.forEach(b => b.classList.toggle('active', b.dataset.target === id));
+            // keep it in URL (so refresh/deep-link works)
+            history.replaceState(null, '', '#' + id);
+        };
+
+        // initial tab: hash if valid, else first button target
+        const hashId = (location.hash || '').replace('#','');
+        const initial = sections.some(s => s.id === hashId)
+            ? hashId
+            : (buttons[0] && buttons[0].dataset.target);
+
+        if (initial) show(initial);
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => show(btn.dataset.target));
+        });
+    });
 </script>
 
 <script>

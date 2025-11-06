@@ -347,6 +347,37 @@
 
 
 @section('page-script')
+    <script !src="">
+        $('#industriesSelect').on('change', function () {
+            const selectedIds = $(this).val();
+            if (selectedIds && selectedIds.length > 0) {
+                $.ajax({
+                    url: "{{ route('sub-industries') }}",
+                    type: "POST",
+                    data: { _token: "{{ csrf_token() }}", industry_ids: selectedIds },
+                    success(response) {
+                        const $right = $('#subIndustriesSelect');
+                        const saved  = $right.val() || [];
+                        (response.data || []).forEach(cat => {
+                            if ($right.find(`option[value="${cat.id}"]`).length === 0) {
+                                $right.append(new Option(cat.name, cat.id, false, false));
+                            }
+                        });
+                        $right.val(saved).trigger('change');
+
+                    },
+                    error(xhr) {
+                        console.error("Error fetching sub industries:", xhr.responseText);
+
+                    }
+                });
+            } else {
+                // Clear right select and sync
+                $('#industriesSelect').empty().trigger('change');
+            }
+        });
+    </script>
+    
     <script>
         $(function () {
             const $circle = $('#shape_circle'); // value="0"

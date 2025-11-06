@@ -47,6 +47,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
     Route::middleware('auth')->group(function () {
         Route::get('states', [MainController::class, 'states'])->name('states');
         Route::get('zones', [MainController::class, 'zones'])->name('zones');
+        Route::post('industries/sub-industries', [IndustryController::class, 'getSubIndustries'])->name('sub-industries');
         Route::get('/dashboard', [StatisticsController::class, 'index'])->name('dashboard.index');
         Route::view('/', 'dashboard.welcome');
         Route::group(['prefix' => 'users', 'as' => 'users.', 'controller' => UserController::class,], function () {
@@ -327,6 +328,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::delete('/media/{media}', [MainController::class, 'removeMedia'])->name("media.destroy");
         Route::post('ship-blu/request-pickup', [ShippingController::class, 'requestPickup'])
             ->name('ship-blu.request-pickup');
+
+        Route::post('social-links',[SettingController::class, 'socialLinks'])->name('social-links');
     });
 
 });

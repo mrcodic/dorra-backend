@@ -130,4 +130,8 @@ class IndustryService extends BaseService
             })->latest()->get();
     }
 
+    public function getSubIndustriesByIndustries($industryIds)
+    {
+        return $this->repository->query()->whereIn('parent_id', $industryIds)->get();
+    }
 }

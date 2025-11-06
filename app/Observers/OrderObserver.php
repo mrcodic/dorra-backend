@@ -21,7 +21,7 @@ class OrderObserver
     {
         $now = now();
         $dateString = $now->format('d-m-Y');
-        $order->order_number = "#ORD-{$dateString}-" . mt_rand(100, 999);
+        $order->order_number = setting('order_format') ?? '#ORD-'. "{$dateString}-" . mt_rand(100, 999);
     }
 
     /**
