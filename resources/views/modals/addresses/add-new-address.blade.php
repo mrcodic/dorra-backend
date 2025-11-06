@@ -19,26 +19,26 @@
                         </div>
                     </div>
                     <div class="row mb-1">
-                        <div class="col-md-6">
-                            <label class="form-label label-text">Country</label>
+                        <div class="col-md-4">
+                            <label class="form-label label-text">Governorate</label>
                             <select id="modalAddressCountry" name="country_id"
                                 class="form-select address-country-select">
-                                <option value="" disabled selected>Select a Country</option>
+                                <option value="" disabled selected>Select a Governorate</option>
                                 @foreach($countries as $country)
                                 <option value="{{ $country->id }}">{{ $country->name }}</option>
                                 @endforeach
                             </select>
                             <div class="invalid-feedback" id="country_id-error"></div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label label-text">State</label>
+                        <div class="col-md-4">
+                            <label class="form-label label-text">City</label>
                             <select id="modalAddressState" name="state_id" class="form-select address-state-select">
-                                <option value="" disabled selected>Select a State</option>
+                                <option value="" disabled selected>Select a City</option>
                             </select>
                             <div class="invalid-feedback" id="state_id-error"></div>
                             <div id="state-url" data-url="{{ route('states') }}"></div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label label-text">Zones</label>
                             <select id="modalAddressZone" name="zone_id" class="form-select address-zone-select">
                                 <option value="" disabled selected>Select a Zone</option>

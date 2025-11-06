@@ -274,8 +274,7 @@
                                         <h5 class="fs-16 text-black"> {{ $address->label }}</h5>
                                         <div class="d-flex flex-column fs-16 text-dark">
                                             <span>{{ $address->line }}</span>
-                                            <span>{{ $address->state->name }}, {{ $address->state->country->name
-                                                }}</span>
+                                            <span>{{ $address->zone->name }},{{ $address->zone->state->name }}, {{ $address->zone->state->country->name }}</span>
                                         </div>
                                     </div>
                                 </div>

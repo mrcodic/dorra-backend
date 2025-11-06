@@ -20,10 +20,10 @@
                         </div>
                     </div>
                     <div class="row mb-1">
-                        <div class="col-md-6">
-                            <label class="form-label label-text">Country</label>
+                        <div class="col-md-4">
+                            <label class="form-label label-text">Governorate</label>
                             <select id="modalAddressCountry" name="country_id" class=" form-select country-select">
-                                <option value="" disabled selected>Select a Country</option>
+                                <option value="" disabled selected>Select a Governorate</option>
                                 @foreach($countries as $country)
                                 <option value="{{ $country->id }}" @selected($country->id ==
                                     $address->state->country->id)> {{ $country->name }}</option>
@@ -31,16 +31,24 @@
 
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label label-text">State</label>
+                        <div class="col-md-4">
+                            <label class="form-label label-text">City</label>
                             <select id="modalAddressState" name="state_id" class="form-select state-select"
                                 data-selected-id="{{ $address->state_id }}">
 
 
-                                <option value="" disabled selected>Select a State</option>
+                                <option value="" disabled selected>Select a City</option>
                             </select>
                             <div id="state-url" data-url="{{ route('states') }}"></div>
 
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label label-text">Zones</label>
+                            <select id="modalAddressZone" name="zone_id" class="form-select address-zone-select">
+                                <option value="" disabled selected>Select a Zone</option>
+                            </select>
+                            <div class="invalid-feedback" id="zone_id-error"></div>
+                            <div id="zone-url" data-url="{{ route('zones') }}"></div>
                         </div>
                     </div>
                     <div class="row my-1">
@@ -82,6 +90,29 @@
             const $modal = $(this).closest('.modal');
             const selectedCountry = $(this).val();
             loadStates($modal, selectedCountry);
+        });
+        $(document).on("change", ".address-state-select", function () {
+            const stateId    = $(this).val();
+            const zoneSelect = $(".address-zone-select");
+
+            if (stateId) {
+                $.ajax({
+                    url: "{{ route('zones') }}",
+                    method: "GET",
+                    data: { "filter[state_id]": stateId },
+                    success: function (response) {
+                        zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
+                        $.each(response.data, function (_, zone) {
+                            zoneSelect.append(`<option value="${zone.id}">${zone.name}</option>`);
+                        });
+                    },
+                    error: function () {
+                        zoneSelect.empty().append('<option value="">Error loading zones</option>');
+                    }
+                });
+            } else {
+                zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
+            }
         });
 
         function loadStates($modal, countryId, selectedStateId = null) {
