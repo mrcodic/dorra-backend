@@ -69,7 +69,7 @@
                                     <p class="text-dark fs-16">
                                         {{ $address?->line ?? 'No Address' }}
                                         @if($address?->relationLoaded('state') && $address->state)
-                                        , {{ $address?->state->name }}
+                                        , {{ $address?->zone?->state->name }}
                                         @if($address?->zone?->state->relationLoaded('country') && $address->zone?->state->country)
                                         , {{ $address?->zone?->state->country->name }}
                                         @endif
