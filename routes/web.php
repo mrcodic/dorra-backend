@@ -265,7 +265,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::controller(ReviewController::class)->group(function () {
             Route::delete('reviews/{review}', 'deleteReview')->name('reviews.destroy');
-            Route::put('reviews/{ review}/reply', 'deleteReply')->name('reviews.reply.destroy');
+            Route::put('reviews/{review}/reply', 'deleteReply')->name('reviews.reply.destroy');
             Route::put('reviews/{review}', 'replyReview')->name('reviews.reply');
         });
 
