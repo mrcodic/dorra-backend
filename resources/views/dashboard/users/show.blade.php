@@ -97,18 +97,6 @@
                     <div class="tab-content mt-3">
                         <!-- tab 1 content -->
                         <div class="tab-pane fade show active" id="tab1">
-                            <!-- Pills -->
-                            <ul class="nav nav-pills mb-3" id="order-status-pills">
-                                <li class="nav-item">
-                                    <button class="tab-button btn active text-white" data-status="all">All</button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="tab-button btn" data-status="placed">Placed</button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="tab-button btn" data-status="canceled">Canceled</button>
-                                </li>
-                            </ul>
 
                             <!-- Order Card -->
                             <div class="card border rounded-3 p-1 mb-2">
@@ -338,6 +326,11 @@
             </div>
             @include('modals.delete',[
             'id' => 'deleteUserModal',
+            'formId' => 'deleteUserForm',
+            'title' => 'Delete User',
+            ])
+            @include('modals.delete',[
+            'id' => 'deleteReviewModal',
             'formId' => 'deleteUserForm',
             'title' => 'Delete User',
             ])

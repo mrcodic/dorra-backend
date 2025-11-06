@@ -85,7 +85,20 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withSchedule(function (Schedule $schedule) {
+        $schedule->command('shipping:sync shipblu')
+            ->dailyAt(env('SHIPPING_SYNC_TIME', '03:15'))
+            ->timezone('Africa/Cairo')
+            ->onOneServer()
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/shipping-sync-shipblu.log'));
+
+
         $schedule->call(function () {
-            Cart::where('expires_at', '<', now())->delete();
-        })->everyFifteenMinutes();
+            \App\Models\Cart::query()
+                ->where('expires_at', '<', now())
+                ->delete();
+        })
+            ->everyFifteenMinutes()
+            ->onOneServer()
+            ->name('cleanup-expired-carts');
     })->create();

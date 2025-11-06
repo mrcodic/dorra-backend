@@ -39,6 +39,12 @@ class SettingController extends Controller
         return view("dashboard.settings.payments",get_defined_vars());
     }
 
+    public function togglePayments(Request $request,PaymentMethodRepositoryInterface $paymentMethodRepository,$id)
+    {
+        $validatedData = $request->validate(['active' => 'required|boolean']);
+        $paymentMethodRepository->update($validatedData,$id);
+        return Response::api();
+}
     public function website(CategoryRepositoryInterface      $repository,
                             CarouselRepositoryInterface      $carouselRepository,
                             ProductRepositoryInterface       $productRepository,

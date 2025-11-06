@@ -31,7 +31,12 @@ class PaymentController extends Controller
 
     public function paymentMethods()
     {
-        return Response::api(data: PaymentResource::collection($this->paymentMethodRepository->all(relations: ['paymentGateway'])));
+        return Response::api(data: PaymentResource::collection(
+            $this->paymentMethodRepository
+                ->query()
+                ->with(['paymentGateway'])
+                ->whereActive(true)
+                ->get()));
     }
 
     public function buyOrderAgain(Request $request)

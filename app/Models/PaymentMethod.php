@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentMethod extends Model
 {
+    protected $fillable= [
+        'active',
+
+    ];
     public function paymentGateway(): BelongsTo
     {
         return $this->belongsTo(PaymentGateway::class);
