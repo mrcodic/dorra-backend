@@ -78,77 +78,103 @@
 </div>
 <script>
     $(document).ready(function () {
-        $(document).on('shown.bs.modal', '#editAddressModal-{{$address->id}}', function () {
-            const $modal = $(this);
-            const selectedCountry = $modal.find('.country-select').val();
-            const selectedStateId = $modal.find('.state-select').data('selected-id'); // new
-            loadStates($modal, selectedCountry, selectedStateId);
+        // When the edit modal opens, load states (and then zones) with preselected values
+        $(document).on('shown.bs.modal', '#editAddressModal-{{ $address->id }}', function () {
+            const $modal          = $(this);
+            const countryId       = $modal.find('.country-select').val();
+            const selectedStateId = $modal.find('.state-select').data('selected-id') || null;
+            const selectedZoneId  = $modal.find('.address-zone-select').data('selected-id') || null;
+
+            loadStates($modal, countryId, selectedStateId, function () {
+                if (selectedStateId) {
+                    loadZones($modal, selectedStateId, selectedZoneId);
+                }
+            });
         });
 
-        // On country change inside modal
+        // Country → States (and reset zones)
         $(document).on('change', '.country-select', function () {
             const $modal = $(this).closest('.modal');
-            const selectedCountry = $(this).val();
-            loadStates($modal, selectedCountry);
-        });
-        $(document).on("change", ".address-state-select", function () {
-            const stateId    = $(this).val();
-            const zoneSelect = $(".address-zone-select");
+            const countryId = $(this).val();
+            // reset zones immediately
+            $modal.find('.address-zone-select')
+                .empty()
+                .append('<option value="" disabled selected>Select a Zone</option>');
 
-            if (stateId) {
-                $.ajax({
-                    url: "{{ route('zones') }}",
-                    method: "GET",
-                    data: { "filter[state_id]": stateId },
-                    success: function (response) {
-                        zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
-                        $.each(response.data, function (_, zone) {
-                            zoneSelect.append(`<option value="${zone.id}">${zone.name}</option>`);
-                        });
-                    },
-                    error: function () {
-                        zoneSelect.empty().append('<option value="">Error loading zones</option>');
-                    }
-                });
-            } else {
-                zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
-            }
+            loadStates($modal, countryId);
         });
 
-        function loadStates($modal, countryId, selectedStateId = null) {
+        // State → Zones  ✅ (fixed selector + scoping)
+        $(document).on('change', '.state-select', function () {
+            const $modal = $(this).closest('.modal');
+            const stateId = $(this).val();
+            loadZones($modal, stateId);
+        });
+
+        // ---- helpers ---------------------------------------------------------
+
+        function loadStates($modal, countryId, selectedStateId = null, done = () => {}) {
             const stateSelect = $modal.find('.state-select');
-            const baseUrl = $('#state-url').data('url');
+            const baseUrl = $modal.find('#state-url').data('url'); // scoped to this modal
 
-            if (countryId) {
-                $.ajax({
-                    url: `${baseUrl}?filter[country_id]=${countryId}`,
-                    method: 'GET',
-                    success: function (response) {
-                        stateSelect.empty().append('<option value="">Select a State</option>');
-
-                        $.each(response.data, function (index, state) {
-                            const selected = state.id == selectedStateId ? 'selected' : '';
-                            stateSelect.append(`<option value="${state.id}" ${selected}>${state.name}</option>`);
-                        });
-                    },
-                    error: function () {
-                        stateSelect.empty().append('<option value="">Error loading states</option>');
-                    }
-                });
-            } else {
-                stateSelect.empty().append('<option value="">Select a State</option>');
+            if (!countryId) {
+                stateSelect.empty().append('<option value="" disabled selected>Select a State</option>');
+                return done();
             }
+
+            $.ajax({
+                url: `${baseUrl}?filter[country_id]=${countryId}`,
+                method: 'GET',
+                success: function (response) {
+                    stateSelect.empty().append('<option value="" disabled selected>Select a State</option>');
+                    $.each(response.data, function (_, state) {
+                        const selected = selectedStateId && (String(state.id) === String(selectedStateId)) ? 'selected' : '';
+                        stateSelect.append(`<option value="${state.id}" ${selected}>${state.name}</option>`);
+                    });
+                    done();
+                },
+                error: function () {
+                    stateSelect.empty().append('<option value="">Error loading states</option>');
+                    done();
+                }
+            });
         }
 
-        $('#editAddressForm-{{$address->id}}').on('submit', function (e) {
-            e.preventDefault();
+        function loadZones($modal, stateId, selectedZoneId = null) {
+            const zoneSelect = $modal.find('.address-zone-select');
+            const baseUrl = $modal.find('#zone-url').data('url'); // scoped to this modal
 
+            if (!stateId) {
+                zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
+                return;
+            }
+
+            $.ajax({
+                url: `${baseUrl}?filter[state_id]=${stateId}`,
+                method: 'GET',
+                success: function (response) {
+                    zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
+                    $.each(response.data, function (_, zone) {
+                        const selected = selectedZoneId && (String(zone.id) === String(selectedZoneId)) ? 'selected' : '';
+                        zoneSelect.append(`<option value="${zone.id}" ${selected}>${zone.name}</option>`);
+                    });
+                },
+                error: function () {
+                    zoneSelect.empty().append('<option value="">Error loading zones</option>');
+                }
+            });
+        }
+
+        // Submit (unchanged)
+        $('#editAddressForm-{{ $address->id }}').on('submit', function (e) {
+            e.preventDefault();
             const $form = $(this);
             const formData = $form.serialize();
             const actionUrl = $form.attr('action');
             const saveButton = $('.saveChangesButton');
             const saveLoader = $('.saveLoader');
             const saveButtonText = $('.saveChangesButton .btn-text');
+
             saveButton.prop('disabled', true);
             saveLoader.removeClass('d-none');
             saveButtonText.addClass('d-none');
@@ -157,39 +183,35 @@
                 url: actionUrl,
                 method: 'POST',
                 data: formData,
-                success: function (response) {
+                success: function () {
                     saveButton.prop('disabled', false);
                     saveLoader.addClass('d-none');
                     saveButtonText.removeClass('d-none');
-                    $('#editAddressModal-{{$address->id}}').modal('hide');
+                    $('#editAddressModal-{{ $address->id }}').modal('hide');
                     $form[0].reset();
-
                     Toastify({
                         text: "Address updated successfully!",
                         duration: 1500,
                         gravity: "top",
                         position: "right",
                         backgroundColor: "#28a745",
-                        close: true ,
-                        callback:function () {
+                        close: true,
+                        callback: function () {
                             window.location.hash = '#tab3';
-                            location.reload()
+                            location.reload();
                         }
                     }).showToast();
-
                 },
                 error: function (xhr) {
                     saveButton.prop('disabled', false);
                     saveLoader.addClass('d-none');
                     saveButtonText.removeClass('d-none');
-                    // Handle validation errors or server error
                     let errorMsg = 'An error occurred while updating the address.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMsg = xhr.responseJSON.message;
-                    }
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
                     alert(errorMsg);
                 }
             });
         });
     });
+
 </script>
