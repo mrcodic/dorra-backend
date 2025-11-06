@@ -15,6 +15,11 @@
         <div class="col-12 ">
             <div class="card">
                 <div class="card-body ">
+                    @php
+                        $preselectedIndustryIds    = $model->industries->whereNull('parent_id')->pluck('id')->values();
+                        $preselectedSubIndustryIds = $model->industries->whereNotNull('parent_id')->pluck('id')->values();
+                    @endphp
+
                     <form id="editTemplateForm" enctype="multipart/form-data" method="post"
                         action="{{ route('product-templates.update',$model->id) }}">
                         @csrf
@@ -182,8 +187,9 @@
                                     <div class="col-md-6 form-group mb-2">
                                         <label for="subIndustriesSelect" class="label-text mb-1">Sub Industries</label>
                                         <select id="subIndustriesSelect" class="form-select select2" name="industry_ids[]"
+
                                                 multiple>
-                                      
+
                                         </select>
                                     </div>
                                 </div>
@@ -343,36 +349,69 @@
 
 
 @section('page-script')
-    <script !src="">
-        $('#industriesSelect').on('change', function () {
-            const selectedIds = $(this).val();
-            if (selectedIds && selectedIds.length > 0) {
-                $.ajax({
-                    url: "{{ route('sub-industries') }}",
-                    type: "POST",
-                    data: { _token: "{{ csrf_token() }}", industry_ids: selectedIds },
-                    success(response) {
-                        const $right = $('#subIndustriesSelect');
-                        const saved  = $right.val() || [];
-                        (response.data || []).forEach(cat => {
-                            if ($right.find(`option[value="${cat.id}"]`).length === 0) {
-                                $right.append(new Option(cat.name, cat.id, false, false));
-                            }
-                        });
-                        $right.val(saved).trigger('change');
+    <script>
+        (function () {
+            const LOCALE          = @json(app()->getLocale());
+            const SUB_ROUTE       = @json(route('sub-industries'));
+            const PRESEL_PARENTS  = @json($preselectedIndustryIds ?? []);
+            const PRESEL_SUBS     = @json($preselectedSubIndustryIds ?? []);
 
-                    },
-                    error(xhr) {
-                        console.error("Error fetching sub industries:", xhr.responseText);
+            const $inds = $('#industriesSelect');     // left (parents)
+            const $subs = $('#subIndustriesSelect');  // right (subs)
+            const cache = {}; // parent_id -> array of subs
 
-                    }
-                });
-            } else {
-                // Clear right select and sync
-                $('#industriesSelect').empty().trigger('change');
+            // helper: robust name (supports translatable {ar,en} or plain string)
+            const pickName = (item) => {
+                if (item?.name && typeof item.name === 'object' && item.name[LOCALE]) return item.name[LOCALE];
+                return item?.name ?? item?.title ?? `#${item?.id ?? ''}`;
+            };
+
+            // helper: unwrap response {data: [...]} or [...]
+            const unpack = (resp) => Array.isArray(resp?.data) ? resp.data : (Array.isArray(resp) ? resp : []);
+
+            function fetchSubs(parentId) {
+                if (cache[parentId]) return Promise.resolve(cache[parentId]);
+                return $.getJSON(SUB_ROUTE, { 'filter[parent_id]': parentId })
+                    .then(resp => (cache[parentId] = unpack(resp)));
             }
-        });
+
+            async function refreshSubs({ preserveSelection = true } = {}) {
+                const selectedParents = $inds.val() || PRESEL_PARENTS || [];
+
+                // clear when no parents selected
+                if (!selectedParents.length) {
+                    $subs.empty().trigger('change');
+                    return;
+                }
+
+                // fetch all sub lists in parallel, merge & dedupe
+                const lists = await Promise.all(selectedParents.map(fetchSubs));
+                const merged = new Map();
+                lists.flat().forEach(it => { if (it?.id != null) merged.set(String(it.id), it); });
+
+                // keep current selection (or fall back to PRESEL_SUBS on first load)
+                const keep = preserveSelection ? (($subs.val() || PRESEL_SUBS || []).map(String)) : [];
+
+                $subs.empty();
+                for (const [id, item] of merged.entries()) {
+                    const isSelected = keep.includes(id);
+                    $subs.append(new Option(pickName(item), id, isSelected, isSelected));
+                }
+                $subs.trigger('change');
+            }
+
+            // change handler for parents
+            $inds.on('change', () => refreshSubs({ preserveSelection: true }));
+
+            // initial load (in case industries are already selected server-side)
+            $(document).ready(() => {
+                // Ensure Select2 placeholders still work
+                if ($inds.data('select2')) $inds.trigger('change.select2');
+                refreshSubs({ preserveSelection: true });
+            });
+        })();
     </script>
+
 
     <script>
         $(function () {
