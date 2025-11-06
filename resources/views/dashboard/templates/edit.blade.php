@@ -183,11 +183,7 @@
                                         <label for="subIndustriesSelect" class="label-text mb-1">Sub Industries</label>
                                         <select id="subIndustriesSelect" class="form-select select2" name="industry_ids[]"
                                                 multiple>
-                                            @foreach($associatedData['sub_industries'] as $industry)
-                                                <option value="{{ $industry->id }}" @selected($model->industries->contains($industry))>
-                                                    {{ $industry->getTranslation('name', app()->getLocale()) }}
-                                                </option>
-                                            @endforeach
+                                      
                                         </select>
                                     </div>
                                 </div>
@@ -377,7 +373,7 @@
             }
         });
     </script>
-    
+
     <script>
         $(function () {
             const $circle = $('#shape_circle'); // value="0"
