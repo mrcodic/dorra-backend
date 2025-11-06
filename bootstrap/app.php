@@ -88,7 +88,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('shipping:sync shipblu')
             ->dailyAt(env('SHIPPING_SYNC_TIME', '03:15'))
             ->timezone('Africa/Cairo')
-            ->onOneServer()
             ->withoutOverlapping()
             ->appendOutputTo(storage_path('logs/shipping-sync-shipblu.log'));
 
@@ -99,6 +98,5 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->delete();
         })
             ->everyFifteenMinutes()
-            ->onOneServer()
             ->name('cleanup-expired-carts');
     })->create();
