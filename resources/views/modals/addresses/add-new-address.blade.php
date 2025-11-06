@@ -97,7 +97,7 @@
         });
         $(document).on("change", "address-state-select", function () {
             const stateId = $(this).val();
-            const stateSelect = $(".address-zone-select");
+            const zoneSelect = $(".address-zone-select");
 
             if (stateId) {
                 $.ajax({
