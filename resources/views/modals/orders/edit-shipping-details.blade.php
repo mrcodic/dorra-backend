@@ -169,7 +169,7 @@
                         <div class="col-md-4">
                             <label class="form-label label-text">Zones</label>
                             <select id="modalAddressZone" name="zone_id" class="form-select address-zone-select"
-                                    data-selected-id="{{ $address->zone_id }}"
+                                    data-selected-id="{{ $address->zone_id }}"  form="addAddressForm"
                             >
                                 <option value="" disabled selected>Select a Zone</option>
                             </select>
