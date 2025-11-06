@@ -70,8 +70,8 @@
                                         {{ $address?->line ?? 'No Address' }}
                                         @if($address?->relationLoaded('state') && $address->state)
                                         , {{ $address?->state->name }}
-                                        @if($address?->state->relationLoaded('country') && $address->state->country)
-                                        , {{ $address?->state->country->name }}
+                                        @if($address?->zone?->state->relationLoaded('country') && $address->zone?->state->country)
+                                        , {{ $address?->zone?->state->country->name }}
                                         @endif
                                         @endif
                                     </p>
