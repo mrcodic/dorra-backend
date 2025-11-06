@@ -456,7 +456,7 @@
                 const formData = new FormData(this);
 
                 $.ajax({
-                    url: `/api/reviews/${currentReviewId}`,
+                    url: `/api/v1/reviews/${currentReviewId}`,
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -577,7 +577,7 @@
 
 
                 $.ajax({
-                    url: '/api/reviews/' + reviewId + '/reply',
+                    url: '/api/v1/reviews/' + reviewId + '/reply',
                     type: 'PUT',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
