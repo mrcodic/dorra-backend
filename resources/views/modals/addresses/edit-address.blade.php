@@ -26,7 +26,7 @@
                                 <option value="" disabled selected>Select a Governorate</option>
                                 @foreach($countries as $country)
                                 <option value="{{ $country->id }}" @selected($country->id ==
-                                    $address->state->country->id)> {{ $country->name }}</option>
+                                    $address->zone->state->country->id)> {{ $country->name }}</option>
                                 @endforeach
 
                             </select>
