@@ -329,11 +329,6 @@
             'formId' => 'deleteUserForm',
             'title' => 'Delete User',
             ])
-            @include('modals.delete',[
-            'id' => 'deleteReviewModal',
-            'formId' => 'deleteUserForm',
-            'title' => 'Delete User',
-            ])
             <!--/ User Content -->
         </div>
     </div>
@@ -528,7 +523,7 @@
                 if (!reviewId) return;
 
                 $.ajax({
-                    url: '/api/reviews/' + reviewId,
+                    url: '/api/v1/reviews/' + reviewId,
                     type: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
