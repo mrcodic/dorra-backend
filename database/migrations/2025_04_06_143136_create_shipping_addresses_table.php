@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('label');
             $table->longText('line');
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(State::class)->constrained()->restrictOnDelete();
             $table->timestamps();
         });
     }

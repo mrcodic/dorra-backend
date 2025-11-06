@@ -36,8 +36,9 @@ class OrderAddressData
                 ? $shipping?->line
                 : $location?->address_line,
 
+
             'state' => $type === OrderTypeEnum::SHIPPING
-                ? $shipping?->state->name
+                ? $shipping?->zone->state->name
                 : $location?->state->name,
 
             'country' => $type === OrderTypeEnum::SHIPPING
