@@ -209,6 +209,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::controller(SettingController::class)->prefix('settings')->group(function () {
             Route::get('/details', 'details')->name('settings-details.show');
+            Route::post('/details', 'editDetails')->name('settings-edit-details');
             Route::get('/payments', 'payments')->name('settings-payments.show');
             Route::post('/payments/{payment}', 'togglePayments')->name('toggle-payment-methods');
             Route::get('/website', 'website')->name('settings-website.show');

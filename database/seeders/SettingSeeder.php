@@ -11,8 +11,9 @@ class SettingSeeder extends Seeder
     {
         $settings = [
             // General settings
-            ['key' => 'phone', 'value' => '01060538209'],
-            ['key' => 'store_email', 'value' => 'dorraprint@gmail.com'],
+            ['key' => 'phone', 'value' => '01060538209', 'group' => 'general_setting'],
+            ['key' => 'store_email', 'value' => 'dorraprint@gmail.com', 'group' => 'general_setting'],
+            ['key' => 'order_format', 'value' => '#ORD'],
             ['key' => 'delivery', 'value' => 30],
             ['key' => 'shipping_visibility', 'value' => true, 'group' => 'visibility_sections_landing'],
             ['key' => 'tax', 'value' => 0.1],

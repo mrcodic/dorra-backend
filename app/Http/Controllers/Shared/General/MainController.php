@@ -20,6 +20,7 @@ use App\Http\Resources\{CategoryResource,
     MediaResource,
     Product\ProductResource,
     SettingResource,
+    SocialLinkResource,
     StateResource,
     StationStatusResource,
     TagResource,
@@ -36,6 +37,7 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     MessageRepositoryInterface,
     ProductRepositoryInterface,
     SettingRepositoryInterface,
+    SocialLinkRepositoryInterface,
     StateRepositoryInterface,
     TemplateRepositoryInterface,
     ZoneRepositoryInterface};
@@ -71,6 +73,7 @@ class MainController extends Controller
         public ZoneRepositoryInterface        $zoneRepository,
         public SettingRepositoryInterface      $settingRepository,
         public IndustryRepositoryInterface    $industryRepository,
+        public SocialLinkRepositoryInterface $socialLinkRepository,
 
     )
     {
@@ -396,7 +399,14 @@ class MainController extends Controller
 
     public function generalSettings()
     {
-        return Response::api(data: SettingResource::collection($this->settingRepository->query()->whereNull('group')
+        return Response::api(data: SettingResource::collection($this->settingRepository->query()
+            ->whereGroup('general_setting')
             ->get(['id', 'key', 'value'])));
+    }
+
+    public function socialLinks()
+    {
+        return Response::api(data: SocialLinkResource::collection($this->socialLinkRepository->query()
+            ->get(['id', 'platform', 'url'])));
     }
 }

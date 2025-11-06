@@ -18,6 +18,7 @@ use App\Repositories\Interfaces\{CarouselRepositoryInterface,
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -32,6 +33,23 @@ class SettingController extends Controller
         return view("dashboard.settings.details", get_defined_vars());
     }
 
+    public function editDetails(Request $request,SettingRepositoryInterface $settingRepository)
+    {
+      $validated =   $request->validate([
+            'phone' => ['sometimes'],
+            'store_email' => ['sometimes'],
+            'order_format' => ['sometimes','string','max:5'],
+        ]);
+        $rows = collect(['phone','store_email','order_format'])
+            ->filter(fn ($k) => array_key_exists($k, $validated))
+            ->map(fn ($k) => ['key' => $k, 'value' => $validated[$k]])
+            ->values()
+            ->all();
+
+        $settingRepository->query()->upsert($rows, ['key'], ['value']);
+        Cache::forget('app_settings');
+        return Response::api();
+    }
     public function notifications()
     {
         return view("dashboard.settings.notifications");

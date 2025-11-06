@@ -45,28 +45,28 @@
         <!-- Profile Section -->
         <div id="tab1" class="tab-section">
             <h4 class="mb-2">Profile</h4>
-            <form id="profileSettingsForm" onsubmit="return false;">
+            <form class="profileSettingsForm" method="post" action="{{ route('settings-edit-details') }}">
                 @csrf
-                @method('PUT')
                 <div class="row mb-2">
                     <div class="col-md-12">
                         <label for="phone" class="form-label">Phone</label>
-                        <input type="text" id="phone" class="form-control" placeholder="Enter phone number"
+                        <input type="text" name="phone" id="phone" class="form-control" placeholder="Enter phone number"
                                value="{{ setting('phone') }}">
                     </div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-md-12">
                         <label for="store_email" class="form-label">Store Contact Email Address</label>
-                        <input type="email" id="store_email" class="form-control" placeholder="Enter store email"
+                        <input type="email" id="store_email" class="form-control" placeholder="Enter store email" name="store_email"
                                value="{{ setting('store_email') }}">
                     </div>
                 </div>
                 <div class="d-flex justify-content-end mt-2">
                     <button class="btn btn-outline-secondary me-1" type="reset">Discard Changes</button>
-                    <button class="btn btn-primary" id="saveProfileBtn" type="button">Save</button>
+                    <button class="btn btn-primary" id="saveProfileBtn" type="submit">Save</button>
                 </div>
-            </form>        </div>
+            </form>
+        </div>
 
 
 
@@ -155,18 +155,22 @@
 
         <!-- Order Format -->
         <div id="tab4" class="tab-section">
+            <form class="profileSettingsForm" method="post" action="{{ route('settings-edit-details') }}">
+                @csrf
             <h4 class="mb-2">Order Format</h4>
             <div class="row mb-2">
                 <div class="col-md-6">
                     <label for="prefix" class="form-label">Prefix</label>
-                    <input type="text" id="prefix" name="prefix" class="form-control" placeholder="e.g. ORD-" />
+                    <input type="text" name="order_format" id="prefix" value="{{ setting('order_format') }}" class="form-control" placeholder="e.g. ORD-" />
                 </div>
             </div>
             <div class="d-flex justify-content-end mt-2">
-                <button class="btn btn-outline-secondary me-1">Discard Changes</button>
-                <button class="btn btn-primary">Save</button>
+                <button class="btn btn-outline-secondary me-1" type="reset">Discard Changes</button>
+                <button class="btn btn-primary" type="submit" >Save</button>
             </div>
+            </form>
         </div>
+
 
     </div>
 
@@ -179,45 +183,19 @@
 @section('vendor-script')
 
     <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-    <script>
-        // Change this to your existing generic settings route that accepts { key, value }.
-        // If you don't have one, you'll need a backend endpoint that does (the toggle one won't work).
-        const SAVE_KEY_ROUTE = @json(route('landing-sections.update')); // expects POST { key, value }
 
-        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-            const phone = document.getElementById('phone').value.trim();
-            const email = document.getElementById('store_email').value.trim();
 
-            const token = document.querySelector('#profileSettingsForm [name=_token]').value;
-
-            const post = (key, value) =>
-
-                fetch(SAVE_KEY_ROUTE, {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json',
-                        'Content-Type': 'application/json' },
-                    body: JSON.stringify({ _method: 'PUT', key, value })
-                }).then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)));
-
-            try {
-                // send sequentially (or Promise.all if your API supports parallel)
-                await post('phone', phone);
-                await post('store_email', email);
-
-                if (window.Toastify) {
-                    Toastify({ text: 'Saved successfully', duration: 2000, gravity: 'top', position: 'right', backgroundColor: '#28a745' }).showToast();
-                }
-            } catch (e) {
-                const msg = e?.message || 'Failed to save';
-                if (window.Toastify) {
-                    Toastify({ text: msg, duration: 3000, gravity: 'top', position: 'right', backgroundColor: '#dc3545' }).showToast();
-                } else alert(msg);
-            }
-        });
-    </script>
     <!-- 2) Your init code (AFTER the plugin) -->
     <script>
         handleAjaxFormSubmit("#socialForm",
+            {
+                successMessage: "Request completed successfully",
+                onSuccess: function () {
+                    location.reload()
+                },
+                resetForm: false,
+            })
+        handleAjaxFormSubmit(".profileSettingsForm",
             {
                 successMessage: "Request completed successfully",
                 onSuccess: function () {
