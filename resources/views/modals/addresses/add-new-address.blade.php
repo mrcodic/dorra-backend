@@ -38,6 +38,14 @@
                             <div class="invalid-feedback" id="state_id-error"></div>
                             <div id="state-url" data-url="{{ route('states') }}"></div>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label label-text">Zones</label>
+                            <select id="modalAddressZone" name="zone_id" class="form-select address-zone-select">
+                                <option value="" disabled selected>Select a Zone</option>
+                            </select>
+                            <div class="invalid-feedback" id="zone_id-error"></div>
+                            <div id="zone-url" data-url="{{ route('zones') }}"></div>
+                        </div>
                     </div>
                     <div class="row my-1">
                         <div class="col-12">
@@ -85,6 +93,29 @@
                 });
             } else {
                 stateSelect.empty().append('<option value="">Select State</option>');
+            }
+        });
+        $(document).on("change", "address-state-select", function () {
+            const stateId = $(this).val();
+            const stateSelect = $(".address-zone-select");
+
+            if (stateId) {
+                $.ajax({
+                    url: "{{ route('zones') }}",
+                    method: "GET",
+                    data: { "filter[state_id]": stateId },
+                    success: function (response) {
+                        zoneSelect.empty().append('<option value="">Select State</option>');
+                        $.each(response.data, function (index, zone) {
+                            zoneSelect.append(`<option value="${zone.id}">${zone.name}</option>`);
+                        });
+                    },
+                    error: function () {
+                        zoneSelect.empty().append('<option value="">Error loading states</option>');
+                    }
+                });
+            } else {
+                stateSelect.empty().append('<option value="">Select Zone</option>');
             }
         });
 
