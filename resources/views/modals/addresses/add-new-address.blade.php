@@ -71,10 +71,14 @@
 
 <script>
     $(document).ready(function () {
-        // Country-State dropdown handling
+        // Country -> States (also clear Zones)
         $(document).on("change", ".address-country-select", function () {
-            const countryId = $(this).val();
+            const countryId   = $(this).val();
             const stateSelect = $(".address-state-select");
+            const zoneSelect  = $(".address-zone-select");
+
+            // reset zones whenever country changes
+            zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
 
             if (countryId) {
                 $.ajax({
@@ -82,8 +86,8 @@
                     method: "GET",
                     data: { "filter[country_id]": countryId },
                     success: function (response) {
-                        stateSelect.empty().append('<option value="">Select State</option>');
-                        $.each(response.data, function (index, state) {
+                        stateSelect.empty().append('<option value="" disabled selected>Select a State</option>');
+                        $.each(response.data, function (_, state) {
                             stateSelect.append(`<option value="${state.id}">${state.name}</option>`);
                         });
                     },
@@ -92,11 +96,13 @@
                     }
                 });
             } else {
-                stateSelect.empty().append('<option value="">Select State</option>');
+                stateSelect.empty().append('<option value="" disabled selected>Select a State</option>');
             }
         });
-        $(document).on("change", "address-state-select", function () {
-            const stateId = $(this).val();
+
+// State -> Zones  ✅ fixed selector & variables
+        $(document).on("change", ".address-state-select", function () {
+            const stateId    = $(this).val();
             const zoneSelect = $(".address-zone-select");
 
             if (stateId) {
@@ -105,19 +111,20 @@
                     method: "GET",
                     data: { "filter[state_id]": stateId },
                     success: function (response) {
-                        zoneSelect.empty().append('<option value="">Select State</option>');
-                        $.each(response.data, function (index, zone) {
+                        zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
+                        $.each(response.data, function (_, zone) {
                             zoneSelect.append(`<option value="${zone.id}">${zone.name}</option>`);
                         });
                     },
                     error: function () {
-                        zoneSelect.empty().append('<option value="">Error loading states</option>');
+                        zoneSelect.empty().append('<option value="">Error loading zones</option>');
                     }
                 });
             } else {
-                stateSelect.empty().append('<option value="">Select Zone</option>');
+                zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
             }
         });
+
 
         // Form submission with validation
         $('#addAddressForm').on('submit', function (e) {
