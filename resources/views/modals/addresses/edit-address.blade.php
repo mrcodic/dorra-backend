@@ -34,7 +34,7 @@
                         <div class="col-md-4">
                             <label class="form-label label-text">City</label>
                             <select id="modalAddressState" name="state_id" class="form-select state-select"
-                                data-selected-id="{{ $address->state_id }}">
+                                data-selected-id="{{ $address->zone->state_id }}">
 
 
                                 <option value="" disabled selected>Select a City</option>
