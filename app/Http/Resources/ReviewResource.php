@@ -21,8 +21,19 @@ class ReviewResource extends JsonResource
             'review'    => $this->review,
             'comment'   => $this->comment,
             'comment_at'=> $this->comment_at ? $this->comment_at->toDateString() : null,
+            'comment_image' => $this->whenLoaded('media', function () {
+                $image = $this->media
+                    ->where('collection_name', 'review_reply')
+                    ->first();
+                return MediaResource::make($image);
+            }),
             'created_at'=> $this->created_at?->toDateString(),
-            'images' => MediaResource::collection($this->whenLoaded('media')),
+            'images' => $this->whenLoaded('media', function () {
+                $images = $this->media
+                    ->where('collection_name', 'reviews')
+                    ->values();
+                return MediaResource::collection($images);
+            })
         ];
     }
 }
