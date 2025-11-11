@@ -235,7 +235,7 @@ $discountTypes = [
                                     style="width: 24px; height: 6px;background-color:#24B094"></span>
                                 <span class="me-auto">Published</span>
                             </div>
-                            <span class="">{{ $bestMonths['published_templates'] }}Templates</span>
+                            <span class="">{{ (int) data_get($bestMonths, 'published_templates.value', 0) }}Templates</span>
                         </div>
 
                         <div class="d-flex flex-column ">
@@ -244,14 +244,14 @@ $discountTypes = [
                                     style="width: 24px; height: 6px;background-color:#B3E3D8"></span>
                                 <span class="me-auto">Draft</span>
                             </div>
-                            <span class="">{{ $bestMonths['draft_templates'] }} Templates</span>
+                            <span class="">{{ (int) data_get($bestMonths, 'draft_templates.value', 0) }} Templates</span>
                         </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $bestMonths['templates'] }}</span> Templates</span>
+                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ (int) data_get($bestMonths, 'templates.value', 0) }}</span> Templates</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ $bestMonths['templates'] }}" aria-valuemin="0"
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ (int) data_get($bestMonths, 'templates.value', 0) }}" aria-valuemin="0"
                             aria-valuemax="100" style="width: {{$bestMonths['templates']}}%"></div>
                     </div>
                 </div>
