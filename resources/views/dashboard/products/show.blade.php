@@ -241,7 +241,7 @@
                                              class="rounded-circle" width="50" height="50">
                                         <div>
                                             <div class="fw-bold text-dark fs-4">{{ $review->review }}</div>
-                                            <div class="fw-bold text-dark fs-4">{{ $review->reviewable?->name }}</div>
+                                            <div class="fw-bold text-dark fs-4">{{ $review->user?->name }}</div>
                                         </div>
                                     </div>
                                     <div class="d-flex flex-wrap gap-1">
