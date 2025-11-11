@@ -494,7 +494,7 @@ $(document).on('click', '#bulk-request-pickup', function (e) {
     }
 
     $.ajax({
-        url: "{{ route('ship-blu.request-pickup') }}",
+        url: "/api/v1/ship-blu/request-pickup",
         method: "POST",
         data: {
             _token: $('meta[name="csrf-token"]').attr("content"),
