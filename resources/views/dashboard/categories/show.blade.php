@@ -330,20 +330,22 @@
 
     <div class="modal modal-slide-in new-user-modal fade" id="modals-slide-in">
         <div class="modal-dialog">
-            <form id="replyForm" class="add-new-user modal-content pt-0">
+            <form id="replyForm" class="add-new-user modal-content pt-0" method="post" enctype="multipart/form-data">
+                @csrf
+                @method("PUT")
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
                 <div class="modal-header mb-1">
-                    <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Reply To Review</h5>
                 </div>
                 <div class="modal-body flex-grow-1">
                     <div class="mb-3">
                         <label for="replyImage" class="form-label">Upload Image</label>
-                        <input class="form-control" type="file" id="replyImage" name="replyImage">
+                        <input class="form-control" type="file" id="image" name="image">
                     </div>
                     <div class="mb-3">
                         <label for="replyText" class="form-label">Your Reply</label>
-                        <textarea class="form-control" id="replyText" rows="4" name="replyText"
-                            placeholder="Write your reply here..."></textarea>
+                        <textarea class="form-control" id="replyText" rows="4" name="comment"
+                                  placeholder="Write your reply here..."></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Send Reply</button>
                 </div>
@@ -351,7 +353,6 @@
             </form>
         </div>
     </div>
-
 
 </div>
 
