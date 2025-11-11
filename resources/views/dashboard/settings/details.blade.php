@@ -90,7 +90,7 @@
                                     <select class="form-select" name="platform">
                                         <option value="" disabled selected>Select Platform</option>
                                         @foreach(\App\Enums\Setting\SocialEnum::cases() as $socialEnum)
-                                            <option value="{{ $socialEnum->value }}">{{ $socialEnum->label() }}</option>
+                                            <option value="{{ $socialEnum->value }}" @selected($socialEnum == $socialLink->platform)>{{ $socialEnum->label() }}</option>
                                         @endforeach
                                     </select>
 
@@ -125,7 +125,7 @@
                                     <select class="form-select" name="platform">
                                         <option value="" disabled selected>Select Platform</option>
                                         @foreach(\App\Enums\Setting\SocialEnum::cases() as $socialEnum)
-                                            <option value="{{ $socialEnum->value }}">{{ $socialEnum->label() }}</option>
+                                            <option value="{{ $socialEnum->value }}" >{{ $socialEnum->label() }}</option>
                                         @endforeach
                                     </select>
 
