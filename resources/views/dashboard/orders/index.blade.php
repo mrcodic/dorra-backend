@@ -308,7 +308,7 @@
                         <tr>
 
                             <th>
-                                <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('orders_delete'))>
+                                <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                             </th>
 
                             <th>Order Number</th>
@@ -322,10 +322,11 @@
                     </thead>
                 </table>
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-                    @can("orders_delete")
+
                     <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
                         style="z-index: 10;">
                         <p id="selected-count-text">0 Orders are selected</p>
+                        @can("orders_delete")
                         <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
                             data-bs-target="#deleteOrdersModal"
                             class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
@@ -339,14 +340,15 @@
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
                         </form>
-
-
-                    </div>
-                    @endcan
+                        @endcan
                         <button type="button" id="bulk-request-pickup"
-                                   class="btn btn-outline-primary d-flex align-items-center gap-1">
+                                class="btn btn-outline-primary d-flex align-items-center gap-1">
                             <i data-feather="truck"></i> Request Pickup
                         </button>
+
+                    </div>
+
+
                 </div>
 
             </div>
