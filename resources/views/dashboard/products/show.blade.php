@@ -230,7 +230,7 @@
                         <div class="">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-small">Total Reviews:</span>
-                                <span class="label-text">{{$model->reviews()->count()}} Reviews</span>
+                                <span class="label-text delete-review-label"  id="review-counter">{{$model->reviews()->count()}} Reviews</span>
                             </div>
 
                             @forelse($model->reviews->sortByDesc('created_at')  as $review)
