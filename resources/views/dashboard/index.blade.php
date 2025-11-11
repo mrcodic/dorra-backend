@@ -215,7 +215,7 @@ $discountTypes = [
                     <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{(int) data_get($bestMonths, 'categories.value', 0)}}</span> Products</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
                         <div class="progress-bar" role="progressbar" aria-valuenow="{{(int) data_get($bestMonths, 'categories.value', 0)}}" aria-valuemin="0"
-                            aria-valuemax="100" style="width: {{$bestMonths['categories']}}%"></div>
+                            aria-valuemax="100" style="width: {{(int) data_get($bestMonths, 'categories.value', 0)}}%"></div>
                     </div>
                 </div>
             </div>
