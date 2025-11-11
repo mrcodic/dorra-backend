@@ -6,6 +6,7 @@ use App\Enums\Order\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Template;
 use Carbon\Carbon;
 use function Awssat\Visits\visits;
@@ -60,6 +61,11 @@ class StatisticsController extends Controller
             ->groupBy('ym')
             ->orderByDesc('c')
             ->first();
+        $topProducts = Product::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
+            ->whereYear('created_at', $year)
+            ->groupBy('ym')
+            ->orderByDesc('c')
+            ->first();
 
 
         $topTemplates = Template::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
@@ -85,6 +91,7 @@ class StatisticsController extends Controller
             'orders_revenue' => $format($topRevenue, 'amount'),
             'orders_refunded' => $format($topRefunded, 'c'),
             'categories' => $format($topCategories, 'c'),
+            'products' => $format($topProducts, 'c'),
             'templates' => $format($topTemplates, 'c'),
             'published_templates' => $format($topPublished, 'c'),
             'draft_templates' => $format($topDraft, 'c'),

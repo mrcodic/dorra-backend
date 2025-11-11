@@ -209,12 +209,12 @@ $discountTypes = [
         <div class="col-md-6">
             <div class="card border-2 p-2">
                 <div class="d-flex flex-column flex-lg-row justify-content-between mb-50">
-                    <p class="fs-2 text-black">Products</p>
+                    <p class="fs-2 text-black">categories</p>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{(int) data_get($bestMonths, 'categories.value', 0)}}</span> Products</span>
+                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{(int) data_get($bestMonths, 'products.value', 0)}}</span> Products</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="{{(int) data_get($bestMonths, 'categories.value', 0)}}" aria-valuemin="0"
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{(int) data_get($bestMonths, 'products.value', 0)}}" aria-valuemin="0"
                             aria-valuemax="100" style="width: {{(int) data_get($bestMonths, 'categories.value', 0)}}%"></div>
                     </div>
                 </div>
