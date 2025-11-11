@@ -11,35 +11,18 @@ use App\Models\Inventory;
 use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
-use Illuminate\Support\Str;
+
 
 
 class OrderObserver
 {
-
-
-    public function creating(Order $order): void
+    public function creating(Order $order)
     {
-
-        $rawPrefix = (string) (setting('order_prefix') ?? 'ORD');
-
-        $prefix = Str::upper(preg_replace('/[^A-Z0-9\-_]/i', '', $rawPrefix)) ?: 'ORD';
-
-        $date = now()->format('Ymd');
-
-        for ($attempt = 0; $attempt < 5; $attempt++) {
-            $seq    = str_pad((string) random_int(0, 999), 3, '0', STR_PAD_LEFT);
-            $number = "#{$prefix}-{$date}-{$seq}";
-
-            if (! Order::where('order_number', $number)->exists()) {
-                $order->order_number = $number;
-                return;
-            }
-        }
-
-        $order->order_number = "#{$prefix}-{$date}-" . Str::upper(Str::random(6));
+        $now = now();
+        $dateString = $now->format('d-m-Y');
+        $orderFormat = setting('order_format');
+        $order->order_number =  "#ORD-{$dateString}-" . mt_rand(100, 999);
     }
-
 
     /**
      * Handle the Order "created" event.
