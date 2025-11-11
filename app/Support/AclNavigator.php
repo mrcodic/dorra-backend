@@ -21,6 +21,7 @@ class AclNavigator
 
 
             if ($preferred && $user->can($preferred)) {
+
                 return url($url);
             }
 

@@ -26,7 +26,7 @@
         @if($model->status == \App\Enums\Order\StatusEnum::PREPARED)
             <form action="{{ route('ship-blu.request-pickup') }}" method="post" id="requestPickupForm">
                 @csrf
-                <input type="hidden" name="shipment_ids[]" value="{{ $model->shipment->id }}">
+                <input type="hidden" name="shipment_ids[]" value="{{ $model->shipment?->id }}">
                 <button type="submit"  class="btn btn-outline-primary btn-sm" @disabled($model->shipment->status == "pickup_requested")>
                     Request To Pickup
                 </button>

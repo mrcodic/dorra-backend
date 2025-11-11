@@ -9,7 +9,8 @@ class LoginResponse implements LoginResponseContract
     public function toResponse($request)
     {
         $user = $request->user();
-        $url = app(AclNavigator::class)->firstAllowedUrl($user) ?? '/';
+        $url = app(AclNavigator::class)->firstAllowedUrl($user) ;
+      
         return redirect()->intended($url);
     }
 }
