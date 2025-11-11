@@ -212,9 +212,9 @@ $discountTypes = [
                     <p class="fs-2 text-black">Products</p>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{$bestMonths['categories']}}</span> Products</span>
+                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{$bestMonths['categories.value']}}</span> Products</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="{{$bestMonths['categories']}}" aria-valuemin="0"
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{$bestMonths['categories.value']}}" aria-valuemin="0"
                             aria-valuemax="100" style="width: {{$bestMonths['categories']}}%"></div>
                     </div>
                 </div>
