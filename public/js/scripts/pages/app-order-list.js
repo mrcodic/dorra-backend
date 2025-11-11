@@ -25,15 +25,12 @@ var dt_user_table = $(".order-list-table").DataTable({
             render: function (data, type, row) {
                 const shipId     =  row?.shipment?.id ?? "";
                 const shipStatus =  row?.shipment?.status ?? "";
-
-                return
-                     `<input type="checkbox"
+                return`<input type="checkbox"
                  name="ids[]"
                  class="category-checkbox"
                  value="${row.id}"
                  data-shipment-id="${shipId}"
-                 data-shipment-status="${shipStatus}">`
-                    ;
+                 data-shipment-status="${shipStatus}">`;
             }
         },
         { data: "order_number" },
