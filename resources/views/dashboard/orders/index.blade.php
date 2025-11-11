@@ -322,6 +322,7 @@
                     </thead>
                 </table>
                 <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                    @can("orders_delete")
                     <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
                         style="z-index: 10;">
                         <p id="selected-count-text">0 Orders are selected</p>
@@ -338,11 +339,14 @@
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
                         </form>
+
+
+                    </div>
+                    @endcan
                         <button type="button" id="bulk-request-pickup"
-                                         class="btn btn-outline-primary d-flex align-items-center gap-1">
+                                   class="btn btn-outline-primary d-flex align-items-center gap-1">
                             <i data-feather="truck"></i> Request Pickup
                         </button>
-                    </div>
                 </div>
 
             </div>
