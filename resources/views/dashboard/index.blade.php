@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Dashboard Ecommerce')
-
+@dd($bestMonths)
 @section('vendor-style')
 {{-- vendor css files --}}
 <link rel="stylesheet" href="{{ asset(mix('vendors/css/charts/apexcharts.css')) }}">
