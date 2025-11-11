@@ -165,7 +165,7 @@
 
                                 </div>
 
-                                @forelse($model->reviews as $review)
+                                @forelse($model->reviews->sortByDesc('created_at')  as $review)
                                 <!-- Single Review -->
                                 <div class="review-wrapper" data-review-id="{{ $review->id }}">
                                     <div class="d-flex align-items-center gap-1 mb-2">
@@ -173,6 +173,7 @@
                                             class="rounded-circle" width="50" height="50">
                                         <div>
                                             <div class="fw-bold text-dark fs-4">{{ $review->review }}</div>
+                                            <div class="fw-bold text-dark fs-4">{{ $review->reviewable?->name }}</div>
                                         </div>
                                     </div>
                                     <div class="d-flex flex-wrap gap-1">

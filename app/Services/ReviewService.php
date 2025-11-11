@@ -25,6 +25,7 @@ class ReviewService extends BaseService
     {
         $review = $this->repository->update([
             'comment' => $request->comment,
+            'comment_at' => now(),
         ], $review);
         if ($request->allFiles()) {
             handleMediaUploads($request->image, $review, "review_reply", clearExisting: true);
