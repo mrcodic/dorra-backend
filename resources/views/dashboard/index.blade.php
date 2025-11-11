@@ -25,88 +25,185 @@ $discountTypes = [
 @endphp
 
 
-@dd($bestMonths['orders'])
 @section('content')
 <div class="card p-2">
+    {{-- remove any @dd() before rendering --}}
+    {{-- @dd($bestMonths) --}}
+
     <div class="row">
-        <!-- order Chart Card starts -->
+        <!-- order Chart Card -->
         <div class="col-lg-3 col-sm-6 col-12">
             <div class="card border-2">
                 <div class="card-header flex-column gap-1 align-items-start pb-0">
                     <div class="d-flex gap-1 align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
-                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
-                            <i data-feather="file-text" class="font-medium-5" style="color: #24B094;"></i>
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color:#FCF8FC;width:40px;height:40px;">
+                            <i data-feather="file-text" class="font-medium-5" style="color:#24B094;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Total Orders</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{ $bestMonths['orders'] }}</span></h2>
-                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
-                                class="font-medium-5"></i></span> Highest Month</h2>
+
+                    <h2 class="text-black">
+          <span class="fw-bolder text-black">
+            {{ number_format((int) data_get($bestMonths, 'orders.value', 0)) }}
+          </span>
+                    </h2>
+
+                    <h2 class="fs-5" style="color:#30A84D;">
+                        <span><i data-feather="trending-up" class="font-medium-5"></i></span>
+                        Highest Month
+                        <span class="text-black ms-50">{{ data_get($bestMonths, 'orders.label', '—') }}</span>
+                    </h2>
                 </div>
                 <div id="order-chart"></div>
             </div>
         </div>
-        <!-- order Chart Card ends -->
-        <!-- Earnings Chart Card starts -->
+
+        <!-- Earnings Chart Card -->
         <div class="col-lg-3 col-sm-6 col-12">
             <div class="card border-2">
                 <div class="card-header flex-column gap-1 align-items-start pb-0">
                     <div class="d-flex gap-1 align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
-                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
-                            <i data-feather="tag" class="font-medium-5" style="color: #4E2775;"></i>
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color:#FCF8FC;width:40px;height:40px;">
+                            <i data-feather="tag" class="font-medium-5" style="color:#4E2775;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Earnings</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{ $bestMonths['orders'] }}</span> EGP</h2>
-                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
-                                class="font-medium-5"></i></span> Highest Month</h2>
+
+                    <h2 class="text-black">
+          <span class="fw-bolder text-black">
+            {{ number_format((float) data_get($bestMonths, 'revenue.value', 0)) }}
+          </span> EGP
+                    </h2>
+
+                    <h2 class="fs-5" style="color:#30A84D;">
+                        <span><i data-feather="trending-up" class="font-medium-5"></i></span>
+                        Highest Month
+                        <span class="text-black ms-50">{{ data_get($bestMonths, 'revenue.label', '—') }}</span>
+                    </h2>
                 </div>
                 <div id="gained-chart"></div>
             </div>
         </div>
-        <!-- Earnings Chart Card ends -->
-        <!-- Visits Chart Card starts -->
+
+        <!-- Visits Chart Card -->
         <div class="col-lg-3 col-sm-6 col-12">
             <div class="card border-2">
                 <div class="card-header flex-column gap-1 align-items-start pb-0">
                     <div class="d-flex gap-1 align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
-                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
-                            <i data-feather="eye" class="font-medium-5" style="color: #F8AB1B"></i>
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color:#FCF8FC;width:40px;height:40px;">
+                            <i data-feather="eye" class="font-medium-5" style="color:#F8AB1B;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Visits</p>
                     </div>
-{{--                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{  $totalVisits }}</span></h2>--}}
-                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
-                                class="font-medium-5"></i></span> Highest Month</h2>
+
+                    <h2 class="text-black">
+          <span class="fw-bolder text-black">
+            {{ number_format((int) data_get($bestMonths, 'visits.value', 0)) }}
+          </span>
+                    </h2>
+
+                    <h2 class="fs-5" style="color:#30A84D;">
+                        <span><i data-feather="trending-up" class="font-medium-5"></i></span>
+                        Highest Month
+                        <span class="text-black ms-50">{{ data_get($bestMonths, 'visits.label', '—') }}</span>
+                    </h2>
                 </div>
                 <div id="visits-chart"></div>
             </div>
         </div>
-        <!-- Visits Chart Card ends -->
 
-        <!-- Refunded Chart Card starts -->
+        <!-- Refunded Chart Card -->
         <div class="col-lg-3 col-sm-6 col-12">
             <div class="card border-2">
                 <div class="card-header flex-column gap-1 align-items-start pb-0">
                     <div class="d-flex gap-1 align-items-center">
-                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
-                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
-                            <i data-feather="rotate-ccw" class="font-medium-5" style="color: #222245"></i>
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color:#FCF8FC;width:40px;height:40px;">
+                            <i data-feather="rotate-ccw" class="font-medium-5" style="color:#222245;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Refunded</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{$bestMonths['orders_refunded']}}</span></h2>
-                    <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
-                                class="font-medium-5"></i></span> Highest Month</h2>
+
+                    <h2 class="text-black">
+          <span class="fw-bolder text-black">
+            {{ number_format((int) data_get($bestMonths, 'orders_refunded.value', data_get($bestMonths, 'orders_refunded', 0))) }}
+          </span>
+                    </h2>
+
+                    <h2 class="fs-5" style="color:#30A84D;">
+                        <span><i data-feather="trending-up" class="font-medium-5"></i></span>
+                        Highest Month
+                        <span class="text-black ms-50">{{ data_get($bestMonths, 'orders_refunded.label', '—') }}</span>
+                    </h2>
                 </div>
                 <div id="refund-chart"></div>
             </div>
         </div>
-        <!-- Refunded Chart Card ends -->
     </div>
+
+    {{-- Products Card --}}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-2 p-2">
+                <div class="d-flex flex-column flex-lg-row justify-content-between mb-50">
+                    <p class="fs-2 text-black">Products</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+        <span class="fs-6 text-black">
+          <span class="fs-2 fw-bold">
+            {{ number_format((int) data_get($bestMonths, 'categories', 0)) }}
+          </span> Products
+        </span>
+                    <div class="progress progress-bar-primary w-75 me-1" style="height:6px">
+                        <div class="progress-bar" role="progressbar"
+                             aria-valuenow="{{ (int) data_get($bestMonths, 'categories', 0) }}"
+                             aria-valuemin="0" aria-valuemax="100"
+                             style="width: {{ (int) data_get($bestMonths, 'categories', 0) }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Templates Card --}}
+        <div class="col-md-6">
+            <div class="card border-2 p-2">
+                <div class="d-flex flex-column flex-lg-row justify-content-between mb-50">
+                    <p class="fs-2 text-black">Templates</p>
+                    <div class="d-flex align-items-center gap-1 gap-lg-4">
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="rounded-1 me-1" style="width:24px;height:6px;background-color:#24B094"></span>
+                                <span class="me-auto">Published</span>
+                            </div>
+                            <span>{{ number_format((int) data_get($bestMonths, 'published_templates', 0)) }} Templates</span>
+                        </div>
+
+                        <div class="d-flex flex-column">
+                            <div class="d-flex align-items-center">
+                                <span class="rounded-1 me-1" style="width:24px;height:6px;background-color:#B3E3D8"></span>
+                                <span class="me-auto">Draft</span>
+                            </div>
+                            <span>{{ number_format((int) data_get($bestMonths, 'draft_templates', 0)) }} Templates</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+        <span class="fs-6 text-black">
+          <span class="fs-2 fw-bold">
+            {{ number_format((int) data_get($bestMonths, 'templates', 0)) }}
+          </span> Templates
+        </span>
+                    <div class="progress progress-bar-primary w-75 me-1" style="height:6px">
+                        <div class="progress-bar" role="progressbar"
+                             aria-valuenow="{{ (int) data_get($bestMonths, 'templates', 0) }}"
+                             aria-valuemin="0" aria-valuemax="100"
+                             style="width: {{ (int) data_get($bestMonths, 'templates', 0) }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         {{-- Products Card --}}
         <div class="col-md-6">
