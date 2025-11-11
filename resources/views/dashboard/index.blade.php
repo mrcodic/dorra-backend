@@ -40,7 +40,7 @@ $discountTypes = [
                         </div>
                         <p class="text-black fs-4 mb-0">Total Orders</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{$totalOrders}}</span></h2>
+                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{ $bestMonths['orders'] }}</span></h2>
                     <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
                                 class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
@@ -59,7 +59,7 @@ $discountTypes = [
                         </div>
                         <p class="text-black fs-4 mb-0">Earnings</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{ (int) round($totalOrdersPries) }}</span> EGP</h2>
+                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{ $bestMonths['orders'] }}</span> EGP</h2>
                     <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
                                 class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
@@ -98,7 +98,7 @@ $discountTypes = [
                         </div>
                         <p class="text-black fs-4 mb-0">Refunded</p>
                     </div>
-                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{$refundedOrders}}</span></h2>
+                    <h2 class=" text-black "><span class="fw-bolder text-black ">{{$bestMonths['orders_refunded']}}</span></h2>
                     <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
                                 class="font-medium-5"></i></span> Highest Month</h2>
                 </div>
@@ -115,10 +115,10 @@ $discountTypes = [
                     <p class="fs-2 text-black">Products</p>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $categoriesCount }}</span> Products</span>
+                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{$bestMonths['categories']}}</span> Products</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="{{$categoriesCount}}" aria-valuemin="0"
-                            aria-valuemax="100" style="width: {{$categoriesCount}}%"></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{$bestMonths['categories']}}" aria-valuemin="0"
+                            aria-valuemax="100" style="width: {{$bestMonths['categories']}}%"></div>
                     </div>
                 </div>
             </div>
@@ -138,7 +138,7 @@ $discountTypes = [
                                     style="width: 24px; height: 6px;background-color:#24B094"></span>
                                 <span class="me-auto">Published</span>
                             </div>
-                            <span class="">{{ \App\Models\Template::status(\App\Enums\Template\StatusEnum::PUBLISHED)->count() }} Templates</span>
+                            <span class="">{{ $bestMonths['published_templates'] }}Templates</span>
                         </div>
 
                         <div class="d-flex flex-column ">
@@ -147,15 +147,15 @@ $discountTypes = [
                                     style="width: 24px; height: 6px;background-color:#B3E3D8"></span>
                                 <span class="me-auto">Draft</span>
                             </div>
-                            <span class="">{{ \App\Models\Template::status(\App\Enums\Template\StatusEnum::DRAFTED)->count() }} Templates</span>
+                            <span class="">{{ $bestMonths['draft_templates'] }} Templates</span>
                         </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $templatesCount }}</span> Templates</span>
+                    <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{ $bestMonths['templates'] }}</span> Templates</span>
                     <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ $templatesCount }}" aria-valuemin="0"
-                            aria-valuemax="100" style="width: {{$templatesCount}}%"></div>
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ $bestMonths['templates'] }}" aria-valuemin="0"
+                            aria-valuemax="100" style="width: {{$bestMonths['templates']}}%"></div>
                     </div>
                 </div>
             </div>
@@ -235,62 +235,62 @@ $discountTypes = [
         <!--/ Line Area Chart Card -->
     </div>
 
-    <div class="row d-flex gap-1 gap-md-0 align-items-stretch mb-2">
-        <!-- Popular Products -->
-        <div class="col-md-6">
-            <div class="card border p-1 h-100">
-                <h2 class="fs-4 text-black">Popular Products</h2>
-                <!-- Product Card -->
-                <div class="d-flex justify-content-between align-items-center">
-                    <!-- Left: Product Info -->
-                    <div class="d-flex align-items-center">
-                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Product Image" class="mx-1 rounded"
-                            style="width: 56px; height: 56px; object-fit: cover;">
-                        <div class="d-flex flex-column">
-                            <span class="fs-14 text-black">Product Name</span>
-                            <span class="">In Stock: 25</span>
-                            <span class="">Added: 2025-05-27</span>
-                        </div>
-                    </div>
+{{--    <div class="row d-flex gap-1 gap-md-0 align-items-stretch mb-2">--}}
+{{--        <!-- Popular Products -->--}}
+{{--        <div class="col-md-6">--}}
+{{--            <div class="card border p-1 h-100">--}}
+{{--                <h2 class="fs-4 text-black">Popular Products</h2>--}}
+{{--                <!-- Product Card -->--}}
+{{--                <div class="d-flex justify-content-between align-items-center">--}}
+{{--                    <!-- Left: Product Info -->--}}
+{{--                    <div class="d-flex align-items-center">--}}
+{{--                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Product Image" class="mx-1 rounded"--}}
+{{--                            style="width: 56px; height: 56px; object-fit: cover;">--}}
+{{--                        <div class="d-flex flex-column">--}}
+{{--                            <span class="fs-14 text-black">Product Name</span>--}}
+{{--                            <span class="">In Stock: 25</span>--}}
+{{--                            <span class="">Added: 2025-05-27</span>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
-                    <!-- Right: Sold Info -->
-                    <div class="d-flex align-items-center">
-                        <span class="fw-bold">Sold: 500</span>
-                        <img src="{{ asset('images/success.svg') }}" alt="Product Image" class=" rounded"
-                            style="width: 20px; height: 20px; object-fit: cover;">
+{{--                    <!-- Right: Sold Info -->--}}
+{{--                    <div class="d-flex align-items-center">--}}
+{{--                        <span class="fw-bold">Sold: 500</span>--}}
+{{--                        <img src="{{ asset('images/success.svg') }}" alt="Product Image" class=" rounded"--}}
+{{--                            style="width: 20px; height: 20px; object-fit: cover;">--}}
 
-                    </div>
-                </div>
-            </div>
-        </div>
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
 
-        <!-- Popular Templates -->
-        <div class="col-md-6">
-            <div class="card border p-1 h-100">
-                <h2 class="fs-4 text-black">Popular Templates</h2>
-                <!-- Templates Card -->
-                <div class="d-flex justify-content-between align-items-center">
-                    <!-- Left: Templates Info -->
-                    <div class="d-flex align-items-center">
-                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Product Image" class="mx-1 rounded"
-                            style="width: 56px; height: 56px; object-fit: cover;">
-                        <div>
-                            <p class="mb-25 fw-bold">Log Template</p>
-                            <p class="mb-0 ">Added: 2025-05-27</p>
-                        </div>
-                    </div>
+{{--        <!-- Popular Templates -->--}}
+{{--        <div class="col-md-6">--}}
+{{--            <div class="card border p-1 h-100">--}}
+{{--                <h2 class="fs-4 text-black">Popular Templates</h2>--}}
+{{--                <!-- Templates Card -->--}}
+{{--                <div class="d-flex justify-content-between align-items-center">--}}
+{{--                    <!-- Left: Templates Info -->--}}
+{{--                    <div class="d-flex align-items-center">--}}
+{{--                        <img src="{{ asset('images/banner/banner-1.jpg') }}" alt="Product Image" class="mx-1 rounded"--}}
+{{--                            style="width: 56px; height: 56px; object-fit: cover;">--}}
+{{--                        <div>--}}
+{{--                            <p class="mb-25 fw-bold">Log Template</p>--}}
+{{--                            <p class="mb-0 ">Added: 2025-05-27</p>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
-                    <!-- Right: Sold Info -->
-                    <div class="d-flex align-items-center">
-                        <span class="fw-bold mx-1">Customized: 500</span>
-                        <img src="{{ asset('images/success.svg') }}" alt="Product Image" class=" rounded"
-                            style="width: 20px; height: 20px; object-fit: cover;">
+{{--                    <!-- Right: Sold Info -->--}}
+{{--                    <div class="d-flex align-items-center">--}}
+{{--                        <span class="fw-bold mx-1">Customized: 500</span>--}}
+{{--                        <img src="{{ asset('images/success.svg') }}" alt="Product Image" class=" rounded"--}}
+{{--                            style="width: 20px; height: 20px; object-fit: cover;">--}}
 
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
 
     <div class="row d-flex gap-1 gap-md-0 align-items-stretch">
         <!-- Discount Codes Chart -->

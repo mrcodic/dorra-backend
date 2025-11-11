@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Location;
 use App\Repositories\Interfaces\InventoryRepositoryInterface;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\OrderService;
@@ -29,6 +30,7 @@ class OrderController extends DashboardController
         public CountryRepositoryInterface  $countryRepository,
         public LocationRepositoryInterface $LocationRepository,
         public InventoryRepositoryInterface $inventoryRepository,
+        public ProductRepositoryInterface $productRepository,
     )
     {
         parent::__construct($orderService);
@@ -43,7 +45,11 @@ class OrderController extends DashboardController
         $this->assoiciatedData = [
             'create' => [
                 'countries' => $this->countryRepository->query(['id', 'name'])->get(),
-                'categories' => $this->categoryRepository->query(['id', 'name'])->whereNull('parent_id')->get(),
+                'categories' => $this->categoryRepository->query(['id', 'name'])
+                    ->whereIsHasCategory(0)
+                    ->whereNull('parent_id')->get(),
+                'products' => $this->productRepository->query(['id', 'name'])
+                    ->get(),
                 'tags' => $this->tagRepository->all(columns: ['id', 'name']),
                 'templates' => [],
             ],
