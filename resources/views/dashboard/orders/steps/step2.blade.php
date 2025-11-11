@@ -19,7 +19,7 @@
     <!-- Filters + Results - Hidden by default -->
     <div id="product-filters-wrapper" class="border shadow rounded-2 p-1 mt-2" style="display: none;">
         <h6 class="mt-1">Category</h6>
-        <div class="mb-1" id="category-filters">
+        <div class="mb-1" class="category-filters">
             @forelse($associatedData['products'] as $product)
                 <span class="badge rounded-pill bg-light text-dark me-1 category-pill"
                       data-product="{{ $product->id }}">
@@ -31,7 +31,7 @@
         </div>
 
         <h6 class="mt-1">Product</h6>
-        <div class="mb-1" id="category-filters">
+        <div class="mb-1" class="category-filters">
             @forelse($associatedData['categories'] as $category)
                 <span class="badge rounded-pill bg-light text-dark me-1 category-pill"
                       data-category="{{ $category->id }}">
