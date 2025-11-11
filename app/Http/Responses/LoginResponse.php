@@ -10,7 +10,7 @@ class LoginResponse implements LoginResponseContract
     {
         $user = $request->user();
         $url = app(AclNavigator::class)->firstAllowedUrl($user) ;
-      
+
         return redirect()->intended($url);
     }
 }
