@@ -338,12 +338,13 @@
                                 <i data-feather="trash-2"></i> Delete Selected
                             </button>
                         </form>
+                        <button type="button" id="bulk-request-pickup"
+                                         class="btn btn-outline-primary d-flex align-items-center gap-1">
+                            <i data-feather="truck"></i> Request Pickup
+                        </button>
                     </div>
                 </div>
-                    <button type="button" id="bulk-request-pickup"
-                            class="btn btn-outline-primary d-flex align-items-center gap-1">
-                        <i data-feather="truck"></i> Request Pickup
-                    </button>
+
             </div>
 
             @include('modals.categories.show-category')
