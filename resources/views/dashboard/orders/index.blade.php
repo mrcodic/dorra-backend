@@ -340,6 +340,14 @@
                         </form>
                     </div>
                 </div>
+                @if($model->status == \App\Enums\Order\StatusEnum::PREPARED)
+                    <button type="button" id="bulk-request-pickup"
+                            class="btn btn-outline-primary d-flex align-items-center gap-1">
+                        <i data-feather="truck"></i> Request Pickup
+                    </button>
+
+
+                @endif
             </div>
 
             @include('modals.categories.show-category')
@@ -463,7 +471,7 @@
                             },
 
                             error: function () {
-                                alert('❌ Failed to load confirmed orders for printing.');
+                                alert('Failed to load confirmed orders for printing.');
                             }
                         });
                     });

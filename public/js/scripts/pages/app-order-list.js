@@ -23,9 +23,17 @@ var dt_user_table = $(".order-list-table").DataTable({
             defaultContent: "",
             orderable: false,
             render: function (data, type, row) {
+                const shipId     =  row?.shipment?.id ?? "";
+                const shipStatus =  row?.shipment?.status ?? "";
+
                 return row?.action?.can_delete
-                    ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
-                    : '';
+                    ? `<input type="checkbox"
+                 name="ids[]"
+                 class="category-checkbox"
+                 value="${row.id}"
+                 data-shipment-id="${shipId}"
+                 data-shipment-status="${shipStatus}">`
+                    : "";
             }
         },
         { data: "order_number" },
@@ -463,3 +471,56 @@ $(document).on('change', '.dt-button input[type="date"]', function() {
     // Add your date filtering logic here
     dt_user_table.draw();
 });
+
+$(document).on('click', '#bulk-request-pickup', function (e) {
+    e.preventDefault();
+
+    // Collect shipment ids from checked rows
+    const shipmentIds = $('.category-checkbox:checked')
+        .map(function () { return $(this).data('shipment-id'); })
+        .get()
+        .filter(Boolean); // drop empties
+
+    // Deduplicate
+    const uniqueShipmentIds = [...new Set(shipmentIds)];
+
+    if (uniqueShipmentIds.length === 0) {
+        Toastify({
+            text: "No shipments found for selected orders.",
+            duration: 2000, gravity: "top", position: "right",
+            backgroundColor: "#EA5455", close: true,
+        }).showToast();
+        return;
+    }
+
+    $.ajax({
+        url: "{{ route('ship-blu.request-pickup') }}",
+        method: "POST",
+        data: {
+            _token: $('meta[name="csrf-token"]').attr("content"),
+            'shipment_ids': uniqueShipmentIds, // 👈 send shipment_ids[]
+        },
+        success: function () {
+            $("#deleteOrdersModal").modal("hide");
+            Toastify({
+                text: "Pickup requested for selected shipments.",
+                duration: 2000, gravity: "top", position: "right",
+                backgroundColor: "#28C76F", close: true,
+            }).showToast();
+
+            // reset selection + reload
+            $('#bulk-delete-container').hide();
+            $('.category-checkbox').prop('checked', false);
+            $('#select-all-checkbox').prop('checked', false);
+            $(".order-list-table").DataTable().ajax.reload(null, false);
+        },
+        error: function (xhr) {
+            Toastify({
+                text: (xhr.responseJSON?.message ?? "Pickup request failed."),
+                duration: 2500, gravity: "top", position: "right",
+                backgroundColor: "#EA5455", close: true,
+            }).showToast();
+        }
+    });
+});
+

@@ -56,7 +56,8 @@ class OrderService extends BaseService
         $this->relations = [
             'user.addresses.state.country',
             'orderAddress',
-            'pickupContact'
+            'pickupContact',
+            'shipment'
         ];
         parent::__construct($repository);
     }
