@@ -17,26 +17,26 @@
     </div>
 
     <!-- Filters + Results - Hidden by default -->
-    <div id="product-filters-wrapper" class="border shadow rounded-2 p-1 mt-2" style="display: none;">
-        <h6 class="mt-1">Category</h6>
-        <div class="mb-1" class="category-filters">
+    <div id="product-filters-wrapper" class="border shadow rounded-2 p-1 mt-2" style="display:none;">
+        <h6 class="mt-1">Product</h6>
+        <div class="mb-1" id="product-filters">
             @forelse($associatedData['products'] as $product)
-                <span class="badge rounded-pill bg-light text-dark me-1 category-pill"
+                <span class="badge rounded-pill bg-light text-dark me-1 product-filter-pill"
                       data-product="{{ $product->id }}">
-                    {{ $product->name }}
-                </span>
+        {{ $product->name }}
+      </span>
             @empty
-                <span class="badge rounded-pill bg-light text-dark me-1">No categories found</span>
+                <span class="badge rounded-pill bg-light text-dark me-1">No products found</span>
             @endforelse
         </div>
 
-        <h6 class="mt-1">Product</h6>
-        <div class="mb-1" class="category-filters">
+        <h6 class="mt-1">Category</h6>
+        <div class="mb-1" id="category-filters">
             @forelse($associatedData['categories'] as $category)
                 <span class="badge rounded-pill bg-light text-dark me-1 category-pill"
                       data-category="{{ $category->id }}">
-                    {{ $category->name }}
-                </span>
+        {{ $category->name }}
+      </span>
             @empty
                 <span class="badge rounded-pill bg-light text-dark me-1">No categories found</span>
             @endforelse
@@ -49,15 +49,14 @@
             @forelse($associatedData['tags'] as $tag)
                 <span class="badge rounded-pill bg-light text-dark me-1 tag-pill"
                       data-tag="{{ $tag->id }}">
-                    {{ $tag->name }}
-                </span>
+        {{ $tag->name }}
+      </span>
             @empty
                 <span class="badge rounded-pill bg-light text-dark me-1">No tags found</span>
             @endforelse
         </div>
 
         <hr>
-
         <div id="product-results"></div>
     </div>
 
@@ -170,39 +169,7 @@
         $('#step-2').hide();
         $('#step-3').show();
 
-        // First save the product selection
-        $.ajax({
-            url: '{{ route("orders.step2") }}',
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            data: {
-                product_id: selectedProductId
-            },
-            success: function(response) {
-                // Then load templates
-                $.ajax({
-                    url: '{{ route("templates.products") }}',
-                    method: 'GET',
-                    data: { product_id: selectedProductId },
-                    success: function(html) {
-                        $('#step-3').html(html);
-                        if (feather) {
-                            feather.replace();
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error('Error loading templates:', xhr.responseText);
-                        $('#step-3').html('<div class="alert alert-danger">Error loading templates</div>');
-                    }
-                });
-            },
-            error: function(xhr) {
-                console.error('Error:', xhr.responseJSON);
-                $('#step-3').html('<div class="alert alert-danger">Error saving product selection</div>');
-            }
-        });
+
     });
 
     $(document).on('click', 'back-step-1', function() {

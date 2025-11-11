@@ -25,7 +25,7 @@ $discountTypes = [
 @endphp
 
 
-
+@dd($bestMonths['orders'])
 @section('content')
 <div class="card p-2">
     <div class="row">
