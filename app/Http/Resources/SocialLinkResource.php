@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\Setting\SocialEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Resources\Product\ProductPriceResource;
 use App\Http\Resources\Product\ProductResource;
@@ -21,6 +22,7 @@ class SocialLinkResource extends JsonResource
         return [
             'id' => $this->id,
             'platform' => $this->platform,
+            'image_url' => SocialEnum::imageUrl($this->platform),
             'url' => $this->url,
         ];
     }

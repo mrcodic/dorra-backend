@@ -87,6 +87,12 @@
                             <div id="social-media-group" class="row social-input-row">
                                 <div class="col-12 col-lg-6">
                                     <label for="platform">Platform</label>
+                                    <select class="form-select" name="platform">
+                                        <option value="" disabled selected>Select Platform</option>
+                                        @foreach(\App\Enums\Setting\SocialEnum::cases() as $socialEnum)
+                                            <option value="{{ $socialEnum->value }}">{{ $socialEnum->label() }}</option>
+                                        @endforeach
+                                    </select>
                                     <input type="text" name="platform" class="form-control" placeholder="ex.Facebook" value="{{ $socialLink->platform }}"/>
 
                                 </div>

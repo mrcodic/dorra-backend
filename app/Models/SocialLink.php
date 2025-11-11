@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Setting\SocialEnum;
 use Illuminate\Database\Eloquent\Model;
 
 class SocialLink extends Model
@@ -11,5 +12,9 @@ class SocialLink extends Model
         'url',
         'sort',
         'is_active',
+    ];
+
+    protected $casts = [
+        'platform' => SocialEnum::class,
     ];
 }
