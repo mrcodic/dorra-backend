@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('mockups', function (Blueprint $table) {
-            $table->foreignIdFor(\App\Models\Category::class)
+            $table->foreignIdFor(\App\Models\Category::class)->nullable()
             ->constrained()
             ->nullOnDelete();
         });
