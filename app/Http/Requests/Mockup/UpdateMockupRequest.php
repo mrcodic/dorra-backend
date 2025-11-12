@@ -4,6 +4,7 @@ namespace App\Http\Requests\Mockup;
 
 use App\Enums\Mockup\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\Category;
 use App\Models\CountryCode;
 use App\Models\Product;
 use Illuminate\Validation\Rule;
@@ -37,7 +38,7 @@ class UpdateMockupRequest extends BaseRequest
             ],
             'types' => ['required','array'],
             'types.*' => ['required', Rule::in(TypeEnum::values())],
-            'product_id' => ['required','integer', Rule::exists(Product::class, 'id')],
+            'category_id' => ['required','integer', Rule::exists(Category::class, 'id')],
             'colors' => ['sometimes','array'],
             'front_mask_image' => [
                 Rule::requiredIf(in_array(1, $types)),

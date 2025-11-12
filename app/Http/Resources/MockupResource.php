@@ -62,7 +62,7 @@ class MockupResource extends JsonResource
             'area_left' => $this->area_left,
             'area_width' => $this->area_width,
             'area_height' => $this->area_height,
-            'product' => ProductResource::make($this->whenLoaded('product')),
+            'product' => CategoryResource::make($this->whenLoaded('category')),
             'mockup_url' => $this->getFirstMediaUrl('mockups'),
             'base_url'      => $img('basic_tshirt_front.png'),
             'shadow_url'    => $img('1678793789014.darkBlend1.png'),

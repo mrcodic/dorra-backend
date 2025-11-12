@@ -28,7 +28,7 @@ class MockupService extends BaseService
 
         $query = $this->repository
             ->query()
-            ->with(['product:id,name'])
+            ->with(['category:id,name'])
             ->when(request()->filled('search_value'), function ($q) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $q->where('name', 'LIKE', '%' . request('search_value') . '%');
@@ -36,8 +36,8 @@ class MockupService extends BaseService
                     $q->whereRaw('1 = 0');
                 }
             })
-            ->when(request()->filled('product_id'), fn($q) => $q->whereProductId(request('product_id')))
-            ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('product_id', request()->array('product_ids')))
+            ->when(request()->filled('product_id'), fn($q) => $q->whereCategoryId(request('product_id')))
+            ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.id',request('type'))))
             ->when(request()->filled('search'), function ($q) {
                 $q->where('name', 'like', '%' . request('search') . '%');

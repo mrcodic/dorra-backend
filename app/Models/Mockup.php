@@ -15,7 +15,7 @@ class Mockup extends Model implements HasMedia
     protected $fillable = [
         'name',
         'type',
-        'product_id',
+        'category_id',
         'colors',
         'area_top',
         'area_left',
@@ -34,10 +34,11 @@ class Mockup extends Model implements HasMedia
         'area_height' => 370,
     ];
 
-    public function product(): BelongsTo
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Category::class);
     }
+
     public function types()
     {
         return $this->morphToMany(Type::class, 'typeable')

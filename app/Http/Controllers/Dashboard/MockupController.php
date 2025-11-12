@@ -7,6 +7,7 @@ use App\Http\Controllers\Base\DashboardController;
 
 
 use App\Http\Resources\MockupResource;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\TypeRepositoryInterface;
 use App\Services\MockupService;
@@ -18,7 +19,7 @@ class MockupController extends DashboardController
 {
     public function __construct(
         public MockupService              $mockupService,
-        public ProductRepositoryInterface $productRepository,
+        public CategoryRepositoryInterface $categoryRepository,
         public TypeRepositoryInterface    $typeRepository,
 
     )
@@ -31,12 +32,12 @@ class MockupController extends DashboardController
         $this->resourceTable = 'mockups';
         $this->assoiciatedData = [
             'index' => [
-                'products' => $this->productRepository->query()->whereHasMockup(true)->get(['id', 'name']),
+                'products' => $this->categoryRepository->query()->whereHasMockup(true)->get(['id', 'name']),
                 'types' => $this->typeRepository->query()->get(['id', 'name']),
             ],
         ];
         $this->methodRelations = [
-            'index' => ['product.saves', 'types'],
+            'index' => [ 'types'],
         ];
         $this->resourceClass = MockupResource::class;
     }
