@@ -44,7 +44,7 @@ $discountTypes = [
 
                     <h2 class="text-black">
           <span class="fw-bolder text-black">
-            {{ number_format((int) data_get($bestMonths, 'orders.value', 0)) }}
+            {{ number_format((int)\App\Models\Order::count()) }}
           </span>
                     </h2>
 
@@ -70,7 +70,7 @@ $discountTypes = [
 
                     <h2 class="text-black">
           <span class="fw-bolder text-black">
-            {{ number_format((float) data_get($bestMonths, 'orders_revenue.value', 0)) }}
+            {{ number_format((float) \App\Models\Order::whereStatus(\App\Enums\Order\StatusEnum::DELIVERED)->sum('total_price')) }}
           </span> EGP
                     </h2>
 
@@ -97,7 +97,7 @@ $discountTypes = [
 
                     <h2 class="text-black">
           <span class="fw-bolder text-black">
-            {{ number_format((int) data_get($bestMonths, 'visits.value', 0)) }}
+            {{ number_format((int) \App\Models\Visit::count()) }}
           </span>
                     </h2>
 
@@ -124,7 +124,7 @@ $discountTypes = [
 
                     <h2 class="text-black">
           <span class="fw-bolder text-black">
-            {{ number_format((int) data_get($bestMonths, 'orders_refunded.value', data_get($bestMonths, 'orders_refunded', 0))) }}
+            {{ number_format((int) data_get($bestMonths, 'orders_refunded.value', \App\Models\Order::whereStatus(\App\Enums\Order\StatusEnum::REFUNDED)->count())) }}
           </span>
                     </h2>
 

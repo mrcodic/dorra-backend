@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Template;
+use App\Models\Visit;
 use Carbon\Carbon;
 use function Awssat\Visits\visits;
 
@@ -34,10 +35,9 @@ class StatisticsController extends Controller
             ];
         };
 
-        $topOrders = Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
+        $topOrders = Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym')
             ->whereYear('created_at', $year)
             ->groupBy('ym')
-            ->orderByDesc('c')
             ->first();
 
 
@@ -45,6 +45,10 @@ class StatisticsController extends Controller
             ->whereYear('created_at', $year)
             ->groupBy('ym')
             ->orderByDesc('amount')
+            ->first();
+        $topVisits = Visit::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym')
+            ->whereYear('created_at', $year)
+            ->groupBy('ym')
             ->first();
 
         $topRefunded = Order::status(StatusEnum::REFUNDED)
@@ -75,6 +79,7 @@ class StatisticsController extends Controller
             'published_templates' => $topPublished,
             'live_templates' => $topLive,
             'draft_templates' => $topDraft,
+            'visits' => $topVisits,
         ];
 
         return view('dashboard.index', compact('bestMonths'));

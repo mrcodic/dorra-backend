@@ -2,6 +2,7 @@
 
 use App\Enums\HttpEnum;
 use App\Http\Middleware\CountSiteVisitsMiddleware;
+use App\Http\Middleware\TrackVisits;
 use App\Models\Cart;
 use App\Support\AclNavigator;
 use Illuminate\Console\Scheduling\Schedule;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(['dorra_auth_token','dorra_auth_cookie_id']);
         $middleware->api([
             EnsureFrontendRequestsAreStateful::class,
+            TrackVisits::class,
 //            CountSiteVisitsMiddleware::class,
             ]);
     })
