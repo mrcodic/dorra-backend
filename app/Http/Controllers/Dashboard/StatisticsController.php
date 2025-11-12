@@ -46,6 +46,7 @@ class StatisticsController extends Controller
             ->groupBy('ym')
             ->orderByDesc('amount')
             ->first();
+
         $topVisits = Visit::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym')
             ->whereYear('created_at', $year)
             ->groupBy('ym')

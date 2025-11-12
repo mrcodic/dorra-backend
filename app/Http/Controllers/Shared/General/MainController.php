@@ -192,7 +192,7 @@ class MainController extends Controller
         $modelId = (int) $model;
         $class   = 'App\\Models\\' . Str::studly($modelName);
         abort_unless(class_exists($class), 404, 'Model not found');
-        $model = $class::findOrFail($modelId);
+        $model = $class::find($modelId);
         $media = handleMediaUploads($request->allFiles(), $model, clearExisting: true);
         return Response::api(data: MediaResource::make($media));
     }
