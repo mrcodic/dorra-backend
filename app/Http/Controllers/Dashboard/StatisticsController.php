@@ -77,8 +77,8 @@ class StatisticsController extends Controller
             'categories' => $categories,
             'products' => $products,
             'templates' => $format($topTemplates, 'c'),
-            'published_templates' => $format($topPublished, 'c'),
-            'draft_templates' => $format($topDraft, 'c'),
+            'published_templates' => $topPublished,
+            'draft_templates' => $topDraft,
         ];
 
         return view('dashboard.index', compact('bestMonths'));
