@@ -21,7 +21,7 @@ class TrackVisits
     {
         $response = $next($request);
 
-        if ($request->isMethod('get') && !$request->is('api/*') && $response->isSuccessful()) {
+        if ($request->isMethod('get') && $response->isSuccessful()) {
             $ip = $request->ip() ?? '0.0.0.0';
             $today = now()->toDateString();
             $query = DB::table('visits')
