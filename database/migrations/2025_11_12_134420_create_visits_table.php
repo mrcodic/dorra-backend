@@ -10,7 +10,11 @@ return new class extends Migration {
     {
         Schema::create('visits', function (Blueprint $table) {
             $table->id();
-            $table->ipAddress('ip')->unique();
+            $table->date('date');
+            $table->ipAddress('ip');
+            $table->unsignedInteger('hits')->default(0);
+            $table->unique(['date', 'ip'], 'visits_date_ip_unique');
+            $table->index('date');
             $table->timestamps();
         });
     }

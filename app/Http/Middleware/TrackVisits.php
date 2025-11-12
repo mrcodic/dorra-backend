@@ -21,16 +21,23 @@ class TrackVisits
     {
         $response = $next($request);
 
-        if ($request->isMethod('get') && $response->isSuccessful()) {
+        if ($request->isMethod('get') && !$request->is('api/*') && $response->isSuccessful()) {
             $ip = $request->ip() ?? '0.0.0.0';
-
-
-            $existed= DB::table('visits')
-                ->where('ip', $ip)->exists();
+            $today = now()->toDateString();
+            $query = DB::table('visits')
+                ->where('date', $today)
+                ->where('ip', $ip);
+            $existed = $query
+                ->exists();
+            if ($existed) {
+                $query->increment('hits');
+            }
 
             if (!$existed) {
                 DB::table('visits')->insert([
-                    'ip'         => $ip,
+                    'date' => $today,
+                    'ip' => $ip,
+                    'hits' => 1,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
