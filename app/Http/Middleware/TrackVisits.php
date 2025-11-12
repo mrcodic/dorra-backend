@@ -22,21 +22,14 @@ class TrackVisits
         $response = $next($request);
 
         if ($request->isMethod('get') && $response->isSuccessful()) {
-            $ip = $request->ip() ?? '0.0.0.0';
 
+            DB::statement(
+                'INSERT INTO visits (`ip`,`hits`,`created_at`,`updated_at`)
+     VALUES (?, 1, NOW(), NOW())
+     ON DUPLICATE KEY UPDATE `hits` = `hits` + 1, `updated_at` = VALUES(`updated_at`)',
+                [$request->ip() ?? '0.0.0.0']
+            );
 
-            $updated = DB::table('visits')
-                ->where('ip', $ip)
-                ->increment('hits');
-
-            if ($updated === 0) {
-                DB::table('visits')->insert([
-                    'ip'         => $ip,
-                    'hits'       => 1,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
         }
 
         return $response;
