@@ -46,7 +46,9 @@ class StatisticsController extends Controller
             ->groupBy('ym')
             ->orderByDesc('amount')
             ->first();
-  $topRefunded = Order::status(StatusEnum::REFUNDED)
+dd($topRevenue);
+
+        $topRefunded = Order::status(StatusEnum::REFUNDED)
             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
             ->whereYear('created_at', $year)
             ->groupBy('ym')
