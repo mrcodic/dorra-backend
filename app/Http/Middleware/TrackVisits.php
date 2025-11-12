@@ -20,33 +20,22 @@ class TrackVisits
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        if (
-            $request->isMethod('get') &&
-            $response->isSuccessful()
-        ) {
 
-            $ua = strtolower($request->userAgent() ?? '');
-            if (!Str::contains($ua, ['bot', 'spider', 'crawl'])) {
-
-                $fingerprint = sha1(($request->ip() ?? '0.0.0.0') . '|' . $ua);
-                $cacheKey = "visit:dedupe:{$fingerprint}";
-                if (Cache::add($cacheKey, true, now()->addMinutes(30))) {
-                    $today = now()->toDateString();
+        if ($request->isMethod('get') && $response->isSuccessful()) {
+            $ip = $request->ip() ?? '0.0.0.0';
 
 
-                    $updated = DB::table('visits')
-                        ->where('date', $today)
-                        ->increment('total');
+            $updated = DB::table('visits')
+                ->where('ip', $ip)
+                ->increment('hits');
 
-                    if ($updated === 0) {
-                        DB::table('visits')->insert([
-                            'date' => $today,
-                            'total' => 1,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    }
-                }
+            if ($updated === 0) {
+                DB::table('visits')->insert([
+                    'ip'         => $ip,
+                    'hits'       => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
         }
 
