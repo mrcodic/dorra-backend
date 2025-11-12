@@ -57,7 +57,7 @@ $discountTypes = [
                 <div id="order-chart"></div>
             </div>
         </div>
-
+@dd($bestMonths)
         <!-- Earnings Chart Card -->
         <div class="col-lg-3 col-sm-6 col-12">
             <div class="card border-2">
