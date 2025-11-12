@@ -80,7 +80,7 @@ class StatisticsController extends Controller
             'published_templates' => $topPublished,
             'live_templates' => $topLive,
             'draft_templates' => $topDraft,
-            'visits' => $topVisits,
+            'visits' => $format($topVisits, 'c') ,
         ];
 
         return view('dashboard.index', compact('bestMonths'));

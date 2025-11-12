@@ -83,7 +83,6 @@ $discountTypes = [
                 <div id="gained-chart"></div>
             </div>
         </div>
-@dd($bestMonths)
         <!-- Visits Chart Card -->
         <div class="col-lg-3 col-sm-6 col-12">
             <div class="card border-2">
