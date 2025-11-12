@@ -59,13 +59,9 @@ class StatisticsController extends Controller
         $categories = Category::count();
         $products = Product::count();
 
-        $topTemplates = Template::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
-            ->whereYear('created_at', $year)
-            ->groupBy('ym')
-            ->orderByDesc('c')
-            ->first();
-        $topPublished = Template::whereStatus(\App\Enums\Template\StatusEnum::PUBLISHED)
-            ->count();
+        $topTemplates = Template::count();
+        $topPublished = Template::whereStatus(\App\Enums\Template\StatusEnum::PUBLISHED)->count();
+        $topLive = Template::whereStatus(\App\Enums\Template\StatusEnum::LIVE)->count();
         $topDraft = Template::
             whereStatus(\App\Enums\Template\StatusEnum::DRAFTED)
             ->count();
@@ -76,8 +72,9 @@ class StatisticsController extends Controller
             'orders_refunded' => $format($topRefunded, 'c'),
             'categories' => $categories,
             'products' => $products,
-            'templates' => $format($topTemplates, 'c'),
+            'templates' => $topTemplates,
             'published_templates' => $topPublished,
+            'live_templates' => $topLive,
             'draft_templates' => $topDraft,
         ];
 

@@ -170,6 +170,13 @@ $discountTypes = [
                     <p class="fs-2 text-black">Templates</p>
                     <div class="d-flex align-items-center gap-1 gap-lg-4">
                         <div class="d-flex flex-column align-items-center">
+                            <div class="d-flex flex-column">
+                                <div class="d-flex align-items-center">
+                                    <span class="rounded-1 me-1" style="width:24px;height:6px;background-color:#B3E3D8"></span>
+                                    <span class="me-auto">Draft</span>
+                                </div>
+                                <span>{{ number_format((int) data_get($bestMonths, 'draft_templates', 0)) }} Templates</span>
+                            </div>
                             <div class="d-flex align-items-center">
                                 <span class="rounded-1 me-1" style="width:24px;height:6px;background-color:#24B094"></span>
                                 <span class="me-auto">Published</span>
@@ -179,10 +186,10 @@ $discountTypes = [
 
                         <div class="d-flex flex-column">
                             <div class="d-flex align-items-center">
-                                <span class="rounded-1 me-1" style="width:24px;height:6px;background-color:#B3E3D8"></span>
-                                <span class="me-auto">Draft</span>
+                                <span class="rounded-1 me-1" style="width:24px;height:6px;background-color:#24b263"></span>
+                                <span class="me-auto">Live</span>
                             </div>
-                            <span>{{ number_format((int) data_get($bestMonths, 'draft_templates', 0)) }} Templates</span>
+                            <span>{{ number_format((int) data_get($bestMonths, 'live_templates', 0)) }} Templates</span>
                         </div>
                     </div>
                 </div>
