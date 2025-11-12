@@ -49,6 +49,7 @@ use App\Services\TeamService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -78,6 +79,7 @@ class MainController extends Controller
     )
     {
     }
+
 
     public function removeMedia(Media $media)
     {
@@ -185,11 +187,13 @@ class MainController extends Controller
         return Response::api(data: MediaResource::make($assetMedia));
     }
 
-    public function addMedia(Request $request, $id = null)
+    public function addMedia(Request $request, $modelName = null, $model = null)
     {
-//        $global  = GlobalAsset::create(['title' => $request->title, 'type' => $request->type]);
-////        $model = ($request->resource)::find($id);
-        $media = handleMediaUploads($request->allFiles(), null, clearExisting: true);
+        $modelId = (int) $model;
+        $class   = 'App\\Models\\' . Str::studly($modelName);
+        abort_unless(class_exists($class), 404, 'Model not found');
+        $model = $class::findOrFail($modelId);
+        $media = handleMediaUploads($request->allFiles(), $model, clearExisting: true);
         return Response::api(data: MediaResource::make($media));
     }
 

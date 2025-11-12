@@ -56,17 +56,8 @@ class StatisticsController extends Controller
             ->first();
 
 
-        $topCategories = Category::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
-            ->whereYear('created_at', $year)
-            ->groupBy('ym')
-            ->orderByDesc('c')
-            ->first();
-        $topProducts = Product::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
-            ->whereYear('created_at', $year)
-            ->groupBy('ym')
-            ->orderByDesc('c')
-            ->first();
-
+        $categories = Category::count();
+        $products = Product::count();
 
         $topTemplates = Template::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
             ->whereYear('created_at', $year)
@@ -90,8 +81,8 @@ class StatisticsController extends Controller
             'orders' => $format($topOrders, 'c'),
             'orders_revenue' => $format($topRevenue, 'amount'),
             'orders_refunded' => $format($topRefunded, 'c'),
-            'categories' => $format($topCategories, 'c'),
-            'products' => $format($topProducts, 'c'),
+            'categories' => $categories,
+            'products' => $products,
             'templates' => $format($topTemplates, 'c'),
             'published_templates' => $format($topPublished, 'c'),
             'draft_templates' => $format($topDraft, 'c'),

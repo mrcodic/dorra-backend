@@ -41,15 +41,20 @@ class AppServiceProvider extends ServiceProvider
         $user = Admin::where('email', $request->email)->first();
 
         if (!$user) {
-            // Email doesn’t exist
             throw ValidationException::withMessages([
                 'email' => trans('auth.user_not_found'),
             ]);
         }
+        if ($user->status == 0)
+        {
+            throw ValidationException::withMessages([
+                'email' => 'your account is blocked',
+            ]);
+        }
         if ($user->roles->isEmpty()) {
-//            throw ValidationException::withMessages([
-//                'role' => 'contact administrator your role deleted',
-//            ]);
+            throw ValidationException::withMessages([
+                'role' => 'contact administrator your role deleted',
+            ]);
         }
 
         if (! Hash::check($request->password, $user->password)) {

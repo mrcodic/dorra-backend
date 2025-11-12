@@ -37,13 +37,20 @@ use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\AutoCheckPermission;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(AutoCheckPermission::class)->group(function () {
 
     Route::view('/login/social', 'dashboard.auth.social-login');
     Route::view('confirm-password', 'dashboard.auth.confirm-password');
-
+    Route::view('forgot-password', 'dashboard.auth.forgot-password')->name('password.request');
+    Route::get('/reset-password', function (Request $request) {
+        return view('dashboard.auth.reset-password', [
+            'token' => $request->query('token'),
+            'email' => $request->query('email'),
+        ]);
+    })->name('password.reset');
     Route::middleware('auth')->group(function () {
         Route::get('states', [MainController::class, 'states'])->name('states');
         Route::get('zones', [MainController::class, 'zones'])->name('zones');
@@ -203,9 +210,11 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             ->name('product-templates.change-status.show');
         Route::resource('/product-templates', TemplateController::class);
 
-
-        Route::resource('/profile', ProfileController::class)->only(['index', 'update']);
-
+        Route::controller(ProfileController::class)->prefix('profile')->group(function () {
+            Route::post('check-old-password', 'checkOldPassword')->name('check-old-password');
+            Route::post('change-password', 'changePassword')->name('change-password');
+        });
+        Route::resource('profile', ProfileController::class)->only(['index', 'update']);
 
         Route::controller(SettingController::class)->prefix('settings')->group(function () {
             Route::get('/details', 'details')->name('settings-details.show');
@@ -325,12 +334,12 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         });
 
         Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);
-        Route::post('addMedia', [MainController::class, 'addMedia'])->name("media.store");
+        Route::post('addMedia/{model_name?}/{model?}', [MainController::class, 'addMedia'])->name("media.store");
         Route::delete('/media/{media}', [MainController::class, 'removeMedia'])->name("media.destroy");
         Route::post('ship-blu/request-pickup', [ShippingController::class, 'requestPickup'])
             ->name('ship-blu.request-pickup');
 
-        Route::post('social-links',[SettingController::class, 'socialLinks'])->name('social-links');
+        Route::post('social-links', [SettingController::class, 'socialLinks'])->name('social-links');
     });
 
 });
