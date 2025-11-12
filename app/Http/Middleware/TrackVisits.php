@@ -25,14 +25,12 @@ class TrackVisits
             $ip = $request->ip() ?? '0.0.0.0';
 
 
-            $updated = DB::table('visits')
-                ->where('ip', $ip)
-                ->increment('hits');
+            $existed= DB::table('visits')
+                ->where('ip', $ip)->exists();
 
-            if ($updated === 0) {
+            if (!$existed) {
                 DB::table('visits')->insert([
                     'ip'         => $ip,
-                    'hits'       => 1,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
