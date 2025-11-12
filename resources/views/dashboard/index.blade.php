@@ -71,14 +71,14 @@ $discountTypes = [
 
                     <h2 class="text-black">
           <span class="fw-bolder text-black">
-            {{ number_format((float) data_get($bestMonths, 'revenue.value', 0)) }}
+            {{ number_format((float) data_get($bestMonths, 'revenue.amount', 0)) }}
           </span> EGP
                     </h2>
 
                     <h2 class="fs-5" style="color:#30A84D;">
                         <span><i data-feather="trending-up" class="font-medium-5"></i></span>
                         Highest Month
-                        <span class="text-black ms-50">{{ data_get($bestMonths, 'revenue.label', '—') }}</span>
+                        <span class="text-black ms-50">{{ data_get($bestMonths, 'revenue.ym', '—') }}</span>
                     </h2>
                 </div>
                 <div id="gained-chart"></div>
