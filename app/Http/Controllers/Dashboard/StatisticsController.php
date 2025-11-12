@@ -64,18 +64,11 @@ class StatisticsController extends Controller
             ->groupBy('ym')
             ->orderByDesc('c')
             ->first();
-        $topPublished = Template::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
-            ->whereYear('created_at', $year)
-            ->whereStatus(\App\Enums\Template\StatusEnum::PUBLISHED)
-            ->groupBy('ym')
-            ->orderByDesc('c')
-            ->first();
-        $topDraft = Template::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, COUNT(*) AS c')
-            ->whereYear('created_at', $year)
-            ->whereStatus(\App\Enums\Template\StatusEnum::DRAFTED)
-            ->groupBy('ym')
-            ->orderByDesc('c')
-            ->first();
+        $topPublished = Template::whereStatus(\App\Enums\Template\StatusEnum::PUBLISHED)
+            ->count();
+        $topDraft = Template::
+            whereStatus(\App\Enums\Template\StatusEnum::DRAFTED)
+            ->count();
 
         $bestMonths = [
             'orders' => $format($topOrders, 'c'),
