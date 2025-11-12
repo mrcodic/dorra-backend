@@ -20,12 +20,8 @@ class TrackVisits
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        dd(  $request->isMethod('get'),
-            $request->is('user/api/*') ,
-            $response->isSuccessful());
         if (
             $request->isMethod('get') &&
-            $request->is('user/api/*') &&
             $response->isSuccessful()
         ) {
 
