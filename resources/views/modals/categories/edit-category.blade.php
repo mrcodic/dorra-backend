@@ -67,7 +67,16 @@
                         </div>
                     </div>
 
-
+                    <!-- Has Mockup -->
+                    <div class="col-md-12">
+                        <div class="mb-2 d-flex align-items-center gap-2">
+                            <label class="form-label label-text ">Is this category has Mockup?</label>
+                            <div class="form-check form-switch">
+                                <input type="hidden" name="has_mockup" value="0"/>
+                                <input class="form-check-input" type="checkbox" id="has_mockup" name="has_mockup" value="1" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer border-top-0">
                     <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
@@ -82,7 +91,7 @@
         </div>
     </div>
 </div>
-</div>
+
 <script !src="">
     Dropzone.autoDiscover = false;
 

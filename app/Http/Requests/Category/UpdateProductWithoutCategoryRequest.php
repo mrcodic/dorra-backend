@@ -43,7 +43,6 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
             'images_ids.*' => ['nullable','exists:media,id'],
             'tags' => ['nullable', 'array'],
             'has_custom_prices' => ['required', 'boolean'],
-            'has_mockup' => ['required', 'boolean'],
             'base_price' => [
                 'required_if:has_custom_prices,false',
                 'prohibited_if:has_custom_prices,true',

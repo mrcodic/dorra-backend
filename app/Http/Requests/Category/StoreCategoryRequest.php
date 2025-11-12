@@ -39,6 +39,7 @@ class StoreCategoryRequest extends BaseRequest
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
             'image_id' => ['required','exists:media,id'],
+            'has_mockup' => ['required', 'boolean'],
         ];
 
     }

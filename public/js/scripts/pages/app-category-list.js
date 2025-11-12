@@ -111,6 +111,7 @@ const dt_user_table = $(".category-list-table").DataTable({
    data-id="${data}"
    data-name_ar="${row.name_ar}"
    data-name_en="${row.name_en}"
+   data-has_mockup="${row.has_mockup}"
    data-image="${row.image}"
    data-image_id="${row.imageId}"
    data-description_en="${row.description_en}"
@@ -376,6 +377,7 @@ $(document).ready(function () {
                 descEn: "#category-description-en",
                 img: "#imagePreview",
                 id: "#category-id",
+                has_mockup: "#has_mockup",
                 imgId: "#image-id",
                 subs: "#subcategories-container",
                 extra: () => {} // nothing special
@@ -387,6 +389,7 @@ $(document).ready(function () {
                 date: "#edit-category-date",
                 descAr: "#edit-category-description-ar",
                 descEn: "#edit-category-description-en",
+                has_mockup: "#has_mockup",
                 img: "#edit-preview-image",
                 id: "#edit-category-id",
                 imgId: null, // not present in your edit modal
@@ -397,7 +400,6 @@ $(document).ready(function () {
 
         const m = maps[modalId] || maps["#showCategoryModal"];
         const $scope = $(modalId);
-
         // Fill fields safely (data-* with underscores come through as same keys in jQuery)
         $scope.find(m.nameAr).val(data.name_ar || "");
         $scope.find(m.nameEn).val(data.name_en || "");
@@ -405,6 +407,7 @@ $(document).ready(function () {
         $scope.find(m.date).val(data.showdate || "");
         $scope.find(m.descAr).val(data.description_ar || "");
         $scope.find(m.descEn).val(data.description_en || "");
+        $scope.find(m.has_mockup).prop('checked', !!data.has_mockup);
         $scope.find(m.img).attr("src", data.image || "");
         if (m.imgId) $scope.find(m.imgId).val(data.image_id || "");
         $scope.find(m.id).val(data.id || "");
@@ -425,12 +428,14 @@ $(document).ready(function () {
         var descEN = $("#category-description-en").val();
         var descAR = $("#category-description-ar").val();
         var imageId = $("#image-id").val();
+        var hasMockup = $("#has_mockup").val();
         var image = $("#imagePreview").attr("src");
         var id = $("#category-id").val();
         $("#edit-category-name-en").val(nameEN);
         $("#edit-category-name-ar").val(nameAR);
         $("#edit-category-description-en").val(descEN);
         $("#edit-category-description-ar").val(descAR);
+        $("#has_mockup").prop('checked', !!hasMockup);
         $("#edit-category-id").val(id);
         $("#edit-uploaded-image").removeClass("d-none");
         $("#edit-preview-image").attr("src", image);
