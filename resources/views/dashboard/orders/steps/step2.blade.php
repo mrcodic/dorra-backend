@@ -7,7 +7,7 @@
             <i data-feather="search"></i>
         </span>
         <input type="text" id="product-search" class="form-control border-start-0 border-end-0"
-               placeholder="Search for products">
+               placeholder="Search for categories">
         <span class="input-group-text bg-white border-start-0"></span>
     </div>
 
@@ -49,7 +49,7 @@
         <div id="product-results"></div>
     </div>
     <h5 class="mb-2 fs-3 text-black mt-2">Or Select Product</h5>
-    <select name="" id="" class="form-select">
+    <select name="category_id" id="categorySelect" class="form-select">
         <option value="" selected disabled>select Product</option>
         @forelse($associatedData['products_without'] as $product)
         <option value="{{ $product->id }}">{{ $product->name }}</option>
@@ -178,5 +178,22 @@
     $(document).on('click', 'next-step-2', function() {
         $('#step-2').hide();
         $('#step-3').show();
+    });
+    const selectedCategoryId = $('#categorySelect').val();
+
+    $.ajax({
+        url: '{{ route("orders.step2") }}',
+        method: 'POST',
+        data: {
+            product_id: selectedProductId,
+            category_id: selectedCategoryId,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function (response) {
+            // Proceed to next step (handle as needed)
+        },
+        error: function (xhr) {
+            console.error(xhr.responseJSON);
+        }
     });
 </script>

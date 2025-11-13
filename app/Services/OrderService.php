@@ -164,11 +164,18 @@ class OrderService extends BaseService
 
     public function storeStep2($request): void
     {
+        $request->validate([
+            "product_id" => ["required", "exists:products,id",],
+            "category_id" => ["required", "exists:categories,id",]
+        ]);
         $product = $this->productRepository->find($request->product_id);
-        $request->validate(["product_id" => ["required", "exists:products,id"]]);
+        $category = $this->productRepository->find($request->category_id);
+
         $this->storeStepData([
+            "category_id" => $category->id,
             "product_id" => $product->id,
             "product_name" => $product->name,
+            "category_name" => $category->name,
         ]);
 
     }
