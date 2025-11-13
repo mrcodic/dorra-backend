@@ -35,6 +35,7 @@ class StatisticsController extends Controller
 
         $topOrders = Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym')
             ->whereYear('created_at', $year)
+            ->wherStatus(StatusEnum::DELIVERED)
             ->groupBy('ym')
             ->first();
 

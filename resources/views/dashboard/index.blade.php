@@ -276,7 +276,7 @@
                                         class="fw-bolder text-black">{{ number_format(data_get($bestMonths, 'orders_revenue.value'), 0) }}</span>
                                     EGP
                                 </h2>
-{{--                                <span>in {{ $salesCard['year'] }}</span>--}}
+                                <span>in {{ data_get($bestMonths, 'orders_revenue.ym') }}</span>
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center w-100 mt-1">
