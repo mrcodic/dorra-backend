@@ -24,7 +24,7 @@ class StatisticsController extends Controller
             if (!$row) return null;
 
 
-            $label = Carbon::createFromFormat('Y-m', $row->ym)->translatedFormat('F Y');
+            $label = Carbon::createFromFormat('m-Y', $row->ym)->translatedFormat('F Y');
 
             return [
                 'ym' => $row->ym,
