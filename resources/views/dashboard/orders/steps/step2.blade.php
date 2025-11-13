@@ -180,20 +180,22 @@
         $('#step-3').show();
     });
     const selectedCategoryId = $('#categorySelect').val();
+    $('#next-step-btn').on('click', function () {
 
-    $.ajax({
-        url: '{{ route("orders.step2") }}',
-        method: 'POST',
-        data: {
-            product_id: selectedProductId,
-            category_id: selectedCategoryId,
-            _token: '{{ csrf_token() }}'
-        },
-        success: function (response) {
-            // Proceed to next step (handle as needed)
-        },
-        error: function (xhr) {
-            console.error(xhr.responseJSON);
-        }
+        $.ajax({
+            url: '{{ route("orders.step2") }}',
+            method: 'POST',
+            data: {
+                product_id: selectedProductId,
+                category_id: selectedCategoryId,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (response) {
+                // Proceed to next step (handle as needed)
+            },
+            error: function (xhr) {
+                console.error(xhr.responseJSON);
+            }
+        });
     });
 </script>
