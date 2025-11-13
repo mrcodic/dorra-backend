@@ -137,7 +137,7 @@
 
 
                             <div class="w-100 text-end">
-                                <a href="{{ route("password.request") }}" class="text-primary text-decoration-underline fs-6 text-end"
+                                <a href="{{ url('/forgot-password') }}" class="text-primary text-decoration-underline fs-6 text-end"
                                    style="color:#24B094!important;">Forgot password?</a>
                             </div>
                         </div>
