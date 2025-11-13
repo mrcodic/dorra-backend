@@ -44,7 +44,7 @@ class StatisticsController extends Controller
             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, SUM(total_price) AS amount')
             ->groupBy('ym');
 
-        $topRevenue    = DB::query()->fromSub($monthlyRevenue, 'm')->orderByDesc('amount')->first();
+        $topRevenue    = DB::query()->orderByDesc('amount')->first();
         $lowestRevenue = DB::query()->fromSub($monthlyRevenue, 'm')->orderBy('amount')->first();
 
         $monthlyVisits = Visit::whereYear(DB::raw('COALESCE(`date`, `created_at`)'), $year)
@@ -75,13 +75,13 @@ class StatisticsController extends Controller
         $bestMonths = [
             'orders'              => $format($topOrders, 'c'),
 
-            // Revenue extremes (keep existing key for highest; add *_lowest)
+
             'orders_revenue'      => $format($topRevenue, 'amount'),
             'orders_revenue_lowest' => $format($lowestRevenue, 'amount'),
 
             'orders_refunded'     => $format($topRefunded, 'c'),
 
-            // Counts
+
             'categories'          => $categories,
             'products'            => $products,
             'templates'           => $topTemplates,
@@ -89,7 +89,7 @@ class StatisticsController extends Controller
             'live_templates'      => $topLive,
             'draft_templates'     => $topDraft,
 
-            // Visits extremes (keep existing key for highest; add *_lowest)
+
             'visits'              => $format($topVisits, 'c'),
             'visits_lowest'       => $format($lowestVisits, 'c'),
         ];
