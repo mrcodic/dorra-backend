@@ -96,6 +96,7 @@ const dt_user_table = $(".category-list-table").DataTable({
                                               data-name_en="${row.name_en}"
                                               data-image="${row.image}"
                                               data-image_id="${row.imageId}"
+                                              data-has_mockup="${row.has_mockup}"
                                               data-description_en="${row.description_en}"
                                               data-description_ar="${row.description_ar}"
                                               data-subcategories="${row.children.map(
