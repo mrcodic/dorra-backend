@@ -87,6 +87,7 @@ class OfferService extends BaseService
                     ->where('cartable_type', Category::class)
                     ->whereIn('cartable_id', $validatedData['category_ids'])
                     ->pluck('cart_id');
+                dd($cartIds);
                 $this->cartRepository->query()->whereIn('id', $cartIds)->update(['discount_amount' => 0, 'discount_code_id' => null]);
             });
 
