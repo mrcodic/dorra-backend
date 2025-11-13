@@ -297,7 +297,7 @@
         const dz = new Dropzone("#avatarDropzone", {
             url: "{{ route('media.store',[
        'model_name'=> 'admin',
-       'model'=> auth()->user()
+       'model'=> auth()->user()->id
       ]) }}",
             method: "post",
             paramName: "file",

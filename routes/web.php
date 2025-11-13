@@ -336,7 +336,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         });
 
         Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);
-        Route::post('addMedia', [MainController::class, 'addMedia'])->name("media.store");
+        Route::post('addMedia/{model_name?}/{model?}', [MainController::class, 'addMedia'])->name("media.store");
         Route::delete('/media/{media}', [MainController::class, 'removeMedia'])->name("media.destroy");
         Route::post('ship-blu/request-pickup', [ShippingController::class, 'requestPickup'])
             ->name('ship-blu.request-pickup');

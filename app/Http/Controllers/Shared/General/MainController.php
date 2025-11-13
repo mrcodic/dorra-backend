@@ -189,11 +189,9 @@ class MainController extends Controller
 
     public function addMedia(Request $request, $modelName = null, $model = null)
     {
-//        $modelId = (int) $model;
-//        $class   = 'App\\Models\\' . Str::studly($modelName);
-//        abort_unless(class_exists($class), 404, 'Model not found');
-//        $model = $class::find($modelId);
-//
+        $modelId = (int) $model;
+        $class   = 'App\\Models\\' . Str::studly($modelName);
+        $model = $modelName && $modelId ? $class::find($modelId) : null;
         $media = handleMediaUploads($request->allFiles(), $model, clearExisting: true);
         return Response::api(data: MediaResource::make($media));
     }
