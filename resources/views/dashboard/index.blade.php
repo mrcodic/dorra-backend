@@ -254,53 +254,65 @@ $discountTypes = [
                 <div class="card-header flex-column align-items-start pb-0">
                     <div class="d-flex gap-1 align-items-center">
                         <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
-                            style="background-color: #FCF8FC; width: 40px; height: 40px;">
-                            <i data-feather="tag" class="font-medium-5" style="color: #4E2775;"></i>
+                             style="background-color:#FCF8FC;width:40px;height:40px;">
+                            <i data-feather="tag" class="font-medium-5" style="color:#4E2775;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Sales</p>
                     </div>
+
                     <div class="ps-3 w-100">
                         <div class="d-flex justify-content-between align-items-center w-100">
-                            <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> EGP</h2>
-                            <span>in 2025</span>
+                            <h2 class="text-black">
+                                <span class="fw-bolder text-black">{{ number_format($salesCard['total'], 0) }}</span> EGP
+                            </h2>
+                            <span>in {{ $salesCard['year'] }}</span>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center w-100 mt-1">
-                            <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
-                                        class="font-medium-5"></i></span> Highest Month</h2>
-                            <span class="text-black">December</span>
+                            <h2 class="fs-5" style="color:#30A84D;">
+                                <span><i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month
+                            </h2>
+                            <span class="text-black">{{ $salesCard['highest'] }}</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center w-100 ">
-                            <h2 class="  fs-5" style="color: #E74943;"><span> <i data-feather="trending-down"
-                                        class="font-medium-5"></i></span> Lowest Month</h2>
-                            <span class="text-black">March</span>
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h2 class="fs-5" style="color:#E74943;">
+                                <span><i data-feather="trending-down" class="font-medium-5"></i></span> Lowest Month
+                            </h2>
+                            <span class="text-black">{{ $salesCard['lowest'] }}</span>
                         </div>
                     </div>
                 </div>
-                <hr class="mx-2" />
+
+                <hr class="mx-2"/>
+
                 <div class="card-header flex-column align-items-start pb-0 mt-0 pt-0">
                     <div class="d-flex gap-1 align-items-center">
                         <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
-                            style="background-color:#FFFEF3; width: 40px; height: 40px;">
-                            <i data-feather="eye" class="font-medium-5" style="color: #F8AB1B;"></i>
+                             style="background-color:#FFFEF3;width:40px;height:40px;">
+                            <i data-feather="eye" class="font-medium-5" style="color:#F8AB1B;"></i>
                         </div>
                         <p class="text-black fs-4 mb-0">Visits</p>
                     </div>
+
                     <div class="ps-3 w-100">
                         <div class="d-flex justify-content-between align-items-center w-100">
-                            <h2 class=" text-black "><span class="fw-bolder text-black ">20k</span> visits</h2>
-                            <span>in 2025</span>
+                            <h2 class="text-black">
+                                <span class="fw-bolder text-black">{{ number_format($visitsCard['total'], 0) }}</span> visits
+                            </h2>
+                            <span>in {{ $visitsCard['year'] }}</span>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center w-100 mt-1">
-                            <h2 class="  fs-5" style="color: #30A84D;"><span> <i data-feather="trending-up"
-                                        class="font-medium-5"></i></span> Highest Month</h2>
-                            <span class="text-black">December</span>
+                            <h2 class="fs-5" style="color:#30A84D;">
+                                <span><i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month
+                            </h2>
+                            <span class="text-black">{{ $visitsCard['highest'] }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center w-100 mb-1">
-                            <h2 class="  fs-5" style="color: #E74943;"><span> <i data-feather="trending-down"
-                                        class="font-medium-5"></i></span> Lowest Month</h2>
-                            <span class="text-black">March</span>
+                            <h2 class="fs-5" style="color:#E74943;">
+                                <span><i data-feather="trending-down" class="font-medium-5"></i></span> Lowest Month
+                            </h2>
+                            <span class="text-black">{{ $visitsCard['lowest'] }}</span>
                         </div>
                     </div>
                 </div>
