@@ -35,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
             'api/v1/user/payment/callback',
+            'api/v1/user/ship-blu/webhook',
         ]);
         $middleware->encryptCookies(['dorra_auth_token','dorra_auth_cookie_id']);
         $middleware->api([

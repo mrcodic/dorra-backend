@@ -134,7 +134,7 @@
                                 <input type="password" class="form-control form-control-merge" id="old-password"
                                        name="current_password" placeholder="Enter old password"/>
                             </div>
-                            
+
                         </div>
 
                         <div class="d-flex gap-1 justify-content-end mt-2">

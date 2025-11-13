@@ -11,9 +11,13 @@ enum StatusEnum : int
     case PENDING = 1;
     case CONFIRMED = 2;
     case PREPARED = 3;
-    case SHIPPED = 4;
-    case DELIVERED = 5;
-    case REFUNDED = 6;
+    case REQUESTED_PICKUP = 4;
+    case SHIPPED = 5;
+    case OUT_FOR_DELIVERY = 6;
+    case IN_TRANSIT = 7;
+    case DELIVERY_ATTEMPTED = 8;
+    case DELIVERED = 9;
+    case REFUNDED = 10;
     public function label(): string
     {
         return match ($this) {

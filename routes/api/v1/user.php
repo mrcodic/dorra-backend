@@ -205,10 +205,8 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
     Route::get('cities/{governorateId}', 'cities');
     Route::get('zones/{cityId}', 'zones');
     Route::post('delivery-fee', 'deliveryFee');
+    Route::get('webhook','handleWebhook');
 });
 
-Route::get('test2',function(\App\Services\Shipping\ShippingManger $shippingManger){
-    $addressDto = RateQuoteDTO::fromArray(\App\Models\Cart::find(117),\App\Models\Cart::find(117)->price,1);
-   return $shippingManger->driver('shipblu')->getRateQuote($addressDto, 'delivery');
-});
+
 
