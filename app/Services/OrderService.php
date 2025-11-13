@@ -15,7 +15,8 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\{DB, Auth, Cache};
 use App\Models\{Order, Design, Product, Location, ShippingAddress};
 use App\DTOs\Order\{OrderData, OrderAddressData, OrderItemData, PickupContactData};
-use App\Repositories\Interfaces\{InventoryRepositoryInterface,
+use App\Repositories\Interfaces\{CategoryRepositoryInterface,
+    InventoryRepositoryInterface,
     PaymentMethodRepositoryInterface,
     UserRepositoryInterface,
     OrderRepositoryInterface,
@@ -48,6 +49,7 @@ class OrderService extends BaseService
         public PaymentMethodRepositoryInterface              $paymentMethodRepository,
         public PaymentGatewayFactory                         $paymentFactory,
         public InventoryRepositoryInterface $inventoryRepository,
+        public CategoryRepositoryInterface $categoryRepository,
 
     )
 
@@ -169,7 +171,7 @@ class OrderService extends BaseService
             "category_id" => ["required_without:product_id", "exists:categories,id",]
         ]);
         $product = $this->productRepository->find($request->product_id);
-        $category = $this->productRepository->find($request->category_id);
+        $category = $this->categoryRepository->find($request->category_id);
 
         $this->storeStepData([
             "category_id" => $category->id,
