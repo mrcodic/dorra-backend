@@ -35,7 +35,6 @@ class StatisticsController extends Controller
 
         $topOrders = Order::selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym')
             ->whereYear('created_at', $year)
-            ->wherStatus(StatusEnum::DELIVERED)
             ->groupBy('ym')
             ->first();
 
@@ -43,6 +42,7 @@ class StatisticsController extends Controller
 
         $monthlyRevenue = Order::whereYear('created_at', $year)
             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, SUM(total_price) AS amount')
+            ->whereStatus(StatusEnum::DELIVERED)
             ->groupBy('ym');
 
         $topRevenue    = $monthlyRevenue->orderByDesc('amount')->first();
