@@ -319,16 +319,16 @@
                                     </div>
                                 </div>
                                 <!-- Buttons -->
-                                <div>
-                                    <button type="button" class="btn bg-white text-danger place-order">
-                                        Remove
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary place-order"
-                                        data-bs-toggle="modal" data-bs-target="#teamAccessModal"
-                                        data-team-id="{{ $team->id }}">
-                                        Show
-                                    </button>
-                                </div>
+{{--                                <div>--}}
+{{--                                    <button type="button" class="btn bg-white text-danger place-order">--}}
+{{--                                        Remove--}}
+{{--                                    </button>--}}
+{{--                                    <button type="button" class="btn btn-outline-secondary place-order"--}}
+{{--                                        data-bs-toggle="modal" data-bs-target="#teamAccessModal"--}}
+{{--                                        data-team-id="{{ $team->id }}">--}}
+{{--                                        Show--}}
+{{--                                    </button>--}}
+{{--                                </div>--}}
                             </div>
 
                             @empty

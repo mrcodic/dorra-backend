@@ -32,11 +32,12 @@
 
         <div class="row">
             <!-- order Chart Card -->
-            <div class="col-lg-3 col-sm-6 col-12">
+            <div class="col-lg-4 col-sm-6 col-12">
                 <div class="card border-2">
                     <div class="card-header flex-column gap-1 align-items-start pb-0">
                         <div class="d-flex gap-1 align-items-center">
-                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color:#FCF8FC;width:40px;height:40px;">
+                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                                 style="background-color:#FCF8FC;width:40px;height:40px;">
                                 <i data-feather="file-text" class="font-medium-5" style="color:#24B094;"></i>
                             </div>
                             <p class="text-black fs-4 mb-0">Total Orders</p>
@@ -58,37 +59,40 @@
                 </div>
             </div>
             <!-- Earnings Chart Card -->
-            <div class="col-lg-3 col-sm-6 col-12">
-                <div class="card border-2">
-                    <div class="card-header flex-column gap-1 align-items-start pb-0">
-                        <div class="d-flex gap-1 align-items-center">
-                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color:#FCF8FC;width:40px;height:40px;">
-                                <i data-feather="tag" class="font-medium-5" style="color:#4E2775;"></i>
-                            </div>
-                            <p class="text-black fs-4 mb-0">Earnings</p>
-                        </div>
+{{--            <div class="col-lg-3 col-sm-6 col-12">--}}
+{{--                <div class="card border-2">--}}
+{{--                    <div class="card-header flex-column gap-1 align-items-start pb-0">--}}
+{{--                        <div class="d-flex gap-1 align-items-center">--}}
+{{--                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50"--}}
+{{--                                 style="background-color:#FCF8FC;width:40px;height:40px;">--}}
+{{--                                <i data-feather="tag" class="font-medium-5" style="color:#4E2775;"></i>--}}
+{{--                            </div>--}}
+{{--                            <p class="text-black fs-4 mb-0">Earnings</p>--}}
+{{--                        </div>--}}
 
-                        <h2 class="text-black">
-          <span class="fw-bolder text-black">
-            {{ number_format((float) \App\Models\Order::whereStatus(\App\Enums\Order\StatusEnum::DELIVERED)->sum('total_price')) }}
-          </span> EGP
-                        </h2>
+{{--                        <h2 class="text-black">--}}
+{{--          <span class="fw-bolder text-black">--}}
+{{--            {{ number_format((float) \App\Models\Order::whereStatus(\App\Enums\Order\StatusEnum::DELIVERED)->sum('total_price')) }}--}}
+{{--          </span> EGP--}}
+{{--                        </h2>--}}
 
-                        <h2 class="fs-5" style="color:#30A84D;">
-                            <span><i data-feather="trending-up" class="font-medium-5"></i></span>
-                            Highest Month
-                            <span class="text-black ms-50">{{ data_get($bestMonths, 'orders_revenue.label', '—') }}</span>
-                        </h2>
-                    </div>
-                    <div id="gained-chart"></div>
-                </div>
-            </div>
+{{--                        <h2 class="fs-5" style="color:#30A84D;">--}}
+{{--                            <span><i data-feather="trending-up" class="font-medium-5"></i></span>--}}
+{{--                            Highest Month--}}
+{{--                            <span--}}
+{{--                                class="text-black ms-50">{{ data_get($bestMonths, 'orders_revenue.label', '—') }}</span>--}}
+{{--                        </h2>--}}
+{{--                    </div>--}}
+{{--                    <div id="gained-chart"></div>--}}
+{{--                </div>--}}
+{{--            </div>--}}
             <!-- Visits Chart Card -->
-            <div class="col-lg-3 col-sm-6 col-12">
+            <div class="col-lg-4 col-sm-6 col-12">
                 <div class="card border-2">
                     <div class="card-header flex-column gap-1 align-items-start pb-0">
                         <div class="d-flex gap-1 align-items-center">
-                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color:#FCF8FC;width:40px;height:40px;">
+                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                                 style="background-color:#FCF8FC;width:40px;height:40px;">
                                 <i data-feather="eye" class="font-medium-5" style="color:#F8AB1B;"></i>
                             </div>
                             <p class="text-black fs-4 mb-0">Visits</p>
@@ -111,11 +115,12 @@
             </div>
 
             <!-- Refunded Chart Card -->
-            <div class="col-lg-3 col-sm-6 col-12">
+            <div class="col-lg-4 col-sm-6 col-12">
                 <div class="card border-2">
                     <div class="card-header flex-column gap-1 align-items-start pb-0">
                         <div class="d-flex gap-1 align-items-center">
-                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50" style="background-color:#FCF8FC;width:40px;height:40px;">
+                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
+                                 style="background-color:#FCF8FC;width:40px;height:40px;">
                                 <i data-feather="rotate-ccw" class="font-medium-5" style="color:#222245;"></i>
                             </div>
                             <p class="text-black fs-4 mb-0">Refunded</p>
@@ -130,7 +135,8 @@
                         <h2 class="fs-5" style="color:#30A84D;">
                             <span><i data-feather="trending-up" class="font-medium-5"></i></span>
                             Highest Month
-                            <span class="text-black ms-50">{{ data_get($bestMonths, 'orders_refunded.label', '—') }}</span>
+                            <span
+                                class="text-black ms-50">{{ data_get($bestMonths, 'orders_refunded.label', '—') }}</span>
                         </h2>
                     </div>
                     <div id="refund-chart"></div>
@@ -170,7 +176,8 @@
                             <div class="d-flex flex-column align-items-center">
                                 <div class="d-flex flex-column">
                                     <div class="d-flex align-items-center">
-                                        <span class="rounded-1 me-1" style="width:24px;height:6px;background-color:#B3E3D8"></span>
+                                        <span class="rounded-1 me-1"
+                                              style="width:24px;height:6px;background-color:#B3E3D8"></span>
                                         <span class="me-auto">Draft</span>
                                     </div>
                                     <span>{{ number_format((int) data_get($bestMonths, 'draft_templates', 0)) }} Templates</span>
@@ -180,7 +187,8 @@
                             <div class="d-flex flex-column align-items-center">
                                 <div class="d-flex flex-column">
                                     <div class="d-flex align-items-center">
-                                        <span class="rounded-1 me-1" style="width:24px;height:6px;background-color:#24B094"></span>
+                                        <span class="rounded-1 me-1"
+                                              style="width:24px;height:6px;background-color:#24B094"></span>
                                         <span class="me-auto">Published</span>
                                     </div>
                                     <span>{{ number_format((int) data_get($bestMonths, 'published_templates', 0)) }} Templates</span>
@@ -190,7 +198,8 @@
 
                             <div class="d-flex flex-column">
                                 <div class="d-flex align-items-center">
-                                    <span class="rounded-1 me-1" style="width:24px;height:6px;background-color:#24b263"></span>
+                                    <span class="rounded-1 me-1"
+                                          style="width:24px;height:6px;background-color:#24b263"></span>
                                     <span class="me-auto">Live</span>
                                 </div>
                                 <span>{{ number_format((int) data_get($bestMonths, 'live_templates', 0)) }} Templates</span>
@@ -224,15 +233,17 @@
                         <p class="fs-2 text-black">Categories</p>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
-                        <span class="fs-6 text-black "><span class="fs-2 fw-bold ">{{(int) data_get($bestMonths, 'products', 0)}}</span> Categories</span>
+                        <span class="fs-6 text-black "><span
+                                class="fs-2 fw-bold ">{{(int) data_get($bestMonths, 'products', 0)}}</span> Categories</span>
                         <div class="progress progress-bar-primary w-75 me-1" style="height: 6px">
-                            <div class="progress-bar" role="progressbar" aria-valuenow="{{(int) data_get($bestMonths, 'products', 0)}}" aria-valuemin="0"
-                                 aria-valuemax="100" style="width: {{(int) data_get($bestMonths, 'products', 0)}}%"></div>
+                            <div class="progress-bar" role="progressbar"
+                                 aria-valuenow="{{(int) data_get($bestMonths, 'products', 0)}}" aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 style="width: {{(int) data_get($bestMonths, 'products', 0)}}%"></div>
                         </div>
                     </div>
                 </div>
             </div>
-
 
 
         </div>
@@ -263,22 +274,24 @@
                         <div class="ps-3 w-100">
                             <div class="d-flex justify-content-between align-items-center w-100">
                                 <h2 class="text-black">
-                                    <span class="fw-bolder text-black">{{ number_format($salesCard['total'], 0) }}</span> EGP
+                                    <span
+                                        class="fw-bolder text-black">{{ number_format(data_get($bestMonths, 'orders_revenue.value'), 0) }}</span>
+                                    EGP
                                 </h2>
-                                <span>in {{ $salesCard['year'] }}</span>
+{{--                                <span>in {{ $salesCard['year'] }}</span>--}}
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center w-100 mt-1">
                                 <h2 class="fs-5" style="color:#30A84D;">
                                     <span><i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month
                                 </h2>
-                                <span class="text-black">{{ $salesCard['highest'] }}</span>
+                                <span class="text-black">{{ data_get($bestMonths, 'orders_revenue.label','—')}}</span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center w-100">
                                 <h2 class="fs-5" style="color:#E74943;">
                                     <span><i data-feather="trending-down" class="font-medium-5"></i></span> Lowest Month
                                 </h2>
-                                <span class="text-black">{{ $salesCard['lowest'] }}</span>
+                                <span class="text-black">{{ data_get($bestMonths, 'orders_revenue_lowest.label','—') }}</span>
                             </div>
                         </div>
                     </div>
@@ -297,22 +310,24 @@
                         <div class="ps-3 w-100">
                             <div class="d-flex justify-content-between align-items-center w-100">
                                 <h2 class="text-black">
-                                    <span class="fw-bolder text-black">{{ number_format($visitsCard['total'], 0) }}</span> visits
+                                    <span
+                                        class="fw-bolder text-black">{{ number_format(data_get($bestMonths, 'visits.value'), 0) }}</span>
+                                    visits
                                 </h2>
-                                <span>in {{ $visitsCard['year'] }}</span>
+{{--                                <span>in {{ $visitsCard['year'] }}</span>--}}
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center w-100 mt-1">
                                 <h2 class="fs-5" style="color:#30A84D;">
                                     <span><i data-feather="trending-up" class="font-medium-5"></i></span> Highest Month
                                 </h2>
-                                <span class="text-black">{{ $visitsCard['highest'] }}</span>
+                                <span class="text-black">{{data_get($bestMonths, 'visits.label','—') }}</span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center w-100 mb-1">
                                 <h2 class="fs-5" style="color:#E74943;">
                                     <span><i data-feather="trending-down" class="font-medium-5"></i></span> Lowest Month
                                 </h2>
-                                <span class="text-black">{{ $visitsCard['lowest'] }}</span>
+                                <span class="text-black">{{ data_get($bestMonths, 'visits_lowest.label','—') }}</span>
                             </div>
                         </div>
                     </div>
@@ -380,7 +395,7 @@
 
         <div class="row d-flex gap-1 gap-md-0 align-items-stretch">
             <!-- Discount Codes Chart -->
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="card border p-2 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-50">
                         <p class="fs-2 text-black">Discount Codes</p>
@@ -413,48 +428,45 @@
             </div>
 
             <!-- Revenue Card -->
-            <div class="col-md-6">
-                <div class="card border h-100">
-                    <div class="card-header flex-column align-items-start pb-0">
-                        <div class="d-flex align-items-center mb-1">
-                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50"
-                                 style="background-color: #FCF8FC; width: 40px; height: 40px;">
-                                <i data-feather="tag" class="font-medium-5" style="color: #4E2775;"></i>
-                            </div>
-                            <p class="text-black fs-4 mb-0 ms-2">Revenue</p>
-                        </div>
+{{--            <div class="col-md-6">--}}
+{{--                <div class="card border h-100">--}}
+{{--                    <div class="card-header flex-column align-items-start pb-0">--}}
+{{--                        <div class="d-flex align-items-center mb-1">--}}
+{{--                            <div class="d-flex align-items-center justify-content-center rounded-3 p-50"--}}
+{{--                                 style="background-color: #FCF8FC; width: 40px; height: 40px;">--}}
+{{--                                <i data-feather="tag" class="font-medium-5" style="color: #4E2775;"></i>--}}
+{{--                            </div>--}}
+{{--                            <p class="text-black fs-4 mb-0 ms-2">Revenue</p>--}}
+{{--                        </div>--}}
 
-                        <div class="ps-3 w-100">
-                            <p>Total earnings from orders used discount codes.</p>
+{{--                        <div class="ps-3 w-100">--}}
+{{--                            <p>Total earnings from orders used discount codes.</p>--}}
 
-                            <div class="d-flex justify-content-between align-items-center w-100">
-                                <h2 class="text-black"><span class="fw-bolder"></span> EGP</h2>
-                                <span>in 2025</span>
-                            </div>
+{{--                            <div class="d-flex justify-content-between align-items-center w-100">--}}
+{{--                                <h2 class="text-black"><span class="fw-bolder"></span> EGP</h2>--}}
+{{--                                <span>in 2025</span>--}}
+{{--                            </div>--}}
 
-                            <div class="d-flex justify-content-between align-items-center w-100 mt-1">
-                                <h2 class="fs-5 text-success">
-                                    <i data-feather="trending-up" class="font-medium-5"></i> Highest Month
-                                </h2>
-                                <span class="text-black">December</span>
-                            </div>
+{{--                            <div class="d-flex justify-content-between align-items-center w-100 mt-1">--}}
+{{--                                <h2 class="fs-5 text-success">--}}
+{{--                                    <i data-feather="trending-up" class="font-medium-5"></i> Highest Month--}}
+{{--                                </h2>--}}
+{{--                                <span class="text-black">December</span>--}}
+{{--                            </div>--}}
 
-                            <div class="d-flex justify-content-between align-items-center w-100">
-                                <h2 class="fs-5 text-danger">
-                                    <i data-feather="trending-down" class="font-medium-5"></i> Lowest Month
-                                </h2>
-                                <span class="text-black">March</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+{{--                            <div class="d-flex justify-content-between align-items-center w-100">--}}
+{{--                                <h2 class="fs-5 text-danger">--}}
+{{--                                    <i data-feather="trending-down" class="font-medium-5"></i> Lowest Month--}}
+{{--                                </h2>--}}
+{{--                                <span class="text-black">March</span>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--            </div>--}}
         </div>
 
     </div>
-
-
-
 
 @endsection
 
@@ -471,12 +483,12 @@
     <script>
         handleAjaxFormSubmit("#editMockupForm", {
             successMessage: "Mockup Updated Successfully",
-            onSuccess: function() {
+            onSuccess: function () {
                 $('#editMockupModal').modal('hide');
                 location.reload();
             }
         })
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const yearSelect = document.getElementById('yearSelect');
             const currentYear = new Date().getFullYear();
             const startYear = 2015;
@@ -492,7 +504,7 @@
             loadChart(currentYear);
 
             // Change chart on year change
-            yearSelect.addEventListener('change', function() {
+            yearSelect.addEventListener('change', function () {
                 const selectedYear = this.value;
                 loadChart(selectedYear);
             });
