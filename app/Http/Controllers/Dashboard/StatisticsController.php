@@ -44,7 +44,7 @@ class StatisticsController extends Controller
             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") AS ym, SUM(total_price) AS amount')
             ->groupBy('ym');
 
-        $topRevenue    = DB::query()->orderByDesc('amount')->first();
+        $topRevenue    = $monthlyRevenue->orderByDesc('amount')->first();
         $lowestRevenue = DB::query()->fromSub($monthlyRevenue, 'm')->orderBy('amount')->first();
 
         $monthlyVisits = Visit::whereYear(DB::raw('COALESCE(`date`, `created_at`)'), $year)
