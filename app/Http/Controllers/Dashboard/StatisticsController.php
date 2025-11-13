@@ -72,6 +72,7 @@ class StatisticsController extends Controller
             ->count();
         $salesRaw = Order::selectRaw('MONTH(created_at) AS m, SUM(total_price) AS amount')
             ->whereYear('created_at', $year)
+            ->whereStatus(\App\Enums\Order\StatusEnum::DELIVERED)
             ->groupBy('m')
             ->pluck('amount', 'm')
             ->all();
