@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 
+use App\DTOs\Shipping\AddressDTO;
 use App\Jobs\ProcessConfirmedOrderJob;
 
 use App\Models\Admin;
@@ -11,7 +12,7 @@ use App\Models\Inventory;
 use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
-
+use App\Services\Shipping\ShippingManger;
 
 
 class OrderObserver
@@ -46,16 +47,16 @@ class OrderObserver
             $inventory->update(["is_available" => false]);
         }
         if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
-//            if ($order->orderAddress->type == OrderTypeEnum::SHIPPING)
-//            {
-//                $shippingManager = app(ShippingManger::class);
-//                $addressDto = AddressDTO::fromArray($order);
-//                $shippingManager->driver('shipblu')->createShipment($addressDto, $order->id);
-//            }
+
             ProcessConfirmedOrderJob::dispatch($order);
             CreateInvoiceJob::dispatch($order);
         }
-
+//        if ($order->status == StatusEnum::PREPARED)
+//        {
+//            $shippingManager = app(ShippingManger::class);
+//            $addressDto = AddressDTO::fromArray($order);
+//            $shippingManager->driver('shipblu')->createShipment($addressDto, $order->id);
+//        }
 
         if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
             $order->loadMissing(['paymentMethod']);
