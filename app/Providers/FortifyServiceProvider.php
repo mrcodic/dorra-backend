@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
-use Laravel\Fortify\Http\Responses\LoginResponse;
-
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use App\Support\AclNavigator;
 class FortifyServiceProvider extends ServiceProvider
 {
     /**
@@ -22,7 +22,20 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-
+        $this->app->singleton(LoginResponseContract::class, function () {
+            return new class implements LoginResponseContract {
+                public function toResponse($request)
+                {
+                    $nav   = app(AclNavigator::class);
+                    $user  = $request->user();
+                    $target = $nav->firstAllowedUrl($user) ?? route('dashboard');
+                    if ($request->wantsJson() || $request->expectsJson()) {
+                        return response()->json(['redirect' => $target], 200);
+                    }
+                    return redirect()->intended($target);
+                }
+            };
+        });
 
     }
 

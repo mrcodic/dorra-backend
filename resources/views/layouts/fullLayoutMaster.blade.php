@@ -167,7 +167,14 @@
     }
 
     handleAjaxFormSubmit(".auth-login-form",{
-        successMessage: "You are Logged in Successfully"
+        successMessage: "You are Logged in Successfully",
+        onSuccess:function (res) {
+            if (res && res.redirect) {
+                window.location.href = res.redirect;
+            } else {
+                window.location.href = '/dashboard';
+            }
+        }
     })
 
 
