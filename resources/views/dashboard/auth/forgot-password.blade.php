@@ -20,6 +20,11 @@
                     </div>
 
                     <h2 class="brand-text text-center">Reset Password</h2>
+                    @if (session('status'))
+                        <div class="mb-4 font-medium text-sm text-green-600">
+                            {{ session('status') }}
+                        </div>
+                    @endif
                     <p class="login-card-text mb-2 text-center">Enter your email address, we’ll send you a reset link</p>
 
                     <form id="forgotForm" class="mt-3" method="post" action="{{ route("password.request") }}">

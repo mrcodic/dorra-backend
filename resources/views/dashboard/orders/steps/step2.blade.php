@@ -186,11 +186,6 @@
         $('#step-3').hide();
         $('#step-2').show();
     });
-
-    $(document).on('click', 'next-step-2', function() {
-        $('#step-2').hide();
-        $('#step-3').show();
-    });
     const selectedCategoryId = $('#categorySelect').val();
 
 </script>

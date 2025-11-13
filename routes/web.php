@@ -44,7 +44,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
     Route::view('/login/social', 'dashboard.auth.social-login');
     Route::view('confirm-password', 'dashboard.auth.confirm-password');
-    Route::view('forgot-password', 'dashboard.auth.forgot-password')->name('password.request');
+//    Route::view('forgot-password', 'dashboard.auth.forgot-password')->name('password.request');
     Route::get('/reset-password', function (Request $request) {
         return view('dashboard.auth.reset-password', [
             'token' => $request->query('token'),
