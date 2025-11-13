@@ -180,7 +180,7 @@
         $('#step-3').show();
     });
     const selectedCategoryId = $('#categorySelect').val();
-    $('#next-step-btn').on('click', function () {
+    $('#next-step-2').on('click', function () {
 
         $.ajax({
             url: '{{ route("orders.step2") }}',
