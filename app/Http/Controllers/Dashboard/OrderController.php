@@ -48,7 +48,8 @@ class OrderController extends DashboardController
                 'categories' => $this->categoryRepository->query(['id', 'name'])
                     ->whereIsHasCategory(1)
                     ->whereNull('parent_id')->get(),
-                'products' => $this->productRepository->query(['id', 'name'])
+                'products_without' => $this->categoryRepository->query(['id', 'name'])
+                    ->whereIsHasCategory(0)
                     ->get(),
                 'tags' => $this->tagRepository->all(columns: ['id', 'name']),
                 'templates' => [],

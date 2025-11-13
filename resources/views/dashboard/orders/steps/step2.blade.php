@@ -1,5 +1,5 @@
 <div id="step-2" class="step" style="display: none;">
-    <h5 class="mb-2 fs-3 text-black">2. Select Products</h5>
+    <h5 class="mb-2 fs-3 text-black">2. Select Category</h5>
 
     <!-- Search Input -->
     <div class="input-group">
@@ -19,7 +19,7 @@
     <!-- Filters + Results - Hidden by default -->
     <div id="product-filters-wrapper" class="border shadow rounded-2 p-1 mt-2" style="display:none;">
 
-        <h6 class="mt-1">Category</h6>
+        <h6 class="mt-1">Product</h6>
         <div class="mb-1" id="product-filters">
             @forelse($associatedData['categories'] as $category)
                 <span class="badge rounded-pill bg-light text-dark me-1 category-pill"
@@ -48,7 +48,16 @@
         <hr>
         <div id="product-results"></div>
     </div>
+    <h5 class="mb-2 fs-3 text-black mt-2">Or Select Product</h5>
+    <select name="" id="" class="form-select">
+        <option value="" selected disabled>select Product</option>
+        @forelse($associatedData['products_without'] as $product)
+        <option value="{{ $product->id }}">{{ $product->name }}</option>
+        @empty
+            <span class="badge  bg-light text-dark me-1">No products found</span>
 
+        @endforelse
+    </select>
     <div class="d-flex justify-content-end mt-2">
         <button class="btn btn-outline-secondary me-1" id="back-step-1">Back</button>
         <button class="btn btn-primary fs-5" id="next-step-2" data-next-step disabled>Next</button>
