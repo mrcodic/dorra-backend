@@ -39,8 +39,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(['dorra_auth_token','dorra_auth_cookie_id']);
         $middleware->api([
             EnsureFrontendRequestsAreStateful::class,
-            TrackVisits::class,
-//            CountSiteVisitsMiddleware::class,
             ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

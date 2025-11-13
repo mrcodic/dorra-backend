@@ -4,6 +4,7 @@
 use App\DTOs\Shipping\AddressDTO;
 use App\DTOs\Shipping\RateQuoteDTO;
 use App\Http\Middleware\LocalizationMiddleware;
+use App\Http\Middleware\TrackVisits;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Auth\LogoutController,
     Auth\OtpController,
@@ -30,7 +31,6 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Review\ReviewController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -66,7 +66,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
     Route::get('/public-search',[MainController::class,'publicSearch']);
 
-    Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+    Route::apiResource('categories', CategoryController::class)->only(['index', 'show'])->middleware(TrackVisits::class);
     Route::get('sub-categories', [MainController::class, 'subCategories']);
     Route::controller(ProductController::class)->group(function () {
         Route::get('product-types', 'productTypes');
@@ -181,7 +181,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::get('partners', 'partners');
         Route::get('reviews-with-images', 'reviewsWithImages');
         Route::get('reviews-without-images', 'reviewsWithoutImages');
-        Route::get('faqs', 'faqs');
+        Route::get('faqs', 'faqs')->middleware(TrackVisits::class);
     });
     Route::get('reviews/{product_id}', [ReviewController::class, 'show']);
     Route::get('reviews-statistics/{reviewable_id}', [ReviewController::class, 'statistics']);
