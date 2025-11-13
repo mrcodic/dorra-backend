@@ -87,7 +87,6 @@ class OfferService extends BaseService
                     ->where('cartable_type', Category::class)
                     ->whereIn('cartable_id', $validatedData['category_ids'])
                     ->pluck('cart_id');
-                dd($cartIds);
                 $this->cartRepository->query()->whereIn('id', $cartIds)->update(['discount_amount' => 0, 'discount_code_id' => null]);
             });
 
@@ -126,9 +125,19 @@ class OfferService extends BaseService
 
         if ($type === 1) {
             $offer->categories()->sync($categoryIds ?? []);
+            $cartIds = $this->cartItemRepository->query()
+                ->where('cartable_type', Category::class)
+                ->whereIn('cartable_id', $categoryIds)
+                ->pluck('cart_id');
+            $this->cartRepository->query()->whereIn('id', $cartIds)->update(['discount_amount' => 0, 'discount_code_id' => null]);
             $offer->products()->sync([]);
         } elseif ($type === 2) {
             $offer->products()->sync($productIds ?? []);
+            $cartIds = $this->cartItemRepository->query()
+                ->where('cartable_type', Product::class)
+                ->whereIn('cartable_id', $productIds)
+                ->pluck('cart_id');
+            $this->cartRepository->query()->whereIn('id', $cartIds)->update(['discount_amount' => 0, 'discount_code_id' => null]);
             $offer->categories()->sync([]);
         } else {
             $offer->categories()->sync([]);
