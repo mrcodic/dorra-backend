@@ -96,7 +96,6 @@ const dt_user_table = $(".category-list-table").DataTable({
                                               data-name_en="${row.name_en}"
                                               data-image="${row.image}"
                                               data-image_id="${row.imageId}"
-                                              data-has_mockup="${row.has_mockup}"
                                               data-description_en="${row.description_en}"
                                               data-description_ar="${row.description_ar}"
                                               data-subcategories="${row.children.map(
@@ -408,7 +407,7 @@ $(document).ready(function () {
         $scope.find(m.date).val(data.showdate || "");
         $scope.find(m.descAr).val(data.description_ar || "");
         $scope.find(m.descEn).val(data.description_en || "");
-        $scope.find(m.has_mockup).prop('checked', !data.has_mockup);
+        $scope.find(m.has_mockup).prop('checked', !!data.has_mockup);
         $scope.find(m.img).attr("src", data.image || "");
         if (m.imgId) $scope.find(m.imgId).val(data.image_id || "");
         $scope.find(m.id).val(data.id || "");

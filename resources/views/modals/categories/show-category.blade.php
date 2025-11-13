@@ -68,7 +68,7 @@
             </div>
             <div class="modal-footer border-top-0">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="editButton">Edit</button>
+{{--                <button type="button" class="btn btn-primary" id="editButton">Edit</button>--}}
             </div>
         </div>
     </div>
