@@ -13,12 +13,12 @@ class UpdateAdminRequest extends BaseRequest
         return true;
     }
 
-    public function rules(): array
+    public function rules($id): array
     {
         return [
             'first_name' => ['sometimes', 'string', 'max:255'],
             'last_name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', Rule::unique('admins', 'email')->ignore(auth()->user()->id)],
+            'email' => ['sometimes', 'email', Rule::unique('admins', 'email')->ignore($id)],
             'phone_number' => ['required', 'string', 'min:10', 'max:15'],
             'status' => ['sometimes', 'boolean'],
             'image_id' => ['nullable','exists:media,id'],
