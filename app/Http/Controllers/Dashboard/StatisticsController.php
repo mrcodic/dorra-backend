@@ -86,7 +86,7 @@ class StatisticsController extends Controller
 
         // --- Visits: monthly hits (SUM hits) using date OR created_at
         $visitsRaw = DB::table('visits')
-            ->selectRaw('MONTH(COALESCE(`date`, `created_at`)) AS m, SUM(hits) AS hits')
+            ->selectRaw('MONTH(COALESCE(`date`, `created_at`)) AS m, Count(*) AS hits')
             ->whereYear(DB::raw('COALESCE(`date`, `created_at`)'), $year)
             ->groupBy('m')
             ->pluck('hits', 'm')
