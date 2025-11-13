@@ -37,7 +37,6 @@ class CartItemObserver
             $cart->guest_id => now()->addMinutes( (int) config('cart.guest_expiration_minutes', 60)),
             default => now()->addHour(),
         };
-
         $cart->saveQuietly();
     }
 
@@ -45,6 +44,7 @@ class CartItemObserver
     private function updateCartTotals(CartItem $cartItem): void
     {
         $cart = $cartItem->cart;
+        $cart->delivery_amount = 0;
         $cart->price = $cart->items()->sum('sub_total');
         $cart->saveQuietly();
     }
