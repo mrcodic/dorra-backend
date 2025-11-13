@@ -165,8 +165,8 @@ class OrderService extends BaseService
     public function storeStep2($request): void
     {
         $request->validate([
-            "product_id" => ["required", "exists:products,id",],
-            "category_id" => ["required", "exists:categories,id",]
+            "product_id" => ["required_without:category_id", "exists:products,id",],
+            "category_id" => ["required_without:product_id", "exists:categories,id",]
         ]);
         $product = $this->productRepository->find($request->product_id);
         $category = $this->productRepository->find($request->category_id);
