@@ -46,7 +46,7 @@ class OrderController extends DashboardController
             'create' => [
                 'countries' => $this->countryRepository->query(['id', 'name'])->get(),
                 'categories' => $this->categoryRepository->query(['id', 'name'])
-                    ->whereIsHasCategory(0)
+                    ->whereIsHasCategory(1)
                     ->whereNull('parent_id')->get(),
                 'products' => $this->productRepository->query(['id', 'name'])
                     ->get(),
