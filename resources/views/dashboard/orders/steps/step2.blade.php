@@ -157,10 +157,22 @@
     });
 
     $('#next-step-2').on('click', function() {
-        if (!selectedProductId) {
-            $('#product-warning').show();
-            return;
-        }
+        console.log(selectedProductId)
+        $.ajax({
+            url: '{{ route("orders.step2") }}',
+            method: 'POST',
+            data: {
+                product_id: selectedProductId,
+                category_id: selectedCategoryId,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (response) {
+                // Proceed to next step (handle as needed)
+            },
+            error: function (xhr) {
+                console.error(xhr.responseJSON);
+            }
+        });
 
         // Show loading state
         $('#step-3').html('<div class="d-flex justify-content-center align-items-center" style="min-height: 300px;"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
@@ -180,22 +192,5 @@
         $('#step-3').show();
     });
     const selectedCategoryId = $('#categorySelect').val();
-    $('#next-step-2').on('click', function () {
 
-        $.ajax({
-            url: '{{ route("orders.step2") }}',
-            method: 'POST',
-            data: {
-                product_id: selectedProductId,
-                category_id: selectedCategoryId,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function (response) {
-                // Proceed to next step (handle as needed)
-            },
-            error: function (xhr) {
-                console.error(xhr.responseJSON);
-            }
-        });
-    });
 </script>
