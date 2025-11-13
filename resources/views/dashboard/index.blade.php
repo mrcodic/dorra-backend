@@ -251,9 +251,7 @@
             <!-- Vists and Sales chart -->
             <div class="col-md-12 col-lg-8">
                 <div class="d-flex justify-content-end">
-                    <select id="yearSelect" class="form-select w-auto mb-1 ">
-                        {{-- Years will be inserted by JavaScript --}}
-                    </select>
+                    <select id="yearSelect" class="form-select w-auto mb-1"></select>
                 </div>
                 <div id="apexColumnChart"></div>
             </div>
@@ -488,70 +486,75 @@
                 location.reload();
             }
         })
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const yearSelect = document.getElementById('yearSelect');
-            const currentYear = new Date().getFullYear();
-            const startYear = 2015;
+            const chartDiv    = document.querySelector('#apexColumnChart');
+            const yearSelect  = document.getElementById('yearSelect');
+            const endpoint    = "{{ route('dashboard.chart') }}";
+            const currentYear = Number("{{ $visitsCard['year'] ?? now()->year }}"); // pass $year to view if you prefer
 
-            for (let year = currentYear; year >= startYear; year--) {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                yearSelect.appendChild(option);
+            // Build year dropdown
+            const startYear = 2015;
+            const maxYear   = new Date().getFullYear();
+            for (let y = maxYear; y >= startYear; y--) {
+                const opt = document.createElement('option');
+                opt.value = y; opt.textContent = y;
+                if (y === currentYear) opt.selected = true;
+                yearSelect.appendChild(opt);
             }
 
-            // Default chart load
-            loadChart(currentYear);
+            let chart = null;
 
-            // Change chart on year change
-            yearSelect.addEventListener('change', function () {
-                const selectedYear = this.value;
-                loadChart(selectedYear);
-            });
-
-            function loadChart(year) {
+            function renderOrUpdate(payload) {
                 const options = {
-                    chart: {
-                        type: 'bar',
-                        height: 350,
-                        toolbar: {
-                            show: false
-                        }
-                    },
-                    series: [{
-                        name: 'Visits',
-                        data: [120, 200, 150, 80, 70, 110, 130, 160, 90, 100, 140, 180]
-                    }, {
-                        name: 'Sales',
-                        data: [60, 100, 80, 40, 30, 60, 70, 90, 50, 70, 100, 120]
-                    }],
-                    xaxis: {
-                        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                    },
+                    chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                    series: payload.series,
+                    xaxis: { categories: payload.categories },
                     colors: ['#4EBFA7', '#B673BD'],
-
-                    plotOptions: {
-                        bar: {
-                            columnWidth: '25%',
-                            borderRadius: 4
-                        }
-                    },
-                    legend: {
-                        position: 'top'
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    grid: {
-                        strokeDashArray: 4
-                    }
+                    plotOptions: { bar: { columnWidth: '25%', borderRadius: 4 } },
+                    legend: { position: 'top' },
+                    dataLabels: { enabled: false },
+                    grid: { strokeDashArray: 4 }
                 };
 
-                const chartDiv = document.querySelector("#apexColumnChart");
-                chartDiv.innerHTML = ""; // Clear old chart
-                const chart = new ApexCharts(chartDiv, options);
+                if (chart) {
+                    chart.updateOptions({ xaxis: { categories: payload.categories } }, false, true);
+                    chart.updateSeries(payload.series, true);
+                } else {
+                    chart = new ApexCharts(chartDiv, options);
+                    chart.render();
+                }
+            }
+
+            async function loadChart(year) {
+                const res = await fetch(`${endpoint}?year=${encodeURIComponent(year)}`);
+                const payload = await res.json();
+
+                const options = {
+                    chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                    series: payload.series,
+                    xaxis: { categories: payload.categories }, // ← use directly
+                    colors: ['#4EBFA7', '#B673BD'],
+                    plotOptions: { bar: { columnWidth: '25%', borderRadius: 4 } },
+                    legend: { position: 'top' },
+                    dataLabels: { enabled: false },
+                    grid: { strokeDashArray: 4 }
+                };
+
+                chart?.destroy?.();
+                chart = new ApexCharts(document.querySelector("#apexColumnChart"), options);
                 chart.render();
             }
+
+
+            // initial
+            loadChart(currentYear);
+
+            // on change
+            yearSelect.addEventListener('change', function () {
+                loadChart(this.value);
+            });
         });
     </script>
     <!-- Vists and Sales chart end -->

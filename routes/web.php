@@ -56,6 +56,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::get('zones', [MainController::class, 'zones'])->name('zones');
         Route::post('industries/sub-industries', [IndustryController::class, 'getSubIndustries'])->name('sub-industries');
         Route::get('/dashboard', [StatisticsController::class, 'index'])->name('dashboard.index');
+        Route::get('/dashboard/chart', [StatisticsController::class, 'chart'])
+            ->name('dashboard.chart');
         Route::view('/', 'dashboard.welcome');
         Route::group(['prefix' => 'users', 'as' => 'users.', 'controller' => UserController::class,], function () {
             Route::get('/data', 'getData')->name('data');

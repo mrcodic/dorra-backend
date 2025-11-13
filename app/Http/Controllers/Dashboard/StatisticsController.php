@@ -10,6 +10,8 @@ use App\Models\Product;
 use App\Models\Template;
 use App\Models\Visit;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class StatisticsController extends Controller
@@ -93,5 +95,45 @@ class StatisticsController extends Controller
         ];
 
         return view('dashboard.index', compact('bestMonths'));
+    }
+    public function chart(Request $request)
+    {
+        $year = (int) $request->query('year', now()->year);
+
+        $payload = Cache::remember("dashboard.chart.$year", now()->addMinutes(10), function () use ($year) {
+            $salesRaw = Order::whereYear('created_at', $year)
+                ->whereStatus(StatusEnum::DELIVERED)
+                ->selectRaw('MONTH(created_at) AS m, SUM(total_price) AS amount')
+                ->groupBy('m')
+                ->pluck('amount', 'm')
+                ->all();
+
+            $salesMonthly = array_replace(array_fill_keys(range(1, 12), 0.0), $salesRaw);
+
+            $visitsRaw = DB::table('visits')
+                ->selectRaw('MONTH(COALESCE(`date`, `created_at`)) AS m, SUM(hits) AS views')
+                ->whereYear(DB::raw('COALESCE(`date`, `created_at`)'), $year)
+                ->groupBy('m')
+                ->pluck('views', 'm')
+                ->all();
+
+            $visitsMonthly = array_replace(array_fill_keys(range(1, 12), 0), $visitsRaw);
+
+            $categories = array_map(
+                fn ($m) => Carbon::createFromDate($year, $m, 1)->translatedFormat('M'),
+                range(1, 12)
+            );
+
+
+            return [
+                'year'       => $year,
+                'categories' => $categories,
+                'series'     => [
+                    ['name' => 'Visits', 'data' => array_values($visitsMonthly)],
+                    ['name' => 'Sales',  'data' => array_values($salesMonthly)],
+                ],
+            ];
+        });
+        return response()->json($payload);
     }
 }
