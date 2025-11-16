@@ -21,27 +21,35 @@ enum StatusEnum : int
     public function label(): string
     {
         return match ($this) {
-            self::PENDING   => __('orders.status.pending'),
-            self::CONFIRMED => __('orders.status.confirmed'),
-            self::PREPARED  => __('orders.status.prepared'),
-            self::SHIPPED   => __('orders.status.shipped'),
-            self::DELIVERED => __('orders.status.delivered'),
-            self::REFUNDED  => __('orders.status.refunded'),
+            self::PENDING              => __('orders.status.pending'),
+            self::CONFIRMED            => __('orders.status.confirmed'),
+            self::PREPARED             => __('orders.status.prepared'),
+            self::REQUESTED_PICKUP     => __('orders.status.requested_pickup'),
+            self::SHIPPED              => __('orders.status.shipped'),
+            self::OUT_FOR_DELIVERY     => __('orders.status.out_for_delivery'),
+            self::IN_TRANSIT           => __('orders.status.in_transit'),
+            self::DELIVERY_ATTEMPTED   => __('orders.status.delivery_attempted'),
+            self::DELIVERED            => __('orders.status.delivered'),
+            self::REFUNDED             => __('orders.status.refunded'),
         };
     }
 
     public function icon()
     {
         return match ($this) {
-            self::PENDING => asset("images/orders/pending.svg"),
-            self::CONFIRMED => asset("images/orders/confirmed.svg"),
-            self::PREPARED => asset("images/orders/preparing.svg"),
-            self::SHIPPED => asset("images/orders/out-for-delivery.svg"),
-            self::DELIVERED => asset("images/orders/delivered.svg"),
-            self::REFUNDED =>asset("images/orders/refund.svg"),
-
+            self::PENDING              => asset("images/orders/pending.svg"),
+            self::CONFIRMED            => asset("images/orders/confirmed.svg"),
+            self::PREPARED             => asset("images/orders/preparing.svg"),
+            self::REQUESTED_PICKUP     => asset("images/orders/shipped.svg"),
+            self::SHIPPED              => asset("images/orders/shipped.svg"),
+            self::OUT_FOR_DELIVERY     => asset("images/orders/delivered.svg"),
+            self::IN_TRANSIT           => asset("images/orders/delivered.svg"),
+            self::DELIVERY_ATTEMPTED   => asset("images/orders/delivered.svg"),
+            self::DELIVERED            => asset("images/orders/delivered.svg"),
+            self::REFUNDED             => asset("images/orders/refund.svg"),
         };
     }
+
 
     public static function toArray(): array
     {
