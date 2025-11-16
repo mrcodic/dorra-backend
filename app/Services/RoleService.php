@@ -14,8 +14,7 @@ class RoleService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
-        $query = $this->repository->query()->withCount('users')
-            ->with('users.media');
+        $query = $this->repository->query();
         if (request()->ajax())
         {
             $locale = app()->getLocale();
