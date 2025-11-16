@@ -42,7 +42,7 @@ class OfferPlaced extends Notification
             ->subject('A New Offer Has Been Placed')
             ->greeting('Hello ' . $notifiable->name . ',')
             ->line('A new offer has just been placed on your platform.')
-            ->action('View Offer', config('services.site_url').'Home')
+//            ->action('View Offer', config('services.site_url').'Home')
             ->line('Thank you for using our application!');
 
     }
