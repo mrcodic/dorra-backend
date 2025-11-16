@@ -32,14 +32,15 @@ class RoleController extends DashboardController
             ],
             'index' => [
                 'roles' => $this->roleRepository->query()
+                    ->when(config('permission.defaults.guard'), fn($q, $guard) => $q->where('guard_name', $guard))
                     ->withCount('users')
                     ->with([
                         'users' => function ($q) {
-                            $q->select('admins.id', 'admins.name')
+                            $q->select('admins.id', 'admins.first_name', 'admins.last_name')
                             ->with('media');
                         },
                     ])
-                    ->get(columns: ['id', 'name']),
+                    ->get(columns: ['id', 'name','guard_name']),
             ],
         ];
         $this->methodRelations = [
