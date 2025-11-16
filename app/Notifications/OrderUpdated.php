@@ -40,7 +40,7 @@ class OrderUpdated extends Notification
         return (new MailMessage)
             ->greeting("Hello $notifiable->name!")
             ->subject('Order status updated')
-            ->line('Order '.$this->order->number.' status has been updated to '.Str::headline((string)($this->order->status->label())).'.')
+            ->line('Order '.$this->order->order_number.' status has been updated to '.Str::headline((string)($this->order->status->label())).'.')
                     ->action('Go To Order',config('services.site_url') . 'order-history/' . $this->order->id)
                     ->line('Thank you for using our application!');
     }
