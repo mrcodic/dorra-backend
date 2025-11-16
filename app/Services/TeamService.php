@@ -21,7 +21,7 @@ use Illuminate\Support\Arr;
         if ($user) {
             $this->query = $this->query->where(function ($query) use ($user) {
                 $query->where('owner_id', $user->id)
-                    ->orWhere('members',function ($query) use ($user) {
+                    ->orWhereHas('members',function ($query) use ($user) {
                        $query->where('users.id',$user->id) ;
                     });
             });
