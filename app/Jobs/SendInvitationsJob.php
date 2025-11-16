@@ -24,7 +24,7 @@ class SendInvitationsJob implements ShouldQueue
 
     protected $emails;
 
-    public function __construct(public ?Team $team = null, public ?Design $design = null, array $emails)
+    public function __construct(public ?Team $team = null, public ?Design $design = null, array $emails, public ?object $notifiable = null)
     {
 
         $this->emails = $emails;
@@ -69,7 +69,7 @@ class SendInvitationsJob implements ShouldQueue
                     'email' => $email,
                 ]);
 
-                Mail::to($email)->send(new Invitation($url, $team,request()->user()->email));
+                Mail::to($email)->send(new Invitation($url, $team,$this->notifiable));
             }
         }
     }

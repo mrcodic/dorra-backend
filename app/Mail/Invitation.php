@@ -16,7 +16,7 @@ class Invitation extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public $url, public $invitedResource,public $inviterEmail)
+        public function __construct(public $url, public $invitedResource, public ?object $notifiable = null,)
     {
     }
 
