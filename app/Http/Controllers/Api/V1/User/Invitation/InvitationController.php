@@ -7,7 +7,6 @@ use App\Enums\Invitation\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invitation\SendInvitationRequest;
 use App\Jobs\SendInvitationsJob;
-use App\Mail\Invitation;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\InvitationRepositoryInterface;
 use App\Repositories\Interfaces\TeamRepositoryInterface;
@@ -15,9 +14,8 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\URL;
+
 
 
 class InvitationController extends Controller

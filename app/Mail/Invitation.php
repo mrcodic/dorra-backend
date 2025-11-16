@@ -16,7 +16,7 @@ class Invitation extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public $url, public $invitedResource)
+    public function __construct(public $url, public $invitedResource,public $inviterEmail)
     {
     }
 
@@ -38,7 +38,7 @@ class Invitation extends Mailable
         return (new Content(
             view: 'emails.invitation',
         ))->with([
-            'inviterEmail' =>  auth('sanctum')->user()?->email,
+            'inviterEmail' =>  $this->inviterEmail,
         ]);
     }
 

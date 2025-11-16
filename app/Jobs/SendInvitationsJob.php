@@ -69,7 +69,7 @@ class SendInvitationsJob implements ShouldQueue
                     'email' => $email,
                 ]);
 
-                Mail::to($email)->send(new Invitation($url, $team));
+                Mail::to($email)->send(new Invitation($url, $team,auth('sanctum')->user()->email));
             }
         }
     }
