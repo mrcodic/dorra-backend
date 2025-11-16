@@ -76,6 +76,9 @@ class User extends Authenticatable implements HasMedia
             $user->last_login_ip = request()->ip();
             $user->last_login_at = now();
         });
+        static::created(function ($user) {
+            $user->notificationTypes()->sync(NotificationType::all(['id'])->pluck('id'));
+        });
         parent::booted();
     }
 

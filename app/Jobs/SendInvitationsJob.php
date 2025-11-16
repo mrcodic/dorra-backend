@@ -7,6 +7,7 @@ use App\Mail\Invitation;
 use App\Models\Design;
 use App\Models\Team;
 use App\Repositories\Interfaces\InvitationRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\HandlesTryCatch;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -57,13 +58,19 @@ class SendInvitationsJob implements ShouldQueue
 
             });
 
+            $user = app(UserRepositoryInterface::class)->findByEmail($email);
+            if ($user->is_email_notifications_enabled
+                && $user->notificationTypes()
+                    ->where('name', 'Added to a new team')
+                    ->exists())
+            {
+                $url = URL::temporarySignedRoute('invitation.accept', now()->addDays(2), [
+                    'invitation' => $invitation->id,
+                    'email' => $email,
+                ]);
 
-            $url = URL::temporarySignedRoute('invitation.accept', now()->addDays(2), [
-                'invitation' => $invitation->id,
-                'email' => $email,
-            ]);
-
-            Mail::to($email)->send(new Invitation($url, $team));
+                Mail::to($email)->send(new Invitation($url, $team));
+            }
         }
     }
 
