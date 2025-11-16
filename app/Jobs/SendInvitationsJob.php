@@ -59,17 +59,21 @@ class SendInvitationsJob implements ShouldQueue
             });
 
             $user = app(UserRepositoryInterface::class)->findByEmail($email);
-            if ($user->is_email_notifications_enabled
-                && $user->notificationTypes()
-                    ->where('name', 'Added to a new team')
-                    ->exists())
+            if ($user->is_email_notifications_enabled)
             {
                 $url = URL::temporarySignedRoute('invitation.accept', now()->addDays(2), [
                     'invitation' => $invitation->id,
                     'email' => $email,
                 ]);
+                if ($user->notificationTypes()
+                ->where('name', 'Added to a new team')
+                ->exists() && $team){
+                    Mail::to($email)->send(new Invitation($url, $team,$this->notifiable));
 
-                Mail::to($email)->send(new Invitation($url, $team,$this->notifiable));
+                }else{
+                    Mail::to($email)->send(new Invitation($url, $design,$this->notifiable));
+                }
+
             }
         }
     }

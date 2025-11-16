@@ -17,10 +17,10 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Response;
 
 
-
 class InvitationController extends Controller
 {
     use HandlesTryCatch;
+
     public function __construct(public InvitationRepositoryInterface $invitationRepository,
                                 public DesignRepositoryInterface     $designRepository,
                                 public TeamRepositoryInterface       $teamRepository,
@@ -34,7 +34,7 @@ class InvitationController extends Controller
         $design = $request->design_id ? $this->designRepository->find($request->design_id) : null;
         $team = $request->team_id ? $this->teamRepository->find($request->team_id) : null;
         $team?->touch();
-        SendInvitationsJob::dispatch(team:$team, design:$design, emails: $request->emails, notifiable:$request->user());
+        SendInvitationsJob::dispatch(team: $team, design: $design, emails: $request->emails, notifiable: $request->user());
         return Response::api();
 
     }
@@ -59,19 +59,21 @@ class InvitationController extends Controller
         $invitationUser = $this->userRepository->query()->whereEmail($email)->first();
         if ($invitation->design_id) {
             $invitationUser?->designs()->syncWithoutDetaching($invitation->design_id);
+            $designUrl = "/projects";
         }
 
         if ($invitation->team_id) {
             $teamDesigns = $invitation->team->designs;
             if ($teamDesigns->isNotEmpty()) {
                 $invitationUser->designs()->syncWithoutDetaching($teamDesigns);
-                $invitationUser->teams()->syncWithoutDetaching($invitation->team->id);
             }
+            $invitationUser->teams()->syncWithoutDetaching($invitation->team->id);
+            $teamUrl = "/teams/{$invitation->team_id}";
         }
 
         $invitation->status = StatusEnum::ACCEPTED;
         $invitation->save();
-        return redirect()->away(config('services.site_url') . 'Home')->withCookie(cookie(
+        return redirect()->away(config('services.site_url') .($designUrl ?? $teamUrl) ?? '/Home')->withCookie(cookie(
             name: 'token',
             value: auth('sanctum')->user()?->currentAccessToken(),
             path: '/',
