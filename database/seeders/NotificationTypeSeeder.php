@@ -16,7 +16,6 @@ class NotificationTypeSeeder extends Seeder
         $notifications = [
             ['name' => 'Order status updated'],
             ['name' => 'Added to a new team'],
-            ['name' => 'Someone in my team requests design review'],
             ['name' => 'Offers on products are placed'],
         ];
 

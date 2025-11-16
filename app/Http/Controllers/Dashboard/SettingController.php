@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class SettingController extends Controller
@@ -66,10 +67,50 @@ class SettingController extends Controller
         Cache::forget('app_settings');
         return Response::api();
     }
-    public function notifications()
+
+    public function notifications(SettingRepositoryInterface $settingRepository)
     {
-        return view("dashboard.settings.notifications");
+        // Get all notification settings as [ key => value ]
+        $flat = $settingRepository->query()
+            ->where('group', 'notifications')
+            ->pluck('value', 'key')
+            ->all();
+
+        // Build dynamic groups from keys like: customers.new_customer_signed_up.email
+        $groups = [];
+        foreach ($flat as $key => $val) {
+            [$group, $event, $channel] = array_pad(explode('.', $key, 3), 3, null);
+            if (!$group || !$event || !in_array($channel, ['email', 'notification'], true)) {
+                continue; // skip malformed keys
+            }
+
+            $dot   = "{$group}.{$event}";
+            $label = Str::headline(str_replace('_', ' ', $event));
+
+            if (!isset($groups[$group][$event])) {
+                $groups[$group][$event] = [
+                    'label'        => $label,
+                    'dot'          => $dot,
+                    'email'        => (bool)($flat["{$dot}.email"] ?? false),
+                    'notification' => (bool)($flat["{$dot}.notification"] ?? false),
+                ];
+            } else {
+                // If only one channel existed, fill the other
+                $groups[$group][$event][$channel] = (bool)$val;
+            }
+        }
+
+        // Sort for stable UI
+        ksort($groups);
+        foreach ($groups as $g => $rows) {
+            ksort($rows);
+            // Reindex numerically for simple @foreach in Blade
+            $groups[$g] = array_values($rows);
+        }
+
+        return view('dashboard.settings.notifications', compact('groups'));
     }
+
 
     public function payments(PaymentMethodRepositoryInterface $paymentMethodRepository)
     {
