@@ -28,7 +28,8 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     ShippingAddress\ShippingController,
     Team\TeamController,
     Template\TemplateController,
-    Review\ReviewController};
+    Review\ReviewController
+};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +53,13 @@ Route::prefix('login')->controller(LoginController::class)->group(function () {
     Route::get('/apple/callback', 'appleCallback');
 });
 
+Route::prefix('invitations/')->controller(InvitationController::class)->group(function () {
+    Route::post('send', 'send')->name('invitation.send');
+    Route::get('accept', 'accept')
+        ->name('invitation.accept')
+        ->middleware('signed');
+});
+
 Route::controller(PaymentController::class)->group(function () {
     Route::get('payment-methods', 'paymentMethods');
     Route::post('buy-order-again', 'buyOrderAgain');
@@ -60,11 +68,22 @@ Route::controller(PaymentController::class)->group(function () {
 });
 
 
+Route::get('locations', [OrderController::class, 'searchLocations'])->name('locations.nearby');
+
+Route::prefix('ship-blu/')->controller(ShippingController::class)->group(function () {
+    Route::get('governorates', 'governorates');
+    Route::get('cities/{governorateId}', 'cities');
+    Route::get('zones/{cityId}', 'zones');
+    Route::post('delivery-fee', 'deliveryFee');
+    Route::get('webhook', 'handleWebhook');
+});
+
+
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::post('contact-us', [MainController::class, 'contactUs'])->name('contact-us');
     Route::get('country-codes', [MainController::class, 'countryCodes']);
 
-    Route::get('/public-search',[MainController::class,'publicSearch']);
+    Route::get('/public-search', [MainController::class, 'publicSearch']);
 
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show'])->middleware(TrackVisits::class);
     Route::get('sub-categories', [MainController::class, 'subCategories']);
@@ -166,14 +185,6 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('templates/{template}', [TemplateController::class, 'show']);
 
 
-
-    Route::prefix('invitations/')->controller(InvitationController::class)->group(function () {
-        Route::post('send', 'send')->name('invitation.send');
-        Route::get('accept', 'accept')
-            ->name('invitation.accept')
-            ->middleware('signed');
-    });
-
     Route::prefix("landing/")->controller(LandingController::class)->group(function () {
         Route::get('carousels', 'carousels');
         Route::get('settings/visibility-sections', 'visibilitySections');
@@ -192,21 +203,13 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('settings/social-links', [MainController::class, 'socialLinks']);
     Route::get('dimensions', [MainController::class, 'dimensions'])->name('dimensions');
 
-    Route::get('industries',[IndustryController::class,'index'])->name('industries');
-    Route::get('sub-industries',[IndustryController::class,'getSubIndustries'])->name('sub-industries');
+    Route::get('industries', [IndustryController::class, 'index'])->name('industries');
+    Route::get('sub-industries', [IndustryController::class, 'getSubIndustries'])->name('sub-industries');
 
 });
 
 
-Route::get('locations', [OrderController::class,'searchLocations'])->name('locations.nearby');
 
-Route::prefix('ship-blu/')->controller(ShippingController::class)->group(function () {
-    Route::get('governorates', 'governorates');
-    Route::get('cities/{governorateId}', 'cities');
-    Route::get('zones/{cityId}', 'zones');
-    Route::post('delivery-fee', 'deliveryFee');
-    Route::get('webhook','handleWebhook');
-});
 
 
 
