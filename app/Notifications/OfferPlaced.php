@@ -11,7 +11,7 @@ use Illuminate\Notifications\Notification;
 class OfferPlaced extends Notification
 {
     use Queueable;
-
+    public $afterCommit = true;
     /**
      * Create a new notification instance.
      */
