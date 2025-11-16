@@ -7,6 +7,7 @@ use App\Http\Requests\User\Profile\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Repositories\Interfaces\SocialAccountRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response;
 
 class ProfileController extends Controller
@@ -24,10 +25,9 @@ class ProfileController extends Controller
         {
             handleMediaUploads($request->file('image'),$request->user(), clearExisting: true);
         }
-        if (!empty($validated['notification_types']))
-        {
-            $request->user()->notificationTypes()->sync($validated['notification_types']);
-        }
+       
+            $request->user()->notificationTypes()->sync(Arr::get($validated, 'notification_types',[]));
+
         return Response::api(data: UserResource::make($request->user()->load('countryCode','socialAccounts','notificationTypes')));
 
     }
