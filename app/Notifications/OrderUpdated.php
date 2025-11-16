@@ -9,18 +9,17 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
-class OrderUpdated extends Notification implements ShouldQueue
+class OrderUpdated extends Notification
 {
     use Queueable;
-    public $afterCommit = true;
+
 
     /**
      * Create a new notification instance.
      */
     public function __construct(public Order $order)
     {
-        $this->onQueue('mail');
-        $this->delay(now()->addSeconds(2));
+       
     }
 
     /**
