@@ -32,7 +32,7 @@ class Offer extends Model
         static::created(function ($offer) {
             User::query()
                 ->select('id','first_name','last_name','email')
-                ->where('is_email_notifications_enabled', true)
+                ->where('is_email_notifications_enabled', '=',1)
                 ->whereHas('notificationTypes', function ($q) {
                     $q->where('name', 'Offers on products are placed');
                 })
