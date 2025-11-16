@@ -7,6 +7,7 @@ use App\Notifications\OfferPlaced;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Translatable\HasTranslations;
 
@@ -30,21 +31,17 @@ class Offer extends Model
     protected static function booted()
     {
         static::created(function ($offer) {
-            dd(    User::query()
-                ->select('id','first_name','last_name','email')
-                ->where('is_email_notifications_enabled', '=',1)
-                ->whereHas('notificationTypes', function ($q) {
-                    $q->where('name', 'Offers on products are placed');
-                })->get());
-            User::query()
-                ->select('id','first_name','last_name','email')
-                ->where('is_email_notifications_enabled', '=',1)
-                ->whereHas('notificationTypes', function ($q) {
-                    $q->where('name', 'Offers on products are placed');
-                })
-                ->chunkById(200, function ($users) use ($offer) {
-                    Notification::send($users, new OfferPlaced($offer));
-                });
+            DB::afterCommit(function () use ($offer) {
+                User::query()
+                    ->select('id','first_name','last_name','email')
+                    ->where('is_email_notifications_enabled', 1)
+                    ->whereHas('notificationTypes', fn($q) =>
+                    $q->where('name', 'Offers on products are placed')
+                    )
+                    ->chunkById(200, function ($users) use ($offer) {
+                        Notification::send($users, new OfferPlaced($offer));
+                    });
+            });
         });
         parent::booted();
     }
