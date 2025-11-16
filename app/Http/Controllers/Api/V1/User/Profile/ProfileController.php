@@ -14,21 +14,18 @@ class ProfileController extends Controller
 {
     public function show(Request $request)
     {
-        return Response::api(data: UserResource::make($request->user()->load('countryCode','socialAccounts','notificationTypes')));
+        return Response::api(data: UserResource::make($request->user()->load('countryCode', 'socialAccounts', 'notificationTypes')));
     }
 
     public function update(UpdateProfileRequest $request)
     {
         $validated = $request->validated();
         $request->user()->update($validated);
-        if ($request->hasFile('image'))
-        {
-            handleMediaUploads($request->file('image'),$request->user(), clearExisting: true);
+        if ($request->hasFile('image')) {
+            handleMediaUploads($request->file('image'), $request->user(), clearExisting: true);
         }
-       
-            $request->user()->notificationTypes()->sync(Arr::get($validated, 'notification_types',[]));
-
-        return Response::api(data: UserResource::make($request->user()->load('countryCode','socialAccounts','notificationTypes')));
+        $request->user()->notificationTypes()->sync(Arr::get($validated, 'notification_types', []));
+        return Response::api(data: UserResource::make($request->user()->load('countryCode', 'socialAccounts', 'notificationTypes')));
 
     }
 

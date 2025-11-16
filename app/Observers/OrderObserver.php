@@ -12,6 +12,7 @@ use App\Models\Inventory;
 use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
+use App\Notifications\OrderUpdated;
 use App\Services\Shipping\ShippingManger;
 
 
@@ -41,6 +42,10 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
+        if ($order->wasChanged('status')){
+            optional($order->user)->notify(new OrderUpdated($order));
+        }
+
         if ($order->wasChanged('inventory_id'))
         {
             $inventory = Inventory::find($order->inventory_id);
