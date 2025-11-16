@@ -24,7 +24,7 @@ class SendInvitationsJob implements ShouldQueue
 
     protected $emails;
 
-    public function __construct(public ?Team $team = null, public ?Design $design = null, array $emails, public ?object $notifiable = null)
+        public function __construct(public ?Team $team = null, public ?Design $design = null, array $emails, public ?object $notifiable = null)
     {
 
         $this->emails = $emails;
