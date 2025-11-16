@@ -9,7 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
-class OrderUpdated extends Notification 
+class OrderUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -19,7 +19,7 @@ class OrderUpdated extends Notification
      */
     public function __construct(public Order $order)
     {
-
+        $this->delay(now()->addSeconds(2));
     }
 
     /**
