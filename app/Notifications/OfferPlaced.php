@@ -28,7 +28,7 @@ class OfferPlaced extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ($notifiable->is_email_notifications_enabled ?? false) ? ['mail'] : [];
+        return  ['mail'];
 
     }
 
