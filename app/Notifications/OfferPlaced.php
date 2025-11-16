@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class OfferPlaced extends Notification
+class OfferPlaced extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -17,7 +17,7 @@ class OfferPlaced extends Notification
      */
     public function __construct(public Offer $offer)
     {
-//        $this->delay(now()->addSeconds(2));
+        $this->delay(now()->addSeconds(2));
         $this->afterCommit();
     }
 
@@ -42,7 +42,7 @@ class OfferPlaced extends Notification
             ->subject('A New Offer Has Been Placed')
             ->greeting('Hello ' . $notifiable->name . ',')
             ->line('A new offer has just been placed on your platform.')
-//            ->action('View Offer', config('services.site_url').'Home')
+            ->action('View Offer', config('services.site_url').'Home')
             ->line('Thank you for using our application!');
 
     }

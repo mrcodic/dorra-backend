@@ -30,6 +30,12 @@ class Offer extends Model
     protected static function booted()
     {
         static::created(function ($offer) {
+            dd(    User::query()
+                ->select('id','first_name','last_name','email')
+                ->where('is_email_notifications_enabled', '=',1)
+                ->whereHas('notificationTypes', function ($q) {
+                    $q->where('name', 'Offers on products are placed');
+                })->get());
             User::query()
                 ->select('id','first_name','last_name','email')
                 ->where('is_email_notifications_enabled', '=',1)

@@ -20,6 +20,7 @@ class OrderUpdated extends Notification implements ShouldQueue
     public function __construct(public Order $order)
     {
         $this->delay(now()->addSeconds(2));
+        $this->afterCommit();
     }
 
     /**
