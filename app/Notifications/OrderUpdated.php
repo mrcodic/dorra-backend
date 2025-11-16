@@ -19,7 +19,8 @@ class OrderUpdated extends Notification
      */
     public function __construct(public Order $order)
     {
-       
+        $this->onQueue('mail');
+        $this->delay(now()->addSeconds(2));
     }
 
     /**
