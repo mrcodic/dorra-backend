@@ -11,14 +11,14 @@ use Illuminate\Notifications\Notification;
 class OfferPlaced extends Notification
 {
     use Queueable;
-    public $afterCommit = true;
+
     /**
      * Create a new notification instance.
      */
     public function __construct(public Offer $offer)
     {
 //        $this->delay(now()->addSeconds(2));
-
+        $this->afterCommit();
     }
 
     /**
