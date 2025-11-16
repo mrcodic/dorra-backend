@@ -7,6 +7,7 @@ use App\Notifications\OfferPlaced;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Translatable\HasTranslations;
 
 class Offer extends Model
@@ -29,13 +30,14 @@ class Offer extends Model
     protected static function booted()
     {
         static::created(function ($offer) {
-            User::where('is_email_notifications_enabled', true)
-                ->notificationTypes()
-                ->whereName('Offers on products are placed')
-                ->chunk(100, function ($users) use ($offer) {
-                    foreach ($users as $user) {
-                        $user->notify(new OfferPlaced($offer));
-                    }
+            User::query()
+                ->select('id','name','email')
+                ->where('is_email_notifications_enabled', true)
+                ->whereHas('notificationTypes', function ($q) {
+                    $q->where('name', 'Offers on products are placed');
+                })
+                ->chunkById(200, function ($users) use ($offer) {
+                    Notification::send($users, new OfferPlaced($offer));
                 });
         });
         parent::booted();
