@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class OfferPlaced extends Notification implements ShouldQueue
+class OfferPlaced extends Notification
 {
     use Queueable;
 
@@ -17,7 +17,7 @@ class OfferPlaced extends Notification implements ShouldQueue
      */
     public function __construct(public Offer $offer)
     {
-        $this->delay(now()->addSeconds(2));
+//        $this->delay(now()->addSeconds(2));
 
     }
 
