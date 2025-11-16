@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Offer\TypeEnum;
+use App\Notifications\OfferPlaced;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -25,6 +26,20 @@ class Offer extends Model
         'end_at'   => 'datetime',
     ];
 
+    protected static function booted()
+    {
+        static::created(function ($offer) {
+            User::where('is_email_notifications_enabled', true)
+                ->notificationTypes()
+                ->whereName('Offers on products are placed')
+                ->chunk(100, function ($users) use ($offer) {
+                    foreach ($users as $user) {
+                        $user->notify(new OfferPlaced($offer));
+                    }
+                });
+        });
+        parent::booted();
+    }
     protected function value(): Attribute
     {
         return Attribute::make(
@@ -32,6 +47,8 @@ class Offer extends Model
 
         );
     }
+
+
     public function products(): MorphToMany
     {
         return $this->morphedByMany(Product::class, 'offerable')
