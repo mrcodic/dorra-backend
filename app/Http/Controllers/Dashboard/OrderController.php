@@ -24,13 +24,13 @@ use App\Http\Requests\Order\{StoreOrderRequest, UpdateOrderRequest};
 class OrderController extends DashboardController
 {
     public function __construct(
-        public OrderService                $orderService,
-        public CategoryRepositoryInterface $categoryRepository,
-        public TagRepositoryInterface      $tagRepository,
-        public CountryRepositoryInterface  $countryRepository,
-        public LocationRepositoryInterface $LocationRepository,
+        public OrderService                 $orderService,
+        public CategoryRepositoryInterface  $categoryRepository,
+        public TagRepositoryInterface       $tagRepository,
+        public CountryRepositoryInterface   $countryRepository,
+        public LocationRepositoryInterface  $LocationRepository,
         public InventoryRepositoryInterface $inventoryRepository,
-        public ProductRepositoryInterface $productRepository,
+        public ProductRepositoryInterface   $productRepository,
     )
     {
         parent::__construct($orderService);
@@ -44,7 +44,6 @@ class OrderController extends DashboardController
         $this->usePagination = true;
         $this->assoiciatedData = [
             'create' => [
-                'countries' => $this->countryRepository->query(['id', 'name'])->get(),
                 'categories' => $this->categoryRepository->query(['id', 'name'])
                     ->whereIsHasCategory(1)
                     ->whereNull('parent_id')->get(),
@@ -55,9 +54,11 @@ class OrderController extends DashboardController
                 'templates' => [],
             ],
             'edit' => [
-                'countries' => $this->countryRepository->query(['id', 'name'])->get(),
                 'locations' => $this->LocationRepository->query(['id', 'name', 'address_line', 'latitude', 'longitude'])->get(),
-                'inventories' => $this->inventoryRepository->query() ->whereNull('parent_id')->get(['id', 'name']),
+                'inventories' => $this->inventoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
+            ],
+            'shared' => [
+                'countries' => $this->countryRepository->query(['id', 'name'])->get(),
             ]
 
         ];
@@ -119,7 +120,7 @@ class OrderController extends DashboardController
             message: "discount code applied successfully",
             data: [
                 "discount_amount" => getDiscountAmount($code, $orderStepData['pricing_details']['sub_total']),
-                "total" => getTotalPrice($code, $orderStepData['pricing_details']['sub_total'],$orderStepData['pricing_details']['delivery']),
+                "total" => getTotalPrice($code, $orderStepData['pricing_details']['sub_total'], $orderStepData['pricing_details']['delivery']),
             ]
         );
     }
@@ -218,6 +219,7 @@ class OrderController extends DashboardController
         $html = $this->orderService->printNewOrders();
         return response()->json(['html' => $html]);
     }
+
     public function print($order): JsonResponse
     {
         $html = $this->orderService->print($order);
