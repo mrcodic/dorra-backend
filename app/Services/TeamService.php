@@ -19,7 +19,12 @@ use Illuminate\Support\Arr;
 
         $this->query = $this->repository->query();
         if ($user) {
-            $this->query = $this->query->whereBelongsTo($user, 'owner');
+            $this->query = $this->query->where(function ($query) use ($user) {
+                $query->where('owner_id', $user->id)
+                    ->orWhere('members',function ($query) use ($user) {
+                       $query->where('users.id',$user->id) ;
+                    });
+            });
         } else {
             $this->query = $this->query->whereRaw('1 = 0');
 
