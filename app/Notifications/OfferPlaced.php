@@ -17,7 +17,7 @@ class OfferPlaced extends Notification implements ShouldQueue
      */
     public function __construct(public Offer $offer)
     {
-        $this->delay(now()->addSeconds(10));
+        $this->delay(now()->addSeconds(2));
 
     }
 
