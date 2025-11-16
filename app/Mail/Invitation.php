@@ -37,9 +37,7 @@ class Invitation extends Mailable
     {
         return (new Content(
             view: 'emails.invitation',
-        ))->with([
-            'inviterEmail' =>  $this->inviterEmail,
-        ]);
+        ));
     }
 
     /**
