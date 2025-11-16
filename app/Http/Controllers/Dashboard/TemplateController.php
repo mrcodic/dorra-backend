@@ -49,29 +49,13 @@ class TemplateController extends DashboardController
         $this->resourceTable = 'templates';
         $this->resourceClass = TemplateResource::class;
         $this->assoiciatedData = [
-            'create' => [
+            'shared' => [
                 'products' => $this->productRepository->query()->get(['id', 'name']),
                 'industries' => $this->industryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
                 'sub_industries' => $this->industryRepository->query()->whereNotNull('parent_id')->get(['id', 'name']),
                 'product_with_categories' => $this->categoryRepository->query()->where('is_has_category',1)->has('products')->get(['id', 'name']),
                 'product_without_categories' => $this->categoryRepository->query()->where('is_has_category',0)->get(['id', 'name']),
                 'tags' => $this->tagRepository->query()->get(['id', 'name']),
-                'flags' => $this->flagRepository->query()->get(['id', 'name']),
-
-            ],
-            'index' => [
-                'products' => $this->productRepository->query()->get(['id', 'name']),
-                'tags' => $this->tagRepository->query()->get(['id', 'name']),
-            ],
-            'edit' => [
-                'products' => $this->productRepository->query()->get(['id', 'name']),
-                'product_with_categories' => $this->categoryRepository->query()->where('is_has_category',1)->has('products')->get(['id', 'name']),
-                'product_without_categories' => $this->categoryRepository->query()->where('is_has_category',0)->get(['id', 'name']),
-                'industries' => $this->industryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
-                'sub_industries' => $this->industryRepository->query()->whereNotNull('parent_id')->get(['id', 'name']),
-                'tags' => $this->tagRepository->query()->get(['id', 'name']),
-                'flags' => $this->flagRepository->query()->get(['id', 'name']),
-
             ],
         ];
         $this->methodRelations = [
