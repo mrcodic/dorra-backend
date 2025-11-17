@@ -1117,8 +1117,14 @@
                 success: function (res) {
                     window.location.replace('/categories');
                     if (res.success) {
-                        sessionStorage.setItem('product_added', 'true');
-                  c
+                        Toastify({
+                            text: "Product created successfully!",
+                            duration: 2000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28C76F",
+                            close: true,
+                        }).showToast();
                     } else {
                         // backend returned success:false
                         saveButton.prop('disabled', false);

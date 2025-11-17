@@ -559,7 +559,7 @@
                                     <div class="col-12 d-flex justify-content-end gap-1">
                                         <button type="button" class="btn btn-secondary prev-tab">Back</button>
                                         <button type="submit" class="btn btn-primary me-1 saveChangesButton" id="SaveChangesButton">
-                                            <span class="btn-text">Edit Category</span>
+                                            <span class="btn-text">Edit Product</span>
                                             <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
                                         </button>
                                     </div>
@@ -1316,8 +1316,14 @@
                     contentType: false,
                     success: function (res) {
                         if (res.success) {
-                            console.log("DFg")
-                            sessionStorage.setItem('product_updated', 'true');
+                            Toastify({
+                                text: "Product updated successfully!",
+                                duration: 2000,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#28C76F",
+                                close: true,
+                            }).showToast();
                             window.location.href = '/categories';
                         }
                     },
