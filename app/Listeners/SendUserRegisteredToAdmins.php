@@ -42,7 +42,6 @@ class SendUserRegisteredToAdmins
 
         Admin::query()
             ->select('id','name','email')
-            ->role(['Super Admin'])
             ->chunkById(200, function ($admins) use ($user, $channels) {
                 Notification::send($admins, new UserRegistered($user, $channels));
             });
