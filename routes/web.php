@@ -225,6 +225,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/payments/{payment}', 'togglePayments')->name('toggle-payment-methods');
             Route::get('/website', 'website')->name('settings-website.show');
             Route::get('/notifications', 'notifications')->name('settings-notifications.show');
+            Route::post('notifications', 'updateNotifications')
+                ->name('settings.notifications.update');
 
             Route::post('/carousels/{carousel?}', 'createOrUpdateCarousel')->name('carousels.update');
 

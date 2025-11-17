@@ -95,4 +95,5 @@ return Application::configure(basePath: dirname(__DIR__))
         })
             ->everyFifteenMinutes()
             ->name('cleanup-expired-carts');
-    })->create();
+    })
+    ->create();

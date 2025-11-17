@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Notifications\UserRegistered;
 use App\Repositories\Implementations\SocialAccountRepository;
+use App\Repositories\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\GuestRepositoryInterface;
@@ -11,9 +13,11 @@ use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
@@ -29,6 +33,7 @@ class AuthService
         public CartRepositoryInterface            $cartRepository,
         public ShippingAddressRepositoryInterface $shippingAddressRepository,
         public GuestRepositoryInterface           $guestRepository,
+        public AdminRepositoryInterface           $adminRepository,
     ) {}
 
     public function register($validatedData): false|User
@@ -46,10 +51,8 @@ class AuthService
 
         $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(5))->plainTextToken;
         $user->token = $plainTextToken;
-
-
         $this->migrateGuestDataToUser($user);
-
+        event(new Registered($user));
         return $user;
     }
 

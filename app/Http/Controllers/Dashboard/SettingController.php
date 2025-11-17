@@ -111,6 +111,17 @@ class SettingController extends Controller
         return view('dashboard.settings.notifications', compact('groups'));
     }
 
+    public function updateNotifications(Request $request,SettingRepositoryInterface $settingRepository)
+    {
+        $incoming = (array)$request->input('settings', []);
+        foreach ($incoming as $key => $val) {
+            $settingRepository->query()->updateOrCreate(
+                ['key' => $key],
+                ['value' => (int)(bool)$val, 'group' => 'notifications']
+            );
+        }
+        return Response::api();
+    }
 
     public function payments(PaymentMethodRepositoryInterface $paymentMethodRepository)
     {
