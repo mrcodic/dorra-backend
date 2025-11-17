@@ -353,7 +353,7 @@
     </nav>
     <script !src="">
         document.getElementById('readAllBtn').addEventListener('click', async () => {
-            await fetch('/notifications/read-all', {
+            await fetch('settings/notifications/read-all', {
                 method: 'POST',
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
