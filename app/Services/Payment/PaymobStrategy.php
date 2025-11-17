@@ -5,6 +5,7 @@ namespace App\Services\Payment;
 use AllowDynamicProperties;
 use App\DTOs\Payment\PaymobIntentionData;
 use App\Enums\Payment\StatusEnum;
+use App\Events\PaymentIntentFailed;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\PaymentGatewayRepositoryInterface;
 use Illuminate\Support\Arr;
@@ -68,6 +69,14 @@ use Illuminate\Support\Facades\Log;
                 'response' => $result,
                 'status_code' => $response->status(),
             ]);
+            event(new PaymentIntentFailed(
+                gateway: 'Paymob',
+                statusCode: $response->status(),
+                cart: $cart ?? null,
+                user: $payload['customer'] ?? null,
+                message: $result['message'] ?? ($result['detail'] ?? null),
+                raw: $result,
+            ));
             return false;
         }
 

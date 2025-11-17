@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Response;
 class ShippingController extends Controller
 {
     use HandlesTryCatch;
+
     public function __construct(public ShippingManger                     $shippingManger,
                                 public CartRepositoryInterface            $cartRepository,
                                 public ShippingAddressRepositoryInterface $shippingAddressRepository,
@@ -120,8 +121,8 @@ class ShippingController extends Controller
         if (!$tracking || !$status) {
             return response()->json(['error' => 'Invalid payload'], 422);
         }
-
-        $order = Shipment::where('tracking_number', $tracking)->first()?->order;
+        $shipment = Shipment::where('tracking_number', $tracking);
+        $order = $shipment?->order;
 
         if (!$order) {
             return response()->json(['error' => 'Order not found'], 404);
@@ -136,8 +137,10 @@ class ShippingController extends Controller
             'DELIVERED' => StatusEnum::DELIVERED,
         ];
 
-        if (isset($map[$status])) {
+        if (isset($map[$status]) && $shipment) {
             $order->status = $map[$status];
+            $shipment->status = $status;
+            $shipment->save();
             $order->save();
         }
 

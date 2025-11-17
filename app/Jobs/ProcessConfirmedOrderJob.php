@@ -2,11 +2,13 @@
 
 namespace App\Jobs;
 
+use App\Models\Admin;
 use App\Models\Inventory;
 use App\Models\Order;
 use App\Models\JobTicket;
 use App\Models\Station;
 use App\Models\StationStatus;
+use App\Notifications\OrderUpdated;
 use App\Services\BarcodeService;
 use App\Enums\Payment\StatusEnum;
 use Illuminate\Bus\Queueable;
@@ -15,6 +17,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class ProcessConfirmedOrderJob implements ShouldQueue
 {
@@ -25,6 +28,12 @@ class ProcessConfirmedOrderJob implements ShouldQueue
     public function handle(): void
     {
         $order = $this->order->loadMissing(['paymentMethod', 'orderItems']);
+        Admin::query()
+            ->select('id','first_name','last_name','email')
+            ->chunkById(200, function ($admins)  use ($order) {
+                Notification::send($admins, new OrderUpdated($order));
+            });
+
         DB::transaction(function () use ($order) {
             $inventory = Inventory::query()
                 ->whereNotNull('parent_id')

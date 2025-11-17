@@ -46,7 +46,7 @@ class SettingSeeder extends Seeder
                 'new_customer_signed_up' => ['email' => true,  'notification' => true],
             ],
             'orders' => [
-                'purchased'        => ['email' => true,  'notification' => true],
+//                'purchased'        => ['email' => true,  'notification' => true],
 //                'cancelled'        => ['email' => true,  'notification' => true],
                 'confirmed'        => ['email' => true,  'notification' => true],
 //                'refund_request'   => ['email' => true,  'notification' => true],

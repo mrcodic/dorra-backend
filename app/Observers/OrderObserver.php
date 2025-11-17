@@ -13,7 +13,10 @@ use App\Models\Order;
 use App\Jobs\CreateInvoiceJob;
 use App\Enums\Order\StatusEnum;
 use App\Notifications\OrderUpdated;
+use App\Notifications\ShippingStatus;
+use App\Notifications\UserRegistered;
 use App\Services\Shipping\ShippingManger;
+use Illuminate\Support\Facades\Notification;
 
 
 class OrderObserver
@@ -44,18 +47,21 @@ class OrderObserver
     {
         if ($order->wasChanged('status')){
             optional($order->user)->notify(new OrderUpdated($order));
-        }
+            if ($order->wasChanged('status') &&
+                in_array($order->status, [StatusEnum::SHIPPED, StatusEnum::DELIVERED], true)) {
 
-        if ($order->wasChanged('inventory_id'))
-        {
-            $inventory = Inventory::find($order->inventory_id);
-            $inventory->update(["is_available" => false]);
-        }
-        if ($order->wasChanged('status') && $order->status === StatusEnum::CONFIRMED) {
+                $scenario = $order->status === StatusEnum::SHIPPED ? 'picked_up' : 'delivered';
 
-            ProcessConfirmedOrderJob::dispatch($order);
-            CreateInvoiceJob::dispatch($order);
-        }
+                Admin::select('id','first_name','last_name','email')
+                    ->chunkById(200, function ($admins) use ($order, $scenario) {
+                        Notification::send($admins, new ShippingStatus($order, $scenario));
+                    });
+            }
+            if ($order->status === StatusEnum::CONFIRMED)
+            {
+                ProcessConfirmedOrderJob::dispatch($order);
+                CreateInvoiceJob::dispatch($order);
+            }
 //        if ($order->status == StatusEnum::PREPARED)
 //        {
 //            $shippingManager = app(ShippingManger::class);
@@ -63,7 +69,7 @@ class OrderObserver
 //            $shippingManager->driver('shipblu')->createShipment($addressDto, $order->id);
 //        }
 
-        if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
+    if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
             $order->loadMissing(['paymentMethod']);
 
             if ($order->paymentMethod?->code === 'cash_on_delivery') {
@@ -72,6 +78,15 @@ class OrderObserver
                 ]);
             }
         }
+        }
+
+        if ($order->wasChanged('inventory_id'))
+        {
+            $inventory = Inventory::find($order->inventory_id);
+            $inventory->update(["is_available" => false]);
+        }
+
+
     }
 
     public function pivotSynced(Order $order, string $relation, array $changes): void
