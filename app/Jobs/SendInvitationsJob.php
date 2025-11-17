@@ -69,7 +69,6 @@ class SendInvitationsJob implements ShouldQueue
                 ->where('name', 'Added to a new team')
                 ->exists() && $team){
                     Mail::to($email)->send(new Invitation($url, $team,$this->notifiable));
-
                 }elseif($design){
                     Mail::to($email)->send(new Invitation($url, $design,$this->notifiable));
                 }
