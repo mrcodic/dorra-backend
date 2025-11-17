@@ -40,12 +40,9 @@ enum StatusEnum : int
             self::PENDING              => asset("images/orders/pending.svg"),
             self::CONFIRMED            => asset("images/orders/confirmed.svg"),
             self::PREPARED             => asset("images/orders/preparing.svg"),
-            self::REQUESTED_PICKUP     => asset("images/orders/shipped.svg"),
-            self::SHIPPED              => asset("images/orders/shipped.svg"),
-            self::OUT_FOR_DELIVERY     => asset("images/orders/delivered.svg"),
-            self::IN_TRANSIT           => asset("images/orders/delivered.svg"),
-            self::DELIVERY_ATTEMPTED   => asset("images/orders/delivered.svg"),
-            self::DELIVERED            => asset("images/orders/delivered.svg"),
+            self::REQUESTED_PICKUP, self::SHIPPED,
+            self::OUT_FOR_DELIVERY, self::IN_TRANSIT,
+            self::DELIVERED, self::DELIVERY_ATTEMPTED => asset("images/orders/delivered.svg"),
             self::REFUNDED             => asset("images/orders/refund.svg"),
         };
     }
