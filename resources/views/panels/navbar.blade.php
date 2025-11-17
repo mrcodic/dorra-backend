@@ -92,9 +92,9 @@
                                         <div class="badge rounded-pill badge-light-primary">{{\Illuminate\Support\Facades\Auth::user()->notifications->count()}} New</div>
                                     </div>
                                 </li>
-                                @foreach (\Illuminate\Support\Facades\Auth::user()->notifications as $notification) {
+                                @foreach (\Illuminate\Support\Facades\Auth::user()->notifications as $notification)
                                 <li class="scrollable-container media-list">
-                                    <a class="d-flex" href="javascript:void(0)">
+                                    <a class="d-flex" href="{{\Illuminate\Support\Arr::get($notification->data,'url') ?:'javascript:void(0)'}}">
                                         <div class="list-item d-flex align-items-start">
 {{--                                            <div class="me-1">--}}
 {{--                                                <div class="avatar">--}}

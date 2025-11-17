@@ -61,7 +61,7 @@ class ShippingStatus extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'order_id' => $this->order->id,
+            'url'     => route('orders.show', $this->order->id),
             'title' => $this->scenario == 'picked_up' ? 'Order picked up' : 'Order delivered',
             'body' => $this->scenario === 'picked_up'
                 ? 'The carrier has picked up order #'.$this->order->order_number
