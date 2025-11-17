@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ShippingStatus extends Notification
+class ShippingStatus extends Notification implements ShouldQueue
 {
     use Queueable;
 
