@@ -100,7 +100,7 @@
                                 </li>
                                 @foreach (\Illuminate\Support\Facades\Auth::user()->notifications as $notification)
                                 <li class="scrollable-container media-list">
-                                    <a class="d-flex {{ $notification->read_at ? '' : 'unread'}} " href="{{\Illuminate\Support\Arr::get($notification->data,'url') ?:'javascript:void(0)'}}">
+                                    <a class="d-flex {{ $notification->read_at ? '' : 'unread'}}" href="{{\Illuminate\Support\Arr::get($notification->data,'url') ?:'javascript:void(0)'}}">
                                         <div class="list-item d-flex align-items-start">
 {{--                                            <div class="me-1">--}}
 {{--                                                <div class="avatar">--}}
