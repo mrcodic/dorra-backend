@@ -33,7 +33,7 @@ class ShippingStatus extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return $this->channels;
+        return ['mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
