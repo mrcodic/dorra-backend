@@ -41,7 +41,7 @@ class SendUserRegisteredToAdmins
         if (empty($channels)) return;
 
         Admin::query()
-            ->select('id','name','email')
+            ->select('id','first_name','last_name','email')
             ->chunkById(200, function ($admins) use ($user, $channels) {
                 Notification::send($admins, new UserRegistered($user, $channels));
             });
