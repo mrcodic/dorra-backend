@@ -83,7 +83,7 @@
                         <li class="nav-item dropdown dropdown-notification me-25">
                             <a class="nav-link" href="javascript:void(0);" data-bs-toggle="dropdown">
                                 <i class="ficon" data-feather="bell"></i>
-                                <span class="badge rounded-pill bg-danger badge-up">5</span>
+                                <span class="badge rounded-pill bg-danger badge-up">{{\Illuminate\Support\Facades\Auth::user()->notifications->count()}}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
                                 <li class="dropdown-menu-header">
@@ -96,13 +96,13 @@
                                 <li class="scrollable-container media-list">
                                     <a class="d-flex" href="javascript:void(0)">
                                         <div class="list-item d-flex align-items-start">
-                                            <div class="me-1">
+{{--                                            <div class="me-1">--}}
 {{--                                                <div class="avatar">--}}
 {{--                                                    <img src="{{ asset('images/portrait/small/avatar-s-15.jpg') }}"--}}
 {{--                                                         alt="avatar" width="32"--}}
 {{--                                                         height="32">--}}
 {{--                                                </div>--}}
-                                            </div>
+{{--                                            </div>--}}
                                             <div class="list-item-body flex-grow-1">
                                                 <p class="media-heading"><span
                                                         class="fw-bolder">{{ $notification->data['title'] }}</p>
