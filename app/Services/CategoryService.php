@@ -57,7 +57,7 @@ class CategoryService extends BaseService
         return $this->repository->query()
             ->with($relations)
             ->withLastOfferId()
-            ->find($id, $relations);
+            ->findOrFail($id, $relations);
     }
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
