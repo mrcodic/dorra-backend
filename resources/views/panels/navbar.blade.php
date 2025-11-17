@@ -1,4 +1,10 @@
 @if ($configData['mainLayoutType'] === 'horizontal' && isset($configData['mainLayoutType']))
+    <style>
+        .notification-item.unread {
+            background: #f5f5f5;   /* Light gray background */
+            border-left: 3px solid #7367f0; /* Optional highlight */
+        }
+    </style>
     <nav
         class="header-navbar navbar-expand-lg navbar navbar-fixed align-items-center navbar-shadow navbar-brand-center {{ $configData['navbarColor'] }}"
         data-nav="brand-center">
@@ -94,7 +100,7 @@
                                 </li>
                                 @foreach (\Illuminate\Support\Facades\Auth::user()->notifications as $notification)
                                 <li class="scrollable-container media-list">
-                                    <a class="d-flex" href="{{\Illuminate\Support\Arr::get($notification->data,'url') ?:'javascript:void(0)'}}">
+                                    <a class="d-flex {{ $notification->read_at ? '' : 'unread'}} " href="{{\Illuminate\Support\Arr::get($notification->data,'url') ?:'javascript:void(0)'}}">
                                         <div class="list-item d-flex align-items-start">
 {{--                                            <div class="me-1">--}}
 {{--                                                <div class="avatar">--}}
@@ -113,7 +119,7 @@
                                 </li>
                                 @endforeach
                                 <li class="dropdown-menu-footer">
-                                    <a class="btn btn-primary w-100" href="javascript:void(0)">Read all
+                                    <a id="readAllBtn" class="btn btn-primary w-100" href="javascript:void(0)">Read all
                                         notifications</a>
                                 </li>
                             </ul>
@@ -344,3 +350,21 @@
             </ul>
             {{-- Search Ends --}}
             <!-- END: Header-->
+    </nav>
+    <script !src="">
+        document.getElementById('readAllBtn').addEventListener('click', async () => {
+            await fetch('/notifications/read-all', {
+                method: 'POST',
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            // Turn all notifications gray → read
+            document.querySelectorAll('.notification-item.unread').forEach(item => {
+                item.classList.remove('unread');
+            });
+        });
+
+
+    </script>

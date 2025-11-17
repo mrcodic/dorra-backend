@@ -227,6 +227,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('/notifications', 'notifications')->name('settings-notifications.show');
             Route::post('notifications', 'updateNotifications')
                 ->name('settings.notifications.update');
+            Route::post('notifications/read-all', 'raedAllNotifications');
 
             Route::post('/carousels/{carousel?}', 'createOrUpdateCarousel')->name('carousels.update');
 
