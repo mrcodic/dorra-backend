@@ -24,7 +24,7 @@ class ShippingStatus extends Notification implements ShouldQueue
 
         $emailOn = (bool)Setting::where('group', 'notifications')->where('key', "shipping.$scenario.email")->value('value');
         $dbOn = (bool)Setting::where('group', 'notifications')->where('key', "shipping.$scenario.notification")->value('value');
-
+dd($emailOn, $dbOn);
         $this->channels = array_values(array_filter([
             $emailOn ? 'mail' : null,
             $dbOn ? 'database' : null,
