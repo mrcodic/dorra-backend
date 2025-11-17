@@ -28,11 +28,11 @@ class ProcessConfirmedOrderJob implements ShouldQueue
     public function handle(): void
     {
         $order = $this->order->loadMissing(['paymentMethod', 'orderItems']);
-        Admin::query()
-            ->select('id','first_name','last_name','email')
-            ->chunkById(200, function ($admins)  use ($order) {
-                Notification::send($admins, new OrderUpdated($order));
-            });
+//        Admin::query()
+//            ->select('id','first_name','last_name','email')
+//            ->chunkById(200, function ($admins)  use ($order) {
+//                Notification::send($admins, new OrderUpdated($order));
+//            });
 
         DB::transaction(function () use ($order) {
             $inventory = Inventory::query()

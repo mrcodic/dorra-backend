@@ -50,10 +50,10 @@ class OrderObserver
             if (in_array($order->status, [StatusEnum::SHIPPED, StatusEnum::DELIVERED], true)) {
 
                 $scenario = $order->status === StatusEnum::SHIPPED ? 'picked_up' : 'delivered';
-                Admin::select('id','first_name','last_name','email')
-                    ->chunkById(200, function ($admins) use ($order, $scenario) {
-                        Notification::send($admins, new ShippingStatus($order, $scenario));
-                    });
+//                Admin::select('id','first_name','last_name','email')
+//                    ->chunkById(200, function ($admins) use ($order, $scenario) {
+//                        Notification::send($admins, new ShippingStatus($order, $scenario));
+//                    });
             }
             if ($order->status === StatusEnum::CONFIRMED)
             {

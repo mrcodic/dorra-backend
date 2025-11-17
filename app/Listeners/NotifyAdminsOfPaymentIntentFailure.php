@@ -45,10 +45,10 @@ class NotifyAdminsOfPaymentIntentFailure
             'raw'         => $event->raw,
         ];
 
-        Admin::select('id','first_name','last_name','email')
-            ->chunkById(200, function ($admins) use ($ctx, $channels) {
-                Notification::send($admins, new PaymentIntentionFailed($ctx, $channels));
-            });
+//        Admin::select('id','first_name','last_name','email')
+//            ->chunkById(200, function ($admins) use ($ctx, $channels) {
+//                Notification::send($admins, new PaymentIntentionFailed($ctx, $channels));
+//            });
     }
 
 }
