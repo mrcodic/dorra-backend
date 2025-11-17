@@ -17,6 +17,7 @@ use App\Repositories\Interfaces\{CarouselRepositoryInterface,
 };
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
@@ -111,11 +112,15 @@ class SettingController extends Controller
         return view('dashboard.settings.notifications', compact('groups'));
     }
 
-    public function raedAllNotifications()
-    {
-        auth()->user()->unreadNotifications->markAsRead();
-        return Response::api();
-    }
+        public function raedAllNotifications(Notification $notification)
+        {
+            if ($notification) {
+                $notification->markAsRead();
+                return Response::api();
+            }
+            auth()->user()->unreadNotifications->markAsRead();
+            return Response::api();
+        }
     public function updateNotifications(Request $request,SettingRepositoryInterface $settingRepository)
     {
         $incoming = (array)$request->input('settings', []);

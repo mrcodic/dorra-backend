@@ -95,7 +95,11 @@
                                 </li>
                                 @foreach (\Illuminate\Support\Facades\Auth::user()->notifications as $notification)
                                 <li class="scrollable-container media-list">
-                                    <a class="d-flex notification-item {{ $notification->read_at ? '' : 'unread'}}" href="{{\Illuminate\Support\Arr::get($notification->data,'url') ?:'javascript:void(0)'}}">
+                                    <a class="d-flex notification-item {{ $notification->read_at ? '' : 'unread'}}"
+                                       href="{{\Illuminate\Support\Arr::get($notification->data,'url') ?:'javascript:void(0)'}}"
+                                       data-id="{{ $notification->id }}"
+
+                                    >
                                         <div class="list-item d-flex align-items-start">
 {{--                                            <div class="me-1">--}}
 {{--                                                <div class="avatar">--}}
@@ -348,7 +352,7 @@
     </nav>
     <script !src="">
         document.getElementById('readAllBtn').addEventListener('click', async () => {
-            await fetch('/settings/notifications/read-all', {
+            await fetch('/settings/notifications/read', {
                 method: 'POST',
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
@@ -358,6 +362,26 @@
             // Turn all notifications gray → read
             document.querySelectorAll('.notification-item.unread').forEach(item => {
                 item.classList.remove('unread');
+            });
+        });
+
+
+            document.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', function () {
+
+                let id = this.getAttribute('data-id');
+                if (!id) return;
+
+                fetch(`/settings/notifications/read/${id}`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                    }
+                }).then(res => res.json()).then(data => {
+                    // Remove unread style
+                    this.classList.remove('unread');
+                });
+
             });
         });
 
