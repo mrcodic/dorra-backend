@@ -35,10 +35,16 @@ class UserRegistered extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
+        $name  = trim($this->user->name);
+        $email = $this->user->email;
+
         return [
-            'user_id' => $this->user->id,
-            'name' => $this->user->name,
-            'email' => $this->user->email,
+            'title'   => 'New user signed up',
+            'body'    => $name
+                ? "{$name} ({$email}) has just registered."
+                : "{$email} has just registered.",
+            'url'     => route('users.show', $this->user->id),
         ];
     }
+
 }

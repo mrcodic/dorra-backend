@@ -62,9 +62,10 @@ class ShippingStatus extends Notification implements ShouldQueue
     {
         return [
             'order_id' => $this->order->id,
-            'number' => $this->order->order_number,
-            'status' => $this->order->status->label() ?? (string)$this->order->status,
-            'scenario' => $this->scenario,
+            'title' => $this->scenario == 'picked_up' ? 'Order picked up' : 'Order delivered',
+            'body' => $this->scenario === 'picked_up'
+                ? 'The carrier has picked up order #'.$this->order->order_number
+                : 'Order #'.$this->order->order_number.' has been delivered'
         ];
     }
 }

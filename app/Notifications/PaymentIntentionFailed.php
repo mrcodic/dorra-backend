@@ -55,6 +55,28 @@ class PaymentIntentionFailed extends Notification
 
     public function toArray(object $notifiable): array
     {
-        return $this->ctx;
+        $gateway = (string)($this->ctx['gateway'] ?? 'Unknown gateway');
+        $code    = $this->ctx['status_code'] ?? null;
+        $cartId  = $this->ctx['cart_id'] ?? null;
+        $email   = $this->ctx['user_email'] ?? null;
+        $message = $this->ctx['message'] ?? 'Unknown error';
+
+        $title = 'Payment error'
+            . ($code ? " (HTTP {$code})" : '')
+            . " – {$gateway}";
+
+        $parts = [];
+        if ($cartId) $parts[] = "Cart #{$cartId}";
+        if ($email)  $parts[] = "User: {$email}";
+        $parts[] = "Message: {$message}";
+        $body = implode(' • ', $parts);
+
+        return [
+            'title'       => $title,
+            'body'        => $body,
+        ];
     }
+
+
+
 }
