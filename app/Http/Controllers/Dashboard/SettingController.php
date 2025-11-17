@@ -17,9 +17,10 @@ use App\Repositories\Interfaces\{CarouselRepositoryInterface,
 };
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\Request;
-use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -112,7 +113,7 @@ class SettingController extends Controller
         return view('dashboard.settings.notifications', compact('groups'));
     }
 
-        public function raedAllNotifications(Notification $notification)
+        public function raedAllNotifications(DatabaseNotification $notification)
         {
             if ($notification) {
                 $notification->markAsRead();
