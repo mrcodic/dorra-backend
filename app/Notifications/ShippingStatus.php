@@ -22,12 +22,12 @@ class ShippingStatus extends Notification implements ShouldQueue
     {
         $this->afterCommit();
 
-        $emailOn = (bool) Setting::where('group','notifications')->where('key',"shipping.$scenario.email")->value('value');
-        $dbOn    = (bool) Setting::where('group','notifications')->where('key',"shipping.$scenario.notification")->value('value');
+        $emailOn = (bool)Setting::where('group', 'notifications')->where('key', "shipping.$scenario.email")->value('value');
+        $dbOn = (bool)Setting::where('group', 'notifications')->where('key', "shipping.$scenario.notification")->value('value');
 
         $this->channels = array_values(array_filter([
-            $emailOn ? 'mail'     : null,
-            $dbOn    ? 'database' : null,
+            $emailOn ? 'mail' : null,
+            $dbOn ? 'database' : null,
         ])) ?: [];
     }
 
@@ -44,12 +44,17 @@ class ShippingStatus extends Notification implements ShouldQueue
 
         $mail = (new MailMessage)
             ->subject($subject)
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line("Order #{$this->order->order_number} status: ".ucwords(strtolower($this->order->status->label() ?? (string)$this->order->status)))
-            ->lineWhen($this->scenario === 'picked_up', 'The carrier has picked up the order.')
-        ->lineWhen($this->scenario === 'delivered', 'The order has been delivered to the customer.');
+            ->greeting('Hello ' . $notifiable->name . ',')
+            ->line("Order #{$this->order->order_number} status: " . ucwords(strtolower($this->order->status->label() ?? (string)$this->order->status)));
+        if ($this->scenario === 'picked_up') {
+            $mail->line('The carrier has picked up the shipment.');
+        }
 
-            $mail->action('Open order', route("order.show", $this->order->id));
+        if ($this->scenario === 'delivered') {
+            $mail->line('The shipment has been delivered to the customer.');
+        }
+
+        $mail->action('Open order', route("order.show", $this->order->id));
 
 
         return $mail->line('Thanks!');
@@ -58,10 +63,10 @@ class ShippingStatus extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'order_id'     => $this->order->id,
-            'number'       => $this->order->order_number,
-            'status'       => $this->order->status->label() ?? (string)$this->order->status,
-            'scenario'     => $this->scenario,
+            'order_id' => $this->order->id,
+            'number' => $this->order->order_number,
+            'status' => $this->order->status->label() ?? (string)$this->order->status,
+            'scenario' => $this->scenario,
         ];
     }
 }
