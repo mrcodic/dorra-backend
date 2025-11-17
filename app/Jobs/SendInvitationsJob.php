@@ -70,7 +70,7 @@ class SendInvitationsJob implements ShouldQueue
                 ->exists() && $team){
                     Mail::to($email)->send(new Invitation($url, $team,$this->notifiable));
 
-                }else{
+                }elseif($design){
                     Mail::to($email)->send(new Invitation($url, $design,$this->notifiable));
                 }
 
