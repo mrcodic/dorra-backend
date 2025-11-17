@@ -113,7 +113,7 @@ class SettingController extends Controller
         return view('dashboard.settings.notifications', compact('groups'));
     }
 
-        public function raedAllNotifications(DatabaseNotification $notification)
+        public function raedAllNotifications(?DatabaseNotification $notification)
         {
             if ($notification) {
                 $notification->markAsRead();
