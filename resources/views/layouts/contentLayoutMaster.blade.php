@@ -31,6 +31,12 @@ $configData = Helper::applClasses();
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css" />
+    <style>
+        .notification-item.unread {
+            background: #f5f5f5;   /* Light gray background */
+            border-left: 3px solid #7367f0; /* Optional highlight */
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 
 

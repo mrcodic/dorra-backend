@@ -1,10 +1,5 @@
 @if ($configData['mainLayoutType'] === 'horizontal' && isset($configData['mainLayoutType']))
-    <style>
-        .notification-item.unread {
-            background: #f5f5f5;   /* Light gray background */
-            border-left: 3px solid #7367f0; /* Optional highlight */
-        }
-    </style>
+
     <nav
         class="header-navbar navbar-expand-lg navbar navbar-fixed align-items-center navbar-shadow navbar-brand-center {{ $configData['navbarColor'] }}"
         data-nav="brand-center">
