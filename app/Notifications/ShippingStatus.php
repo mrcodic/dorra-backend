@@ -53,9 +53,8 @@ class ShippingStatus extends Notification
             $mail->line('The shipment has been delivered to the customer.');
         }
 
-        $mail->action('Open order', route("order.show", $this->order->id));
+        $mail->action('Open order', route("orders.show", $this->order->id));
 
-dd($subject, $mail);
         return $mail->line('Thanks!');
     }
 
