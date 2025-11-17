@@ -1396,7 +1396,14 @@
                     contentType: false,
                     success: function (res) {
                         if (res.success) {
-                            sessionStorage.setItem('product_added', 'true');
+                            Toastify({
+                                text: "Product created successfully!",
+                                duration: 2000,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#28C76F",
+                                close: true,
+                            }).showToast();
                             window.location.href = '/products';
                         }
                     },
