@@ -105,8 +105,8 @@
 {{--                                            </div>--}}
                                             <div class="list-item-body flex-grow-1">
                                                 <p class="media-heading"><span
-                                                        class="fw-bolder">{{ $notification->data['title'] }}</p>
-                                                <small class="notification-text">{{$notification->data['body']}}</small>
+                                                        class="fw-bolder">{{ \Illuminate\Support\Arr::get($notification->data,'title') }}</p>
+                                                <small class="notification-text">{{\Illuminate\Support\Arr::get($notification->data,'body')}}</small>
                                             </div>
                                         </div>
                                     </a>
