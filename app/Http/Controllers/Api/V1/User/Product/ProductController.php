@@ -35,9 +35,10 @@ class ProductController extends Controller
     {
         return Response::api(data: ProductResource::make($this->productService->showResource($product->id, [
             'category:id,name',
-            'templates',
+            'templates.industries.children',
             'media',
             'specifications.options',
+          
             'dimensions',
             'prices' => fn($q) => $q->orderBy('quantity'),
             'lastOffer',
