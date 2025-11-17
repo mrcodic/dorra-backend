@@ -84,13 +84,13 @@
                         <li class="nav-item dropdown dropdown-notification me-25">
                             <a class="nav-link" href="javascript:void(0);" data-bs-toggle="dropdown">
                                 <i class="ficon" data-feather="bell"></i>
-                                <span class="badge rounded-pill bg-danger badge-up">{{\Illuminate\Support\Facades\Auth::user()->notifications->count()}}</span>
+                                <span class="badge rounded-pill bg-danger badge-up">{{\Illuminate\Support\Facades\Auth::user()->unreadNotifications->count()}}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
                                 <li class="dropdown-menu-header">
                                     <div class="dropdown-header d-flex">
                                         <h4 class="notification-title mb-0 me-auto">Notifications</h4>
-                                        <div class="badge rounded-pill badge-light-primary">{{\Illuminate\Support\Facades\Auth::user()->notifications->count()}} New</div>
+                                        <div class="badge rounded-pill badge-light-primary">{{\Illuminate\Support\Facades\Auth::user()->unreadNotifications->count()}} New</div>
                                     </div>
                                 </li>
                                 @foreach (\Illuminate\Support\Facades\Auth::user()->notifications as $notification)
