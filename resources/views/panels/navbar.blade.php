@@ -1,5 +1,4 @@
 @if ($configData['mainLayoutType'] === 'horizontal' && isset($configData['mainLayoutType']))
-   @php $user = \Illuminate\Support\Facades\Auth::user(); @endphp
     <nav
         class="header-navbar navbar-expand-lg navbar navbar-fixed align-items-center navbar-shadow navbar-brand-center {{ $configData['navbarColor'] }}"
         data-nav="brand-center">
@@ -90,10 +89,10 @@
                                 <li class="dropdown-menu-header">
                                     <div class="dropdown-header d-flex">
                                         <h4 class="notification-title mb-0 me-auto">Notifications</h4>
-                                        <div class="badge rounded-pill badge-light-primary">{{$user->notifications->count()}} New</div>
+                                        <div class="badge rounded-pill badge-light-primary">{{\Illuminate\Support\Facades\Auth::user()->notifications->count()}} New</div>
                                     </div>
                                 </li>
-                                @foreach ($user->notifications as $notification) {
+                                @foreach (\Illuminate\Support\Facades\Auth::user()->notifications as $notification) {
                                 <li class="scrollable-container media-list">
                                     <a class="d-flex" href="javascript:void(0)">
                                         <div class="list-item d-flex align-items-start">
