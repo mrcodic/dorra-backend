@@ -72,8 +72,8 @@ use Illuminate\Support\Facades\Log;
             event(new PaymentIntentFailed(
                 gateway: 'Paymob',
                 statusCode: $response->status(),
-                cart: $cart ?? null,
-                user: $payload['customer'] ?? null,
+                cart: $data['cart'] ?? null,
+                user: $data['user'] ?? null,
                 message: $result['message'] ?? ($result['detail'] ?? null),
                 raw: $result,
             ));

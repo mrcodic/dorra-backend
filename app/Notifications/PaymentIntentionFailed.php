@@ -44,7 +44,6 @@ class PaymentIntentionFailed extends Notification
             ->line('Cart: #' . ($this->ctx['cart_id'] ?? '-'))
             ->line('User: ' . ($this->ctx['user_email'] ?? '-'))
             ->line('Message: ' . ($this->ctx['message'] ?? 'Unknown error'))
-            ->action('Open Admin', url('/admin'))
             ->line('This alert was generated automatically.');
     }
     /**
