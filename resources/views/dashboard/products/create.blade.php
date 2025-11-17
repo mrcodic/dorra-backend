@@ -1397,7 +1397,7 @@
                     success: function (res) {
                         if (res.success) {
                             Toastify({
-                                text: "Product created successfully!",
+                                text: "Category created successfully!",
                                 duration: 2000,
                                 gravity: "top",
                                 position: "right",

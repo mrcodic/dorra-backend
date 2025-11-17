@@ -1366,7 +1366,7 @@
                     success: function (res) {
                         if (res.success) {
                             Toastify({
-                                text: "Product updated successfully!",
+                                text: "Category updated successfully!",
                                 duration: 2000,
                                 gravity: "top",
                                 position: "right",
