@@ -38,7 +38,6 @@ class ProductController extends Controller
             'templates.industries.children',
             'media',
             'specifications.options',
-          
             'dimensions',
             'prices' => fn($q) => $q->orderBy('quantity'),
             'lastOffer',
