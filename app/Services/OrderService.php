@@ -127,7 +127,11 @@ class OrderService extends BaseService
                 return $order->total_price ?? 0;
             })
             ->addColumn('status', function ($order) {
-                return $order->status ? $order->status->label() : 'No Status';
+                return $order->status ?[
+                    'value' => $order->status->value,
+                    'label' => $order->status->label(),
+                    'icon' => $order->status->icon(),
+                ] : 'No Status';
             })
             ->addColumn('added_date', function ($order) {
                 return $order->created_at ? $order->created_at->format('d/m/Y') : '-';
