@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ShippingStatus extends Notification 
+class ShippingStatus extends Notification
 {
     use Queueable;
 
@@ -24,7 +24,6 @@ class ShippingStatus extends Notification
 
         $emailOn = (bool)Setting::where('group', 'notifications')->where('key', "shipping.$scenario.email")->value('value');
         $dbOn = (bool)Setting::where('group', 'notifications')->where('key', "shipping.$scenario.notification")->value('value');
-dd($emailOn, $dbOn);
         $this->channels = array_values(array_filter([
             $emailOn ? 'mail' : null,
             $dbOn ? 'database' : null,
@@ -33,7 +32,7 @@ dd($emailOn, $dbOn);
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $this->channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -56,7 +55,7 @@ dd($emailOn, $dbOn);
 
         $mail->action('Open order', route("order.show", $this->order->id));
 
-
+dd($subject, $mail);
         return $mail->line('Thanks!');
     }
 
