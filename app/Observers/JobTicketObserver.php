@@ -31,8 +31,9 @@ class JobTicketObserver
         if ($jobTicket->isDirty('station_id') && $jobTicket->isClean('current_status_id')) {
             $station = optional($jobTicket->station)
                 ?? Station::whereKey($jobTicket->station_id)->first();
-            $jobTicket->current_status_id = $jobTicket->orderItem->orderable->stationStatuses->isEmpty() ?
-                $station->statuses->first()->id
+            $jobTicket->current_status_id =
+                $jobTicket->orderItem->orderable->stationStatuses->isEmpty()
+                ? $station->statuses->first()->id
                 : $jobTicket->orderItem->orderable->stationStatuses->sortBy('station_id')->first()?->id;
 
         }

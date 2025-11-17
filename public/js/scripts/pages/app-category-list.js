@@ -253,23 +253,6 @@ $(document).ready(function () {
     const saveButton = $(".saveChangesButton");
     const saveLoader = $(".saveLoader");
     const saveButtonText = $(".saveChangesButton .btn-text");
-    $(document).ready(function () {
-        // Check if the product was added successfully
-        if (sessionStorage.getItem("Category_added") == "true") {
-            // Show the success Toastify message
-            Toastify({
-                text: "Category added successfully!",
-                duration: 4000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#28a745", // Green for success
-                close: true,
-            }).showToast();
-
-            // Remove the flag after showing the Toastify message
-            sessionStorage.removeItem("Category_added");
-        }
-    });
 
     $("#addCategoryForm").on("submit", function (e) {
         e.preventDefault();
@@ -286,7 +269,7 @@ $(document).ready(function () {
             contentType: false,
             success: function (response) {
                 Toastify({
-                    text: "Category added successfully!",
+                    text: "Product added successfully!",
                     duration: 2000,
                     gravity: "top",
                     position: "right",
@@ -484,7 +467,7 @@ $(document).ready(function () {
                 saveButtonText.removeClass("d-none");
                 saveButton.prop("disabled", false);
                 Toastify({
-                    text: "Category updated successfully!",
+                    text: "Product updated successfully!",
                     duration: 3000,
                     gravity: "top",
                     position: "right",
@@ -562,7 +545,7 @@ $(document).ready(function () {
             success: function (res) {
                 $("#deleteCategoryModal").modal("hide");
                 Toastify({
-                    text: "Category deleted successfully!",
+                    text: "Product deleted successfully!",
                     duration: 2000,
                     gravity: "top",
                     position: "right",
@@ -606,7 +589,7 @@ $(document).ready(function () {
             success: function (response) {
                 $("#deleteCategoriesModal").modal("hide");
                 Toastify({
-                    text: "Selected categories deleted successfully!",
+                    text: "Selected products deleted successfully!",
                     duration: 1500,
                     gravity: "top",
                     position: "right",

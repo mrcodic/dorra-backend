@@ -160,37 +160,7 @@ $('.tag-select').on('change', function () {
 });
 
 $(document).ready(function () {
-    $(document).ready(function () {
-        // Check if the product was added successfully
-        if (sessionStorage.getItem("product_added") == "true") {
-            // Show the success Toastify message
-            Toastify({
-                text: "Product added successfully!",
-                duration: 4000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#28a745", // Green for success
-                close: true,
-            }).showToast();
 
-            // Remove the flag after showing the Toastify message
-            sessionStorage.removeItem("product_added");
-        }
-        if (sessionStorage.getItem("product_updated") == "true") {
-            // Show the success Toastify message
-            Toastify({
-                text: "Product updated successfully!",
-                duration: 4000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#28a745", // Green for success
-                close: true,
-            }).showToast();
-
-            // Remove the flag after showing the Toastify message
-            sessionStorage.removeItem("product_updated");
-        }
-    });
 
     $(document).on("click", ".open-delete-product-modal", function () {
         const productId = $(this).data("id");
@@ -208,7 +178,7 @@ $(document).ready(function () {
                 $("#deleteProductModal").modal("hide");
 
                 Toastify({
-                    text: "Product deleted successfully!",
+                    text: "Category deleted successfully!",
                     duration: 2000,
                     gravity: "top",
                     position: "right",
@@ -254,7 +224,7 @@ $(document).ready(function () {
             success: function (response) {
                 $("#deleteProductsModal").modal("hide");
                 Toastify({
-                    text: "Selected products deleted successfully!",
+                    text: "Selected categories deleted successfully!",
                     duration: 1500,
                     gravity: "top",
                     position: "right",
