@@ -78,8 +78,11 @@ trait OtpTrait
         $now = now();
         $expiresAt = $otp->expires_at;
         $diff = $now->diff($expiresAt);
-
-        return Response::api(message: "Otp has been sent to your email");
+        return Response::api(message: "Otp has been sent to your email", data: [
+            'current_time' => $now,
+            'otp_expires_at' => $expiresAt,
+            'remaining_time' => $diff->i . ' minutes and ' . $diff->s . ' seconds',
+        ]);
     }
 
 
