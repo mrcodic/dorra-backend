@@ -28,7 +28,7 @@ class PaymentRequestData
         $baseItems = $this->order->orderItems->map(fn($item) => [
             'itemId'      => (string) Str::uuid(),
             'description' => Str::limit($item?->itemable->name ?? 'Item', 50, ''),
-            'price'       => (int) round($item->sub_total * 100),
+            'price'       => (int) round($item->sub_total)* 100,
             'quantity'    => 1,
         ])->toArray();
 
@@ -38,7 +38,7 @@ class PaymentRequestData
             $extraItems[] = [
                 'itemId'      => (string) Str::uuid(),
                 'description' => 'Delivery Fee',
-                'price'       => (int) round($this->order->delivery_amount * 100),
+                'price'       => (int) round($this->order->delivery_amount)* 100,
                 'quantity'    => 1,
             ];
         }
@@ -47,7 +47,7 @@ class PaymentRequestData
             $extraItems[] = [
                 'itemId'      => (string) Str::uuid(),
                 'description' => 'Tax',
-                'price'       => (int) getPriceAfterTax(setting('tax'), $this->order->subtotal * 100),
+                'price'       => (int) getPriceAfterTax(setting('tax'), $this->order->subtotal)* 100,
                 'quantity'    => 1,
             ];
         }
@@ -56,7 +56,7 @@ class PaymentRequestData
             $extraItems[] = [
                 'itemId'      => (string) Str::uuid(),
                 'description' => 'Discount',
-                'price'       => -(int) round($this->order->discount_amount * 100),
+                'price'       => -(int) round($this->order->discount_amount)* 100,
                 'quantity'    => 1,
             ];
         }
