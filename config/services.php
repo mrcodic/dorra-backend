@@ -34,23 +34,17 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
-    'apple' => [
-        'client_id' => env('APPLE_CLIENT_ID'),
-        'client_secret' => env('APPLE_CLIENT_SECRET'),
-        'redirect' => env('APPLE_REDIRECT_URI'),
-        'team_id' => env('APPLE_TEAM_ID'),
-        'key_id' => env('APPLE_KEY_ID'),
-        'private_key' => env('APPLE_PRIVATE_KEY_PATH'),
+    'google_maps' => [
+        'key' => env('GOOGLE_MAPS_KEY'),
     ],
 
-    'editor_url' => env('FRONT_END_EDITOR_URL'),
-    'site_url' => env('FRONT_END_URL'),
     'paymob' => [
         'base_url' => env('PAYMOB_BASE_URL'),
         'redirection_url' => env('PAYMOB_REDIRECTION_URL'),
@@ -64,15 +58,23 @@ return [
         'hmac' => env('PAYMOB_HMAC'),
         'currency' => 'EGP',
     ],
-    'google_maps' => [
-        'key' => env('GOOGLE_MAPS_KEY'),
+
+    'fawry' => [
+        'base_url' => env('FAWRY_BASE_URL'),
+        'redirection_url' => env('FAWRY_REDIRECTION_URL'),
+        'webhook_url' => env('FAWRY_WEBHOOK_URL'),
+        'merchant_code' => env('FAWRY_MERCHANT_CODE'),
+        'secret_key' => env('FAWRY_SECRET_KEY'),
     ],
+
     'shipblu' => [
         'key'  => env('SHIPBLU_API_KEY'),
         'base' => rtrim(env('SHIPBLU_BASE_URL', 'https://api.shipblu.com'), '/'),
         'webhook_secret' => env('SHIPBLU_WEBHOOK_SECRET'),
     ],
 
+    'editor_url' => env('FRONT_END_EDITOR_URL'),
+    'site_url' => env('FRONT_END_URL'),
 
 
 ];

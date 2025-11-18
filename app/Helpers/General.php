@@ -18,7 +18,7 @@ function getAuthOrGuest()
     $cookieData = getCookie('cookie_id');
     $cookieValue = $cookieData['value'];
 
-    $guest = Guest::query()->firstOrCreate(['cookie_value'=> $cookieValue]);
+    $guest = Guest::query()->firstOrCreate(['cookie_value' => $cookieValue]);
     if ($guest) {
         return $guest;
     }
@@ -104,10 +104,10 @@ function getTotalPrice($discount, $subtotal, $delivery): float|int
 
 function getPriceAfterTax($tax, $subtotal): float|int
 {
-    return round($tax * $subtotal,2) ;
+    return round($tax * $subtotal, 2);
 }
 
-function setting(string $key = null, $group = null ,$default = null)
+function setting(string $key = null, $group = null, $default = null)
 {
     $repository = app(SettingRepository::class);
     return $repository->get($key, $default, $group);
@@ -123,13 +123,47 @@ function commentableModelClass(string $type): ?string
     };
 }
 
-    function hasMeaningfulSearch($value): bool
-    {
-        if (!is_string($value) || trim($value) === '') {
+function hasMeaningfulSearch($value): bool
+{
+    if (!is_string($value) || trim($value) === '') {
 
-            return false;
-        }
-
-        $stripped = trim(str_replace(['%', '_'], '', $value));
-        return $stripped !== '';
+        return false;
     }
+
+    $stripped = trim(str_replace(['%', '_'], '', $value));
+    return $stripped !== '';
+}
+
+function generateFawrySignature(
+    string $merchantCode,
+    string $merchantRefNum,
+    string $customerProfileId,
+    string $returnUrl,
+    array  $items
+): string
+{
+
+    usort($items, fn($a, $b) => strcmp($a['itemId'], $b['itemId']));
+
+    $secureKey = config("services.fawry.secret_key");
+
+    $signatureString =
+        $merchantCode .
+        $merchantRefNum .
+        $customerProfileId .
+        $returnUrl;
+
+     collect($items)->each(function ($item) use ($secureKey, $signatureString) {
+         $formattedPrice = number_format($item['price'] / 100, 2, '.', '');
+
+         $signatureString .=
+             $item['itemId'] .
+             $item['quantity'] .
+             $formattedPrice;
+    });
+
+    $signatureString .= $secureKey;
+    return hash('sha256', $signatureString);
+
+
+}

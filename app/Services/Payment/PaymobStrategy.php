@@ -3,12 +3,11 @@
 namespace App\Services\Payment;
 
 use AllowDynamicProperties;
-use App\DTOs\Payment\PaymobIntentionData;
+use App\DTOs\Payment\Paymob\PaymobIntentionData;
 use App\Enums\Payment\StatusEnum;
 use App\Events\PaymentIntentFailed;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\PaymentGatewayRepositoryInterface;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -31,7 +30,7 @@ use Illuminate\Support\Facades\Log;
         $this->config = config('services.paymob');
     }
 
-    public function pay(array $payload, array $data): false|array
+    public function pay(array $payload, ?array $data): false|array
     {
         $method = $payload['method'];
 
@@ -108,7 +107,7 @@ use Illuminate\Support\Facades\Log;
         ]);
 
         return [
-            'transaction_id' => $transaction->transaction_id,
+//            'transaction_id' => $transaction->transaction_id,
             'amount' => $orderData['amount'],
             'payment_url' => $orderData['checkout_url'],
         ];

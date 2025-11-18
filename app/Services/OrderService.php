@@ -3,30 +3,30 @@
 namespace App\Services;
 
 
-use App\DTOs\Payment\PaymentRequestData;
-use App\Services\Payment\PaymentGatewayFactory;
-use Exception;
-use Barryvdh\DomPDF\Facade\Pdf;
-use App\Rules\ValidDiscountCode;
-use Illuminate\Http\Response;
-use Illuminate\Validation\ValidationException;
+use App\DTOs\Order\{OrderAddressData, OrderData, PickupContactData};
+use App\DTOs\Payment\Paymob\PaymentRequestData;
 use App\Enums\Order\{OrderTypeEnum, StatusEnum};
-use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Support\Facades\{DB, Auth, Cache};
-use App\Models\{Order, Design, Product, Location, ShippingAddress};
-use App\DTOs\Order\{OrderData, OrderAddressData, OrderItemData, PickupContactData};
+use App\Models\{Design, Location, Order, Product, ShippingAddress};
 use App\Repositories\Interfaces\{CategoryRepositoryInterface,
-    InventoryRepositoryInterface,
-    PaymentMethodRepositoryInterface,
-    UserRepositoryInterface,
-    OrderRepositoryInterface,
     DesignRepositoryInterface,
-    ProductRepositoryInterface,
-    LocationRepositoryInterface,
     DiscountCodeRepositoryInterface,
+    InventoryRepositoryInterface,
+    LocationRepositoryInterface,
+    OrderRepositoryInterface,
+    PaymentMethodRepositoryInterface,
     ProductPriceRepositoryInterface,
+    ProductRepositoryInterface,
+    ProductSpecificationOptionRepositoryInterface,
     ShippingAddressRepositoryInterface,
-    ProductSpecificationOptionRepositoryInterface};
+    UserRepositoryInterface};
+use App\Rules\ValidDiscountCode;
+use App\Services\Payment\PaymentGatewayFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Exception;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\{Auth, Cache, DB};
+use Illuminate\Validation\ValidationException;
+use Yajra\DataTables\Facades\DataTables;
 
 
 class OrderService extends BaseService
@@ -688,7 +688,9 @@ class OrderService extends BaseService
             ];
 
         }
+
         $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
+
         $dto = PaymentRequestData::fromArray(['order' => $order,
             'requestData' => $request,
             'user' => auth('sanctum')->user(),

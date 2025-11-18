@@ -20,6 +20,12 @@ class PaymentGatewaySeeder extends Seeder
             ],
             'active' => true,
         ]);
+        $fawry = PaymentGateway::create([
+            'name' => 'Fawry',
+            'code' => 'fawry',
+            'api_key' => env('FAWRY_SECRET_KEY'),
+            'active' => true,
+        ]);
 
         $paymob->paymentMethods()->createMany([
             [

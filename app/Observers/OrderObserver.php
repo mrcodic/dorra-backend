@@ -23,10 +23,8 @@ class OrderObserver
 {
     public function creating(Order $order)
     {
-        $now = now();
-        $dateString = $now->format('d-m-Y');
-        $orderFormat = setting('order_format');
-        $order->order_number =  "#ORD-{$dateString}-" . mt_rand(100, 999);
+        $prefix = (string) (setting('order_format') ?: '#ORD');
+        $order->order_number = sprintf('%s-%s-%06d', $prefix, now()->format('Ymd'), $order->id);
     }
 
     /**

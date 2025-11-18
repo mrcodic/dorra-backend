@@ -8,18 +8,18 @@ use Illuminate\Support\Manager;
 final class ShippingManger extends Manager
 {
 
-    public function getDefaultDriver(): void
+    public function getDefaultDriver()
     {
-        $this->config->get('shipping.drivers.shipblu','shipblu');
+        return $this->config->get('shipping.default', 'shipblu');
     }
 
     protected function createShipbluDriver(): ShipBluDriver
     {
-        $cfg = (array) $this->config->get('shipping.drivers.shipblu', []);
+        $cfg = (array)$this->config->get('shipping.drivers.shipblu', []);
 
         return new ShipBluDriver(
             apiKey: (string)($cfg['api_key'] ?? $cfg['token'] ?? ''),
-            baseUrl: rtrim((string)($cfg['base_url'] ?? 'https://api.shipblu.com/'), '/').'/',
+            baseUrl: rtrim((string)($cfg['base_url'] ?? 'https://api.shipblu.com/'), '/') . '/',
         );
     }
 }
