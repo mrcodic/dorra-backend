@@ -65,7 +65,7 @@ class PaymentRequestData
         }
         $allItems = array_merge($baseItems, $extraItems);
         return [
-            'amount' => $amountCents,
+            'amount' =>collect($allItems)->sum('amount'),
             'method' => $this->method,
             'billing' => [
                 'first_name' => $this->requestData->first_name,
