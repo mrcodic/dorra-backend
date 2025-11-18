@@ -24,7 +24,7 @@ class OrderObserver
     public function creating(Order $order)
     {
         $prefix = (string) (setting('order_format') ?: '#ORD');
-        $order->order_number = sprintf('%s-%s-%06d', $prefix, now()->format('Ymd'), $order->id);
+        $order->order_number = sprintf('%s-%s-%s', $prefix, now()->format('Ymd'), $order->id);
     }
 
     /**
