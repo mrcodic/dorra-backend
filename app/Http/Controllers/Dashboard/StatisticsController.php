@@ -112,7 +112,7 @@ class StatisticsController extends Controller
             $salesMonthly = array_replace(array_fill_keys(range(1, 12), 0.0), $salesRaw);
 
             $visitsRaw = DB::table('visits')
-                ->selectRaw('MONTH(COALESCE(`date`, `created_at`)) AS m, SUM(hits) AS views')
+                ->selectRaw('MONTH(COALESCE(`date`, `created_at`)) AS m, Count(*) AS views')
                 ->whereYear(DB::raw('COALESCE(`date`, `created_at`)'), $year)
                 ->groupBy('m')
                 ->pluck('views', 'm')
