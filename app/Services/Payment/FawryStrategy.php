@@ -29,13 +29,13 @@ use Illuminate\Support\Facades\Http;
 
     public function pay(array $payload, ?array $data): false|array
     {
-        $response = Http::post("$this->baseUrl.api/payments/init",$payload);
-        $result = $response->json();
-        if ($response->failed())
-        {
-            dd($result);
-        }
-        dd($result);
+        $result =  Http::
+        acceptJson()
+        ->post($this->baseUrl . "fawrypay-api/api/payments/init", $payload)
+            ->throw()
+            ->json();
+
+        dd($result,$this->baseUrl."api/payments/init",$payload);
 
     }
 

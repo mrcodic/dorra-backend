@@ -9,9 +9,11 @@ class PaymentSeeder extends Seeder
 {
     public function run(): void
     {
-        // 🔹 Seed Paymob gateway
-        $paymobConfig = config('services.paymob');
-
+        /*
+        |--------------------------------------------------------------------------
+        | 1) Paymob Gateway
+        |--------------------------------------------------------------------------
+        */
         DB::table('payment_gateways')->updateOrInsert(
             ['code' => 'paymob'],
             [
@@ -23,19 +25,18 @@ class PaymentSeeder extends Seeder
         );
 
         $paymobGateway = DB::table('payment_gateways')->where('code', 'paymob')->first();
-
         if (!$paymobGateway) {
             throw new \Exception("Paymob gateway not found.");
         }
 
-        // 🔹 Seed Paymob methods
-        $methods = [
+        // Paymob Methods
+        $paymobMethods = [
             ['name' => 'Debit/Credit Card', 'code' => 'paymob_card'],
             ['name' => 'Wallet', 'code' => 'paymob_wallet'],
             ['name' => 'Aman', 'code' => 'paymob_kiosk'],
         ];
 
-        foreach ($methods as $method) {
+        foreach ($paymobMethods as $method) {
             DB::table('payment_methods')->updateOrInsert(
                 ['code' => $method['code']],
                 [
@@ -48,11 +49,55 @@ class PaymentSeeder extends Seeder
             );
         }
 
-        // 🔹 Seed Cash on Delivery (no gateway)
+        /*
+        |--------------------------------------------------------------------------
+        | 2) Fawry Gateway
+        |--------------------------------------------------------------------------
+        */
+        DB::table('payment_gateways')->updateOrInsert(
+            ['code' => 'fawry'],
+            [
+                'name' => 'Fawry',
+                'active' => true,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+
+        $fawryGateway = DB::table('payment_gateways')->where('code', 'fawry')->first();
+        if (!$fawryGateway) {
+            throw new \Exception("Fawry gateway not found.");
+        }
+
+        // Fawry Methods
+        $fawryMethods = [
+            ['code' => 'PayAtFawry', 'name' => 'Pay At Fawry'],
+            ['code' => 'MWALLET', 'name' => 'Mobile WALLET'],
+            ['code' => 'CARD', 'name' => 'CARD'],
+        ];
+
+        foreach ($fawryMethods as $method) {
+            DB::table('payment_methods')->updateOrInsert(
+                ['code' => $method['code']],
+                [
+                    'payment_gateway_id' => $fawryGateway->id,
+                    'name' => $method['name'],
+                    'active' => true,
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ]
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 3) Cash on Delivery (No Gateway)
+        |--------------------------------------------------------------------------
+        */
         DB::table('payment_methods')->updateOrInsert(
             ['code' => 'cash_on_delivery'],
             [
-                'payment_gateway_id' => null, // COD doesn't belong to an external gateway
+                'payment_gateway_id' => null,
                 'name' => 'Cash on Delivery',
                 'active' => true,
                 'updated_at' => now(),

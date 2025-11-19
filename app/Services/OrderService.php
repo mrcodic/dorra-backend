@@ -18,7 +18,8 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     ProductRepositoryInterface,
     ProductSpecificationOptionRepositoryInterface,
     ShippingAddressRepositoryInterface,
-    UserRepositoryInterface};
+    UserRepositoryInterface
+};
 use App\Rules\ValidDiscountCode;
 use App\Services\Payment\PaymentGatewayFactory;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -48,8 +49,8 @@ class OrderService extends BaseService
         public CartService                                   $cartService,
         public PaymentMethodRepositoryInterface              $paymentMethodRepository,
         public PaymentGatewayFactory                         $paymentFactory,
-        public InventoryRepositoryInterface $inventoryRepository,
-        public CategoryRepositoryInterface $categoryRepository,
+        public InventoryRepositoryInterface                  $inventoryRepository,
+        public CategoryRepositoryInterface                   $categoryRepository,
 
     )
 
@@ -127,7 +128,7 @@ class OrderService extends BaseService
                 return $order->total_price ?? 0;
             })
             ->addColumn('status', function ($order) {
-                return $order->status ?[
+                return $order->status ? [
                     'value' => $order->status->value,
                     'label' => $order->status->label(),
                     'icon' => $order->status->icon(),
@@ -138,9 +139,9 @@ class OrderService extends BaseService
             })
             ->addColumn('action', function () {
                 return [
-                    'can_show' => (bool) auth()->user()->hasPermissionTo('orders_show'),
-                    'can_edit' => (bool) auth()->user()->hasPermissionTo('orders_update'),
-                    'can_delete' => (bool) auth()->user()->hasPermissionTo('orders_delete'),
+                    'can_show' => (bool)auth()->user()->hasPermissionTo('orders_show'),
+                    'can_edit' => (bool)auth()->user()->hasPermissionTo('orders_update'),
+                    'can_delete' => (bool)auth()->user()->hasPermissionTo('orders_delete'),
                 ];
             })
             ->make();
@@ -447,7 +448,7 @@ class OrderService extends BaseService
         DB::transaction(function () use (&$model, $validatedData) {
             // ===== Handle inventories (multi-select) =====
             if (array_key_exists('inventory_ids', $validatedData)) {
-                $newIds = array_values(array_unique(array_filter($validatedData['inventory_ids'] ?? [], fn ($v) => !empty($v))));
+                $newIds = array_values(array_unique(array_filter($validatedData['inventory_ids'] ?? [], fn($v) => !empty($v))));
 
 
                 $changes = $model->inventories()->sync($newIds);
@@ -470,16 +471,16 @@ class OrderService extends BaseService
 
             if (
                 array_key_exists('first_name', $validatedData) ||
-                array_key_exists('last_name',  $validatedData) ||
-                array_key_exists('email',      $validatedData) ||
-                array_key_exists('phone',      $validatedData)
+                array_key_exists('last_name', $validatedData) ||
+                array_key_exists('email', $validatedData) ||
+                array_key_exists('phone', $validatedData)
             ) {
                 if ($orderAddress = $model->orderAddress()->first()) {
                     $orderAddress->update([
                         'first_name' => $validatedData['first_name'] ?? $orderAddress->first_name,
-                        'last_name'  => $validatedData['last_name']  ?? $orderAddress->last_name,
-                        'email'      => $validatedData['email']      ?? $orderAddress->email,
-                        'phone'      => $validatedData['phone']      ?? $orderAddress->phone,
+                        'last_name' => $validatedData['last_name'] ?? $orderAddress->last_name,
+                        'email' => $validatedData['email'] ?? $orderAddress->email,
+                        'phone' => $validatedData['phone'] ?? $orderAddress->phone,
                     ]);
                 }
             }
@@ -625,9 +626,9 @@ class OrderService extends BaseService
             ]);
         }
 
-        $subTotal = $cart->items->sum(fn ($item) => $item->sub_total_after_offer ?? $item->sub_total);
+        $subTotal = $cart->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total);
         $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request) {
-            $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode,$cart));
+            $order = $this->repository->query()->create(OrderData::fromCart($subTotal, $discountCode, $cart));
             $orderItems = $order->orderItems()->createMany(
                 $cart->items->map(function ($item) {
                     return [
@@ -690,12 +691,16 @@ class OrderService extends BaseService
         }
 
         $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
-
-        $dto = PaymentRequestData::fromArray(['order' => $order,
+        $dto=   \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray(['order' => $order,
             'requestData' => $request,
             'user' => auth('sanctum')->user(),
             'guest' => $order->orderAddress ?? $order->pickupContact,
-            'method' => $selectedPaymentMethod]);
+            'method' => $selectedPaymentMethod->code]);
+//        $dto = PaymentRequestData::fromArray(['order' => $order,
+//            'requestData' => $request,
+//            'user' => auth('sanctum')->user(),
+//            'guest' => $order->orderAddress ?? $order->pickupContact,
+//            'method' => $selectedPaymentMethod]);
         $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), [
             'order' => $order, 'user' => auth('sanctum')->user(),
             'cart' => $cart, 'discountCode' => $discountCode]);
@@ -734,6 +739,7 @@ class OrderService extends BaseService
         $this->repository->query()->whereIn('id', $orders->pluck('id'))->update(['is_already_printed' => 1]);
         return $html;
     }
+
     public function print($order)
     {
         $order = $this->repository->find($order);

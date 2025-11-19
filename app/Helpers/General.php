@@ -153,6 +153,7 @@ function generateFawrySignature(
         $customerProfileId .
         $returnUrl;
 
+
      collect($items)->each(function ($item) use ($secureKey, $signatureString) {
          $formattedPrice = number_format($item['price'] / 100, 2, '.', '');
 
@@ -163,6 +164,7 @@ function generateFawrySignature(
     });
 
     $signatureString .= $secureKey;
+    dd($signatureString);
     return hash('sha256', $signatureString);
 
 
