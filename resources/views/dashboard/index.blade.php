@@ -309,7 +309,7 @@
                             <div class="d-flex justify-content-between align-items-center w-100">
                                 <h2 class="text-black">
                                     <span
-                                        class="fw-bolder text-black">{{ number_format(data_get($bestMonths, 'visits.value'), 0) }}</span>
+                                        class="fw-bolder text-black">{{ number_format((int) \App\Models\Visit::count()) }}</span>
                                     visits
                                 </h2>
 {{--                                <span>in {{ $visitsCard['year'] }}</span>--}}
