@@ -691,16 +691,16 @@ class OrderService extends BaseService
         }
 
         $paymentGatewayStrategy = $this->paymentFactory->make($selectedPaymentMethod->paymentGateway->code ?? 'paymob');
-        $dto=   \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray(['order' => $order,
-            'requestData' => $request,
-            'user' => auth('sanctum')->user(),
-            'guest' => $order->orderAddress ?? $order->pickupContact,
-            'method' => $selectedPaymentMethod->code]);
-//        $dto = PaymentRequestData::fromArray(['order' => $order,
+//        $dto=   \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray(['order' => $order,
 //            'requestData' => $request,
 //            'user' => auth('sanctum')->user(),
 //            'guest' => $order->orderAddress ?? $order->pickupContact,
-//            'method' => $selectedPaymentMethod]);
+//            'method' => $selectedPaymentMethod->code]);
+        $dto = PaymentRequestData::fromArray(['order' => $order,
+            'requestData' => $request,
+            'user' => auth('sanctum')->user(),
+            'guest' => $order->orderAddress ?? $order->pickupContact,
+            'method' => $selectedPaymentMethod]);
         $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), [
             'order' => $order, 'user' => auth('sanctum')->user(),
             'cart' => $cart, 'discountCode' => $discountCode]);
