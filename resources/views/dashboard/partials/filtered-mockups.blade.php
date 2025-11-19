@@ -59,21 +59,21 @@
                         </button>
                     @endcan
 
-                    @can('mockups_update')
-                        <button type="button" class="btn btn-outline-secondary flex-fill edit-mockup-btn"
-                                data-bs-toggle="modal" data-bs-target="#editMockupModal"
-                                data-id="{{ $mockup->id }}"
-                                data-name="{{ $mockup->name }}"
-                                data-types='@json($mockup->types?->pluck("id"))'
-                                data-product-id="{{ $mockup->product?->id }}"
-                                data-colors='@json($mockup->colors ?? [])'
-                                data-images='@json($mockup->getMedia("mockups")->map(fn($m)=>[
-                                    "original_url"=>$m->getFullUrl(),
-                                    "custom_properties"=>$m->custom_properties,
-                                ]))'>
-                            Edit
-                        </button>
-                    @endcan
+{{--                    @can('mockups_update')--}}
+{{--                        <button type="button" class="btn btn-outline-secondary flex-fill edit-mockup-btn"--}}
+{{--                                data-bs-toggle="modal" data-bs-target="#editMockupModal"--}}
+{{--                                data-id="{{ $mockup->id }}"--}}
+{{--                                data-name="{{ $mockup->name }}"--}}
+{{--                                data-types='@json($mockup->types?->pluck("id"))'--}}
+{{--                                data-product-id="{{ $mockup->product?->id }}"--}}
+{{--                                data-colors='@json($mockup->colors ?? [])'--}}
+{{--                                data-images='@json($mockup->getMedia("mockups")->map(fn($m)=>[--}}
+{{--                                    "original_url"=>$m->getFullUrl(),--}}
+{{--                                    "custom_properties"=>$m->custom_properties,--}}
+{{--                                ]))'>--}}
+{{--                            Edit--}}
+{{--                        </button>--}}
+{{--                    @endcan--}}
 
                     @can('mockups_delete')
                         <button class="btn btn-outline-danger flex-fill open-delete-mockup-modal"

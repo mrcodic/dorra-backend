@@ -105,16 +105,16 @@ var dt_user_table = $(".order-list-table").DataTable({
                 e.preventDefault();
             },
         },
-        {
-            text: "Add New Order",
-            className: "add-new btn btn-outline-primary",
-            action: function (e, dt, node, config) {
-                window.location.href = ordersCreateUrl;
-            },
-            init: function (api, node, config) {
-                $(node).removeClass("btn-secondary");
-            },
-        },
+        // {
+        //     text: "Add New Order",
+        //     className: "add-new btn btn-outline-primary",
+        //     action: function (e, dt, node, config) {
+        //         window.location.href = ordersCreateUrl;
+        //     },
+        //     init: function (api, node, config) {
+        //         $(node).removeClass("btn-secondary");
+        //     },
+        // },
     ],
     drawCallback: function () {
         feather.replace();
