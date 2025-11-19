@@ -62,7 +62,7 @@
 
 
                     </div>
-{{--                    <ul class="nav navbar-nav align-items-center ms-auto">--}}
+                    <ul class="nav navbar-nav align-items-center ms-auto">
 {{--                        <li class="nav-item dropdown dropdown-language">--}}
 {{--                            <a class="nav-link dropdown-toggle" id="dropdown-flag" href="#" data-bs-toggle="dropdown"--}}
 {{--                               aria-haspopup="true">--}}
@@ -81,26 +81,26 @@
 
 
 
-{{--                        <li class="nav-item dropdown dropdown-notification me-25">--}}
-{{--                            <a class="nav-link" href="javascript:void(0);" data-bs-toggle="dropdown">--}}
-{{--                                <i class="ficon" data-feather="bell"></i>--}}
-{{--                                <span class="badge rounded-pill bg-danger badge-up">{{\Illuminate\Support\Facades\Auth::user()->unreadNotifications->count()}}</span>--}}
-{{--                            </a>--}}
-{{--                            <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">--}}
-{{--                                <li class="dropdown-menu-header">--}}
-{{--                                    <div class="dropdown-header d-flex">--}}
-{{--                                        <h4 class="notification-title mb-0 me-auto">Notifications</h4>--}}
-{{--                                        <div class="badge rounded-pill badge-light-primary">{{\Illuminate\Support\Facades\Auth::user()->unreadNotifications->count()}} New</div>--}}
-{{--                                    </div>--}}
-{{--                                </li>--}}
-{{--                                @foreach (\Illuminate\Support\Facades\Auth::user()->notifications as $notification)--}}
-{{--                                <li class="scrollable-container media-list">--}}
-{{--                                    <a class="d-flex notification-item {{ $notification->read_at ? '' : 'unread'}}"--}}
-{{--                                       href="{{\Illuminate\Support\Arr::get($notification->data,'url') ?:'javascript:void(0)'}}"--}}
-{{--                                       data-id="{{ $notification->id }}"--}}
+                        <li class="nav-item dropdown dropdown-notification me-25">
+                            <a class="nav-link" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                <i class="ficon" data-feather="bell"></i>
+                                <span class="badge rounded-pill bg-danger badge-up">{{\Illuminate\Support\Facades\Auth::user()->unreadNotifications->count()}}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
+                                <li class="dropdown-menu-header">
+                                    <div class="dropdown-header d-flex">
+                                        <h4 class="notification-title mb-0 me-auto">Notifications</h4>
+                                        <div class="badge rounded-pill badge-light-primary">{{\Illuminate\Support\Facades\Auth::user()->unreadNotifications->count()}} New</div>
+                                    </div>
+                                </li>
+                                @foreach (\Illuminate\Support\Facades\Auth::user()->notifications as $notification)
+                                <li class="scrollable-container media-list">
+                                    <a class="d-flex notification-item {{ $notification->read_at ? '' : 'unread'}}"
+                                       href="{{\Illuminate\Support\Arr::get($notification->data,'url') ?:'javascript:void(0)'}}"
+                                       data-id="{{ $notification->id }}"
 
-{{--                                    >--}}
-{{--                                        <div class="list-item d-flex align-items-start">--}}
+                                    >
+                                        <div class="list-item d-flex align-items-start">
 {{--                                            <div class="me-1">--}}
 {{--                                                <div class="avatar">--}}
 {{--                                                    <img src="{{ asset('images/portrait/small/avatar-s-15.jpg') }}"--}}
@@ -108,101 +108,101 @@
 {{--                                                         height="32">--}}
 {{--                                                </div>--}}
 {{--                                            </div>--}}
-{{--                                            <div class="list-item-body flex-grow-1">--}}
-{{--                                                <p class="media-heading"><span--}}
-{{--                                                        class="fw-bolder">{{ \Illuminate\Support\Arr::get($notification->data,'title') }}</p>--}}
-{{--                                                <small class="notification-text">{{\Illuminate\Support\Arr::get($notification->data,'body')}}</small>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </a>--}}
-{{--                                </li>--}}
-{{--                                @endforeach--}}
-{{--                                <li class="dropdown-menu-footer">--}}
-{{--                                    <a id="readAllBtn" class="btn btn-primary w-100" href="javascript:void(0)">Read all--}}
-{{--                                        notifications</a>--}}
-{{--                                </li>--}}
-{{--                            </ul>--}}
-{{--                        </li>--}}
-{{--                        <li class="nav-item dropdown dropdown-user">--}}
-{{--                            <a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user"--}}
-{{--                               href="javascript:void(0);"--}}
-{{--                               data-bs-toggle="dropdown" aria-haspopup="true">--}}
-{{--                                <div class="user-nav d-sm-flex d-none">--}}
-{{--          <span class="user-name fw-bolder">--}}
-{{--            @if (Auth::check())--}}
-{{--                  {{ Auth::user()->name }}--}}
-{{--              @else--}}
-{{--                  John Doe--}}
-{{--              @endif--}}
-{{--          </span>--}}
-{{--                                    <span class="user-status">--}}
-{{--            {{ Auth::user()->name }}--}}
-{{--          </span>--}}
-{{--                                </div>--}}
-{{--                                <span class="avatar">--}}
-{{--          <img class="round"--}}
-{{--               src="{{ Auth::user()->image?->getUrl() ?? asset('images/default-user.png') }}"--}}
-{{--               alt="avatar" height="40" width="40">--}}
-{{--          <span class="avatar-status-online"></span>--}}
-{{--        </span>--}}
-{{--                            </a>--}}
-{{--                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-user">--}}
-{{--                                <h6 class="dropdown-header">Manage Profile</h6>--}}
-{{--                                <div class="dropdown-divider"></div>--}}
-{{--                                <a class="dropdown-item"--}}
-{{--                                   href="/profile">--}}
-{{--                                    <i class="me-50" data-feather="user"></i> Profile--}}
-{{--                                </a>--}}
-{{--                                @if (Auth::check() && Laravel\Jetstream\Jetstream::hasApiFeatures())--}}
-{{--                                    <a class="dropdown-item" href="{{ route('api-tokens.index') }}">--}}
-{{--                                        <i class="me-50" data-feather="key"></i> API Tokens--}}
-{{--                                    </a>--}}
-{{--                                @endif--}}
+                                            <div class="list-item-body flex-grow-1">
+                                                <p class="media-heading"><span
+                                                        class="fw-bolder">{{ \Illuminate\Support\Arr::get($notification->data,'title') }}</p>
+                                                <small class="notification-text">{{\Illuminate\Support\Arr::get($notification->data,'body')}}</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                @endforeach
+                                <li class="dropdown-menu-footer">
+                                    <a id="readAllBtn" class="btn btn-primary w-100" href="javascript:void(0)">Read all
+                                        notifications</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown dropdown-user">
+                            <a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user"
+                               href="javascript:void(0);"
+                               data-bs-toggle="dropdown" aria-haspopup="true">
+                                <div class="user-nav d-sm-flex d-none">
+          <span class="user-name fw-bolder">
+            @if (Auth::check())
+                  {{ Auth::user()->name }}
+              @else
+                  John Doe
+              @endif
+          </span>
+                                    <span class="user-status">
+            {{ Auth::user()->name }}
+          </span>
+                                </div>
+                                <span class="avatar">
+          <img class="round"
+               src="{{ Auth::user()->image?->getUrl() ?? asset('images/default-user.png') }}"
+               alt="avatar" height="40" width="40">
+          <span class="avatar-status-online"></span>
+        </span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-user">
+                                <h6 class="dropdown-header">Manage Profile</h6>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item"
+                                   href="/profile">
+                                    <i class="me-50" data-feather="user"></i> Profile
+                                </a>
+                                @if (Auth::check() && Laravel\Jetstream\Jetstream::hasApiFeatures())
+                                    <a class="dropdown-item" href="{{ route('api-tokens.index') }}">
+                                        <i class="me-50" data-feather="key"></i> API Tokens
+                                    </a>
+                                @endif
 
-{{--                                @if (Auth::User() && Laravel\Jetstream\Jetstream::hasTeamFeatures())--}}
-{{--                                    <div class="dropdown-divider"></div>--}}
-{{--                                    <h6 class="dropdown-header">Manage Team</h6>--}}
-{{--                                    <div class="dropdown-divider"></div>--}}
-{{--                                    <a class="dropdown-item"--}}
-{{--                                       href="{{ Auth::user() ? route('teams.show', Auth::user()->currentTeam->id) : 'javascript:void(0)' }}">--}}
-{{--                                        <i class="me-50" data-feather="settings"></i> Team Settings--}}
-{{--                                    </a>--}}
-{{--                                    @can('create', Laravel\Jetstream\Jetstream::newTeamModel())--}}
-{{--                                        <a class="dropdown-item" href="{{ route('teams.create') }}">--}}
-{{--                                            <i class="me-50" data-feather="users"></i> Create New Team--}}
-{{--                                        </a>--}}
-{{--                                    @endcan--}}
+                                @if (Auth::User() && Laravel\Jetstream\Jetstream::hasTeamFeatures())
+                                    <div class="dropdown-divider"></div>
+                                    <h6 class="dropdown-header">Manage Team</h6>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item"
+                                       href="{{ Auth::user() ? route('teams.show', Auth::user()->currentTeam->id) : 'javascript:void(0)' }}">
+                                        <i class="me-50" data-feather="settings"></i> Team Settings
+                                    </a>
+                                    @can('create', Laravel\Jetstream\Jetstream::newTeamModel())
+                                        <a class="dropdown-item" href="{{ route('teams.create') }}">
+                                            <i class="me-50" data-feather="users"></i> Create New Team
+                                        </a>
+                                    @endcan
 
-{{--                                    <div class="dropdown-divider"></div>--}}
-{{--                                    <h6 class="dropdown-header">--}}
-{{--                                        Switch Teams--}}
-{{--                                    </h6>--}}
-{{--                                    <div class="dropdown-divider"></div>--}}
-{{--                                    @if (Auth::user())--}}
-{{--                                        @foreach (Auth::user()->allTeams() as $team)--}}
-{{--                                            --}}{{-- Below commented code read by artisan command while installing jetstream. !! Do not remove if you want to use jetstream. --}}
+                                    <div class="dropdown-divider"></div>
+                                    <h6 class="dropdown-header">
+                                        Switch Teams
+                                    </h6>
+                                    <div class="dropdown-divider"></div>
+                                    @if (Auth::user())
+                                        @foreach (Auth::user()->allTeams() as $team)
+                                            {{-- Below commented code read by artisan command while installing jetstream. !! Do not remove if you want to use jetstream. --}}
 
-{{--                                            --}}{{-- <x-jet-switchable-team :team="$team" /> --}}
-{{--                                        @endforeach--}}
-{{--                                    @endif--}}
-{{--                                @endif--}}
-{{--                                @if (Auth::check())--}}
-{{--                                    <a class="dropdown-item" href="{{ route('logout') }}"--}}
-{{--                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">--}}
-{{--                                        <i class="me-50" data-feather="power"></i> Logout--}}
-{{--                                    </a>--}}
-{{--                                    <form method="POST" id="logout-form" action="{{ route('logout') }}">--}}
-{{--                                        @csrf--}}
-{{--                                    </form>--}}
-{{--                                @else--}}
-{{--                                    <a class="dropdown-item"--}}
-{{--                                       href="{{ Route::has('login') ? route('login') : 'javascript:void(0)' }}">--}}
-{{--                                        <i class="me-50" data-feather="log-in"></i> Login--}}
-{{--                                    </a>--}}
-{{--                                @endif--}}
-{{--                            </div>--}}
-{{--                        </li>--}}
-{{--                    </ul>--}}
+                                            {{-- <x-jet-switchable-team :team="$team" /> --}}
+                                        @endforeach
+                                    @endif
+                                @endif
+                                @if (Auth::check())
+                                    <a class="dropdown-item" href="{{ route('logout') }}"
+                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        <i class="me-50" data-feather="power"></i> Logout
+                                    </a>
+                                    <form method="POST" id="logout-form" action="{{ route('logout') }}">
+                                        @csrf
+                                    </form>
+                                @else
+                                    <a class="dropdown-item"
+                                       href="{{ Route::has('login') ? route('login') : 'javascript:void(0)' }}">
+                                        <i class="me-50" data-feather="log-in"></i> Login
+                                    </a>
+                                @endif
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </nav>
 
