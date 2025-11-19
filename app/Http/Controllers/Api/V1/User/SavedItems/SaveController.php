@@ -29,7 +29,7 @@ class SaveController extends Controller
             ->get();
 
         $savedDesigns = $user->savedDesigns()
-            ->with('designable','owner','media')
+            ->with('designable.productPrice','owner','media')
             ->when(request()->filled('category_id'), fn($q) => $q->whereIn('designable_id', $category?->is_has_category ?
                 $category?->products->pluck('id') :
                 [request('category_id')])
