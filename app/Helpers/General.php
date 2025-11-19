@@ -164,7 +164,6 @@ function generateFawrySignature(
     });
 
     $signatureString .= $secureKey;
-    dd($signatureString);
     return hash('sha256', $signatureString);
 
 
