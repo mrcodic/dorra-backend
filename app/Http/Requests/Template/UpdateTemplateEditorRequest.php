@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Template;
 
 use App\Enums\OrientationEnum;
+use App\Enums\SafetyAreaEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
@@ -51,6 +52,8 @@ class UpdateTemplateEditorRequest extends BaseRequest
             'safety_area' => ['sometimes', 'numeric'],
             'border' => ['sometimes', 'numeric'],
             'go_to_editor' => ['sometimes', 'boolean'],
+            'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
+
         ];
     }
 

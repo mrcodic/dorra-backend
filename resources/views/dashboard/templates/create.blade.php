@@ -262,7 +262,7 @@
                                             </div>
                                         </div>
 
-                                        {{-- Safety Area (col-6) --}}
+                                        {{-- Cut Margin (col-6) --}}
                                         <div class="col-md-6">
                                             <div class="form-group mb-2">
                                                 <div class="form-check mb-1">
@@ -479,14 +479,14 @@
             // init select2 if not already
             if ($select.length && !$select.data('select2')) {
                 $select.select2({
-                    placeholder: "Safety Area",
+                    placeholder: "Cut Margin",
                     allowClear: true,
                     minimumResultsForSearch: Infinity
                 });
             }
 
             $toggle.on('change', syncCutMargin);
-            syncSafetyArea(); // initial state
+            syncCutMargin(); // initial state
         });
     </script>
 

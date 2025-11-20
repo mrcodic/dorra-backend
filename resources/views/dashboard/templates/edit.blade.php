@@ -285,6 +285,37 @@
                                             </div>
                                         </div>
                                     </div>
+
+
+                                    {{-- Cut Margin (col-6) --}}
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-2">
+                                            <div class="form-check mb-1">
+                                                {{-- send 0 when unchecked --}}
+                                                <input type="hidden" value="0">
+                                                <input class="form-check-input" type="checkbox" id="hasCutMargin"
+                                                       value="1" {{ $model->cut_margin
+                                                    ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="hasCutMargin">Enable Cut Margin</label>
+                                            </div>
+
+                                            <div id="cutMarginBox"
+                                                 class="{{ $model->cut_margin ? '' : 'd-none' }}">
+                                                <label for="cutMarginSelect" class="label-text mb-1">Cut Margin</label>
+                                                <select id="cutMarginSelect" class="form-select select2"
+                                                        name="cut_margin">
+
+                                                @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                        <option value="{{ $area->value }}"   @selected($area->value == $model->cut_margin) >
+                                                            {{ $area->label() }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                {{--                                                    <small class="form-text text-muted">Padding inside the design--}}
+                                                {{--                                                        area.</small>--}}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
 
@@ -514,6 +545,37 @@
             }
 
             $toggle.on('change', syncSafetyArea);
+            syncSafetyArea(); // initial state
+        });
+    </script>
+    <script>
+        $(function () {
+            const $toggle = $('#hasCutMargin');
+            const $box = $('#cutMarginBox');
+            const $select = $('#cutMarginSelect');
+
+            function syncCutMargin() {
+                if ($toggle.is(':checked')) {
+                    $box.removeClass('d-none');
+                } else {
+                    $box.addClass('d-none');
+                    // Clear value when hidden (so backend gets null/empty)
+                    $select.val(null).trigger('change');
+                }
+                // If sizes depend on safety area, refresh:
+                // if (typeof refreshSizes === 'function') refreshSizes();
+            }
+
+            // init select2 if not already
+            if ($select.length && !$select.data('select2')) {
+                $select.select2({
+                    placeholder: "Cut Margin",
+                    allowClear: true,
+                    minimumResultsForSearch: Infinity
+                });
+            }
+
+            $toggle.on('change', syncCutMargin);
             syncSafetyArea(); // initial state
         });
     </script>
