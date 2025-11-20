@@ -313,6 +313,7 @@
                                     <div class="form-group mb-2 d-none" id="cornersBox">
                                         <label for="cornersSelect" class="label-text mb-1">Corners</label>
                                         <select id="cornersSelect" class="form-select select2" name="border">
+                                            <option value="" selected disabled>Choose Corner</option>
                                             @foreach(\App\Enums\BorderEnum::cases() as $border)
                                                 <option value="{{ $border->value }}">{{$border->label()}}</option>
                                             @endforeach

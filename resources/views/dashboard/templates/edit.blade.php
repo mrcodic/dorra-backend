@@ -310,7 +310,7 @@
                                                 <input type="hidden" value="0">
                                                 <input class="form-check-input" type="checkbox" id="hasCutMargin"
                                                        value="1" {{ $model->cut_margin
-                                                    ? 'checked' : '' }}>
+                                                    ? 'checked' : '' }} disabled>
                                                 <label class="form-check-label" for="hasCutMargin">Enable Cut Margin</label>
                                             </div>
 
@@ -318,7 +318,7 @@
                                                  class="{{ $model->cut_margin ? '' : 'd-none' }}">
                                                 <label for="cutMarginSelect" class="label-text mb-1">Cut Margin</label>
                                                 <select id="cutMarginSelect" class="form-select select2"
-                                                        name="cut_margin">
+                                                        name="cut_margin" disabled>
 
                                                 @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
                                                         <option value="{{ $area->value }}"   @selected($area->value == $model->cut_margin) >
@@ -337,6 +337,7 @@
                                 <div class="form-group mb-2 d-none" id="cornersBox">
                                     <label for="cornersSelect" class="label-text mb-1">Corners</label>
                                     <select id="cornersSelect" class="form-select select2" name="border">
+                                        <option value="" selected disabled>Choose Corner</option>
                                         @foreach(\App\Enums\BorderEnum::cases() as $border)
                                             <option value="{{ $border->value }}"
                                                 @selected($border->value == $model->border) disabled>
