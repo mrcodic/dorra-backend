@@ -134,18 +134,18 @@ function hasMeaningfulSearch($value): bool
     return $stripped !== '';
 }
 
+// app/Helpers/FawrySignature.php
 function generateFawrySignature(
     string $merchantCode,
     string $merchantRefNum,
     ?string $customerProfileId,
     string $returnUrl,
-    array  $items
+    array $items
 ): string {
-    // Fawry wants empty string if no profile id
+
     $customerProfileId = $customerProfileId ?: '';
 
-    // Sort items by itemId as required
-    usort($items, fn ($a, $b) => strcmp((string) $a['itemId'], (string) $b['itemId']));
+    usort($items, fn($a, $b) => strcmp($a['itemId'], $b['itemId']));
 
     $secureKey = config('services.fawry.secret_key');
 
@@ -156,14 +156,15 @@ function generateFawrySignature(
         $returnUrl;
 
     foreach ($items as $item) {
-        $formattedPrice = number_format((float) $item['price'], 2, '.', '');
-
+        $formattedPrice = number_format((float)$item['price'], 2, '.', '');
         $signatureString .=
-            (string) $item['itemId'] .
-            (string) $item['quantity'] .
+            (string)$item['itemId'] .
+            (string)$item['quantity'] .
             $formattedPrice;
     }
 
     $signatureString .= $secureKey;
+
     return hash('sha256', $signatureString);
 }
+
