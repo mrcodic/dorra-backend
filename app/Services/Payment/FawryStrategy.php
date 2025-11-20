@@ -34,7 +34,6 @@ use Illuminate\Support\Facades\Http;
         $response = Http::
         withHeaders([
             'Content-Type' => 'application/json',
-
         ])->post($url, $payload);
 
         dd($response->body(), $response->status(),$response,$payload);
