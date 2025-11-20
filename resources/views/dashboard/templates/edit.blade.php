@@ -31,6 +31,21 @@
                                     <label class="label-text mb-1">Template Image</label>
 
                                     <!-- Dropzone container -->
+                                    <div id="template-main-dropzone" class="dropzone border rounded p-3"
+                                         style="cursor:pointer; min-height:150px;">
+                                        <div class="dz-message" data-dz-message>
+                                            <span>Drop image here or click to upload</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden input for uploaded file id -->
+                                    <input type="hidden" name="template_image_main_id" id="uploadedMainTemplateImage">
+                                </div>
+
+                                <div class="form-group mb-2">
+                                    <label class="label-text mb-1">Template Model Image</label>
+
+                                    <!-- Dropzone container -->
                                     <div id="template-dropzone" class="dropzone border rounded p-3"
                                          style="cursor:pointer; min-height:150px;">
                                         <div class="dz-message" data-dz-message>
@@ -846,6 +861,64 @@
             // Initial state
             toggleCheckboxes();
         });
+</script>
+    <script>
+
+    const modelMainDropzone = new Dropzone("#template-main-dropzone", {
+        url: "{{ route('media.store') }}",
+        paramName: "file",
+        maxFiles: 1,
+        maxFilesize: 1, // MB
+        acceptedFiles: "image/*",
+        headers: {
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        addRemoveLinks: true,
+        dictDefaultMessage: "Drop image here or click to upload",
+        init: function () {
+            let dz = this;
+
+            // ✅ Show existing image if editing
+            @if(!empty($media = $model->getFirstMedia('templates')))
+            let modelMockFile = {
+                name: "{{ $media->file_name }}",
+                size: {{ $media->size ?? 12345 }},
+                _hiddenInputId: "{{ $media->id }}"
+            };
+            document.getElementById("uploadedMainTemplateImage").value = "{{ $media->id }}";
+
+
+            dz.emit("addedfile", modelMockFile);
+            dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
+            dz.emit("complete", modelMockFile);
+            dz.files.push(modelMockFile);
+            @endif
+
+            dz.on("success", function (file, response) {
+                if (response?.data?.id) {
+                    file._hiddenInputId = response.data.id;
+                    document.getElementById("uploadedMainTemplateImage").value = response.data.id;
+                }
+            });
+
+            dz.on("removedfile", function (file) {
+                if (file._hiddenInputId) {
+                    fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                        method: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    });
+                    let hiddenInput = document.getElementById("uploadedMainTemplateImage");
+                    if (hiddenInput.value == file._hiddenInputId) {
+                        hiddenInput.value = "";
+                    }
+                }
+            });
+        }
+    });
+
+
 </script>
 
 

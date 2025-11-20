@@ -204,7 +204,97 @@
 
         const locale = "{{ app()->getLocale() }}";
 </script>
+<script !src="">
+    document.addEventListener("DOMContentLoaded", function () {
+        // Feather icons refresh
+        if (window.feather) feather.replace();
 
+        // Handle clear localStorage when clicking "Show"
+        $(document).on("click", ".show-template", function () {
+            localStorage.removeItem("frontCanvas");
+            localStorage.removeItem("backCanvas");
+            console.log("✅ Cleared frontCanvas & backCanvas from localStorage");
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.feather) {
+            feather.replace();
+        }
+    });
+
+    // Also run after AJAX updates
+    $(document).ajaxComplete(function () {
+        if (window.feather) {
+            feather.replace();
+        }
+    });
+
+    handleAjaxFormSubmit('.change-status-form', {
+        successMessage: '✅ Status updated successfully!',
+        onSuccess: function (response, $form) {
+            console.log('Success:', response);
+
+            const templateId = response.data.id;
+            const status = response.data.status.value; // assuming this contains status enum value
+            const statusLabel = response.data.status.label;
+            const bg = response.data.status.bgHex;
+            const color = response.data.status.textHex;
+            const designData = response.data.design_data; // assuming design_data returned from server
+
+            // Update status label text
+            const $statusLabel = $('.template-status-label[data-template-id="' + templateId + '"]');
+            if ($statusLabel.length) {
+                $statusLabel.text(statusLabel)
+                    .css({
+                        backgroundColor: bg,
+                        color: color,
+                    });
+            }
+
+            // Find the template card div by data-template-id
+            const $templateCard = $('[data-template-id="' + templateId + '"]');
+
+            if ($templateCard.length) {
+                // Find publish button
+                const $publishBtn = $templateCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::PUBLISHED }}"]').siblings('button');
+                // Find draft button
+                const $draftBtn = $templateCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::DRAFTED }}"]').siblings('button');
+                // Find live button
+                const $liveBtn = $templateCard.find('form.change-status-form input[name="status"][value="{{ \App\Enums\Template\StatusEnum::LIVE }}"]').siblings('button');
+
+                // Logic to enable/disable buttons, example (adjust according to your rules):
+
+                {{--// Enable Publish if design_data exists and status not published--}}
+                {{--if (designData && status !== {{ \App\Enums\Template\StatusEnum::PUBLISHED->value }}) {--}}
+                {{--    $publishBtn.removeClass('disabled').prop('disabled', false);--}}
+                {{--} else {--}}
+                {{--    $publishBtn.addClass('disabled').prop('disabled', true);--}}
+                {{--}--}}
+
+                {{--// Enable Draft if design_data exists and status not drafted--}}
+                {{--if (designData && status !== {{ \App\Enums\Template\StatusEnum::DRAFTED->value }}) {--}}
+                {{--    $draftBtn.removeClass('disabled').prop('disabled', false);--}}
+                {{--} else {--}}
+                {{--    $draftBtn.addClass('disabled').prop('disabled', true);--}}
+                {{--}--}}
+
+                {{--// Enable Live if design_data exists and status not live (adjust this condition if needed)--}}
+                {{--if (designData && status !== {{ \App\Enums\Template\StatusEnum::LIVE->value }}) {--}}
+                {{--    $liveBtn.removeClass('disabled').prop('disabled', false);--}}
+                {{--} else {--}}
+                {{--    $liveBtn.addClass('disabled').prop('disabled', true);--}}
+                {{--}--}}
+            }
+        },
+
+        onError: function (xhr, $form) {
+            console.error('Error:', xhr);
+        },
+        resetForm: false,
+    });
+
+</script>
 
 {{-- Page js files --}}
 <script src="{{ asset('js/scripts/pages/app-template-list.js') }}?v={{ time() }}"></script>

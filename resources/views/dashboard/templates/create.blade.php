@@ -22,6 +22,18 @@
                             <div class="flex-grow-1">
                                 <div class="">
                                     <div class="form-group mb-2">
+                                        <label class="label-text mb-1">Template Image</label>
+
+                                        <!-- Dropzone Container -->
+                                        <div id="main-template-dropzone" class="dropzone border rounded p-3"
+                                             style="cursor:pointer; min-height:150px;">
+                                            <div class="dz-message" data-dz-message>
+                                                <span>Drop image here or click to upload</span>
+                                            </div> <!-- Hidden input for uploaded file ID -->
+                                            <input type="hidden" name="template_image_main_id" id="uploadedMainTemplateImage">
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-2">
                                         <label class="label-text mb-1">Template Model Image</label>
 
                                         <!-- Dropzone Container -->
@@ -271,12 +283,14 @@
                                                     <input class="form-check-input" type="checkbox" id="hasCutMargin"
                                                            value="1" {{ old('cut_margin')
                                                     ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="hasCutMargin">Enable Cut Margin</label>
+                                                    <label class="form-check-label" for="hasCutMargin">Enable Cut
+                                                        Margin</label>
                                                 </div>
 
                                                 <div id="cutMarginBox"
                                                      class="{{ old('cut_margin') ? '' : 'd-none' }}">
-                                                    <label for="cutMarginSelect" class="label-text mb-1">Cut Margin</label>
+                                                    <label for="cutMarginSelect" class="label-text mb-1">Cut
+                                                        Margin</label>
                                                     <select id="cutMarginSelect" class="form-select select2"
                                                             name="cut_margin">
                                                         @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
@@ -287,8 +301,8 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
-{{--                                                    <small class="form-text text-muted">Padding inside the design--}}
-{{--                                                        area.</small>--}}
+                                                    {{--                                                    <small class="form-text text-muted">Padding inside the design--}}
+                                                    {{--                                                        area.</small>--}}
                                                 </div>
                                             </div>
                                         </div>
@@ -818,12 +832,46 @@
             }
         });
 
-        // Manual remove button
-        document.getElementById("remove-template-image").addEventListener("click", function () {
-            templateDropzone.removeAllFiles(true);
-            document.getElementById("uploadedTemplateImage").value = "";
-            document.getElementById("uploaded-template-preview").classList.add("d-none");
+
+    </script>
+
+    <script>
+        Dropzone.autoDiscover = false;
+
+        const mainTemplateDropzone = new Dropzone("#main-template-dropzone", {
+            url: "{{ route('media.store') }}", // your Laravel media upload route
+            paramName: "file",
+            maxFiles: 1,
+            maxFilesize: 1, // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop image here or click to upload",
+            init: function () {
+                this.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedMainTemplateImage").value = response.data.id;
+                    }
+                });
+
+                this.on("removedfile", function (file) {
+                    document.getElementById("uploadedMainTemplateImage").value = "";
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
+                });
+            }
         });
+
+
     </script>
 
     <script>

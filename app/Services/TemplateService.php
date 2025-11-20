@@ -160,6 +160,13 @@ class TemplateService extends BaseService
                     'model_id' => $model->id,
                     'collection_name' => 'template_model_image',
                 ]);
+        }  if (isset($validatedData['template_image_main_id'])) {
+            Media::where('id', $validatedData['template_image_main_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'templates',
+                ]);
         }
         return $model->load($relationsToLoad);
     }
@@ -167,6 +174,7 @@ class TemplateService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
             $model = $this->repository->update($validatedData, $id);
             if (!empty($validatedData['types'])) {
@@ -188,6 +196,18 @@ class TemplateService extends BaseService
                         'model_type' => get_class($model),
                         'model_id' => $model->id,
                         'collection_name' => 'template_model_image',
+                    ]);
+            }
+            if (!empty($validatedData['template_image_main_id'])) {
+                $model->getMedia('templates')
+                    ->where('id', '!=', $validatedData['template_image_main_id'])
+                    ->each->delete();
+
+                Media::where('id', $validatedData['template_image_main_id'])
+                    ->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'templates',
                     ]);
             }
             return $model;
