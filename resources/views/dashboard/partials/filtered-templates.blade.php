@@ -92,7 +92,7 @@
                     @endcan
                 </ul>
             </div>
-            <div style="background-color: #F4F6F6;height:200px;border-radius:12px;padding: 10px" >
+            <div style="background-color: #F4F6F6;height:200px;border-radius:12px;padding: 15px" >
                 <!-- Top Image --> <img
                     src="{{  $template->getFirstMediaUrl('templates') ?: asset("images/default-photo.png") }}"
                     class="mx-auto d-block"
