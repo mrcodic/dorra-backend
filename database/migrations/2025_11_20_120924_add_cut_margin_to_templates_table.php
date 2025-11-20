@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('templates', function (Blueprint $table) {
                 $table->decimal('cut_margin')
                     ->after('has_safety_area')
-                    ->default(0)->nullable();
+                    ->nullable();
         });
     }
 
