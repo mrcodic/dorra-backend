@@ -576,7 +576,7 @@
             }
 
             $toggle.on('change', syncCutMargin);
-            syncSafetyArea(); // initial state
+            syncCutMargin(); // initial state
         });
     </script>
     <script>
