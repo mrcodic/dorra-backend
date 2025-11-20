@@ -48,7 +48,7 @@
                             </form>
                         </li>
                     @endcan
-                    @can('product-templates.change-status.draft_show')
+{{--                    @can('product-templates.change-status.draft_show')--}}
                         <li>
                             <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
@@ -63,8 +63,8 @@
                                 </button>
                             </form>
                         </li>
-                    @endcan
-                    @can('product-templates.change-status.live_show')
+{{--                    @endcan--}}
+{{--                    @can('product-templates.change-status.live_show')--}}
                         <li>
                             <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
@@ -79,8 +79,8 @@
                                 </button>
                             </form>
                         </li>
-                    @endcan
-                    @can('product-templates_delete')
+{{--                    @endcan--}}
+{{--                    @can('product-templates_delete')--}}
                         <li>
                             <button class="dropdown-item text-danger open-delete-template-modal w-100"
                                     data-bs-toggle="modal"
@@ -89,7 +89,7 @@
                                     class="me-1 text-danger"></i>Delete
                             </button>
                         </li>
-                    @endcan
+{{--                    @endcan--}}
                 </ul>
             </div>
             <div style="background-color: #F4F6F6;height:200px;border-radius:12px;padding: 15px;" class="d-flex justify-content-center align-items-center" >

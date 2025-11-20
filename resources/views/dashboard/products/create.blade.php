@@ -206,19 +206,30 @@
 
 {{--                                                                <div class="col-md-6">--}}
 {{--                                                                    <label class="form-label label-text">Color Value *</label>--}}
-{{--                                                                    <div class="d-flex gap-1">--}}
-{{--                                                                        <input type="color"--}}
-{{--                                                                               name="value"--}}
-{{--                                                                               class="form-control form-control-color"--}}
-{{--                                                                               value="#ffffff"--}}
-{{--                                                                               style="max-width: 60px; padding: 0;" />--}}
-{{--                                                                        <input type="text"--}}
-{{--                                                                               class="form-control color-hex-input"--}}
-{{--                                                                               placeholder="#FFFFFF"--}}
-{{--                                                                               oninput="this.value=this.value.toUpperCase()" />--}}
+{{--                                                                    <div class="d-flex gap-1 align-items-center">--}}
+{{--                                                                        <!-- Color picker -->--}}
+{{--                                                                        <input--}}
+{{--                                                                            type="color"--}}
+{{--                                                                            class="form-control rounded-circle color-picker border border-0  "--}}
+{{--                                                                            style="max-width: 30px; padding: 0;"--}}
+{{--                                                                            value="#000"--}}
+{{--                                                                        />--}}
+
+{{--                                                                        <!-- Text hex input (this will actually submit the value) -->--}}
+{{--                                                                        <input--}}
+{{--                                                                            type="text"--}}
+{{--                                                                            name="value"--}}
+{{--                                                                            class="form-control color-hex-input"--}}
+{{--                                                                            placeholder="#000000"--}}
+{{--                                                                            value="#000000"--}}
+{{--                                                                            pattern="^#([A-Fa-f0-9]{6})$"--}}
+{{--                                                                        />--}}
 {{--                                                                    </div>--}}
-{{--                                                                    <small class="text-muted">Pick a color or type hex.</small>--}}
+{{--                                                                    <small class="text-muted">Pick a color or type hex (e.g. #FFAA00).</small>--}}
 {{--                                                                </div>--}}
+
+
+
 
 {{--                                                                <div class="col-md-12 mt-1">--}}
 {{--                                                                    <label class="form-label label-text">Color Image (optional)</label>--}}
@@ -697,6 +708,27 @@
 @endsection
 
 @section('page-script')
+    <script>
+        // keep color picker & text field in sync
+        document.addEventListener("input", (e) => {
+            if (e.target.classList.contains("color-picker")) {
+                const picker = e.target;
+                const text = picker.closest(".d-flex").querySelector(".color-hex-input");
+                text.value = picker.value.toUpperCase();
+            }
+
+            if (e.target.classList.contains("color-hex-input")) {
+                const text = e.target;
+                const picker = text.closest(".d-flex").querySelector(".color-picker");
+                const val = text.value.trim();
+
+                // Only update if valid hex
+                if (/^#([A-Fa-f0-9]{6})$/.test(val)) {
+                    picker.value = val;
+                }
+            }
+        });
+    </script>
     <script !src="">
         // Color repeater
         $('.color-repeater').repeater({
