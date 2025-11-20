@@ -137,15 +137,17 @@ function hasMeaningfulSearch($value): bool
 function generateFawrySignature(
     string $merchantCode,
     string $merchantRefNum,
-    string $customerProfileId,
+    ?string $customerProfileId,
     string $returnUrl,
     array  $items
-): string
-{
+): string {
+    // Fawry wants empty string if no profile id
+    $customerProfileId = $customerProfileId ?: '';
 
-    usort($items, fn($a, $b) => strcmp($a['itemId'], $b['itemId']));
+    // Sort items by itemId as required
+    usort($items, fn ($a, $b) => strcmp((string) $a['itemId'], (string) $b['itemId']));
 
-    $secureKey = config("services.fawry.secret_key");
+    $secureKey = config('services.fawry.secret_key');
 
     $signatureString =
         $merchantCode .
@@ -153,18 +155,15 @@ function generateFawrySignature(
         $customerProfileId .
         $returnUrl;
 
+    foreach ($items as $item) {
+        $formattedPrice = number_format((float) $item['price'], 2, '.', '');
 
-     collect($items)->each(function ($item) use ($secureKey, $signatureString) {
-         $formattedPrice = number_format($item['price'] / 100, 2, '.', '');
-
-         $signatureString .=
-             $item['itemId'] .
-             $item['quantity'] .
-             $formattedPrice;
-    });
+        $signatureString .=
+            (string) $item['itemId'] .
+            (string) $item['quantity'] .
+            $formattedPrice;
+    }
 
     $signatureString .= $secureKey;
     return hash('sha256', $signatureString);
-
-
 }

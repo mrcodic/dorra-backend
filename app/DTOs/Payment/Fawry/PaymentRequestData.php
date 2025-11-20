@@ -32,18 +32,19 @@ class PaymentRequestData
         $baseItems = $this->order->orderItems->map(fn($item) => [
             'itemId' => (string)Str::uuid(),
             'description' => Str::limit($item?->itemable->name ?? 'Item', 50, ''),
-            'price' => (int)round($item->sub_total),
-            'quantity' => 1,
+            'price' => (float) number_format($item->sub_total -round($this->order->discount_amount ??0 , 2), 2, '.', ''),
+            'quantity' => 1.00,
         ])->toArray();
 
         $extraItems = [];
 
         if ($this->order->delivery_amount > 0) {
             $extraItems[] = [
-                'itemId' => (string)Str::uuid(),
+                'itemId' => (string) Str::uuid(),
                 'description' => 'Delivery Fee',
-                'price' => (int)round($this->order->delivery_amount),
-                'quantity' => 1,
+                'price' => round($this->order->delivery_amount, 2),
+
+                'quantity' => 1.00,
             ];
         }
 
@@ -51,28 +52,26 @@ class PaymentRequestData
             $extraItems[] = [
                 'itemId' => (string)Str::uuid(),
                 'description' => 'Tax',
-                'price' => (int)getPriceAfterTax(setting('tax'), $this->order->subtotal),
-                'quantity' => 1,
+                'price' => getPriceAfterTax(setting('tax'), $this->order->subtotal),
+                'quantity' => 1.00,
             ];
         }
 
-        if ($this->order?->discount_amount > 0) {
-            $extraItems[] = [
-                'itemId' => (string)Str::uuid(),
-                'description' => 'Discount',
-                'price' => -(int)round($this->order->discount_amount),
-                'quantity' => 1,
-            ];
-        }
 
+//        if ($this->order?->discount_amount > 0) {
+//            $extraItems[] = [
+//                'itemId' => (string)Str::uuid(),
+//                'description' => 'Discount',
+//                'price' => -(int)round($this->order->discount_amount),
+//                'quantity' => 1,
+//            ];
+//        }
         $allItems = array_merge($baseItems, $extraItems);
 
-
         $merchantCode = config("services.fawry.merchant_code");
-        $merchantRef = $this->order->order_number;
-        $returnUrl = config("services.fawry.redirection_url");
-        $profileId = $this->user?->id ?? "";
-
+        $merchantRef  = $this->order->order_number;
+        $returnUrl    = config("services.fawry.redirection_url");
+        $profileId    = $this->user?->id ?? $this->guest?->id ?? "";
 
         $signature = generateFawrySignature(
             merchantCode: $merchantCode,
@@ -83,21 +82,22 @@ class PaymentRequestData
         );
 
         return [
-            'merchantCode' => $merchantCode,
-            'merchantRefNum' => $merchantRef,
-            'customerProfileId' => $profileId,
-            'customerName' => $this->requestData->first_name . ' ' . $this->requestData->last_name,
-            'paymentExpiry' => now()->addDays(2)->valueOf(),
-            'customerMobile' => $this->requestData->full_phone_number,
-            'customerEmail' => $this->requestData->email,
-            'language' => app()->getLocale() . '-eg',
-            'returnUrl' => $returnUrl,
-//            'orderWebHookUrl'    => config("services.fawry.webhook_url"),
-            'chargeItems' => $allItems,
-            'paymentMethod' => $this->method,
-            'signature' => $signature,
+            'merchantCode'     => $merchantCode,
+            'merchantRefNum'   => $merchantRef,
+            'customerProfileId'=> $profileId,
+
+            'customerName'     => $this->requestData->first_name . ' ' . $this->requestData->last_name,
+            'paymentExpiry'    => now()->addDays(2)->valueOf(),
+            'customerMobile'   => $this->requestData->full_phone_number,
+            'customerEmail'    => $this->requestData->email,
+            'language'         =>  'en-eg',
+            'returnUrl'        => $returnUrl,
+            'chargeItems'      => $allItems,
+            'paymentMethod'    => $this->method,
+            'signature'        => $signature,
         ];
     }
+
 
 
 }
