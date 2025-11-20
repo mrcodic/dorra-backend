@@ -247,6 +247,7 @@
                                         <div class="form-group mb-2 d-none" id="cornersBox">
                                             <label for="cornersSelect" class="label-text mb-1">Corners</label>
                                             <select id="cornersSelect" class="form-select select2" name="border">
+                                                <option value="" selected disabled>Choose Corner</option>
                                                 @foreach(\App\Enums\BorderEnum::cases() as $border)
                                                 <option value="{{ $border->value }}">{{$border->label()}}</option>
                                                 @endforeach
@@ -316,17 +317,15 @@
                                                     {{-- area.</small>--}}
                                             </div>
                                         </div>
-<<<<<<< Updated upstream
 
                                     </div>
-
 
                                     <div class="form-group mb-2 d-none" id="cornersBox">
                                         <label for="cornersSelect" class="label-text mb-1">Corners</label>
                                         <select id="cornersSelect" class="form-select select2" name="border">
                                             <option value="" selected disabled>Choose Corner</option>
                                             @foreach(\App\Enums\BorderEnum::cases() as $border)
-                                                <option value="{{ $border->value }}">{{$border->label()}}</option>
+                                            <option value="{{ $border->value }}">{{$border->label()}}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -338,20 +337,8 @@
                                         <small class="form-text text-muted">
                                             If no size is selected, the default 650×650 will be applied.
                                         </small>
-=======
->>>>>>> Stashed changes
                                     </div>
 
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label for="sizesSelect" class="label-text mb-1">Sizes</label>
-                                    <select id="sizesSelect" class="form-select" name="dimension_id">
-                                        <option value="" selected disabled>Select Size</option>
-                                    </select>
-                                    <small class="form-text text-muted">
-                                        If no size is selected, the default 650×650 will be applied.
-                                    </small>
                                 </div>
 
                             </div>
