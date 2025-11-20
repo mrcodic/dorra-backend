@@ -36,6 +36,7 @@ class Template extends Model implements HasMedia
         'has_corner',
         'has_safety_area',
         'safety_area',
+        'cut_margin',
         'border',
     ];
     protected $casts = [
