@@ -56,7 +56,7 @@ class TemplateResource extends JsonResource
             'has_safety_area' => $this->has_safety_area,
             'safety_area' =>$this->safety_area,
             'border' => $this->border,
-            'has_cut_margin' => $this->has_cut_margin,
+            'has_cut_margin' => (bool)$this->cut_margin ,
             'cut_margin' => $this->cut_margin,
 
         ];
