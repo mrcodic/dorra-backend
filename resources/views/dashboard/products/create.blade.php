@@ -187,76 +187,76 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Category Colors -->
-                                        <div class="col-md-12">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text">Category Colors</label>
+{{--                                        <!-- Category Colors -->--}}
+{{--                                        <div class="col-md-12">--}}
+{{--                                            <div class="mb-2">--}}
+{{--                                                <label class="form-label label-text">Category Colors</label>--}}
 
-                                                <div class="color-repeater">
-                                                    <div data-repeater-list="colors">
-                                                        <div data-repeater-item>
-                                                            <div class="row align-items-start mt-1">
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label label-text">Color Label (optional)</label>
-                                                                    <input type="text"
-                                                                           name="label"
-                                                                           class="form-control"
-                                                                           placeholder="e.g. Red, Blue, Primary" />
-                                                                </div>
+{{--                                                <div class="color-repeater">--}}
+{{--                                                    <div data-repeater-list="colors">--}}
+{{--                                                        <div data-repeater-item>--}}
+{{--                                                            <div class="row align-items-start mt-1">--}}
+{{--                                                                <div class="col-md-6">--}}
+{{--                                                                    <label class="form-label label-text">Color Label (optional)</label>--}}
+{{--                                                                    <input type="text"--}}
+{{--                                                                           name="label"--}}
+{{--                                                                           class="form-control"--}}
+{{--                                                                           placeholder="e.g. Red, Blue, Primary" />--}}
+{{--                                                                </div>--}}
 
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label label-text">Color Value *</label>
-                                                                    <div class="d-flex gap-1">
-                                                                        <input type="color"
-                                                                               name="value"
-                                                                               class="form-control form-control-color"
-                                                                               value="#ffffff"
-                                                                               style="max-width: 60px; padding: 0;" />
-                                                                        <input type="text"
-                                                                               class="form-control color-hex-input"
-                                                                               placeholder="#FFFFFF"
-                                                                               oninput="this.value=this.value.toUpperCase()" />
-                                                                    </div>
-                                                                    <small class="text-muted">Pick a color or type hex.</small>
-                                                                </div>
+{{--                                                                <div class="col-md-6">--}}
+{{--                                                                    <label class="form-label label-text">Color Value *</label>--}}
+{{--                                                                    <div class="d-flex gap-1">--}}
+{{--                                                                        <input type="color"--}}
+{{--                                                                               name="value"--}}
+{{--                                                                               class="form-control form-control-color"--}}
+{{--                                                                               value="#ffffff"--}}
+{{--                                                                               style="max-width: 60px; padding: 0;" />--}}
+{{--                                                                        <input type="text"--}}
+{{--                                                                               class="form-control color-hex-input"--}}
+{{--                                                                               placeholder="#FFFFFF"--}}
+{{--                                                                               oninput="this.value=this.value.toUpperCase()" />--}}
+{{--                                                                    </div>--}}
+{{--                                                                    <small class="text-muted">Pick a color or type hex.</small>--}}
+{{--                                                                </div>--}}
 
-                                                                <div class="col-md-12 mt-1">
-                                                                    <label class="form-label label-text">Color Image (optional)</label>
-                                                                    <div class="dropzone color-dropzone border rounded p-2"
-                                                                         style="cursor:pointer; min-height:100px;">
-                                                                        <div class="dz-message" data-dz-message>
-                                                                            <span>Drop image or click</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <input type="hidden" name="image_id" class="color-image-hidden">
-                                                                </div>
+{{--                                                                <div class="col-md-12 mt-1">--}}
+{{--                                                                    <label class="form-label label-text">Color Image (optional)</label>--}}
+{{--                                                                    <div class="dropzone color-dropzone border rounded p-2"--}}
+{{--                                                                         style="cursor:pointer; min-height:100px;">--}}
+{{--                                                                        <div class="dz-message" data-dz-message>--}}
+{{--                                                                            <span>Drop image or click</span>--}}
+{{--                                                                        </div>--}}
+{{--                                                                    </div>--}}
+{{--                                                                    <input type="hidden" name="image_id" class="color-image-hidden">--}}
+{{--                                                                </div>--}}
 
-                                                                <div class="col-md-2 text-center mt-1  ms-auto">
-                                                                    <button type="button"
-                                                                            class="btn btn-outline-danger"
-                                                                            data-repeater-delete>
-                                                                        <i data-feather="x" class="me-25"></i>
-                                                                        Delete
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+{{--                                                                <div class="col-md-2 text-center mt-1  ms-auto">--}}
+{{--                                                                    <button type="button"--}}
+{{--                                                                            class="btn btn-outline-danger"--}}
+{{--                                                                            data-repeater-delete>--}}
+{{--                                                                        <i data-feather="x" class="me-25"></i>--}}
+{{--                                                                        Delete--}}
+{{--                                                                    </button>--}}
+{{--                                                                </div>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
 
-                                                    <div class="row mt-1">
-                                                        <div class="col-12">
-                                                            <button type="button"
-                                                                    class="w-100 rounded-3 p-1 text-dark"
-                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
-                                                                    data-repeater-create>
-                                                                <i data-feather="plus" class="me-25"></i>
-                                                                <span>Add New Color</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+{{--                                                    <div class="row mt-1">--}}
+{{--                                                        <div class="col-12">--}}
+{{--                                                            <button type="button"--}}
+{{--                                                                    class="w-100 rounded-3 p-1 text-dark"--}}
+{{--                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"--}}
+{{--                                                                    data-repeater-create>--}}
+{{--                                                                <i data-feather="plus" class="me-25"></i>--}}
+{{--                                                                <span>Add New Color</span>--}}
+{{--                                                            </button>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                </div>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
 
                                         <!-- Multiple Images Upload -->
                                         <div class="col-md-12">
