@@ -31,7 +31,11 @@ use Illuminate\Support\Facades\Http;
     {
         $url = $this->baseUrl.'fawrypay-api/api/payments/init';
 
-        $response = Http::asJson()->acceptJson()->post($url, $payload);
+        $response = Http::
+        withHeaders([
+            'Content-Type' => 'application/json',
+
+        ])->post($url, $payload);
 
         dd($response->body(), $response->status(),$response,$payload);
 

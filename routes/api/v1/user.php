@@ -63,8 +63,10 @@ Route::prefix('invitations/')->controller(InvitationController::class)->group(fu
 Route::controller(PaymentController::class)->group(function () {
     Route::get('payment-methods', 'paymentMethods');
     Route::post('buy-order-again', 'buyOrderAgain');
-    Route::post('payment/callback', 'handleCallback');
-    Route::get('payment/redirect', 'handleRedirect');
+    Route::post('paymob/payment/callback', 'handlePaymobCallback');
+    Route::get('paymob/payment/redirect', 'handlePaymobRedirect');
+    Route::post('fawry/payment/callback', 'handleFawryCallback');
+    Route::get('fawry/payment/redirect', 'handleFawryRedirect');
 });
 
 

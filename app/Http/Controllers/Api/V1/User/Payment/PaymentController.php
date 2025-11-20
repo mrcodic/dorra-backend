@@ -25,6 +25,7 @@ class PaymentController extends Controller
                                 public PaymentGatewayFactory            $paymentFactory,
                                 public OrderRepositoryInterface         $orderRepository,
                                 public CartService                      $cartService,
+
     )
     {
     }
@@ -102,10 +103,41 @@ class PaymentController extends Controller
     }
 
 
+
+    /**
+     * @param $transaction
+     * @param mixed $paymentMethod
+     * @param StatusEnum $paymentStatus
+     * @param array $data
+     * @return void
+     * @throws \Exception
+     */
+    public function resetCart($transaction, mixed $paymentMethod, StatusEnum $paymentStatus, array $data): void
+    {
+        $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data) {
+            $cart = $transaction->order->user?->cart ?? $transaction->order->guest?->cart;
+            if ($cart) {
+                $cart->items()->delete();
+
+                if ($cart->discountCode) {
+                    $cart->discountCode->increment('used');
+                }
+
+                $cart->update([
+                    'price' => 0,
+                    'discount_amount' => 0,
+                    'delivery_amount' => 0,
+                    'discount_code_id' => null,
+                ]);
+            }
+
+
+        });
+    }
     /**
      * @throws \Exception
      */
-    public function handleCallback(Request $request)
+    public function handlePaymobCallback(Request $request)
     {
         $data = $request->json()->all();
         $paymentMethod = data_get($data, 'obj.source_data.sub_type');
@@ -148,38 +180,9 @@ class PaymentController extends Controller
         return Response::api();
     }
 
-    /**
-     * @param $transaction
-     * @param mixed $paymentMethod
-     * @param StatusEnum $paymentStatus
-     * @param array $data
-     * @return void
-     * @throws \Exception
-     */
-    public function resetCart($transaction, mixed $paymentMethod, StatusEnum $paymentStatus, array $data): void
-    {
-        $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data) {
-            $cart = $transaction->order->user?->cart ?? $transaction->order->guest?->cart;
-            if ($cart) {
-                $cart->items()->delete();
-
-                if ($cart->discountCode) {
-                    $cart->discountCode->increment('used');
-                }
-
-                $cart->update([
-                    'price' => 0,
-                    'discount_amount' => 0,
-                    'delivery_amount' => 0,
-                    'discount_code_id' => null,
-                ]);
-            }
 
 
-        });
-    }
-
-    public function handleRedirect(Request $request): RedirectResponse
+    public function handlePaymobRedirect(Request $request): RedirectResponse
     {
         $requestedData = $request->all();
         $paymobOrderId = data_get($requestedData, 'order');
@@ -197,6 +200,18 @@ class PaymentController extends Controller
             }
             return redirect()->to($transaction->failure_url);
         }
+
+    }
+    public function handleFawryCallback(Request $request)
+    {
+
+    }
+
+
+
+    public function handleFawryRedirect(Request $request): RedirectResponse
+    {
+
 
     }
 }
