@@ -29,7 +29,8 @@ class Product extends Model implements HasMedia
         'status',
         'has_mockup',
         'show_add_cart_btn',
-        'show_customize_design_btn'
+        'show_customize_design_btn',
+        'colors'
     ];
 
 
@@ -236,6 +237,7 @@ class Product extends Model implements HasMedia
     {
         return [
             'status' => StatusEnum::class,
+            'colors' => 'array',
         ];
     }
 

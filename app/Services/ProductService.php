@@ -143,7 +143,14 @@ class ProductService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
+       $colors = Arr::get($validatedData, 'colors');
+        $finalColors = collect($colors)->flatMap(function ($color) {
+           return [
+            $color['value'],
+           ];
+       })->toArray();
+        $validatedData['colors'] = $finalColors;
+        return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad,$colors) {
             $product = $this->repository->create($validatedData);
             $product->load($this->relations);
             $product->tags()->sync($validatedData['tags'] ?? []);
@@ -219,6 +226,24 @@ class ProductService extends BaseService
                 });
 
             }
+            collect($colors)->each(function ($color) use ($product) {
+                if (empty($color['image_id'])) {
+                    return;
+                }
+
+                $media = Media::where('id', $color['image_id'])->first();
+
+                if ($media) {
+                    $media->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'product_extra_images',
+                    ]);
+
+                    $media->setCustomProperty('color_hex', $color['value']);
+                    $media->save();
+                }
+            });
             return $product;
         });
 

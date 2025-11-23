@@ -17,6 +17,7 @@ class MediaResource extends JsonResource
             'size' =>$this->size,
             'mime_type' => $this->mime_type,
             'url' => $this->getFullUrl(),
+            'custom_properties' => $this->custom_properties,
         ];
     }
 
