@@ -36,7 +36,8 @@ use Illuminate\Support\Facades\Http;
             'Content-Type' => 'application/json',
         ])->post('https://atfawry.fawrystaging.com/fawrypay-api/api/payments/init', $payload);
 
-        dd($response->body(), $response->status(),$response,$payload);
+        dd($response->status(), $response->header('Content-Type'), $response->body());
+
 
     }
 
