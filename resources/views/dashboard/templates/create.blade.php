@@ -19,6 +19,7 @@
                     <form id="addTemplateForm" enctype="multipart/form-data" method="post"
                         action="{{ route('templates.redirect.store') }}">
                         @csrf
+                        <input type="hidden" name="approach" value="{{ request()->query('q') == 'without' ? 'without_editor' : 'with_editor' }}">
                         <div class="flex-grow-1">
                             <div class="">
                                 @if(request()->query('q') == 'without')
@@ -48,6 +49,7 @@
                                         <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
                                     </div>
                                 </div>
+                                    @if(request()->query('q') == 'without')
                                     <!-- Template Colors -->
                                     <div class="col-md-12">
                                         <div class="mb-2">
@@ -124,6 +126,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    @endif
                                 <div class="position-relative mt-3 text-center">
                                     <hr class="opacity-75" style="border: 1px solid #24B094;">
                                     <span
