@@ -309,7 +309,7 @@
 
                                                                     <div class="col-md-12 mt-1">
                                                                         <label class="form-label label-text">Color Image
-                                                                            (optional)</label>
+                                                                           </label>
                                                                         <div
                                                                             class="dropzone color-dropzone border rounded p-2"
                                                                             style="cursor:pointer; min-height:100px;"
