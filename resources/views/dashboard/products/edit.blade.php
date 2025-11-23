@@ -246,8 +246,8 @@
 
                                                                     {{-- Color image --}}
                                                                     <div class="col-md-12 mt-1">
-                                                                        <label class="form-label label-text">Color Image
-                                                                            (optional)</label>
+                                                                        <label class="form-label label-text">Color Image *
+                                                                            </label>
                                                                         @php
                                                                             $mediaWithColor = $model
                                                                                  ->getMedia('product_extra_images')
@@ -308,7 +308,7 @@
                                                                     </div>
 
                                                                     <div class="col-md-12 mt-1">
-                                                                        <label class="form-label label-text">Color Image
+                                                                        <label class="form-label label-text">Color Image *
                                                                            </label>
                                                                         <div
                                                                             class="dropzone color-dropzone border rounded p-2"
