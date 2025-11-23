@@ -100,9 +100,9 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             'custom_dimensions'=>['required_without:dimensions', 'array'],
             'custom_dimensions.*' =>['sometimes'],
             'colors' => ['required','array'],
-            'colors.*.value' => ['nullalble','string'],
-            'colors.*.image_id' => ['nullalble', 'integer', 'exists:media,id'],
-            'is_has_category' => ['nullalble', 'boolean'],
+            'colors.*.value' => ['nullable','string'],
+            'colors.*.image_id' => ['nullable', 'integer', 'exists:media,id'],
+            'is_has_category' => ['nullable', 'boolean'],
             'show_add_cart_btn' => ['required', 'boolean'],
             'show_customize_design_btn' => ['required', 'boolean'],
 
