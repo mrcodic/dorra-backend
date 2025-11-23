@@ -20,6 +20,7 @@
                         </li>
                     @endcan
                     @can('product-templates_show')
+                        @if($template->approach == 'with_editor')
                         <li>
                             <a class="dropdown-item"
                                href="{{ config('services.editor_url') . 'templates/' . $template->id . '?is_clear'}}"
@@ -27,6 +28,7 @@
                                 <i data-feather="eye" class="me-1"></i>Show
                             </a>
                         </li>
+                            @endif
                     @endcan
 {{--                    @can('product-templates.change-status.publish_show')--}}
                         <li>
