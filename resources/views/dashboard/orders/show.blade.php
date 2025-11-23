@@ -146,7 +146,6 @@
                                         ></span>
                                         <span class="text-muted">{{ $orderItem->color }}</span>
                                     </div>
-
                                 @endif
                             </div>
                         </div>
