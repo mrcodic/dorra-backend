@@ -567,7 +567,181 @@
 
 
 @section('page-script')
-<script>
+    <script>
+        // keep color picker & text field in sync
+        document.addEventListener("input", (e) => {
+            if (e.target.classList.contains("color-picker")) {
+                const picker = e.target;
+                const text = picker.closest(".d-flex").querySelector(".color-hex-input");
+                text.value = picker.value.toUpperCase();
+            }
+
+            if (e.target.classList.contains("color-hex-input")) {
+                const text = e.target;
+                const picker = text.closest(".d-flex").querySelector(".color-picker");
+                let val = text.value.trim().toUpperCase();
+
+                if (!val.startsWith("#")) val = "#" + val;
+                text.value = val;
+
+                if (/^#([0-9A-F]{6})$/.test(val)) {
+                    picker.value = val;
+                }
+            }
+        });
+    </script>
+    <script>
+        Dropzone.autoDiscover = false;
+
+        function initColorItem(item) {
+            const dropzoneElement = item.querySelector('.color-dropzone');
+            const hiddenInput = item.querySelector('.color-image-hidden');
+
+            if (!dropzoneElement || !hiddenInput) return;
+            if (dropzoneElement.dropzone) return; // prevent double init
+
+            const existingMedia = dropzoneElement.dataset.existingMedia
+                ? JSON.parse(dropzoneElement.dataset.existingMedia)
+                : null;
+
+            const dz = new Dropzone(dropzoneElement, {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1, // MB
+                acceptedFiles: "image/*",
+                headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop image or click",
+                init: function () {
+                    const dropzone = this;
+
+                    if (existingMedia) {
+                        const mockFile = {
+                            name: existingMedia.file_name,
+                            size: existingMedia.size,
+                            _hiddenInputId: existingMedia.id
+                        };
+
+                        dropzone.emit("addedfile", mockFile);
+                        dropzone.emit("thumbnail", mockFile, existingMedia.original_url);
+                        dropzone.emit("complete", mockFile);
+                        dropzone.files.push(mockFile);
+
+                        hiddenInput.value = existingMedia.id;
+                    }
+
+                    // ✅ success upload
+                    dropzone.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            hiddenInput.value = response.data.id;
+                        }
+                    });
+
+                    // ✅ removed file
+                    dropzone.on("removedfile", function (file) {
+                        if (hiddenInput.value == file._hiddenInputId) {
+                            hiddenInput.value = "";
+                        }
+
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+
+            const colorPicker = item.querySelector('.color-picker');
+            const hexInput = item.querySelector('.color-hex-input');
+
+            if (colorPicker && hexInput) {
+                colorPicker.addEventListener('input', function () {
+                    const hex = this.value.toUpperCase();
+                    hexInput.value = hex;
+                });
+
+                hexInput.addEventListener('input', function () {
+                    let v = this.value.toUpperCase();
+                    if (!v.startsWith('#')) v = '#' + v;
+                    this.value = v;
+
+                    if (/^#([0-9A-F]{6})$/.test(v)) {
+                        colorPicker.value = v;
+                    }
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const $colorRepeater = $('.color-repeater');
+
+            // 1) init Dropzone على العناصر الموجودة (ألوان قديمة)
+            $colorRepeater.find('[data-repeater-item]').each(function () {
+                initColorItem(this);
+            });
+
+            // 2) init jquery.repeater
+            if (window.$ && $.fn.repeater) {
+                $colorRepeater.repeater({
+                    initEmpty: {{ $colors->isEmpty() ? 'true' : 'false' }},
+                    show: function () {
+                        $(this).slideDown();
+
+                        const item           = this;
+                        const dropzoneElement = item.querySelector('.color-dropzone');
+                        const hiddenInput     = item.querySelector('.color-image-hidden');
+                        const colorPicker     = item.querySelector('.color-picker');
+                        const hexInput        = item.querySelector('.color-hex-input');
+
+                        if (dropzoneElement) {
+                            // 🧹 1) امسح أي DOM منسوخ من الصف القديم (previews, classes...)
+                            dropzoneElement.innerHTML =
+                                '<div class="dz-message" data-dz-message><span>Drop image or click</span></div>';
+
+                            dropzoneElement.classList.remove('dz-started', 'dz-max-files-reached');
+                            // امسح أي media منسوخ
+                            dropzoneElement.dataset.existingMedia = '';
+                        }
+
+                        // 2) امسح قيمة الـ image_id
+                        if (hiddenInput) {
+                            hiddenInput.value = '';
+                        }
+
+                        // 3) Reset للّون الافتراضي
+                        if (colorPicker) colorPicker.value = '#000000';
+                        if (hexInput)    hexInput.value    = '#000000';
+
+                        // 4) الآن نعمل init للـ Dropzone + events بتاعة اللون
+                        initColorItem(item);
+
+                        if (window.feather) feather.replace();
+                    },
+                    hide: function (deleteElement) {
+                        $(this).slideUp(deleteElement);
+                    }
+                });
+
+
+                @if($colors->isEmpty())
+                const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;
+                if (!hasItems) {
+                    $colorRepeater.find('[data-repeater-create]').first().trigger('click');
+                }
+                @endif
+            }
+
+        });
+    </script>
+
+    <script>
     (function () {
             const LOCALE          = @json(app()->getLocale());
             const SUB_ROUTE       = @json(route('sub-industries'));
