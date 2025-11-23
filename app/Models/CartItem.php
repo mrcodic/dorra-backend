@@ -22,7 +22,8 @@ class CartItem extends Model
         'sub_total',
         'product_price',
         'product_price_id',
-        'quantity'
+        'quantity',
+        'color'
     ];
     protected $table = 'cart_items';
     protected $appends = ['sub_total_after_offer','offer_amount'];

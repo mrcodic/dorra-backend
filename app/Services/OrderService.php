@@ -641,6 +641,7 @@ class OrderService extends BaseService
                         'specs_price' => $item->specs_price,
                         'sub_total' => $item->sub_total_after_offer ?: $item->sub_total,
                         'product_price_id' => $item->product_price_id,
+                        'color' => $item->color,
                     ];
                 })->toArray()
             );

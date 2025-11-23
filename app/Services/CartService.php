@@ -83,6 +83,7 @@ class CartService extends BaseService
                 $priceDetails['sub_total'],
                 $request->cartable_id,
                 $request->cartable_type,
+                $request->color,
             );
 
             $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);

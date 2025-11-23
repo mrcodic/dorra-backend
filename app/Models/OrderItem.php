@@ -21,7 +21,8 @@ class OrderItem extends Model
         'sub_total',
         'product_price',
         'product_price_id',
-        'quantity'
+        'quantity',
+        'color',
     ];
 
     public function totalPrice(): Attribute

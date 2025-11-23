@@ -39,6 +39,8 @@ class CartItemResource extends JsonResource
             'product_price' => $this->product_price,
             'price_after_offer' => is_null($after) ? null : sprintf('%.2f', round($after, 2)),
             'quantity' => $this->quantity,
+            'color' => $this->color,
+
         ];
     }
 }
