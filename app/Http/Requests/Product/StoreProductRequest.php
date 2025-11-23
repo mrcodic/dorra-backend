@@ -110,7 +110,7 @@ class StoreProductRequest extends BaseRequest
             'custom_dimensions.*' =>['sometimes'],
             'colors' => ['required','array'],
             'colors.*.value' => ['required','string'],
-            'colors.*.image_id' => ['nullable'],
+            'colors.*.image_id' => ['required', 'integer', 'exists:media,id'],
             'is_free_shipping' => ['nullable', 'boolean'],
             'status' => ['nullable', 'in:', StatusEnum::values()],
             'show_add_cart_btn' => ['required', 'boolean'],

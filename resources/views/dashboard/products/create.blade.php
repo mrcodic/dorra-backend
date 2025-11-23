@@ -226,7 +226,7 @@
 
 
                                                                 <div class="col-md-12 mt-1">
-                                                                    <label class="form-label label-text">Color Image (optional)</label>
+                                                                    <label class="form-label label-text">Color Image *</label>
                                                                     <div class="dropzone color-dropzone border rounded p-2"
                                                                          style="cursor:pointer; min-height:100px;">
                                                                         <div class="dz-message" data-dz-message>
@@ -268,7 +268,7 @@
                                         <div class="col-md-12">
                                             <div class="mb-2">
                                                 <label class="form-label label-text" for="product-images">Category
-                                                    Images</label>
+                                                    Images (optional)</label>
 
                                                 <!-- Dropzone container -->
                                                 <div id="multi-dropzone" class="dropzone border rounded p-3"
@@ -724,52 +724,38 @@
             }
         });
     </script>
-    <script !src="">
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // 1) تهيئة العناصر الموجودة بالفعل
-            document
-                .querySelectorAll('.color-repeater [data-repeater-item]')
-                .forEach(function (item) {
-                    initColorItem(item);
-                });
+            const $colorRepeater = $('.color-repeater');
 
-            // 2) لو بتستخدم jquery-repeater جهّزه هنا
+            // لو في items جاهزة (في حالة edit مثلاً)
+            $colorRepeater.find('[data-repeater-item]').each(function () {
+                initColorItem(this);
+            });
+
             if (window.$ && $.fn.repeater) {
-                $('.color-repeater').repeater({
+                $colorRepeater.repeater({
+                    initEmpty: true, // يستخدم الـ item الموجود كـ template
                     show: function () {
                         $(this).slideDown();
-                        // this هو الـ data-repeater-item الجديد
+                        // this = data-repeater-item الجديد
                         initColorItem(this);
+                        if (window.feather) feather.replace();
                     },
                     hide: function (deleteElement) {
                         $(this).slideUp(deleteElement);
                     }
                 });
+
+                // نضيف أول صف تلقائيًا في صفحة الإنشاء
+                const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;
+                if (!hasItems) {
+                    $colorRepeater.find('[data-repeater-create]').first().trigger('click');
+                }
             }
         });
-
-        // Color repeater
-        $('.color-repeater').repeater({
-            initEmpty: true,
-            show: function () {
-                $(this).slideDown();
-                initColorDropzones(this);
-                feather && feather.replace();
-            },
-            hide: function (deleteElement) {
-                $(this).slideUp(deleteElement);
-            }
-        });
-
-        // Optional: start with one color row
-        $('.color-repeater').each(function () {
-            const hasItems = $(this).find('[data-repeater-item]').length > 0;
-            if (!hasItems) {
-                $(this).find('[data-repeater-create]').first().trigger('click');
-            }
-        });
-
     </script>
+
     <script>
         Dropzone.autoDiscover = false;
 
@@ -940,13 +926,13 @@
     <script>
         Dropzone.autoDiscover = false;
 
-
         function initColorItem(item) {
             const dropzoneElement = item.querySelector('.color-dropzone');
             const hiddenInput = item.querySelector('.color-image-hidden');
 
             if (!dropzoneElement || !hiddenInput) return;
 
+            // متعملش init مرتين لنفس العنصر
             if (dropzoneElement.dropzone) return;
 
             const dz = new Dropzone(dropzoneElement, {
@@ -979,18 +965,15 @@
                 }
             });
 
-            // ربط الـ color picker مع الـ text hex (اختياري بس لطيف)
             const colorPicker = item.querySelector('.color-picker');
             const hexInput = item.querySelector('.color-hex-input');
 
             if (colorPicker && hexInput) {
-                // لما تختار من الـ color input
                 colorPicker.addEventListener('input', function () {
                     const hex = this.value.toUpperCase();
                     hexInput.value = hex;
                 });
 
-                // لما تكتب في الـ text input
                 hexInput.addEventListener('input', function () {
                     let v = this.value.toUpperCase();
                     if (!v.startsWith('#')) v = '#' + v;
@@ -1002,7 +985,6 @@
                 });
             }
         }
-
     </script>
 
     <script>
