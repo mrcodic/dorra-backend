@@ -708,7 +708,7 @@
             // 2) init jquery.repeater
             if (window.$ && $.fn.repeater) {
                 $colorRepeater.repeater({
-                    initEmpty: {{ $colors->isEmpty() ? 'true' : 'false' }},
+                    initEmpty: {{ $hasColors ? 'true' : 'false' }},
                     show: function () {
                         $(this).slideDown();
 
