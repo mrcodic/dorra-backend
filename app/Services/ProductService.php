@@ -252,7 +252,14 @@ class ProductService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        return $this->handleTransaction(function () use ($id, $validatedData) {
+        $colors = Arr::get($validatedData, 'colors');
+        $finalColors = collect($colors)->flatMap(function ($color) {
+            return [
+                $color['value'],
+            ];
+        })->toArray();
+        $validatedData['colors'] = $finalColors;
+        return $this->handleTransaction(function () use ($id, $validatedData,$colors) {
 
             $product = $this->repository->update($validatedData, $id);
             $product->load($this->relations);
@@ -382,6 +389,30 @@ class ProductService extends BaseService
                         'collection_name' => 'product_model_image',
                     ]);
             }
+
+            $product->getMedia('product_extra_images')
+                ->each(function (Media $media) {
+                    if ($media->hasCustomProperty('color_hex')) {
+                        $media->forgetCustomProperty('color_hex');
+                        $media->save();
+                    }
+                });
+
+            collect($colors ?? [])->each(function ($color) use ($product) {
+                if (empty($color['value']) || empty($color['image_id'])) {
+                    return;
+                }
+
+                $media = Media::find($color['image_id']);
+
+                $media->update([
+                    'model_type'      => get_class($product),
+                    'model_id'        => $product->id,
+                    'collection_name' => 'product_extra_images',
+                ]);
+                $media->setCustomProperty('color_hex', $color['value']);
+                $media->save();
+            });
 
             return $product;
         });
