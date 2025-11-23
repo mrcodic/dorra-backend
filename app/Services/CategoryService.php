@@ -76,7 +76,14 @@ class CategoryService extends BaseService
 
     public function storeProductWithoutCategories($validatedData)
     {
-        return $this->handleTransaction(function () use ($validatedData) {
+        $colors = Arr::get($validatedData, 'colors');
+        $finalColors = collect($colors)->flatMap(function ($color) {
+            return [
+                $color['value'],
+            ];
+        })->toArray();
+        $validatedData['colors'] = $finalColors;
+        return $this->handleTransaction(function () use ($validatedData,$colors) {
             $product = $this->repository->create($validatedData);
             $product->tags()->sync($validatedData['tags'] ?? []);
             if (!empty($validatedData['dimensions'])) {
@@ -150,6 +157,25 @@ class CategoryService extends BaseService
                 });
 
             }
+            collect($colors)->each(function ($color) use ($product) {
+                if (empty($color['image_id'])) {
+                    return;
+                }
+
+                $media = Media::where('id', $color['image_id'])->first();
+
+                if ($media) {
+                    $media->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'category_extra_images',
+                    ]);
+
+                    $media->setCustomProperty('color_hex', $color['value']);
+                    $media->save();
+                }
+            });
+
             return $product;
         });
 
@@ -157,7 +183,14 @@ class CategoryService extends BaseService
 
     public function updateProductWithoutCategories($id, $validatedData)
     {
-        return $this->handleTransaction(function () use ($id, $validatedData) {
+        $colors = Arr::get($validatedData, 'colors');
+        $finalColors = collect($colors)->flatMap(function ($color) {
+            return [
+                $color['value'],
+            ];
+        })->toArray();
+        $validatedData['colors'] = $finalColors;
+        return $this->handleTransaction(function () use ($id, $validatedData,$colors) {
 
             $product = $this->repository->update($validatedData, $id);
             $product->tags()->sync($validatedData['tags'] ?? []);
@@ -287,6 +320,29 @@ class CategoryService extends BaseService
                         'collection_name' => 'category_model_image',
                     ]);
             }
+            $product->getMedia('category_extra_images')
+                ->each(function (Media $media) {
+                    if ($media->hasCustomProperty('color_hex')) {
+                        $media->forgetCustomProperty('color_hex');
+                        $media->save();
+                    }
+                });
+
+            collect($colors ?? [])->each(function ($color) use ($product) {
+                if (empty($color['value']) || empty($color['image_id'])) {
+                    return;
+                }
+
+                $media = Media::find($color['image_id']);
+
+                $media->update([
+                    'model_type'      => get_class($product),
+                    'model_id'        => $product->id,
+                    'collection_name' => 'category_extra_images',
+                ]);
+                $media->setCustomProperty('color_hex', $color['value']);
+                $media->save();
+            });
 
             return $product;
         });

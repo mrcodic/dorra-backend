@@ -70,7 +70,7 @@ class CategoryResource extends JsonResource
                     ->filter()
                     ->unique('id');
 
-                $subs = $industries->filter(fn($i) => !is_null($i->parent_id)&& $i->children->isNotEmpty());
+                $subs = $industries->filter(fn($i) => !is_null($i->parent_id) && $i->children->isNotEmpty());
 
 
                 $parents = $industries
@@ -83,7 +83,6 @@ class CategoryResource extends JsonResource
                         ->unique('id')
                         ->values();
                 }
-
 
 
                 return IndustryResource::collection($parents);
@@ -110,7 +109,7 @@ class CategoryResource extends JsonResource
             'type' => 'category',
             'rating' => $this->when(isset($this->rating), $this->rating),
             'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
-
+            'colors' => $this->colors,
         ];
     }
 }

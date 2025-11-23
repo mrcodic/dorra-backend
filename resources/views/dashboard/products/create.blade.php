@@ -932,7 +932,7 @@
 
             if (!dropzoneElement || !hiddenInput) return;
 
-            // متعملش init مرتين لنفس العنصر
+
             if (dropzoneElement.dropzone) return;
 
             const dz = new Dropzone(dropzoneElement, {

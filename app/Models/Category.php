@@ -19,16 +19,27 @@ class Category extends Model implements HasMedia
     use InteractsWithMedia, HasTranslations;
 
     public $translatable = ['name', 'description'];
-    protected $fillable = ['name', 'description', 'parent_id', 'is_landing', 'has_mockup', 'base_price', 'has_custom_prices', 'is_has_category','show_add_cart_btn','show_customize_design_btn'];
+    protected $fillable = [
+        'name', 'description',
+        'parent_id', 'is_landing', 'has_mockup',
+        'base_price', 'has_custom_prices',
+        'is_has_category', 'show_add_cart_btn',
+        'show_customize_design_btn',
+        'colors'
+    ];
     protected $attributes = ['is_has_category' => 1];
+    protected $casts = [
+        'colors' => 'array'
+    ];
 
     public function scopeIsLanding(Builder $builder): Builder
     {
         return $builder->where('is_landing', true);
     }
+
     public function scopeWithReviewRating(Builder $query, $ratings): Builder
     {
-        $ratings = is_array($ratings) ? $ratings : explode(',', (string) $ratings);
+        $ratings = is_array($ratings) ? $ratings : explode(',', (string)$ratings);
         $ratings = array_values(array_filter(array_map('intval', $ratings)));
 
         if (empty($ratings)) {
@@ -37,8 +48,9 @@ class Category extends Model implements HasMedia
 
         return $query
             ->withAvg('reviews as avg_rating', 'rating')
-            ->havingRaw('ROUND(avg_rating) IN ('.implode(',', $ratings).')');
+            ->havingRaw('ROUND(avg_rating) IN (' . implode(',', $ratings) . ')');
     }
+
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -49,6 +61,7 @@ class Category extends Model implements HasMedia
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
+
     public function designs()
     {
         return $this->morphToMany(Design::class, 'designable', 'designables')
@@ -101,10 +114,6 @@ class Category extends Model implements HasMedia
     {
         return $this->morphMany(ProductPrice::class, 'pricable');
     }
-    public function reviews(): MorphMany
-    {
-        return $this->morphMany(Review::class,'reviewable');
-    }
 
     public function dimensions()
     {
@@ -125,9 +134,10 @@ class Category extends Model implements HasMedia
             ])
             ->withTimestamps();
     }
+
     public function confirmedOrders(): MorphToMany
     {
-        return $this->morphToMany(Order::class,'orderable','order_items')
+        return $this->morphToMany(Order::class, 'orderable', 'order_items')
             ->where('status', \App\Enums\Order\StatusEnum::CONFIRMED);
     }
 
@@ -136,20 +146,20 @@ class Category extends Model implements HasMedia
         return $this->morphToMany(Offer::class, 'offerable')
             ->withTimestamps();
     }
+
     public function lastOffer(): BelongsTo
     {
         return $this->belongsTo(Offer::class, 'last_offer_id');
     }
 
-
     public function scopeWithLastOfferId(Builder $q): Builder
     {
         $offerables = 'offerables';
-        $offers     = 'offers';
-        $table      = $this->getTable();
+        $offers = 'offers';
+        $table = $this->getTable();
 
 
-        $morphType  = $this->getMorphClass();
+        $morphType = $this->getMorphClass();
 
 
         if (empty($q->getQuery()->columns)) {
@@ -166,10 +176,19 @@ class Category extends Model implements HasMedia
                     $qq->whereNull("$offers.end_at")
                         ->orWhere("$offers.end_at", '>=', now());
                 })
-
                 ->orderByDesc("$offerables.id")
                 ->limit(1),
         ]);
+    }
+
+    public function carts(): MorphMany
+    {
+        return $this->morphMany(CartItem::class, 'cartable');
+    }
+
+    public function getMainImageUrl(): string
+    {
+        return $this->getFirstMediaUrl('categories');
     }
 
     protected function rating(): Attribute
@@ -177,17 +196,13 @@ class Category extends Model implements HasMedia
         return Attribute::make(
             get: function () {
                 $avg = $this->reviews_avg_rating ?? $this->reviews()->avg('rating');
-                return is_numeric($avg) ? (int) round($avg) : null;
+                return is_numeric($avg) ? (int)round($avg) : null;
             }
         );
     }
 
-    public function carts(): MorphMany
+    public function reviews(): MorphMany
     {
-        return $this->morphMany(CartItem::class, 'cartable');
-    }
-    public function getMainImageUrl(): string
-    {
-        return $this->getFirstMediaUrl('categories');
+        return $this->morphMany(Review::class, 'reviewable');
     }
 }
