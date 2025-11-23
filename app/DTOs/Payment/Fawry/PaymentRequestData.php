@@ -95,7 +95,6 @@ class PaymentRequestData
             'returnUrl' => $returnUrl,
             'chargeItems' => $allItems,
             'paymentMethod' => $this->method,
-            'authCaptureModePayment' => false,
             'signature' => $signature,
         ];
     }
