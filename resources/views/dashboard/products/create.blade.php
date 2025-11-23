@@ -188,81 +188,81 @@
                                             </div>
                                         </div>
                                         <!-- Category Colors -->
-                                        <div class="col-md-12">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text">Category Colors</label>
+{{--                                        <div class="col-md-12">--}}
+{{--                                            <div class="mb-2">--}}
+{{--                                                <label class="form-label label-text">Category Colors</label>--}}
 
-                                                <div class="color-repeater">
-                                                    <div data-repeater-list="colors">
-                                                        <div data-repeater-item>
-                                                            <div class="row align-items-start mt-1">
-
-
-                                                                <div class="col-md-12">
-                                                                    <label class="form-label label-text">Color Value *</label>
-                                                                    <div class="d-flex gap-1 align-items-center">
-                                                                        <!-- Color picker -->
-                                                                        <input
-                                                                            type="color"
-                                                                            class="form-control rounded-circle color-picker border border-0  "
-                                                                            style="max-width: 30px; padding: 0;"
-                                                                            value="#000"
-                                                                        />
-
-                                                                        <!-- Text hex input (this will actually submit the value) -->
-                                                                        <input
-                                                                            type="text"
-                                                                            name="value"
-                                                                            class="form-control color-hex-input"
-                                                                            placeholder="#000000"
-                                                                            value="#000000"
-                                                                            pattern="^#([A-Fa-f0-9]{6})$"
-                                                                        />
-                                                                    </div>
-                                                                    <small class="text-muted">Pick a color or type hex (e.g. #FFAA00).</small>
-                                                                </div>
+{{--                                                <div class="color-repeater">--}}
+{{--                                                    <div data-repeater-list="colors">--}}
+{{--                                                        <div data-repeater-item>--}}
+{{--                                                            <div class="row align-items-start mt-1">--}}
 
 
+{{--                                                                <div class="col-md-12">--}}
+{{--                                                                    <label class="form-label label-text">Color Value *</label>--}}
+{{--                                                                    <div class="d-flex gap-1 align-items-center">--}}
+{{--                                                                        <!-- Color picker -->--}}
+{{--                                                                        <input--}}
+{{--                                                                            type="color"--}}
+{{--                                                                            class="form-control rounded-circle color-picker border border-0  "--}}
+{{--                                                                            style="max-width: 30px; padding: 0;"--}}
+{{--                                                                            value="#000"--}}
+{{--                                                                        />--}}
+
+{{--                                                                        <!-- Text hex input (this will actually submit the value) -->--}}
+{{--                                                                        <input--}}
+{{--                                                                            type="text"--}}
+{{--                                                                            name="value"--}}
+{{--                                                                            class="form-control color-hex-input"--}}
+{{--                                                                            placeholder="#000000"--}}
+{{--                                                                            value="#000000"--}}
+{{--                                                                            pattern="^#([A-Fa-f0-9]{6})$"--}}
+{{--                                                                        />--}}
+{{--                                                                    </div>--}}
+{{--                                                                    <small class="text-muted">Pick a color or type hex (e.g. #FFAA00).</small>--}}
+{{--                                                                </div>--}}
 
 
-                                                                <div class="col-md-12 mt-1">
-                                                                    <label class="form-label label-text">Color Image *</label>
-                                                                    <div class="dropzone color-dropzone border rounded p-2"
-                                                                         style="cursor:pointer; min-height:100px;">
-                                                                        <div class="dz-message" data-dz-message>
-                                                                            <span>Drop image or click</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <input type="hidden" name="image_id" class="color-image-hidden">
-                                                                </div>
 
 
-                                                                <div class="col-md-2 text-center mt-1  ms-auto">
-                                                                    <button type="button"
-                                                                            class="btn btn-outline-danger"
-                                                                            data-repeater-delete>
-                                                                        <i data-feather="x" class="me-25"></i>
-                                                                        Delete
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+{{--                                                                <div class="col-md-12 mt-1">--}}
+{{--                                                                    <label class="form-label label-text">Color Image *</label>--}}
+{{--                                                                    <div class="dropzone color-dropzone border rounded p-2"--}}
+{{--                                                                         style="cursor:pointer; min-height:100px;">--}}
+{{--                                                                        <div class="dz-message" data-dz-message>--}}
+{{--                                                                            <span>Drop image or click</span>--}}
+{{--                                                                        </div>--}}
+{{--                                                                    </div>--}}
+{{--                                                                    <input type="hidden" name="image_id" class="color-image-hidden">--}}
+{{--                                                                </div>--}}
 
-                                                    <div class="row mt-1">
-                                                        <div class="col-12">
-                                                            <button type="button"
-                                                                    class="w-100 rounded-3 p-1 text-dark"
-                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
-                                                                    data-repeater-create>
-                                                                <i data-feather="plus" class="me-25"></i>
-                                                                <span>Add New Color</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+
+{{--                                                                <div class="col-md-2 text-center mt-1  ms-auto">--}}
+{{--                                                                    <button type="button"--}}
+{{--                                                                            class="btn btn-outline-danger"--}}
+{{--                                                                            data-repeater-delete>--}}
+{{--                                                                        <i data-feather="x" class="me-25"></i>--}}
+{{--                                                                        Delete--}}
+{{--                                                                    </button>--}}
+{{--                                                                </div>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+
+{{--                                                    <div class="row mt-1">--}}
+{{--                                                        <div class="col-12">--}}
+{{--                                                            <button type="button"--}}
+{{--                                                                    class="w-100 rounded-3 p-1 text-dark"--}}
+{{--                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"--}}
+{{--                                                                    data-repeater-create>--}}
+{{--                                                                <i data-feather="plus" class="me-25"></i>--}}
+{{--                                                                <span>Add New Color</span>--}}
+{{--                                                            </button>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                </div>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
 
                                         <!-- Multiple Images Upload -->
                                         <div class="col-md-12">
@@ -923,69 +923,69 @@
             }
         });
     </script>
-    <script>
-        Dropzone.autoDiscover = false;
+{{--    <script>--}}
+{{--        Dropzone.autoDiscover = false;--}}
 
-        function initColorItem(item) {
-            const dropzoneElement = item.querySelector('.color-dropzone');
-            const hiddenInput = item.querySelector('.color-image-hidden');
+{{--        function initColorItem(item) {--}}
+{{--            const dropzoneElement = item.querySelector('.color-dropzone');--}}
+{{--            const hiddenInput = item.querySelector('.color-image-hidden');--}}
 
-            if (!dropzoneElement || !hiddenInput) return;
+{{--            if (!dropzoneElement || !hiddenInput) return;--}}
 
 
-            if (dropzoneElement.dropzone) return;
+{{--            if (dropzoneElement.dropzone) return;--}}
 
-            const dz = new Dropzone(dropzoneElement, {
-                url: "{{ route('media.store') }}",
-                paramName: "file",
-                maxFiles: 1,
-                maxFilesize: 1, // MB
-                acceptedFiles: "image/*",
-                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-                addRemoveLinks: true,
-                init: function () {
-                    this.on("success", function (file, response) {
-                        if (response.success && response.data) {
-                            file._hiddenInputId = response.data.id;
-                            hiddenInput.value = response.data.id;
-                        }
-                    });
+{{--            const dz = new Dropzone(dropzoneElement, {--}}
+{{--                url: "{{ route('media.store') }}",--}}
+{{--                paramName: "file",--}}
+{{--                maxFiles: 1,--}}
+{{--                maxFilesize: 1, // MB--}}
+{{--                acceptedFiles: "image/*",--}}
+{{--                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },--}}
+{{--                addRemoveLinks: true,--}}
+{{--                init: function () {--}}
+{{--                    this.on("success", function (file, response) {--}}
+{{--                        if (response.success && response.data) {--}}
+{{--                            file._hiddenInputId = response.data.id;--}}
+{{--                            hiddenInput.value = response.data.id;--}}
+{{--                        }--}}
+{{--                    });--}}
 
-                    this.on("removedfile", function (file) {
-                        hiddenInput.value = "";
-                        if (file._hiddenInputId) {
-                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+{{--                    this.on("removedfile", function (file) {--}}
+{{--                        hiddenInput.value = "";--}}
+{{--                        if (file._hiddenInputId) {--}}
+{{--                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {--}}
+{{--                                method: "DELETE",--}}
+{{--                                headers: {--}}
+{{--                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content--}}
+{{--                                }--}}
+{{--                            });--}}
+{{--                        }--}}
+{{--                    });--}}
+{{--                }--}}
+{{--            });--}}
 
-            const colorPicker = item.querySelector('.color-picker');
-            const hexInput = item.querySelector('.color-hex-input');
+{{--            const colorPicker = item.querySelector('.color-picker');--}}
+{{--            const hexInput = item.querySelector('.color-hex-input');--}}
 
-            if (colorPicker && hexInput) {
-                colorPicker.addEventListener('input', function () {
-                    const hex = this.value.toUpperCase();
-                    hexInput.value = hex;
-                });
+{{--            if (colorPicker && hexInput) {--}}
+{{--                colorPicker.addEventListener('input', function () {--}}
+{{--                    const hex = this.value.toUpperCase();--}}
+{{--                    hexInput.value = hex;--}}
+{{--                });--}}
 
-                hexInput.addEventListener('input', function () {
-                    let v = this.value.toUpperCase();
-                    if (!v.startsWith('#')) v = '#' + v;
-                    this.value = v;
+{{--                hexInput.addEventListener('input', function () {--}}
+{{--                    let v = this.value.toUpperCase();--}}
+{{--                    if (!v.startsWith('#')) v = '#' + v;--}}
+{{--                    this.value = v;--}}
 
-                    if (/^#([0-9A-F]{6})$/.test(v)) {
-                        colorPicker.value = v;
-                    }
-                });
-            }
-        }
-    </script>
+{{--                    if (/^#([0-9A-F]{6})$/.test(v)) {--}}
+{{--                        colorPicker.value = v;--}}
+{{--                    }--}}
+{{--                });--}}
+{{--            }--}}
+{{--        }--}}
+{{--    </script>--}}
 
     <script>
         Dropzone.autoDiscover = false;

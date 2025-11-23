@@ -58,15 +58,16 @@
                                         <!-- Hidden input for uploaded file id -->
                                         <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
                                     </div>
+                                        @php
+                                            $colors = collect($model->colors) ?? collect();
+                                            $hasColors = $colors->isNotEmpty();
+                                        @endphp
                                     @if($model->approach == 'without_editor')
                                         <div class="col-md-12">
                                             <div class="mb-2">
                                                 <label class="form-label label-text">Template Colors</label>
 
-                                                @php
-                                                    $colors = collect($model->colors) ?? collect();
-                                                    $hasColors = $colors->isNotEmpty();
-                                                @endphp
+
 
                                                 <div class="color-repeater">
                                                     <div data-repeater-list="colors">
@@ -708,7 +709,7 @@
             // 2) init jquery.repeater
             if (window.$ && $.fn.repeater) {
                 $colorRepeater.repeater({
-                    initEmpty: "{{ $hasColors ? 'true' : 'false' }}",
+                    initEmpty: {{ $colors->isEmpty() ? 'true' : 'false' }},
                     show: function () {
                         $(this).slideDown();
 
