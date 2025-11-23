@@ -72,7 +72,7 @@ class UpdateTemplateRequest extends BaseRequest
             'go_to_editor' => ['sometimes', 'boolean'],
             'has_corner' => ['sometimes', 'in:0,1'],
             'has_safety_area' => ['sometimes', 'in:0,1'],
-            'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
+            'border' => ['nullable', 'in:' . BorderEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
 
