@@ -33,7 +33,7 @@ class PaymentRequestData
             'itemId' => (string)Str::uuid(),
             'description' => Str::limit($item?->itemable->name ?? 'Item', 50, ''),
             'price' => (float)number_format((float)$item->sub_total, 2, '.', ''),
-            'quantity' => 1,
+            'quantity' => 1.0,
         ])->toArray();
 
         $extraItems = [];
@@ -43,7 +43,7 @@ class PaymentRequestData
                 'itemId' => (string)Str::uuid(),
                 'description' => 'Delivery Fee',
                 'price' => (float)number_format((float)$this->order->delivery_amount, 2, '.', ''),
-                'quantity' => 1,
+                'quantity' => 1.0,
             ];
         }
 
@@ -53,7 +53,7 @@ class PaymentRequestData
                 'itemId' => (string)Str::uuid(),
                 'description' => 'Tax',
                 'price' => (float)number_format((float)$taxAmount, 2, '.', ''),
-                'quantity' => 1,
+                'quantity' => 1.0,
             ];
         }
 
