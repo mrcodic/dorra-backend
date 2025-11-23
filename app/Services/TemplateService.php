@@ -133,7 +133,14 @@ class TemplateService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
+        $colors = Arr::get($validatedData, 'colors');
+        $finalColors = collect($colors)->flatMap(function ($color) {
+            return [
+                $color['value'],
+            ];
+        })->toArray();
+        $validatedData['colors'] = $finalColors;
+        $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad,$colors) {
             $model = $this->repository->create($validatedData);
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
@@ -141,6 +148,24 @@ class TemplateService extends BaseService
             $model->types()->sync($validatedData['types']);
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
+            collect($colors)->each(function ($color) use ($model) {
+                if (empty($color['image_id'])) {
+                    return;
+                }
+
+                $media = Media::where('id', $color['image_id'])->first();
+
+                if ($media) {
+                    $media->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'color_templates',
+                    ]);
+
+                    $media->setCustomProperty('color_hex', $color['value']);
+                    $media->save();
+                }
+            });
             return $model->refresh();
         });
 
