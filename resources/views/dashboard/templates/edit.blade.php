@@ -56,6 +56,156 @@
                                     <!-- Hidden input for uploaded file id -->
                                     <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
                                 </div>
+                                <div class="col-md-12">
+                                    <div class="mb-2">
+                                        <label class="form-label label-text">Template Colors</label>
+
+                                        @php
+                                            $colors = collect($model->colors) ?? collect();
+                                            $hasColors = $colors->isNotEmpty();
+                                        @endphp
+
+                                        <div class="color-repeater">
+                                            <div data-repeater-list="colors">
+                                                @forelse($colors as $color)
+
+                                                    <div data-repeater-item>
+                                                        <div class="row align-items-start mt-1">
+
+                                                            {{-- Color value --}}
+                                                            <div class="col-md-12">
+                                                                <label class="form-label label-text">Color Value
+                                                                    *</label>
+                                                                <div class="d-flex gap-1 align-items-center">
+                                                                    {{-- Color picker --}}
+                                                                    <input
+                                                                        type="color"
+                                                                        class="form-control rounded-circle color-picker border border-0"
+                                                                        style="max-width: 30px; padding: 0;"
+                                                                        value="{{ $color ?? '#000000' }}"
+                                                                    />
+
+                                                                    {{-- Text hex input (submitted) --}}
+                                                                    <input
+                                                                        type="text"
+                                                                        name="value"
+                                                                        class="form-control color-hex-input"
+                                                                        placeholder="#000000"
+                                                                        value="{{ $color ?? '#000000' }}"
+                                                                        pattern="^#([A-Fa-f0-9]{6})$"
+                                                                    />
+                                                                </div>
+                                                                <small class="text-muted">
+                                                                    Pick a color or type hex (e.g. #FFAA00).
+                                                                </small>
+                                                            </div>
+
+                                                            {{-- Color image --}}
+                                                            <div class="col-md-12 mt-1">
+                                                                <label class="form-label label-text">Color Image *
+                                                                </label>
+                                                                @php
+                                                                    $mediaWithColor = $model
+                                                                         ->getMedia('color_templates')
+                                                                         ->first(fn ($media) => $media->getCustomProperty('color_hex') ==$color);
+                                                                @endphp
+
+                                                                <div
+                                                                    class="dropzone color-dropzone border rounded p-2"
+                                                                    style="cursor:pointer; min-height:100px;"
+                                                                    data-existing-media='@json($mediaWithColor)'>
+                                                                    <div class="dz-message" data-dz-message>
+                                                                        <span>Drop image or click</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <input type="hidden"
+                                                                       name="image_id"
+                                                                       class="color-image-hidden"
+                                                                       value="{{$mediaWithColor->id ?? ''}}">
+                                                            </div>
+
+                                                            {{-- Delete row --}}
+                                                            <div class="col-md-2 text-center mt-1 ms-auto">
+                                                                <button type="button"
+                                                                        class="btn btn-outline-danger"
+                                                                        data-repeater-delete>
+                                                                    <i data-feather="x" class="me-25"></i>
+                                                                    Delete
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @empty
+                                                    <div data-repeater-item>
+                                                        <div class="row align-items-start mt-1">
+
+                                                            <div class="col-md-12">
+                                                                <label class="form-label label-text">Color Value
+                                                                    *</label>
+                                                                <div class="d-flex gap-1 align-items-center">
+                                                                    <input
+                                                                        type="color"
+                                                                        class="form-control rounded-circle color-picker border border-0"
+                                                                        style="max-width: 30px; padding: 0;"
+                                                                        value="#000000"
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        name="value"
+                                                                        class="form-control color-hex-input"
+                                                                        placeholder="#000000"
+                                                                        value="#000000"
+                                                                        pattern="^#([A-Fa-f0-9]{6})$"
+                                                                    />
+                                                                </div>
+                                                                <small class="text-muted">Pick a color or type
+                                                                    hex (e.g. #FFAA00).</small>
+                                                            </div>
+
+                                                            <div class="col-md-12 mt-1">
+                                                                <label class="form-label label-text">Color Image *
+                                                                </label>
+                                                                <div
+                                                                    class="dropzone color-dropzone border rounded p-2"
+                                                                    style="cursor:pointer; min-height:100px;"
+                                                                    data-existing-media='null'>
+                                                                    <div class="dz-message" data-dz-message>
+                                                                        <span>Drop image or click</span>
+                                                                    </div>
+                                                                </div>
+                                                                <input type="hidden" name="image_id"
+                                                                       class="color-image-hidden">
+                                                            </div>
+
+                                                            <div class="col-md-2 text-center mt-1 ms-auto">
+                                                                <button type="button"
+                                                                        class="btn btn-outline-danger"
+                                                                        data-repeater-delete>
+                                                                    <i data-feather="x" class="me-25"></i>
+                                                                    Delete
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforelse
+                                            </div>
+
+                                            <div class="row mt-1">
+                                                <div class="col-12">
+                                                    <button type="button"
+                                                            class="w-100 rounded-3 p-1 text-dark"
+                                                            style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                            data-repeater-create>
+                                                        <i data-feather="plus" class="me-25"></i>
+                                                        <span>Add New Color</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="position-relative mt-3 text-center">
                                     <hr class="opacity-75" style="border: 1px solid #24B094;">
                                     <span

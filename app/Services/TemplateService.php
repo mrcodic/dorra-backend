@@ -199,8 +199,14 @@ class TemplateService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-
-        $model = $this->handleTransaction(function () use ($validatedData, $id) {
+        $colors = Arr::get($validatedData, 'colors');
+        $finalColors = collect($colors)->flatMap(function ($color) {
+            return [
+                $color['value'],
+            ];
+        })->toArray();
+        $validatedData['colors'] = $finalColors;
+        $model = $this->handleTransaction(function () use ($validatedData, $id, $colors) {
             $model = $this->repository->update($validatedData, $id);
             if (!empty($validatedData['types'])) {
                 $model->types()->sync($validatedData['types']);
@@ -235,6 +241,25 @@ class TemplateService extends BaseService
                         'collection_name' => 'templates',
                     ]);
             }
+            collect($colors)->each(function ($color) use ($model) {
+                if (empty($color['image_id'])) {
+                    return;
+                }
+
+                $media = Media::where('id', $color['image_id'])->first();
+
+                if ($media) {
+                    $media->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'color_templates',
+                    ]);
+
+                    $media->setCustomProperty('color_hex', $color['value']);
+                    $media->save();
+                }
+            });
+
             return $model;
         });
         if (isset($validatedData['base64_preview_image'])) {
