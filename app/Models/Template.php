@@ -38,6 +38,7 @@ class Template extends Model implements HasMedia
         'safety_area',
         'cut_margin',
         'border',
+        'approach'
     ];
     protected $casts = [
         'status' => StatusEnum::class,

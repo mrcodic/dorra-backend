@@ -58,6 +58,7 @@ class StoreTemplateRequest extends BaseRequest
             'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
+            'approach' => ['sometimes', 'in:with_editor,without_editor'],
 
         ];
     }
