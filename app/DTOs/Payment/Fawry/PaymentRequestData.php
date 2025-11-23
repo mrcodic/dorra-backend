@@ -94,7 +94,7 @@ class PaymentRequestData
             'language' => $language,
             'returnUrl' => $returnUrl,
             'chargeItems' => $allItems,
-//            'paymentMethod' => $this->method,
+            'paymentMethod' => $this->method,
             'signature' => $signature,
         ];
     }
