@@ -28,7 +28,7 @@
                             </a>
                         </li>
                     @endcan
-                    @can('product-templates.change-status.publish_show')
+{{--                    @can('product-templates.change-status.publish_show')--}}
                         <li>
                             <form class="change-status-form"
                                   action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value]) }}"
@@ -47,8 +47,8 @@
                                 </button>
                             </form>
                         </li>
-                    @endcan
-                    @can('product-templates.change-status.draft_show')
+{{--                    @endcan--}}
+{{--                    @can('product-templates.change-status.draft_show')--}}
                         <li>
                             <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
@@ -63,8 +63,8 @@
                                 </button>
                             </form>
                         </li>
-                    @endcan
-                    @can('product-templates.change-status.live_show')
+{{--                    @endcan--}}
+{{--                    @can('product-templates.change-status.live_show')--}}
                         <li>
                             <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
@@ -79,7 +79,7 @@
                                 </button>
                             </form>
                         </li>
-                    @endcan
+{{--                    @endcan--}}
                     @can('product-templates_delete')
                         <li>
                             <button class="dropdown-item text-danger open-delete-template-modal w-100"
