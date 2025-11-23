@@ -132,6 +132,22 @@
                                 <div class="text-dark fs-5">
                                     Qty: {{$orderItem->quantity }}
                                 </div>
+                                @if($orderItem->color)
+                                    <div class="text-dark small d-flex align-items-center mt-25">
+                                        <span class="me-1">Color:</span>
+                                        <span
+                                            class="rounded-circle border me-1"
+                                            style="
+                                width: 16px;
+                                height: 16px;
+                                display: inline-block;
+                                background-color: {{ $orderItem->color }};
+                            "
+                                        ></span>
+                                        <span class="text-muted">{{ $orderItem->color }}</span>
+                                    </div>
+                                    
+                                @endif
                             </div>
                         </div>
                         <div class="text-end">
