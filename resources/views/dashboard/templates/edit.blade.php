@@ -16,8 +16,8 @@
             <div class="card">
                 <div class="card-body ">
                     @php
-                        $preselectedIndustryIds    = $model->industries->whereNull('parent_id')->pluck('id')->values();
-                        $preselectedSubIndustryIds = $model->industries->whereNotNull('parent_id')->pluck('id')->values();
+                    $preselectedIndustryIds = $model->industries->whereNull('parent_id')->pluck('id')->values();
+                    $preselectedSubIndustryIds = $model->industries->whereNotNull('parent_id')->pluck('id')->values();
                     @endphp
 
                     <form id="editTemplateForm" enctype="multipart/form-data" method="post"
@@ -32,7 +32,7 @@
 
                                     <!-- Dropzone container -->
                                     <div id="template-main-dropzone" class="dropzone border rounded p-3"
-                                         style="cursor:pointer; min-height:150px;">
+                                        style="cursor:pointer; min-height:150px;">
                                         <div class="dz-message" data-dz-message>
                                             <span>Drop image here or click to upload</span>
                                         </div>
@@ -47,7 +47,7 @@
 
                                     <!-- Dropzone container -->
                                     <div id="template-dropzone" class="dropzone border rounded p-3"
-                                         style="cursor:pointer; min-height:150px;">
+                                        style="cursor:pointer; min-height:150px;">
                                         <div class="dz-message" data-dz-message>
                                             <span>Drop image here or click to upload</span>
                                         </div>
@@ -101,16 +101,17 @@
                                 </div>
 
 
-{{--                                <div class="form-group mb-2">--}}
-{{--                                    <label for="statusSelect" class="label-text mb-1">Status</label>--}}
-{{--                                    <select id="statusSelect" name="status" class="form-select select2">--}}
-{{--                                        <option value="" disabled selected>Choose status</option>--}}
-{{--                                        @foreach(\App\Enums\Template\StatusEnum::cases() as $status)--}}
-{{--                                        <option value="{{ $status->value }}" @selected($status==$model->status)>{{--}}
-{{--                                            $status->label() }}</option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
-{{--                                </div>--}}
+                                {{-- <div class="form-group mb-2">--}}
+                                    {{-- <label for="statusSelect" class="label-text mb-1">Status</label>--}}
+                                    {{-- <select id="statusSelect" name="status" class="form-select select2">--}}
+                                        {{-- <option value="" disabled selected>Choose status</option>--}}
+                                        {{-- @foreach(\App\Enums\Template\StatusEnum::cases() as $status)--}}
+                                        {{-- <option value="{{ $status->value }}" @selected($status==$model->
+                                            status)>{{--}}
+                                            {{-- $status->label() }}</option>--}}
+                                        {{-- @endforeach--}}
+                                        {{-- </select>--}}
+                                    {{-- </div>--}}
                                 <div class="row mb-2">
                                     <div class="col-md-6">
                                         <label for="templateDescription" class="label-text mb-1">Description
@@ -140,14 +141,15 @@
                                 <div class="row mb-2">
 
                                     <div class="col-md-6 form-group mb-2">
-                                        <label for="categoriesSelect" class="label-text mb-1">Products With Categories</label>
-                                        <select id="categoriesSelect" class="form-select select2" name="product_with_category"
-                                                multiple>
+                                        <label for="categoriesSelect" class="label-text mb-1">Products With
+                                            Categories</label>
+                                        <select id="categoriesSelect" class="form-select select2"
+                                            name="product_with_category" multiple>
                                             @foreach($associatedData['product_with_categories'] as $category)
-                                                <option value="{{ $category->id }}"
-                                                    @selected($category->load('products')->products->intersect($model->products)->isNotEmpty())>
-                                                    {{ $category->getTranslation('name', app()->getLocale()) }}
-                                                </option>
+                                            <option value="{{ $category->id }}" @selected($category->
+                                                load('products')->products->intersect($model->products)->isNotEmpty())>
+                                                {{ $category->getTranslation('name', app()->getLocale()) }}
+                                            </option>
 
                                             @endforeach
                                         </select>
@@ -155,24 +157,27 @@
                                     <div class="col-md-6 form-group mb-2">
                                         <label for="productsSelect" class="label-text mb-1">Categories</label>
                                         <select id="productsSelect" class="form-select select2" name="product_ids[]"
-                                                multiple>
+                                            multiple>
                                             @foreach($associatedData['products'] as $product)
-                                                <option value="{{ $product->id }}"  @selected($model->products->contains($product))>
-                                                    {{ $product->getTranslation('name', app()->getLocale()) }}
-                                                </option>
+                                            <option value="{{ $product->id }}" @selected($model->
+                                                products->contains($product))>
+                                                {{ $product->getTranslation('name', app()->getLocale()) }}
+                                            </option>
                                             @endforeach
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="form-group mb-2">
-                                    <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products Without Categories</label>
-                                    <select id="productsWithoutCategoriesSelect" class="form-select select2" name="category_ids[]"
-                                            multiple>
+                                    <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products
+                                        Without Categories</label>
+                                    <select id="productsWithoutCategoriesSelect" class="form-select select2"
+                                        name="category_ids[]" multiple>
                                         @foreach($associatedData['product_without_categories'] as $category)
-                                            <option value="{{ $category->id }}" @selected($model->categories->contains($category))>
-                                                {{ $category->getTranslation('name', app()->getLocale()) }}
-                                            </option>
+                                        <option value="{{ $category->id }}" @selected($model->
+                                            categories->contains($category))>
+                                            {{ $category->getTranslation('name', app()->getLocale()) }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -191,23 +196,24 @@
                                     <div class="col-md-6 form-group mb-2">
                                         <label for="industriesSelect" class="label-text mb-1">Industries</label>
                                         <select id="industriesSelect" class="form-select select2" name="industry_ids[]"
-                                                multiple>
+                                            multiple>
                                             @foreach($associatedData['industries'] as $industry)
-                                                <option value="{{ $industry->id }}" @selected($model->industries->contains($industry))>
-                                                    {{ $industry->getTranslation('name', app()->getLocale()) }}
-                                                </option>
+                                            <option value="{{ $industry->id }}" @selected($model->
+                                                industries->contains($industry))>
+                                                {{ $industry->getTranslation('name', app()->getLocale()) }}
+                                            </option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-6 form-group mb-2">
                                         <label for="subIndustriesSelect" class="label-text mb-1">Sub Industries</label>
-                                        <select id="subIndustriesSelect" class="form-select select2" name="industry_ids[]"
-
-                                                multiple>
+                                        <select id="subIndustriesSelect" class="form-select select2"
+                                            name="industry_ids[]" multiple>
                                             @foreach($associatedData['sub_industries'] as $industry)
-                                                <option value="{{ $industry->id }}"  @selected($model->industries->contains($industry))>
-                                                    {{ $industry->getTranslation('name', app()->getLocale()) }}
-                                                </option>
+                                            <option value="{{ $industry->id }}" @selected($model->
+                                                industries->contains($industry))>
+                                                {{ $industry->getTranslation('name', app()->getLocale()) }}
+                                            </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -218,9 +224,9 @@
                                     <label for="tagsSelect" class="label-text mb-1">Tags</label>
                                     <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
                                         @foreach($associatedData['tags'] as $tag)
-                                            <option value="{{ $tag->id }}" @selected($model->tags->contains($tag))>
-                                                {{ $tag->getTranslation('name', app()->getLocale()) }}
-                                            </option>
+                                        <option value="{{ $tag->id }}" @selected($model->tags->contains($tag))>
+                                            {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -234,126 +240,139 @@
                                     </span>
                                 </div>
                                 {{-- Persisted resources (used on submit / ajax) --}}
-                                <input type="hidden" name="dimension_resource_ids"   id="dimensionResourceIds">
+                                <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
                                 <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
                                 <div class="form-group mb-2">
                                     <label for="orientation" class="label-text mb-1">Orientation</label>
-                                    <select id="orientation" class="form-select" name="orientation" >
-                                        <option value=""  disabled>
+                                    <select id="orientation" class="form-select" name="orientation">
+                                        <option value="" disabled>
                                             chooese orientation
                                         </option>
                                         @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                            <option value="{{ $orientation->value }}" @selected($orientation == $model->orientation) >
-                                                {{$orientation->label()}}
-                                            </option>
+                                        <option value="{{ $orientation->value }}" @selected($orientation==$model->
+                                            orientation) >
+                                            {{$orientation->label()}}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="position-relative mt-3 text-center">
+                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                    <span
+                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                        style="color: #24B094;">
+                                        Guides Settings
+                                    </span>
+                                </div>
+                                <label class="label-text mb-1">Shape</label>
                                 <div class="row mb-2">
-
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group mb-2">
-                                            <label class="label-text mb-1">Shape</label>
                                             <input type="hidden" name="has_corner" id="has_corner_hidden"
-                                                   value="{{ old('has_corner', $model->has_corner ?? '') }}" >
+                                                value="{{ old('has_corner', $model->has_corner ?? '') }}">
 
                                             <div class="d-flex gap-3">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_circle" value="0"
-                                                    @checked($model->has_corner == 0)
-                                                     >
+                                                    <input class="form-check-input" type="checkbox" name="has_corner"
+                                                        id="shape_circle" value="0" @checked($model->has_corner == 0)
+                                                    >
                                                     <label class="form-check-label" for="shape_circle">Circle</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="has_corner" id="shape_other" value="1"
-                                                        @checked($model->has_corner == 1)
+                                                    <input class="form-check-input" type="checkbox" name="has_corner"
+                                                        id="shape_other" value="1" @checked($model->has_corner == 1)
 
                                                     >
                                                     <label class="form-check-label" for="shape_other">Other</label>
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-group mb-2 d-none" id="cornersBox">
+                                            <label for="cornersSelect" class="label-text mb-1">Corners</label>
+                                            <select id="cornersSelect" class="form-select select2" name="border">
+                                                <option value="" selected>Choose Corner</option>
+                                                @foreach(\App\Enums\BorderEnum::cases() as $border)
+                                                <option value="{{ $border->value }}" @selected($border->value ==
+                                                    $model->border)
+                                                    >
+                                                    {{$border->label()}}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
 
-
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group mb-2">
-                                            <div class="form-check mb-1">
+                                            <div class="form-check mb-2">
 
                                                 <input type="hidden" name="has_safety_area" value="0">
-                                                <input class="form-check-input" type="checkbox" id="hasSafetyArea" name="has_safety_area"
-                                                       value="1" {{ $model->has_safety_area ? 'checked' : '' }} >
-                                                <label class="form-check-label" for="hasSafetyArea">Enable Safety Area</label>
+                                                <input class="form-check-input" type="checkbox" id="hasSafetyArea"
+                                                    name="has_safety_area" value="1" {{ $model->has_safety_area ?
+                                                'checked' : '' }} >
+                                                <label class="form-check-label" for="hasSafetyArea">Enable Safety
+                                                    Area</label>
                                             </div>
 
-                                            <div id="safetyAreaBox" class="{{ old('has_safety_area') ? '' : 'd-none' }}">
-                                                <label for="safetyAreaSelect" class="label-text mb-1">Safety Area</label>
-                                                <select id="safetyAreaSelect" class="form-select select2" name="safety_area" >
+                                            <div id="safetyAreaBox"
+                                                class="{{ old('has_safety_area') ? '' : 'd-none' }}">
+                                                <label for="safetyAreaSelect" class="label-text mb-1">Safety
+                                                    Area</label>
+                                                <select id="safetyAreaSelect" class="form-select select2"
+                                                    name="safety_area">
                                                     @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                        <option value="{{ $area->value }}"
-                                                            @selected($area->value == $model->safety_area) >
-                                                            {{ $area->label() }}
-                                                        </option>
+                                                    <option value="{{ $area->value }}" @selected($area->value ==
+                                                        $model->safety_area) >
+                                                        {{ $area->label() }}
+                                                    </option>
                                                     @endforeach
                                                 </select>
-                                                <small class="form-text text-muted">Padding inside the design area.</small>
+                                                <small class="form-text text-muted">Padding inside the design
+                                                    area.</small>
                                             </div>
                                         </div>
                                     </div>
 
 
                                     {{-- Cut Margin (col-6) --}}
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group mb-2">
-                                            <div class="form-check mb-1">
+                                            <div class="form-check mb-2">
                                                 {{-- send 0 when unchecked --}}
                                                 <input type="hidden" value="0">
                                                 <input class="form-check-input" type="checkbox" id="hasCutMargin"
-                                                       value="1" {{ $model->cut_margin
-                                                    ? 'checked' : '' }} >
-                                                <label class="form-check-label" for="hasCutMargin">Enable Cut Margin</label>
+                                                    value="1" {{ $model->cut_margin
+                                                ? 'checked' : '' }} >
+                                                <label class="form-check-label" for="hasCutMargin">Enable Cut
+                                                    Margin</label>
                                             </div>
 
-                                            <div id="cutMarginBox"
-                                                 class="{{ $model->cut_margin ? '' : 'd-none' }}">
+                                            <div id="cutMarginBox" class="{{ $model->cut_margin ? '' : 'd-none' }}">
                                                 <label for="cutMarginSelect" class="label-text mb-1">Cut Margin</label>
                                                 <select id="cutMarginSelect" class="form-select select2"
-                                                        name="cut_margin" >
+                                                    name="cut_margin">
 
-                                                @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                        <option value="{{ $area->value }}"   @selected($area->value == $model->cut_margin) >
-                                                            {{ $area->label() }}
-                                                        </option>
+                                                    @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                    <option value="{{ $area->value }}" @selected($area->value ==
+                                                        $model->cut_margin) >
+                                                        {{ $area->label() }}
+                                                    </option>
                                                     @endforeach
                                                 </select>
-                                                {{--                                                    <small class="form-text text-muted">Padding inside the design--}}
-                                                {{--                                                        area.</small>--}}
+                                                {{-- <small class="form-text text-muted">Padding inside the design--}}
+                                                    {{-- area.</small>--}}
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-
-
-                                <div class="form-group mb-2 d-none" id="cornersBox">
-                                    <label for="cornersSelect" class="label-text mb-1">Corners</label>
-                                    <select id="cornersSelect" class="form-select select2" name="border">
-                                        <option value="" selected >Choose Corner</option>
-                                        @foreach(\App\Enums\BorderEnum::cases() as $border)
-                                            <option value="{{ $border->value }}"
-                                                @selected($border->value == $model->border) >
-                                                {{$border->label()}}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label for="sizesSelect" class="label-text mb-1">Sizes</label>
-                                    <select id="sizesSelect" class="form-select" name="dimension_id" >
-                                        <option value="" disabled>Select Size</option>
-                                    </select>
-                                    <small class="form-text text-muted">
-                                        If no size is selected, the default 650×650 will be applied.
-                                    </small>
+                                    <div class="form-group mb-2">
+                                        <label for="sizesSelect" class="label-text mb-1">Sizes</label>
+                                        <select id="sizesSelect" class="form-select" name="dimension_id">
+                                            <option value="" disabled>Select Size</option>
+                                        </select>
+                                        <small class="form-text text-muted">
+                                            If no size is selected, the default 650×650 will be applied.
+                                        </small>
+                                    </div>
                                 </div>
 
 
@@ -400,8 +419,8 @@
 
 
 @section('page-script')
-    <script>
-        (function () {
+<script>
+    (function () {
             const LOCALE          = @json(app()->getLocale());
             const SUB_ROUTE       = @json(route('sub-industries'));
             const PRESEL_PARENTS  = @json($preselectedIndustryIds ?? []);
@@ -459,12 +478,12 @@
                 refreshSubs({ preserveSelection: true });
             });
         })();
-    </script>
+</script>
 
 
 
-    <script>
-        $(function () {
+<script>
+    $(function () {
             const $circle = $('#shape_circle'); // value="0"
             const $other  = $('#shape_other');  // value="1"
             const $hidden = $('#has_corner_hidden');
@@ -530,11 +549,11 @@
                 syncState();
             });
         });
-    </script>
+</script>
 
 
-    <script>
-        $(function () {
+<script>
+    $(function () {
             const $toggle = $('#hasSafetyArea');
             const $box    = $('#safetyAreaBox');
             const $select = $('#safetyAreaSelect');
@@ -563,9 +582,9 @@
             $toggle.on('change', syncSafetyArea);
             syncSafetyArea(); // initial state
         });
-    </script>
-    <script>
-        $(function () {
+</script>
+<script>
+    $(function () {
             const $toggle = $('#hasCutMargin');
             const $box = $('#cutMarginBox');
             const $select = $('#cutMarginSelect');
@@ -594,9 +613,9 @@
             $toggle.on('change', syncCutMargin);
             syncCutMargin(); // initial state
         });
-    </script>
-    <script>
-        document.addEventListener('click', function (e) {
+</script>
+<script>
+    document.addEventListener('click', function (e) {
             const submitBtn = e.target.closest('button[type="submit"]');
             if (!submitBtn) return;
 
@@ -610,10 +629,10 @@
                 flag.value = '0';
             }
         });
-    </script>
+</script>
 
-    <script>
-        // Build parallel arrays from current UI selections
+<script>
+    // Build parallel arrays from current UI selections
         function buildDimensionPayloadFromUI() {
             const categoryIds = ($('#productsSelect').val() || []).map(String);               // categories
             const productIds  = ($('#productsWithoutCategoriesSelect').val() || []).map(String); // products
@@ -701,10 +720,10 @@
             });
         }
 
-    </script>
+</script>
 
-    <script>
-        // Listen for change on "Products With Categories"
+<script>
+    // Listen for change on "Products With Categories"
         // Left: Products With Categories → updates right list, then refresh
         $('#categoriesSelect').on('change', function () {
             syncSelectedResourcesToHiddenInputs();
@@ -758,10 +777,9 @@
         });
 
 
-    </script>
+</script>
 
 <script>
-
     const modelDropzone = new Dropzone("#template-dropzone", {
         url: "{{ route('media.store') }}",
         paramName: "file",
@@ -863,8 +881,7 @@
             toggleCheckboxes();
         });
 </script>
-    <script>
-
+<script>
     const modelMainDropzone = new Dropzone("#template-main-dropzone", {
         url: "{{ route('media.store') }}",
         paramName: "file",
