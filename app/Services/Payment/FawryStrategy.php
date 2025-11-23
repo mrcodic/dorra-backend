@@ -36,8 +36,7 @@ use Illuminate\Support\Facades\Http;
             'Content-Type' => 'application/json',
         ])->post($url, $payload);
 
-        dd($response->body(), $response->status(),$response,$payload);
-
+        return $response->json();
     }
 
     public function storeTransaction($orderData, $data, $paymentMethod): array
