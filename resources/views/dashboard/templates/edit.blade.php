@@ -238,12 +238,12 @@
                                 <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
                                 <div class="form-group mb-2">
                                     <label for="orientation" class="label-text mb-1">Orientation</label>
-                                    <select id="orientation" class="form-select" name="orientation" disabled>
+                                    <select id="orientation" class="form-select" name="orientation" >
                                         <option value=""  disabled>
                                             chooese orientation
                                         </option>
                                         @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                            <option value="{{ $orientation->value }}" @selected($orientation == $model->orientation) disabled>
+                                            <option value="{{ $orientation->value }}" @selected($orientation == $model->orientation) >
                                                 {{$orientation->label()}}
                                             </option>
                                         @endforeach
@@ -255,19 +255,19 @@
                                         <div class="form-group mb-2">
                                             <label class="label-text mb-1">Shape</label>
                                             <input type="hidden" name="has_corner" id="has_corner_hidden"
-                                                   value="{{ old('has_corner', $model->has_corner ?? '') }}" disabled>
+                                                   value="{{ old('has_corner', $model->has_corner ?? '') }}" >
 
                                             <div class="d-flex gap-3">
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" name="has_corner" id="shape_circle" value="0"
                                                     @checked($model->has_corner == 0)
-                                                    disabled >
+                                                     >
                                                     <label class="form-check-label" for="shape_circle">Circle</label>
                                                 </div>
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" name="has_corner" id="shape_other" value="1"
                                                         @checked($model->has_corner == 1)
-                                                        disabled
+
                                                     >
                                                     <label class="form-check-label" for="shape_other">Other</label>
                                                 </div>
@@ -282,16 +282,16 @@
 
                                                 <input type="hidden" name="has_safety_area" value="0">
                                                 <input class="form-check-input" type="checkbox" id="hasSafetyArea" name="has_safety_area"
-                                                       value="1" {{ $model->has_safety_area ? 'checked' : '' }} disabled>
+                                                       value="1" {{ $model->has_safety_area ? 'checked' : '' }} >
                                                 <label class="form-check-label" for="hasSafetyArea">Enable Safety Area</label>
                                             </div>
 
                                             <div id="safetyAreaBox" class="{{ old('has_safety_area') ? '' : 'd-none' }}">
                                                 <label for="safetyAreaSelect" class="label-text mb-1">Safety Area</label>
-                                                <select id="safetyAreaSelect" class="form-select select2" name="safety_area" disabled>
+                                                <select id="safetyAreaSelect" class="form-select select2" name="safety_area" >
                                                     @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
                                                         <option value="{{ $area->value }}"
-                                                            @selected($area->value == $model->safety_area) disabled>
+                                                            @selected($area->value == $model->safety_area) >
                                                             {{ $area->label() }}
                                                         </option>
                                                     @endforeach
@@ -310,7 +310,7 @@
                                                 <input type="hidden" value="0">
                                                 <input class="form-check-input" type="checkbox" id="hasCutMargin"
                                                        value="1" {{ $model->cut_margin
-                                                    ? 'checked' : '' }} disabled>
+                                                    ? 'checked' : '' }} >
                                                 <label class="form-check-label" for="hasCutMargin">Enable Cut Margin</label>
                                             </div>
 
@@ -318,7 +318,7 @@
                                                  class="{{ $model->cut_margin ? '' : 'd-none' }}">
                                                 <label for="cutMarginSelect" class="label-text mb-1">Cut Margin</label>
                                                 <select id="cutMarginSelect" class="form-select select2"
-                                                        name="cut_margin" disabled>
+                                                        name="cut_margin" >
 
                                                 @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
                                                         <option value="{{ $area->value }}"   @selected($area->value == $model->cut_margin) >
@@ -337,10 +337,10 @@
                                 <div class="form-group mb-2 d-none" id="cornersBox">
                                     <label for="cornersSelect" class="label-text mb-1">Corners</label>
                                     <select id="cornersSelect" class="form-select select2" name="border">
-                                        <option value="" selected disabled>Choose Corner</option>
+                                        <option value="" selected >Choose Corner</option>
                                         @foreach(\App\Enums\BorderEnum::cases() as $border)
                                             <option value="{{ $border->value }}"
-                                                @selected($border->value == $model->border) disabled>
+                                                @selected($border->value == $model->border) >
                                                 {{$border->label()}}
                                             </option>
                                         @endforeach
@@ -348,7 +348,7 @@
                                 </div>
                                 <div class="form-group mb-2">
                                     <label for="sizesSelect" class="label-text mb-1">Sizes</label>
-                                    <select id="sizesSelect" class="form-select" name="dimension_id" disabled>
+                                    <select id="sizesSelect" class="form-select" name="dimension_id" >
                                         <option value="" disabled>Select Size</option>
                                     </select>
                                     <small class="form-text text-muted">
