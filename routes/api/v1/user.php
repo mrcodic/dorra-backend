@@ -1,8 +1,5 @@
 <?php
 
-
-use App\DTOs\Shipping\AddressDTO;
-use App\DTOs\Shipping\RateQuoteDTO;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Middleware\TrackVisits;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
@@ -63,8 +60,8 @@ Route::prefix('invitations/')->controller(InvitationController::class)->group(fu
 Route::controller(PaymentController::class)->group(function () {
     Route::get('payment-methods', 'paymentMethods');
     Route::post('buy-order-again', 'buyOrderAgain');
-    Route::post('paymob/payment/callback', 'handlePaymobCallback');
-    Route::get('paymob/payment/redirect', 'handlePaymobRedirect');
+    Route::post('payment/callback', 'handlePaymobCallback');
+    Route::get('payment/redirect', 'handlePaymobRedirect');
     Route::post('fawry/payment/callback', 'handleFawryCallback');
     Route::get('fawry/payment/redirect', 'handleFawryRedirect');
 });
