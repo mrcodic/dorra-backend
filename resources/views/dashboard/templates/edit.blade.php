@@ -333,7 +333,6 @@
                                         </div>
                                     </div>
 
-
                                     {{-- Cut Margin (col-6) --}}
                                     <div class="col-md-4">
                                         <div class="form-group mb-2">
@@ -341,13 +340,12 @@
                                                 {{-- send 0 when unchecked --}}
                                                 <input type="hidden" value="0">
                                                 <input class="form-check-input" type="checkbox" id="hasCutMargin"
-                                                    value="1" {{ $model->cut_margin
-                                                ? 'checked' : '' }} >
+                                                    value="1"  @checked((int) $model->cut_margin > 0) >
                                                 <label class="form-check-label" for="hasCutMargin">Enable Cut
                                                     Margin</label>
                                             </div>
 
-                                            <div id="cutMarginBox" class="{{ $model->cut_margin ? '' : 'd-none' }}">
+                                            <div id="cutMarginBox" class="{{ $model->cut_margin > 0 ? '' : 'd-none' }}">
                                                 <label for="cutMarginSelect" class="label-text mb-1">Cut Margin</label>
                                                 <select id="cutMarginSelect" class="form-select select2"
                                                     name="cut_margin">

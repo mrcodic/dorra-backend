@@ -14,12 +14,12 @@
                     <i data-feather="more-vertical"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionDropdown{{ $template->id }}">
-{{--                    @can('product-templates_update')--}}
+                    @can('product-templates_update')
                         <li><a class="dropdown-item" href="{{ route('product-templates.edit',$template->id) }}"><i
                                     data-feather="edit-3" class="me-1"></i>Edit</a>
                         </li>
-{{--                    @endcan--}}
-{{--                    @can('product-templates_show')--}}
+                    @endcan
+                    @can('product-templates_show')
                         <li>
                             <a class="dropdown-item"
                                href="{{ config('services.editor_url') . 'templates/' . $template->id . '?is_clear'}}"
@@ -27,8 +27,8 @@
                                 <i data-feather="eye" class="me-1"></i>Show
                             </a>
                         </li>
-{{--                    @endcan--}}
-{{--                    @can('product-templates.change-status.publish_show')--}}
+                    @endcan
+                    @can('product-templates.change-status.publish_show')
                         <li>
                             <form class="change-status-form"
                                   action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value]) }}"
@@ -47,8 +47,8 @@
                                 </button>
                             </form>
                         </li>
-{{--                    @endcan--}}
-{{--                    @can('product-templates.change-status.draft_show')--}}
+                    @endcan
+                    @can('product-templates.change-status.draft_show')
                         <li>
                             <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
@@ -63,8 +63,8 @@
                                 </button>
                             </form>
                         </li>
-{{--                    @endcan--}}
-{{--                    @can('product-templates.change-status.live_show')--}}
+                    @endcan
+                    @can('product-templates.change-status.live_show')
                         <li>
                             <form class="change-status-form" action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])
                         }}" method="post">
@@ -79,8 +79,8 @@
                                 </button>
                             </form>
                         </li>
-{{--                    @endcan--}}
-{{--                    @can('product-templates_delete')--}}
+                    @endcan
+                    @can('product-templates_delete')
                         <li>
                             <button class="dropdown-item text-danger open-delete-template-modal w-100"
                                     data-bs-toggle="modal"
@@ -89,7 +89,7 @@
                                     class="me-1 text-danger"></i>Delete
                             </button>
                         </li>
-{{--                    @endcan--}}
+                    @endcan
                 </ul>
             </div>
             <div style="background-color: #F4F6F6;height:200px;border-radius:12px;padding: 15px;" class="d-flex justify-content-center align-items-center" >

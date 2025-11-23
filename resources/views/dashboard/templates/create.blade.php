@@ -21,6 +21,7 @@
                         @csrf
                         <div class="flex-grow-1">
                             <div class="">
+                                @if(request()->query('q') == 'without')
                                 <div class="form-group mb-2">
                                     <label class="label-text mb-1">Template Image</label>
 
@@ -34,6 +35,7 @@
                                             id="uploadedMainTemplateImage">
                                     </div>
                                 </div>
+                                @endif
                                 <div class="form-group mb-2">
                                     <label class="label-text mb-1">Template Model Image</label>
 
@@ -213,7 +215,9 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="position-relative mt-3 text-center">
+                                    @if(request()->query('q') == 'with')
+
+                                    <div class="position-relative mt-3 text-center">
                                     <hr class="opacity-75" style="border: 1px solid #24B094;">
                                     <span
                                         class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
@@ -320,6 +324,7 @@
                                         </div>
                                     </div>
 
+
                                 </div>
 
                                 <div class="form-group mb-2">
@@ -333,6 +338,7 @@
                                 </div>
 
                             </div>
+                            @endif
                         </div>
 
 
@@ -340,18 +346,23 @@
                             <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel
                             </button>
                             <div class="d-flex gap-1">
+                                @if(request()->query('q') == 'without')
                                 <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
                                     data-action="draft">
                                     <span>Add Template as Draft</span>
                                     <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
                                         role="status" aria-hidden="true"></span>
                                 </button>
+                                @endif
+                                @if(request()->query('q') == 'with')
                                 <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
                                     data-action="editor">
                                     <span>Save & Go to Editor</span>
                                     <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
                                         role="status" aria-hidden="true"></span>
                                 </button>
+                                @endif
+
                             </div>
                         </div>
                     </form>

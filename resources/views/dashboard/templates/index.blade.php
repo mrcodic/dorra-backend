@@ -82,7 +82,7 @@
 
                     {{-- create template button --}}
                     @can('product-templates_create')
-                    <a class="btn btn-primary col-12 col-md-3 col-lg-2" href="{{ route('product-templates.create') }}">
+                    <a class="btn btn-primary col-12 col-md-3 col-lg-2" data-bs-target="#templateEditorModal" data-bs-toggle="modal" href="{{ route('product-templates.create') }}">
                         <i data-feather="plus"></i>
                         Create Template
                     </a>
@@ -140,7 +140,7 @@
 
 
     </div>
-
+@include("modals.templates.template-editor-modal")
     @include('modals.delete',[
     'id' => 'deleteTemplateModal',
     'formId' => 'deleteTemplateForm',
