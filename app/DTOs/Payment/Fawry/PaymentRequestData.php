@@ -71,6 +71,7 @@ class PaymentRequestData
         $merchantCode = config('services.fawry.merchant_code');
         $merchantRef = $this->order->order_number;
         $returnUrl = config('services.fawry.redirection_url');
+        $returnUrl = config('services.fawry.redirection_url');
         $profileId = $this->user?->id ?? $this->guest?->id ?? '';
 
         $signature = generateFawrySignature(
@@ -95,7 +96,9 @@ class PaymentRequestData
             'returnUrl' => $returnUrl,
             'chargeItems' => $allItems,
             'paymentMethod' => $this->method,
+            'authCaptureModePayment'=> false,
             'signature' => $signature,
+            'orderWebHookUrl'       => config('services.fawry.webhook_url'),
         ];
     }
 }
