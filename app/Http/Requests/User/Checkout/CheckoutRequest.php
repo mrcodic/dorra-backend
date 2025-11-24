@@ -67,7 +67,7 @@ class CheckoutRequest extends FormRequest
             'first_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
             'email' => ['required', 'email'],
-            'full_phone_number' => ['nullable', 'string', new Phone($isoCode)],
+            'full_phone_number' => ['nullable', 'string', (new Phone())->country($isoCode)->mobile()],
             'type' => ['required', 'in:' . OrderTypeEnum::getValuesAsString()],
 
 
@@ -100,7 +100,7 @@ class CheckoutRequest extends FormRequest
             'pickup_full_phone_number' => [
                 'nullable',
                 'string',
-                new Phone($isoCode),
+                (new Phone())->country($isoCode)->mobile(),
             ],
             'pickup_contact_phone_number' => [Rule::requiredIf($this->type == OrderTypeEnum::PICKUP->value),]
 

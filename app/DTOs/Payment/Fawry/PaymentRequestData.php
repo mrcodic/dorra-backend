@@ -3,6 +3,7 @@
 namespace App\DTOs\Payment\Fawry;
 
 use Illuminate\Support\Str;
+use function PHPUnit\Framework\stringContains;
 
 class PaymentRequestData
 {
@@ -33,7 +34,7 @@ class PaymentRequestData
             'itemId' => (string)Str::uuid(),
             'description' => Str::limit($item?->itemable->name ?? 'Item', 50, ''),
             'price' => (float)number_format((float)$item->sub_total, 2, '.', ''),
-            'quantity' => 1.0,
+            'quantity' => 1,
         ])->toArray();
 
         $extraItems = [];
@@ -43,7 +44,7 @@ class PaymentRequestData
                 'itemId' => (string)Str::uuid(),
                 'description' => 'Delivery Fee',
                 'price' => (float)number_format((float)$this->order->delivery_amount, 2, '.', ''),
-                'quantity' => 1.0,
+                'quantity' => 1,
             ];
         }
 
@@ -53,7 +54,7 @@ class PaymentRequestData
                 'itemId' => (string)Str::uuid(),
                 'description' => 'Tax',
                 'price' => (float)number_format((float)$taxAmount, 2, '.', ''),
-                'quantity' => 1.0,
+                'quantity' => 1,
             ];
         }
 
@@ -70,9 +71,9 @@ class PaymentRequestData
 
         $merchantCode = config('services.fawry.merchant_code');
         $merchantRef = $this->order->order_number;
-        $returnUrl = config('services.fawry.redirection_url');
-        $webhookUrl = config('services.fawry.redirection_url');
-        $profileId = $this->user?->id ?? $this->guest?->id ?? '';
+        $returnUrl =(string) config('services.fawry.redirection_url');
+        $webhookUrl =(string) config('services.fawry.redirection_url');
+        $profileId = (string) $this->user?->id ?? $this->guest?->id ?? '';
 
         $signature = generateFawrySignature(
             merchantCode: $merchantCode,
@@ -90,12 +91,12 @@ class PaymentRequestData
             'customerProfileId' => $profileId,
             'customerName' => trim($this->requestData->first_name . ' ' . $this->requestData->last_name),
             'paymentExpiry' => now()->addDays(2)->valueOf(),
-//            'customerMobile' => $this->requestData->full_phone_number,
+            'customerMobile' => '01000000000',
             'customerEmail' => $this->requestData->email,
-            'language' => $language,
+            'language' => 'ar-eg',
             'returnUrl' => $returnUrl,
             'chargeItems' => $allItems,
-            'paymentMethod' => $this->method,
+            'paymentMethod' =>(string) $this->method,
             'authCaptureModePayment'=> false,
             'signature' => $signature,
             'orderWebHookUrl' => $webhookUrl,
