@@ -15,12 +15,12 @@
                         <div class="col-md-6">
                             <label class="form-label label-text">Name (EN)</label>
                             <input type="text" class="form-control" placeholder="Enter Category Name(En)"
-                                   id="add-category-name-en" name="name[en]" />
+                                id="add-category-name-en" name="name[en]" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label label-text">Name (AR)</label>
                             <input type="text" class="form-control" placeholder="Enter Category Name(Ar)"
-                                   id="add-category-name-ar" name="name[ar]" />
+                                id="add-category-name-ar" name="name[ar]" />
                         </div>
                     </div>
 
@@ -31,7 +31,7 @@
                             <select name="parent_id" class="form-select" id="">
                                 <option value="" disabled selected>Choose Main Product</option>
                                 @foreach($associatedData['categories'] as $category)
-                                    <option value="{{ $category->id }}"> {{
+                                <option value="{{ $category->id }}"> {{
                                     $category->getTranslation('name',app()->getLocale()) }}</option>
                                 @endforeach
 
@@ -46,7 +46,7 @@
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Save</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                              aria-hidden="true"></span>
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </form>

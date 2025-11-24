@@ -11,7 +11,8 @@
                 <div class="modal-body flex-grow-1">
 
                     <div class="mb-1">
-                        <label class="form-label label-text">Image*</label>
+                        <label class="form-label label-text">Image <span
+                                style="color: red; font-size: 20px;">*</span></label>
 
                         <!-- Dropzone upload area -->
                         <div id="category-dropzone"
@@ -20,9 +21,7 @@
                             <div class="dz-message" data-dz-message>
                                 <span>Drop image here or click to upload</span>
                             </div>
-                        </div>
-
-                        <!-- hidden input to store uploaded image_id -->
+                        </div <!-- hidden input to store uploaded image_id -->
                         <input type="hidden" name="image_id" id="uploadedImage">
                     </div>
                     <span class="image-hint small text-end">
@@ -32,12 +31,14 @@
                     <!-- Name in Arabic and English -->
                     <div class="row my-1">
                         <div class="col-md-6">
-                            <label class="form-label label-text">Name (EN)</label>
+                            <label class="form-label label-text">Name (EN) <span
+                                    style="color: red; font-size: 20px;">*</span></label>
                             <input type="text" class="form-control" placeholder="Enter Category Name(En)"
                                 id="add-category-name-en" name="name[en]" />
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label label-text">Name (AR)</label>
+                            <label class="form-label label-text">Name (AR) <span
+                                    style="color: red; font-size: 20px;">*</span></label>
                             <input type="text" class="form-control" placeholder="Enter Category Name(Ar)"
                                 id="add-category-name-ar" name="name[ar]" />
                         </div>
@@ -46,12 +47,14 @@
                     <!-- Description in Arabic and English -->
                     <div class="row mb-1">
                         <div class="col-lg-6">
-                            <label class="form-label label-text">Description (EN)</label>
+                            <label class="form-label label-text">Description (EN) <span
+                                    style="color: red; font-size: 20px;">*</span></label>
                             <textarea class="form-control" id="add-category-description-en"
                                 placeholder="Enter Description Name(En)" name="description[en]" rows="2"></textarea>
                         </div>
                         <div class="col-lg-6">
-                            <label class="form-label label-text">Description (AR)</label>
+                            <label class="form-label label-text">Description (AR) <span
+                                    style="color: red; font-size: 20px;">*</span></label>
                             <textarea class="form-control" id="add-category-description-ar"
                                 placeholder="Enter Description Name(Ar)" name="description[ar]" rows="2"></textarea>
                         </div>
@@ -60,11 +63,11 @@
                     <div class="col-md-12">
                         <div class="mb-2 d-flex align-items-center gap-2">
                             <label class="form-label label-text ">Is this product has
-                                Mockup?*</label>
+                                Mockup?</label>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="has_mockup" value="0" />
-                                <input class="form-check-input" type="checkbox" id="has_mockup"
-                                       name="has_mockup" value="1" />
+                                <input class="form-check-input" type="checkbox" id="has_mockup" name="has_mockup"
+                                    value="1" />
 
                             </div>
                         </div>
