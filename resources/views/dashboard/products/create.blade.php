@@ -180,10 +180,195 @@
                                                     <div class="file-name fw-bold"></div>
                                                     <div class="file-size text-muted small"></div>
                                                 </div>
-                                                <button type="button" id="remove-image"
-                                                    class="btn btn-sm position-absolute text-danger"
-                                                    style="top: 5px; right: 5px; background-color: #FFEEED">
-                                                    <i data-feather="trash"></i>
+                                            </div>
+                                        </div>
+                                        <!-- Category Colors -->
+                                        {{-- <div class="col-md-12">--}}
+                                            {{-- <div class="mb-2">--}}
+                                                {{-- <label class="form-label label-text">Category Colors</label>--}}
+
+                                                {{-- <div class="color-repeater">--}}
+                                                    {{-- <div data-repeater-list="colors">--}}
+                                                        {{-- <div data-repeater-item>--}}
+                                                            {{-- <div class="row align-items-start mt-1">--}}
+
+
+                                                                {{-- <div class="col-md-12">--}}
+                                                                    {{-- <label class="form-label label-text">Color
+                                                                        Value *</label>--}}
+                                                                    {{-- <div class="d-flex gap-1 align-items-center">
+                                                                        --}}
+                                                                        {{--
+                                                                        <!-- Color picker -->--}}
+                                                                        {{--
+                                                                        <input--}} {{-- type="color" --}} {{--
+                                                                            class="form-control rounded-circle color-picker border border-0  "
+                                                                            --}} {{--
+                                                                            style="max-width: 30px; padding: 0;" --}}
+                                                                            {{-- value="#000" --}} {{-- />--}}
+
+                                                                        {{--
+                                                                        <!-- Text hex input (this will actually submit the value) -->--}}
+                                                                        {{--
+                                                                        <input--}} {{-- type="text" --}} {{--
+                                                                            name="value" --}} {{--
+                                                                            class="form-control color-hex-input" --}}
+                                                                            {{-- placeholder="#000000" --}} {{--
+                                                                            value="#000000" --}} {{--
+                                                                            pattern="^#([A-Fa-f0-9]{6})$" --}} {{-- />
+                                                                        --}}
+                                                                        {{--
+                                                                    </div>--}}
+                                                                    {{-- <small class="text-muted">Pick a color or type
+                                                                        hex (e.g. #FFAA00).</small>--}}
+                                                                    {{-- </div>--}}
+
+
+
+
+                                                                {{-- <div class="col-md-12 mt-1">--}}
+                                                                    {{-- <label class="form-label label-text">Color
+                                                                        Image *</label>--}}
+                                                                    {{-- <div
+                                                                        class="dropzone color-dropzone border rounded p-2"
+                                                                        --}} {{--
+                                                                        style="cursor:pointer; min-height:100px;">--}}
+                                                                        {{-- <div class="dz-message" data-dz-message>
+                                                                            --}}
+                                                                            {{-- <span>Drop image or click</span>--}}
+                                                                            {{-- </div>--}}
+                                                                        {{-- </div>--}}
+                                                                    {{-- <input type="hidden" name="image_id"
+                                                                        class="color-image-hidden">--}}
+                                                                    {{-- </div>--}}
+
+
+                                                                {{-- <div class="col-md-2 text-center mt-1  ms-auto">
+                                                                    --}}
+                                                                    {{-- <button type="button" --}} {{--
+                                                                        class="btn btn-outline-danger" --}} {{--
+                                                                        data-repeater-delete>--}}
+                                                                        {{-- <i data-feather="x" class="me-25"></i>--}}
+                                                                        {{-- Delete--}}
+                                                                        {{-- </button>--}}
+                                                                    {{-- </div>--}}
+                                                                {{-- </div>--}}
+                                                            {{-- </div>--}}
+                                                        {{-- </div>--}}
+
+                                                    {{-- <div class="row mt-1">--}}
+                                                        {{-- <div class="col-12">--}}
+                                                            {{-- <button type="button" --}} {{--
+                                                                class="w-100 rounded-3 p-1 text-dark" --}} {{--
+                                                                style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                                --}} {{-- data-repeater-create>--}}
+                                                                {{-- <i data-feather="plus" class="me-25"></i>--}}
+                                                                {{-- <span>Add New Color</span>--}}
+                                                                {{-- </button>--}}
+                                                            {{-- </div>--}}
+                                                        {{-- </div>--}}
+                                                    {{-- </div>--}}
+                                                {{-- </div>--}}
+                                            {{-- </div>--}}
+
+                                        <!-- Multiple Images Upload -->
+                                        <div class="col-md-12">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text" for="product-images">Category
+                                                    Images (optional)</label>
+
+                                                <!-- Dropzone container -->
+                                                <div id="multi-dropzone" class="dropzone border rounded p-3"
+                                                    style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <i data-feather="upload" class="mb-2"></i>
+                                                        <p>Drag images here or click to upload</p>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="images_ids[]" id="images_ids">
+                                                <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2">
+                                                </div>
+
+                                                <span class="image-hint small text-end">
+                                                    Max size: 1MB | Dimensions: 512x512 px
+                                                </span>
+                                            </div>
+                                        </div>
+
+
+
+                                        <!-- Category & Subcategory -->
+                                        <div class="col-md-6">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text" for="category">Product*</label>
+                                                <select name="category_id" id="category"
+                                                    class="form-control category-select">
+                                                    <option value="" selected disabled>Select product</option>
+                                                    @foreach($associatedData['categories'] as $category)
+                                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text"
+                                                    for="sub-category">Subproduct</label>
+                                                <select name="sub_category_id" id="sub-category"
+                                                    class="form-control sub-category-select"
+                                                    data-sub-category-url="{{ route('sub-categories') }}">
+                                                    <option value="" selected disabled>Select subproduct</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tags -->
+                                        <div class="col-md-12">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text" for="tags">Tags</label>
+                                                <select name="tags[]" id="tags" class="select2 form-select" multiple>
+                                                    @foreach($associatedData['tags'] as $tag)
+                                                    <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!-- Dimensions -->
+
+                                        <div class="col-md-12 mb-2">
+                                            <div>
+                                                <label class="form-label label-text">Category Size*</label>
+
+                                                <!-- Standard Dimensions -->
+                                                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start"
+                                                    id="standard-dimensions-container">
+                                                    @foreach($associatedData['dimensions'] as $dimension)
+                                                    <label
+                                                        class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center cursor-pointer"
+                                                        for="dimension-checkbox-{{ $dimension['id'] }}"
+                                                        style="width: 100px;">
+                                                        <input class="form-check-input me-1" type="checkbox"
+                                                            name="dimensions[]"
+                                                            id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                            value="{{ $dimension['id'] }}"
+                                                            style="pointer-events: none" />
+                                                        <span class="form-check-label mb-0">
+                                                            {{ $dimension['name'] }}
+                                                        </span>
+                                                    </label>
+                                                    @endforeach
+                                                </div>
+
+                                                <!-- Custom Dimensions -->
+                                                <div class="d-flex gap-3 mt-2" id="custom-dimensions-container">
+                                                    <!-- Custom dimensions from sessionStorage will be injected here -->
+                                                </div>
+
+                                                <!-- Add Custom Size Button -->
+                                                <button type="button" class="upload-card w-100 mt-2"
+                                                    data-bs-toggle="modal" data-bs-target="#addSizeModal">
+                                                    Add Custom Size
                                                 </button>
                                             </div>
                                         </div>
@@ -919,69 +1104,71 @@
             }
         });
 </script>
-<script>
-    Dropzone.autoDiscover = false;
+{{-- <script>
+    --}}
+{{--        Dropzone.autoDiscover = false;--}}
 
-        function initColorItem(item) {
-            const dropzoneElement = item.querySelector('.color-dropzone');
-            const hiddenInput = item.querySelector('.color-image-hidden');
+{{--        function initColorItem(item) {--}}
+{{--            const dropzoneElement = item.querySelector('.color-dropzone');--}}
+{{--            const hiddenInput = item.querySelector('.color-image-hidden');--}}
 
-            if (!dropzoneElement || !hiddenInput) return;
+{{--            if (!dropzoneElement || !hiddenInput) return;--}}
 
 
-            if (dropzoneElement.dropzone) return;
+{{--            if (dropzoneElement.dropzone) return;--}}
 
-            const dz = new Dropzone(dropzoneElement, {
-                url: "{{ route('media.store') }}",
-                paramName: "file",
-                maxFiles: 1,
-                maxFilesize: 1, // MB
-                acceptedFiles: "image/*",
-                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-                addRemoveLinks: true,
-                init: function () {
-                    this.on("success", function (file, response) {
-                        if (response.success && response.data) {
-                            file._hiddenInputId = response.data.id;
-                            hiddenInput.value = response.data.id;
-                        }
-                    });
+{{--            const dz = new Dropzone(dropzoneElement, {--}}
+{{--                url: "{{ route('media.store') }}",--}}
+{{--                paramName: "file",--}}
+{{--                maxFiles: 1,--}}
+{{--                maxFilesize: 1, // MB--}}
+{{--                acceptedFiles: "image/*",--}}
+{{--                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },--}}
+{{--                addRemoveLinks: true,--}}
+{{--                init: function () {--}}
+{{--                    this.on("success", function (file, response) {--}}
+{{--                        if (response.success && response.data) {--}}
+{{--                            file._hiddenInputId = response.data.id;--}}
+{{--                            hiddenInput.value = response.data.id;--}}
+{{--                        }--}}
+{{--                    });--}}
 
-                    this.on("removedfile", function (file) {
-                        hiddenInput.value = "";
-                        if (file._hiddenInputId) {
-                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+{{--                    this.on("removedfile", function (file) {--}}
+{{--                        hiddenInput.value = "";--}}
+{{--                        if (file._hiddenInputId) {--}}
+{{--                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {--}}
+{{--                                method: "DELETE",--}}
+{{--                                headers: {--}}
+{{--                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content--}}
+{{--                                }--}}
+{{--                            });--}}
+{{--                        }--}}
+{{--                    });--}}
+{{--                }--}}
+{{--            });--}}
 
-            const colorPicker = item.querySelector('.color-picker');
-            const hexInput = item.querySelector('.color-hex-input');
+{{--            const colorPicker = item.querySelector('.color-picker');--}}
+{{--            const hexInput = item.querySelector('.color-hex-input');--}}
 
-            if (colorPicker && hexInput) {
-                colorPicker.addEventListener('input', function () {
-                    const hex = this.value.toUpperCase();
-                    hexInput.value = hex;
-                });
+{{--            if (colorPicker && hexInput) {--}}
+{{--                colorPicker.addEventListener('input', function () {--}}
+{{--                    const hex = this.value.toUpperCase();--}}
+{{--                    hexInput.value = hex;--}}
+{{--                });--}}
 
-                hexInput.addEventListener('input', function () {
-                    let v = this.value.toUpperCase();
-                    if (!v.startsWith('#')) v = '#' + v;
-                    this.value = v;
+{{--                hexInput.addEventListener('input', function () {--}}
+{{--                    let v = this.value.toUpperCase();--}}
+{{--                    if (!v.startsWith('#')) v = '#' + v;--}}
+{{--                    this.value = v;--}}
 
-                    if (/^#([0-9A-F]{6})$/.test(v)) {
-                        colorPicker.value = v;
-                    }
-                });
-            }
-        }
-</script>
+{{--                    if (/^#([0-9A-F]{6})$/.test(v)) {--}}
+{{--                        colorPicker.value = v;--}}
+{{--                    }--}}
+{{--                });--}}
+{{--            }--}}
+{{--        }--}}
+{{--    
+</script>--}}
 
 <script>
     Dropzone.autoDiscover = false;

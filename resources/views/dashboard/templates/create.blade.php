@@ -19,6 +19,7 @@
                     <form id="addTemplateForm" enctype="multipart/form-data" method="post"
                         action="{{ route('templates.redirect.store') }}">
                         @csrf
+                        <input type="hidden" name="approach" value="{{ request()->query('q') == 'without' ? 'without_editor' : 'with_editor' }}">
                         <div class="flex-grow-1">
                             <div class="">
                                 @if(request()->query('q') == 'without')
@@ -48,7 +49,84 @@
                                         <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
                                     </div>
                                 </div>
+                                    @if(request()->query('q') == 'without')
+                                    <!-- Template Colors -->
+                                    <div class="col-md-12">
+                                        <div class="mb-2">
+                                            <label class="form-label label-text">Template Colors</label>
 
+                                            <div class="color-repeater">
+                                                <div data-repeater-list="colors">
+                                                    <div data-repeater-item>
+                                                        <div class="row align-items-start mt-1">
+
+
+                                                            <div class="col-md-12">
+                                                                <label class="form-label label-text">Color Value *</label>
+                                                                <div class="d-flex gap-1 align-items-center">
+                                                                    <!-- Color picker -->
+                                                                    <input
+                                                                        type="color"
+                                                                        class="form-control rounded-circle color-picker border border-0  "
+                                                                        style="max-width: 30px; padding: 0;"
+                                                                        value="#000"
+                                                                    />
+
+                                                                    <!-- Text hex input (this will actually submit the value) -->
+                                                                    <input
+                                                                        type="text"
+                                                                        name="value"
+                                                                        class="form-control color-hex-input"
+                                                                        placeholder="#000000"
+                                                                        value="#000000"
+                                                                        pattern="^#([A-Fa-f0-9]{6})$"
+                                                                    />
+                                                                </div>
+                                                                <small class="text-muted">Pick a color or type hex (e.g. #FFAA00).</small>
+                                                            </div>
+
+
+
+
+                                                            <div class="col-md-12 mt-1">
+                                                                <label class="form-label label-text">Color Image *</label>
+                                                                <div class="dropzone color-dropzone border rounded p-2"
+                                                                     style="cursor:pointer; min-height:100px;">
+                                                                    <div class="dz-message" data-dz-message>
+                                                                        <span>Drop image or click</span>
+                                                                    </div>
+                                                                </div>
+                                                                <input type="hidden" name="image_id" class="color-image-hidden">
+                                                            </div>
+
+
+                                                            <div class="col-md-2 text-center mt-1  ms-auto">
+                                                                <button type="button"
+                                                                        class="btn btn-outline-danger"
+                                                                        data-repeater-delete>
+                                                                    <i data-feather="x" class="me-25"></i>
+                                                                    Delete
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mt-1">
+                                                    <div class="col-12">
+                                                        <button type="button"
+                                                                class="w-100 rounded-3 p-1 text-dark"
+                                                                style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                                data-repeater-create>
+                                                            <i data-feather="plus" class="me-25"></i>
+                                                            <span>Add New Color</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endif
                                 <div class="position-relative mt-3 text-center">
                                     <hr class="opacity-75" style="border: 1px solid #24B094;">
                                     <span
@@ -375,6 +453,122 @@
 
 @endsection
 @section('vendor-script')
+    <script>
+        // keep color picker & text field in sync
+        document.addEventListener("input", (e) => {
+            if (e.target.classList.contains("color-picker")) {
+                const picker = e.target;
+                const text = picker.closest(".d-flex").querySelector(".color-hex-input");
+                text.value = picker.value.toUpperCase();
+            }
+
+            if (e.target.classList.contains("color-hex-input")) {
+                const text = e.target;
+                const picker = text.closest(".d-flex").querySelector(".color-picker");
+                const val = text.value.trim();
+
+                // Only update if valid hex
+                if (/^#([A-Fa-f0-9]{6})$/.test(val)) {
+                    picker.value = val;
+                }
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const $colorRepeater = $('.color-repeater');
+
+            // لو في items جاهزة (في حالة edit مثلاً)
+            $colorRepeater.find('[data-repeater-item]').each(function () {
+                initColorItem(this);
+            });
+
+            if (window.$ && $.fn.repeater) {
+                $colorRepeater.repeater({
+                    initEmpty: true, // يستخدم الـ item الموجود كـ template
+                    show: function () {
+                        $(this).slideDown();
+                        // this = data-repeater-item الجديد
+                        initColorItem(this);
+                        if (window.feather) feather.replace();
+                    },
+                    hide: function (deleteElement) {
+                        $(this).slideUp(deleteElement);
+                    }
+                });
+
+                // نضيف أول صف تلقائيًا في صفحة الإنشاء
+                const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;
+                if (!hasItems) {
+                    $colorRepeater.find('[data-repeater-create]').first().trigger('click');
+                }
+            }
+        });
+    </script>
+    <script>
+        Dropzone.autoDiscover = false;
+
+        function initColorItem(item) {
+            const dropzoneElement = item.querySelector('.color-dropzone');
+            const hiddenInput = item.querySelector('.color-image-hidden');
+
+            if (!dropzoneElement || !hiddenInput) return;
+
+
+            if (dropzoneElement.dropzone) return;
+
+            const dz = new Dropzone(dropzoneElement, {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1, // MB
+                acceptedFiles: "image/*",
+                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                addRemoveLinks: true,
+                init: function () {
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            hiddenInput.value = response.data.id;
+                        }
+                    });
+
+                    this.on("removedfile", function (file) {
+                        hiddenInput.value = "";
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            const colorPicker = item.querySelector('.color-picker');
+            const hexInput = item.querySelector('.color-hex-input');
+
+            if (colorPicker && hexInput) {
+                colorPicker.addEventListener('input', function () {
+                    const hex = this.value.toUpperCase();
+                    hexInput.value = hex;
+                });
+
+                hexInput.addEventListener('input', function () {
+                    let v = this.value.toUpperCase();
+                    if (!v.startsWith('#')) v = '#' + v;
+                    this.value = v;
+
+                    if (/^#([0-9A-F]{6})$/.test(v)) {
+                        colorPicker.value = v;
+                    }
+                });
+            }
+        }
+    </script>
+
 <script !src="">
     $('#industriesSelect').on('change', function () {
             const selectedIds = $(this).val();

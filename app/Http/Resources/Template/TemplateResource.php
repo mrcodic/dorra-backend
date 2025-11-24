@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Template;
 
 use App\Http\Resources\DimensionResource;
+use App\Http\Resources\MediaResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\TagResource;
 use App\Models\Guest;
@@ -45,24 +46,26 @@ class TemplateResource extends JsonResource
             'back_base64_preview_image' => $this->getFirstMediaUrl('back_templates'),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
-            'colors' => $this->colors,
             'template_model_image' => $this->getFirstMediaUrl('template_model_image'),
-            'orientation' =>  [
+            'orientation' => [
                 'value' => $this->orientation?->value,
                 'label' => $this->orientation?->label(),
             ],
             'dimension' => DimensionResource::make($this->whenLoaded('dimension')),
-            'has_corner' => $this->has_corner ,
+            'has_corner' => $this->has_corner,
             'has_safety_area' => $this->has_safety_area,
-            'safety_area' =>$this->safety_area,
+            'safety_area' => $this->safety_area,
             'border' => $this->border,
-            'has_cut_margin' => (bool) $this->cut_margin,
+            'has_cut_margin' => (bool)$this->cut_margin,
             'cut_margin' => $this->cut_margin,
+            'approach' => $this->approach,
+            'colors' => $this->colors,
+            'color_templates_media' => $this->when($this->approach == 'without_editor',function(){
+               return MediaResource::collection( $this->getMedia('color_templates'));
+            }),
 
         ];
     }
-
-
 
 
 }
