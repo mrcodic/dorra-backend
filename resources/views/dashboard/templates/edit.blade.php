@@ -672,68 +672,83 @@
             }
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const $colorRepeater = $('.color-repeater');
+    document.addEventListener("DOMContentLoaded", function () {
+        const $colorRepeater = $('.color-repeater');
 
-            // 1) init Dropzone على العناصر الموجودة (ألوان قديمة)
-            $colorRepeater.find('[data-repeater-item]').each(function () {
-                initColorItem(this);
-            });
+        // 1) init Dropzone على العناصر الموجودة (ألوان قديمة)
+        $colorRepeater.find('[data-repeater-item]').each(function () {
+            initColorItem(this);
+        });
 
-            // 2) init jquery.repeater
-            if (window.$ && $.fn.repeater) {
-                $colorRepeater.repeater({
-                    initEmpty: {{ $colors->isEmpty() ? 'true' : 'false' }},
-                    show: function () {
-                        $(this).addClass('col-12 col-md-6 col-lg-3').hide().slideDown();
+        // 2) init jquery.repeater
+        if (window.$ && $.fn.repeater) {
+            $colorRepeater.repeater({
+                initEmpty: {{ $colors->isEmpty() ? 'true' : 'false' }},
+                show: function () {
+                    $(this).addClass('col-12 col-md-6 col-lg-3').hide().slideDown();
 
-                        const item = this;
-                        const dropzoneElement = item.querySelector('.color-dropzone');
-                        const hiddenInput = item.querySelector('.color-image-hidden');
-                        const colorPicker = item.querySelector('.color-picker');
-                        const hexInput = item.querySelector('.color-hex-input');
+                    const item = this;
+                    const dropzoneElement = item.querySelector('.color-dropzone');
+                    const hiddenInput = item.querySelector('.color-image-hidden');
+                    const colorPicker = item.querySelector('.color-picker');
+                    const hexInput = item.querySelector('.color-hex-input');
 
-                        if (dropzoneElement) {
-                            // 🧹 1) امسح أي DOM منسوخ من الصف القديم (previews, classes...)
-                            dropzoneElement.innerHTML =
-                                '<div class="dz-message" data-dz-message><span>Drop image or click</span></div>';
+                    if (dropzoneElement) {
+                        // 🧹 امسح أي DOM منسوخ من الصف القديم (previews, classes...)
+                        dropzoneElement.innerHTML =
+                            '<div class="dz-message" data-dz-message><span>Drop image or click</span></div>';
 
-                            dropzoneElement.classList.remove('dz-started', 'dz-max-files-reached');
-                            // امسح أي media منسوخ
-                            dropzoneElement.dataset.existingMedia = '';
-                        }
+                        dropzoneElement.classList.remove('dz-started', 'dz-max-files-reached');
+                        dropzoneElement.dataset.existingMedia = '';
+                    }
 
-                        // 2) امسح قيمة الـ image_id
-                        if (hiddenInput) {
-                            hiddenInput.value = '';
-                        }
+                    // امسح قيمة الـ image_id
+                    if (hiddenInput) {
+                        hiddenInput.value = '';
+                    }
 
-                        // 3) Reset للّون الافتراضي
-                        if (colorPicker) colorPicker.value = '#000000';
-                        if (hexInput) hexInput.value = '#000000';
+                    // Reset للّون الافتراضي
+                    if (colorPicker) colorPicker.value = '#000000';
+                    if (hexInput) hexInput.value = '#000000';
 
-                        // 4) الآن نعمل init للـ Dropzone + events بتاعة اللون
-                        initColorItem(item);
+                    // init Dropzone + events
+                    initColorItem(item);
 
-                        if (window.feather) feather.replace();
-                    },
-                    hide: function (deleteElement) {
-                        $(this).slideUp(function(){
-                            $this.remove()
+                    if (window.feather) feather.replace();
+                },
+                hide: function (deleteElement) {
+                    const item = this;
+                    const hiddenInput = item.querySelector('.color-image-hidden');
+                    const mediaId = hiddenInput ? hiddenInput.value : null;
+
+                    // 🔥 لو في صورة مرتبطة باللون ده امسحها من السيرفر
+                    if (mediaId) {
+                        fetch("{{ url('api/v1/media') }}/" + mediaId, {
+                            method: "DELETE",
+                            headers: {
+                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        }).catch(function (err) {
+                            console.error("Failed to delete media:", err);
                         });
                     }
-                });
 
-
-                @if($colors->isEmpty())
-                const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;
-                if (!hasItems) {
-                    $colorRepeater.find('[data-repeater-create]').first().trigger('click');
+                    // بعد الأنيميشن فعلياً شيل العنصر من الـ DOM ومن الـ array بتاعة repeater
+                    $(item).slideUp(function () {
+                        deleteElement(); // مهم جداً تستخدم deleteElement بدل $this.remove()
+                    });
                 }
-                @endif
-            }
+            });
 
-        });
+            @if($colors->isEmpty())
+            const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;
+            if (!hasItems) {
+                $colorRepeater.find('[data-repeater-create]').first().trigger('click');
+            }
+            @endif
+        }
+    });
+
 </script>
 
 <script>
