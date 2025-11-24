@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Http;
 
         $response = Http::asJson()->post($url, $payload);
 
-        dd($response->status(), $response->header('Content-Type'), $response->body(),$payload);
+        dd($response->status(), $response->header('Content-Type'), $response->body(),$response->json(),$payload);
 
 
     }
