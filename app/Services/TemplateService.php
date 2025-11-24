@@ -242,7 +242,7 @@ class TemplateService extends BaseService
                     ]);
             }
             dd($colors);
-$model->clearMediaCollection('color_templates');
+            $model->clearMediaCollection('color_templates');
                 collect($colors)->each(function ($color) use ($model) {
                     if (empty($color['image_id'])) {
                         return;
