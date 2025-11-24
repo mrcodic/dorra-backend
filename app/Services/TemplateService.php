@@ -242,7 +242,7 @@ class TemplateService extends BaseService
                     ]);
             }
 
-            $imageIds = $colors
+            $imageIds = collect($colors)
                 ->pluck('image_id')
                 ->filter()
                 ->toArray();
