@@ -19,7 +19,8 @@
                     <form id="addTemplateForm" enctype="multipart/form-data" method="post"
                         action="{{ route('templates.redirect.store') }}">
                         @csrf
-                        <input type="hidden" name="approach" value="{{ request()->query('q') == 'without' ? 'without_editor' : 'with_editor' }}">
+                        <input type="hidden" name="approach"
+                            value="{{ request()->query('q') == 'without' ? 'without_editor' : 'with_editor' }}">
                         <div class="flex-grow-1">
                             <div class="">
                                 @if(request()->query('q') == 'without')
@@ -49,84 +50,75 @@
                                         <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
                                     </div>
                                 </div>
-                                    @if(request()->query('q') == 'without')
-                                    <!-- Template Colors -->
-                                    <div class="col-md-12">
-                                        <div class="mb-2">
-                                            <label class="form-label label-text">Template Colors</label>
+                                @if(request()->query('q') == 'without')
+                                <!-- Template Colors -->
+                                <div class="col-md-12">
+                                    <div class="mb-2">
+                                        <label class="form-label label-text">Template Colors</label>
 
-                                            <div class="color-repeater">
-                                                <div data-repeater-list="colors">
-                                                    <div data-repeater-item>
-                                                        <div class="row align-items-start mt-1">
+                                        <div class="color-repeater">
+                                            <div data-repeater-list="colors" class="row d-flex flex-wrap">
+                                                <div data-repeater-item class="col-12 col-md-6 col-lg-3">
+                                                    <div
+                                                        class="border rounded-3 p-1 d-flex flex-column align-items-start mt-1">
 
+                                                        <div class="col-12">
+                                                            <label class="form-label label-text">Color Value <span
+                                                                    style="color: red; font-size: 20px;">*</span></label>
+                                                            <div class="d-flex gap-1 align-items-center">
+                                                                <!-- Color picker -->
+                                                                <input type="color"
+                                                                    class="form-control rounded-circle color-picker border-0"
+                                                                    style="max-width: 30px; padding: 0;" value="#000" />
 
-                                                            <div class="col-md-12">
-                                                                <label class="form-label label-text">Color Value *</label>
-                                                                <div class="d-flex gap-1 align-items-center">
-                                                                    <!-- Color picker -->
-                                                                    <input
-                                                                        type="color"
-                                                                        class="form-control rounded-circle color-picker border border-0  "
-                                                                        style="max-width: 30px; padding: 0;"
-                                                                        value="#000"
-                                                                    />
+                                                                <!-- Text hex input (this will actually submit the value) -->
+                                                                <input type="text" name="value"
+                                                                    class="form-control color-hex-input"
+                                                                    placeholder="#000000" value="#000000"
+                                                                    pattern="^#([A-Fa-f0-9]{6})$" />
+                                                            </div>
+                                                            <small class="text-muted">Pick a color or type hex (e.g.
+                                                                #FFAA00).</small>
+                                                        </div>
 
-                                                                    <!-- Text hex input (this will actually submit the value) -->
-                                                                    <input
-                                                                        type="text"
-                                                                        name="value"
-                                                                        class="form-control color-hex-input"
-                                                                        placeholder="#000000"
-                                                                        value="#000000"
-                                                                        pattern="^#([A-Fa-f0-9]{6})$"
-                                                                    />
+                                                        <div class="col-12 mt-1">
+                                                            <label class="form-label label-text">Color Image <span
+                                                                    style="color: red; font-size: 20px;">*</span></label>
+                                                            <div class="dropzone color-dropzone border rounded p-2"
+                                                                style="cursor:pointer; min-height:100px;">
+                                                                <div class="dz-message" data-dz-message>
+                                                                    <span>Drop image or click</span>
                                                                 </div>
-                                                                <small class="text-muted">Pick a color or type hex (e.g. #FFAA00).</small>
                                                             </div>
+                                                            <input type="hidden" name="image_id"
+                                                                class="color-image-hidden">
+                                                        </div>
 
-
-
-
-                                                            <div class="col-md-12 mt-1">
-                                                                <label class="form-label label-text">Color Image *</label>
-                                                                <div class="dropzone color-dropzone border rounded p-2"
-                                                                     style="cursor:pointer; min-height:100px;">
-                                                                    <div class="dz-message" data-dz-message>
-                                                                        <span>Drop image or click</span>
-                                                                    </div>
-                                                                </div>
-                                                                <input type="hidden" name="image_id" class="color-image-hidden">
-                                                            </div>
-
-
-                                                            <div class="col-md-2 text-center mt-1  ms-auto">
-                                                                <button type="button"
-                                                                        class="btn btn-outline-danger"
-                                                                        data-repeater-delete>
-                                                                    <i data-feather="x" class="me-25"></i>
-                                                                    Delete
-                                                                </button>
-                                                            </div>
+                                                        <div class="col-12 text-center mt-1 ms-auto">
+                                                            <button type="button" class="btn btn-outline-danger"
+                                                                data-repeater-delete>
+                                                                <i data-feather="x" class="me-25"></i>
+                                                                Delete
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </div>
 
-                                                <div class="row mt-1">
-                                                    <div class="col-12">
-                                                        <button type="button"
-                                                                class="w-100 rounded-3 p-1 text-dark"
-                                                                style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
-                                                                data-repeater-create>
-                                                            <i data-feather="plus" class="me-25"></i>
-                                                            <span>Add New Color</span>
-                                                        </button>
-                                                    </div>
+                                            <div class="row mt-1">
+                                                <div class="col-12">
+                                                    <button type="button" class="w-100 rounded-3 p-1 text-dark"
+                                                        style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                        data-repeater-create>
+                                                        <i data-feather="plus" class="me-25"></i>
+                                                        <span>Add New Color</span>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    @endif
+                                </div>
+                                @endif
                                 <div class="position-relative mt-3 text-center">
                                     <hr class="opacity-75" style="border: 1px solid #24B094;">
                                     <span
@@ -293,9 +285,9 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                    @if(request()->query('q') == 'with')
+                                @if(request()->query('q') == 'with')
 
-                                    <div class="position-relative mt-3 text-center">
+                                <div class="position-relative mt-3 text-center">
                                     <hr class="opacity-75" style="border: 1px solid #24B094;">
                                     <span
                                         class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
@@ -453,8 +445,8 @@
 
 @endsection
 @section('vendor-script')
-    <script>
-        // keep color picker & text field in sync
+<script>
+    // keep color picker & text field in sync
         document.addEventListener("input", (e) => {
             if (e.target.classList.contains("color-picker")) {
                 const picker = e.target;
@@ -473,9 +465,9 @@
                 }
             }
         });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
             const $colorRepeater = $('.color-repeater');
 
             // لو في items جاهزة (في حالة edit مثلاً)
@@ -487,13 +479,16 @@
                 $colorRepeater.repeater({
                     initEmpty: true, // يستخدم الـ item الموجود كـ template
                     show: function () {
-                        $(this).slideDown();
-                        // this = data-repeater-item الجديد
-                        initColorItem(this);
-                        if (window.feather) feather.replace();
+                        $(this).addClass('col-12 col-md-6 col-lg-3').hide().slideDown(200, function(){
+                            // this = data-repeater-item الجديد
+                            initColorItem(this);
+                            if (window.feather) feather.replace();
+                        });
                     },
                     hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
+                        $(this).slideUp(function(){
+                            $this.remove()
+                        });
                     }
                 });
 
@@ -504,9 +499,9 @@
                 }
             }
         });
-    </script>
-    <script>
-        Dropzone.autoDiscover = false;
+</script>
+<script>
+    Dropzone.autoDiscover = false;
 
         function initColorItem(item) {
             const dropzoneElement = item.querySelector('.color-dropzone');
@@ -567,7 +562,7 @@
                 });
             }
         }
-    </script>
+</script>
 
 <script !src="">
     $('#industriesSelect').on('change', function () {
