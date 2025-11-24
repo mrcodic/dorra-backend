@@ -136,15 +136,16 @@
                                                     </div>
                                                 </div>
                                                 @empty
-                                                <div data-repeater-item>
-                                                    <div class="row align-items-start mt-1">
+                                                <div data-repeater-item class="col-12 col-md-6 col-lg-3">
+                                                    <div
+                                                        class="border rounded-3 p-1 d-flex flex-column align-items-start mt-1">
 
-                                                        <div class="col-md-12">
+                                                        <div class="col-12">
                                                             <label class="form-label label-text">Color Value
                                                                 *</label>
                                                             <div class="d-flex gap-1 align-items-center">
                                                                 <input type="color"
-                                                                    class="form-control rounded-circle color-picker border border-0"
+                                                                    class="form-control rounded-circle color-picker border-0"
                                                                     style="max-width: 30px; padding: 0;"
                                                                     value="#000000" />
                                                                 <input type="text" name="value"
@@ -156,7 +157,7 @@
                                                                 hex (e.g. #FFAA00).</small>
                                                         </div>
 
-                                                        <div class="col-md-12 mt-1">
+                                                        <div class="col-12 mt-1">
                                                             <label class="form-label label-text">Color Image
                                                                 *
                                                             </label>
@@ -171,7 +172,7 @@
                                                                 class="color-image-hidden">
                                                         </div>
 
-                                                        <div class="col-md-2 text-center mt-1 ms-auto">
+                                                        <div class="col-12 text-center mt-1 ms-auto">
                                                             <button type="button" class="btn btn-outline-danger"
                                                                 data-repeater-delete>
                                                                 <i data-feather="x" class="me-25"></i>
