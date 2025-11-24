@@ -41,7 +41,7 @@ class PaymentRequestData
 
         if ($this->order->delivery_amount > 0) {
             $extraItems[] = [
-                'itemId' => (string)Str::uuid(),
+                'itemId' => (string)'134',
                 'description' => 'Delivery Fee',
                 'price' => (float)number_format((float)$this->order->delivery_amount, 2, '.', ''),
                 'quantity' => 1,
@@ -51,7 +51,7 @@ class PaymentRequestData
         if (setting('tax') > 0) {
             $taxAmount = getPriceAfterTax(setting('tax'), $this->order->subtotal);
             $extraItems[] = [
-                'itemId' => (string)Str::uuid(),
+                'itemId' => (string)'1234',
                 'description' => 'Tax',
                 'price' => (float)number_format((float)$taxAmount, 2, '.', ''),
                 'quantity' => 1,
@@ -72,7 +72,7 @@ class PaymentRequestData
         $merchantCode = config('services.fawry.merchant_code');
         $merchantRef = $this->order->order_number;
         $returnUrl =(string) config('services.fawry.redirection_url');
-        $webhookUrl =(string) config('services.fawry.redirection_url');
+        $webhookUrl =(string) config('services.fawry.webhook_url');
         $profileId = (string) $this->user?->id ?? $this->guest?->id ?? '';
 
         $signature = generateFawrySignature(
@@ -88,15 +88,16 @@ class PaymentRequestData
         return [
             'merchantCode' => $merchantCode,
             'merchantRefNum' => $merchantRef,
-            'customerProfileId' => $profileId,
-            'customerName' => trim($this->requestData->first_name . ' ' . $this->requestData->last_name),
-            'paymentExpiry' => now()->addDays(2)->valueOf(),
             'customerMobile' => '01000000000',
             'customerEmail' => $this->requestData->email,
+            'customerName' => trim($this->requestData->first_name . ' ' . $this->requestData->last_name),
+            'customerProfileId' => $profileId,
+//            'paymentExpiry' => now()->addDays(2)->valueOf(),
             'language' => 'ar-eg',
-            'returnUrl' => $returnUrl,
             'chargeItems' => $allItems,
+
             'paymentMethod' =>(string) $this->method,
+            'returnUrl' => $returnUrl,
             'authCaptureModePayment'=> false,
             'signature' => $signature,
             'orderWebHookUrl' => $webhookUrl,

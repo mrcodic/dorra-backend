@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Http;
 
     public function pay(array $payload, ?array $data): false|array
     {
+        $p = $payload;
         $url          = rtrim($this->baseUrl, '/') . '/fawrypay-api/api/payments/init';
         $merchantCode = (string) $this->config['merchant_code'];
         $secureKey    = (string) $this->config['secret_key'];
@@ -68,13 +69,13 @@ use Illuminate\Support\Facades\Http;
                 'signature'              => $signature,
                 'orderWebHookUrl'        => (string) ($this->config['webhook_url'] ?? ''),
             ];
+            dd($payload, $p);
         }
 
         // ---------- PURE cURL CALL ----------
         $ch = curl_init();
 
         $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE);
-
         curl_setopt_array($ch, [
             CURLOPT_URL            => $url,
             CURLOPT_RETURNTRANSFER => true,
