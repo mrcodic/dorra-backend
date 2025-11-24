@@ -629,26 +629,26 @@ class OrderService extends BaseService
             ->where('idempotency_key', $idempotencyKey)
             ->first();
 
-        $gatewayCode = $selectedPaymentMethod->paymentGateway->code ?? 'paymob';
-        $dto = $gatewayCode === 'fawry'
-            ? \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray([
-                'order' => $order,
-                'requestData' => $request,
-                'user' => auth('sanctum')->user(),
-                'guest' => $order->orderAddress ?? $order->pickupContact,
-                'method' => $selectedPaymentMethod->code,
-            ])
-            : PaymentRequestData::fromArray([
-                'order' => $order,
-                'requestData' => $request,
-                'user' => auth('sanctum')->user(),
-                'guest' => $order->orderAddress ?? $order->pickupContact,
-                'method' => $selectedPaymentMethod,
-            ]);
 
-        $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
+
         if ($order) {
-
+            $gatewayCode = $selectedPaymentMethod->paymentGateway->code ?? 'paymob';
+            $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
+            $dto = $gatewayCode === 'fawry'
+                ? \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray([
+                    'order' => $order,
+                    'requestData' => $request,
+                    'user' => auth('sanctum')->user(),
+                    'guest' => $order->orderAddress ?? $order->pickupContact,
+                    'method' => $selectedPaymentMethod->code,
+                ])
+                : PaymentRequestData::fromArray([
+                    'order' => $order,
+                    'requestData' => $request,
+                    'user' => auth('sanctum')->user(),
+                    'guest' => $order->orderAddress ?? $order->pickupContact,
+                    'method' => $selectedPaymentMethod,
+                ]);
             $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(),[]);
 
             return [
@@ -742,8 +742,23 @@ class OrderService extends BaseService
                 'paymentDetails' => [],
             ];
         }
-
-
+        $gatewayCode = $selectedPaymentMethod->paymentGateway->code ?? 'paymob';
+        $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
+        $dto = $gatewayCode === 'fawry'
+            ? \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray([
+                'order' => $order,
+                'requestData' => $request,
+                'user' => auth('sanctum')->user(),
+                'guest' => $order->orderAddress ?? $order->pickupContact,
+                'method' => $selectedPaymentMethod->code,
+            ])
+            : PaymentRequestData::fromArray([
+                'order' => $order,
+                'requestData' => $request,
+                'user' => auth('sanctum')->user(),
+                'guest' => $order->orderAddress ?? $order->pickupContact,
+                'method' => $selectedPaymentMethod,
+            ]);
         $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), [
             'order' => $order,
             'user' => auth('sanctum')->user(),
