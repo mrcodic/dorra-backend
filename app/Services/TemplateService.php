@@ -241,7 +241,7 @@ class TemplateService extends BaseService
                         'collection_name' => 'templates',
                     ]);
             }
-            if (!empty($validatedData['colors'])) {
+dd($colors);
                 $model->clearMediaCollection('color_templates');
                 collect($colors)->each(function ($color) use ($model) {
                     if (empty($color['image_id'])) {
@@ -261,7 +261,7 @@ class TemplateService extends BaseService
                         $media->save();
                     }
                 });
-            }
+
 
 
             return $model;
