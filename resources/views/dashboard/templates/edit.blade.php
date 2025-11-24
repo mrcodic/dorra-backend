@@ -26,36 +26,38 @@
                         @method("PUT")
                         <div class="flex-grow-1">
                             <div class="">
-                                @if($model->approach == 'without_editor')
+                                <div class="row">
+                                    @if($model->approach == 'without_editor')
+                                    <div class="form-group mb-2 col-md-6">
+                                        <label class="label-text mb-1">Template Image</label>
 
-                                <div class="form-group mb-2">
-                                    <label class="label-text mb-1">Template Image</label>
-
-                                    <!-- Dropzone container -->
-                                    <div id="template-main-dropzone" class="dropzone border rounded p-3"
-                                        style="cursor:pointer; min-height:150px;">
-                                        <div class="dz-message" data-dz-message>
-                                            <span>Drop image here or click to upload</span>
+                                        <!-- Dropzone container -->
+                                        <div id="template-main-dropzone" class="dropzone border rounded p-3"
+                                            style="cursor:pointer; min-height:150px;">
+                                            <div class="dz-message" data-dz-message>
+                                                <span>Drop image here or click to upload</span>
+                                            </div>
                                         </div>
+
+                                        <!-- Hidden input for uploaded file id -->
+                                        <input type="hidden" name="template_image_main_id"
+                                            id="uploadedMainTemplateImage">
                                     </div>
+                                    @endif
+                                    <div class="form-group mb-2 col-md-6">
+                                        <label class="label-text mb-1">Template Model Image</label>
 
-                                    <!-- Hidden input for uploaded file id -->
-                                    <input type="hidden" name="template_image_main_id" id="uploadedMainTemplateImage">
-                                </div>
-                                @endif
-                                <div class="form-group mb-2">
-                                    <label class="label-text mb-1">Template Model Image</label>
-
-                                    <!-- Dropzone container -->
-                                    <div id="template-dropzone" class="dropzone border rounded p-3"
-                                        style="cursor:pointer; min-height:150px;">
-                                        <div class="dz-message" data-dz-message>
-                                            <span>Drop image here or click to upload</span>
+                                        <!-- Dropzone container -->
+                                        <div id="template-dropzone" class="dropzone border rounded p-3"
+                                            style="cursor:pointer; min-height:150px;">
+                                            <div class="dz-message" data-dz-message>
+                                                <span>Drop image here or click to upload</span>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <!-- Hidden input for uploaded file id -->
-                                    <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
+                                        <!-- Hidden input for uploaded file id -->
+                                        <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
+                                    </div>
                                 </div>
                                 @php
                                 $colors = collect($model->colors) ?? collect();

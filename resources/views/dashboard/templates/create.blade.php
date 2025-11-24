@@ -23,31 +23,33 @@
                             value="{{ request()->query('q') == 'without' ? 'without_editor' : 'with_editor' }}">
                         <div class="flex-grow-1">
                             <div class="">
-                                @if(request()->query('q') == 'without')
-                                <div class="form-group mb-2">
-                                    <label class="label-text mb-1">Template Image</label>
+                                <div class="row">
+                                    @if(request()->query('q') == 'without')
+                                    <div class="form-group mb-2 col-md-6">
+                                        <label class="label-text mb-1">Template Image</label>
 
-                                    <!-- Dropzone Container -->
-                                    <div id="main-template-dropzone" class="dropzone border rounded p-3"
-                                        style="cursor:pointer; min-height:150px;">
-                                        <div class="dz-message" data-dz-message>
-                                            <span>Drop image here or click to upload</span>
-                                        </div> <!-- Hidden input for uploaded file ID -->
-                                        <input type="hidden" name="template_image_main_id"
-                                            id="uploadedMainTemplateImage">
+                                        <!-- Dropzone Container -->
+                                        <div id="main-template-dropzone" class="dropzone border rounded p-3"
+                                            style="cursor:pointer; min-height:150px;">
+                                            <div class="dz-message" data-dz-message>
+                                                <span>Drop image here or click to upload</span>
+                                            </div> <!-- Hidden input for uploaded file ID -->
+                                            <input type="hidden" name="template_image_main_id"
+                                                id="uploadedMainTemplateImage">
+                                        </div>
                                     </div>
-                                </div>
-                                @endif
-                                <div class="form-group mb-2">
-                                    <label class="label-text mb-1">Template Model Image</label>
+                                    @endif
+                                    <div class="form-group mb-2 col-md-6">
+                                        <label class="label-text mb-1">Template Model Image</label>
 
-                                    <!-- Dropzone Container -->
-                                    <div id="template-dropzone" class="dropzone border rounded p-3"
-                                        style="cursor:pointer; min-height:150px;">
-                                        <div class="dz-message" data-dz-message>
-                                            <span>Drop image here or click to upload</span>
-                                        </div> <!-- Hidden input for uploaded file ID -->
-                                        <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
+                                        <!-- Dropzone Container -->
+                                        <div id="template-dropzone" class="dropzone border rounded p-3"
+                                            style="cursor:pointer; min-height:150px;">
+                                            <div class="dz-message" data-dz-message>
+                                                <span>Drop image here or click to upload</span>
+                                            </div> <!-- Hidden input for uploaded file ID -->
+                                            <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
+                                        </div>
                                     </div>
                                 </div>
                                 @if(request()->query('q') == 'without')
