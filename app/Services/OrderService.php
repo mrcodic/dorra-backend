@@ -613,10 +613,10 @@ class OrderService extends BaseService
         return $this->discountCodeRepository->query()->where($validated)->first();
     }
 
+
+
     public function checkout($request)
     {
-        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
-
         $idempotencyKey = $request->header('Idempotency-Key');
 
         if (!$idempotencyKey) {
@@ -625,50 +625,44 @@ class OrderService extends BaseService
             ]);
         }
 
+        $user = auth('sanctum')->user();
+        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
 
-        $order = $this->repository->query()
+        // 1) If we already have an order for this idempotency key → only (re)trigger payment
+        $existingOrder = $this->repository->query()
             ->where('idempotency_key', $idempotencyKey)
             ->first();
 
-
-
-        if ($order) {
-            $gatewayCode = $selectedPaymentMethod->paymentGateway->code ?? 'paymob';
-            $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
-            $dto = $gatewayCode === 'fawry'
-                ? \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray([
-                    'order' => $order,
-                    'requestData' => $request,
-                    'user' => auth('sanctum')->user(),
-                    'guest' => $order->orderAddress ?? $order->pickupContact,
-                    'method' => $selectedPaymentMethod->code,
-                ])
-                : PaymentRequestData::fromArray([
-                    'order' => $order,
-                    'requestData' => $request,
-                    'user' => auth('sanctum')->user(),
-                    'guest' => $order->orderAddress ?? $order->pickupContact,
-                    'method' => $selectedPaymentMethod,
-                ]);
-            $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(),[]);
+        if ($existingOrder) {
+            $paymentDetails = $this->payOrder(
+                order: $existingOrder,
+                paymentMethod: $selectedPaymentMethod,
+                request: $request,
+                user: $user,
+                cart: null,
+                discountCode: null,
+            );
 
             return [
                 'order' => [
-                    'id' => $order->id,
-                    'number' => $order->order_number,
-                    'status' => $order->status,
+                    'id'     => $existingOrder->id,
+                    'number' => $existingOrder->order_number,
+                    'status' => $existingOrder->status,
                 ],
                 'paymentDetails' => $paymentDetails,
             ];
         }
 
+        // 2) No existing order → create one from cart
         $cart = $this->cartService->getCurrentUserOrGuestCart();
+
         if (!$cart || $cart->items->isEmpty()) {
             throw ValidationException::withMessages([
                 'cart' => ['Your cart is empty.'],
             ]);
         }
 
+        // validate discount code
         $discountCode = $cart->discountCode;
         if ($cart->discountCode()->isNotValid()->exists()) {
             throw ValidationException::withMessages([
@@ -676,102 +670,169 @@ class OrderService extends BaseService
             ]);
         }
 
-        $subTotal = $cart->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total);
+        $subTotal = $cart->items->sum(fn ($item) => $item->sub_total_after_offer ?? $item->sub_total);
 
+        // create order + items + address inside transaction
         $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request, $idempotencyKey) {
-            $order = $this->repository->query()->create(
-                array_merge(OrderData::fromCart($subTotal, $discountCode, $cart), [
-                    'idempotency_key' => $idempotencyKey,
-                ])
+            return $this->createOrderFromCart(
+                cart: $cart,
+                discountCode: $discountCode,
+                subTotal: $subTotal,
+                request: $request,
+                idempotencyKey: $idempotencyKey,
             );
-
-
-            $orderItems = $order->orderItems()->createMany(
-                $cart->items->map(fn($item) => [
-                    'orderable_id' => $item->cartable_id,
-                    'orderable_type' => $item->cartable_type,
-                    'quantity' => $item->quantity,
-                    'product_price' => $item->product_price,
-                    'itemable_id' => $item->itemable_id,
-                    'itemable_type' => $item->itemable_type,
-                    'specs_price' => $item->specs_price,
-                    'sub_total' => $item->sub_total_after_offer ?: $item->sub_total,
-                    'product_price_id' => $item->product_price_id,
-                    'color' => $item->color,
-                ])->toArray()
-            );
-
-            $cartItems = $cart->items->values();
-            $orderItems->values()->each(function ($orderItem, $i) use ($cartItems) {
-                $cartItem = $cartItems[$i] ?? null;
-                if (!$cartItem) return;
-                $cartItem->loadMissing(['specs.productSpecification', 'specs.productSpecificationOption']);
-                $cartItem->specs->each(fn($spec) => $orderItem->specs()->create([
-                    'spec_name' => $spec->productSpecification?->name,
-                    'option_name' => $spec->productSpecificationOption?->value,
-                    'option_price' => $spec->productSpecificationOption?->price,
-                    'product_specification_id' => $spec->productSpecification?->id,
-                    'spec_option_id' => $spec->productSpecificationOption?->id,
-                ]));
-            });
-
-            $order->orderAddress()->create(OrderAddressData::fromRequest($request));
-            if (OrderTypeEnum::from($request->type) == OrderTypeEnum::PICKUP) {
-                $order->pickupContact()->create(PickupContactData::fromRequest($request));
-            }
-
-            return $order;
         });
 
-
-        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
+        // 3) Cash on delivery → no online payment
         if ($selectedPaymentMethod->code === 'cash_on_delivery') {
-            $cart->items()->delete();
-            if ($cart->discountCode) {
-                $cart->discountCode->increment('used');
-            }
-
-            $cart->update([
-                'price' => 0,
-                'discount_amount' => 0,
-                'delivery_amount' => 0,
-                'discount_code_id' => null,
-            ]);
+            $this->clearCartAfterCashOnDelivery($cart);
 
             return [
-                'order' => ['id' => $order->id, 'number' => $order->order_number],
+                'order' => [
+                    'id'     => $order->id,
+                    'number' => $order->order_number,
+                ],
                 'paymentDetails' => [],
             ];
         }
-        $gatewayCode = $selectedPaymentMethod->paymentGateway->code ?? 'paymob';
-        $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
-        $dto = $gatewayCode === 'fawry'
-            ? \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray([
-                'order' => $order,
-                'requestData' => $request,
-                'user' => auth('sanctum')->user(),
-                'guest' => $order->orderAddress ?? $order->pickupContact,
-                'method' => $selectedPaymentMethod->code,
-            ])
-            : PaymentRequestData::fromArray([
-                'order' => $order,
-                'requestData' => $request,
-                'user' => auth('sanctum')->user(),
-                'guest' => $order->orderAddress ?? $order->pickupContact,
-                'method' => $selectedPaymentMethod,
-            ]);
-        $paymentDetails = $paymentGatewayStrategy->pay($dto->toArray(), [
-            'order' => $order,
-            'user' => auth('sanctum')->user(),
-            'cart' => $cart,
-            'discountCode' => $discountCode,
-        ]);
+
+        // 4) Online payment
+        $paymentDetails = $this->payOrder(
+            order: $order,
+            paymentMethod: $selectedPaymentMethod,
+            request: $request,
+            user: $user,
+            cart: $cart,
+            discountCode: $discountCode,
+        );
 
         return [
-            'order' => ['id' => $order->id, 'number' => $order->order_number],
+            'order' => [
+                'id'     => $order->id,
+                'number' => $order->order_number,
+            ],
             'paymentDetails' => $paymentDetails,
         ];
     }
+
+    /**
+     * Creates order + items + specs + address/pickup from the cart.
+     */
+    protected function createOrderFromCart($cart, $discountCode, $subTotal, $request, string $idempotencyKey)
+    {
+        $order = $this->repository->query()->create(
+            array_merge(
+                OrderData::fromCart($subTotal, $discountCode, $cart),
+                ['idempotency_key' => $idempotencyKey]
+            )
+        );
+
+        // order items
+        $orderItems = $order->orderItems()->createMany(
+            $cart->items->map(fn ($item) => [
+                'orderable_id'      => $item->cartable_id,
+                'orderable_type'    => $item->cartable_type,
+                'quantity'          => $item->quantity,
+                'product_price'     => $item->product_price,
+                'itemable_id'       => $item->itemable_id,
+                'itemable_type'     => $item->itemable_type,
+                'specs_price'       => $item->specs_price,
+                'sub_total'         => $item->sub_total_after_offer ?: $item->sub_total,
+                'product_price_id'  => $item->product_price_id,
+                'color'             => $item->color,
+            ])->toArray()
+        );
+
+        // specs
+        $cartItems = $cart->items->values();
+        $orderItems->values()->each(function ($orderItem, $i) use ($cartItems) {
+            $cartItem = $cartItems[$i] ?? null;
+            if (!$cartItem) {
+                return;
+            }
+
+            $cartItem->loadMissing(['specs.productSpecification', 'specs.productSpecificationOption']);
+
+            $cartItem->specs->each(function ($spec) use ($orderItem) {
+                $orderItem->specs()->create([
+                    'spec_name'                 => $spec->productSpecification?->name,
+                    'option_name'               => $spec->productSpecificationOption?->value,
+                    'option_price'              => $spec->productSpecificationOption?->price,
+                    'product_specification_id'  => $spec->productSpecification?->id,
+                    'spec_option_id'            => $spec->productSpecificationOption?->id,
+                ]);
+            });
+        });
+
+        // address / pickup
+        $order->orderAddress()->create(
+            OrderAddressData::fromRequest($request)
+        );
+
+        if (OrderTypeEnum::from($request->type) === OrderTypeEnum::PICKUP) {
+            $order->pickupContact()->create(
+                PickupContactData::fromRequest($request)
+            );
+        }
+
+        return $order;
+    }
+
+    /**
+     * Clears cart after COD and increments discount usage if exists.
+     */
+    protected function clearCartAfterCashOnDelivery($cart): void
+    {
+        $cart->items()->delete();
+
+        if ($cart->discountCode) {
+            $cart->discountCode->increment('used');
+        }
+
+        $cart->update([
+            'price'             => 0,
+            'discount_amount'   => 0,
+            'delivery_amount'   => 0,
+            'discount_code_id'  => null,
+        ]);
+    }
+
+    /**
+     * Shared payment logic for any order (existing or newly created).
+     * Returns `$paymentDetails` only; caller decides the response shape.
+     */
+    protected function payOrder($order, $paymentMethod, $request, $user, $cart = null, $discountCode = null)
+    {
+        $gatewayCode = $paymentMethod->paymentGateway->code ?? 'paymob';
+        $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
+
+        $dto = $gatewayCode === 'fawry'
+            ? \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray([
+                'order'       => $order,
+                'requestData' => $request,
+                'user'        => $user,
+                'guest'       => $order->orderAddress ?? $order->pickupContact,
+                'method'      => $paymentMethod->code,
+            ])
+            : PaymentRequestData::fromArray([
+                'order'       => $order,
+                'requestData' => $request,
+                'user'        => $user,
+                'guest'       => $order->orderAddress ?? $order->pickupContact,
+                'method'      => $paymentMethod,
+            ]);
+
+        // Extra context for some gateways (only available for new orders flow)
+        $meta = array_filter([
+            'order'        => $order,
+            'user'         => $user,
+            'cart'         => $cart,
+            'discountCode' => $discountCode,
+        ], fn ($v) => $v !== null);
+
+        return $paymentGatewayStrategy->pay($dto->toArray(), $meta);
+    }
+
 
 
     public function trackOrder($id)
