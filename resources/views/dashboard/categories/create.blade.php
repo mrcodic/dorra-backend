@@ -21,61 +21,62 @@
                 <div class="card-body ">
 
                     <form id="category-form" class="form" action="{{ route('product-without-categories.store') }}"
-                          method="POST" enctype="multipart/form-data" novalidate>
+                        method="POST" enctype="multipart/form-data" novalidate>
                         @csrf
-                    {{-- checkbox added --}}
-                    <div class="px-2 row gap-2">
-                        <div class="d-flex gap-2 rounded p-1 mb-2 col" style="border: 1px solid #CED5D4">
-                            <div>
-                                <!-- Hidden fallback -->
-                                <input type="hidden" name="show_add_cart_btn" value="0">
+                        {{-- checkbox added --}}
+                        <div class="px-2 row gap-2">
+                            <div class="d-flex gap-2 rounded p-1 mb-2 col" style="border: 1px solid #CED5D4">
+                                <div>
+                                    <!-- Hidden fallback -->
+                                    <input type="hidden" name="show_add_cart_btn" value="0">
 
-                                <!-- Actual checkbox -->
-                                <input class="form-check-input mt-0 " type="checkbox"
-                                       name="show_add_cart_btn" value="1"
-                                    @checked(old('show_add_cart_btn', false))>
+                                    <!-- Actual checkbox -->
+                                    <input class="form-check-input mt-0 " type="checkbox" name="show_add_cart_btn"
+                                        value="1" @checked(old('show_add_cart_btn', false))>
+                                </div>
+                                <div class="d-flex flex-column gap-1">
+                                    <h5 style="color: #121212">Show “Add to Cart” Button</h5>
+                                    <p style="color: #424746">
+                                        When the checkbox is selected, the product can be added directly to the cart
+                                        without customization.
+                                        If it’s not selected, the product must be customized before being added to cart.
+                                    </p>
+                                </div>
                             </div>
-                            <div class="d-flex flex-column gap-1">
-                                <h5 style="color: #121212">Show “Add to Cart” Button</h5>
-                                <p style="color: #424746">
-                                    When the checkbox is selected, the product can be added directly to the cart without customization.
-                                    If it’s not selected, the product must be customized before being added to cart.
-                                </p>
+                            <div class="d-flex gap-2 rounded p-1 mb-2 col" style="border: 1px solid #CED5D4">
+                                <div>
+                                    <!-- Hidden fallback -->
+                                    <input type="hidden" name="show_customize_design_btn" value="0">
+
+                                    <!-- Actual checkbox -->
+                                    <input class="form-check-input mt-0 " type="checkbox"
+                                        name="show_customize_design_btn" value="1"
+                                        @checked(old('show_customize_design_btn', false))>
+                                </div>
+                                <div class="d-flex flex-column gap-1">
+                                    <h5 style="color: #121212">Show “Customize Design” Button</h5>
+                                    <p style="color: #424746">
+                                        When the checkbox is selected, the product can be customized before being added
+                                        to cart.
+                                    </p>
+                                </div>
                             </div>
+
                         </div>
-                        <div class="d-flex gap-2 rounded p-1 mb-2 col" style="border: 1px solid #CED5D4">
-                            <div>
-                                <!-- Hidden fallback -->
-                                <input type="hidden" name="show_customize_design_btn" value="0">
-
-                                <!-- Actual checkbox -->
-                                <input class="form-check-input mt-0 " type="checkbox"
-                                       name="show_customize_design_btn" value="1"
-                                    @checked(old('show_customize_design_btn', false))>
-                            </div>
-                            <div class="d-flex flex-column gap-1">
-                                <h5 style="color: #121212">Show “Customize Design” Button</h5>
-                                <p style="color: #424746">
-                                    When the checkbox is selected, the product can be customized before being added to cart.
-                                </p>
-                            </div>
-                        </div>
-
-                    </div>
 
 
-                    <ul class="nav nav-tabs mb-2 w-100 d-flex justify-content-center" id="formTabs">
-                        <li class="nav-item" style="width: 30%;">
-                            <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Product
-                                Details</a>
-                        </li>
-                        <li class="nav-item" style="width: 30%;">
-                            <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity & Price</a>
-                        </li>
-                        <li class="nav-item" style="width: 30%;">
-                            <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Product Specs</a>
-                        </li>
-                    </ul>
+                        <ul class="nav nav-tabs mb-2 w-100 d-flex justify-content-center" id="formTabs">
+                            <li class="nav-item" style="width: 30%;">
+                                <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Product
+                                    Details</a>
+                            </li>
+                            <li class="nav-item" style="width: 30%;">
+                                <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity & Price</a>
+                            </li>
+                            <li class="nav-item" style="width: 30%;">
+                                <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Product Specs</a>
+                            </li>
+                        </ul>
 
 
                         <div class="tab-content">
@@ -87,7 +88,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-2">
                                             <label class="form-label label-text" for="product-name-en">Product Name
-                                                (EN)*</label>
+                                                (EN) <span style="color: red; font-size: 20px;">*</span></label>
                                             <input type="text" id="product-name-en" class="form-control" name="name[en]"
                                                 placeholder="Product Name (EN)" />
                                         </div>
@@ -95,7 +96,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-2">
                                             <label class="form-label label-text" for="product-name-ar">Product Name
-                                                (AR)</label>
+                                                (AR) <span style="color: red; font-size: 20px;">*</span></label>
                                             <input type="text" id="product-name-ar" class="form-control" name="name[ar]"
                                                 placeholder="Product Name (AR)" />
                                         </div>
@@ -105,7 +106,8 @@
                                     <div class="col-md-6">
                                         <div class="mb-2">
                                             <label class="form-label label-text" for="description-en">Product
-                                                Description (EN)</label>
+                                                Description (EN) <span
+                                                    style="color: red; font-size: 20px;">*</span></label>
                                             <textarea name="description[en]" id="description-en" class="form-control"
                                                 placeholder="Product Description (EN)"></textarea>
                                         </div>
@@ -113,7 +115,8 @@
                                     <div class="col-md-6">
                                         <div class="mb-2">
                                             <label class="form-label label-text" for="description-ar">Product
-                                                Description (AR)</label>
+                                                Description (AR) <span
+                                                    style="color: red; font-size: 20px;">*</span></label>
                                             <textarea name="description[ar]" id="description-ar" class="form-control"
                                                 placeholder="Product Description (AR)"></textarea>
                                         </div>
@@ -124,7 +127,7 @@
                                     <div class="col-md-12">
                                         <div class="mb-2">
                                             <label class="form-label label-text" for="product-image-main">
-                                                Product Image (main)*
+                                                Product Image (main) <span style="color: red; font-size: 20px;">*</span>
                                             </label>
 
                                             <!-- Dropzone Container -->
@@ -149,7 +152,8 @@
                                     <div class="col-md-12">
                                         <div class="mb-2">
                                             <label class="form-label label-text" for="product-image-main">
-                                                Product Model Image (main)*
+                                                Product Model Image (main) <span
+                                                    style="color: red; font-size: 20px;">*</span>
                                             </label>
 
                                             <!-- Dropzone Container -->
@@ -196,48 +200,45 @@
 
 
                                                             <div class="col-md-12">
-                                                                <label class="form-label label-text">Color Value *</label>
+                                                                <label class="form-label label-text">Color Value
+                                                                    *</label>
                                                                 <div class="d-flex gap-1 align-items-center">
                                                                     <!-- Color picker -->
-                                                                    <input
-                                                                        type="color"
+                                                                    <input type="color"
                                                                         class="form-control rounded-circle color-picker border border-0  "
                                                                         style="max-width: 30px; padding: 0;"
-                                                                        value="#000"
-                                                                    />
+                                                                        value="#000" />
 
                                                                     <!-- Text hex input (this will actually submit the value) -->
-                                                                    <input
-                                                                        type="text"
-                                                                        name="value"
+                                                                    <input type="text" name="value"
                                                                         class="form-control color-hex-input"
-                                                                        placeholder="#000000"
-                                                                        value="#000000"
-                                                                        pattern="^#([A-Fa-f0-9]{6})$"
-                                                                    />
+                                                                        placeholder="#000000" value="#000000"
+                                                                        pattern="^#([A-Fa-f0-9]{6})$" />
                                                                 </div>
-                                                                <small class="text-muted">Pick a color or type hex (e.g. #FFAA00).</small>
+                                                                <small class="text-muted">Pick a color or type hex (e.g.
+                                                                    #FFAA00).</small>
                                                             </div>
 
 
 
 
                                                             <div class="col-md-12 mt-1">
-                                                                <label class="form-label label-text">Color Image *</label>
+                                                                <label class="form-label label-text">Color Image
+                                                                    *</label>
                                                                 <div class="dropzone color-dropzone border rounded p-2"
-                                                                     style="cursor:pointer; min-height:100px;">
+                                                                    style="cursor:pointer; min-height:100px;">
                                                                     <div class="dz-message" data-dz-message>
                                                                         <span>Drop image or click</span>
                                                                     </div>
                                                                 </div>
-                                                                <input type="hidden" name="image_id" class="color-image-hidden">
+                                                                <input type="hidden" name="image_id"
+                                                                    class="color-image-hidden">
                                                             </div>
 
 
                                                             <div class="col-md-2 text-center mt-1  ms-auto">
-                                                                <button type="button"
-                                                                        class="btn btn-outline-danger"
-                                                                        data-repeater-delete>
+                                                                <button type="button" class="btn btn-outline-danger"
+                                                                    data-repeater-delete>
                                                                     <i data-feather="x" class="me-25"></i>
                                                                     Delete
                                                                 </button>
@@ -248,10 +249,9 @@
 
                                                 <div class="row mt-1">
                                                     <div class="col-12">
-                                                        <button type="button"
-                                                                class="w-100 rounded-3 p-1 text-dark"
-                                                                style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
-                                                                data-repeater-create>
+                                                        <button type="button" class="w-100 rounded-3 p-1 text-dark"
+                                                            style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                            data-repeater-create>
                                                             <i data-feather="plus" class="me-25"></i>
                                                             <span>Add New Color</span>
                                                         </button>
@@ -287,7 +287,8 @@
                                     <!-- Tags -->
                                     <div class="col-md-12">
                                         <div class="mb-2">
-                                            <label class="form-label label-text" for="tags">Tags</label>
+                                            <label class="form-label label-text" for="tags">Tags <span
+                                                    style="color: red; font-size: 20px;">*</span></label>
                                             <select name="tags[]" id="tags" class="select2 form-select" multiple>
                                                 @foreach($associatedData['tags'] as $tag)
                                                 <option value="{{ $tag->id }}">{{ $tag->name }}</option>
@@ -299,7 +300,8 @@
 
                                     <div class="col-md-12 mb-2">
                                         <div>
-                                            <label class="form-label label-text">Product Size*</label>
+                                            <label class="form-label label-text">Product Size <span
+                                                    style="color: red; font-size: 20px;">*</span></label>
 
                                             <!-- Standard Dimensions -->
                                             <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start"
@@ -351,7 +353,8 @@
                                     <div class="mb-2">
                                         <label class="form-label label-text d-block">Quantity & Price
                                             Options</label>
-                                        <label class="form-label label-text mt-2">Quantity Type*</label>
+                                        <label class="form-label label-text mt-2">Quantity Type <span
+                                                style="color: red; font-size: 20px;">*</span></label>
                                         <div class="row gap-1 d-flex flex-column flex-md-row" style="margin: 2px;">
                                             <div class="col border rounded-3 p-1">
                                                 <div class="form-check form-check-inline">
@@ -473,7 +476,8 @@
                                                                 <div class="col-md-6">
                                                                     <div class="mb-1">
                                                                         <label class="form-label label-text">Name
-                                                                            (EN)</label>
+                                                                            (EN) <span
+                                                                                style="color: red; font-size: 20px;">*</span></label>
                                                                         <input type="text" name="name_en"
                                                                             class="form-control"
                                                                             placeholder="Specification Name (EN)" />
@@ -482,7 +486,8 @@
                                                                 <div class="col-md-6">
                                                                     <div class="mb-2">
                                                                         <label class="form-label label-text">Name
-                                                                            (AR)</label>
+                                                                            (AR) <span
+                                                                                style="color: red; font-size: 20px;">*</span></label>
                                                                         <input type="text" name="name_ar"
                                                                             class="form-control"
                                                                             placeholder="Specification Name (AR)" />
@@ -499,7 +504,8 @@
                                                                                 <div class="col">
                                                                                     <label
                                                                                         class="form-label label-text">Value
-                                                                                        (EN)</label>
+                                                                                        (EN) <span
+                                                                                            style="color: red; font-size: 20px;">*</span></label>
                                                                                     <input type="text" name="value_en"
                                                                                         class="form-control"
                                                                                         placeholder="Option (EN)" />
@@ -509,7 +515,8 @@
                                                                                 <div class="col">
                                                                                     <label
                                                                                         class="form-label label-text">Value
-                                                                                        (AR)</label>
+                                                                                        (AR) <span
+                                                                                            style="color: red; font-size: 20px;">*</span></label>
                                                                                     <input type="text" name="value_ar"
                                                                                         class="form-control"
                                                                                         placeholder="Option (AR)" />
@@ -651,8 +658,8 @@
 @endsection
 
 @section('page-script')
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
             const $colorRepeater = $('.color-repeater');
 
 
@@ -681,10 +688,10 @@
                 }
             }
         });
-    </script>
+</script>
 
-    <script>
-        Dropzone.autoDiscover = false;
+<script>
+    Dropzone.autoDiscover = false;
 
         function initColorItem(item) {
             const dropzoneElement = item.querySelector('.color-dropzone');
@@ -745,7 +752,7 @@
                 });
             }
         }
-    </script>
+</script>
 <script>
     Dropzone.autoDiscover = false;
 
