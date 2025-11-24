@@ -65,6 +65,8 @@ return [
         'webhook_url' => env('FAWRY_WEBHOOK_URL'),
         'merchant_code' => env('FAWRY_MERCHANT_CODE'),
         'secret_key' => env('FAWRY_SECRET_KEY'),
+        'force_static_payload' => env('FAWRY_FORCE_STATIC'),
+        'test_return_url' => env('FAWRY_RETRN_TEST_URL'),
     ],
 
     'shipblu' => [
