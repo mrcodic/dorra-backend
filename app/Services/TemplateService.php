@@ -242,13 +242,16 @@ class TemplateService extends BaseService
                     ]);
             }
 
+            if (empty($colors)) {
+                $model->clearMediaCollection('color_templates');
+            } else {
+                $model->clearMediaCollection('color_templates');
                 collect($colors)->each(function ($color) use ($model) {
                     if (empty($color['image_id'])) {
                         return;
                     }
 
-                    $media = Media::where('id', $color['image_id'])->first();
-
+                    $media = Media::find($color['image_id']);
                     if ($media) {
                         $media->update([
                             'model_type' => get_class($model),
@@ -260,8 +263,7 @@ class TemplateService extends BaseService
                         $media->save();
                     }
                 });
-
-
+            }
 
             return $model;
         });
