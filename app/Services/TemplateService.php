@@ -242,6 +242,15 @@ class TemplateService extends BaseService
                     ]);
             }
 
+            $imageIds = collect($colors)
+                ->pluck('image_id')
+                ->filter()
+                ->toArray();
+
+            $model->getMedia('color_templates')
+                ->whereNotIn('id', $imageIds)
+                ->each
+                ->delete();
                 collect($colors)->each(function ($color) use ($model) {
                     if (empty($color['image_id'])) {
                         return;
