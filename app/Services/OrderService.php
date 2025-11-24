@@ -615,6 +615,7 @@ class OrderService extends BaseService
 
     public function checkout($request)
     {
+        $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
 
         $idempotencyKey = $request->header('Idempotency-Key');
 
