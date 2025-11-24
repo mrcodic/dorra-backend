@@ -241,6 +241,7 @@ class TemplateService extends BaseService
                         'collection_name' => 'templates',
                     ]);
             }
+            $model->clearMediaCollection('color_templates');
             collect($colors)->each(function ($color) use ($model) {
                 if (empty($color['image_id'])) {
                     return;
