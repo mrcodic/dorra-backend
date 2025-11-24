@@ -241,25 +241,28 @@ class TemplateService extends BaseService
                         'collection_name' => 'templates',
                     ]);
             }
-            $model->clearMediaCollection('color_templates');
-            collect($colors)->each(function ($color) use ($model) {
-                if (empty($color['image_id'])) {
-                    return;
-                }
+            if ($colors) {
+                $model->clearMediaCollection('color_templates');
+                collect($colors)->each(function ($color) use ($model) {
+                    if (empty($color['image_id'])) {
+                        return;
+                    }
 
-                $media = Media::where('id', $color['image_id'])->first();
+                    $media = Media::where('id', $color['image_id'])->first();
 
-                if ($media) {
-                    $media->update([
-                        'model_type' => get_class($model),
-                        'model_id' => $model->id,
-                        'collection_name' => 'color_templates',
-                    ]);
+                    if ($media) {
+                        $media->update([
+                            'model_type' => get_class($model),
+                            'model_id' => $model->id,
+                            'collection_name' => 'color_templates',
+                        ]);
 
-                    $media->setCustomProperty('color_hex', $color['value']);
-                    $media->save();
-                }
-            });
+                        $media->setCustomProperty('color_hex', $color['value']);
+                        $media->save();
+                    }
+                });
+            }
+
 
             return $model;
         });
