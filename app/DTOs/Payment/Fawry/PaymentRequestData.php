@@ -31,9 +31,9 @@ class PaymentRequestData
     public function toArray(): array
     {
         $baseItems = $this->order->orderItems->map(fn($item) => [
-            'itemId' => (string)Str::uuid(),
+            'itemId' => (string)$item->id,
             'description' => Str::limit($item?->itemable->name ?? 'Item', 50, ''),
-            'price' => (float)number_format((float)$item->sub_total, 2, '.', ''),
+            'price' => (float)number_format($item->sub_total, 2, '.', ''),
             'quantity' => 1,
         ])->toArray();
 
@@ -41,22 +41,21 @@ class PaymentRequestData
 
         if ($this->order->delivery_amount > 0) {
             $extraItems[] = [
-                'itemId' => (string)'134',
+                'itemId' => (string)Str::uuid(),
                 'description' => 'Delivery Fee',
-                'price' => (float)number_format((float)$this->order->delivery_amount, 2, '.', ''),
+                'price' =>(float) number_format($this->order->delivery_amount, 2, '.', ''),
                 'quantity' => 1,
             ];
         }
-
-        if (setting('tax') > 0) {
-            $taxAmount = getPriceAfterTax(setting('tax'), $this->order->subtotal);
-            $extraItems[] = [
-                'itemId' => (string)'1234',
-                'description' => 'Tax',
-                'price' => (float)number_format((float)$taxAmount, 2, '.', ''),
-                'quantity' => 1,
-            ];
-        }
+//        if (setting('tax') > 0) {
+//            $taxAmount = getPriceAfterTax(setting('tax'), $this->order->subtotal);
+//            $extraItems[] = [
+//                'itemId' => (string)'1234',
+//                'description' => 'Tax',
+//                'price' => (float)number_format((float)$taxAmount, 2, '.', ''),
+//                'quantity' => 1,
+//            ];
+//        }
 
 //        if ($this->order?->discount_amount > 0) {
 //            $extraItems[] = [
@@ -70,10 +69,11 @@ class PaymentRequestData
         $allItems = array_merge($baseItems, $extraItems);
 
         $merchantCode = config('services.fawry.merchant_code');
-        $merchantRef = $this->order->order_number;
+        $merchantRef = str_replace('#', '', $this->order->order_number);
+
         $returnUrl =(string) config('services.fawry.redirection_url');
         $webhookUrl =(string) config('services.fawry.webhook_url');
-        $profileId = (string) $this->user?->id ?? $this->guest?->id ?? '';
+        $profileId = ((string) $this->user?->id) ?? ((string)$this->guest?->id) ?? '0';
 
         $signature = generateFawrySignature(
             merchantCode: $merchantCode,
@@ -84,10 +84,9 @@ class PaymentRequestData
         );
 
         $language = app()->getLocale() === 'en' ? 'en-gb' : 'ar-eg';
-
         return [
             'merchantCode' => $merchantCode,
-            'merchantRefNum' => $merchantRef,
+            'merchantRefNum' => 'mx-' . now()->format('YmdHis') . '-' . \Illuminate\Support\Str::random(6),
             'customerMobile' => '01000000000',
             'customerEmail' => $this->requestData->email,
             'customerName' => trim($this->requestData->first_name . ' ' . $this->requestData->last_name),
@@ -95,9 +94,8 @@ class PaymentRequestData
 //            'paymentExpiry' => now()->addDays(2)->valueOf(),
             'language' => 'ar-eg',
             'chargeItems' => $allItems,
-
-            'paymentMethod' =>(string) $this->method,
             'returnUrl' => $returnUrl,
+            'paymentMethod' =>(string) $this->method,
             'authCaptureModePayment'=> false,
             'signature' => $signature,
             'orderWebHookUrl' => $webhookUrl,

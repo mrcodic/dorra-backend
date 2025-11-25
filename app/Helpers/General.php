@@ -142,25 +142,36 @@ function generateFawrySignature(
     string $returnUrl,
     array $items
 ): string {
+
     $secureKey = config('services.fawry.secret_key');
+
     $customerProfileId = $customerProfileId ?: '';
 
+    // Sort items by itemId ASC
+    usort($items, fn($a, $b) => strcmp((string)$a['itemId'], (string)$b['itemId']));
 
-    $item = $items[0] ?? null;
-    $itemId = $item['itemId'] ?? '';
-    $qty = (string)($item['quantity'] ?? 1);
-    $price = number_format((float)($item['price'] ?? 0), 2, '.', '');
+    $signatureString =
+        $merchantCode .
+        $merchantRefNum .
+        $customerProfileId .
+        $returnUrl;
 
-    $signatureString = $merchantCode
-        . $merchantRefNum
-        . $customerProfileId
-        . $returnUrl
-        . $itemId
-        . $qty
-        . $price
-        . $secureKey;
+    foreach ($items as $item) {
+
+        $itemId = (string)$item['itemId'];
+        $qty    = (string)$item['quantity'];
+        $price  = number_format($item['price'], 2, '.', '');
+
+        $signatureString .= $itemId . $qty . $price;
+    }
+
+    $signatureString .= $secureKey;
 
     return hash('sha256', $signatureString);
 }
+
+
+
+
 
 
