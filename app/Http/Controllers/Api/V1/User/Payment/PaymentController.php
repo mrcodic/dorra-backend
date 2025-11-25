@@ -202,12 +202,6 @@ class PaymentController extends Controller
         }
 
     }
-    public function handleFawryCallback(Request $request)
-    {
-
-    }
-
-
 
     public function handleFawryRedirect(Request $request): RedirectResponse
     {
@@ -227,9 +221,101 @@ class PaymentController extends Controller
             return redirect()->to($transaction->success_url);
         }elseif ($orderStatus == 'UNPAID' && $paymentMethod == 'PayAtFawry')
         {
-            return redirect()->to($transaction->pending_url."?referenceNumber=$referenceNumber");
+            return redirect()->to($transaction->pending_url."&referenceNumber=$referenceNumber");
         }else{
             return redirect()->to($transaction->failure_url);
         }
     }
+    private function verifySignature(array $payload): bool
+    {
+        $mustRequestParams = ['fawryRefNumber','merchantRefNumber','paymentAmount','orderAmount','orderStatus','paymentMethod','messageSignature'];
+        foreach ($mustRequestParams as $param) {
+            if (!array_key_exists($param, $payload)) return false;
+        }
+
+        $secureKey = (string) config('services.fawry.secret_key');
+
+
+        $paymentAmount = number_format((float) $payload['paymentAmount'], 2, '.', '');
+        $orderAmount   = number_format((float) $payload['orderAmount'],   2, '.', '');
+
+
+        $paymentRef = $payload['paymentRefrenceNumber'] ?? '';
+
+        $raw = ($payload['fawryRefNumber']    ?? '')
+            . ($payload['merchantRefNumber'] ?? '')
+            . $paymentAmount
+            . $orderAmount
+            . ($payload['orderStatus']   ?? '')
+            . ($payload['paymentMethod'] ?? '')
+            . $paymentRef
+            . $secureKey;
+
+        $calc = hash('sha256', $raw);
+        return hash_equals($calc, (string) $payload['messageSignature']);
+    }
+
+    public function handleFawryCallback(Request $request)
+    {
+        $payload = $request->all();
+        if (!$this->verifySignature($payload)) {
+            Log::warning('Fawry webhook invalid signature');
+            return response()->json(['error' => 'invalid signature'], 400);
+        }
+
+        $merchantRef   = $payload['merchantRefNumber'] ?? null;
+        $fawryRef      = $payload['fawryRefNumber']    ?? null;
+        $status        = strtoupper((string) ($payload['orderStatus'] ?? ''));
+        $paymentMethod = strtoupper((string) ($payload['paymentMethod'] ?? ''));
+
+        $transaction = Transaction::query()
+            ->where(function ($q) use ($merchantRef, $fawryRef) {
+                if ($merchantRef) {
+                    $q->orWhere('transaction_id', $merchantRef);
+                }
+                if ($fawryRef) {
+                    $q->orWhere('kiosk_reference', $fawryRef)
+                        ->orWhere('wallet_reference', $fawryRef);
+                }
+            })
+            ->first();
+
+        if (!$transaction) {
+            return response()->json(['error' => 'Transaction not found'], 404);
+        }
+
+        if ($transaction->payment_status === StatusEnum::PAID->value) {
+            return response()->json(['message' => 'Already paid'], 200);
+        }
+
+        $paymentStatus = match ($status) {
+            'PAID'                           => StatusEnum::PAID->value,
+            'EXPIRED', 'CANCELLED', 'FAILED' => StatusEnum::UNPAID->value,
+            default                          => StatusEnum::PENDING->value,
+        };
+
+        $updates = [
+            'payment_status'   => $paymentStatus,
+            'payment_method'   => $transaction->payment_method ?: $paymentMethod,
+            'response_message' => json_encode($payload, JSON_UNESCAPED_UNICODE),
+        ];
+
+        if (!empty($fawryRef)) {
+            if ($paymentMethod === 'PAYATFAWRY') {
+                $updates['kiosk_refrance'] = $fawryRef;
+            } elseif ($paymentMethod === 'MWALLET') {
+                $updates['wallet_refrance'] = $fawryRef;
+            }
+        }
+
+        $transaction->update($updates);
+
+        if ($paymentStatus === StatusEnum::PAID->value) {
+             $this->resetCart($transaction,$payload['paymentMethod'],StatusEnum::PAID,$payload);
+        }
+
+        return response()->json(['message' => 'Webhook processed']);
+    }
+
+
 }
