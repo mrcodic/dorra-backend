@@ -120,6 +120,7 @@ use Illuminate\Support\Facades\Http;
 
         // HTTP failure (non 2xx)
         if ($status < 200 || $status >= 300) {
+            dd($body);
             \Log::error('Fawry init failed', [
                 'status' => $status,
                 'ct'     => $ct,
