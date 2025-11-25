@@ -105,6 +105,7 @@ use Illuminate\Support\Facades\Http;
 
         // cURL-level error (DNS, SSL, timeout, etc.)
         if ($errno) {
+            dd($errno);
             \Log::error('Fawry init cURL error', [
                 'errno'  => $errno,
                 'error'  => $error,
