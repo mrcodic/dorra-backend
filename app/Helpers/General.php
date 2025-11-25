@@ -136,18 +136,17 @@ function hasMeaningfulSearch($value): bool
 
 
 function generateFawrySignature(
-    string $merchantCode,
-    string $merchantRefNum,
-    ?string $customerProfileId,
-    string $returnUrl,
-    array $items
+     $merchantCode,
+     $merchantRefNum,
+     $customerProfileId,
+     $returnUrl,
+     $items
 ): string {
 
     $secureKey = config('services.fawry.secret_key');
 
     $customerProfileId = $customerProfileId ?: '';
 
-    // Sort items by itemId ASC
     usort($items, fn($a, $b) => strcmp((string)$a['itemId'], (string)$b['itemId']));
 
     $signatureString =
@@ -156,10 +155,11 @@ function generateFawrySignature(
         $customerProfileId .
         $returnUrl;
 
+
     foreach ($items as $item) {
 
-        $itemId = (string)$item['itemId'];
-        $qty    = (string)$item['quantity'];
+        $itemId = $item['itemId'];
+        $qty    = $item['quantity'];
         $price  = number_format($item['price'], 2, '.', '');
 
         $signatureString .= $itemId . $qty . $price;

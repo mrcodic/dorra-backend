@@ -211,7 +211,25 @@ class PaymentController extends Controller
 
     public function handleFawryRedirect(Request $request): RedirectResponse
     {
+        $requestedData = $request->all();
+        $statusCode = data_get($requestedData, 'statusCode');
+        $orderStatus = data_get($requestedData, 'orderStatus');
+        $merchantRef =  data_get($requestedData, 'merchantRefNumber');
+        $paymentMethod =  data_get($requestedData, 'paymentMethod');
+        $referenceNumber =  data_get($requestedData, 'referenceNumber');
 
-
+        $transaction = Transaction::where('transaction_id', $merchantRef)->first();
+        if (!$transaction) {
+            return redirect()->back();
+        }
+        if ($orderStatus == 'PAID' && $statusCode == 200)
+        {
+            return redirect()->to($transaction->success_url);
+        }elseif ($orderStatus == 'UNPAID' && $paymentMethod == 'PayAtFawry')
+        {
+            return redirect()->to($transaction->pending_url."?referenceNumber=$referenceNumber");
+        }else{
+            return redirect()->to($transaction->failure_url);
+        }
     }
 }

@@ -29,48 +29,9 @@ use Illuminate\Support\Facades\Http;
 
     public function pay(array $payload, ?array $data): false|array
     {
+        $method = $payload['paymentMethod'];
+
         $url          = rtrim($this->baseUrl, '/') . '/fawrypay-api/api/payments/init';
-        $merchantCode = (string) $this->config['merchant_code'];
-        $secureKey    = (string) $this->config['secret_key'];
-
-        $forceStatic  = (bool) ($this->config['force_static_payload'] ?? false);
-
-        if ($forceStatic) {
-
-            // ---- STATIC, KNOWN-GOOD PAYLOAD (ASCII only, short fields) ----
-            $merchantRefNum    = 'mx-' . now()->format('YmdHis') . '-' . \Illuminate\Support\Str::random(6);
-            $customerProfileId = '41';
-            $returnUrl         = (string) $this->config['test_return_url'];
-            $itemId            = '123';
-            $qty               = 1;
-            $price             = number_format(185.00, 2, '.', ''); // "185.00"
-
-            // Signature: merchantCode + merchantRefNum + customerProfileId + returnUrl + itemId + qty + price + secureKey
-            $rawSig    = $merchantCode . $merchantRefNum . $customerProfileId . $returnUrl . $itemId . $qty . $price . $secureKey;
-            $signature = hash('sha256', $rawSig);
-
-            $payload = [
-                'merchantCode'           => $merchantCode,
-                'merchantRefNum'         => $merchantRefNum,
-                'customerMobile'         => '01000000000',
-                'customerEmail'          => 'test@example.com',
-                'customerName'           => 'Staging Test',
-                'customerProfileId'      => $customerProfileId,
-                'language'               => 'ar-eg',
-                'chargeItems'            => [[
-                    'itemId'      => $itemId,
-                    'description' => 'Test Staging Item',
-                    'price'       => (float) $price,
-                    'quantity'    => $qty,
-                ]],
-                'returnUrl'              => $returnUrl,
-                'paymentMethod'          => 'MWALLET',
-                'authCaptureModePayment' => false,
-                'signature'              => $signature,
-                'orderWebHookUrl'        => (string) ($this->config['webhook_url'] ?? ''),
-            ];
-        }
-
         // ---------- PURE cURL CALL ----------
         $ch = curl_init();
 
@@ -105,7 +66,7 @@ use Illuminate\Support\Facades\Http;
 
         // cURL-level error (DNS, SSL, timeout, etc.)
         if ($errno) {
-            dd($errno);
+
             \Log::error('Fawry init cURL error', [
                 'errno'  => $errno,
                 'error'  => $error,
@@ -120,7 +81,7 @@ use Illuminate\Support\Facades\Http;
 
         // HTTP failure (non 2xx)
         if ($status < 200 || $status >= 300) {
-            dd($body);
+
             \Log::error('Fawry init failed', [
                 'status' => $status,
                 'ct'     => $ct,
@@ -147,6 +108,7 @@ use Illuminate\Support\Facades\Http;
         } else {
             $json = json_decode($body, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
+
                 $checkoutUrl = $json['paymentLink']
                     ?? $json['paymentUrl']
                     ?? $json['redirectUrl']
@@ -168,16 +130,19 @@ use Illuminate\Support\Facades\Http;
             fn ($i) => (float) $i['price'] * (int) $i['quantity']
         );
 
-        return [
+        $orderData= [
             'order_id'     => $payload['merchantRefNum'] ?? null,
             'amount'       => $amount,
             'checkout_url' => $checkoutUrl,
         ];
+        return $this->storeTransaction($orderData, $data, $method);
+
     }
     public function storeTransaction($orderData, $data, $paymentMethod): array
     {
-        $transaction = Transaction::create([
-            'order_id' => $data['order']->id,
+        $transaction = Transaction::firstORCreate([
+            'order_id' => $data['order']->id]
+            ,[
             'amount' => $orderData['amount'],
             'payment_method' => $paymentMethod,
             'payment_status' => StatusEnum::PENDING,

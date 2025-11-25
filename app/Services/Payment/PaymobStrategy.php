@@ -85,8 +85,7 @@ use Illuminate\Support\Facades\Log;
                 . '&clientSecret=' . $result['client_secret'],
             'order_id' => $result['intention_order_id'],
             'amount' => $result['intention_detail']['amount'],
-            'intention_id' => $result['id'],
-            'client_secret' => $result['client_secret'],
+
         ];
         return $this->storeTransaction($orderData, $data, $paymentMethod);
     }
