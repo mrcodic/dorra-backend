@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\Http;
 
     public function pay(array $payload, ?array $data): false|array
     {
-        $p = $payload;
         $url          = rtrim($this->baseUrl, '/') . '/fawrypay-api/api/payments/init';
         $merchantCode = (string) $this->config['merchant_code'];
         $secureKey    = (string) $this->config['secret_key'];
@@ -37,6 +36,7 @@ use Illuminate\Support\Facades\Http;
         $forceStatic  = (bool) ($this->config['force_static_payload'] ?? false);
 
         if ($forceStatic) {
+
             // ---- STATIC, KNOWN-GOOD PAYLOAD (ASCII only, short fields) ----
             $merchantRefNum    = 'mx-' . now()->format('YmdHis') . '-' . \Illuminate\Support\Str::random(6);
             $customerProfileId = '41';
@@ -47,7 +47,6 @@ use Illuminate\Support\Facades\Http;
 
             // Signature: merchantCode + merchantRefNum + customerProfileId + returnUrl + itemId + qty + price + secureKey
             $rawSig    = $merchantCode . $merchantRefNum . $customerProfileId . $returnUrl . $itemId . $qty . $price . $secureKey;
-//            dd($rawSig);
             $signature = hash('sha256', $rawSig);
 
             $payload = [
@@ -70,13 +69,13 @@ use Illuminate\Support\Facades\Http;
                 'signature'              => $signature,
                 'orderWebHookUrl'        => (string) ($this->config['webhook_url'] ?? ''),
             ];
-            dd($payload, $p,$rawSig);
         }
 
         // ---------- PURE cURL CALL ----------
         $ch = curl_init();
-//dd($payload);
+
         $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE);
+
         curl_setopt_array($ch, [
             CURLOPT_URL            => $url,
             CURLOPT_RETURNTRANSFER => true,
@@ -106,7 +105,6 @@ use Illuminate\Support\Facades\Http;
 
         // cURL-level error (DNS, SSL, timeout, etc.)
         if ($errno) {
-
             \Log::error('Fawry init cURL error', [
                 'errno'  => $errno,
                 'error'  => $error,
@@ -121,7 +119,6 @@ use Illuminate\Support\Facades\Http;
 
         // HTTP failure (non 2xx)
         if ($status < 200 || $status >= 300) {
-            dd($body);
             \Log::error('Fawry init failed', [
                 'status' => $status,
                 'ct'     => $ct,
