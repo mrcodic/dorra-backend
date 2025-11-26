@@ -30,7 +30,7 @@ class ProcessConfirmedOrderJob implements ShouldQueue
     {
         $order = $this->order->loadMissing(['paymentMethod', 'orderItems']);
         if ($order->user->phone_number){
-            app(SmsInterface::class)->send($order->user->phone_number,'Your Order confirmed successfully',1);
+            app(SmsInterface::class)->send($order->user->phone_number,'Your Order confirmed successfully',[1]);
         }
 //        Admin::query()
 //            ->select('id','first_name','last_name','email')
