@@ -289,20 +289,17 @@ class PaymentController extends Controller
                         ->orWhere('wallet_reference', $fawryRef);
                 }
             })
-            ->first();
+            ->firstOrFail();
 
-        if (!$transaction) {
-            return response()->json(['error' => 'Transaction not found'], 404);
-        }
 
-        if ($transaction->payment_status === StatusEnum::PAID->value) {
+        if ($transaction->payment_status === StatusEnum::PAID) {
             return response()->json(['message' => 'Already paid'], 200);
         }
 
         $paymentStatus = match ($status) {
-            'PAID'                           => StatusEnum::PAID->value,
-            'EXPIRED', 'CANCELLED', 'FAILED' => StatusEnum::UNPAID->value,
-            default                          => StatusEnum::PENDING->value,
+            'PAID'                           => StatusEnum::PAID,
+            'EXPIRED', 'CANCELLED', 'FAILED' => StatusEnum::UNPAID,
+            default                          => StatusEnum::PENDING,
         };
 
         $updates = [
@@ -311,17 +308,9 @@ class PaymentController extends Controller
             'response_message' => json_encode($payload, JSON_UNESCAPED_UNICODE),
         ];
 
-        if (!empty($fawryRef)) {
-            if ($paymentMethod === 'PAYATFAWRY') {
-                $updates['kiosk_refrance'] = $fawryRef;
-            } elseif ($paymentMethod === 'MWALLET') {
-                $updates['wallet_refrance'] = $fawryRef;
-            }
-        }
-
         $transaction->update($updates);
 
-        if ($paymentStatus === StatusEnum::PAID->value) {
+        if ($paymentStatus === StatusEnum::PAID) {
              $this->resetCart($transaction,$payload['paymentMethod'],StatusEnum::PAID,$payload);
         }
 
