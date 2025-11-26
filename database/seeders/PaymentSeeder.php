@@ -84,7 +84,6 @@ class PaymentSeeder extends Seeder
                     'payment_gateway_id' => $fawryGateway->id,
                     'name' => $method['name'],
                     'file_name' => $method['file_name'],
-                    
                     'active' => true,
                     'updated_at' => now(),
                     'created_at' => now(),
@@ -103,6 +102,7 @@ class PaymentSeeder extends Seeder
                 'payment_gateway_id' => null,
                 'name' => 'Cash on Delivery',
                 'active' => true,
+                'file_name' =>'cash_on_delivery.png' ,
                 'updated_at' => now(),
                 'created_at' => now(),
             ]
