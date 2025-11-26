@@ -29,7 +29,6 @@ var dt_user_table = $(".user-list-table").DataTable({
                     ;
             },
         },
-        { data: "name" },
         {
             data: "image",
             render: function (data, type, row) {
@@ -39,6 +38,8 @@ var dt_user_table = $(".user-list-table").DataTable({
         `;
             }
         },
+        { data: "name" },
+        
         { data: "phone_number" },
 
     ],
