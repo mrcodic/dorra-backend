@@ -290,9 +290,9 @@ class PaymentController extends Controller
                 }
             })
             ->firstOrFail();
+dd($transaction);
 
-
-        if ($transaction->payment_status === StatusEnum::PAID) {
+        if ($transaction->payment_status == StatusEnum::PAID) {
             return response()->json(['message' => 'Already paid'], 200);
         }
 
