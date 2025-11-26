@@ -205,6 +205,7 @@ class PaymentController extends Controller
 
     public function handleFawryRedirect(Request $request): RedirectResponse
     {
+        dd($request->all());
         $requestedData = $request->all();
         $statusCode = data_get($requestedData, 'statusCode');
         $orderStatus = data_get($requestedData, 'orderStatus');
@@ -213,6 +214,7 @@ class PaymentController extends Controller
         $referenceNumber =  data_get($requestedData, 'referenceNumber');
 
         $transaction = Transaction::where('transaction_id', $merchantRef)->first();
+
         if (!$transaction) {
             return redirect()->back();
         }
