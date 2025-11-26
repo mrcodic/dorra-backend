@@ -4,6 +4,7 @@ return [
     "Apps & Pages" => "Apps & Pages",
     "User Interface" => "User Interface",
     "Dashboards" => "Dashboards",
+    "Campaigns" => "Campaigns",
     "Jobs" => "Jobs",
     "Print command" => "Print Command",
     "Industries" => "Industries",

@@ -175,6 +175,12 @@
                     "name": "Messages",
                     "icon": "circle",
                     "slug": ""
+                },
+                {
+                    "url": "/campaigns",
+                    "name": "Campaigns",
+                    "icon": "circle",
+                    "slug": ""
                 }
             ]
         },

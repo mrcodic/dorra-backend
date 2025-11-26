@@ -31,7 +31,7 @@ class UserController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'show' => ['ownerTeams', 'reviews.reviewable', 'addresses.state.country','addresses.user','orders.orderItems.itemable'],
+            'show' => ['ownerTeams', 'reviews.reviewable', 'addresses.state.country', 'addresses.user', 'orders.orderItems.itemable'],
             'edit' => ['ownerTeams'],
         ];
         $this->relationsToStore = ['addresses'];
@@ -49,24 +49,23 @@ class UserController extends DashboardController
         return $this->userService->getData();
     }
 
-    public function changePassword(Request $request,$id)
+    public function changePassword(Request $request, $id)
     {
-        $isChanged = $this->userService->changePassword($request,$id);
-        return $isChanged ? Response::api() : Response::api(status:HttpEnum::NOT_MODIFIED ,message:"something went wrong",errors: [
+        $isChanged = $this->userService->changePassword($request, $id);
+        return $isChanged ? Response::api() : Response::api(status: HttpEnum::NOT_MODIFIED, message: "something went wrong", errors: [
             'password' => 'password not changed',
         ]);
-    }
-    public function billing(User $user): View|Factory|Application
-    {
-        $countries = $this->countryRepository->all(columns : ['id', 'name']);
-
-        return view('dashboard.users.billing', get_defined_vars());
     }
 
     public function search(Request $request): JsonResponse
     {
         return Response::api(data: $this->userService->search($request));
 
+    }
+
+    public function campaigns()
+    {
+        return view('dashbord.users.campaigns');
     }
 }
 

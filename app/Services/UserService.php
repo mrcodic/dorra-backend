@@ -19,6 +19,7 @@ class UserService extends BaseService
         $this->repository = $repository;
         parent::__construct($repository);
     }
+
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->repository->create($validatedData);
@@ -26,7 +27,7 @@ class UserService extends BaseService
             Media::where('id', $validatedData['image_id'])
                 ->update([
                     'model_type' => get_class($model),
-                    'model_id'   => $model->id,
+                    'model_id' => $model->id,
                     'collection_name' => 'users',
                 ]);
         }
@@ -43,8 +44,8 @@ class UserService extends BaseService
 
             Media::where('id', $validatedData['image_id'])
                 ->update([
-                    'model_type'      => get_class($model),
-                    'model_id'        => $model->id,
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
                     'collection_name' => 'users',
                 ]);
 
@@ -61,15 +62,15 @@ class UserService extends BaseService
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
-                $words = preg_split('/\s+/', $search);
-                $query->where(function ($query) use ($words) {
-                    foreach ($words as $word) {
-                        $query->where(function ($q) use ($word) {
-                            $q->where('first_name', 'like', '%' . $word . '%')
-                                ->orWhere('last_name', 'like', '%' . $word . '%');
-                        });
-                    }
-                });
+                    $words = preg_split('/\s+/', $search);
+                    $query->where(function ($query) use ($words) {
+                        foreach ($words as $word) {
+                            $query->where(function ($q) use ($word) {
+                                $q->where('first_name', 'like', '%' . $word . '%')
+                                    ->orWhere('last_name', 'like', '%' . $word . '%');
+                            });
+                        }
+                    });
                 } else {
                     $query->whereRaw('1 = 0');
                 }
@@ -88,9 +89,9 @@ class UserService extends BaseService
             })
             ->addColumn('action', function () {
                 return [
-                    'can_show' => (bool) auth()->user()->hasPermissionTo('users_show'),
-                    'can_edit' => (bool) auth()->user()->hasPermissionTo('users_update'),
-                    'can_delete' => (bool) auth()->user()->hasPermissionTo('users_delete'),
+                    'can_show' => (bool)auth()->user()->hasPermissionTo('users_show'),
+                    'can_edit' => (bool)auth()->user()->hasPermissionTo('users_update'),
+                    'can_delete' => (bool)auth()->user()->hasPermissionTo('users_delete'),
                 ];
             })
             ->make();
@@ -99,11 +100,11 @@ class UserService extends BaseService
     public function changePassword($request, $id): bool
     {
         $request->validate([
-            'password' => ['required', 'string','confirmed',
+            'password' => ['required', 'string', 'confirmed',
                 Password::min(8)->letters()->mixedCase()->numbers()->symbols(),],
         ]);
         $user = $this->repository->find($id);
-        $user =  $user->update([
+        $user = $user->update([
             'password' => $request->password,
         ]);
         return (bool)$user;
@@ -129,12 +130,17 @@ class UserService extends BaseService
             })
             ->limit($all ? 100 : 5)
             ->get()
-            ->map(fn ($user) => [
+            ->map(fn($user) => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'image_url' => $user->image?->getUrl() ?? asset("images/default-user.png"),
             ]);
     }
 
-
+    public function campaigns()
+    {
+        return $this->repository->query()
+            ->select(['first_name', 'last_name', 'phone_number'])
+            ->get();
+    }
 }

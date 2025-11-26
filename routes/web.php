@@ -44,7 +44,6 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
     Route::view('/login/social', 'dashboard.auth.social-login');
     Route::view('confirm-password', 'dashboard.auth.confirm-password');
-//    Route::view('forgot-password', 'dashboard.auth.forgot-password')->name('password.request');
     Route::get('/reset-password', function (Request $request) {
         return view('dashboard.auth.reset-password', [
             'token' => $request->query('token'),
@@ -52,18 +51,20 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         ]);
     })->name('password.reset');
     Route::middleware('auth')->group(function () {
+        Route::redirect('/', '/dashboard');
         Route::get('states', [MainController::class, 'states'])->name('states');
         Route::get('zones', [MainController::class, 'zones'])->name('zones');
         Route::post('industries/sub-industries', [IndustryController::class, 'getSubIndustries'])->name('sub-industries');
+
         Route::get('/dashboard', [StatisticsController::class, 'index'])->name('dashboard.index');
         Route::get('/dashboard/chart', [StatisticsController::class, 'chart'])
             ->name('dashboard.chart');
-        Route::view('/', 'dashboard.welcome');
+
         Route::group(['prefix' => 'users', 'as' => 'users.', 'controller' => UserController::class,], function () {
             Route::get('/data', 'getData')->name('data');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
             Route::put('{id}/change-password', [UserController::class, 'changePassword'])->name('change-password');
-            Route::get('/billing/{user}', [UserController::class, 'billing'])->name('billing');
+            Route::get('/campaigns', [UserController::class, 'campaigns']);
             Route::get('/search', [UserController::class, 'search'])->name('search');
         });
         Route::resource('/users', UserController::class);
