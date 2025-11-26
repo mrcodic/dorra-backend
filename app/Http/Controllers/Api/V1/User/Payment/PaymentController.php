@@ -220,9 +220,17 @@ class PaymentController extends Controller
         }
         if ($orderStatus == 'PAID' && $statusCode == 200)
         {
+            if ($paymentMethod == 'MWALLET'){
+                $transaction->update([
+                    'wallet_reference' => $referenceNumber
+                ]);
+            }
             return redirect()->to($transaction->success_url);
         }elseif ($orderStatus == 'UNPAID' && $paymentMethod == 'PayAtFawry')
         {
+            $transaction->update([
+               'kiosk_reference' => $referenceNumber
+            ]);
             return redirect()->to($transaction->pending_url."&referenceNumber=$referenceNumber");
         }else{
             return redirect()->to($transaction->failure_url);
@@ -260,6 +268,8 @@ class PaymentController extends Controller
     public function handleFawryCallback(Request $request)
     {
         $payload = $request->all();
+        Log::info('Fawry webhook payload',$payload);
+
         if (!$this->verifySignature($payload)) {
             Log::warning('Fawry webhook invalid signature');
             return response()->json(['error' => 'invalid signature'], 400);
