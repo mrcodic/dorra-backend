@@ -280,17 +280,20 @@ class PaymentController extends Controller
         $paymentMethod = strtoupper((string) ($payload['paymentMethod'] ?? ''));
 
         $transaction = Transaction::query()
-            ->where(function ($q) use ($merchantRef, $fawryRef) {
-                if ($merchantRef) {
-                    $q->orWhere('transaction_id', $merchantRef);
-                }
-                if ($fawryRef) {
-                    $q->orWhere('kiosk_reference', $fawryRef)
-                        ->orWhere('wallet_reference', $fawryRef);
-                }
+            ->when($merchantRef || $fawryRef, function ($q) use ($merchantRef, $fawryRef) {
+                $q->where(function ($q2) use ($merchantRef, $fawryRef) {
+                    if ($merchantRef) {
+                        $q2->orWhere('transaction_id', $merchantRef);
+                    }
+                    if ($fawryRef) {
+                        $q2->orWhere('kiosk_reference', $fawryRef)
+                            ->orWhere('wallet_reference', $fawryRef);
+                    }
+                });
             })
             ->firstOrFail();
-dd($transaction);
+
+        dd($transaction);
 
         if ($transaction->payment_status == StatusEnum::PAID) {
             return response()->json(['message' => 'Already paid'], 200);
