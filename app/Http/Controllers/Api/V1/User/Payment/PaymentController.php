@@ -14,6 +14,7 @@ use App\Services\Payment\PaymentGatewayFactory;
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
@@ -32,12 +33,19 @@ class PaymentController extends Controller
 
     public function paymentMethods()
     {
-        return Response::api(data: PaymentResource::collection(
-            $this->paymentMethodRepository
+        $methods = Cache::rememberForever('payment_methods', function () {
+            return $this->paymentMethodRepository
                 ->query()
-                ->with(['paymentGateway'])
+                ->with('paymentGateway')
                 ->whereActive(true)
-                ->get()));
+                ->where(function ($q) {
+                    $q->whereHas('paymentGateway', fn($gw) => $gw->active())
+                        ->orWhereNull('payment_gateway_id');
+                })
+                ->get();
+        });
+
+        return Response::api(data: PaymentResource::collection($methods));
     }
 
     public function buyOrderAgain(Request $request)

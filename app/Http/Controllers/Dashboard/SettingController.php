@@ -136,10 +136,15 @@ class SettingController extends Controller
 
     public function payments(PaymentMethodRepositoryInterface $paymentMethodRepository)
     {
-        $paymentMethods = $paymentMethodRepository->query()->
-        whereHas('paymentGateway',function ($query){
-            return $query->active();
-        })->get();
+        $paymentMethods = $paymentMethodRepository
+            ->query()
+            ->with('paymentGateway')
+            ->whereActive(true)
+            ->where(function ($q) {
+                $q->whereHas('paymentGateway', fn($gw) => $gw->active())
+                    ->orWhereNull('payment_gateway_id');
+            })
+            ->get();
         return view("dashboard.settings.payments", get_defined_vars());
     }
 
@@ -147,6 +152,7 @@ class SettingController extends Controller
     {
         $validatedData = $request->validate(['active' => 'required|boolean']);
         $paymentMethodRepository->update($validatedData, $id);
+        Cache::forget('payment_methods');
         return Response::api();
     }
 
