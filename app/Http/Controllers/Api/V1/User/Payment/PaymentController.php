@@ -279,19 +279,23 @@ class PaymentController extends Controller
         $status        = strtoupper((string) ($payload['orderStatus'] ?? ''));
         $paymentMethod = strtoupper((string) ($payload['paymentMethod'] ?? ''));
 
-        $transaction = Transaction::query()
-            ->when($merchantRef || $fawryRef, function ($q) use ($merchantRef, $fawryRef) {
-                $q->where(function ($q2) use ($merchantRef, $fawryRef) {
-                    if ($merchantRef) {
-                        $q2->orWhere('transaction_id', $merchantRef);
-                    }
-                    if ($fawryRef) {
-                        $q2->orWhere('kiosk_reference', $fawryRef)
-                            ->orWhere('wallet_reference', $fawryRef);
-                    }
-                });
-            })
-            ->firstOrFail();
+        if (!$merchantRef && !$fawryRef) {
+            abort(404, 'Missing search parameters');
+        }
+
+        $query = Transaction::query();
+
+        if ($merchantRef) {
+            $query->orWhere('transaction_id', $merchantRef);
+        }
+
+        if ($fawryRef) {
+            $query->orWhere('kiosk_reference', $fawryRef)
+                ->orWhere('wallet_reference', $fawryRef);
+        }
+
+        $transaction = $query->firstOrFail();
+
 
         dd($transaction);
 
