@@ -348,3 +348,4 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
     });
 
 });
+Route::view('test','dashboard.test');
