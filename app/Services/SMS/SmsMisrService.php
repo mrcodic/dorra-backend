@@ -30,7 +30,7 @@ class SmsMisrService implements SmsInterface
             'message' => $message,
         ];
         $response = Http::asForm()->post($this->conig['base_url'] . 'api/SMS', $payload);
-        Log::info('SmsMisr', $response->json());
+        Log::info('SmsMisr', [$response->json(),$payload]);
         return $response->json();
     }
 }
