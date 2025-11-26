@@ -18,7 +18,7 @@ class PaymentSeeder extends Seeder
             ['code' => 'paymob'],
             [
                 'name' => 'Paymob',
-                'active' => true,
+                'active' => false,
                 'updated_at' => now(),
                 'created_at' => now(),
             ]

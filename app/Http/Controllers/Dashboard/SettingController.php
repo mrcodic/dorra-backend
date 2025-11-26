@@ -136,7 +136,10 @@ class SettingController extends Controller
 
     public function payments(PaymentMethodRepositoryInterface $paymentMethodRepository)
     {
-        $paymentMethods = $paymentMethodRepository->all();
+        $paymentMethods = $paymentMethodRepository->query()->
+        whereHas('paymentGateway',function ($query){
+            return $query->active;
+        })->get();
         return view("dashboard.settings.payments", get_defined_vars());
     }
 

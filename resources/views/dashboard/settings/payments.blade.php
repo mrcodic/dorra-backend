@@ -50,7 +50,7 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="d-flex align-items-center gap-3">
-                        <img src="{{ asset('images/payment/' . $paymentMethod->file_name }}"
+                        <img src="{{ asset('images/payment/' . $paymentMethod->file_name) }}"
                              alt="Payment Icon" style="height:40px;width:auto;">
                         <span class="fw-bold text-black">{{ $paymentMethod->name }}</span>
                     </div>
