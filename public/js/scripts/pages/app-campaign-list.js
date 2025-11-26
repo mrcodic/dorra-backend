@@ -39,7 +39,6 @@ var dt_user_table = $(".user-list-table").DataTable({
         `;
             }
         },
-        { data: "email" },
         { data: "phone_number" },
 
     ],

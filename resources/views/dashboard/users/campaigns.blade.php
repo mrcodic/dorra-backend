@@ -159,12 +159,8 @@
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('users_delete'))>
                         </th>
                         <th>Name</th>
-                        <th>IMAGE</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Joined Date</th>
-                        <th>Orders Count</th>
-                        <th>Actions</th>
+                        <th>Phone</th>
+
                     </tr>
                     </thead>
                 </table>
