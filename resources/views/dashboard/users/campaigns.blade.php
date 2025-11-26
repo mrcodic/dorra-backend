@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'User List')
-@section('main-page', 'Users')
+@section('title', 'Campaigns')
+@section('main-page', 'Campaigns')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 
     <style>
-        /* Responsive table accordion styles */
+        /* Responsive table accordion stylefs */
         @media (max-width: 768px) {
 
             /* Hide the last 4 columns on mobile */
@@ -143,22 +143,9 @@
             </div>
             <div class="card-datatable table-responsive pt-0">
                 <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                    <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
-                        <i data-feather="search"
-                           class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
-                        <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                               id="search-user-form" placeholder="Search user..." style="height: 38px;">
-                        <!-- Clear button -->
-                        <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                   background: transparent; border: none; font-weight: bold;
-                   color: #aaa; cursor: pointer; font-size: 18px; line-height: 1;" title="Clear filter">
-                            &times;
-                        </button>
-                    </form>
-
                     <div class="col-12 col-md-3">
                         <select name="created_at" class="form-select filter-date">
-                            <option value="" disabled>Date</option>
+                            <option value="" disabled></option>
                             <option value="desc">Newest</option>
                             <option value="asc">Oldest</option>
                         </select>
@@ -189,14 +176,14 @@
                         <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
                                 data-bs-target="#deleteUsersModal"
                                 class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-users-modal">
-                            <i data-feather="trash-2"></i> Delete Selected
+                            <i data-feather="trash-2"></i> Send SMS
                         </button>
                         <form style="display: none;" id="bulk-delete-form" method="POST"
                               action="{{ route('users.bulk-delete') }}">
                             @csrf
                             <button type="submit" id="delete-selected-btn"
                                     class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                                <i data-feather="trash-2"></i> Delete Selected
+                                <i data-feather="trash-2"></i> Send SMS
                             </button>
                         </form>
 
@@ -249,7 +236,7 @@
 
 
     <script>
-        const usersDataUrl = "{{ route('users.data') }}";
+        const usersDataUrl = "{{ route('users.campaigns.data') }}";
 
         $('#address-repeater').repeater({
             initEmpty: false,
@@ -420,7 +407,7 @@
         });
     </script>
 
-    <script src="{{ asset('js/scripts/pages/app-user-list.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/scripts/pages/app-campaign-list.js') }}?v={{ time() }}"></script>
 
     <script>
         // Backup accordion handler in case the main one doesn't work

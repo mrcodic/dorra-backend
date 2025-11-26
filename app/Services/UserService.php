@@ -97,6 +97,22 @@ class UserService extends BaseService
             ->make();
     }
 
+    public function getCampaignData(): JsonResponse
+    {
+        $users = $this->repository
+            ->query(['id', 'first_name', 'last_name', 'phone_number'])
+           ->latest();
+        return DataTables::of($users)
+            ->addColumn('name', function ($user) {
+                return $user->name;
+            })
+            ->addColumn('image', function ($admin) {
+                return $admin->getFirstMediaUrl('users') ?: asset("images/default-user.png");
+            })
+            ->make();
+    }
+
+
     public function changePassword($request, $id): bool
     {
         $request->validate([

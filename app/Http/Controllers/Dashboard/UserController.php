@@ -4,11 +4,8 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Enums\HttpEnum;
 use App\Models\CountryCode;
-use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Foundation\Application;
-use Illuminate\Contracts\View\{Factory, View};
 use App\Http\Controllers\Base\DashboardController;
 use App\Repositories\Interfaces\CountryRepositoryInterface;
 use Illuminate\Http\Request;

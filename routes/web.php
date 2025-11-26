@@ -62,6 +62,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::group(['prefix' => 'users', 'as' => 'users.', 'controller' => UserController::class,], function () {
             Route::get('/data', 'getData')->name('data');
+            Route::get('/campaigns/data', 'getCampaignData')->name('campaigns.data');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
             Route::put('{id}/change-password', [UserController::class, 'changePassword'])->name('change-password');
             Route::get('/campaigns', [UserController::class, 'campaigns']);
