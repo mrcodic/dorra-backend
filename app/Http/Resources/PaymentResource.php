@@ -20,6 +20,7 @@ class PaymentResource extends JsonResource
             "name" => $this->name,
             "code" => $this->code,
             "active" => $this->active,
+            "image_url" => asset("images/payment/" . $this->file_name),
             "gateway" => [
                 "id" => $this->paymentGateway?->id,
                 "name" => $this->paymentGateway?->name,

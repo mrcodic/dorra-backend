@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('payment_gateway_id')->nullable()->constrained('payment_gateways')->onDelete('cascade');
             $table->string('name');
             $table->string('code')->unique();
+            $table->string('file_name');
             $table->boolean('active')->default(true);
             $table->timestamps();
         });

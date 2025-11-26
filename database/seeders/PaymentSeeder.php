@@ -31,9 +31,9 @@ class PaymentSeeder extends Seeder
 
         // Paymob Methods
         $paymobMethods = [
-            ['name' => 'Debit/Credit Card', 'code' => 'paymob_card'],
-            ['name' => 'Wallet', 'code' => 'paymob_wallet'],
-            ['name' => 'Aman', 'code' => 'paymob_kiosk'],
+            ['name' => 'Debit/Credit Card', 'code' => 'paymob_card', 'file_name' => 'card.png'],
+            ['name' => 'Wallet', 'code' => 'paymob_wallet', 'file_name' => 'wallet.png'],
+            ['name' => 'Aman', 'code' => 'paymob_kiosk', 'file_name' => 'aman.png'],
         ];
 
         foreach ($paymobMethods as $method) {
@@ -71,9 +71,9 @@ class PaymentSeeder extends Seeder
 
         // Fawry Methods
         $fawryMethods = [
-            ['code' => 'PayAtFawry', 'name' => 'Pay At Fawry'],
-            ['code' => 'MWALLET', 'name' => 'Mobile WALLET'],
-            ['code' => 'CARD', 'name' => 'CARD'],
+            ['code' => 'PayAtFawry', 'name' => 'Pay At Fawry', 'file_name' => 'fawry.png'],
+            ['code' => 'MWALLET', 'name' => 'Mobile WALLET', 'file_name' => 'wallet.png'],
+            ['code' => 'CARD', 'name' => 'CARD', 'file_name' => 'card.png'],
         ];
 
         foreach ($fawryMethods as $method) {
