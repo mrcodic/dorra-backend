@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Enums\HttpEnum;
 use App\Models\Admin;
 use App\Models\Product;
+use App\Services\SMS\SmsInterface;
+use App\Services\SMS\SmsMisrService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
@@ -24,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(SmsInterface::class,SmsMisrService::class);
     }
 
     /**

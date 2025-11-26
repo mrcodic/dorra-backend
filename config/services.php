@@ -69,8 +69,17 @@ return [
         'test_return_url' => env('FAWRY_RETRN_TEST_URL'),
     ],
 
+    'sms_misr' => [
+        'base_url' => env('SMSMISR_BASE_URL'),
+        'username' => env('SMSMISR_USERNAME'),
+        'password' => env('SMSMISR_PASSWORD'),
+        'sender' => env('SMSMISR_SENDER'),
+        'environment' => env('SMSMISR_ENVIRONMENT'),
+
+    ],
+
     'shipblu' => [
-        'key'  => env('SHIPBLU_API_KEY'),
+        'key' => env('SHIPBLU_API_KEY'),
         'base' => rtrim(env('SHIPBLU_BASE_URL', 'https://api.shipblu.com'), '/'),
         'webhook_secret' => env('SHIPBLU_WEBHOOK_SECRET'),
     ],
