@@ -11,6 +11,7 @@ class PaymentMethod extends Model
 {
     protected $fillable= [
         'active',
+        'file_name'
 
     ];
     public function paymentGateway(): BelongsTo
