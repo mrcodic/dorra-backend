@@ -45,6 +45,10 @@ class UserController extends DashboardController
     {
         return $this->userService->getData();
     }
+    public function getCampaignData(): JsonResponse
+    {
+        return $this->userService->getCampaignData();
+    }
 
     public function changePassword(Request $request, $id)
     {
