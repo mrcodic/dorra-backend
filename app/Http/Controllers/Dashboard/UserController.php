@@ -65,7 +65,7 @@ class UserController extends DashboardController
 
     public function campaigns()
     {
-        return view('dashbord.users.campaigns');
+        return view('dashboard.users.campaigns');
     }
 }
 
