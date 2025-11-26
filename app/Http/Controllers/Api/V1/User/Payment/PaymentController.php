@@ -269,10 +269,10 @@ class PaymentController extends Controller
         $payload = $request->all();
         Log::info('Fawry webhook payload',$payload);
 
-        if (!$this->verifySignature($payload)) {
-            Log::warning('Fawry webhook invalid signature');
-            return response()->json(['error' => 'invalid signature'], 400);
-        }
+//        if (!$this->verifySignature($payload)) {
+//            Log::warning('Fawry webhook invalid signature');
+//            return response()->json(['error' => 'invalid signature'], 400);
+//        }
 
         $merchantRef   = $payload['merchantRefNumber'] ?? null;
         $fawryRef      = $payload['fawryRefNumber']    ?? null;
