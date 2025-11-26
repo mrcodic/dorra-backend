@@ -3,6 +3,7 @@
 namespace App\Services\SMS;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SmsMisrService implements SmsInterface
 {
@@ -29,6 +30,7 @@ class SmsMisrService implements SmsInterface
             'message' => $message,
         ];
         $response = Http::asForm()->post($this->conig['base_url'] . 'api/SMS', $payload);
+        Log::info('SmsMisr', $response->json());
         return $response->json();
     }
 }
