@@ -30,7 +30,7 @@ class SmsMisrService implements SmsInterface
      */
     public function send(array|string $numbers, string $message, array $options = [])
     {
-        $numbers = array_map('normalizeEgyptianNumber', (array) $numbers);
+        $numbers = array_map([$this, 'normalizeEgyptianNumber'], (array) $numbers);
         $numbers = implode(',', $numbers);
         $payload = [
             'environment' => $this->conig['environment'],
