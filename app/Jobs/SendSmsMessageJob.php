@@ -27,8 +27,9 @@ class SendSmsMessageJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(SmsInterface $sms): void
+    public function handle(): void
     {
+        $sms = app(SmsInterface::class);
         $chunkSize = 20;
         $delaySeconds = 2;
         $chunks = $this->users->chunk($chunkSize);
