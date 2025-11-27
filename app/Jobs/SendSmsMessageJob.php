@@ -5,12 +5,16 @@ namespace App\Jobs;
 
 use App\Services\SMS\SmsInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class SendSmsMessageJob implements ShouldQueue
 {
-    use Queueable;
+    use Dispatchable, InteractsWithQueue, \Illuminate\Bus\Queueable, SerializesModels;
+
 
     /**
      * Create a new job instance.
