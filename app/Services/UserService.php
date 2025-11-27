@@ -137,7 +137,7 @@ class UserService extends BaseService
                 continue;
             }
 
-dd($numbers);
+dump($numbers);
             $sms->send($numbers, $validatedData['message'], ['language' => 1]);
             if ($index < $chunks->count() - 1) {
                 sleep($delaySeconds);
