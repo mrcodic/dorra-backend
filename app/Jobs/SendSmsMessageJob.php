@@ -28,7 +28,6 @@ class SendSmsMessageJob implements ShouldQueue
         $chunkSize = 20;
         $delaySeconds = 2;
         $chunks = $this->users->chunk($chunkSize);
-        Log::info("chunk", $chunks);
         foreach ($chunks as $index => $chunk) {
 
             $numbers = $chunk->pluck('phone_number')
@@ -37,9 +36,7 @@ class SendSmsMessageJob implements ShouldQueue
                 ->unique()
                 ->values()
                 ->toArray();
-
-            Log::info("number", $numbers);
-
+            
             if (empty($numbers)) {
                 continue;
             }
