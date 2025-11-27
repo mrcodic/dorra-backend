@@ -12,6 +12,7 @@ enum PermissionEnum: string
     // Dashboards
     case DASHBOARDS = 'dashboard_show';
 
+
     // Admins
 
     case CREATE_ADMINS = 'admins_create';
@@ -159,6 +160,7 @@ enum PermissionEnum: string
     case TEMPLATES_PUBLISHED_SHOW = 'product-templates.change-status.publish_show';
     case TEMPLATES_DRAFTED_SHOW   = 'product-templates.change-status.draft_show';
     case TEMPLATES_LIVE_SHOW      = 'product-templates.change-status.live_show';
+    case CAMPAIGNS = 'users.campaigns_show';
 
 
     public function group(): array
@@ -206,6 +208,7 @@ enum PermissionEnum: string
             'board'               => 'Board',
             'inventories'         => 'Inventories',
             'station-statuses'    => 'Custom Statuses',
+            'campaigns'    => 'Campaigns',
             default               => Str::headline(str_replace('-', ' ', $this->groupKey())),
         };
     }

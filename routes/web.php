@@ -66,7 +66,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/campaigns/send-sms', 'sendSms')->name('campaigns.send.sms');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
             Route::put('{id}/change-password', [UserController::class, 'changePassword'])->name('change-password');
-            Route::get('/campaigns', [UserController::class, 'campaigns']);
+            Route::get('/campaigns', [UserController::class, 'campaigns'])->name('campaigns');
             Route::get('/search', [UserController::class, 'search'])->name('search');
         });
         Route::resource('/users', UserController::class);

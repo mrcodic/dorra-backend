@@ -269,10 +269,10 @@
                 return false;
             }
 
-            // remove old inputs first
-            $('#sms-user-ids').remove();
 
-            // add new hidden inputs for array numbers[]
+            $('#send-sms-form input[name="numbers[]"]').remove();
+
+
             selected.forEach(number => {
                 $('#send-sms-form').append(
                     `<input type="hidden" name="numbers[]" value="${number}">`
