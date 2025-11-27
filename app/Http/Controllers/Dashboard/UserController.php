@@ -77,7 +77,6 @@ class UserController extends DashboardController
             'numbers.*' => ['exists:users,phone_number'],
             'message' => ['required', 'string'],
         ]);
-        dd("FSDfsd");
         $this->userService->sendSms($validatedData);
         return Response::api();
 
