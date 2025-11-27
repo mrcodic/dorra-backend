@@ -142,16 +142,16 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive pt-0">
-                <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                    <div class="col-12 col-md-3">
-                        <select name="created_at" class="form-select filter-date">
-                            <option value="" disabled></option>
-                            <option value="desc">Newest</option>
-                            <option value="asc">Oldest</option>
-                        </select>
-                    </div>
+{{--                <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">--}}
+{{--                    <div class="col-12 col-md-3">--}}
+{{--                        <select name="created_at" class="form-select filter-date">--}}
+{{--                            <option value="" disabled></option>--}}
+{{--                            <option value="desc">Newest</option>--}}
+{{--                            <option value="asc">Oldest</option>--}}
+{{--                        </select>--}}
+{{--                    </div>--}}
 
-                </div>
+{{--                </div>--}}
                 <table class="user-list-table table">
                     <thead class="table-light">
                     <tr>
