@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Jobs\SendSmsMessageJob;
+use App\Services\SMS\SmsInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rules\Password;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -118,7 +120,30 @@ class UserService extends BaseService
         $users = $this->repository->query()
             ->whereIn('id', $validatedData['numbers'])
             ->get();
-        SendSmsMessageJob::dispatch($users, $validatedData['message']);
+        $sms = app(SmsInterface::class);
+        $chunkSize = 20;
+        $delaySeconds = 2;
+        $chunks = $users->chunk($chunkSize);
+        foreach ($chunks as $index => $chunk) {
+
+            $numbers = $chunk->pluck('phone_number')
+                ->filter()
+                ->unique()
+                ->values()
+                ->toArray();
+            Log::info("numbers: " . json_encode($numbers));
+
+            if (empty($numbers)) {
+                continue;
+            }
+
+
+            $sms->send($numbers, $validatedData['message'], ['language' => 1]);
+            if ($index < $chunks->count() - 1) {
+                sleep($delaySeconds);
+            }
+//        SendSmsMessageJob::dispatch($users, $validatedData['message']);
+        }
     }
     public function changePassword($request, $id): bool
     {
