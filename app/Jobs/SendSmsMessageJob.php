@@ -36,7 +36,8 @@ class SendSmsMessageJob implements ShouldQueue
                 ->unique()
                 ->values()
                 ->toArray();
-            
+            Log::info("numbers: " . json_encode($numbers));
+
             if (empty($numbers)) {
                 continue;
             }
