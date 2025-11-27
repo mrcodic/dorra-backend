@@ -108,6 +108,8 @@ class UserService extends BaseService
         return DataTables::of($users)
             ->addColumn('name', function ($user) {
                 return $user->name;
+            })->addColumn('phone_number', function ($user) {
+                return $user->phone_number ?? "-";
             })
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('users') ?: asset("images/default-user.png");
