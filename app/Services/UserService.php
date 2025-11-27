@@ -119,7 +119,7 @@ class UserService extends BaseService
     {
 
         $users = $this->repository->query()
-            ->whereIn('id', $validatedData['numbers'])
+            ->whereIn('phone_number', $validatedData['numbers'])
             ->get();
         $sms = app(SmsInterface::class);
         $chunkSize = 20;
