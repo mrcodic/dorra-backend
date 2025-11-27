@@ -6,6 +6,7 @@ use App\Jobs\SendSmsMessageJob;
 use App\Services\SMS\SmsInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rules\Password;
@@ -104,7 +105,32 @@ class UserService extends BaseService
     {
         $users = $this->repository
             ->query(['id', 'first_name', 'last_name', 'phone_number'])
-           ->latest();
+            ->when(request()->filled('order_count'), function ($query) {
+                $filter = request('order_count');
+
+                if ($filter == '0') {
+                    $query->whereDoesntHave('orders');
+                }
+                if ($filter == '1_5') {
+                    $query->whereHas('orders', function ($q) {
+                        $q->select('user_id')
+                            ->groupBy('user_id')
+                            ->havingRaw('COUNT(*) BETWEEN 1 AND 5');
+                    });
+                }
+
+                if ($filter == '5_plus') {
+                    $query->whereHas('orders', function ($q) {
+                        $q->select('user_id')
+                            ->groupBy('user_id')
+                            ->havingRaw('COUNT(*) > 5');
+                    });
+                }
+            })
+            ->latest();
+
+
+
         return DataTables::of($users)
             ->addColumn('name', function ($user) {
                 return $user->name;
