@@ -117,7 +117,7 @@ class UserService extends BaseService
 
     public function sendSms($validatedData): void
     {
-        dd("DSfsd");
+
         $users = $this->repository->query()
             ->whereIn('id', $validatedData['numbers'])
             ->get();
@@ -125,6 +125,7 @@ class UserService extends BaseService
         $chunkSize = 20;
         $delaySeconds = 2;
         $chunks = $users->chunk($chunkSize);
+        dd($chunks,$users);
         foreach ($chunks as $index => $chunk) {
 
             $numbers = $chunk->pluck('phone_number')
