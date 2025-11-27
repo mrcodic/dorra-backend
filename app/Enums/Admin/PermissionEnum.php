@@ -208,7 +208,7 @@ enum PermissionEnum: string
             'board'               => 'Board',
             'inventories'         => 'Inventories',
             'station-statuses'    => 'Custom Statuses',
-            'campaigns'    => 'Campaigns',
+            'users.campaigns'    => 'Campaigns',
             default               => Str::headline(str_replace('-', ' ', $this->groupKey())),
         };
     }

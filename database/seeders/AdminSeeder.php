@@ -23,16 +23,14 @@ class AdminSeeder extends Seeder
             'password' => 123456789,
             'status' => 1,
         ]);
-        $role = Role::firstOrCreate(
-            [
-                'name' => json_encode([
-                    'en' => 'Super Admin',
-                    'ar' => 'مشرف عام',
-                ]),
-                'guard_name' => 'web',
-            ]
-        );
+        $role = Role::query()->firstOrCreate([
+            'name' => [
+                'en' => 'Super Admin',
+                'ar' => 'مشرف عام',
+            ],
 
+               'guard_name' => 'web',
+            ]);
         $admin->roles()->sync([
             $role->id => ['model_type' => $admin->getMorphClass()]
         ]);
