@@ -32,7 +32,6 @@ class SendSmsMessageJob implements ShouldQueue
 
             $numbers = $chunk->pluck('phone_number')
                 ->filter()
-                ->map(fn ($number) => $sms->normalizeEgyptianNumber($number))
                 ->unique()
                 ->values()
                 ->toArray();
@@ -42,8 +41,8 @@ class SendSmsMessageJob implements ShouldQueue
                 continue;
             }
 
-            $numbersString = implode(',', $numbers);
-            $sms->send($numbersString, $this->message, ['language' => 1]);
+
+            $sms->send($numbers, $this->message, ['language' => 1]);
             if ($index < $chunks->count() - 1) {
                 sleep($delaySeconds);
             }
