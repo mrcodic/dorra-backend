@@ -281,7 +281,7 @@
         });
 
         handleAjaxFormSubmit("#send-sms-form",{
-            successMessages:"Sms send successfully",
+            successMessage :"SMS send successfully",
             onSuccess:function () {
                 location.reload();
             }
