@@ -117,6 +117,7 @@ class UserService extends BaseService
 
     public function sendSms($validatedData): void
     {
+        dd("DSfsd");
         $users = $this->repository->query()
             ->whereIn('id', $validatedData['numbers'])
             ->get();
