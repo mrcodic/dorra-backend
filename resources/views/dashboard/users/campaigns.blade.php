@@ -156,7 +156,7 @@
                     <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('users_delete'))>
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                         </th>
                         <th>Image</th>
                         <th>Name</th>
@@ -170,19 +170,12 @@
                         class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
                         style="z-index: 10;">
                         <p id="selected-count-text">0 Users are selected</p>
-                        <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                                data-bs-target="#deleteUsersModal"
-                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-users-modal">
-                            <i data-feather="trash-2"></i> Send SMS
+                        <button type="button" id="open-sms-modal-btn" data-bs-toggle="modal"
+                                data-bs-target="#smsModal"
+                                class="btn btn-outline-primary d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+                            <i data-feather="message-square"></i> Send SMS
                         </button>
-                        <form style="display: none;" id="bulk-delete-form" method="POST"
-                              action="{{ route('users.bulk-delete') }}">
-                            @csrf
-                            <button type="submit" id="delete-selected-btn"
-                                    class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
-                                <i data-feather="trash-2"></i> Send SMS
-                            </button>
-                        </form>
+
 
 
                     </div>
@@ -190,17 +183,46 @@
 
             </div>
         </div>
-        @include('modals.delete',[
-        'id' => 'deleteUserModal',
-        'formId' => 'deleteUserForm',
-        'title' => 'Delete User',
-        ])
-        @include('modals.delete',[
-        'id' => 'deleteUsersModal',
-        'formId' => 'bulk-delete-form',
-        'title' => 'Delete Users',
-        'confirmText' => 'Are you sure you want to delete this items?',
-        ])
+        {{-- SMS Modal --}}
+        <div class="modal fade" id="smsModal" tabindex="-1" aria-labelledby="smsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form id="send-sms-form" method="POST" action="{{ route("users.campaigns.send.sms") }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="smsModalLabel">Send SMS to selected users</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+
+                        </div>
+
+                        <div class="modal-body">
+                            {{-- Hidden field for selected user IDs (will be filled from JS) --}}
+                            <input type="hidden" name="numbers[]" id="sms-user-ids">
+
+                            <div class="mb-1">
+                                <label for="sms-message" class="form-label">Message</label>
+                                <textarea class="form-control" id="sms-message" name="message" rows="4"
+                                          placeholder="Write your SMS message here..." required></textarea>
+                            </div>
+
+                            <small class="text-muted d-block">
+                                The message will be sent to all selected users.
+                            </small>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Send SMS
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- list and filter end -->
     </section>
     <!-- users list ends -->
@@ -231,7 +253,35 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.repeater/1.2.1/jquery.repeater.min.js"></script>
 
+    <script !src="">
+        $(document).on('click', '#open-sms-modal-btn', function () {
+            const selected = $('.category-checkbox:checked').map(function () {
+                return this.value;
+            }).get();
 
+            if (selected.length === 0) {
+                Toastify({
+                    text: "Please select at least one user.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                }).showToast();
+                return false;
+            }
+
+            // remove old inputs first
+            $('#sms-user-ids').remove();
+
+            // add new hidden inputs for array numbers[]
+            selected.forEach(number => {
+                $('#send-sms-form').append(
+                    `<input type="hidden" name="numbers[]" value="${number}">`
+                );
+            });
+        });
+
+        handleAjaxFormSubmit("#send-sms-form")
+    </script>
     <script>
         const usersDataUrl = "{{ route('users.campaigns.data') }}";
 

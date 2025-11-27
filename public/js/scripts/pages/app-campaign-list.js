@@ -25,7 +25,8 @@ var dt_user_table = $(".user-list-table").DataTable({
             defaultContent: "",
             orderable: false,
             render: function (data, type, row) {
-                `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+               return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.phone_number}"
+>`
                     ;
             },
         },
@@ -39,7 +40,7 @@ var dt_user_table = $(".user-list-table").DataTable({
             }
         },
         { data: "name" },
-        
+
         { data: "phone_number" },
 
     ],

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendSmsMessageJob;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -112,7 +113,13 @@ class UserService extends BaseService
             ->make();
     }
 
-
+    public function sendSms($validatedData): void
+    {
+        $users = $this->repository->query()
+            ->whereIn('id', $validatedData['numbers'])
+            ->get();
+        SendSmsMessageJob::dispatch($users, $validatedData['message']);
+    }
     public function changePassword($request, $id): bool
     {
         $request->validate([
