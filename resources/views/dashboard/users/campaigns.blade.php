@@ -280,7 +280,12 @@
             });
         });
 
-        handleAjaxFormSubmit("#send-sms-form")
+        handleAjaxFormSubmit("#send-sms-form",{
+            successMessages:"Sms send successfully",
+            onSuccess:function () {
+                location.reload();
+            }
+        })
     </script>
     <script>
         const usersDataUrl = "{{ route('users.campaigns.data') }}";
