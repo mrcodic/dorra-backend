@@ -121,31 +121,8 @@ class UserService extends BaseService
         $users = $this->repository->query()
             ->whereIn('phone_number', $validatedData['numbers'])
             ->get();
-        $sms = app(SmsInterface::class);
-        $chunkSize = 20;
-        $delaySeconds = 2;
-        $chunks = $users->chunk($chunkSize);
-        dd($chunks,$users);
-        foreach ($chunks as $index => $chunk) {
 
-            $numbers = $chunk->pluck('phone_number')
-                ->filter()
-                ->unique()
-                ->values()
-                ->toArray();
-            Log::info("numbers: " . json_encode($numbers));
-
-            if (empty($numbers)) {
-                continue;
-            }
-
-dump($numbers);
-            $sms->send($numbers, $validatedData['message'], ['language' => 1]);
-            if ($index < $chunks->count() - 1) {
-                sleep($delaySeconds);
-            }
-//        SendSmsMessageJob::dispatch($users, $validatedData['message']);
-        }
+        SendSmsMessageJob::dispatch($users, $validatedData['message']);
     }
     public function changePassword($request, $id): bool
     {
