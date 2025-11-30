@@ -16,7 +16,7 @@ class MockupRenderer
      * - tint color (HEX)
      * - configurable print box & size
      */
-    public function render(array $options): EncodedImageInterface
+    public function render(array $options)
     {
         // ----- 1) Read options with sane defaults -----
         $basePath   = $options['base_path'];         // required
@@ -66,10 +66,10 @@ class MockupRenderer
         }
         $encoded = $canvas->toPng(); // EncodedImage
 
-        dd(response((string) $encoded, 200)
-            ->header('Content-Type', $encoded->mimetype())) ;
+        return response((string) $encoded, 200)
+            ->header('Content-Type', $encoded->mimetype());
         // ----- 7) Return encoded PNG -----
-        return $canvas->toPng();
+//        return $canvas->toPng();
     }
 
     /**
