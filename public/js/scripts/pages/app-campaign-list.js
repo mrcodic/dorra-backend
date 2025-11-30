@@ -39,7 +39,7 @@ var dt_user_table = $(".user-list-table").DataTable({
             }
         },
         { data: "name" },
-        
+
         { data: "phone_number" },
 
     ],
