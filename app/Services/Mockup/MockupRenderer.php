@@ -64,7 +64,10 @@ class MockupRenderer
         if ($maxDim > 0) {
             $canvas->scaleDown(width: $maxDim, height: $maxDim);
         }
-dd($canvas->toPng());
+        $encoded = $canvas->toPng(); // EncodedImage
+
+        dd(response((string) $encoded, 200)
+            ->header('Content-Type', $encoded->mimetype())) ;
         // ----- 7) Return encoded PNG -----
         return $canvas->toPng();
     }
