@@ -22,7 +22,6 @@ class MockupRenderer
         $basePath   = $options['base_path'];         // required
         $shirtPath  = $options['shirt_path'];        // required
         $designPath = $options['design_path'] ?? null;
-dd($options);
         $hex        = $options['hex'] ?? '#D0293B';
 
         $printX     = $options['print_x'] ?? 360;
@@ -65,7 +64,7 @@ dd($options);
         if ($maxDim > 0) {
             $canvas->scaleDown(width: $maxDim, height: $maxDim);
         }
-
+dd($canvas->toPng());
         // ----- 7) Return encoded PNG -----
         return $canvas->toPng();
     }
