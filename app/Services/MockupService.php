@@ -109,13 +109,17 @@ class MockupService extends BaseService
                             if (!$baseMedia || !$maskMedia) {
                                 return [$sideName => null];
                             }
+                            $designMedia = $type == TypeEnum::BACK
+                                ? $template->getFirstMedia('back_templates')
+                                : $template->getFirstMedia('templates');
 
+                            if (! $designMedia || ! $designMedia->getPath()) {
+                                throw new \Exception("Missing design media for {$sideName}");
+                            }
                             $binary = (new MockupRenderer())->render([
                                 'base_path'   => $baseMedia->getPath(),
                                 'shirt_path'  => $maskMedia->getPath(),
-                                'design_path' => $type == TypeEnum::BACK
-                                    ? $template->getFirstMedia('back_templates')->getPath()
-                                    : $template->getFirstMedia('templates')->getPath(),
+                                'design_path' =>$designMedia->getPath(),
                             ]);
 
                             $model
