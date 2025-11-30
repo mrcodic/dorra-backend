@@ -68,6 +68,7 @@ class MockupResource extends JsonResource
             'shadow_url'    => $img('1678793789014.darkBlend1.png'),
             'mask_url'      => $img('mask.png'),
             'disp_url'      => $img('1678793789014.darkBlend1.png'),
+            'mockup_template_url' => $img('basic_tshirt_front.png'),
             'images' => $images,
         ];
     }
