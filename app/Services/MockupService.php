@@ -71,31 +71,17 @@ class MockupService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData) {
 
-            // 1) Create mockup
+
             $model = $this->repository->create($validatedData);
-
-            // 2) Attach types normally
             $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
-
-            // 3) Handle templates
             $templatesInput = collect(Arr::get($validatedData, 'templates', []));
 
             if ($templatesInput->isNotEmpty()) {
-
-                // 3.1 Attach all templates to pivot `mockup_template`
                 $templateIds = $templatesInput->pluck('template_id')->all();
                 $model->templates()->attach($templateIds);
-
-                // 3.2 Reload templates so pivot IDs exist
                 $model->load('templates');
-
-                // Key request data by template_id for easy lookup
                 $templatesById = $templatesInput->keyBy('template_id');
-
                 $rows = [];
-
-                // Map of request keys -> numeric template_type
-                // Adjust the numbers to your enum values
                 $typeMap = [
                     'front' => 1,
                     'back'  => 2,
@@ -105,7 +91,7 @@ class MockupService extends BaseService
                 foreach ($model->templates as $template) {
                     $input = $templatesById->get($template->id);
                     if (!$input) {
-                        continue; // no extra data for this template
+                        continue;
                     }
 
                     $pivotId = $template->pivot->id; // from withPivot('id')
