@@ -155,8 +155,7 @@
 
                     {{-- create mockup button --}}
                     @can('mockups_create')
-                    <a class="btn btn-outline-primary col-12 col-md-3 col-lg-2" data-bs-toggle="modal"
-                        data-bs-target="#addMockupModal" href="">
+                    <a class="btn btn-outline-primary col-12 col-md-3 col-lg-2"  href="{{ route("mockups.create") }}">
                         <i data-feather="plus"></i>
                         Create Mockup
                     </a>

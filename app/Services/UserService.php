@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
+use App\Jobs\SendSmsMessageJob;
+use App\Services\SMS\SmsInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rules\Password;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -101,10 +105,37 @@ class UserService extends BaseService
     {
         $users = $this->repository
             ->query(['id', 'first_name', 'last_name', 'phone_number'])
-           ->latest();
+            ->when(request()->filled('order_count'), function ($query) {
+                $filter = request('order_count');
+
+                if ($filter == '0') {
+                    $query->whereDoesntHave('orders');
+                }
+                if ($filter == '1_5') {
+                    $query->whereHas('orders', function ($q) {
+                        $q->select('user_id')
+                            ->groupBy('user_id')
+                            ->havingRaw('COUNT(*) BETWEEN 1 AND 5');
+                    });
+                }
+
+                if ($filter == '5_plus') {
+                    $query->whereHas('orders', function ($q) {
+                        $q->select('user_id')
+                            ->groupBy('user_id')
+                            ->havingRaw('COUNT(*) > 5');
+                    });
+                }
+            })
+            ->latest();
+
+
+
         return DataTables::of($users)
             ->addColumn('name', function ($user) {
                 return $user->name;
+            })->addColumn('phone_number', function ($user) {
+                return $user->phone_number ?? "-";
             })
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('users') ?: asset("images/default-user.png");
@@ -112,7 +143,15 @@ class UserService extends BaseService
             ->make();
     }
 
+    public function sendSms($validatedData): void
+    {
 
+        $users = $this->repository->query()
+            ->whereIn('phone_number', $validatedData['numbers'])
+            ->get();
+
+        SendSmsMessageJob::dispatch($users, $validatedData['message']);
+    }
     public function changePassword($request, $id): bool
     {
         $request->validate([

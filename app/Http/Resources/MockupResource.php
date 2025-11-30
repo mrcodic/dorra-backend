@@ -2,8 +2,9 @@
 
 namespace App\Http\Resources;
 
-use App\Http\Resources\Product\ProductResource;
+
 use App\Http\Resources\Template\TypeResource;
+use App\Services\Mockup\MockupRenderer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -53,6 +54,29 @@ class MockupResource extends JsonResource
                     ]
                 ];
             });
+        $mockupTemplateImages = collect($this->types)
+            ->mapWithKeys(function ($type)  {
+                $sideName = strtolower($type->value->name);
+
+                $baseMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
+                    return $media->getCustomProperty('side') === $sideName &&
+                        $media->getCustomProperty('role') === 'base';
+                });
+
+                $maskMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
+                    return $media->getCustomProperty('side') === $sideName &&
+                        $media->getCustomProperty('role') === 'mask';
+                });
+
+                return [
+                    $sideName =>(new MockupRenderer())->render([
+                        'base_path' => $baseMedia?->getPath(),
+                        'shirt_path' => $maskMedia?->getPath(),
+                        'design_path' => $maskMedia?->getPath(),
+                    ])
+                ];
+            });
+
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -68,6 +92,7 @@ class MockupResource extends JsonResource
             'shadow_url'    => $img('1678793789014.darkBlend1.png'),
             'mask_url'      => $img('mask.png'),
             'disp_url'      => $img('1678793789014.darkBlend1.png'),
+            'mockup_template_urls' => $mockupTemplateImages,
             'images' => $images,
         ];
     }

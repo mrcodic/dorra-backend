@@ -13,13 +13,25 @@ class SmsMisrService implements SmsInterface
     {
         $this->conig = config('services.sms_misr');
     }
+    function normalizeEgyptianNumber($number): array|string|null
+    {
+        $number = preg_replace('/\D+/', '', $number);
+        if (str_starts_with($number, '0')) {
+            $number = substr($number, 1);
+        }
+        if (!str_starts_with($number, '20')) {
+            $number = '20' . $number;
+        }
+        return $number;
+    }
 
     /**
      * @inheritDoc
      */
     public function send(array|string $numbers, string $message, array $options = [])
     {
-        $numbers = is_array($numbers) ? implode(',', $numbers) : $numbers;
+        $numbers = array_map([$this, 'normalizeEgyptianNumber'], (array) $numbers);
+        $numbers = implode(',', $numbers);
         $payload = [
             'environment' => $this->conig['environment'],
             'username' => $this->conig['username'],

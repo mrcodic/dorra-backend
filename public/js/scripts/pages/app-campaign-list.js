@@ -15,7 +15,7 @@ var dt_user_table = $(".user-list-table").DataTable({
         type: "GET",
         data: function (d) {
             d.search_value = $("#search-user-form").val(); // get from input
-            d.created_at = $(".filter-date").val();
+            d.order_count = $("#filter-order-count").val();
             return d;
         },
     },
@@ -25,7 +25,8 @@ var dt_user_table = $(".user-list-table").DataTable({
             defaultContent: "",
             orderable: false,
             render: function (data, type, row) {
-                `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
+               return `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.phone_number}"
+>`
                     ;
             },
         },
@@ -83,7 +84,7 @@ $("#search-user-form").on("keyup", function () {
 
 // Custom search with debounce
 
-$(".filter-date").on("change", function () {
+$("#filter-order-count").on("change", function () {
     dt_user_table.draw();
 });
 

@@ -45,6 +45,7 @@ class UserController extends DashboardController
     {
         return $this->userService->getData();
     }
+
     public function getCampaignData(): JsonResponse
     {
         return $this->userService->getCampaignData();
@@ -67,6 +68,18 @@ class UserController extends DashboardController
     public function campaigns()
     {
         return view('dashboard.users.campaigns');
+    }
+
+    public function sendSms(Request $request): JsonResponse
+    {
+        $validatedData = $request->validate([
+            'numbers' => ['required', 'array'],
+            'numbers.*' => ['exists:users,phone_number'],
+            'message' => ['required', 'string'],
+        ]);
+        $this->userService->sendSms($validatedData);
+        return Response::api();
+
     }
 }
 

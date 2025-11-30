@@ -177,7 +177,7 @@
                     "slug": ""
                 },
                 {
-                    "url": "/campaigns",
+                    "url": "/users/campaigns",
                     "name": "Campaigns",
                     "icon": "circle",
                     "slug": ""

@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Repositories\Implementations\StationStatusRepository;
 use App\Services\FlagService;
+use App\Services\MockupService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
     CountryResource,
@@ -18,6 +19,7 @@ use App\Http\Resources\{CategoryResource,
     FlagResource,
     FolderResource,
     MediaResource,
+    MockupResource,
     Product\ProductResource,
     SettingResource,
     SocialLinkResource,
@@ -35,6 +37,7 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     DimensionRepositoryInterface,
     IndustryRepositoryInterface,
     MessageRepositoryInterface,
+    MockupRepositoryInterface,
     ProductRepositoryInterface,
     SettingRepositoryInterface,
     SocialLinkRepositoryInterface,
@@ -75,6 +78,7 @@ class MainController extends Controller
         public SettingRepositoryInterface      $settingRepository,
         public IndustryRepositoryInterface    $industryRepository,
         public SocialLinkRepositoryInterface $socialLinkRepository,
+        public MockupService $mockupService,
 
     )
     {
@@ -92,6 +96,11 @@ class MainController extends Controller
         return Response::api();
     }
 
+    public function mockups()
+    {
+        return Response::api(data: MockupResource::collection($this->mockupService->getAll()));
+
+    }
     public function countries()
     {
         return Response::api(data: CountryResource::collection($this->countryRepository->all()));
