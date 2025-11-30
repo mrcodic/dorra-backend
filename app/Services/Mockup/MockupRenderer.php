@@ -2,6 +2,7 @@
 
 namespace App\Services\Mockup;
 
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Interfaces\EncodedImageInterface;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -64,12 +65,16 @@ class MockupRenderer
         if ($maxDim > 0) {
             $canvas->scaleDown(width: $maxDim, height: $maxDim);
         }
-        $encoded = $canvas->toPng(); // EncodedImage
 
-        return response((string) $encoded, 200)
-            ->header('Content-Type', $encoded->mimetype());
         // ----- 7) Return encoded PNG -----
-//        return $canvas->toPng();
+        $png = $canvas->toPng()->toString();  // Get raw PNG string
+
+        $fileName = 'mockup_' . uniqid() . '.png';
+        $filePath = 'mockups/' . $fileName;
+
+        Storage::disk('public')->put($filePath, $png);
+
+        return Storage::disk('public')->url($filePath);
     }
 
     /**
