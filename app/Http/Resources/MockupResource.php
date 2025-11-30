@@ -70,9 +70,9 @@ class MockupResource extends JsonResource
 
                 return [
                     $sideName => app((new MockupRenderer())->render([
-                        'base_path' => $baseMedia?->getFullUrl(),
-                        'shirt_path' => $maskMedia?->getFullUrl(),
-                        'design_path' => $maskMedia?->getFullUrl(),
+                        'base_path' => $baseMedia?->getPath(),
+                        'shirt_path' => $maskMedia?->getPath(),
+                        'design_path' => $maskMedia?->getPath(),
                     ]))
                 ];
             });
