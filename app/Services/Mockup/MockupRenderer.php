@@ -67,14 +67,9 @@ class MockupRenderer
         }
 
         // ----- 7) Return encoded PNG -----
-        $png = $canvas->toPng()->toString();  // Get raw PNG string
+       return $canvas->toPng()->toString();  // Get raw PNG string
 
-        $fileName = 'mockup_' . uniqid() . '.png';
-        $filePath = 'mockups/' . $fileName;
 
-        Storage::disk('public')->put($filePath, $png);
-
-        return Storage::disk('public')->url($filePath);
     }
 
     /**

@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Enums\Mockup\TypeEnum;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
+use App\Services\Mockup\MockupRenderer;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -92,6 +93,43 @@ class MockupService extends BaseService
                 ];
 
                 foreach ($model->templates as $template) {
+                    collect($model->types)
+                        ->mapWithKeys(function ($type) use ($model, $template) {
+
+                            $sideName = strtolower($type->value->name);
+
+                            $baseMedia = $model->getMedia('mockups')
+                                ->first(fn ($m) => $m->getCustomProperty('side') === $sideName &&
+                                    $m->getCustomProperty('role') === 'base');
+
+                            $maskMedia = $model->getMedia('mockups')
+                                ->first(fn ($m) => $m->getCustomProperty('side') === $sideName &&
+                                    $m->getCustomProperty('role') === 'mask');
+
+                            if (!$baseMedia || !$maskMedia) {
+                                return [$sideName => null];
+                            }
+
+                            $binary = (new MockupRenderer())->render([
+                                'base_path'   => $baseMedia->getPath(),
+                                'shirt_path'  => $maskMedia->getPath(),
+                                'design_path' => $type == TypeEnum::BACK
+                                    ? $template->getFirstMedia('back_templates')->getPath()
+                                    : $template->getFirstMedia('templates')->getPath(),
+                            ]);
+
+                            $model
+                                ->addMediaFromString($binary)
+                                ->usingFileName("mockup_{$sideName}.png")
+                                ->withCustomProperties([
+                                    'side' => $sideName,
+                                    'template_id' => $template->id,
+                                ])
+                                ->toMediaCollection('generated_mockups');
+
+
+                        });
+
                     $input = $templatesById->get($template->id);
                     if (!$input) {
                         continue;
