@@ -37,6 +37,9 @@ class MockupService extends BaseService
                     $q->whereRaw('1 = 0');
                 }
             })
+            ->when(request()->filled('color'),function ($query){
+
+            })
             ->when(request()->filled('product_id'), fn($q) => $q->whereCategoryId(request('product_id')))
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates',function ($query){
                 $query->where('templates.id',request('template_id'));
