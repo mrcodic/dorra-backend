@@ -40,7 +40,7 @@ class MockupService extends BaseService
             ->when(request()->filled('product_id'), fn($q) => $q->whereCategoryId(request('product_id')))
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates',function ($query){
                 $query->where('templates.id',request('template_id'));
-            })
+            }))
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.id',request('type'))))
             ->when(request()->filled('search'), function ($q) {
