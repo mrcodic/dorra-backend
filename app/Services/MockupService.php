@@ -119,7 +119,7 @@ class MockupService extends BaseService
                             $binary = (new MockupRenderer())->render([
                                 'base_path'   => $baseMedia->getPath(),
                                 'shirt_path'  => $maskMedia->getPath(),
-                                'design_path' =>$designMedia->getPath(),
+                                'design_path' =>$maskMedia->getPath(),
                             ]);
 
                             $model
