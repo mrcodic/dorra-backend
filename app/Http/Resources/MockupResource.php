@@ -69,13 +69,14 @@ class MockupResource extends JsonResource
                 });
 
                 return [
-                    $sideName => app((new MockupRenderer())->render([
+                    $sideName =>(new MockupRenderer())->render([
                         'base_path' => $baseMedia?->getPath(),
                         'shirt_path' => $maskMedia?->getPath(),
                         'design_path' => $maskMedia?->getPath(),
-                    ]))
+                    ])
                 ];
             });
+
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
