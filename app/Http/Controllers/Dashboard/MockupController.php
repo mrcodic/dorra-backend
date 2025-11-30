@@ -8,7 +8,9 @@ use App\Http\Controllers\Base\DashboardController;
 
 use App\Http\Resources\MockupResource;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\PositionRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\TypeRepositoryInterface;
 use App\Services\MockupService;
 use Illuminate\Support\Facades\Response;
@@ -21,6 +23,8 @@ class MockupController extends DashboardController
         public MockupService              $mockupService,
         public CategoryRepositoryInterface $categoryRepository,
         public TypeRepositoryInterface    $typeRepository,
+        public PositionRepositoryInterface $positionRepository,
+        public TemplateRepositoryInterface $templateRepository,
 
     )
     {
@@ -28,13 +32,17 @@ class MockupController extends DashboardController
         $this->storeRequestClass = new StoreMockupRequest();
         $this->updateRequestClass = new UpdateMockupRequest();
         $this->indexView = 'mockups.index';
+        $this->createView = 'mockups.create';
         $this->usePagination = true;
         $this->resourceTable = 'mockups';
         $this->assoiciatedData = [
-            'index' => [
+            'shared' => [
                 'products' => $this->categoryRepository->query()->whereHasMockup(true)->get(['id', 'name']),
+                'positions' => $this->positionRepository->query()->get(['id', 'name']),
+                'templates' => $this->templateRepository->query()->get(['id', 'name']),
                 'types' => $this->typeRepository->query()->get(['id', 'name']),
             ],
+
         ];
         $this->methodRelations = [
             'index' => [ 'types'],

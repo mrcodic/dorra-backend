@@ -7,6 +7,7 @@ use App\Enums\Mockup\TypeEnum;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MockupService extends BaseService
@@ -37,6 +38,9 @@ class MockupService extends BaseService
                 }
             })
             ->when(request()->filled('product_id'), fn($q) => $q->whereCategoryId(request('product_id')))
+            ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates',function ($query){
+                $query->where('templates.id',request('template_id'));
+            })
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.id',request('type'))))
             ->when(request()->filled('search'), function ($q) {
@@ -62,15 +66,75 @@ class MockupService extends BaseService
     }
 
 
+
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $model = $this->handleTransaction(function () use ($validatedData, $relationsToLoad) {
+        $model = $this->handleTransaction(function () use ($validatedData) {
+
+            // 1) Create mockup
             $model = $this->repository->create($validatedData);
+
+            // 2) Attach types normally
             $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
+
+            // 3) Handle templates
+            $templatesInput = collect(Arr::get($validatedData, 'templates', []));
+
+            if ($templatesInput->isNotEmpty()) {
+
+                // 3.1 Attach all templates to pivot `mockup_template`
+                $templateIds = $templatesInput->pluck('template_id')->all();
+                $model->templates()->attach($templateIds);
+
+                // 3.2 Reload templates so pivot IDs exist
+                $model->load('templates');
+
+                // Key request data by template_id for easy lookup
+                $templatesById = $templatesInput->keyBy('template_id');
+
+                $rows = [];
+
+                // Map of request keys -> numeric template_type
+                // Adjust the numbers to your enum values
+                $typeMap = [
+                    'front' => 1,
+                    'back'  => 2,
+                    'none'  => 3,
+                ];
+
+                foreach ($model->templates as $template) {
+                    $input = $templatesById->get($template->id);
+                    if (!$input) {
+                        continue; // no extra data for this template
+                    }
+
+                    $pivotId = $template->pivot->id; // from withPivot('id')
+
+                    foreach ($typeMap as $field => $typeValue) {
+                        // e.g. if "front" exists in the request for this template
+                        if (!empty($input[$field])) {
+                            $rows[] = [
+                                'mockup_template_id' => $pivotId,
+                                'position_id'        => $input[$field],  // e.g. "1"
+                                'template_type'      => $typeValue,      // e.g. 1 = front
+                                'created_at'         => now(),
+                                'updated_at'         => now(),
+                            ];
+                        }
+                    }
+                }
+
+                if (!empty($rows)) {
+                    DB::table('mockup_position_template')->insert($rows);
+                }
+            }
+
             return $model;
         });
+
         return $this->handleFiles($model);
     }
+
 
     /**
      * @param mixed $model
