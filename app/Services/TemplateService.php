@@ -11,7 +11,7 @@ use App\Repositories\Base\BaseRepositoryInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Validation\ValidationException;
-use App\Repositories\Interfaces\{ProductRepositoryInterface, TemplateRepositoryInterface};
+use App\Repositories\Interfaces\{CategoryRepositoryInterface, ProductRepositoryInterface, TemplateRepositoryInterface};
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TemplateService extends BaseService
@@ -20,6 +20,7 @@ class TemplateService extends BaseService
 
     public function __construct(TemplateRepositoryInterface $repository
         , public ProductRepositoryInterface                 $productRepository
+        ,public CategoryRepositoryInterface                 $categoryRepository
     )
     {
         parent::__construct($repository);
@@ -73,6 +74,9 @@ class TemplateService extends BaseService
                     })
                         ->orwhereHas('products.category', function ($q) use ($categoryId) {
                             $q->where('categories.id', $categoryId);
+                        })->orwhereHas('products', function ($q) use ($categoryId) {
+                            $category =  $this->categoryRepository->find($categoryId);
+                            $q->whereIn('products.id', $category->products->pluck('id'));
                         });
                 });
 
