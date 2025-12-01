@@ -216,6 +216,7 @@ class MockupService extends BaseService
                                 'base_path' => $baseMedia->getPath(),
                                 'shirt_path' => $maskMedia->getPath(),
                                 'design_path' => $designMedia->getPath(),
+                                'hex' => $model->colors ? $model->colors[0] : null,
                             ]);
 
                             $model
@@ -238,12 +239,12 @@ class MockupService extends BaseService
                     $pivotId = $template->pivot->id; // from withPivot('id')
 
                     foreach ($typeMap as $field => $typeValue) {
-                        // e.g. if "front" exists in the request for this template
+
                         if (!empty($input[$field])) {
                             $rows[] = [
                                 'mockup_template_id' => $pivotId,
-                                'position_id' => $input[$field],  // e.g. "1"
-                                'template_type' => $typeValue,      // e.g. 1 = front
+                                'position_id' => $input[$field],
+                                'template_type' => $typeValue,
                                 'created_at' => now(),
                                 'updated_at' => now(),
                             ];

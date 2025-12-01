@@ -257,13 +257,11 @@
                     product_without_category_id: productId,
                     request_type: "api",
                     approach: "without_editor",
-                    // لو حبيت تبعت أنواع الموك اب:
                     // selected_types: selectedTypes.join(',')
                 },
                 success: function (response) {
                     console.log('templates response:', response);
 
-                    // دعم حالتين: لو API رجع data أو رجع array مباشر
                     const templates = Array.isArray(response)
                         ? response
                         : (response.data ?? []);
