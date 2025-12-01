@@ -23,7 +23,8 @@ class MockupRenderer
         $basePath   = $options['base_path'];         // required
         $shirtPath  = $options['shirt_path'];        // required
         $designPath = $options['design_path'] ?? null;
-        $hex        = $options['hex'] ?? '#D0293B';
+        $hex = $options['hex'] ?? null;
+
 
         $printX     = $options['print_x'] ?? 360;
         $printY     = $options['print_y'] ?? 660;
@@ -42,7 +43,12 @@ class MockupRenderer
         }
 
         // ----- 3) Tint the shirt -----
-        $tintedShirt = $this->tintShirt($shirt, $hex);
+        // ----- 3) Tint the shirt (only if hex provided) -----
+        $tintedShirt = $shirt;
+
+        if (!empty($hex)) {
+            $tintedShirt = $this->tintShirt($shirt, $hex);
+        }
 
         // ----- 4) Compose canvas -----
         $canvas = clone $base;
