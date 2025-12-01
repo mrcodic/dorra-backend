@@ -294,14 +294,15 @@
         document.getElementById('productsSelect')
             ?.addEventListener('change', function () {
                 window.updateTemplateVisibility();
-                loadTemplates();
+                setTimeout(loadTemplates, 150); // ⭐ wait until repeater adjusts DOM
             });
 
         document.querySelectorAll('.type-checkbox')
             .forEach(cb => cb.addEventListener('change', function () {
                 window.updateTemplateVisibility();
-                loadTemplates();
+                setTimeout(loadTemplates, 150); // ⭐ DOM always ready
             }));
+
 
     </script>
     <script>
