@@ -164,7 +164,8 @@
 
                                             <div class="form-group mb-2 col-4 position-wrapper d-none"
                                                  data-type="{{ $typeKey }}">
-                                                <label class="label-text mb-1">{{ $type->value->label() }} Position</label>
+                                                <label class="label-text mb-1">{{ $type->value->label() }}
+                                                    Position</label>
 
                                                 {{-- 👇 This is inside data-repeater-item, so it becomes:
                                                      templates[INDEX][positions][front] = {id} --}}
@@ -179,7 +180,8 @@
 
                                         <!-- DELETE -->
                                         <div class="col-12 text-end">
-                                            <button type="button" data-repeater-delete class="btn btn-sm btn-light-danger">
+                                            <button type="button" data-repeater-delete
+                                                    class="btn btn-sm btn-light-danger">
                                                 Remove Template
                                             </button>
                                         </div>
@@ -272,11 +274,11 @@
                 method: "GET",
                 data: {
                     product_without_category_id: productId,
-                    request_type:"api",
+                    request_type: "api",
                     approach: "without_editor",
                 },
                 success: function (response) {
-                    console.log(response)
+                    console.log(response.data)
                     let templateSelects = document.querySelectorAll(`[name="template_id"]`);
 
                     templateSelects.forEach(select => {
@@ -288,6 +290,7 @@
                 }
             });
         }
+
         document.getElementById('productsSelect')
             ?.addEventListener('change', function () {
                 window.updateTemplateVisibility();
@@ -304,12 +307,12 @@
     <script>
         // 🔹 Make it available globally so repeater can call it
         window.updateTemplateVisibility = function () {
-            const productSelect   = document.getElementById('productsSelect');
+            const productSelect = document.getElementById('productsSelect');
             const templateWrapper = document.getElementById('template-wrapper');
-            const typeCheckboxes  = document.querySelectorAll('.type-checkbox');
+            const typeCheckboxes = document.querySelectorAll('.type-checkbox');
 
             const productSelected = productSelect?.value;
-            const selectedTypes   = [...typeCheckboxes]
+            const selectedTypes = [...typeCheckboxes]
                 .filter(cb => cb.checked)
                 .map(cb => cb.dataset.typeName);
 
@@ -335,7 +338,7 @@
         };
 
         document.addEventListener('DOMContentLoaded', function () {
-            const productSelect  = document.getElementById('productsSelect');
+            const productSelect = document.getElementById('productsSelect');
             const typeCheckboxes = document.querySelectorAll('.type-checkbox');
 
             // Bind events
