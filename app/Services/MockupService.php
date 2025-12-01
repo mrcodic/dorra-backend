@@ -39,16 +39,17 @@ class MockupService extends BaseService
             ->values()
             ->toArray();
 
-        $urls = [];
+        $urls  = [];
         $color = request('color');
+
         foreach ($mockups as $mockup) {
-
             foreach ($mockup->templates as $template) {
-
                 foreach ($mockup->types as $type) {
-
                     $sideName = strtolower($type->value->name);
 
+                    // ===========================
+                    // 1) نحدد الـ base و mask
+                    // ===========================
                     $baseMedia = $mockup->getMedia('mockups')
                         ->first(fn($m) =>
                             $m->getCustomProperty('side') === $sideName &&
@@ -61,27 +62,62 @@ class MockupService extends BaseService
                             $m->getCustomProperty('role') === 'mask'
                         );
 
-                    if (!$baseMedia || !$maskMedia) continue;
+                    if (!$baseMedia || !$maskMedia) {
+                        continue;
+                    }
 
                     $designMedia = $type == TypeEnum::BACK
                         ? $template->getFirstMedia('back_templates')
                         : $template->getFirstMedia('templates');
 
-                    if (!$designMedia) continue;
+                    if (!$designMedia || !$designMedia->getPath()) {
+                        continue;
+                    }
 
+                    // ===========================
+                    // 2) نشوف لو فيه موكاب متخزن قبل كده بنفس:
+                    // mockup + template_id + side + color
+                    // ===========================
+                    $existingMedia = $mockup->getMedia('generated_mockups')
+                        ->first(function ($m) use ($sideName, $template, $color) {
+                            return $m->getCustomProperty('side') === $sideName
+                                && $m->getCustomProperty('template_id') === $template->id
+                                && $m->getCustomProperty('color') === $color;
+                        });
 
+                    if ($existingMedia) {
+                        // ✅ موكاب باللون ده موجود بالفعل → استخدم URL وخلاص
+                        $urls[] = $existingMedia->getFullUrl();
+                        continue;
+                    }
+
+                    // ===========================
+                    // 3) مفيش موكاب سابق → نولّد جديد باللون المطلوب
+                    // ===========================
                     $binary = $this->renderer->render([
                         'base_path'   => $baseMedia->getPath(),
                         'shirt_path'  => $maskMedia->getPath(),
                         'design_path' => $designMedia->getPath(),
-                        'hex'         => $color,
+                        'hex'         => $color,  // ✅ اللون اللي جاي من الريكوست
                     ]);
 
+                    $media = $mockup
+                        ->addMediaFromString($binary)
+                        ->usingFileName("mockup_{$sideName}_{$template->id}_{$color}.png")
+                        ->withCustomProperties([
+                            'side'        => $sideName,
+                            'template_id' => $template->id,
+                            'color'       => $color, // ✅ نخزن اللون لأول مرة
+                        ])
+                        ->toMediaCollection('generated_mockups');
 
-                    $urls[] = 'data:image/png;base64,' . base64_encode($binary);
+                    $urls[] = $media->getFullUrl();
                 }
             }
         }
+
+        // ممكن تشيل الـ unique لو عايز تكرار
+        $urls = array_values(array_unique($urls));
 
         return [
             'colors' => $colors,
