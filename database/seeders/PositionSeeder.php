@@ -13,12 +13,18 @@ class PositionSeeder extends Seeder
      */
     public function run(): void
     {
-        Position::create([
+        Position::createMany([[
             'name' => 'top-left',
             'print_x' => 360,
             'print_y' => 660,
             'print_height' => 480,
             'print_width' => 540,
-        ]);
+        ],[
+            'name' => 'center',
+            'print_x' => 360,
+            'print_y' => 660,
+            'print_height' => 480,
+            'print_width' => 540,
+        ]]);
     }
 }
