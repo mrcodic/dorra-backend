@@ -15,7 +15,7 @@ class MockupService extends BaseService
 {
     public BaseRepositoryInterface $repository;
 
-    public function __construct(MockupRepositoryInterface $repository)
+    public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer)
     {
         parent::__construct($repository);
     }
@@ -36,15 +36,63 @@ class MockupService extends BaseService
             ->flatten()
             ->unique()
             ->values();
-
         $urls = $mockups
             ->flatMap(fn($m) => $m->getMedia('generated_mockups')->map->getFullUrl())
             ->unique()
             ->values();
+        $urls = [];
+        $color = request()->color;
+        foreach ($mockups as $mockup) {
+
+            foreach ($mockup->templates as $template) {
+                collect($mockup->types)
+                    ->each(function ($type) use ($mockup, $template, $color) {
+
+                        $sideName = strtolower($type->value->name);
+
+                        $baseMedia = $mockup->getMedia('mockups')
+                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                                $m->getCustomProperty('role') === 'base');
+
+                        $maskMedia = $mockup->getMedia('mockups')
+                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                                $m->getCustomProperty('role') === 'mask');
+                        if (!$baseMedia || !$maskMedia) {
+                            return [$sideName => null];
+                        }
+                        $designMedia = $type == TypeEnum::BACK
+                            ? $template->getFirstMedia('back_templates')
+                            : $template->getFirstMedia('templates');
+                        if (!$designMedia || !$designMedia->getPath()) {
+                            throw new \Exception("Missing design media for {$sideName}");
+                        }
+                        $binary = (new MockupRenderer())->render([
+                            'base_path' => $baseMedia->getPath(),
+                            'shirt_path' => $maskMedia->getPath(),
+                            'design_path' => $designMedia->getPath(),
+                            'hex' => $color,
+                        ]);
+
+                        $mockup
+                            ->addMediaFromString($binary)
+                            ->usingFileName("mockup_{$sideName}.png")
+                            ->withCustomProperties([
+                                'side' => $sideName,
+                                'template_id' => $template->id,
+                            ])
+                            ->toMediaCollection('generated_mockups');
+
+
+                    });
+
+            }
+
+        }
+
 
         return [
             'colors' => $colors,
-            'urls'   => $urls,
+            'urls' => $urls,
         ];
     }
 
@@ -101,7 +149,7 @@ class MockupService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
 
-//        $model = $this->handleTransaction(function () use ($validatedData) {
+        $model = $this->handleTransaction(function () use ($validatedData) {
 
 
         $model = $this->repository->create($validatedData);
@@ -188,7 +236,7 @@ class MockupService extends BaseService
         }
 
         return $model;
-//        });
+        });
 
         return $model;
     }
