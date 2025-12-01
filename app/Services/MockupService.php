@@ -28,70 +28,69 @@ class MockupService extends BaseService
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
                 $query->where('templates.id', request('template_id'));
             }))
+            ->with(['templates', 'types', 'media'])
             ->get();
 
-
+        // ✅ الألوان من العمود
         $colors = $mockups->pluck('colors')
             ->filter()
             ->flatten()
             ->unique()
-            ->values();
-  
+            ->values()
+            ->toArray();
+
         $urls = [];
-        $color = request()->color;
+        $color = request('color'); // اللون المطلوب
+        $renderer = new MockupRenderer();
+
         foreach ($mockups as $mockup) {
 
             foreach ($mockup->templates as $template) {
-                collect($mockup->types)
-                    ->each(function ($type) use ($mockup, $template, $color) {
 
-                        $sideName = strtolower($type->value->name);
+                foreach ($mockup->types as $type) {
 
-                        $baseMedia = $mockup->getMedia('mockups')
-                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                                $m->getCustomProperty('role') === 'base');
+                    $sideName = strtolower($type->value->name);
 
-                        $maskMedia = $mockup->getMedia('mockups')
-                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                                $m->getCustomProperty('role') === 'mask');
-                        if (!$baseMedia || !$maskMedia) {
-                            return [$sideName => null];
-                        }
-                        $designMedia = $type == TypeEnum::BACK
-                            ? $template->getFirstMedia('back_templates')
-                            : $template->getFirstMedia('templates');
-                        if (!$designMedia || !$designMedia->getPath()) {
-                            throw new \Exception("Missing design media for {$sideName}");
-                        }
-                        $binary = (new MockupRenderer())->render([
-                            'base_path' => $baseMedia->getPath(),
-                            'shirt_path' => $maskMedia->getPath(),
-                            'design_path' => $designMedia->getPath(),
-                            'hex' => $color,
-                        ]);
+                    $baseMedia = $mockup->getMedia('mockups')
+                        ->first(fn($m) =>
+                            $m->getCustomProperty('side') === $sideName &&
+                            $m->getCustomProperty('role') === 'base'
+                        );
 
-                        $urls [] = $mockup
-                            ->addMediaFromString($binary)
-                            ->usingFileName("mockup_{$sideName}.png")
-                            ->withCustomProperties([
-                                'side' => $sideName,
-                                'template_id' => $template->id,
-                            ])
-                            ->toMediaCollection('generated_mockups');
+                    $maskMedia = $mockup->getMedia('mockups')
+                        ->first(fn($m) =>
+                            $m->getCustomProperty('side') === $sideName &&
+                            $m->getCustomProperty('role') === 'mask'
+                        );
 
-                        return $urls;
-                    });
+                    if (!$baseMedia || !$maskMedia) continue;
 
+                    $designMedia = $type == TypeEnum::BACK
+                        ? $template->getFirstMedia('back_templates')
+                        : $template->getFirstMedia('templates');
+
+                    if (!$designMedia) continue;
+
+                    // ✅ توليد الصورة باللون المطلوب
+                    $binary = $renderer->render([
+                        'base_path'   => $baseMedia->getPath(),
+                        'shirt_path'  => $maskMedia->getPath(),
+                        'design_path' => $designMedia->getPath(),
+                        'hex'         => $color,
+                    ]);
+
+                    // ✅ رجّع Base64 أو URL مؤقت
+                    $urls[] = 'data:image/png;base64,' . base64_encode($binary);
+                }
             }
-
         }
-
 
         return [
             'colors' => $colors,
-            'urls' => $urls,
+            'urls'   => $urls,
         ];
     }
+
 
 
     public function getAll(
