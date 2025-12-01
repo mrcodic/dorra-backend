@@ -281,7 +281,7 @@
 
                     templateSelects.forEach(select => {
                         select.innerHTML = `<option value="" disabled selected>Choose template</option>`;
-                        response.templates.forEach(t => {
+                        response.data.forEach(t => {
                             select.innerHTML += `<option value="${t.id}">${t.name}</option>`;
                         });
                     });
