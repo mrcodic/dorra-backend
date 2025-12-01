@@ -151,7 +151,6 @@
                                         <div class="form-group mb-2 col-4">
                                             <label class="label-text mb-1">Template</label>
                                             <select name="template_id" class="form-select">
-                                                <option value="" disabled selected>Choose template</option>
 
                                             </select>
                                         </div>
