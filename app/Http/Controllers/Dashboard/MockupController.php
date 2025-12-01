@@ -40,7 +40,6 @@ class MockupController extends DashboardController
             'shared' => [
                 'products' => $this->categoryRepository->query()->whereHasMockup(true)->get(['id', 'name']),
                 'positions' => $this->positionRepository->query()->get(['id', 'name']),
-                'templates' => $this->templateRepository->query()->get(['id', 'name']),
                 'types' => $this->typeRepository->query()->get(['id', 'name']),
             ],
 

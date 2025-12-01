@@ -110,8 +110,8 @@
                                     <option value="" disabled>Choose product</option>
                                     @foreach($associatedData['products'] as $product)
                                         <option value="{{ $product->id }}"
-                                        @selected($product->id == $model->category_id)">
-                                        {{ $product->getTranslation('name', app()->getLocale()) }}
+                                        @selected($product->id == $model->category_id)>
+                                        {{ $product->name }}
                                         </option>
                                     @endforeach
                                 </select>
