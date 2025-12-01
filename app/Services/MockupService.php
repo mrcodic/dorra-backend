@@ -271,35 +271,53 @@ class MockupService extends BaseService
      */
     public function handleFiles(mixed $model, $clearExisting = false): mixed
     {
-        if (request()->allFiles()) {
-            $types = collect(request()->input('types', []));
-            $mediaTypes = collect(['base_image', 'mask_image']);
-            $types->each(function ($type) use ($mediaTypes, $model, $clearExisting) {
-                $sideName = strtolower(TypeEnum::from($type)->name);
-                $mediaTypes->each(function ($mediaType) use ($sideName, $type, $model, $clearExisting) {
-                    $inputName = "{$sideName}_{$mediaType}";
-
-                    if (request()->hasFile($inputName)) {
-                        $customProperties = [
-                            'side' => $sideName,
-                            'role' => str_contains($mediaType, 'base') ? 'base' : 'mask',
-                        ];
-
-                        handleMediaUploads(
-                            request()->file($inputName),
-                            $model,
-                            customProperties: $customProperties,
-                            clearExisting: $clearExisting);
-                    }
-                });
-            });
+        if (!request()->allFiles()) {
+            return $model;
         }
+
+        $types      = collect(request()->input('types', []));
+        $mediaTypes = collect(['base_image', 'mask_image']);
+
+        $types->each(function ($type) use ($mediaTypes, $model, $clearExisting) {
+            $sideName = strtolower(TypeEnum::from($type)->name);
+
+            $mediaTypes->each(function ($mediaType) use ($sideName, $type, $model, $clearExisting) {
+                $inputName = "{$sideName}_{$mediaType}";
+
+                if (!request()->hasFile($inputName)) {
+                    return;
+                }
+
+                $role = str_contains($mediaType, 'base') ? 'base' : 'mask';
+
+                if ($clearExisting) {
+                    $model->media()
+                        ->where('collection_name', 'mockups')
+                        ->where('custom_properties->side', $sideName)
+                        ->where('custom_properties->role', $role)
+                        ->each
+                        ->delete();
+                }
+
+
+                handleMediaUploads(
+                    request()->file($inputName),
+                    $model,
+                    customProperties: [
+                        'side' => $sideName,
+                        'role' => $role,
+                    ],
+
+                );
+            });
+        });
+
         return $model;
     }
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-     
+
         $model = $this->handleTransaction(function () use ($validatedData, $id) {
 
             $model = $this->repository->update($validatedData, $id);
