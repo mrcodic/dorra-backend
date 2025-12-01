@@ -84,7 +84,7 @@ class MockupRenderer
     public function tintShirt(ImageInterface $shirt, string $hex): ImageInterface
     {
         $hex = ltrim($hex, '#');
-
+dd($hex);
         $r = hexdec(substr($hex, 0, 2));
         $g = hexdec(substr($hex, 2, 2));
         $b = hexdec(substr($hex, 4, 2));

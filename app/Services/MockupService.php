@@ -31,7 +31,7 @@ class MockupService extends BaseService
             ->with(['templates', 'types', 'media'])
             ->get();
 
-        // ✅ الألوان من العمود
+
         $colors = $mockups->pluck('colors')
             ->filter()
             ->flatten()
@@ -40,9 +40,7 @@ class MockupService extends BaseService
             ->toArray();
 
         $urls = [];
-        $color = request('color'); // اللون المطلوب
-        $renderer = new MockupRenderer();
-
+        $color = request('color');
         foreach ($mockups as $mockup) {
 
             foreach ($mockup->templates as $template) {
@@ -71,15 +69,15 @@ class MockupService extends BaseService
 
                     if (!$designMedia) continue;
 
-                    // ✅ توليد الصورة باللون المطلوب
-                    $binary = $renderer->render([
+
+                    $binary = $this->renderer->render([
                         'base_path'   => $baseMedia->getPath(),
                         'shirt_path'  => $maskMedia->getPath(),
                         'design_path' => $designMedia->getPath(),
                         'hex'         => $color,
                     ]);
 
-                    // ✅ رجّع Base64 أو URL مؤقت
+
                     $urls[] = 'data:image/png;base64,' . base64_encode($binary);
                 }
             }
