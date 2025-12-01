@@ -136,9 +136,9 @@
                                         <!-- TEMPLATE SELECT -->
                                         <div class="form-group mb-2 col-4">
                                             <label class="label-text mb-1">Template</label>
-                                            <select name="template_id" class="form-select">
+                                            <select name="template_id" class="form-select template-select">
                                                 <option value="" disabled selected>Choose template</option>
-                                           
+
                                             </select>
                                         </div>
 
@@ -267,7 +267,7 @@
                         ? response
                         : (response.data ?? []);
 
-                    let templateSelects = document.querySelectorAll('[name="template_id"]');
+                    let templateSelects = document.querySelectorAll('.template-select');
 
                     templateSelects.forEach(select => {
                         select.innerHTML = `<option value="" disabled selected>Choose template</option>`;
