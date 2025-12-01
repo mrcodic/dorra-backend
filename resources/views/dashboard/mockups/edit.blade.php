@@ -155,24 +155,15 @@
                             <div class="template-repeater row d-none" id="template-wrapper">
                                 <div data-repeater-list="templates">
 
-                                    {{-- لو فيه templates مرتبطة بالموديل اعرضها كـ initial items --}}
                                     @forelse($model->templates as $mockupTemplate)
                                         @php
 
                                             $pivotPositions = $mockupTemplate->pivot->positions ?? collect();
                                             $positionForType = function($typeKey) use ($pivotPositions) {
-                                                    $map = [
-        'front' => 1,
-        'back'  => 2,
-        'none'  => 3,
-    ];
-                                                     $typeValue = $map[$typeKey] ?? null;
-    if ($typeValue === null) return null;
-
                                                 $row = $pivotPositions->firstWhere('template_type', $typeKey);
                                                 return $row->position_id ?? null;
                                             };
-                                         
+
                                         @endphp
 
                                         <div data-repeater-item class="row template-item">
@@ -193,8 +184,9 @@
                                             {{-- Positions per type --}}
                                             @foreach($associatedData['types'] as $type)
                                                 @php
-                                                    $typeKey = strtolower($type->value->name);
+                                                    $typeKey = $type->value->value;
                                                     $selectedPositionId = $positionForType($typeKey);
+                                                    dd($typeKey, $selectedPositionId)
                                                 @endphp
 
                                                 <div class="form-group mb-2 col-4 position-wrapper d-none"
