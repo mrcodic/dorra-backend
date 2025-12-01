@@ -98,7 +98,7 @@ class MainController extends Controller
 
     public function mockups()
     {
-        return Response::api(data: MockupResource::collection($this->mockupService->getAll()));
+        return Response::api(data: $this->mockupService->getMockups());
 
     }
     public function countries()
