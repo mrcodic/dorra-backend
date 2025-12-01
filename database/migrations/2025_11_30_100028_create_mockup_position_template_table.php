@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('mockup_position_template', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Position::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(MockupTemplate::class,'mockup_template_Id')
+            $table->foreignIdFor(MockupTemplate::class,'mockup_template_id')
                 ->constrained()->cascadeOnDelete();
             $table->tinyInteger('template_type');
             $table->timestamps();

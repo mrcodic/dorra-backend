@@ -127,6 +127,7 @@
                                             // هنا يفترض إن عندك علاقة على الـ template pivot بترجع الـ positions
                                             // مثال: $mockupTemplate->pivotPositions => Collection فيها [template_type, position_id]
                                             $pivotPositions = $mockupTemplate->pivot->positions ?? collect();
+                                            dd($pivotPositions);
 //                                            dd($mockupTemplate->pivot->load('positions'));
                                             $positionForType = function($typeKey) use ($pivotPositions) {
                                                 $row = $pivotPositions->firstWhere('template_type', $typeKey);
