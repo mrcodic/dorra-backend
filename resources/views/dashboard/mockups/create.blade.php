@@ -239,7 +239,6 @@
     <script>
         const locale = "{{ app()->getLocale() }}";
 
-        // خليها جلوبال عشان السكربتات التانية تستخدمها
         window.loadTemplates = function () {
             let productId = document.getElementById('productsSelect')?.value;
 
@@ -258,7 +257,6 @@
                     product_without_category_id: productId,
                     request_type: "api",
                     approach: "without_editor",
-                    // selected_types: selectedTypes.join(',')
                 },
                 success: function (response) {
                     console.log('templates response:', response);
@@ -270,18 +268,33 @@
                     let templateSelects = document.querySelectorAll('.template-select');
 
                     templateSelects.forEach(select => {
+                        // 🔹 احفظ القيمة المختارة قبل ما تمسح الـ options
+                        const prevValue = select.value;
+
+                        // امسح الـ options القديمة
                         select.innerHTML = `<option value="" disabled selected>Choose template</option>`;
 
+                        // أضف الـ options الجديدة
                         templates.forEach(t => {
                             let label = t.name;
 
-                            // لو name جاية كـ object {en: '...', ar: '...'}
                             if (t.name && typeof t.name === 'object') {
                                 label = t.name[locale] ?? Object.values(t.name)[0] ?? '';
                             }
 
-                            select.innerHTML += `<option value="${t.id}">${label}</option>`;
+                            const option = document.createElement('option');
+                            option.value = t.id;
+                            option.textContent = label;
+                            select.appendChild(option);
                         });
+
+                        // 🔹 رجّع القيمة القديمة لو لسه موجودة
+                        if (prevValue) {
+                            const hasPrev = Array.from(select.options).some(opt => opt.value == prevValue);
+                            if (hasPrev) {
+                                select.value = prevValue;
+                            }
+                        }
                     });
                 },
                 error: function (xhr) {
