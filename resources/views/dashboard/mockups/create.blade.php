@@ -23,17 +23,13 @@
             cursor: pointer;
             position: relative;
         }
-
-        /* Hide any accidental injected .pcr-button */
         .gradient-picker-trigger .pcr-button {
             display: none !important;
         }
-
         .selected-color-wrapper {
             width: 28px;
             height: 28px;
         }
-
         .selected-color-dot {
             width: 100%;
             height: 100%;
@@ -43,13 +39,11 @@
             box-sizing: border-box;
             background-clip: content-box;
         }
-
         .selected-color-inner {
             width: 100%;
             height: 100%;
             border-radius: 50%;
         }
-
         .remove-color-btn {
             position: absolute;
             top: -5px;
@@ -64,19 +58,16 @@
             padding: 1px;
             display: none;
         }
-
         .selected-color-wrapper:hover .remove-color-btn {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
         .gradient-edit-picker-trigger {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             background-image: url('/images/AddColor.svg') !important;
-            /* force override */
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -84,13 +75,10 @@
             cursor: pointer;
             position: relative;
         }
-
-        /* Hide any accidental injected .pcr-button */
         .gradient-edit-picker-trigger .pcr-button {
             display: none !important;
         }
     </style>
-
 @endsection
 
 @section('page-style')
@@ -141,34 +129,25 @@
                                     @endforeach
                                 </select>
                             </div>
+
                             <div class="template-repeater row d-none" id="template-wrapper">
-
                                 <div data-repeater-list="templates">
-
                                     <div data-repeater-item class="row template-item">
-
                                         <!-- TEMPLATE SELECT -->
                                         <div class="form-group mb-2 col-4">
                                             <label class="label-text mb-1">Template</label>
                                             <select name="template_id" class="form-select">
                                                 <option value="" disabled selected>Choose template</option>
-
                                             </select>
                                         </div>
 
                                         @foreach($associatedData['types'] as $type)
                                             @php
-                                                // e.g. "front", "back", "none"
                                                 $typeKey = strtolower($type->value->name);
                                             @endphp
-
                                             <div class="form-group mb-2 col-4 position-wrapper d-none"
                                                  data-type="{{ $typeKey }}">
-                                                <label class="label-text mb-1">{{ $type->value->label() }}
-                                                    Position</label>
-
-                                                {{-- 👇 This is inside data-repeater-item, so it becomes:
-                                                     templates[INDEX][positions][front] = {id} --}}
+                                                <label class="label-text mb-1">{{ $type->value->label() }} Position</label>
                                                 <select name="positions[{{ $typeKey }}]" class="form-select">
                                                     <option value="" disabled selected>Choose position</option>
                                                     @foreach($associatedData['positions'] ?? [] as $pos)
@@ -202,12 +181,11 @@
 
                         </div>
 
-
                         <div class="col-md-12">
-                            <div id="fileInputsContainer" class="dynamic-upload-container mb-1">
-                            </div>
+                            <div id="fileInputsContainer" class="dynamic-upload-container mb-1"></div>
                         </div>
                     </div>
+
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
                         <div class="d-flex flex-wrap align-items-center gap-1">
@@ -229,9 +207,8 @@
                         </button>
                     </div>
 
+                </form>
             </div>
-            </form>
-        </div>
         </div>
     </section>
     <!-- users list ends -->
@@ -240,7 +217,7 @@
 @section('vendor-script')
     {{-- Vendor js files --}}
     <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script -->
+    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
@@ -255,19 +232,23 @@
     <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-
 @endsection
 
 @section('page-script')
-    <script !src="">
-        function loadTemplates() {
+    <script>
+        const locale = "{{ app()->getLocale() }}";
+
+        // خليها جلوبال عشان السكربتات التانية تستخدمها
+        window.loadTemplates = function () {
             let productId = document.getElementById('productsSelect')?.value;
 
             let selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
                 .filter(cb => cb.checked)
                 .map(cb => cb.dataset.typeName);
 
-            if (!productId || selectedTypes.length === 0) return;
+            if (!productId || selectedTypes.length === 0) {
+                return;
+            }
 
             $.ajax({
                 url: "{{ route('product-templates.index') }}",
@@ -276,37 +257,41 @@
                     product_without_category_id: productId,
                     request_type: "api",
                     approach: "without_editor",
+                    // لو حبيت تبعت أنواع الموك اب:
+                    // selected_types: selectedTypes.join(',')
                 },
                 success: function (response) {
-                    console.log(response.data)
-                    let templateSelects = document.querySelectorAll(`[name="template_id"]`);
+                    console.log('templates response:', response);
+
+                    // دعم حالتين: لو API رجع data أو رجع array مباشر
+                    const templates = Array.isArray(response)
+                        ? response
+                        : (response.data ?? []);
+
+                    let templateSelects = document.querySelectorAll('[name="template_id"]');
 
                     templateSelects.forEach(select => {
                         select.innerHTML = `<option value="" disabled selected>Choose template</option>`;
-                        response.data.forEach(t => {
-                            select.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+
+                        templates.forEach(t => {
+                            let label = t.name;
+
+                            // لو name جاية كـ object {en: '...', ar: '...'}
+                            if (t.name && typeof t.name === 'object') {
+                                label = t.name[locale] ?? Object.values(t.name)[0] ?? '';
+                            }
+
+                            select.innerHTML += `<option value="${t.id}">${label}</option>`;
                         });
                     });
+                },
+                error: function (xhr) {
+                    console.error('Error loading templates', xhr);
                 }
             });
-        }
+        };
 
-        document.getElementById('productsSelect')
-            ?.addEventListener('change', function () {
-                window.updateTemplateVisibility();
-                setTimeout(loadTemplates, 150); // ⭐ wait until repeater adjusts DOM
-            });
-
-        document.querySelectorAll('.type-checkbox')
-            .forEach(cb => cb.addEventListener('change', function () {
-                window.updateTemplateVisibility();
-                setTimeout(loadTemplates, 150); // ⭐ DOM always ready
-            }));
-
-
-    </script>
-    <script>
-        // 🔹 Make it available globally so repeater can call it
+        // ====== تحكم في إظهار/إخفاء template wrapper والـ positions ======
         window.updateTemplateVisibility = function () {
             const productSelect = document.getElementById('productsSelect');
             const templateWrapper = document.getElementById('template-wrapper');
@@ -317,7 +302,6 @@
                 .filter(cb => cb.checked)
                 .map(cb => cb.dataset.typeName);
 
-            // Hide wrapper and all positions
             templateWrapper.classList.add('d-none');
 
             document.querySelectorAll('.template-item').forEach(item => {
@@ -326,10 +310,8 @@
 
             if (!productSelected || selectedTypes.length === 0) return;
 
-            // Show wrapper
             templateWrapper.classList.remove('d-none');
 
-            // Show matching type rows in each repeater item
             document.querySelectorAll('.template-item').forEach(item => {
                 selectedTypes.forEach(type => {
                     const row = item.querySelector(`.position-wrapper[data-type="${type}"]`);
@@ -342,58 +324,59 @@
             const productSelect = document.getElementById('productsSelect');
             const typeCheckboxes = document.querySelectorAll('.type-checkbox');
 
-            // Bind events
-            productSelect?.addEventListener('change', window.updateTemplateVisibility);
-            typeCheckboxes.forEach(cb => cb.addEventListener('change', window.updateTemplateVisibility));
+            productSelect?.addEventListener('change', function () {
+                window.updateTemplateVisibility();
+                setTimeout(window.loadTemplates, 150);
+            });
 
-            // Initial run
+            typeCheckboxes.forEach(cb => cb.addEventListener('change', function () {
+                window.updateTemplateVisibility();
+                setTimeout(window.loadTemplates, 150);
+            }));
+
             window.updateTemplateVisibility();
         });
     </script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-
             const $templateRepeater = $('.template-repeater');
 
             if (!$templateRepeater.length) return;
 
             if ($.fn.repeater) {
-
                 $templateRepeater.repeater({
                     initEmpty: true,
-
                     show: function () {
                         $(this).slideDown();
                         if (window.feather) feather.replace();
 
-                        // ✅ Re-apply visibility for new item
                         if (window.updateTemplateVisibility) {
                             window.updateTemplateVisibility();
                         }
-                        loadTemplates();
+                        if (window.loadTemplates) {
+                            window.loadTemplates();
+                        }
                     },
-
                     hide: function (deleteElement) {
                         $(this).slideUp(deleteElement);
                     }
                 });
 
-                // Create first row
+                // إنشاء أول صف
                 $templateRepeater.find('[data-repeater-create]').first().click();
 
-                // Apply visibility on first render
                 if (window.updateTemplateVisibility) {
                     window.updateTemplateVisibility();
                 }
-                loadTemplates();
-
+                if (window.loadTemplates) {
+                    window.loadTemplates();
+                }
             } else {
                 console.error("Repeater not loaded — include jquery.repeater.min.js");
             }
         });
     </script>
-
-
 
     <script>
         // ========== Type Checkbox & File Inputs ==========
@@ -402,7 +385,7 @@
 
         function renderFileInputs() {
             if (!fileInputsContainer) return;
-            fileInputsContainer.innerHTML = ''; // Clear old inputs
+            fileInputsContainer.innerHTML = '';
 
             let selectedTypes = Array.from(checkboxes)
                 .filter(cb => cb.checked)
@@ -414,32 +397,32 @@
                 block.classList.add('mb-3');
 
                 block.innerHTML = `
-                <label class="form-label label-text">${typeLabel} Base Image</label>
-                <input type="file" name="${type}_base_image" id="${type}-base-input" class="d-none" accept="image/*">
-                <div class="upload-card upload-area" data-input-id="${type}-base-input">
-                    <div class="upload-content">
-                        <i data-feather="upload" class="mb-2"></i>
-                        <p>${typeLabel} Base Image: Drag file here or click to upload</p>
-                        <div class="preview mt-1"></div>
+                    <label class="form-label label-text">${typeLabel} Base Image</label>
+                    <input type="file" name="${type}_base_image" id="${type}-base-input" class="d-none" accept="image/*">
+                    <div class="upload-card upload-area" data-input-id="${type}-base-input">
+                        <div class="upload-content">
+                            <i data-feather="upload" class="mb-2"></i>
+                            <p>${typeLabel} Base Image: Drag file here or click to upload</p>
+                            <div class="preview mt-1"></div>
+                        </div>
                     </div>
-                </div>
 
-                <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
-                <input type="file" name="${type}_mask_image" id="${type}-mask-input" class="d-none" accept="image/*">
-                <div class="upload-card upload-area" data-input-id="${type}-mask-input">
-                    <div class="upload-content">
-                        <i data-feather="upload" class="mb-2"></i>
-                        <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
-                        <div class="preview mt-1"></div>
+                    <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
+                    <input type="file" name="${type}_mask_image" id="${type}-mask-input" class="d-none" accept="image/*">
+                    <div class="upload-card upload-area" data-input-id="${type}-mask-input">
+                        <div class="upload-content">
+                            <i data-feather="upload" class="mb-2"></i>
+                            <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
+                            <div class="preview mt-1"></div>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
                 fileInputsContainer.appendChild(block);
             });
 
-            feather.replace();   // Refresh icons
-            bindUploadAreas();   // Re-bind events for new inputs
+            feather.replace();
+            bindUploadAreas();
         }
 
         function bindUploadAreas() {
@@ -481,7 +464,6 @@
             };
             reader.readAsDataURL(file);
 
-            // Ensure input gets the file when dragged
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             input.files = dataTransfer.files;
@@ -505,24 +487,21 @@
                 );
             });
 
-            // Always update inputs whenever checkboxes change
             renderFileInputs();
         }
 
-        // Bind event
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));
     </script>
 
     <script>
         $(document).ready(function () {
-
             handleAjaxFormSubmit("#addMockupForm", {
                 successMessage: "Mockup Created Successfully",
                 onSuccess: function () {
                     $('#addMockupModal').modal('hide');
                     location.reload();
                 }
-            })
+            });
         });
 
         $(document).ready(function () {
@@ -533,17 +512,14 @@
             let uploadedImage = $('#uploaded-image');
             let removeButton = $('#remove-image');
 
-            // Click on the upload area triggers the hidden input
             uploadArea.on('click', function () {
                 input.click();
             });
 
-            // Handle file selection
             input.on('change', function (e) {
                 handleFiles(e.target.files);
             });
 
-            // Handle Drag & Drop
             uploadArea.on('dragover', function (e) {
                 e.preventDefault();
                 uploadArea.addClass('dragover');
@@ -563,17 +539,13 @@
             function handleFiles(files) {
                 if (files.length > 0) {
                     let file = files[0];
-
-                    // Assign the dropped file to the input element
                     let dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
                     input[0].files = dataTransfer.files;
 
-                    // Show loader
                     progress.removeClass('d-none');
                     progressBar.css('width', '0%');
 
-                    // Fake loading effect
                     let fakeProgress = 0;
                     let interval = setInterval(function () {
                         fakeProgress += 10;
@@ -582,14 +554,12 @@
                         if (fakeProgress >= 100) {
                             clearInterval(interval);
 
-                            // Preview image
                             let reader = new FileReader();
                             reader.onload = function (e) {
                                 uploadedImage.find('img').attr('src', e.target.result);
                                 uploadedImage.removeClass('d-none');
                                 progress.addClass('d-none');
 
-                                // Show file name and size
                                 $('#file-details .file-name').text(file.name);
                                 $('#file-details .file-size').text((file.size / 1024).toFixed(2) + ' KB');
                             }
@@ -599,10 +569,9 @@
                 }
             }
 
-            // Remove image
             removeButton.on('click', function () {
                 uploadedImage.addClass('d-none');
-                input.val(''); // Clear the input
+                input.val('');
             });
         });
 
@@ -610,15 +579,11 @@
         let pickrInstance = null;
 
         $(document).ready(function () {
-
-            // Destroy any existing instance
             if (pickrInstance) pickrInstance.destroyAndRemove();
 
-            // Create hidden element for Pickr
             const dummyElement = document.createElement('div');
             document.body.appendChild(dummyElement);
 
-            // Initialize Pickr
             pickrInstance = Pickr.create({
                 el: dummyElement,
                 theme: 'classic',
@@ -634,7 +599,6 @@
                 }
             });
 
-            // Save color
             pickrInstance.on('save', (color) => {
                 const hex = color.toHEXA().toString();
                 if (!selectedColors.includes(hex)) {
@@ -675,21 +639,20 @@
             ul.innerHTML = '';
 
             const container = document.getElementById('colorsInputContainer');
-            container.innerHTML = ''; // Clear previous
+            container.innerHTML = '';
 
             selectedColors.forEach(c => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                <div class="selected-color-wrapper position-relative">
-                    <div class="selected-color-dot" style="background-color: #fff;">
-                        <div class="selected-color-inner" style="background-color: ${c};"></div>
+                    <div class="selected-color-wrapper position-relative">
+                        <div class="selected-color-dot" style="background-color: #fff;">
+                            <div class="selected-color-inner" style="background-color: ${c};"></div>
+                        </div>
+                        <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
                     </div>
-                    <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
-                </div>
-            `;
+                `;
                 ul.appendChild(li);
 
-                // Add a hidden input for each color
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
                 hiddenInput.name = 'colors[]';
@@ -698,5 +661,4 @@
             });
         }
     </script>
-
 @endsection
