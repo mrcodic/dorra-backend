@@ -295,7 +295,6 @@ class MockupService extends BaseService
                         ->where('collection_name', 'mockups')
                         ->where('custom_properties->side', $sideName)
                         ->where('custom_properties->role', $role)
-                        ->each
                         ->delete();
                 }
 
