@@ -77,6 +77,9 @@ class TemplateService extends BaseService
                 });
 
             })
+            ->when(request()->filled('approach'), function ($q) {
+                $q->where('approach', request('approach'));
+            })
             ->when(request('category_id'), function ($q) {
                 $q->whereHas('products', function ($q) {
                     $q->whereCategoryId(request('category_id'));

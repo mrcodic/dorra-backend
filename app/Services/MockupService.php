@@ -47,9 +47,6 @@ class MockupService extends BaseService
                 foreach ($mockup->types as $type) {
                     $sideName = strtolower($type->value->name);
 
-                    // ===========================
-                    // 1) نحدد الـ base و mask
-                    // ===========================
                     $baseMedia = $mockup->getMedia('mockups')
                         ->first(fn($m) =>
                             $m->getCustomProperty('side') === $sideName &&
@@ -74,10 +71,7 @@ class MockupService extends BaseService
                         continue;
                     }
 
-                    // ===========================
-                    // 2) نشوف لو فيه موكاب متخزن قبل كده بنفس:
-                    // mockup + template_id + side + color
-                    // ===========================
+
                     $existingMedia = $mockup->getMedia('generated_mockups')
                         ->first(function ($m) use ($sideName, $template, $color) {
                             return $m->getCustomProperty('side') === $sideName
@@ -86,19 +80,16 @@ class MockupService extends BaseService
                         });
 
                     if ($existingMedia) {
-                        // ✅ موكاب باللون ده موجود بالفعل → استخدم URL وخلاص
                         $urls[] = $existingMedia->getFullUrl();
                         continue;
                     }
 
-                    // ===========================
-                    // 3) مفيش موكاب سابق → نولّد جديد باللون المطلوب
-                    // ===========================
+
                     $binary = $this->renderer->render([
                         'base_path'   => $baseMedia->getPath(),
                         'shirt_path'  => $maskMedia->getPath(),
                         'design_path' => $designMedia->getPath(),
-                        'hex'         => $color,  // ✅ اللون اللي جاي من الريكوست
+                        'hex'         => $color,
                     ]);
 
                     $media = $mockup
@@ -107,7 +98,7 @@ class MockupService extends BaseService
                         ->withCustomProperties([
                             'side'        => $sideName,
                             'template_id' => $template->id,
-                            'color'       => $color, // ✅ نخزن اللون لأول مرة
+                            'color'       => $color,
                         ])
                         ->toMediaCollection('generated_mockups');
 
@@ -116,7 +107,7 @@ class MockupService extends BaseService
             }
         }
 
-        // ممكن تشيل الـ unique لو عايز تكرار
+
         $urls = array_values(array_unique($urls));
 
         return [

@@ -70,6 +70,10 @@ class TemplateController extends DashboardController
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination, perPage: request('per_page', 16));
         $associatedData = $this->getAssociatedData('index');
         if (request()->ajax()) {
+            if (request()->filled('request_type') == 'api')
+            {
+                return Response::api(data: TemplateResource::collection($data));
+            }
             $cards = view('dashboard.partials.filtered-templates', compact('data'))->render();
 
             $pagination = '';

@@ -152,9 +152,7 @@
                                             <label class="label-text mb-1">Template</label>
                                             <select name="template_id" class="form-select">
                                                 <option value="" disabled selected>Choose template</option>
-                                                @foreach($associatedData['templates'] ?? [] as $template)
-                                                    <option value="{{ $template->id }}">{{ $template->name }}</option>
-                                                @endforeach
+
                                             </select>
                                         </div>
 
@@ -259,7 +257,50 @@
 @endsection
 
 @section('page-script')
+    <script !src="">
+        function loadTemplates() {
+            let productId = document.getElementById('productsSelect')?.value;
 
+            let selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
+                .filter(cb => cb.checked)
+                .map(cb => cb.dataset.typeName);
+
+            if (!productId || selectedTypes.length === 0) return;
+
+            $.ajax({
+                url: "{{ route('product-templates.index') }}",
+                method: "GET",
+                data: {
+                    product_without_category_id: productId,
+                    request_type:"api",
+                    approach: "without_editor",
+                },
+                success: function (response) {
+                    console.log(response)
+                    let templateSelects = document.querySelectorAll(`[name="template_id"]`);
+
+                    templateSelects.forEach(select => {
+                        select.innerHTML = `<option value="" disabled selected>Choose template</option>`;
+                        response.templates.forEach(t => {
+                            select.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+                        });
+                    });
+                }
+            });
+        }
+        document.getElementById('productsSelect')
+            ?.addEventListener('change', function () {
+                window.updateTemplateVisibility();
+                loadTemplates();
+            });
+
+        document.querySelectorAll('.type-checkbox')
+            .forEach(cb => cb.addEventListener('change', function () {
+                window.updateTemplateVisibility();
+                loadTemplates();
+            }));
+
+    </script>
     <script>
         // 🔹 Make it available globally so repeater can call it
         window.updateTemplateVisibility = function () {
