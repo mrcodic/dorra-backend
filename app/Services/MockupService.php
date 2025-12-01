@@ -212,11 +212,12 @@ class MockupService extends BaseService
                             if (!$designMedia || !$designMedia->getPath()) {
                                 throw new \Exception("Missing design media for {$sideName}");
                             }
+                            $firstMockup = $this->repository->query()->whereBelongsTo($model->category)->first();
                             $binary = (new MockupRenderer())->render([
                                 'base_path' => $baseMedia->getPath(),
                                 'shirt_path' => $maskMedia->getPath(),
                                 'design_path' => $designMedia->getPath(),
-                                'hex' => $model->templates->first()->colors ? $model->templates->first()->colors[0] : null,
+                                'hex' => $firstMockup->colors ? $firstMockup->colors[0] : null,
                             ]);
 
                             $model
