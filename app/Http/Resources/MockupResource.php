@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 
 use App\Http\Resources\Template\TypeResource;
-use App\Services\Mockup\MockupRenderer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,22 +16,6 @@ class MockupResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        /* helper → turn  'base_grey.png'  into  https://yourapp.com/images/base_grey.png */
-        $img = fn(string $file) => asset("images/{$file}");
-        /* default values when Media-Library hasn’t been filled yet */
-        $defaults = [
-            'base_url'      => $img('basic_tshirt_front.png'),
-            'shadow_url'    => $img('1678793789014.darkBlend1.png'),
-            'mask_url'      => $img('mask.png'),
-            'disp_url'      => $img('1678793789014.darkBlend1.png'),
-            // match the PNG dimensions you exported (example 620 × 680 px)
-            'pixel_w'       => 620,
-            'pixel_h'       => 680,
-            'offset_x'      => 0,
-            'offset_y'      => 0,
-            'default_color' => '#000000',
-            'warp_mode'     => 'none',
-        ];
         $images = collect($this->types)
             ->mapWithKeys(function ($type)  {
                 $sideName = strtolower($type->value->name); // e.g., FRONT, BACK, NONE
@@ -54,29 +37,6 @@ class MockupResource extends JsonResource
                     ]
                 ];
             });
-        $mockupTemplateImages = collect($this->types)
-            ->mapWithKeys(function ($type)  {
-                $sideName = strtolower($type->value->name);
-
-                $baseMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
-                    return $media->getCustomProperty('side') === $sideName &&
-                        $media->getCustomProperty('role') === 'base';
-                });
-
-                $maskMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
-                    return $media->getCustomProperty('side') === $sideName &&
-                        $media->getCustomProperty('role') === 'mask';
-                });
-
-                return [
-                    $sideName =>(new MockupRenderer())->render([
-                        'base_path' => $baseMedia?->getPath(),
-                        'shirt_path' => $maskMedia?->getPath(),
-                        'design_path' => $maskMedia?->getPath(),
-                    ])
-                ];
-            });
-
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -87,12 +47,8 @@ class MockupResource extends JsonResource
             'area_width' => $this->area_width,
             'area_height' => $this->area_height,
             'product' => CategoryResource::make($this->whenLoaded('category')),
-            'mockup_url' => $this->getFirstMediaUrl('mockups'),
-            'base_url'      => $img('basic_tshirt_front.png'),
-            'shadow_url'    => $img('1678793789014.darkBlend1.png'),
-            'mask_url'      => $img('mask.png'),
-            'disp_url'      => $img('1678793789014.darkBlend1.png'),
-            'mockup_template_urls' => $this->getMedia('generated_mockups'),
+            'mockup_template_urls' => $this->getMedia('generated_mockups')
+                ->map(fn($m) => $m->getFullUrl()),
             'images' => $images,
         ];
     }
