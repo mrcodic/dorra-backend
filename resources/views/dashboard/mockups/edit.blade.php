@@ -186,7 +186,6 @@
                                                 @php
                                                     $typeKey = $type->value->value;
                                                     $selectedPositionId = $positionForType($typeKey);
-                                                    dd($typeKey, $selectedPositionId)
                                                 @endphp
 
                                                 <div class="form-group mb-2 col-4 position-wrapper d-none"
