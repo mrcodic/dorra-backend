@@ -13,7 +13,7 @@ class PositionSeeder extends Seeder
      */
     public function run(): void
     {
-        Position::createMany([[
+        Position::insert([[
             'name' => 'top-left',
             'print_x' => 360,
             'print_y' => 660,
