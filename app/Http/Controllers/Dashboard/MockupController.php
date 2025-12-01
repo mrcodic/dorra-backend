@@ -33,6 +33,7 @@ class MockupController extends DashboardController
         $this->updateRequestClass = new UpdateMockupRequest();
         $this->indexView = 'mockups.index';
         $this->createView = 'mockups.create';
+        $this->editView = 'mockups.edit';
         $this->usePagination = true;
         $this->resourceTable = 'mockups';
         $this->assoiciatedData = [
