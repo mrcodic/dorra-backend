@@ -138,6 +138,9 @@
                                             <label class="label-text mb-1">Template</label>
                                             <select name="template_id" class="form-select">
                                                 <option value="" disabled selected>Choose template</option>
+                                                @foreach($associatedData['templates'] ?? [] as $pos)
+                                                    <option value="{{ $pos->id }}">{{ $pos->name }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
 
