@@ -36,10 +36,7 @@ class MockupService extends BaseService
             ->flatten()
             ->unique()
             ->values();
-        $urls = $mockups
-            ->flatMap(fn($m) => $m->getMedia('generated_mockups')->map->getFullUrl())
-            ->unique()
-            ->values();
+  
         $urls = [];
         $color = request()->color;
         foreach ($mockups as $mockup) {
