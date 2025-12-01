@@ -23,35 +23,69 @@
             cursor: pointer;
             position: relative;
         }
-        .gradient-picker-trigger .pcr-button { display: none !important; }
 
-        .selected-color-wrapper { width: 28px; height: 28px; }
-        .selected-color-dot {
-            width: 100%; height: 100%; padding: 1px;
-            border-radius: 50%; border: 2px solid #ccc;
-            box-sizing: border-box; background-clip: content-box;
+        .gradient-picker-trigger .pcr-button {
+            display: none !important;
         }
-        .selected-color-inner { width: 100%; height: 100%; border-radius: 50%; }
+
+        .selected-color-wrapper {
+            width: 28px;
+            height: 28px;
+        }
+
+        .selected-color-dot {
+            width: 100%;
+            height: 100%;
+            padding: 1px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            box-sizing: border-box;
+            background-clip: content-box;
+        }
+
+        .selected-color-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
         .remove-color-btn {
-            position: absolute; top: -5px; right: -5px;
+            position: absolute;
+            top: -5px;
+            right: -5px;
             background-color: #F4F6F6 !important;
             color: #424746 !important;
-            border-radius: 5px; width: 16px; height: 16px;
-            font-size: 16px; line-height: 1; padding: 1px;
+            border-radius: 5px;
+            width: 16px;
+            height: 16px;
+            font-size: 16px;
+            line-height: 1;
+            padding: 1px;
             display: none;
         }
+
         .selected-color-wrapper:hover .remove-color-btn {
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .gradient-edit-picker-trigger {
-            width: 40px; height: 40px; border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             background-image: url('/images/AddColor.svg') !important;
-            background-size: cover; background-position: center;
-            background-repeat: no-repeat; border: 1px solid #ccc;
-            cursor: pointer; position: relative;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            position: relative;
         }
-        .gradient-edit-picker-trigger .pcr-button { display: none !important; }
+
+        .gradient-edit-picker-trigger .pcr-button {
+            display: none !important;
+        }
     </style>
 @endsection
 
@@ -110,8 +144,8 @@
                                     <option value="" disabled>Choose product</option>
                                     @foreach($associatedData['products'] as $product)
                                         <option value="{{ $product->id }}"
-                                        @selected($product->id == $model->category_id)>
-                                        {{ $product->name }}
+                                            @selected($product->id == $model->category_id)>
+                                            {{ $product->name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -127,9 +161,18 @@
 
                                             $pivotPositions = $mockupTemplate->pivot->positions ?? collect();
                                             $positionForType = function($typeKey) use ($pivotPositions) {
+                                                    $map = [
+        'front' => 1,
+        'back'  => 2,
+        'none'  => 3,
+    ];
+                                                     $typeValue = $map[$typeKey] ?? null;
+    if ($typeValue === null) return null;
+
                                                 $row = $pivotPositions->firstWhere('template_type', $typeKey);
                                                 return $row->position_id ?? null;
                                             };
+                                         
                                         @endphp
 
                                         <div data-repeater-item class="row template-item">
@@ -151,8 +194,6 @@
                                             @foreach($associatedData['types'] as $type)
                                                 @php
                                                     $typeKey = strtolower($type->value->name);
-                                                    // template_type في جدولك ممكن تكون int/enum،
-                                                    // عدّله حسب implementation عندك
                                                     $selectedPositionId = $positionForType($typeKey);
                                                 @endphp
 
@@ -189,7 +230,8 @@
                                                 <select name="template_id" class="form-select template-select">
                                                     <option value="" disabled selected>Choose template</option>
                                                     @foreach($associatedData['templates'] ?? [] as $template)
-                                                        <option value="{{ $template->id }}">{{ $template->name }}</option>
+                                                        <option
+                                                            value="{{ $template->id }}">{{ $template->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
