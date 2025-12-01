@@ -151,6 +151,7 @@
                                         <div class="form-group mb-2 col-4">
                                             <label class="label-text mb-1">Template</label>
                                             <select name="template_id" class="form-select">
+                                                <option value="" disabled selected>Choose template</option>
 
                                             </select>
                                         </div>
@@ -368,6 +369,7 @@
                         if (window.updateTemplateVisibility) {
                             window.updateTemplateVisibility();
                         }
+                        loadTemplates();
                     },
 
                     hide: function (deleteElement) {
@@ -382,6 +384,7 @@
                 if (window.updateTemplateVisibility) {
                     window.updateTemplateVisibility();
                 }
+                loadTemplates();
 
             } else {
                 console.error("Repeater not loaded — include jquery.repeater.min.js");
