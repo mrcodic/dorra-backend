@@ -139,7 +139,7 @@
                                                 <label class="label-text mb-1">Template</label>
                                                 <select name="template_id" class="form-select template-select">
                                                     <option value="" disabled>Choose template</option>
-                                                    @foreach($associatedData['templates'] ?? [] as $template)
+                                                    @foreach($model->templates  as $template)
                                                         <option value="{{ $template->id }}"
                                                             @selected($template->id == $mockupTemplate->id)>
                                                             {{ $template->name }}
