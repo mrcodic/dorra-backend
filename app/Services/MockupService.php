@@ -299,13 +299,113 @@ class MockupService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        $model = $this->handleTransaction(function () use ($validatedData, $id, $relationsToLoad) {
+        $model = $this->handleTransaction(function () use ($validatedData, $id) {
+
             $model = $this->repository->update($validatedData, $id);
-            $model->types()->sync(Arr::get($validatedData, 'types') ?? []);
+
+
+            $model->types()->sync(Arr::get($validatedData, 'types', []));
+
+
+            $model->clearMediaCollection('generated_mockups');
+
+            $this->handleFiles($model, true);
+
+            DB::table('mockup_position_template')
+                ->whereIn('mockup_template_id', $model->templates->pluck('pivot.id'))
+                ->delete();
+
+            $model->templates()->detach();
+
+
+            $templatesInput = collect(Arr::get($validatedData, 'templates', []));
+
+            if ($templatesInput->isNotEmpty()) {
+
+                $templateIds = $templatesInput->pluck('template_id')->all();
+                $model->templates()->sync($templateIds);
+
+
+                $model->load(['templates', 'types', 'category']);
+
+                $templatesById = $templatesInput->keyBy('template_id');
+
+                $typeMap = [
+                    'front' => 1,
+                    'back' => 2,
+                    'none' => 3,
+                ];
+
+                $rows = [];
+
+                foreach ($model->templates as $template) {
+
+                    foreach ($model->types as $type) {
+
+                        $sideName = strtolower($type->value->name);
+
+                        $baseMedia = $model->getMedia('mockups')
+                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                                $m->getCustomProperty('role') === 'base');
+
+                        $maskMedia = $model->getMedia('mockups')
+                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                                $m->getCustomProperty('role') === 'mask');
+
+                        if (!$baseMedia || !$maskMedia) continue;
+
+                        $designMedia = $type == TypeEnum::BACK
+                            ? $template->getFirstMedia('back_templates')
+                            : $template->getFirstMedia('templates');
+
+                        if (!$designMedia || !$designMedia->getPath()) {
+                            throw new \Exception("Missing design media for {$sideName}");
+                        }
+
+                        $binary = (new MockupRenderer())->render([
+                            'base_path' => $baseMedia->getPath(),
+                            'shirt_path' => $maskMedia->getPath(),
+                            'design_path' => $designMedia->getPath(),
+                            'hex' => $model->colors[0] ?? null,
+                        ]);
+
+                        $model
+                            ->addMediaFromString($binary)
+                            ->usingFileName("mockup_{$sideName}.png")
+                            ->withCustomProperties([
+                                'side' => $sideName,
+                                'template_id' => $template->id,
+                            ])
+                            ->toMediaCollection('generated_mockups');
+                    }
+
+
+                    $input = $templatesById->get($template->id);
+                    if (!$input) continue;
+
+                    $pivotId = $template->pivot->id;
+
+                    foreach ($typeMap as $field => $typeValue) {
+                        if (!empty($input[$field])) {
+                            $rows[] = [
+                                'mockup_template_id' => $pivotId,
+                                'position_id' => $input[$field],
+                                'template_type' => $typeValue,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                        }
+                    }
+                }
+                if (!empty($rows)) {
+                    DB::table('mockup_position_template')->insert($rows);
+                }
+            }
+
             return $model;
         });
 
-        return $this->handleFiles($model, true);
+        return $model;
     }
 
     public function deleteResource($id)
