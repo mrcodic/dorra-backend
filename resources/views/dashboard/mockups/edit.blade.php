@@ -324,6 +324,22 @@
 
 @section('page-script')
     <script>
+        window.existingMockupMedia = {
+            @foreach($model->types as $type)
+            "{{ strtolower($type->value->name) }}": {
+                base: "{{ $model->getMedia('mockups')
+                    ->first(fn($m) => $m->getCustomProperty('side') === strtolower($type->value->name) && $m->getCustomProperty('role') === 'base')
+                    ?->getFullUrl() ?? '' }}",
+
+                mask: "{{ $model->getMedia('mockups')
+                    ->first(fn($m) => $m->getCustomProperty('side') === strtolower($type->value->name) && $m->getCustomProperty('role') === 'mask')
+                    ?->getFullUrl() ?? '' }}"
+            },
+            @endforeach
+        };
+    </script>
+
+    <script>
         const locale = "{{ app()->getLocale() }}";
         // ألوان الموكاب الحالية من الـ DB
         let selectedColors = @json($model->colors ?? []);
@@ -472,30 +488,44 @@
 
             selectedTypes.forEach(type => {
                 const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+
+                const baseImage = window.existingMockupMedia?.[type]?.base ?? null;
+                const maskImage = window.existingMockupMedia?.[type]?.mask ?? null;
+
                 const block = document.createElement('div');
                 block.classList.add('mb-3');
 
                 block.innerHTML = `
-                    <label class="form-label label-text">${typeLabel} Base Image</label>
-                    <input type="file" name="${type}_base_image" id="${type}-base-input" class="d-none" accept="image/*">
-                    <div class="upload-card upload-area" data-input-id="${type}-base-input">
-                        <div class="upload-content">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>${typeLabel} Base Image: Drag file here or click to upload</p>
-                            <div class="preview mt-1"></div>
-                        </div>
-                    </div>
+            <label class="form-label label-text">${typeLabel} Base Image</label>
 
-                    <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
-                    <input type="file" name="${type}_mask_image" id="${type}-mask-input" class="d-none" accept="image/*">
-                    <div class="upload-card upload-area" data-input-id="${type}-mask-input">
-                        <div class="upload-content">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
-                            <div class="preview mt-1"></div>
-                        </div>
+            <input type="file" name="${type}_base_image" id="${type}-base-input" class="d-none" accept="image/*">
+
+            <div class="upload-card upload-area" data-input-id="${type}-base-input">
+                <div class="upload-content">
+                    <i data-feather="upload" class="mb-2"></i>
+                    <p>${typeLabel} Base Image: Drag file here or click to upload</p>
+
+                    <div class="preview mt-1">
+                        ${baseImage ? `<img src="${baseImage}" class="img-fluid rounded border" style="max-height:120px">` : ''}
                     </div>
-                `;
+                </div>
+            </div>
+
+            <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
+
+            <input type="file" name="${type}_mask_image" id="${type}-mask-input" class="d-none" accept="image/*">
+
+            <div class="upload-card upload-area" data-input-id="${type}-mask-input">
+                <div class="upload-content">
+                    <i data-feather="upload" class="mb-2"></i>
+                    <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
+
+                    <div class="preview mt-1">
+                        ${maskImage ? `<img src="${maskImage}" class="img-fluid rounded border" style="max-height:120px">` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
 
                 fileInputsContainer.appendChild(block);
             });
