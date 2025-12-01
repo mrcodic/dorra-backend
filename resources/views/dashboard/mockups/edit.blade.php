@@ -155,6 +155,7 @@
                             <div class="template-repeater row d-none" id="template-wrapper">
                                 <div data-repeater-list="templates">
 
+
                                     @forelse($model->templates as $mockupTemplate)
                                         @php
 
@@ -184,8 +185,9 @@
                                             {{-- Positions per type --}}
                                             @foreach($associatedData['types'] as $type)
                                                 @php
-                                                    $typeKey = $type->value->value;
-                                                    $selectedPositionId = $positionForType($typeKey);
+                                                    $typeKey = strtolower($type->value->name);
+                                                    $typeValue = $type->value->value;
+                                                    $selectedPositionId = $positionForType($typeValue);
                                                 @endphp
 
                                                 <div class="form-group mb-2 col-4 position-wrapper d-none"
