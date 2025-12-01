@@ -73,7 +73,7 @@ class MockupService extends BaseService
                             'hex' => $color,
                         ]);
 
-                        $mockup
+                        $urls [] = $mockup
                             ->addMediaFromString($binary)
                             ->usingFileName("mockup_{$sideName}.png")
                             ->withCustomProperties([
@@ -82,7 +82,7 @@ class MockupService extends BaseService
                             ])
                             ->toMediaCollection('generated_mockups');
 
-
+                        return $urls;
                     });
 
             }
@@ -152,90 +152,90 @@ class MockupService extends BaseService
         $model = $this->handleTransaction(function () use ($validatedData) {
 
 
-        $model = $this->repository->create($validatedData);
-        $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
-        $templatesInput = collect(Arr::get($validatedData, 'templates', []));
+            $model = $this->repository->create($validatedData);
+            $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
+            $templatesInput = collect(Arr::get($validatedData, 'templates', []));
 
-        if ($templatesInput->isNotEmpty()) {
-            $templateIds = $templatesInput->pluck('template_id')->all();
-            $model->templates()->attach($templateIds);
-            $model->load('templates');
-            $templatesById = $templatesInput->keyBy('template_id');
-            $rows = [];
-            $typeMap = [
-                'front' => 1,
-                'back' => 2,
-                'none' => 3,
-            ];
-            $this->handleFiles($model);
+            if ($templatesInput->isNotEmpty()) {
+                $templateIds = $templatesInput->pluck('template_id')->all();
+                $model->templates()->attach($templateIds);
+                $model->load('templates');
+                $templatesById = $templatesInput->keyBy('template_id');
+                $rows = [];
+                $typeMap = [
+                    'front' => 1,
+                    'back' => 2,
+                    'none' => 3,
+                ];
+                $this->handleFiles($model);
 
-            foreach ($model->templates as $template) {
-                collect($model->types)
-                    ->each(function ($type) use ($model, $template) {
+                foreach ($model->templates as $template) {
+                    collect($model->types)
+                        ->each(function ($type) use ($model, $template) {
 
-                        $sideName = strtolower($type->value->name);
+                            $sideName = strtolower($type->value->name);
 
-                        $baseMedia = $model->getMedia('mockups')
-                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                                $m->getCustomProperty('role') === 'base');
+                            $baseMedia = $model->getMedia('mockups')
+                                ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                                    $m->getCustomProperty('role') === 'base');
 
-                        $maskMedia = $model->getMedia('mockups')
-                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                                $m->getCustomProperty('role') === 'mask');
-                        if (!$baseMedia || !$maskMedia) {
-                            return [$sideName => null];
+                            $maskMedia = $model->getMedia('mockups')
+                                ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                                    $m->getCustomProperty('role') === 'mask');
+                            if (!$baseMedia || !$maskMedia) {
+                                return [$sideName => null];
+                            }
+                            $designMedia = $type == TypeEnum::BACK
+                                ? $template->getFirstMedia('back_templates')
+                                : $template->getFirstMedia('templates');
+                            if (!$designMedia || !$designMedia->getPath()) {
+                                throw new \Exception("Missing design media for {$sideName}");
+                            }
+                            $binary = (new MockupRenderer())->render([
+                                'base_path' => $baseMedia->getPath(),
+                                'shirt_path' => $maskMedia->getPath(),
+                                'design_path' => $designMedia->getPath(),
+                            ]);
+
+                            $model
+                                ->addMediaFromString($binary)
+                                ->usingFileName("mockup_{$sideName}.png")
+                                ->withCustomProperties([
+                                    'side' => $sideName,
+                                    'template_id' => $template->id,
+                                ])
+                                ->toMediaCollection('generated_mockups');
+
+
+                        });
+
+                    $input = $templatesById->get($template->id);
+                    if (!$input) {
+                        continue;
+                    }
+
+                    $pivotId = $template->pivot->id; // from withPivot('id')
+
+                    foreach ($typeMap as $field => $typeValue) {
+                        // e.g. if "front" exists in the request for this template
+                        if (!empty($input[$field])) {
+                            $rows[] = [
+                                'mockup_template_id' => $pivotId,
+                                'position_id' => $input[$field],  // e.g. "1"
+                                'template_type' => $typeValue,      // e.g. 1 = front
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
                         }
-                        $designMedia = $type == TypeEnum::BACK
-                            ? $template->getFirstMedia('back_templates')
-                            : $template->getFirstMedia('templates');
-                        if (!$designMedia || !$designMedia->getPath()) {
-                            throw new \Exception("Missing design media for {$sideName}");
-                        }
-                        $binary = (new MockupRenderer())->render([
-                            'base_path' => $baseMedia->getPath(),
-                            'shirt_path' => $maskMedia->getPath(),
-                            'design_path' => $designMedia->getPath(),
-                        ]);
-
-                        $model
-                            ->addMediaFromString($binary)
-                            ->usingFileName("mockup_{$sideName}.png")
-                            ->withCustomProperties([
-                                'side' => $sideName,
-                                'template_id' => $template->id,
-                            ])
-                            ->toMediaCollection('generated_mockups');
-
-
-                    });
-
-                $input = $templatesById->get($template->id);
-                if (!$input) {
-                    continue;
-                }
-
-                $pivotId = $template->pivot->id; // from withPivot('id')
-
-                foreach ($typeMap as $field => $typeValue) {
-                    // e.g. if "front" exists in the request for this template
-                    if (!empty($input[$field])) {
-                        $rows[] = [
-                            'mockup_template_id' => $pivotId,
-                            'position_id' => $input[$field],  // e.g. "1"
-                            'template_type' => $typeValue,      // e.g. 1 = front
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
                     }
                 }
+
+                if (!empty($rows)) {
+                    DB::table('mockup_position_template')->insert($rows);
+                }
             }
 
-            if (!empty($rows)) {
-                DB::table('mockup_position_template')->insert($rows);
-            }
-        }
-
-        return $model;
+            return $model;
         });
 
         return $model;
