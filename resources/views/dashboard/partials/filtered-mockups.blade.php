@@ -22,7 +22,13 @@
 
             <div style="background-color: #F4F6F6;height:200px">
                 <img
-                    src="{{ $mockup->getFirstMediaUrl('mockups') ?: asset('images/default-photo.png') }}"
+                    src="{{ $mockup->getMedia('mockups')->firstWhere([
+              'custom_properties.side', 'front',
+             'custom_properties.role', 'mask',
+         ])
+
+?->getFullUrl()
+?: asset('images/default-photo.png') }}"
                     class="mx-auto d-block rounded-top" style="height:100%; width:auto; max-width:100%;"
                     alt="Template Image">
             </div>
@@ -35,13 +41,15 @@
                     </h6>
 
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:300px; height:29px">
+                        <div
+                            style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:300px; height:29px">
                             {{ $mockup->product?->name }}
                         </div>
 
                         <div>
                             @foreach($mockup->types as $type)
-                                <span class="badge text-light p-75 template-status-label" style="background-color:#222245">
+                                <span class="badge text-light p-75 template-status-label"
+                                      style="background-color:#222245">
                                     {{ $type->value->label() }}
                                 </span>
                             @endforeach
@@ -60,7 +68,8 @@
                     @endcan
 
                     @can('mockups_update')
-                        <a href="{{ route("mockups.edit",$mockup->id) }}" class="btn btn-outline-secondary flex-fill edit-mockup-btn">
+                        <a href="{{ route("mockups.edit",$mockup->id) }}"
+                           class="btn btn-outline-secondary flex-fill edit-mockup-btn">
                             Edit
                         </a>
                     @endcan
@@ -79,7 +88,8 @@
 
     @include('modals.mockups.edit-mockup', ['mockup' => $mockup, 'associatedData' => $associatedData])
 @empty
-    <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100" style="min-height:65vh;">
+    <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"
+         style="min-height:65vh;">
         <img src="{{ asset('images/Empty.png') }}" alt="No Templates" style="max-width:200px;" class="mb-2">
         <p class="mb-2 text-secondary">Nothing to show yet.</p>
     </div>
