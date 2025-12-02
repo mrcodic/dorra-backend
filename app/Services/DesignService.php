@@ -220,7 +220,7 @@ class DesignService extends BaseService
     public function owners()
     {
 
-        return auth('sanctum')->user()
+        return getAuthOrGuest()
             ->designs()
             ->with('owner:id,first_name,last_name')
             ->get()

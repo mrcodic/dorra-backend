@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Guest extends Model
 {
@@ -26,5 +27,9 @@ class Guest extends Model
     public function addresses(): HasMany
     {
         return $this->hasMany(ShippingAddress::class);
+    }
+    public function designs(): MorphToMany
+    {
+        return $this->morphToMany(Design::class, 'designable', 'designables')->withTimestamps();
     }
 }
