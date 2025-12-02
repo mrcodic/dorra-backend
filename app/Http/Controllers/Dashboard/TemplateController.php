@@ -14,6 +14,7 @@ use App\Http\Resources\{MediaResource, Template\TemplateResource};
 use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     FlagRepositoryInterface,
     IndustryRepositoryInterface,
+    MockupRepositoryInterface,
     ProductRepositoryInterface,
     ProductSpecificationRepositoryInterface,
     TagRepositoryInterface,
@@ -35,6 +36,7 @@ class TemplateController extends DashboardController
         public CategoryRepositoryInterface              $categoryRepository,
         public FlagRepositoryInterface                  $flagRepository,
         public IndustryRepositoryInterface              $industryRepository,
+        public MockupRepositoryInterface              $mockupRepository,
 
     )
     {
@@ -56,6 +58,7 @@ class TemplateController extends DashboardController
                 'product_with_categories' => $this->categoryRepository->query()->where('is_has_category',1)->has('products')->get(['id', 'name']),
                 'product_without_categories' => $this->categoryRepository->query()->where('is_has_category',0)->get(['id', 'name']),
                 'tags' => $this->tagRepository->query()->get(['id', 'name']),
+                'mockups' => $this->mockupRepository->query()->with(['media'])->get(),
             ],
         ];
         $this->methodRelations = [
