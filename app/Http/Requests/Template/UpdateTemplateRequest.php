@@ -75,9 +75,9 @@ class UpdateTemplateRequest extends BaseRequest
             'border' => ['nullable', 'in:' . BorderEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
-            'colors' => ['sometimes','array'],
-            'colors.*.value' => ['sometimes','string'],
-            'colors.*.image_id' => ['sometimes', 'integer', 'exists:media,id'],
+//            'colors' => ['sometimes','array'],
+//            'colors.*.value' => ['sometimes','string'],
+//            'colors.*.image_id' => ['sometimes', 'integer', 'exists:media,id'],
         ];
     }
 

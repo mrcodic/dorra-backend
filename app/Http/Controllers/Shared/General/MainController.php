@@ -318,7 +318,7 @@ class MainController extends Controller
                 Rule::exists('products', 'resource_id');
             }, Rule::exists('categories', 'id'))],
             'resource_type' => ['required', 'in:product,category'],
-        ]); 
+        ]);
         $allowedTypes = [
             'product' => Product::class,
             'category' => Category::class,
