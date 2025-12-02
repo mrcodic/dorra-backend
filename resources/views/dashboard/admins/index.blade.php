@@ -204,20 +204,30 @@
             </tbody>
         </table>
         @can('admins_delete')
-        <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
-            <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
-                style="z-index: 10;">
-                <p id="selected-count-text">0 admins are selected</p>
-                <form id="bulk-delete-form" method="POST" action="{{ route('admins.bulk-delete') }}">
-                    @csrf
-                    <button type="submit" id="delete-selected-btn"
-                        class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns">
+            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+
+                <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                     style="z-index: 10;">
+                    <p id="selected-count-text">0 Admins are selected</p>
+                    <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
+                            data-bs-target="#deleteAdminsModal"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                         <i data-feather="trash-2"></i> Delete Selected
                     </button>
-                </form>
+                    <form style="display: none;" id="bulk-delete-form" method="POST"
+                          action="{{ route('admins.bulk-delete') }}">
+                        @csrf
+                        <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
+                                data-bs-target="#deleteAdminsModal"
+                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
+                            <i data-feather="trash-2"></i> Delete Selected
+                        </button>
+                    </form>
+
+
+                </div>
             </div>
-        </div>
-    @endcan
+        @endcan
     </div>
     </div>
     @include('modals/admins/add-admin')
