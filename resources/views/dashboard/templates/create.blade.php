@@ -39,7 +39,7 @@
                                         </div>
                                     </div>
                                     @endif
-                                    <div class="form-group mb-2 col-md-6">
+                                    <div class="form-group mb-2 {{ request()->query('q') == 'with' ? 'col-md-12' :'col-md-6 '}}">
                                         <label class="label-text mb-1">Template Model Image</label>
 
                                         <!-- Dropzone Container -->
