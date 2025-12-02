@@ -274,19 +274,19 @@
                                         Design Specifications
                                     </span>
                                 </div>
-                                <div class="form-group mb-2">
-                                    <label for="orientation" class="label-text mb-1">Orientation</label>
-                                    <select id="orientation" class="form-select" name="orientation">
-                                        <option value="" selected disabled>
-                                            chooese orientation
-                                        </option>
-                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                        <option value="{{ $orientation->value }}">
-                                            {{$orientation->label()}}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+{{--                                <div class="form-group mb-2">--}}
+{{--                                    <label for="orientation" class="label-text mb-1">Orientation</label>--}}
+{{--                                    <select id="orientation" class="form-select" name="orientation">--}}
+{{--                                        <option value="" selected disabled>--}}
+{{--                                            chooese orientation--}}
+{{--                                        </option>--}}
+{{--                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)--}}
+{{--                                        <option value="{{ $orientation->value }}">--}}
+{{--                                            {{$orientation->label()}}--}}
+{{--                                        </option>--}}
+{{--                                        @endforeach--}}
+{{--                                    </select>--}}
+{{--                                </div>--}}
                                 @if(request()->query('q') == 'with')
 
                                 <div class="position-relative mt-3 text-center">

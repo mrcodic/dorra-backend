@@ -48,7 +48,7 @@ class StoreTemplateRequest extends BaseRequest
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file'],
-            'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
+            'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
             'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
 //            'colors' => ['sometimes','array'],
 //            'colors.*.value' => ['sometimes','string'],

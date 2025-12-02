@@ -63,7 +63,7 @@
                                 $colors = collect($model->colors) ?? collect();
                                 $hasColors = $colors->isNotEmpty();
                                 @endphp
-                                @if($model->approach == 'without_editor')
+{{--                                @if($model->approach == 'without_editor')--}}
 {{--                                <div class="col-md-12">--}}
 {{--                                    <div class="mb-2">--}}
 {{--                                        <label class="form-label label-text">Template Colors</label>--}}
@@ -199,7 +199,7 @@
 {{--                                        </div>--}}
 {{--                                    </div>--}}
 {{--                                </div>--}}
-                                @endif
+{{--                                @endif--}}
                                 <div class="position-relative mt-3 text-center">
                                     <hr class="opacity-75" style="border: 1px solid #24B094;">
                                     <span
@@ -387,20 +387,20 @@
                                 {{-- Persisted resources (used on submit / ajax) --}}
                                 <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
                                 <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
-                                <div class="form-group mb-2">
-                                    <label for="orientation" class="label-text mb-1">Orientation</label>
-                                    <select id="orientation" class="form-select" name="orientation">
-                                        <option value="" disabled>
-                                            chooese orientation
-                                        </option>
-                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                        <option value="{{ $orientation->value }}" @selected($orientation==$model->
-                                            orientation) >
-                                            {{$orientation->label()}}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+{{--                                <div class="form-group mb-2">--}}
+{{--                                    <label for="orientation" class="label-text mb-1">Orientation</label>--}}
+{{--                                    <select id="orientation" class="form-select" name="orientation">--}}
+{{--                                        <option value="" disabled>--}}
+{{--                                            chooese orientation--}}
+{{--                                        </option>--}}
+{{--                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)--}}
+{{--                                        <option value="{{ $orientation->value }}" @selected($orientation==$model->--}}
+{{--                                            orientation) >--}}
+{{--                                            {{$orientation->label()}}--}}
+{{--                                        </option>--}}
+{{--                                        @endforeach--}}
+{{--                                    </select>--}}
+{{--                                </div>--}}
                                 @if($model->approach == 'with_editor')
 
                                 <div class="position-relative mt-3 text-center">
