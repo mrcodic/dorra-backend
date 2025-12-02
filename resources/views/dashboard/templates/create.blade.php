@@ -146,12 +146,13 @@
 
                                     </div>
                                 </div>
+                                <div class="row mb-2">
                                 <div class="col-md-6">
                                     <label for="templateName" class="label-text mb-1">Name (EN)</label>
                                     <input type="text" id="templateName" class="form-control" name="name[en]"
                                            placeholder="Template Name in English">
                                 </div>
-                                <div class="row mb-2">
+
                                     <div class="col-md-6">
                                         <label for="templateName" class="label-text mb-1">Name (AR)</label>
                                         <input type="text" id="templateName" class="form-control" name="name[ar]"
