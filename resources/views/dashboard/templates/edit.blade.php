@@ -226,7 +226,12 @@
                                         @endforeach
                                     </div>
                                 </div>
-
+                                <div class="col-md-6">
+                                    <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
+                                    <input type="text" id="templateNameEn" class="form-control" name="name[en]"
+                                           value="{{ $model->getTranslation('name','en') }}"
+                                           placeholder="Template Name in English">
+                                </div>
 
                                 <div class="row mb-2">
                                     <div class="col-md-6">
@@ -236,12 +241,7 @@
                                             placeholder="Template Name in Arabic">
                                     </div>
 
-                                    <div class="col-md-6">
-                                        <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
-                                        <input type="text" id="templateNameEn" class="form-control" name="name[en]"
-                                            value="{{ $model->getTranslation('name','en') }}"
-                                            placeholder="Template Name in English">
-                                    </div>
+
                                 </div>
 
 
