@@ -191,6 +191,7 @@ class MockupService extends BaseService
                 $this->handleFiles($model);
 
                 foreach ($model->templates as $template) {
+                    dd($template);
                     $pivotPositions = json_decode($template->positions, true); // Get positions as array
 
                     collect($model->types)->each(function ($type) use ($model, $template, $pivotPositions) {
