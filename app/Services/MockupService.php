@@ -221,7 +221,6 @@ class MockupService extends BaseService
                         $printY = $pivotPositions[$sideName . '_y'] ?? 0;
                         $printW = $pivotPositions[$sideName . '_width'] ?? 100;  // fallback
                         $printH = $pivotPositions[$sideName . '_height'] ?? 100; // fallback
-dd($printX,$printY,$printW,$printH,$sideName . '_x',$pivotPositions);
                         $firstMockup = $this->repository->query()->whereBelongsTo($model->category)->first();
 
                         $binary = (new MockupRenderer())->render([
