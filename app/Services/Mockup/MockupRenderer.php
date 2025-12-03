@@ -17,7 +17,6 @@ class MockupRenderer
      */
     public function render(array $options)
     {
-        // ----- 1) Read options with sane defaults -----
         $basePath   = $options['base_path'];
         $shirtPath  = $options['shirt_path'];
         $designPath = $options['design_path'] ?? null;
@@ -30,56 +29,40 @@ class MockupRenderer
 
         $maxDim     = $options['max_dim'] ?? 800;
 
-        // ----- 2) Read images -----
         $base  = Image::read($basePath);
         $shirt = Image::read($shirtPath);
-
         $design = $designPath ? Image::read($designPath) : null;
 
-        // ----- 3) Tint the shirt (only if hex provided) -----
-        $tintedShirt = $shirt;
         if (!empty($hex)) {
-            $tintedShirt = $this->tintShirt($shirt, $hex);
+            $shirt = $this->tintShirt($shirt, $hex);
         }
 
-        // ----- 4) Resize shirt to match base -----
-        $tintedShirt->resize($base->width(), $base->height());
+        // Resize shirt to base size
+        $shirt->resize($base->width(), $base->height());
 
-        // ----- 5) Compose canvas -----
         $canvas = clone $base;
+        $canvas->place($shirt);
 
-        // place shirt on base
-        $canvas->place($tintedShirt);
-
-        // ----- 6) Place design if exists -----
         if ($design) {
-            // scale design to fit in print box (maintain aspect ratio)
             $ratio = min($printW / $design->width(), $printH / $design->height());
-            $design->resize(
-                (int)($design->width() * $ratio),
-                (int)($design->height() * $ratio)
-            );
+            $design->resize((int)($design->width() * $ratio), (int)($design->height() * $ratio));
 
-            // center design inside print box
             $offsetX = $printX + (int)(($printW - $design->width()) / 2);
             $offsetY = $printY + (int)(($printH - $design->height()) / 2);
 
-            $canvas->place($design, 'top-left', $offsetX, $offsetY);
+            $canvas->place($design, offset_x: $offsetX, offset_y: $offsetY);
         }
 
-        // ----- 7) Scale down for web -----
+        // Scale down for web
         if ($maxDim > 0) {
             $ratio = min($maxDim / $canvas->width(), $maxDim / $canvas->height());
-            if ($ratio < 1) { // only scale down
-                $canvas->resize(
-                    (int)($canvas->width() * $ratio),
-                    (int)($canvas->height() * $ratio)
-                );
+            if ($ratio < 1) {
+                $canvas->resize((int)($canvas->width() * $ratio), (int)($canvas->height() * $ratio));
             }
         }
 
-        // ----- 8) Return encoded PNG -----
-        return $canvas->encode('png')->__toString();
+        // Return PNG string (version 3.x compatible)
+        return $canvas->toPng()->toString();
     }
 
     /**
