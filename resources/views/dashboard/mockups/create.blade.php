@@ -201,17 +201,6 @@
                         </div>
                     </div>
 
-                    <div class="mb-2">
-                        <label class="label-text mb-1 d-block">Colors</label>
-                        <div class="d-flex flex-wrap align-items-center gap-1">
-                            <button type="button" id="openColorPicker"
-                                    class="gradient-picker-trigger border"></button>
-
-                            <span id="selected-colors"
-                                  class="d-flex gap-1 flex-wrap align-items-center"></span>
-                        </div>
-                        <div id="colorsInputContainer"></div>
-                    </div>
                     <div class="mt-2 d-none" id="editorFrontWrapper">
                         <label class="label-text">Mockup Editor (Front)</label>
                         <canvas id="mockupCanvasFront" width="800" height="800" style="border:1px solid #ccc;"></canvas>
@@ -225,6 +214,17 @@
                     <div class="mt-2 d-none" id="editorNoneWrapper">
                         <label class="label-text">Mockup Editor (General)</label>
                         <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                    </div>
+                    <div class="mb-2">
+                        <label class="label-text mb-1 d-block">Colors</label>
+                        <div class="d-flex flex-wrap align-items-center gap-1">
+                            <button type="button" id="openColorPicker"
+                                    class="gradient-picker-trigger border"></button>
+
+                            <span id="selected-colors"
+                                  class="d-flex gap-1 flex-wrap align-items-center"></span>
+                        </div>
+                        <div id="colorsInputContainer"></div>
                     </div>
 
                     <div class="modal-footer border-top-0">
