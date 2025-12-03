@@ -54,7 +54,7 @@ class MockupRenderer
         $canvas = clone $base;
 
         // place shirt on base
-        $canvas->place($tintedShirt, 'top-left');
+        $canvas->place($tintedShirt);
 
         // ----- 5) Place design if exists -----
         if ($design) {
@@ -64,7 +64,7 @@ class MockupRenderer
             $offsetX = $printX + (int)(($printW - $design->width()) / 2);
             $offsetY = $printY;
 
-            $canvas->place($design, 'top-left', $offsetX, $offsetY);
+            $canvas->place($design, offset_x: $offsetX, offset_y:$offsetY);
         }
 
         // ----- 6) Scale down for web -----
