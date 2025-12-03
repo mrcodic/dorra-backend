@@ -120,7 +120,11 @@ class TemplateService extends BaseService
             ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
             })
-            ->when(request()->filled('limit'), fn($q) => $q->limit(request()->input('limit')))
+            ->when(true, function ($q) {
+                $limit = request('limit', 3);
+                $q->limit($limit);
+            })
+
             ->latest();
 
         if (request()->ajax()) {
