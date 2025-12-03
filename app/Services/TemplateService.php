@@ -21,7 +21,7 @@ class TemplateService extends BaseService
 
     public function __construct(TemplateRepositoryInterface $repository
         , public ProductRepositoryInterface                 $productRepository
-        ,public CategoryRepositoryInterface                 $categoryRepository
+        , public CategoryRepositoryInterface                $categoryRepository
     )
     {
         parent::__construct($repository);
@@ -33,7 +33,7 @@ class TemplateService extends BaseService
     {
         request('with_design_data', true);
 
-
+        $paginate = request('paginate', false);
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
@@ -70,7 +70,6 @@ class TemplateService extends BaseService
                     $q->whereIn('types.value', $types);
                 }, '=', count($types));
             })
-
             ->when(request()->filled('product_id'), function ($query) use ($productId) {
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
@@ -83,7 +82,7 @@ class TemplateService extends BaseService
                         ->orwhereHas('products.category', function ($q) use ($categoryId) {
                             $q->where('categories.id', $categoryId);
                         })->orwhereHas('products', function ($q) use ($categoryId) {
-                            $category =  $this->categoryRepository->find($categoryId);
+                            $category = $this->categoryRepository->find($categoryId);
                             $q->whereIn('products.id', $category->products->pluck('id'));
                         });
                 });
@@ -121,6 +120,7 @@ class TemplateService extends BaseService
             ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
             })
+            ->when(request()->filled('limit'), fn($q) => $q->limit(request()->input('limit')))
             ->latest();
 
         if (request()->ajax()) {
@@ -155,7 +155,7 @@ class TemplateService extends BaseService
             ];
         })->toArray();
         $validatedData['colors'] = $finalColors;
-        $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad,$colors) {
+        $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad, $colors) {
             $model = $this->repository->create($validatedData);
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
@@ -200,18 +200,20 @@ class TemplateService extends BaseService
                     'model_id' => $model->id,
                     'collection_name' => 'template_model_image',
                 ]);
-        }  if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
+        }
+        if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
 
-            Media::where(function ($query) use ($validatedData){
+            Media::where(function ($query) use ($validatedData) {
                 $query->whereKey($validatedData['template_image_front_id'])
-                    ->orWhere('id',$validatedData['template_image_none_id']);
+                    ->orWhere('id', $validatedData['template_image_none_id']);
             })
                 ->update([
                     'model_type' => get_class($model),
                     'model_id' => $model->id,
                     'collection_name' => 'templates',
                 ]);
-        } if (isset($validatedData['template_image_back_id'])) {
+        }
+        if (isset($validatedData['template_image_back_id'])) {
 
             Media::whereKey($validatedData['template_image_back_id'])
                 ->update([
@@ -278,25 +280,24 @@ class TemplateService extends BaseService
                 ->whereNotIn('id', $imageIds)
                 ->each
                 ->delete();
-                collect($colors)->each(function ($color) use ($model) {
-                    if (empty($color['image_id'])) {
-                        return;
-                    }
+            collect($colors)->each(function ($color) use ($model) {
+                if (empty($color['image_id'])) {
+                    return;
+                }
 
-                    $media = Media::where('id', $color['image_id'])->first();
+                $media = Media::where('id', $color['image_id'])->first();
 
-                    if ($media) {
-                        $media->update([
-                            'model_type' => get_class($model),
-                            'model_id' => $model->id,
-                            'collection_name' => 'color_templates',
-                        ]);
+                if ($media) {
+                    $media->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'color_templates',
+                    ]);
 
-                        $media->setCustomProperty('color_hex', $color['value']);
-                        $media->save();
-                    }
-                });
-
+                    $media->setCustomProperty('color_hex', $color['value']);
+                    $media->save();
+                }
+            });
 
 
             return $model;

@@ -406,6 +406,8 @@
                     product_without_category_id: productId,
                     request_type: "api",
                     approach: "without_editor",
+                    paginate: true,
+                    limit: 3,
                     types: selectedTypes,
                 },
                 success: function (response) {

@@ -38,7 +38,7 @@ class StoreMockupRequest extends BaseRequest
             ],
             'types.*' => ['required', Rule::in(TypeEnum::values())],
             'category_id' => ['required','integer', Rule::exists(Category::class, 'id')],
-            'colors' => ['required','array'],
+            'colors' => ['sometimes','array'],
             'templates' => ['required','array'],
             'templates.*.template_id' => ['required','exists:templates,id','distinct'],
             'templates.*.front_x'      => ['nullable', 'numeric', 'min:0'],
