@@ -31,10 +31,10 @@ class MockupRenderer
         $maxDim     = $options['max_dim'] ?? 800;
 
         // ----- 2) Read images -----
-        $base  = Image::make($basePath);
-        $shirt = Image::make($shirtPath);
+        $base  = Image::read($basePath);
+        $shirt = Image::read($shirtPath);
 
-        $design = $designPath ? Image::make($designPath) : null;
+        $design = $designPath ? Image::read($designPath) : null;
 
         // ----- 3) Tint the shirt (only if hex provided) -----
         $tintedShirt = $shirt;
