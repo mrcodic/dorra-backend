@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignUuid('template_id')->constrained('templates')->cascadeOnDelete();
             $table->foreignIdFor(Mockup::class)->constrained()->cascadeOnDelete();
+            $table->json('positions');
             $table->timestamps();
         });
     }

@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Enums\OrientationEnum;
 use App\Enums\Template\StatusEnum;
+use App\Enums\Template\TypeEnum;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -62,7 +63,14 @@ class TemplateService extends BaseService
                 } else {
                     $q->whereRaw('1 = 0');
                 }
+            })->when(request()->filled('types'), function ($query) {
+                $types = request()->input('types');
+
+                $query->whereHas('types', function ($q) use ($types) {
+                    $q->whereIn('types.value', $types);
+                }, '=', count($types));
             })
+
             ->when(request()->filled('product_id'), function ($query) use ($productId) {
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
@@ -192,12 +200,24 @@ class TemplateService extends BaseService
                     'model_id' => $model->id,
                     'collection_name' => 'template_model_image',
                 ]);
-        }  if (isset($validatedData['template_image_main_id'])) {
-            Media::where('id', $validatedData['template_image_main_id'])
+        }  if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
+
+            Media::where(function ($query) use ($validatedData){
+                $query->whereKey($validatedData['template_image_front_id'])
+                    ->orWhere('id',$validatedData['template_image_none_id']);
+            })
                 ->update([
                     'model_type' => get_class($model),
                     'model_id' => $model->id,
                     'collection_name' => 'templates',
+                ]);
+        } if (isset($validatedData['template_image_back_id'])) {
+
+            Media::whereKey($validatedData['template_image_back_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'back_templates',
                 ]);
         }
         return $model->load($relationsToLoad);

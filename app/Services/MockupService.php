@@ -169,93 +169,84 @@ class MockupService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-
         $model = $this->handleTransaction(function () use ($validatedData) {
-
 
             $model = $this->repository->create($validatedData);
             $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
             $templatesInput = collect(Arr::get($validatedData, 'templates', []));
 
             if ($templatesInput->isNotEmpty()) {
-                $templateIds = $templatesInput->pluck('template_id')->all();
-                $model->templates()->attach($templateIds);
+                collect($validatedData['templates'])->map(function ($template) use ($model, $validatedData){
+                    $templateId = $template['template_id'] ?? null;
+                    if (!$templateId) return;
+                    $positions = collect($template)
+                        ->except('template_id')
+                        ->filter(fn($value) => !is_null($value))
+                        ->toArray();
+                    $model->templates()->attach([
+                        $templateId => ['positions' => json_encode($positions)]
+                    ]);
+                });
                 $model->load('templates');
-                $templatesById = $templatesInput->keyBy('template_id');
-                $rows = [];
-                $typeMap = [
-                    'front' => 1,
-                    'back' => 2,
-                    'none' => 3,
-                ];
                 $this->handleFiles($model);
 
                 foreach ($model->templates as $template) {
-                    collect($model->types)
-                        ->each(function ($type) use ($model, $template) {
+                    $pivotPositions = json_decode($template->pivot->positions, true); // Get positions as array
 
-                            $sideName = strtolower($type->value->name);
+                    collect($model->types)->each(function ($type) use ($model, $template, $pivotPositions) {
+                        $sideName = strtolower($type->value->name);
 
-                            $baseMedia = $model->getMedia('mockups')
-                                ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                                    $m->getCustomProperty('role') === 'base');
+                        $baseMedia = $model->getMedia('mockups')
+                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                                $m->getCustomProperty('role') === 'base');
 
-                            $maskMedia = $model->getMedia('mockups')
-                                ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                                    $m->getCustomProperty('role') === 'mask');
-                            if (!$baseMedia || !$maskMedia) {
-                                return [$sideName => null];
-                            }
-                            $designMedia = $type == TypeEnum::BACK
-                                ? $template->getFirstMedia('back_templates')
-                                : $template->getFirstMedia('templates');
-                            if (!$designMedia || !$designMedia->getPath()) {
-                                throw new \Exception("Missing design media for {$sideName}");
-                            }
-                            $firstMockup = $this->repository->query()->whereBelongsTo($model->category)->first();
-                            $binary = (new MockupRenderer())->render([
-                                'base_path' => $baseMedia->getPath(),
-                                'shirt_path' => $maskMedia->getPath(),
-                                'design_path' => $designMedia->getPath(),
-                                'hex' => $firstMockup->colors ? $firstMockup->colors[0] : null,
-                            ]);
+                        $maskMedia = $model->getMedia('mockups')
+                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                                $m->getCustomProperty('role') === 'mask');
 
-                            $model
-                                ->addMediaFromString($binary)
-                                ->usingFileName("mockup_{$sideName}.png")
-                                ->withCustomProperties([
-                                    'side' => $sideName,
-                                    'template_id' => $template->id,
-                                ])
-                                ->toMediaCollection('generated_mockups');
-
-
-                        });
-
-                    $input = $templatesById->get($template->id);
-                    if (!$input) {
-                        continue;
-                    }
-
-                    $pivotId = $template->pivot->id; // from withPivot('id')
-
-                    foreach ($typeMap as $field => $typeValue) {
-
-                        if (!empty($input[$field])) {
-                            $rows[] = [
-                                'mockup_template_id' => $pivotId,
-                                'position_id' => $input[$field],
-                                'template_type' => $typeValue,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ];
+                        if (!$baseMedia || !$maskMedia) {
+                            return [$sideName => null];
                         }
-                    }
+
+                        $designMedia = $type == TypeEnum::BACK
+                            ? $template->getFirstMedia('back_templates')
+                            : $template->getFirstMedia('templates');
+
+                        if (!$designMedia || !$designMedia->getPath()) {
+                            throw new \Exception("Missing design media for {$sideName}");
+                        }
+
+                        // Pull positions for this side (front/back/none)
+                        $printX = $pivotPositions[$sideName . '_x'] ?? 0;
+                        $printY = $pivotPositions[$sideName . '_y'] ?? 0;
+                        $printW = $pivotPositions[$sideName . '_width'] ?? 100;  // fallback
+                        $printH = $pivotPositions[$sideName . '_height'] ?? 100; // fallback
+
+                        $firstMockup = $this->repository->query()->whereBelongsTo($model->category)->first();
+
+                        $binary = (new MockupRenderer())->render([
+                            'base_path' => $baseMedia->getPath(),
+                            'shirt_path' => $maskMedia->getPath(),
+                            'design_path' => $designMedia->getPath(),
+                            'print_x' => $printX,
+                            'print_y' => $printY,
+                            'print_w' => $printW,
+                            'print_h' => $printH,
+                            'hex' => $firstMockup->colors ? $firstMockup->colors[0] : null,
+                        ]);
+
+                        $model
+                            ->addMediaFromString($binary)
+                            ->usingFileName("mockup_{$sideName}.png")
+                            ->withCustomProperties([
+                                'side' => $sideName,
+                                'template_id' => $template->id,
+                            ])
+                            ->toMediaCollection('generated_mockups');
+                    });
                 }
 
-                if (!empty($rows)) {
-                    DB::table('mockup_position_template')->insert($rows);
-                }
+
             }
 
             return $model;
