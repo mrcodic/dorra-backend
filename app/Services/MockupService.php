@@ -176,33 +176,42 @@ class MockupService extends BaseService
             $templatesInput = collect(Arr::get($validatedData, 'templates', []));
 
             if ($templatesInput->isNotEmpty()) {
-                collect($validatedData['templates'])->map(function ($template) use ($model, $validatedData){
+                // 1) خزن الـ positions كما هي (مفترض إنها نسب مئوية)
+                collect($validatedData['templates'])->map(function ($template) use ($model) {
                     $templateId = $template['template_id'] ?? null;
                     if (!$templateId) return;
+
                     $positions = collect($template)
                         ->except('template_id')
-                        ->filter(fn($value) => !is_null($value))
+                        ->filter(fn ($value) => !is_null($value))
                         ->toArray();
+
                     $model->templates()->attach([
-                        $templateId => ['positions' => json_encode($positions)]
+                        $templateId => ['positions' => json_encode($positions)],
                     ]);
                 });
+
                 $model->load('templates');
                 $this->handleFiles($model);
 
                 foreach ($model->templates as $template) {
-                    $pivotPositions = json_decode($template->pivot->positions, true); // Get positions as array
+                    $pivotPositions = json_decode($template->pivot->positions, true) ?? [];
 
                     collect($model->types)->each(function ($type) use ($model, $template, $pivotPositions) {
                         $sideName = strtolower($type->value->name);
 
+                        // ----- base & mask media -----
                         $baseMedia = $model->getMedia('mockups')
-                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                                $m->getCustomProperty('role') === 'base');
+                            ->first(fn ($m) =>
+                                $m->getCustomProperty('side') === $sideName &&
+                                $m->getCustomProperty('role') === 'base'
+                            );
 
                         $maskMedia = $model->getMedia('mockups')
-                            ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                                $m->getCustomProperty('role') === 'mask');
+                            ->first(fn ($m) =>
+                                $m->getCustomProperty('side') === $sideName &&
+                                $m->getCustomProperty('role') === 'mask'
+                            );
 
                         if (!$baseMedia || !$maskMedia) {
                             return [$sideName => null];
@@ -216,36 +225,55 @@ class MockupService extends BaseService
                             throw new \Exception("Missing design media for {$sideName}");
                         }
 
-                        // Pull positions for this side (front/back/none)
-                        $printX = $pivotPositions[$sideName . '_x'] ?? 0;
-                        $printY = $pivotPositions[$sideName . '_y'] ?? 0;
-                        $printW = $pivotPositions[$sideName . '_width'] ?? 100;  // fallback
-                        $printH = $pivotPositions[$sideName . '_height'] ?? 100; // fallback
-                        $firstMockup = $this->repository->query()->whereBelongsTo($model->category)->first();
+                        // ----- ➊ اقرأ حجم صورة الـ base -----
+                        $basePath = $baseMedia->getPath();
+                        [$baseWidth, $baseHeight] = getimagesize($basePath);
+
+                        // ----- ➋ اسحب النِسَب من الـ pivot (0–100) -----
+                        // أمثلة: front_x = 25 (يعني 25% من العرض)
+                        $percentX = $pivotPositions[$sideName . '_x']      ?? 0;
+                        $percentY = $pivotPositions[$sideName . '_y']      ?? 0;
+                        $percentW = $pivotPositions[$sideName . '_width']  ?? 100;
+                        $percentH = $pivotPositions[$sideName . '_height'] ?? 100;
+
+                        // لو مخزنها من 0 → 1 بدل 0 → 100، شيل /100 تحت أو عدّل النسب هنا.
+
+                        // ----- ➌ حوِّل النِسَب إلى بيكسل على مقاس الـ base -----
+                        $printX = (int) round($baseWidth  * ($percentX / 100));
+                        $printY = (int) round($baseHeight * ($percentY / 100));
+                        $printW = (int) round($baseWidth  * ($percentW / 100));
+                        $printH = (int) round($baseHeight * ($percentH / 100));
+
+                        // fallback لو حصل أي قيم غريبة
+                        if ($printW <= 0)  $printW = (int) round($baseWidth * 0.3);
+                        if ($printH <= 0)  $printH = (int) round($baseHeight * 0.3);
+
+                        $firstMockup = $this->repository
+                            ->query()
+                            ->whereBelongsTo($model->category)
+                            ->first();
 
                         $binary = (new MockupRenderer())->render([
-                            'base_path' => $baseMedia->getPath(),
-                            'shirt_path' => $maskMedia->getPath(),
+                            'base_path'   => $basePath,
+                            'shirt_path'  => $maskMedia->getPath(),
                             'design_path' => $designMedia->getPath(),
-                            'print_x' => $printX,
-                            'print_y' => $printY,
-                            'print_w' => $printW,
-                            'print_h' => $printH,
-                            'hex' => $firstMockup->colors ? $firstMockup->colors[0] : null,
+                            'print_x'     => $printX,
+                            'print_y'     => $printY,
+                            'print_w'     => $printW,
+                            'print_h'     => $printH,
+                            'hex'         => $firstMockup->colors ? $firstMockup->colors[0] : null,
                         ]);
 
                         $model
                             ->addMediaFromString($binary)
                             ->usingFileName("mockup_{$sideName}.png")
                             ->withCustomProperties([
-                                'side' => $sideName,
+                                'side'        => $sideName,
                                 'template_id' => $template->id,
                             ])
                             ->toMediaCollection('generated_mockups');
                     });
                 }
-
-
             }
 
             return $model;
@@ -253,7 +281,6 @@ class MockupService extends BaseService
 
         return $model;
     }
-
 
     /**
      * @param mixed $model
