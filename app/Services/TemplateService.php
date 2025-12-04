@@ -122,16 +122,18 @@ class TemplateService extends BaseService
             })->when(request()->filled('limit'), function ($q) {
                 $q->limit((int) request('limit'));
             })
-            ->distinct()
+
             ->latest();
 
         if (request()->ajax()) {
+
             return $pageSize === null
                 ? $query->get()
                 : $query->paginate($pageSize)->withQueryString();
         }
 
         if (request()->expectsJson()) {
+            dd("GFD");
             $query = $query->whereStatus(StatusEnum::LIVE);
 
             return $paginate
