@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Enums\OrientationEnum;
 use App\Enums\Template\StatusEnum;
+use App\Enums\Template\TypeEnum;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -20,7 +21,7 @@ class TemplateService extends BaseService
 
     public function __construct(TemplateRepositoryInterface $repository
         , public ProductRepositoryInterface                 $productRepository
-        ,public CategoryRepositoryInterface                 $categoryRepository
+        , public CategoryRepositoryInterface                $categoryRepository
     )
     {
         parent::__construct($repository);
@@ -32,7 +33,7 @@ class TemplateService extends BaseService
     {
         request('with_design_data', true);
 
-
+        $paginate = request('paginate', false);
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
@@ -62,6 +63,12 @@ class TemplateService extends BaseService
                 } else {
                     $q->whereRaw('1 = 0');
                 }
+            })->when(request()->filled('types'), function ($query) {
+                $types = request()->input('types');
+
+                $query->whereHas('types', function ($q) use ($types) {
+                    $q->whereIn('types.value', $types);
+                }, '=', count($types));
             })
             ->when(request()->filled('product_id'), function ($query) use ($productId) {
                 $query->whereHas('products', function ($q) use ($productId) {
@@ -75,7 +82,7 @@ class TemplateService extends BaseService
                         ->orwhereHas('products.category', function ($q) use ($categoryId) {
                             $q->where('categories.id', $categoryId);
                         })->orwhereHas('products', function ($q) use ($categoryId) {
-                            $category =  $this->categoryRepository->find($categoryId);
+                            $category = $this->categoryRepository->find($categoryId);
                             $q->whereIn('products.id', $category->products->pluck('id'));
                         });
                 });
@@ -113,6 +120,11 @@ class TemplateService extends BaseService
             ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
             })
+            ->when(true, function ($q) {
+                $limit = request('limit', 3);
+                $q->limit($limit);
+            })
+
             ->latest();
 
         if (request()->ajax()) {
@@ -147,7 +159,7 @@ class TemplateService extends BaseService
             ];
         })->toArray();
         $validatedData['colors'] = $finalColors;
-        $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad,$colors) {
+        $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad, $colors) {
             $model = $this->repository->create($validatedData);
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
@@ -192,12 +204,26 @@ class TemplateService extends BaseService
                     'model_id' => $model->id,
                     'collection_name' => 'template_model_image',
                 ]);
-        }  if (isset($validatedData['template_image_main_id'])) {
-            Media::where('id', $validatedData['template_image_main_id'])
+        }
+        if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
+
+            Media::where(function ($query) use ($validatedData) {
+                $query->whereKey($validatedData['template_image_front_id'])
+                    ->orWhere('id', $validatedData['template_image_none_id']);
+            })
                 ->update([
                     'model_type' => get_class($model),
                     'model_id' => $model->id,
                     'collection_name' => 'templates',
+                ]);
+        }
+        if (isset($validatedData['template_image_back_id'])) {
+
+            Media::whereKey($validatedData['template_image_back_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'back_templates',
                 ]);
         }
         return $model->load($relationsToLoad);
@@ -258,25 +284,24 @@ class TemplateService extends BaseService
                 ->whereNotIn('id', $imageIds)
                 ->each
                 ->delete();
-                collect($colors)->each(function ($color) use ($model) {
-                    if (empty($color['image_id'])) {
-                        return;
-                    }
+            collect($colors)->each(function ($color) use ($model) {
+                if (empty($color['image_id'])) {
+                    return;
+                }
 
-                    $media = Media::where('id', $color['image_id'])->first();
+                $media = Media::where('id', $color['image_id'])->first();
 
-                    if ($media) {
-                        $media->update([
-                            'model_type' => get_class($model),
-                            'model_id' => $model->id,
-                            'collection_name' => 'color_templates',
-                        ]);
+                if ($media) {
+                    $media->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'color_templates',
+                    ]);
 
-                        $media->setCustomProperty('color_hex', $color['value']);
-                        $media->save();
-                    }
-                });
-
+                    $media->setCustomProperty('color_hex', $color['value']);
+                    $media->save();
+                }
+            });
 
 
             return $model;

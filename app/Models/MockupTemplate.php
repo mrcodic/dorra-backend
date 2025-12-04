@@ -12,10 +12,13 @@ class MockupTemplate extends Pivot
 
     protected $primaryKey = 'id';
     public $incrementing = true;
-
+    protected $casts = [
+        'positions' => 'array'
+    ];
     protected $fillable = [
         'mockup_id',
         'template_id',
+        'positions'
     ];
 
     public function mockup()
