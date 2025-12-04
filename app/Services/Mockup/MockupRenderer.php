@@ -20,21 +20,23 @@ class MockupRenderer
     public function render(array $options)
     {
         // ----- 1) Read options with sane defaults -----
-        $basePath   = $options['base_path'];         // required
-        $shirtPath  = $options['shirt_path'];        // required
+        $basePath = $options['base_path'];         // required
+        $shirtPath = $options['shirt_path'];        // required
         $designPath = $options['design_path'] ?? null;
         $hex = $options['hex'] ?? null;
 
 
-        $printX     = $options['print_x'] ?? 360;
-        $printY     = $options['print_y'] ?? 660;
-        $printW     = $options['print_w'] ?? 480;
-        $printH     = $options['print_h'] ?? 540;
+        $printX = $options['print_x'] ?? 360;
+        $printY = $options['print_y'] ?? 660;
+        $printW = $options['print_w'] ?? 480;
+        $printH = $options['print_h'] ?? 540;
 
-        $maxDim     = $options['max_dim'] ?? 800;
+        $maxDim = $options['max_dim'] ?? 800;
+        $angle = $options['angle'] ?? 0; // degree rotation
+
 
         // ----- 2) Read images -----
-        $base  = Image::read($basePath);
+        $base = Image::read($basePath);
         $shirt = Image::read($shirtPath);
 
         $design = null;
@@ -56,15 +58,25 @@ class MockupRenderer
         $canvas->place($tintedShirt, 'top-left');
 
         // ----- 5) Place design if exists -----
+        // ----- 5) Place design if exists -----
         if ($design) {
+
             // scale design to fit in print box
             $design->scaleDown(width: $printW, height: $printH);
 
+            // rotate if angle exists
+            if (!empty($angle)) {
+                // rotate around center & keep alpha
+                $design = $design->rotate((float)$angle, 'transparent');
+            }
+
+            // center horizontally in print box
             $offsetX = $printX + (int)(($printW - $design->width()) / 2);
             $offsetY = $printY;
 
             $canvas->place($design, 'top-left', $offsetX, $offsetY);
         }
+
 
         // ----- 6) Scale down for web -----
         if ($maxDim > 0) {
@@ -89,7 +101,7 @@ class MockupRenderer
 
         // Map 0..255 -> -40..40 for subtle colorize
         $map = function (int $c): int {
-            return (int) round((($c - 128) / 127) * 40);
+            return (int)round((($c - 128) / 127) * 40);
         };
 
         $rAdj = $map($r);

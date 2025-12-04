@@ -257,8 +257,10 @@ class MockupService extends BaseService
                             'print_y'     => $printY,
                             'print_w'     => $printW,
                             'print_h'     => $printH,
+                            'angle'       => $pivotPositions[$sideName . '_angle'] ?? 0,
                             'hex'         => $firstMockup->colors ? $firstMockup->colors[0] : null,
                         ]);
+
 
                         $model
                             ->addMediaFromString($binary)
