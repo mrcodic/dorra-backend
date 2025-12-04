@@ -243,7 +243,7 @@ class MockupService extends BaseService
                         // fallback لو حصل أي قيم غريبة
                         if ($printW <= 0)  $printW = (int) round($baseWidth * 0.3);
                         if ($printH <= 0)  $printH = (int) round($baseHeight * 0.3);
-
+dd($pivotPositions[$sideName . '_angle']);
                         $firstMockup = $this->repository
                             ->query()
                             ->whereBelongsTo($model->category)
