@@ -240,7 +240,7 @@ class MockupService extends BaseService
                         $printH = (int) round($pivotPositions[$sideName.'_height'] * $scaleY);
                         $angle = (float) ($pivotPositions[$sideName . '_angle'] ?? 0);
 
-                        
+
                         if ($printW <= 0)  $printW = (int) round($baseWidth * 0.3);
                         if ($printH <= 0)  $printH = (int) round($baseHeight * 0.3);
 
