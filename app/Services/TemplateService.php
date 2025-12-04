@@ -119,15 +119,11 @@ class TemplateService extends BaseService
             })
             ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
-            })->when(request()->filled('limit'), function ($q) {
-                $q->limit((int) request('limit'));
-            })
-
-            ->latest();
+            })->latest()->when(request()->filled('limit'), function ($q) {
+        $q->limit((int) request('limit'));
+    });
 
         if (request()->ajax()) {
-            dd($pageSize);
-
             return $pageSize === null
                 ? $query->get()
                 : $query->paginate($pageSize)->withQueryString();
