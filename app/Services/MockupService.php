@@ -229,20 +229,19 @@ class MockupService extends BaseService
                         $basePath = $baseMedia->getPath();
                         [$baseWidth, $baseHeight] = getimagesize($basePath);
 
-                        // ----- ➋ اسحب النِسَب من الـ pivot (0–100) -----
-                        // أمثلة: front_x = 25 (يعني 25% من العرض)
-                        $percentX = $pivotPositions[$sideName . '_x']      ?? 0;
-                        $percentY = $pivotPositions[$sideName . '_y']      ?? 0;
-                        $percentW = $pivotPositions[$sideName . '_width']  ?? 100;
-                        $percentH = $pivotPositions[$sideName . '_height'] ?? 100;
+                        $previewWidth  = 800;
+                        $previewHeight = 800;
 
-                        // لو مخزنها من 0 → 1 بدل 0 → 100، شيل /100 تحت أو عدّل النسب هنا.
+// scaling ratio
+                        $scaleX = $baseWidth  / $previewWidth;
+                        $scaleY = $baseHeight / $previewHeight;
 
-                        // ----- ➌ حوِّل النِسَب إلى بيكسل على مقاس الـ base -----
-                        $printX = (int) round($baseWidth  * ($percentX / 100));
-                        $printY = (int) round($baseHeight * ($percentY / 100));
-                        $printW = (int) round($baseWidth  * ($percentW / 100));
-                        $printH = (int) round($baseHeight * ($percentH / 100));
+// convert pixels (from canvas) -> pixels (on base)
+                        $printX = (int) round($pivotPositions[$sideName.'_x']      * $scaleX);
+                        $printY = (int) round($pivotPositions[$sideName.'_y']      * $scaleY);
+                        $printW = (int) round($pivotPositions[$sideName.'_width']  * $scaleX);
+                        $printH = (int) round($pivotPositions[$sideName.'_height'] * $scaleY);
+
 
                         // fallback لو حصل أي قيم غريبة
                         if ($printW <= 0)  $printW = (int) round($baseWidth * 0.3);
