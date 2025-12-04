@@ -1,39 +1,21 @@
-<div class="modal modal-slide-in new-user-modal fade" id="templateModal">
-    <div class="modal-dialog">
-        <div class="add-new-user modal-content pt-0">
+{{-- Templates Modal --}}
+<div class="modal fade" id="templateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Remaining Templates</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
-                <div class="modal-header mb-1">
-                    <h5 class="modal-title" id="exampleModalLabel">Select template to add Mockup Editor</h5>
-                </div>
-                <div class="modal-body flex-grow-1">
-
-                    <!-- Name in Arabic and English -->
-                    <div class="row mb-1">
-                        <div class="col-md-6">
-                            <label class="form-label label-text">Name (EN)</label>
-                            <input type="text" class="form-control" placeholder="Enter Industry Name(En)"
-                                   id="add-category-name-en" name="name[en]" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label label-text">Name (AR)</label>
-                            <input type="text" class="form-control" placeholder="Enter Industry Name(Ar)"
-                                   id="add-category-name-ar" name="name[ar]" />
-                        </div>
-                    </div>
-
-
+            <div class="modal-body">
+                <div id="templates-modal-container" class="row g-2">
+                    {{-- AJAX templates will be injected here --}}
                 </div>
 
-                <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                        <span class="btn-text">Save</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                              aria-hidden="true"></span>
-                    </button>
+                <div id="templates-modal-pagination" class="mt-3 text-center">
+                    {{-- Load more / pagination will be injected here --}}
                 </div>
-
+            </div>
         </div>
     </div>
 </div>

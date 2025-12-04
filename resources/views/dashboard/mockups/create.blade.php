@@ -268,6 +268,200 @@
 @endsection
 
 @section('page-script')
+    @push('scripts')
+        <script>
+            $(function () {
+                let nextPageUrl = null; // from pagination.next_page_url
+
+                // When modal is about to open
+                $('#templateModal').on('show.bs.modal', function () {
+                    // 1) Close any open Select2
+                    try {
+                        $('.select2-hidden-accessible').each(function () {
+                            if ($(this).data('select2')) {
+                                $(this).select2('close');
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Select2 close error:', e);
+                    }
+
+                    // 2) Load first page of remaining templates
+                    loadTemplatesFirstPage();
+                });
+
+                function getFilters() {
+                    // TODO: replace with your own logic if different
+                    const productId     = $('#product_id').val() || null;       // example
+                    const selectedTypes = $('#types').val() || [];              // example (multi-select)
+
+                    return { productId, selectedTypes };
+                }
+
+                function loadTemplatesFirstPage() {
+                    const { productId, selectedTypes } = getFilters();
+
+                    $('#templates-modal-container').html(
+                        '<div class="col-12 text-center py-3">Loading...</div>'
+                    );
+                    $('#templates-modal-pagination').empty();
+                    nextPageUrl = null;
+
+                    $.ajax({
+                        url: "{{ route('product-templates.index') }}",
+                        method: "GET",
+                        data: {
+                            product_without_category_id: productId,
+                            request_type: "api",
+                            approach: "without_editor",
+                            paginate: true,
+                            per_page: 3,
+                            limit: 3,
+                            types: selectedTypes,
+                            page: 1,
+                        },
+                        success: function (res) {
+                            renderTemplatesResponse(res, false);
+                        },
+                        error: function (xhr) {
+                            console.error(xhr.responseText || xhr.statusText);
+                            $('#templates-modal-container').html(
+                                '<div class="col-12 text-danger text-center py-3">Error loading templates</div>'
+                            );
+                        }
+                    });
+                }
+
+                // Handle "Load more" click inside modal (delegated)
+                $(document).on('click', '#templates-modal-load-more', function () {
+                    if (!nextPageUrl) return;
+
+                    const $btn = $(this);
+                    $btn.prop('disabled', true).text('Loading...');
+
+                    $.ajax({
+                        url: nextPageUrl,
+                        method: "GET",
+                        success: function (res) {
+                            renderTemplatesResponse(res, true);
+                        },
+                        error: function (xhr) {
+                            console.error(xhr.responseText || xhr.statusText);
+                            $btn.prop('disabled', false).text('Load More');
+                        }
+                    });
+                });
+
+                function renderTemplatesResponse(res, append) {
+                    // Expecting structure like the one you pasted:
+                    // {
+                    //   status: 200,
+                    //   success: true,
+                    //   data: [ ...templates... ],
+                    //   pagination: { next_page_url, ... }
+                    //   ...other fields (source_design_svg, orientation, etc.)
+                    // }
+
+                    const templates  = res.data || [];
+                    const pagination = res.pagination || {};
+
+                    if (!append) {
+                        $('#templates-modal-container').empty();
+                    }
+
+                    if (!templates.length && !append) {
+                        $('#templates-modal-container').html(
+                            '<div class="col-12 text-center text-muted py-3">No templates found</div>'
+                        );
+                    } else {
+                        templates.forEach(function (tpl) {
+                            const img = tpl.product_model_image || tpl.template_model_image || '';
+
+                            const html = `
+                        <div class="col-6 col-md-4 mb-2">
+                            <button
+                                type="button"
+                                class="btn w-100 p-0 border-0 template-item-modal"
+                                data-id="${tpl.id}"
+                                data-name="${tpl.name || ''}"
+                                data-image="${img}"
+                            >
+                                <div class="card h-100">
+                                    ${img
+                                ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
+                                : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
+                                              <span class="text-muted small">No image</span>
+                                           </div>`
+                            }
+                                    <div class="card-body py-2 px-2">
+                                        <div class="small fw-semibold text-truncate mb-1">
+                                            ${tpl.name || ''}
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center small text-muted">
+                                            <span>${tpl.type || ''}</span>
+                                            ${tpl.rating
+                                ? `<span>${'★'.repeat(tpl.rating)}</span>`
+                                : ''
+                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    `;
+
+                            $('#templates-modal-container').append(html);
+                        });
+                    }
+
+                    // Pagination
+                    nextPageUrl = pagination.next_page_url || null;
+
+                    if (nextPageUrl) {
+                        $('#templates-modal-pagination').html(`
+                    <button
+                        id="templates-modal-load-more"
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                    >
+                        Load More
+                    </button>
+                `);
+                    } else {
+                        if (!append) {
+                            $('#templates-modal-pagination').empty();
+                        } else {
+                            $('#templates-modal-pagination').html(`
+                        <div class="text-muted small">No more templates</div>
+                    `);
+                        }
+                    }
+                }
+
+                // Optional: handle click on template in modal -> set value somewhere + close modal
+                $(document).on('click', '.template-item-modal', function () {
+                    const id   = $(this).data('id');
+                    const name = $(this).data('name');
+                    const img  = $(this).data('image');
+
+                    // Example: set hidden input & preview (adjust to your needs)
+                    $('#template_id').val(id);
+                    $('#template_preview_name').text(name);
+
+                    if (img) {
+                        $('#template_preview_img').attr('src', img).show();
+                    } else {
+                        $('#template_preview_img').hide();
+                    }
+
+                    const modalEl = document.getElementById('templateModal');
+                    const modal   = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                });
+            });
+        </script>
+    @endpush
+
     <script>
         // =========================
         // SELECT2 FORMATTER
