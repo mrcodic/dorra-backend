@@ -292,8 +292,8 @@
 
                 function getFilters() {
                     // TODO: replace with your own logic if different
-                    const productId     = $('#product_id').val() || null;       // example
-                    const selectedTypes = $('#types').val() || [];              // example (multi-select)
+                    const productId     = document.getElementById('productsSelect') || null;       // example
+                    const selectedTypes = $('.type-checkbox').val() || [];              // example (multi-select)
 
                     return { productId, selectedTypes };
                 }

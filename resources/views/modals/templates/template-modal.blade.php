@@ -1,7 +1,7 @@
 {{-- Templates Modal --}}
 <div class="modal modal-slide-in  fade" id="templateModal" tabindex="-1" aria-hidden="true">
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
-    
+
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
