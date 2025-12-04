@@ -41,7 +41,7 @@ class MockupRenderer
         if ($designPath) {
             $design = Image::read($designPath);
         }
-        dd($design,$shirt,$base);
+        dd( getimagesize($designPath),getimagesize($basePath),getimagesize($shirtPath));
         // ----- 3) Tint the shirt -----
         // ----- 3) Tint the shirt (only if hex provided) -----
         $tintedShirt = $shirt;
