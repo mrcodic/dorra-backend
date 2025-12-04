@@ -203,17 +203,17 @@
 
                     <div class="mt-2 d-none" id="editorFrontWrapper">
                         <label class="label-text">Mockup Editor (Front)</label>
-                        <canvas id="mockupCanvasFront" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                        <canvas id="mockupCanvasFront" width="1200" height="1800" style="border:1px solid #ccc;"></canvas>
                     </div>
 
                     <div class="mt-2 d-none" id="editorBackWrapper">
                         <label class="label-text">Mockup Editor (Back)</label>
-                        <canvas id="mockupCanvasBack" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                        <canvas id="mockupCanvasBack" width="1200" height="1800" style="border:1px solid #ccc;"></canvas>
                     </div>
 
                     <div class="mt-2 d-none" id="editorNoneWrapper">
                         <label class="label-text">Mockup Editor (General)</label>
-                        <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                        <canvas id="mockupCanvasNone" width="1200" height="1800" style="border:1px solid #ccc;"></canvas>
                     </div>
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
