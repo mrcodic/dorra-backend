@@ -429,7 +429,7 @@
                     request_type: "api",
                     approach: "without_editor",
                     paginate: true,
-                    per_page: 10,
+                    per_page: 3,
                     limit: 3,
                     types: selectedTypes,
                 },
