@@ -126,6 +126,7 @@ class TemplateService extends BaseService
             ->latest();
 
         if (request()->ajax()) {
+            dd("GFD");
 
             return $pageSize === null
                 ? $query->get()
@@ -133,7 +134,6 @@ class TemplateService extends BaseService
         }
 
         if (request()->expectsJson()) {
-            dd("GFD");
             $query = $query->whereStatus(StatusEnum::LIVE);
 
             return $paginate
