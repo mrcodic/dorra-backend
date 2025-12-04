@@ -381,39 +381,36 @@
                         const back  = tpl.back_base64_preview_image || '';
 
                         const html = `
-                <div class="col-6 col-md-4 mb-2 ">
-                    <button
-                        type="button"
-                        class="btn w-100 p-0 border-0 template-item-modal show-template-canvas"
-                        data-id="${tpl.id}"
-                        data-name="${tpl.name || ''}"
-                        data-image="${img}"
-                        data-front="${front}"
-                        data-back="${back}"
-                    >
-                        <div class="card h-100 ">
-                            ${img
+    <div class="col-6 col-md-4 mb-2">
+        <button
+            type="button"
+            class="btn w-100 p-0 border-0 template-item-modal show-template-canvas"
+            data-id="${tpl.id}"
+            data-name="${tpl.name || ''}"
+            data-image="${img}"
+            data-front="${front}"
+            data-back="${back}"
+        >
+            <div class="card h-100">
+                ${img
                             ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
                             : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
-                                        <span class="text-muted small">No image</span>
-                                   </div>`
+                           <span class="text-muted small">No image</span>
+                       </div>`
                         }
-                            <div class="card-body py-2 px-2">
-                                <div class="small fw-semibold text-truncate mb-1">
-                                    ${tpl.name || ''}
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center small text-muted">
-                                    <span>${tpl.type || ''}</span>
-                                    ${tpl.rating ? `<span>${'★'.repeat(tpl.rating)}</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-   <button type="button" class="btn btn-primary w-100 show-template-canvas">
-                                                Show on Canvas
-                                            </button>
+                <div class="card-body py-2 px-2">
+                    <div class="small fw-semibold text-truncate mb-1">
+                        ${tpl.name || ''}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center small text-muted">
+                        <span>${tpl.type || ''}</span>
+                        ${tpl.rating ? `<span>${'★'.repeat(tpl.rating)}</span>` : ''}
+                    </div>
                 </div>
-            `;
+            </div>
+        </button>
+    </div>
+`;
 
                         $('#templates-modal-container').append(html);
                     });
@@ -576,25 +573,59 @@
         bindCanvasUpdates(canvasBack, "back");
         bindCanvasUpdates(canvasNone, "none");
     </script>
-    <script !src="">
-        // When clicking "SHOW ON CANVAS"
+    <script>
+        // Global handler for all ".show-template-canvas" clicks
         document.addEventListener('click', function (e) {
-            if (!e.target.matches('.show-template-canvas')) return;
+            const btn = e.target.closest('.show-template-canvas');
+            if (!btn) return;
 
-            const row = e.target.closest(".template-item");
-            const select = row.querySelector(".template-select");
-            const option = select.selectedOptions[0];
-            if (!option) return;
+            // ================================
+            // CASE 1: inside repeater row
+            // ================================
+            const row = btn.closest(".template-item");
+            if (row) {
+                const select = row.querySelector(".template-select");
+                if (!select) return;
 
-            const front = option.dataset.image;
-            const back = option.dataset.backImage;
+                const option = select.selectedOptions[0];
+                if (!option) return;
 
-            // Load images on respective canvases
-            if (front) loadAndBind(canvasFront, front, "front", row);
-            if (back) loadAndBind(canvasBack, back, "back", row);
+                const front = option.dataset.image;
+                const back  = option.dataset.backImage;
+
+                if (front) loadAndBind(canvasFront, front, "front", row);
+                if (back)  loadAndBind(canvasBack,  back,  "back",  row);
+
+                return; // ✅ stop here, we handled repeater case
+            }
+
+            // ================================
+            // CASE 2: inside modal drawer
+            // ================================
+            const modalItem = btn.closest(".template-item-modal");
+            if (modalItem) {
+                const front = modalItem.dataset.front;
+                const back  = modalItem.dataset.back;
+
+                if (front) {
+                    loadAndBind(canvasFront, front, "front", null);
+                    document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
+                }
+
+                if (back) {
+                    loadAndBind(canvasBack, back, "back", null);
+                    document.getElementById('editorBackWrapper')?.classList.remove('d-none');
+                }
+
+                const modalEl = document.getElementById('templateModal');
+                const modal   = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+
+                return;
+            }
         });
-
     </script>
+
     <script>
         const locale = "{{ app()->getLocale() }}";
 
