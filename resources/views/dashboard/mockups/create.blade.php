@@ -441,24 +441,44 @@
 
             // Optional: handle click on template in modal -> set value somewhere + close modal
             $(document).on('click', '.template-item-modal', function () {
-                const id = $(this).data('id');
-                const name = $(this).data('name');
-                const img = $(this).data('image');
+                const id    = $(this).data('id');
+                const name  = $(this).data('name');
+                const front = $(this).data('front');
+                const back  = $(this).data('back');
 
-                // Example: set hidden input & preview (adjust to your needs)
-                $('#template_id').val(id);
-                $('#template_preview_name').text(name);
+                // 1) get the correct select that opened modal
+                const select = $('#templateModal').data('origin-select');
+                if (!select) return;
 
-                if (img) {
-                    $('#template_preview_img').attr('src', img).show();
-                } else {
-                    $('#template_preview_img').hide();
+                // 2) check if option already exists — if not, add it
+                let option = $(select).find(`option[value="${id}"]`);
+                if (!option.length) {
+                    option = $('<option>')
+                        .val(id)
+                        .text(name)
+                        .attr('data-image', front)
+                        .attr('data-back-image', back);
+                    $(select).append(option);
                 }
 
+                // 3) select the option
+                $(select).val(id).trigger('change');
+
+                // 4) update Select2 UI
+                if ($(select).data('select2')) {
+                    $(select).trigger('change.select2');
+                }
+
+                // 5) close modal
                 const modalEl = document.getElementById('templateModal');
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
+                bootstrap.Modal.getInstance(modalEl)?.hide();
+
+                // 6) OPTIONAL: also place on canvas
+                if (front) loadAndBind(canvasFront, front, "front", null);
+                if (back)  loadAndBind(canvasBack,  back,  "back", null);
+
             });
+
         });
     </script>
 
