@@ -104,6 +104,7 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             'colors.*.image_id' => ['nullable', 'integer', 'exists:media,id'],
             'is_has_category' => ['nullable', 'boolean'],
             'show_add_cart_btn' => ['required', 'boolean'],
+            'has_mockup' => ['required', 'boolean'],
             'show_customize_design_btn' => ['required', 'boolean'],
 
         ];

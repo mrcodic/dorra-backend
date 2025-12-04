@@ -2,7 +2,9 @@
 
 namespace App\Services\Mockup;
 
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Interfaces\EncodedImageInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 
 class MockupRenderer
@@ -17,10 +19,12 @@ class MockupRenderer
      */
     public function render(array $options)
     {
-        $basePath   = $options['base_path'];
-        $shirtPath  = $options['shirt_path'];
+        // ----- 1) Read options with sane defaults -----
+        $basePath   = $options['base_path'];         // required
+        $shirtPath  = $options['shirt_path'];        // required
         $designPath = $options['design_path'] ?? null;
-        $hex        = $options['hex'] ?? null;
+        $hex = $options['hex'] ?? null;
+
 
         $printX     = $options['print_x'] ?? 360;
         $printY     = $options['print_y'] ?? 660;
@@ -29,40 +33,49 @@ class MockupRenderer
 
         $maxDim     = $options['max_dim'] ?? 800;
 
+        // ----- 2) Read images -----
         $base  = Image::read($basePath);
         $shirt = Image::read($shirtPath);
-        $design = $designPath ? Image::read($designPath) : null;
+
+        $design = null;
+        if ($designPath) {
+            $design = Image::read($designPath);
+        }
+
+        // ----- 3) Tint the shirt -----
+        // ----- 3) Tint the shirt (only if hex provided) -----
+        $tintedShirt = $shirt;
 
         if (!empty($hex)) {
-            $shirt = $this->tintShirt($shirt, $hex);
+            $tintedShirt = $this->tintShirt($shirt, $hex);
         }
 
-        // Resize shirt to base size
-        $shirt->resize($base->width(), $base->height());
-
+        // ----- 4) Compose canvas -----
         $canvas = clone $base;
-        $canvas->place($shirt);
 
+        // place shirt on base
+        $canvas->place($tintedShirt, 'top-left');
+
+        // ----- 5) Place design if exists -----
         if ($design) {
-            $ratio = min($printW / $design->width(), $printH / $design->height());
-            $design->resize((int)($design->width() * $ratio), (int)($design->height() * $ratio));
+            // scale design to fit in print box
+            $design->scaleDown(width: $printW, height: $printH);
 
             $offsetX = $printX + (int)(($printW - $design->width()) / 2);
-            $offsetY = $printY + (int)(($printH - $design->height()) / 2);
+            $offsetY = $printY;
 
-            $canvas->place($design, offset_x: $offsetX, offset_y: $offsetY);
+            $canvas->place($design, 'top-left', $offsetX, $offsetY);
         }
 
-        // Scale down for web
+        // ----- 6) Scale down for web -----
         if ($maxDim > 0) {
-            $ratio = min($maxDim / $canvas->width(), $maxDim / $canvas->height());
-            if ($ratio < 1) {
-                $canvas->resize((int)($canvas->width() * $ratio), (int)($canvas->height() * $ratio));
-            }
+            $canvas->scaleDown(width: $maxDim, height: $maxDim);
         }
 
-        // Return PNG string (version 3.x compatible)
-        return $canvas->toPng()->toString();
+        // ----- 7) Return encoded PNG -----
+        return $canvas->toPng()->toString();  // Get raw PNG string
+
+
     }
 
     /**

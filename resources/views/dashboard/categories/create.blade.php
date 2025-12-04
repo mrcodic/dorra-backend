@@ -347,6 +347,19 @@
 
 
 
+                                    <!-- Has Mockup -->
+                                    <div class="col-md-12">
+                                        <div class="mb-2 d-flex align-items-center gap-2">
+                                            <label class="form-label label-text ">Is this product has
+                                                Mockup?</label>
+                                            <div class="form-check form-switch">
+                                                <input type="hidden" name="has_mockup" value="0"/>
+                                                <input class="form-check-input" type="checkbox" id="has_mockup"
+                                                       name="has_mockup" value="1"/>
+
+                                            </div>
+                                        </div>
+                                    </div>
 
 
                                     <div class="d-flex justify-content-end">
@@ -668,11 +681,11 @@
 @endsection
 
 @section('page-script')
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const $colorRepeater = $('.color-repeater');
-     <script>
-        }
+
+
+{{--     <script>--}}
+{{--           document.addEventListener("DOMContentLoaded", function () {--}}
+{{--         const $colorRepeater = $('.color-repeater');--}}
 {{--        document.addEventListener("DOMContentLoaded", function () {--}}
 {{--            const $colorRepeater = $('.color-repeater');--}}
 
@@ -702,7 +715,7 @@
 {{--                }--}}
 {{--            }--}}
 {{--        });--}}
-{{--    
+{{--
 </script>--}}
 
 {{-- <script>
@@ -768,59 +781,58 @@
 {{--                });--}}
 {{--            }--}}
 {{--        }--}}
-{{--    
+{{--
 </script>--}}
-<script>
+<script !src="">
     Dropzone.autoDiscover = false;
 
-        const categoryDropzone = new Dropzone("#product-model-dropzone", {
-            url: "{{ route('media.store') }}",
-            paramName: "file",
-            maxFiles: 1,
-            maxFilesize: 1, // MB
-            acceptedFiles: "image/*",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            addRemoveLinks: true,
-            dictDefaultMessage: "Drop image here or click to upload",
-            init: function () {
-                this.on("success", function (file, response) {
-                    if (response.success && response.data) {
-                        file._hiddenInputId = response.data.id;
+    const categoryDropzone = new Dropzone("#product-model-dropzone", {
+        url: "{{ route('media.store') }}",
+        paramName: "file",
+        maxFiles: 1,
+        maxFilesize: 1, // MB
+        acceptedFiles: "image/*",
+        headers: {
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        addRemoveLinks: true,
+        dictDefaultMessage: "Drop image here or click to upload",
+        init: function () {
+            this.on("success", function (file, response) {
+                if (response.success && response.data) {
+                    file._hiddenInputId = response.data.id;
 
-                        // ✅ This will now set the hidden field correctly
-                        document.getElementById("uploadedImageModel").value = response.data.id;
-                        file._hiddenInputId = response.data.id;
-                    }
+                    // ✅ This will now set the hidden field correctly
+                    document.getElementById("uploadedImageModel").value = response.data.id;
+                    file._hiddenInputId = response.data.id;
+                }
 
-                });
+            });
 
-                this.on("removedfile", function (file) {
-                    document.getElementById("uploadedImageModel").value = "";
-                    if (file._hiddenInputId) {
-                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                            method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        });
-                    }
+            this.on("removedfile", function (file) {
+                document.getElementById("uploadedImageModel").value = "";
+                if (file._hiddenInputId) {
+                    fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                        method: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    });
+                }
 
-                    // hide preview
-                    document.getElementById("uploaded-image").classList.add("d-none");
-                });
-            }
-        });
+                // hide preview
+                document.getElementById("uploaded-image").classList.add("d-none");
+            });
+        }
+    });
 
-        // Handle remove button manually
-        document.getElementById("remove-image").addEventListener("click", function () {
-            categoryDropzone.removeAllFiles(true);
-            document.getElementById("uploadedImage").value = "";
-            document.getElementById("uploaded-image").classList.add("d-none");
-        });
+    // Handle remove button manually
+    document.getElementById("remove-image").addEventListener("click", function () {
+        categoryDropzone.removeAllFiles(true);
+        document.getElementById("uploadedImage").value = "";
+        document.getElementById("uploaded-image").classList.add("d-none");
+    });
 </script>
-
 <script>
     Dropzone.autoDiscover = false; // prevent auto init
 
