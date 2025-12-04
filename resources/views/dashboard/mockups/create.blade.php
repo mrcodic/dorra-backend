@@ -445,7 +445,7 @@
                 const name  = $(this).data('name');
                 const front = $(this).data('front');
                 const back  = $(this).data('back');
-
+                console.log(id)
                 // 1) get the correct select that opened modal
                 const select = $('#templateModal').data('origin-select');
                 if (!select) return;
@@ -471,7 +471,7 @@
 
                 // 5) close modal
                 const modalEl = document.getElementById('templateModal');
-                bootstrap.Modal.getInstance(modalEl)?.hide();
+                // bootstrap.Modal.getInstance(modalEl)?.hide();
 
                 // 6) OPTIONAL: also place on canvas
                 if (front) loadAndBind(canvasFront, front, "front", null);
