@@ -139,6 +139,7 @@ class AppServiceProvider extends ServiceProvider
 
             return $jsonResponse;
         });
+
          Model::preventLazyLoading(!app()->isProduction());
     }
 }
