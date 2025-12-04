@@ -409,6 +409,9 @@
                             </div>
                         </div>
                     </button>
+   <button type="button" class="btn btn-primary w-100 show-template-canvas">
+                                                Show on Canvas
+                                            </button>
                 </div>
             `;
 
