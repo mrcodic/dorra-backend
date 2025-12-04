@@ -169,6 +169,7 @@ class MockupService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
+        dd($validatedData);
         $model = $this->handleTransaction(function () use ($validatedData) {
 
             $model = $this->repository->create($validatedData);

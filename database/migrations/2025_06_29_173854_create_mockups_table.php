@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->tinyInteger('type')->default(1);
-            $table->json('colors');
+            $table->json('colors')->nullable();
             $table->timestamps();
         });
     }
