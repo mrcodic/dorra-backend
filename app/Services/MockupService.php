@@ -238,12 +238,13 @@ class MockupService extends BaseService
                         $printY = (int) round($pivotPositions[$sideName.'_y']      * $scaleY);
                         $printW = (int) round($pivotPositions[$sideName.'_width']  * $scaleX);
                         $printH = (int) round($pivotPositions[$sideName.'_height'] * $scaleY);
+                        $angle= (int) round($pivotPositions[$sideName . '_angle']);
 
 
                         // fallback لو حصل أي قيم غريبة
                         if ($printW <= 0)  $printW = (int) round($baseWidth * 0.3);
                         if ($printH <= 0)  $printH = (int) round($baseHeight * 0.3);
-dd($pivotPositions[$sideName . '_angle']);
+
                         $firstMockup = $this->repository
                             ->query()
                             ->whereBelongsTo($model->category)
@@ -257,7 +258,7 @@ dd($pivotPositions[$sideName . '_angle']);
                             'print_y'     => $printY,
                             'print_w'     => $printW,
                             'print_h'     => $printH,
-                            'angle'       => $pivotPositions[$sideName . '_angle'] ?? 0,
+                            'angle'       =>$angle ?? 0,
                             'hex'         => $firstMockup->colors ? $firstMockup->colors[0] : null,
                         ]);
 
