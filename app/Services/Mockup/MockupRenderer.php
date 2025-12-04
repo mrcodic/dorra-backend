@@ -67,7 +67,7 @@ class MockupRenderer
             // rotate if angle exists
             if (!empty($angle)) {
                 // rotate around center & keep alpha
-                $design = $design->rotate((float)$angle, 'transparent');
+                $design = $design->rotate(-(float)$angle, 'transparent');
             }
 
             // center horizontally in print box

@@ -233,15 +233,14 @@ class MockupService extends BaseService
                         $scaleX = $baseWidth  / $previewWidth;
                         $scaleY = $baseHeight / $previewHeight;
 
-// convert pixels (from canvas) -> pixels (on base)
+
                         $printX = (int) round($pivotPositions[$sideName.'_x']      * $scaleX);
                         $printY = (int) round($pivotPositions[$sideName.'_y']      * $scaleY);
                         $printW = (int) round($pivotPositions[$sideName.'_width']  * $scaleX);
                         $printH = (int) round($pivotPositions[$sideName.'_height'] * $scaleY);
-                        $angle= (int) round($pivotPositions[$sideName . '_angle']);
+                        $angle = (float) ($pivotPositions[$sideName . '_angle'] ?? 0);
 
-
-                        // fallback لو حصل أي قيم غريبة
+                        
                         if ($printW <= 0)  $printW = (int) round($baseWidth * 0.3);
                         if ($printH <= 0)  $printH = (int) round($baseHeight * 0.3);
 
