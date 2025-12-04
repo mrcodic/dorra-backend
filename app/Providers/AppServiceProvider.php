@@ -79,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
             $errors = [],
             $forgetToken = false
         ) {
+
             $response = [
                 'status'  => $statusCode->value,
                 'success' => $statusCode->value < HttpEnum::BAD_REQUEST->value,
@@ -90,7 +91,26 @@ class AppServiceProvider extends ServiceProvider
             }
 
             if (!empty($data)) {
-                if ($data instanceof LengthAwarePaginator) {
+
+                // ✅ PAGINATED RESOURCE COLLECTION
+                if ($data instanceof ResourceCollection && $data->resource instanceof LengthAwarePaginator) {
+                    $paginator = $data->resource;
+
+                    $response['data'] = $data->collection;
+                    $response['pagination'] = [
+                        'total'         => $paginator->total(),
+                        'count'         => $paginator->count(),
+                        'per_page'      => $paginator->perPage(),
+                        'current_page'  => $paginator->currentPage(),
+                        'last_page'     => $paginator->lastPage(),
+                        'next_page_url' => $paginator->nextPageUrl(),
+                        'prev_page_url' => $paginator->previousPageUrl(),
+                    ];
+
+                }
+
+                // ✅ RAW PAGINATOR (NO RESOURCE)
+                elseif ($data instanceof LengthAwarePaginator) {
                     $response['data'] = $data->items();
                     $response['pagination'] = [
                         'total'         => $data->total(),
@@ -101,7 +121,10 @@ class AppServiceProvider extends ServiceProvider
                         'next_page_url' => $data->nextPageUrl(),
                         'prev_page_url' => $data->previousPageUrl(),
                     ];
-                } else {
+                }
+
+                // ✅ NORMAL COLLECTION / ARRAY
+                else {
                     $response['data'] = $data;
                 }
             }
@@ -116,7 +139,6 @@ class AppServiceProvider extends ServiceProvider
 
             return $jsonResponse;
         });
-
          Model::preventLazyLoading(!app()->isProduction());
     }
 }
