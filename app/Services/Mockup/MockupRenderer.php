@@ -58,6 +58,7 @@ class MockupRenderer
 
         // ----- 5) Place design if exists -----
         if ($design) {
+            dd($design);
             // scale design to fit in print box
             $design->scaleDown(width: $printW, height: $printH);
 
