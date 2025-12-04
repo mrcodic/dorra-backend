@@ -136,12 +136,13 @@
                                         <!-- TEMPLATE SELECT -->
                                         <div class="form-group mb-2 col-8">
                                             <label class="label-text mb-1">Template</label>
-                                            <select class="template-select" name="template_id"></select>
-                                            <div class="template-preview">
+                                            <select class="template-select" name="template_id" data-page="1"></select>
+
+
+                                            <div class="template-preview mt-25">
                                                 <img class="front-preview rounded-circle" style="width:40px;height:40px;display:none;">
                                                 <img class="back-preview rounded-circle" style="width:40px;height:40px;display:none;">
                                             </div>
-
                                         </div>
 
                                         <!-- SHOW ON CANVAS BUTTON -->
@@ -285,6 +286,24 @@
             </div>
         `);
         }
+        function injectLoadMoreButton($select) {
+            let dropdown = $(".select2-results");
+
+            if (dropdown.find(".load-all-btn").length) return;
+
+            dropdown.append(`
+        <div class="text-center py-1 border-top">
+            <button type="button" class="btn btn-sm btn-outline-primary load-all-btn">
+                Show Remaining Templates
+            </button>
+        </div>
+    `);
+
+            $(".load-all-btn").on("click", function (e) {
+                e.preventDefault();
+                loadAllTemplates($select);
+            });
+        }
 
         // =========================
         // INIT SELECT2
@@ -300,6 +319,9 @@
                 templateResult: formatTemplateOption,
                 templateSelection: formatTemplateOption,
                 minimumResultsForSearch: -1
+            });
+            $select.on("select2:open", function () {
+                injectLoadMoreButton($select);
             });
         }
 
