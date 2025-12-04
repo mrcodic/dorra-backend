@@ -41,7 +41,6 @@ class MockupRenderer
         if ($designPath) {
             $design = Image::read($designPath);
         }
-        dd(getimagesize($designPath),getimagesize($basePath),getimagesize($shirtPath));
         // ----- 3) Tint the shirt -----
         // ----- 3) Tint the shirt (only if hex provided) -----
         $tintedShirt = $shirt;
@@ -58,7 +57,6 @@ class MockupRenderer
 
         // ----- 5) Place design if exists -----
         if ($design) {
-            dd($design);
             // scale design to fit in print box
             $design->scaleDown(width: $printW, height: $printH);
 
