@@ -384,14 +384,14 @@
                 <div class="col-6 col-md-4 mb-2 ">
                     <button
                         type="button"
-                        class="btn w-100 p-0 border-0 template-item-modal"
+                        class="btn w-100 p-0 border-0 template-item-modal show-template-canvas"
                         data-id="${tpl.id}"
                         data-name="${tpl.name || ''}"
                         data-image="${img}"
                         data-front="${front}"
                         data-back="${back}"
                     >
-                        <div class="card h-100 show-template-canvas">
+                        <div class="card h-100 ">
                             ${img
                             ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
                             : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
