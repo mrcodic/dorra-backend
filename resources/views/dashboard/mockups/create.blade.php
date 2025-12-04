@@ -381,7 +381,7 @@
                         const back  = tpl.back_base64_preview_image || '';
 
                         const html = `
-                <div class="col-6 col-md-4 mb-2">
+                <div class="col-6 col-md-4 mb-2 show-template-canvas">
                     <button
                         type="button"
                         class="btn w-100 p-0 border-0 template-item-modal"
@@ -497,7 +497,7 @@
 
             $(".load-all-btn").on("click", function (e) {
                 e.preventDefault();
-      
+
             });
         }
 
