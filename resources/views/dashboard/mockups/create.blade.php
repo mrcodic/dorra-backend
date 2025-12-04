@@ -268,116 +268,126 @@
 @endsection
 
 @section('page-script')
-    @push('scripts')
-        <script>
-            $(function () {
-                let nextPageUrl = null; // from pagination.next_page_url
 
-                // When modal is about to open
-                $('#templateModal').on('show.bs.modal', function () {
-                    // 1) Close any open Select2
-                    try {
-                        $('.select2-hidden-accessible').each(function () {
-                            if ($(this).data('select2')) {
-                                $(this).select2('close');
-                            }
-                        });
-                    } catch (e) {
-                        console.warn('Select2 close error:', e);
-                    }
+    <script>
+        $(function () {
+            let nextPageUrl = null; // from pagination.next_page_url
 
-                    // 2) Load first page of remaining templates
-                    loadTemplatesFirstPage();
-                });
-
-                function getFilters() {
-                    // TODO: replace with your own logic if different
-                    const productId     = $('#product_id').val() || null;       // example
-                    const selectedTypes = $('#types').val() || [];              // example (multi-select)
-
-                    return { productId, selectedTypes };
-                }
-
-                function loadTemplatesFirstPage() {
-                    const { productId, selectedTypes } = getFilters();
-
-                    $('#templates-modal-container').html(
-                        '<div class="col-12 text-center py-3">Loading...</div>'
-                    );
-                    $('#templates-modal-pagination').empty();
-                    nextPageUrl = null;
-
-                    $.ajax({
-                        url: "{{ route('product-templates.index') }}",
-                        method: "GET",
-                        data: {
-                            product_without_category_id: productId,
-                            request_type: "api",
-                            approach: "without_editor",
-                            paginate: true,
-                            per_page: 3,
-                            limit: 3,
-                            types: selectedTypes,
-                            page: 1,
-                        },
-                        success: function (res) {
-                            renderTemplatesResponse(res, false);
-                        },
-                        error: function (xhr) {
-                            console.error(xhr.responseText || xhr.statusText);
-                            $('#templates-modal-container').html(
-                                '<div class="col-12 text-danger text-center py-3">Error loading templates</div>'
-                            );
+            // When modal is about to open
+            $('#templateModal').on('show.bs.modal', function () {
+                // 1) Close any open Select2
+                try {
+                    $('.select2-hidden-accessible').each(function () {
+                        if ($(this).data('select2')) {
+                            $(this).select2('close');
                         }
                     });
+                } catch (e) {
+                    console.warn('Select2 close error:', e);
                 }
 
-                // Handle "Load more" click inside modal (delegated)
-                $(document).on('click', '#templates-modal-load-more', function () {
-                    if (!nextPageUrl) return;
+                // 2) Load first page of remaining templates
+                loadTemplatesFirstPage();
+            });
 
-                    const $btn = $(this);
-                    $btn.prop('disabled', true).text('Loading...');
+            function getFilters() {
+                // same mapping you used in loadTemplates()
+                const typeMap = { front: 1, back: 2, none: 3 };
 
-                    $.ajax({
-                        url: nextPageUrl,
-                        method: "GET",
-                        success: function (res) {
-                            renderTemplatesResponse(res, true);
-                        },
-                        error: function (xhr) {
-                            console.error(xhr.responseText || xhr.statusText);
-                            $btn.prop('disabled', false).text('Load More');
-                        }
-                    });
-                });
+                // product from #productsSelect
+                const productId = $('#productsSelect').val() || null;
 
-                function renderTemplatesResponse(res, append) {
-                    // Expecting structure like the one you pasted:
-                    // {
-                    //   status: 200,
-                    //   success: true,
-                    //   data: [ ...templates... ],
-                    //   pagination: { next_page_url, ... }
-                    //   ...other fields (source_design_svg, orientation, etc.)
-                    // }
+                // types from checkboxes
+                const selectedTypes = $('.type-checkbox:checked')
+                    .map(function () {
+                        const typeName = $(this).data('typeName'); // front / back / none
+                        return typeMap[typeName];
+                    })
+                    .get(); // => [1, 2] for example
 
-                    const templates  = res.data || [];
-                    const pagination = res.pagination || {};
+                return { productId, selectedTypes };
+            }
 
-                    if (!append) {
-                        $('#templates-modal-container').empty();
-                    }
+            function loadTemplatesFirstPage() {
+                const {productId, selectedTypes} = getFilters();
 
-                    if (!templates.length && !append) {
+                $('#templates-modal-container').html(
+                    '<div class="col-12 text-center py-3">Loading...</div>'
+                );
+                $('#templates-modal-pagination').empty();
+                nextPageUrl = null;
+
+                $.ajax({
+                    url: "{{ route('product-templates.index') }}",
+                    method: "GET",
+                    data: {
+                        product_without_category_id: productId,
+                        request_type: "api",
+                        approach: "without_editor",
+                        paginate: true,
+                        per_page: 3,
+                        limit: 3,
+                        types: selectedTypes,
+                        page: 1,
+                    },
+                    success: function (res) {
+                        renderTemplatesResponse(res, false);
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText || xhr.statusText);
                         $('#templates-modal-container').html(
-                            '<div class="col-12 text-center text-muted py-3">No templates found</div>'
+                            '<div class="col-12 text-danger text-center py-3">Error loading templates</div>'
                         );
-                    } else {
-                        templates.forEach(function (tpl) {
-                            const img = tpl.product_model_image || tpl.template_model_image || '';
+                    }
+                });
+            }
 
-                            const html = `
+            // Handle "Load more" click inside modal (delegated)
+            $(document).on('click', '#templates-modal-load-more', function () {
+                if (!nextPageUrl) return;
+
+                const $btn = $(this);
+                $btn.prop('disabled', true).text('Loading...');
+
+                $.ajax({
+                    url: nextPageUrl,
+                    method: "GET",
+                    success: function (res) {
+                        renderTemplatesResponse(res, true);
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText || xhr.statusText);
+                        $btn.prop('disabled', false).text('Load More');
+                    }
+                });
+            });
+
+            function renderTemplatesResponse(res, append) {
+                // Expecting structure like the one you pasted:
+                // {
+                //   status: 200,
+                //   success: true,
+                //   data: [ ...templates... ],
+                //   pagination: { next_page_url, ... }
+                //   ...other fields (source_design_svg, orientation, etc.)
+                // }
+
+                const templates = res.data || [];
+                const pagination = res.pagination || {};
+
+                if (!append) {
+                    $('#templates-modal-container').empty();
+                }
+
+                if (!templates.length && !append) {
+                    $('#templates-modal-container').html(
+                        '<div class="col-12 text-center text-muted py-3">No templates found</div>'
+                    );
+                } else {
+                    templates.forEach(function (tpl) {
+                        const img = tpl.product_model_image || tpl.template_model_image || '';
+
+                        const html = `
                         <div class="col-6 col-md-4 mb-2">
                             <button
                                 type="button"
@@ -388,11 +398,11 @@
                             >
                                 <div class="card h-100">
                                     ${img
-                                ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
-                                : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
+                            ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
+                            : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
                                               <span class="text-muted small">No image</span>
                                            </div>`
-                            }
+                        }
                                     <div class="card-body py-2 px-2">
                                         <div class="small fw-semibold text-truncate mb-1">
                                             ${tpl.name || ''}
@@ -400,9 +410,9 @@
                                         <div class="d-flex justify-content-between align-items-center small text-muted">
                                             <span>${tpl.type || ''}</span>
                                             ${tpl.rating
-                                ? `<span>${'★'.repeat(tpl.rating)}</span>`
-                                : ''
-                            }
+                            ? `<span>${'★'.repeat(tpl.rating)}</span>`
+                            : ''
+                        }
                                         </div>
                                     </div>
                                 </div>
@@ -410,15 +420,15 @@
                         </div>
                     `;
 
-                            $('#templates-modal-container').append(html);
-                        });
-                    }
+                        $('#templates-modal-container').append(html);
+                    });
+                }
 
-                    // Pagination
-                    nextPageUrl = pagination.next_page_url || null;
+                // Pagination
+                nextPageUrl = pagination.next_page_url || null;
 
-                    if (nextPageUrl) {
-                        $('#templates-modal-pagination').html(`
+                if (nextPageUrl) {
+                    $('#templates-modal-pagination').html(`
                     <button
                         id="templates-modal-load-more"
                         type="button"
@@ -427,40 +437,39 @@
                         Load More
                     </button>
                 `);
+                } else {
+                    if (!append) {
+                        $('#templates-modal-pagination').empty();
                     } else {
-                        if (!append) {
-                            $('#templates-modal-pagination').empty();
-                        } else {
-                            $('#templates-modal-pagination').html(`
+                        $('#templates-modal-pagination').html(`
                         <div class="text-muted small">No more templates</div>
                     `);
-                        }
                     }
                 }
+            }
 
-                // Optional: handle click on template in modal -> set value somewhere + close modal
-                $(document).on('click', '.template-item-modal', function () {
-                    const id   = $(this).data('id');
-                    const name = $(this).data('name');
-                    const img  = $(this).data('image');
+            // Optional: handle click on template in modal -> set value somewhere + close modal
+            $(document).on('click', '.template-item-modal', function () {
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+                const img = $(this).data('image');
 
-                    // Example: set hidden input & preview (adjust to your needs)
-                    $('#template_id').val(id);
-                    $('#template_preview_name').text(name);
+                // Example: set hidden input & preview (adjust to your needs)
+                $('#template_id').val(id);
+                $('#template_preview_name').text(name);
 
-                    if (img) {
-                        $('#template_preview_img').attr('src', img).show();
-                    } else {
-                        $('#template_preview_img').hide();
-                    }
+                if (img) {
+                    $('#template_preview_img').attr('src', img).show();
+                } else {
+                    $('#template_preview_img').hide();
+                }
 
-                    const modalEl = document.getElementById('templateModal');
-                    const modal   = bootstrap.Modal.getInstance(modalEl);
-                    if (modal) modal.hide();
-                });
+                const modalEl = document.getElementById('templateModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
             });
-        </script>
-    @endpush
+        });
+    </script>
 
     <script>
         // =========================
@@ -471,16 +480,17 @@
 
             const $option = $(option.element);
             const front = $option.data("image");
-            const back  = $option.data("back-image");
+            const back = $option.data("back-image");
 
             return $(`
             <div style="display:flex;align-items:center;">
                 ${front ? `<img src="${front}" style="width:24px;height:24px;border-radius:50%;margin-right:5px;">` : ""}
-                ${back  ? `<img src="${back}"  style="width:24px;height:24px;border-radius:50%;margin-right:5px;">` : ""}
+                ${back ? `<img src="${back}"  style="width:24px;height:24px;border-radius:50%;margin-right:5px;">` : ""}
                 <span>${option.text}</span>
             </div>
         `);
         }
+
         function injectLoadMoreButton($select) {
             let dropdown = $(".select2-results");
 
@@ -524,12 +534,12 @@
         // CANVAS HELPER FUNCTIONS
         // =========================
         let canvasFront = new fabric.Canvas('mockupCanvasFront');
-        let canvasBack  = new fabric.Canvas('mockupCanvasBack');
-        let canvasNone  = new fabric.Canvas('mockupCanvasNone');
+        let canvasBack = new fabric.Canvas('mockupCanvasBack');
+        let canvasNone = new fabric.Canvas('mockupCanvasNone');
 
         function loadBaseImage(canvas, baseUrl) {
-            fabric.Image.fromURL(baseUrl, function(img) {
-                img.set({ selectable: false });
+            fabric.Image.fromURL(baseUrl, function (img) {
+                img.set({selectable: false});
                 canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
                     scaleX: canvas.width / img.width,
                     scaleY: canvas.height / img.height
@@ -538,7 +548,7 @@
         }
 
         function loadAndBind(canvas, designUrl, type, templateItem) {
-            fabric.Image.fromURL(designUrl, function(img) {
+            fabric.Image.fromURL(designUrl, function (img) {
                 img.set({
                     left: 150,
                     top: 150,
@@ -556,25 +566,25 @@
         }
 
         function bindCanvasUpdates(canvas, type) {
-            canvas.on('object:modified', function(e) {
+            canvas.on('object:modified', function (e) {
                 const obj = e.target;
                 if (!obj?.templateItem) return;
                 const row = obj.templateItem;
-                row.querySelector(`.template_x.${type}`).value      = obj.left;
-                row.querySelector(`.template_y.${type}`).value      = obj.top;
-                row.querySelector(`.template_width.${type}`).value  = obj.width * obj.scaleX;
+                row.querySelector(`.template_x.${type}`).value = obj.left;
+                row.querySelector(`.template_y.${type}`).value = obj.top;
+                row.querySelector(`.template_width.${type}`).value = obj.width * obj.scaleX;
                 row.querySelector(`.template_height.${type}`).value = obj.height * obj.scaleY;
-                row.querySelector(`.template_angle.${type}`).value  = obj.angle;
+                row.querySelector(`.template_angle.${type}`).value = obj.angle;
             });
         }
 
         bindCanvasUpdates(canvasFront, "front");
-        bindCanvasUpdates(canvasBack,  "back");
-        bindCanvasUpdates(canvasNone,  "none");
+        bindCanvasUpdates(canvasBack, "back");
+        bindCanvasUpdates(canvasNone, "none");
     </script>
     <script !src="">
         // When clicking "SHOW ON CANVAS"
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!e.target.matches('.show-template-canvas')) return;
 
             const row = e.target.closest(".template-item");
@@ -583,11 +593,11 @@
             if (!option) return;
 
             const front = option.dataset.image;
-            const back  = option.dataset.backImage;
+            const back = option.dataset.backImage;
 
             // Load images on respective canvases
             if (front) loadAndBind(canvasFront, front, "front", row);
-            if (back)  loadAndBind(canvasBack,  back,  "back",  row);
+            if (back) loadAndBind(canvasBack, back, "back", row);
         });
 
     </script>
@@ -609,7 +619,7 @@
 
         window.loadTemplates = function () {
             let productId = document.getElementById('productsSelect')?.value;
-            let typeMap = { front: 1, back: 2, none: 3 };
+            let typeMap = {front: 1, back: 2, none: 3};
             let selectedTypes = [...document.querySelectorAll('.type-checkbox')]
                 .filter(cb => cb.checked)
                 .map(cb => typeMap[cb.dataset.typeName]);
@@ -645,17 +655,25 @@
                         initTemplateSelect(select);
                     });
                 },
-                error: function (xhr) { console.error("Error loading templates", xhr); }
+                error: function (xhr) {
+                    console.error("Error loading templates", xhr);
+                }
             });
         };
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const productSelect = document.getElementById("productsSelect");
-            productSelect?.addEventListener("change", () => { updateTemplateVisibility(); loadTemplates(); });
+            productSelect?.addEventListener("change", () => {
+                updateTemplateVisibility();
+                loadTemplates();
+            });
 
             document.querySelectorAll(".type-checkbox").forEach(cb =>
-                cb.addEventListener("change", () => { updateTemplateVisibility(); loadTemplates(); })
+                cb.addEventListener("change", () => {
+                    updateTemplateVisibility();
+                    loadTemplates();
+                })
             );
 
             updateTemplateVisibility();
@@ -672,14 +690,16 @@
                         window.updateTemplateVisibility();
                         window.loadTemplates();
                     },
-                    hide: function (deleteElement) { $(this).slideUp(deleteElement); }
+                    hide: function (deleteElement) {
+                        $(this).slideUp(deleteElement);
+                    }
                 });
                 $templateRepeater.find('[data-repeater-create]').first().click();
             }
         });
 
         // Repeater new row click: initialize Select2
-        document.addEventListener("click", function(e){
+        document.addEventListener("click", function (e) {
             if (!e.target.matches("[data-repeater-create]")) return;
             setTimeout(() => {
                 document.querySelectorAll(".template-select").forEach(select => {
@@ -756,9 +776,19 @@
                 const preview = area.querySelector('.preview');
 
                 area.addEventListener('click', () => input?.click());
-                area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
-                area.addEventListener('dragleave', e => { e.preventDefault(); area.classList.remove('dragover'); });
-                area.addEventListener('drop', e => { e.preventDefault(); area.classList.remove('dragover'); handleFiles(e.dataTransfer.files, input, preview); });
+                area.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    area.classList.add('dragover');
+                });
+                area.addEventListener('dragleave', e => {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                });
+                area.addEventListener('drop', e => {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                    handleFiles(e.dataTransfer.files, input, preview);
+                });
                 input?.addEventListener('change', e => handleFiles(e.target.files, input, preview));
             });
         }
