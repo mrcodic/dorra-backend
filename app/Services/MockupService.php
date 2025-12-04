@@ -224,19 +224,15 @@ class MockupService extends BaseService
                         if (!$designMedia || !$designMedia->getPath()) {
                             throw new \Exception("Missing design media for {$sideName}");
                         }
-
-                        // ----- ➊ اقرأ حجم صورة الـ base -----
                         $basePath = $baseMedia->getPath();
                         [$baseWidth, $baseHeight] = getimagesize($basePath);
 
                         $previewWidth  = 800;
                         $previewHeight = 800;
 
-// scaling ratio
                         $scaleX = $baseWidth  / $previewWidth;
                         $scaleY = $baseHeight / $previewHeight;
 
-// convert pixels (from canvas) -> pixels (on base)
                         $printX = (int) round($pivotPositions[$sideName.'_x']      * $scaleX);
                         $printY = (int) round($pivotPositions[$sideName.'_y']      * $scaleY);
                         $printW = (int) round($pivotPositions[$sideName.'_width']  * $scaleX);
