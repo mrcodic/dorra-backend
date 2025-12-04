@@ -381,7 +381,7 @@
                         const back  = tpl.back_base64_preview_image || '';
 
                         const html = `
-                <div class="col-6 col-md-4 mb-2 show-template-canvas">
+                <div class="col-6 col-md-4 mb-2 ">
                     <button
                         type="button"
                         class="btn w-100 p-0 border-0 template-item-modal"
@@ -391,7 +391,7 @@
                         data-front="${front}"
                         data-back="${back}"
                     >
-                        <div class="card h-100">
+                        <div class="card h-100 show-template-canvas">
                             ${img
                             ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
                             : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
