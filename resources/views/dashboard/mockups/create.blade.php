@@ -498,7 +498,13 @@
             $(".load-all-btn").on("click", function (e) {
                 e.preventDefault();
 
+                // save source select that opened modal
+                const select = $(this).closest('.select2-container')
+                    .prev('.template-select')[0];
+
+                $('#templateModal').data('origin-select', select);
             });
+
         }
 
         // =========================
