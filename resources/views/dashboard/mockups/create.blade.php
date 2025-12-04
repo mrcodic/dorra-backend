@@ -363,16 +363,7 @@
             });
 
             function renderTemplatesResponse(res, append) {
-                // Expecting structure like the one you pasted:
-                // {
-                //   status: 200,
-                //   success: true,
-                //   data: [ ...templates... ],
-                //   pagination: { next_page_url, ... }
-                //   ...other fields (source_design_svg, orientation, etc.)
-                // }
-
-                const templates = res.data || [];
+                const templates  = res.data || [];
                 const pagination = res.pagination || {};
 
                 if (!append) {
@@ -385,65 +376,65 @@
                     );
                 } else {
                     templates.forEach(function (tpl) {
-                        const img = tpl.product_model_image || tpl.template_model_image || '';
+                        const img   = tpl.product_model_image || tpl.template_model_image || '';
+                        const front = tpl.source_design_svg || '';
+                        const back  = tpl.back_base64_preview_image || '';
 
                         const html = `
-                        <div class="col-6 col-md-4 mb-2 show-template-canvas">
-                            <button
-                                type="button"
-                                class="btn w-100 p-0 border-0 template-item-modal"
-                                data-id="${tpl.id}"
-                                data-name="${tpl.name || ''}"
-                                data-image="${img}"
-                            >
-                                <div class="card h-100">
-                                    ${img
+                <div class="col-6 col-md-4 mb-2">
+                    <button
+                        type="button"
+                        class="btn w-100 p-0 border-0 template-item-modal"
+                        data-id="${tpl.id}"
+                        data-name="${tpl.name || ''}"
+                        data-image="${img}"
+                        data-front="${front}"
+                        data-back="${back}"
+                    >
+                        <div class="card h-100">
+                            ${img
                             ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
                             : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
-                                              <span class="text-muted small">No image</span>
-                                           </div>`
+                                        <span class="text-muted small">No image</span>
+                                   </div>`
                         }
-                                    <div class="card-body py-2 px-2">
-                                        <div class="small fw-semibold text-truncate mb-1">
-                                            ${tpl.name || ''}
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center small text-muted">
-                                            <span>${tpl.type || ''}</span>
-                                            ${tpl.rating
-                            ? `<span>${'★'.repeat(tpl.rating)}</span>`
-                            : ''
-                        }
-                                        </div>
-                                    </div>
+                            <div class="card-body py-2 px-2">
+                                <div class="small fw-semibold text-truncate mb-1">
+                                    ${tpl.name || ''}
                                 </div>
-                            </button>
+                                <div class="d-flex justify-content-between align-items-center small text-muted">
+                                    <span>${tpl.type || ''}</span>
+                                    ${tpl.rating ? `<span>${'★'.repeat(tpl.rating)}</span>` : ''}
+                                </div>
+                            </div>
                         </div>
-                    `;
+                    </button>
+                </div>
+            `;
 
                         $('#templates-modal-container').append(html);
                     });
                 }
 
-                // Pagination
                 nextPageUrl = pagination.next_page_url || null;
 
                 if (nextPageUrl) {
                     $('#templates-modal-pagination').html(`
-                    <button
-                        id="templates-modal-load-more"
-                        type="button"
-                        class="btn btn-sm btn-outline-primary"
-                    >
-                        Load More
-                    </button>
-                `);
+            <button
+                id="templates-modal-load-more"
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+            >
+                Load More
+            </button>
+        `);
                 } else {
                     if (!append) {
                         $('#templates-modal-pagination').empty();
                     } else {
                         $('#templates-modal-pagination').html(`
-                        <div class="text-muted small">No more templates</div>
-                    `);
+                <div class="text-muted small">No more templates</div>
+            `);
                     }
                 }
             }
