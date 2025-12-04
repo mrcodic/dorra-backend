@@ -240,6 +240,7 @@
                 </form>
             </div>
         </div>
+        @include("modals.templates.template-modal")
     </section>
     <!-- users list ends -->
 @endsection
@@ -293,7 +294,7 @@
 
             dropdown.append(`
         <div class="text-center py-1 border-top">
-            <button type="button" class="btn btn-sm btn-outline-primary load-all-btn">
+            <button type="button" class="btn btn-sm btn-outline-primary load-all-btn" data-bs-toggle="modal" data-bs-target="#templateModal">
                 Show Remaining Templates
             </button>
         </div>
