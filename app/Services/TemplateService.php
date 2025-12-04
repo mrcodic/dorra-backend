@@ -122,6 +122,7 @@ class TemplateService extends BaseService
             })->when(request()->filled('limit'), function ($q) {
                 $q->limit((int) request('limit'));
             })
+            ->distinct()
             ->latest();
 
         if (request()->ajax()) {
@@ -129,7 +130,8 @@ class TemplateService extends BaseService
                 ? $query->get()
                 : $query->paginate($pageSize)->withQueryString();
         }
-        elseif (request()->expectsJson()) {
+
+        if (request()->expectsJson()) {
             $query = $query->whereStatus(StatusEnum::LIVE);
 
             return $paginate
