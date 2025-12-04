@@ -125,9 +125,8 @@ class TemplateService extends BaseService
             ->latest();
 
         if (request()->ajax()) {
-            dd($query->get());
             return $pageSize === null
-                ? $query->get()
+                ?
                 : $query->paginate($pageSize)->withQueryString();
         }
 
