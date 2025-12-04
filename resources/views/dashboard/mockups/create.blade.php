@@ -388,7 +388,7 @@
                         const img = tpl.product_model_image || tpl.template_model_image || '';
 
                         const html = `
-                        <div class="col-6 col-md-4 mb-2">
+                        <div class="col-6 col-md-4 mb-2 show-template-canvas">
                             <button
                                 type="button"
                                 class="btn w-100 p-0 border-0 template-item-modal"
