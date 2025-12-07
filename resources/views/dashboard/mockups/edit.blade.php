@@ -157,15 +157,15 @@
 
 
                                     @forelse($model->templates as $mockupTemplate)
-                                        @php
+{{--                                        @php--}}
 
-                                            $pivotPositions = $mockupTemplate->pivot->positions ?? collect();
-                                            $positionForType = function($typeKey) use ($pivotPositions) {
-                                                $row = $pivotPositions->firstWhere('template_type', $typeKey);
-                                                return $row->position_id ?? null;
-                                            };
+{{--                                            $pivotPositions = $mockupTemplate->pivot->positions ?? collect();--}}
+{{--                                            $positionForType = function($typeKey) use ($pivotPositions) {--}}
+{{--                                                $row = $pivotPositions->firstWhere('template_type', $typeKey);--}}
+{{--                                                return $row->position_id ?? null;--}}
+{{--                                            };--}}
 
-                                        @endphp
+{{--                                        @endphp--}}
 
                                         <div data-repeater-item class="row template-item">
                                             {{-- TEMPLATE SELECT --}}
@@ -187,7 +187,7 @@
                                                 @php
                                                     $typeKey = strtolower($type->value->name);
                                                     $typeValue = $type->value->value;
-                                                    $selectedPositionId = $positionForType($typeValue);
+//                                                    $selectedPositionId = $positionForType($typeValue);
                                                 @endphp
 
                                                 <div class="form-group mb-2 col-4 position-wrapper d-none"
@@ -199,7 +199,8 @@
                                                         <option value="" disabled>Choose position</option>
                                                         @foreach($associatedData['positions'] ?? [] as $pos)
                                                             <option value="{{ $pos->id }}"
-                                                                @selected($pos->id == $selectedPositionId)>
+{{--                                                                @selected($pos->id == $selectedPositionId)--}}
+                                                            >
                                                                 {{ $pos->name }}
                                                             </option>
                                                         @endforeach
