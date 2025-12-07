@@ -63,16 +63,19 @@ class TemplateService extends BaseService
                     $q->whereRaw('1 = 0');
                 }
             })->when(filter_var(request('has_not_mockups'), FILTER_VALIDATE_BOOLEAN), function ($q) {
-                dd(request('has_not_mockups'));
                 $q->whereDoesntHave('mockups');
             })
             ->when(request()->filled('types'), function ($query) {
-                $types = request()->input('types');
+                $types = array_map('intval', request()->input('types'));
 
                 $query->whereHas('types', function ($q) use ($types) {
                     $q->whereIn('types.value', $types);
-                }, '=', count($types));
+                })
+                    ->whereHas('types', function ($q) {
+                        $q->selectRaw('COUNT(*)');
+                    }, '=', count($types));
             })
+
             ->when(request()->filled('product_id'), function ($query) use ($productId) {
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
