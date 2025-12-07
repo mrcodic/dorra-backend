@@ -376,7 +376,7 @@
                     );
                 } else {
                     templates.forEach(function (tpl) {
-                        const img   = tpl.product_model_image || tpl.template_model_image || '';
+                        const img   = tpl.source_design_svg || tpl.back_base64_preview_image || '';
                         const front = tpl.source_design_svg || '';
                         const back  = tpl.back_base64_preview_image || '';
 
@@ -576,14 +576,14 @@
 
         function loadAndBind(canvas, designUrl, type, templateItem) {
             // 🔥 remove previous design(s) of this type from this canvas
-            // clearTemplateDesigns(canvas, type);
+            clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
                 img.set({
                     left: 150,
                     top: 150,
-                    // scaleX: 0.5,
-                    // scaleY: 0.5,
+                    scaleX: 0.5,
+                    scaleY: 0.5,
                     // cornerStyle: "circle",
                     transparentCorners: false
                 });
