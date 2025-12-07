@@ -66,7 +66,7 @@ class TemplateService extends BaseService
                 $q->whereDoesntHave('mockups');
             })
             ->when(request()->filled('types'), function ($query) {
-                $types = array_map('intval', request()->input('types'));
+                $types = request()->input('types');
 
                 $query->whereHas('types', function ($q) use ($types) {
                     $q->whereIn('types.value', $types);
