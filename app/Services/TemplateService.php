@@ -32,9 +32,7 @@ class TemplateService extends BaseService
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
         request('with_design_data', true);
-
         $paginate =  request()->boolean('paginate');
-
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
@@ -65,6 +63,7 @@ class TemplateService extends BaseService
                     $q->whereRaw('1 = 0');
                 }
             })->when(filter_var(request('has_not_mockups'), FILTER_VALIDATE_BOOLEAN), function ($q) {
+                dd(request('has_not_mockups'));
                 $q->whereDoesntHave('mockups');
             })
             ->when(request()->filled('types'), function ($query) {
