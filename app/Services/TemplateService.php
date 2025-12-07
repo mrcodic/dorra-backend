@@ -33,7 +33,7 @@ class TemplateService extends BaseService
     {
         request('with_design_data', true);
 
-        $paginate = request('paginate', false);
+        $paginate = request('paginate');
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
