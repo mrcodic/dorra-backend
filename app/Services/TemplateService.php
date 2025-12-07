@@ -68,15 +68,9 @@ class TemplateService extends BaseService
             ->when(request()->filled('types'), function ($query) {
                 $types = array_map('intval', request()->input('types'));
 
-                // يجب أن يحتوي كل الأنواع المطلوبة
                 $query->whereHas('types', function ($q) use ($types) {
                     $q->whereIn('types.value', $types);
                 }, '=', count($types));
-
-                // ويجب ألا يحتوي أي نوع آخر غير المطلوب
-                $query->whereDoesntHave('types', function ($q) use ($types) {
-                    $q->whereNotIn('types.value', $types);
-                });
             })
 
 
