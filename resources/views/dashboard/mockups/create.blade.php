@@ -441,44 +441,48 @@
             }
 
             // Optional: handle click on template in modal -> set value somewhere + close modal
+            // Click on template card inside modal
             $(document).on('click', '.template-item-modal', function () {
                 const id    = $(this).data('id');
                 const name  = $(this).data('name');
                 const front = $(this).data('front');
                 const back  = $(this).data('back');
-                console.log(id)
-                // 1) get the correct select that opened modal
+
+                // 1) الـ select اللي فتح المودال
                 const select = $('#templateModal').data('origin-select');
                 if (!select) return;
 
-                // 2) check if option already exists — if not, add it
-                let option = $(select).find(`option[value="${id}"]`);
-                if (!option.length) {
-                    option = $('<option>')
+                const $select = $(select);
+
+                // 2) لو الـ option مش موجودة، نضيفها
+                let $option = $select.find(`option[value="${id}"]`);
+                if (!$option.length) {
+                    $option = $('<option>')
                         .val(id)
-                        .text(name)
-                        .attr('data-image', front)
-                        .attr('data-back-image', back);
-                    $(select).append(option);
+                        .text(name || '')
+                        .attr('data-image', front || '')
+                        .attr('data-back-image', back || '');
+                    $select.append($option);
                 }
 
-                // 3) select the option
-                $(select).val(id).trigger('change');
+                // 3) نخليها selected
+                $select.val(id).trigger('change');
 
-                // 4) update Select2 UI
-                if ($(select).data('select2')) {
-                    $(select).trigger('change.select2');
+                // 4) تحديث واجهة Select2
+                if ($select.data('select2')) {
+                    $select.trigger('change.select2');
                 }
 
-                // 5) close modal
+                // 5) (اختياري) إغلاق المودال
                 const modalEl = document.getElementById('templateModal');
-                // bootstrap.Modal.getInstance(modalEl)?.hide();
+                const modal   = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
 
-                // 6) OPTIONAL: also place on canvas
+                // 6) (اختياري) حطّ التصميم على الكانفس لو عايز
                 if (front) loadAndBind(canvasFront, front, "front", null);
-                if (back)  loadAndBind(canvasBack,  back,  "back", null);
-
+                if (back)  loadAndBind(canvasBack,  back,  "back",  null);
             });
+
 
         });
     </script>
@@ -519,14 +523,14 @@
             $(".load-all-btn").on("click", function (e) {
                 e.preventDefault();
 
-                // save source select that opened modal
+                // 🟢 this is the select that opened the modal
                 const select = $(this).closest('.select2-container')
                     .prev('.template-select')[0];
 
                 $('#templateModal').data('origin-select', select);
             });
-
         }
+
 
         // =========================
         // INIT SELECT2
