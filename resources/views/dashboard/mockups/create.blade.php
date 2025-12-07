@@ -506,7 +506,6 @@
             </div>
         `);
         }
-
         function injectLoadMoreButton($select) {
             let dropdown = $(".select2-results");
 
@@ -532,7 +531,6 @@
                 $('#templateModal').modal('show');
             });
         }
-
 
         // =========================
         // INIT SELECT2
