@@ -25,8 +25,7 @@ class CategoryController extends Controller
             'products',
             'lastOffer'
             ],
-            paginate: (bool) request('paginate'),
-            perPage: request('per_page',8));
+        );
         dd($categories);
         $categoryResourceCollection = $categories instanceof LengthAwarePaginator ?
             CategoryResource::collection($categories)->response()->getData()
