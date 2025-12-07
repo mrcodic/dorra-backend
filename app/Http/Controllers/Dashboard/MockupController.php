@@ -8,8 +8,6 @@ use App\Http\Controllers\Base\DashboardController;
 
 use App\Http\Resources\MockupResource;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
-use App\Repositories\Interfaces\PositionRepositoryInterface;
-use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\TypeRepositoryInterface;
 use App\Services\MockupService;
@@ -23,7 +21,6 @@ class MockupController extends DashboardController
         public MockupService              $mockupService,
         public CategoryRepositoryInterface $categoryRepository,
         public TypeRepositoryInterface    $typeRepository,
-        public PositionRepositoryInterface $positionRepository,
         public TemplateRepositoryInterface $templateRepository,
 
     )
@@ -39,7 +36,7 @@ class MockupController extends DashboardController
         $this->assoiciatedData = [
             'shared' => [
                 'products' => $this->categoryRepository->query()->whereHasMockup(true)->get(['id', 'name']),
-                'positions' => $this->positionRepository->query()->get(['id', 'name']),
+           
                 'types' => $this->typeRepository->query()->get(['id', 'name']),
             ],
 
