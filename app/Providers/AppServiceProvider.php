@@ -71,74 +71,38 @@ class AppServiceProvider extends ServiceProvider
     });
 
         Fortify::loginView(fn () => view('dashboard.auth.login'));
-
-        Response::macro('api', function (
-            $statusCode = HttpEnum::OK,
-            $message = "Request completed successfully",
-            $data = [],
-            $errors = [],
-            $forgetToken = false
-        ) {
-
+        
+        Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "Request completed successfully", $data = [], $errors = []) {
             $response = [
-                'status'  => $statusCode->value,
+                'status' => $statusCode->value,
                 'success' => $statusCode->value < HttpEnum::BAD_REQUEST->value,
                 'message' => $message,
             ];
-
             if (!empty($errors)) {
                 $response['errors'] = $errors;
             }
-
             if (!empty($data)) {
-
-                // ✅ PAGINATED RESOURCE COLLECTION
-                if ($data instanceof ResourceCollection && $data->resource instanceof LengthAwarePaginator) {
-                    $paginator = $data->resource;
-
-                    $response['data'] = $data->collection;
-                    $response['pagination'] = [
-                        'total'         => $paginator->total(),
-                        'count'         => $paginator->count(),
-                        'per_page'      => $paginator->perPage(),
-                        'current_page'  => $paginator->currentPage(),
-                        'last_page'     => $paginator->lastPage(),
-                        'next_page_url' => $paginator->nextPageUrl(),
-                        'prev_page_url' => $paginator->previousPageUrl(),
-                    ];
-
-                }
-
-                // ✅ RAW PAGINATOR (NO RESOURCE)
-                elseif ($data instanceof LengthAwarePaginator) {
+                if ($data instanceof LengthAwarePaginator)
+                {
                     $response['data'] = $data->items();
                     $response['pagination'] = [
-                        'total'         => $data->total(),
-                        'count'         => $data->count(),
-                        'per_page'      => $data->perPage(),
-                        'current_page'  => $data->currentPage(),
-                        'last_page'     => $data->lastPage(),
+                        'total' => $data->total(),
+                        'count' => $data->count(),
+                        'per_page' => $data->perPage(),
+                        'current_page' => $data->currentPage(),
+                        'last_page' => $data->lastPage(),
                         'next_page_url' => $data->nextPageUrl(),
                         'prev_page_url' => $data->previousPageUrl(),
                     ];
-                }
 
-                // ✅ NORMAL COLLECTION / ARRAY
-                else {
+                }
+                else{
                     $response['data'] = $data;
                 }
             }
-
-            $jsonResponse = response()->json($response, $statusCode->value);
-
-            if ($forgetToken) {
-                $jsonResponse->withCookie(
-                    cookie()->forget('token', '/', '.dorraprint.com')
-                );
-            }
-
-            return $jsonResponse;
+            return response()->json($response, $statusCode->value);
         });
+
 
          Model::preventLazyLoading(!app()->isProduction());
     }
