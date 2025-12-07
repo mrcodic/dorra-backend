@@ -41,54 +41,114 @@ class StoreMockupRequest extends BaseRequest
             'colors' => ['sometimes','array'],
             'templates' => ['required','array'],
             'templates.*.template_id' => ['required','exists:templates,id','distinct'],
-            'templates.*.front_x'      => ['nullable', 'numeric', 'min:0'],
-            'templates.*.front_y'      => ['nullable', 'numeric', 'min:0'],
-            'templates.*.front_width'  => ['nullable', 'numeric', 'min:0'],
-            'templates.*.front_height' => ['nullable', 'numeric', 'min:0'],
-            'templates.*.front_angle'  => ['nullable', 'numeric'],
+            'templates.*.front_x' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'numeric',
+                'min:0'
+            ],
+            'templates.*.front_y' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'numeric',
+                'min:0'
+            ],
+            'templates.*.front_width' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'numeric',
+                'min:0'
+            ],
+            'templates.*.front_height' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'numeric',
+                'min:0'
+            ],
+            'templates.*.front_angle' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'numeric'
+            ],
 
-            'templates.*.back_x'       => ['nullable', 'numeric', 'min:0'],
-            'templates.*.back_y'       => ['nullable', 'numeric', 'min:0'],
-            'templates.*.back_width'   => ['nullable', 'numeric', 'min:0'],
-            'templates.*.back_height'  => ['nullable', 'numeric', 'min:0'],
-            'templates.*.back_angle'   => ['nullable', 'numeric'],
 
-            'templates.*.none_x'       => ['nullable', 'numeric', 'min:0'],
-            'templates.*.none_y'       => ['nullable', 'numeric', 'min:0'],
-            'templates.*.none_width'   => ['nullable', 'numeric', 'min:0'],
-            'templates.*.none_height'  => ['nullable', 'numeric', 'min:0'],
-            'templates.*.none_angle'   => ['nullable', 'numeric'],
+            'templates.*.back_x' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'numeric',
+                'min:0',
+            ],
+            'templates.*.back_y' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'numeric',
+                'min:0',
+            ],
+            'templates.*.back_width' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'numeric',
+                'min:0',
+            ],
+            'templates.*.back_height' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'numeric',
+                'min:0',
+            ],
+            'templates.*.back_angle' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'numeric',
+            ],
+
+
+            'templates.*.none_x' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'numeric',
+                'min:0',
+            ],
+            'templates.*.none_y' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'numeric',
+                'min:0',
+            ],
+            'templates.*.none_width' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'numeric',
+                'min:0',
+            ],
+            'templates.*.none_height' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'numeric',
+                'min:0',
+            ],
+            'templates.*.none_angle' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'numeric',
+            ],
+
             'front_base_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
-//                'mimes:jpg',
+                'mimes:jpg',
             ],
             'front_mask_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
-//                'mimes:png',
+                'mimes:png',
             ],
 
             'back_base_image' => [
                 Rule::requiredIf(in_array(2, $types)),
                 'image',
-//                'mimes:jpg',
+                'mimes:jpg',
             ],
             'back_mask_image' => [
                 Rule::requiredIf(in_array(2, $types)),
                 'image',
-//                'mimes:png',
+                'mimes:png',
             ],
 
             'none_base_image' => [
                 Rule::requiredIf(in_array(3, $types)),
                 'image',
-//                'mimes:jpg',
+                'mimes:jpg',
             ],
             'none_mask_image' => [
                 Rule::requiredIf(in_array(3, $types)),
                 'image',
-//                'mimes:png',
+                'mimes:png',
             ],
         ];
     }
