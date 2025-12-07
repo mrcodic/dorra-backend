@@ -75,7 +75,7 @@ class TemplateController extends DashboardController
         if (request()->ajax()) {
             if (request()->filled('request_type') == 'api')
             {
-                return Response::api(data: TemplateResource::collection($data)) ;
+                return Response::api(data: TemplateResource::collection($data)->response()->getData()) ;
             }
             $cards = view('dashboard.partials.filtered-templates', compact('data'))->render();
 
