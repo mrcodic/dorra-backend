@@ -576,15 +576,15 @@
 
         function loadAndBind(canvas, designUrl, type, templateItem) {
             // 🔥 remove previous design(s) of this type from this canvas
-            clearTemplateDesigns(canvas, type);
+            // clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
                 img.set({
                     left: 150,
                     top: 150,
-                    scaleX: 0.5,
-                    scaleY: 0.5,
-                    cornerStyle: "circle",
+                    // scaleX: 0.5,
+                    // scaleY: 0.5,
+                    // cornerStyle: "circle",
                     transparentCorners: false
                 });
                 img.templateItem = templateItem; // row in repeater (or null from modal)
