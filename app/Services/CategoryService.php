@@ -22,7 +22,7 @@ class CategoryService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
-        $paginate = (bool) request('paginate');
+        $paginate =  request()->boolean('paginate');
         $perPage =  request('per_page');
         $query = $this->repository->query()
             ->withLastOfferId()
