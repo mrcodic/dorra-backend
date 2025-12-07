@@ -18,7 +18,6 @@ class CategoryController extends Controller
 
     public function index()
     {
-        dd(request('paginate',false));
         $categories = $this->categoryService->getAll(relations: ['media',
             'landingSubCategories',
             'landingSubCategories.subCategoryProducts',
@@ -26,7 +25,7 @@ class CategoryController extends Controller
             'products',
             'lastOffer'
             ],
-            paginate: request('paginate',false),
+            paginate: (bool) request('paginate',false),
             perPage: request('per_page',8));
         dd($categories);
         $categoryResourceCollection = $categories instanceof LengthAwarePaginator ?
