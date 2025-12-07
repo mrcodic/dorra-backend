@@ -725,19 +725,46 @@
                     types: selectedTypes,
                 },
                 success: function (response) {
+
                     const templates = Array.isArray(response) ? response : (response.data.data ?? []);
+
                     document.querySelectorAll('.template-select').forEach(select => {
-                        if ($(select).data('select2')) $(select).off().select2("destroy");
-                        select.innerHTML = `<option value="" disabled selected>Choose template</option>`;
+
+                        const currentValue = select.value; // 🟢 keep old value
+
+                        // Destroy select2, but DO NOT reset the value
+                        if ($(select).data('select2')) {
+                            $(select).select2("destroy");
+                        }
+
+                        // ONLY reset options if value is empty
+                        if (!currentValue) {
+                            select.innerHTML = `<option value="" disabled selected>Choose template</option>`;
+                        }
+
                         templates.forEach(t => {
+                            // If option already exists, skip it
+                            if (select.querySelector(`option[value="${t.id}"]`)) return;
+
                             const option = document.createElement("option");
-                            const label = typeof t.name === "object" ? (t.name[locale] ?? Object.values(t.name)[0]) : t.name;
+                            const label = typeof t.name === "object"
+                                ? (t.name[locale] ?? Object.values(t.name)[0])
+                                : t.name;
+
                             option.value = t.id;
                             option.textContent = label;
                             option.dataset.image = t.source_design_svg;
                             option.dataset.backImage = t.back_base64_preview_image;
+
                             select.appendChild(option);
                         });
+
+                        // Restore previous selected value
+                        if (currentValue) {
+                            select.value = currentValue;
+                        }
+
+                        // Re-init select2
                         initTemplateSelect(select);
                     });
                 },
@@ -746,6 +773,7 @@
                 }
             });
         };
+
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
