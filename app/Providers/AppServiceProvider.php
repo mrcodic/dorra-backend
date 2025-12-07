@@ -71,7 +71,7 @@ class AppServiceProvider extends ServiceProvider
     });
 
         Fortify::loginView(fn () => view('dashboard.auth.login'));
-        
+
         Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "Request completed successfully", $data = [], $errors = []) {
             $response = [
                 'status' => $statusCode->value,
