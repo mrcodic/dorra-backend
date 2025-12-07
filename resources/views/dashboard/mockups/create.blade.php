@@ -574,9 +574,27 @@
             });
             canvas.renderAll();
         }
+        function syncTemplateInputs(obj, type) {
+            if (!obj?.templateItem) return;
+            const row = obj.templateItem;
+
+            const xInput      = row.querySelector(`.template_x.${type}`);
+            const yInput      = row.querySelector(`.template_y.${type}`);
+            const widthInput  = row.querySelector(`.template_width.${type}`);
+            const heightInput = row.querySelector(`.template_height.${type}`);
+            const angleInput  = row.querySelector(`.template_angle.${type}`);
+
+            if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
+
+            xInput.value      = obj.left;
+            yInput.value      = obj.top;
+            widthInput.value  = obj.width * obj.scaleX;
+            heightInput.value = obj.height * obj.scaleY;
+            angleInput.value  = obj.angle || 0;
+        }
+
 
         function loadAndBind(canvas, designUrl, type, templateItem) {
-            // 🔥 remove previous design(s) of this type from this canvas
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
@@ -585,15 +603,16 @@
                     top: 150,
                     scaleX: 0.5,
                     scaleY: 0.5,
-                    // cornerStyle: "circle",
                     transparentCorners: false
                 });
-                img.templateItem = templateItem; // row in repeater (or null from modal)
-                img.templateType = type;         // "front" / "back" / "none"
+                img.templateItem = templateItem;
+                img.templateType = type;
 
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.renderAll();
+
+                syncTemplateInputs(img, type);
             });
         }
 
@@ -601,15 +620,10 @@
         function bindCanvasUpdates(canvas, type) {
             canvas.on('object:modified', function (e) {
                 const obj = e.target;
-                if (!obj?.templateItem) return;
-                const row = obj.templateItem;
-                row.querySelector(`.template_x.${type}`).value = obj.left;
-                row.querySelector(`.template_y.${type}`).value = obj.top;
-                row.querySelector(`.template_width.${type}`).value = obj.width * obj.scaleX;
-                row.querySelector(`.template_height.${type}`).value = obj.height * obj.scaleY;
-                row.querySelector(`.template_angle.${type}`).value = obj.angle;
+                syncTemplateInputs(obj, type);
             });
         }
+
 
         bindCanvasUpdates(canvasFront, "front");
         bindCanvasUpdates(canvasBack, "back");
