@@ -364,8 +364,8 @@
             });
 
             function renderTemplatesResponse(res, append) {
-                const templates  = res.data || [];
-                const pagination = res.pagination || {};
+                const templates  = res.data.data || [];
+                const pagination = res.links || {};
 
                 if (!append) {
                     $('#templates-modal-container').empty();
@@ -417,7 +417,7 @@
                     });
                 }
 
-                nextPageUrl = pagination.next_page_url || null;
+                nextPageUrl = pagination.next || null;
 
                 if (nextPageUrl) {
                     $('#templates-modal-pagination').html(`
@@ -707,7 +707,7 @@
                     types: selectedTypes,
                 },
                 success: function (response) {
-                    const templates = Array.isArray(response) ? response : (response.data ?? []);
+                    const templates = Array.isArray(response) ? response : (response.data.data ?? []);
                     document.querySelectorAll('.template-select').forEach(select => {
                         if ($(select).data('select2')) $(select).off().select2("destroy");
                         select.innerHTML = `<option value="" disabled selected>Choose template</option>`;
