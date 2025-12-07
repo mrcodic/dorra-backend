@@ -64,7 +64,7 @@ class TemplateService extends BaseService
                     $q->whereRaw('1 = 0');
                 }
             })->when(filter_var(request('has_not_mockups'), FILTER_VALIDATE_BOOLEAN), function ($q) {
-                dd("jhhkj");
+                dd($q->whereDoesntHave('mockups')->get());
                 $q->whereDoesntHave('mockups');
             })
             ->when(request()->filled('types'), function ($query) {
