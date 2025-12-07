@@ -26,7 +26,7 @@ class CategoryController extends Controller
             'lastOffer'
             ],
         );
-        dd($categories);
+
         $categoryResourceCollection = $categories instanceof LengthAwarePaginator ?
             CategoryResource::collection($categories)->response()->getData()
             : CategoryResource::collection($categories);

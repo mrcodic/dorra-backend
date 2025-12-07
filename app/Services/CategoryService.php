@@ -22,7 +22,7 @@ class CategoryService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
-        $paginate =  request('paginate');
+        $paginate = (bool) request('paginate');
         $perPage =  request('per_page');
         $query = $this->repository->query()
             ->withLastOfferId()
@@ -50,6 +50,7 @@ class CategoryService extends BaseService
                     $query->where('is_has_category', 0)->orWhereHas('products');
                 });
             });
+
         return $paginate ? $query->paginate($perPage) : $query->get();
     }
 
