@@ -563,8 +563,21 @@
                 });
             });
         }
+        function clearTemplateDesigns(canvas, type) {
+            // Remove only images that belong to this template type
+            const objects = canvas.getObjects();
+            objects.forEach(obj => {
+                if (obj.templateType === type) {
+                    canvas.remove(obj);
+                }
+            });
+            canvas.renderAll();
+        }
 
         function loadAndBind(canvas, designUrl, type, templateItem) {
+            // 🔥 remove previous design(s) of this type from this canvas
+            clearTemplateDesigns(canvas, type);
+
             fabric.Image.fromURL(designUrl, function (img) {
                 img.set({
                     left: 150,
@@ -574,13 +587,15 @@
                     cornerStyle: "circle",
                     transparentCorners: false
                 });
-                img.templateItem = templateItem;
-                img.templateType = type;
+                img.templateItem = templateItem; // row in repeater (or null from modal)
+                img.templateType = type;         // "front" / "back" / "none"
+
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.renderAll();
             });
         }
+
 
         function bindCanvasUpdates(canvas, type) {
             canvas.on('object:modified', function (e) {
