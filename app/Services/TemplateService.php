@@ -63,7 +63,10 @@ class TemplateService extends BaseService
                 } else {
                     $q->whereRaw('1 = 0');
                 }
-            })->when(request()->filled('types'), function ($query) {
+            })->when(request()->filled('has_not_mockups'), function ($q) use ($locale) {
+                $q->whereDoesntHave('mockups');
+            })
+            ->when(request()->filled('types'), function ($query) {
                 $types = request()->input('types');
 
                 $query->whereHas('types', function ($q) use ($types) {
