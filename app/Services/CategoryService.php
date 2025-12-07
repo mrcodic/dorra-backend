@@ -50,7 +50,7 @@ class CategoryService extends BaseService
                     $query->where('is_has_category', 0)->orWhereHas('products');
                 });
             });
-        
+
         return $paginate ? $query->paginate($perPage) : $query->get();
     }
 
