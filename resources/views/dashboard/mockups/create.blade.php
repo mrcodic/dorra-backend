@@ -365,7 +365,7 @@
 
             function renderTemplatesResponse(res, append) {
                 const templates  = res.data.data || [];
-                const pagination = res.links || {};
+                const pagination = res.data.links || {};
 
                 if (!append) {
                     $('#templates-modal-container').empty();
