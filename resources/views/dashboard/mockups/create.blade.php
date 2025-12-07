@@ -510,24 +510,26 @@
         function injectLoadMoreButton($select) {
             let dropdown = $(".select2-results");
 
-            if (dropdown.find(".load-all-btn").length) return;
+            // avoid duplicates
+            dropdown.find(".load-all-wrapper").remove();
 
             dropdown.append(`
-        <div class="text-center py-1 border-top">
-            <button type="button" class="btn btn-sm btn-outline-primary load-all-btn" data-bs-toggle="modal" data-bs-target="#templateModal">
+        <div class="load-all-wrapper text-center py-1 border-top">
+            <button type="button"
+                class="btn btn-sm btn-outline-primary load-all-btn">
                 Show Remaining Templates
             </button>
         </div>
     `);
 
-            $(".load-all-btn").on("click", function (e) {
+            dropdown.find(".load-all-btn").off("click.loadAll").on("click.loadAll", function (e) {
                 e.preventDefault();
 
-                // 🟢 this is the select that opened the modal
-                const select = $(this).closest('.select2-container')
-                    .prev('.template-select')[0];
+                // ✅ هنا نخزن الـ select الحقيقي مباشرة
+                $('#templateModal').data('origin-select', $select[0]);
 
-                $('#templateModal').data('origin-select', select);
+                // افتح المودال يدويًا
+                $('#templateModal').modal('show');
             });
         }
 
