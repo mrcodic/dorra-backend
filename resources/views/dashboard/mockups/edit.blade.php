@@ -137,56 +137,51 @@
 
                             <div class="template-repeater row d-none" id="template-wrapper">
                                 <div data-repeater-list="templates">
-                                    <div data-repeater-item class="row template-item align-items-end">
-                                        <!-- TEMPLATE SELECT -->
-                                        <div class="form-group mb-2 col-8">
-                                            <label class="label-text mb-1">Template</label>
-                                            <select class="template-select" name="template_id" data-page="1"></select>
+                                    @foreach($model->templates as $tpl)
+                                        <div data-repeater-item class="row template-item align-items-end">
+                                            <div class="form-group mb-2 col-8">
+                                                <label class="label-text mb-1">Template</label>
 
+                                                <select class="template-select" name="template_id">
+                                                    <option value="{{ $tpl->template_id }}" selected
+                                                            data-image="{{ $tpl->front_image }}"
+                                                            data-back-image="{{ $tpl->back_image }}">
+                                                        {{ $tpl->name }}
+                                                    </option>
+                                                </select>
 
-                                            <div class="template-preview mt-25">
-                                                <img class="front-preview rounded-circle" style="width:40px;height:40px;display:none;">
-                                                <img class="back-preview rounded-circle" style="width:40px;height:40px;display:none;">
+                                                <div class="template-preview mt-25">
+                                                    @if($tpl->front_image)
+                                                        <img src="{{ $tpl->front_image }}" class="front-preview rounded-circle" style="width:40px;height:40px;">
+                                                    @endif
+                                                    @if($tpl->back_image)
+                                                        <img src="{{ $tpl->back_image }}" class="back-preview rounded-circle" style="width:40px;height:40px;">
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group mb-2 col-4">
+                                                <button type="button" class="btn btn-primary w-100 show-template-canvas">
+                                                    Show on Canvas
+                                                </button>
+                                            </div>
+
+                                            <!-- HIDDEN VALUES RESTORED -->
+                                            <input type="hidden" name="front_x" value="{{ $tpl->front_x }}" class="template_x front">
+                                            <input type="hidden" name="front_y" value="{{ $tpl->front_y }}" class="template_y front">
+                                            <input type="hidden" name="front_width" value="{{ $tpl->front_width }}" class="template_width front">
+                                            <input type="hidden" name="front_height" value="{{ $tpl->front_height }}" class="template_height front">
+                                            <input type="hidden" name="front_angle" value="{{ $tpl->front_angle }}" class="template_angle front">
+
+                                            <!-- same for back + none -->
+
+                                            <div class="col-12 text-end mt-2">
+                                                <button type="button" data-repeater-delete class="btn btn-sm btn-light-danger">
+                                                    Remove Template
+                                                </button>
                                             </div>
                                         </div>
-
-                                        <!-- SHOW ON CANVAS BUTTON -->
-                                        <div class="form-group mb-2 col-4">
-                                            <button type="button" class="btn btn-primary w-100 show-template-canvas">
-                                                Show on Canvas
-                                            </button>
-                                        </div>
-
-                                        <!-- Hidden inputs for this template -->
-                                        <!-- FRONT -->
-                                        <input type="hidden" name="templates[][front_x]" class="template_x front">
-                                        <input type="hidden" name="templates[][front_y]" class="template_y front">
-                                        <input type="hidden" name="templates[][front_width]" class="template_width front">
-                                        <input type="hidden" name="templates[][front_height]" class="template_height front">
-                                        <input type="hidden" name="templates[][front_angle]" class="template_angle front">
-
-                                        <!-- BACK -->
-                                        <input type="hidden" name="templates[][back_x]" class="template_x back">
-                                        <input type="hidden" name="templates[][back_y]" class="template_y back">
-                                        <input type="hidden" name="templates[][back_width]" class="template_width back">
-                                        <input type="hidden" name="templates[][back_height]" class="template_height back">
-                                        <input type="hidden" name="templates[][back_angle]" class="template_angle back">
-
-                                        <!-- NONE -->
-                                        <input type="hidden" name="templates[][none_x]" class="template_x none">
-                                        <input type="hidden" name="templates[][none_y]" class="template_y none">
-                                        <input type="hidden" name="templates[][none_width]" class="template_width none">
-                                        <input type="hidden" name="templates[][none_height]" class="template_height none">
-                                        <input type="hidden" name="templates[][none_angle]" class="template_angle none">
-
-                                        <!-- DELETE BUTTON -->
-                                        <div class="col-12 text-end mt-2">
-                                            <button type="button" data-repeater-delete class="btn btn-sm btn-light-danger">
-                                                Remove Template
-                                            </button>
-                                        </div>
-                                    </div>
-
+                                    @endforeach
                                 </div>
 
                                 <!-- ADD BUTTON -->
@@ -265,7 +260,7 @@
             'none_base'  => $model->none_base_image_url,
             'none_mask'  => $model->none_mask_image_url,
         ];
-   
+
     @endphp
 @endsection
 
