@@ -4,281 +4,335 @@
 @section('main-page', 'Create Mockup')
 
 @section('vendor-style')
-    {{-- Page Css files --}}
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
-    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
-    <style>
-        .gradient-picker-trigger {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-image: url('/images/AddColor.svg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            border: 1px solid #ccc;
-            cursor: pointer;
-            position: relative;
-        }
-        .gradient-picker-trigger .pcr-button {
-            display: none !important;
-        }
-        .selected-color-wrapper {
-            width: 28px;
-            height: 28px;
-        }
-        .selected-color-dot {
-            width: 100%;
-            height: 100%;
-            padding: 1px;
-            border-radius: 50%;
-            border: 2px solid #ccc;
-            box-sizing: border-box;
-            background-clip: content-box;
-        }
-        .selected-color-inner {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-        }
-        .remove-color-btn {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: #F4F6F6 !important;
-            color: #424746 !important;
-            border-radius: 5px;
-            width: 16px;
-            height: 16px;
-            font-size: 16px;
-            line-height: 1;
-            padding: 1px;
-            display: none;
-        }
-        .selected-color-wrapper:hover .remove-color-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .gradient-edit-picker-trigger {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-image: url('/images/AddColor.svg') !important;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            border: 1px solid #ccc;
-            cursor: pointer;
-            position: relative;
-        }
-        .gradient-edit-picker-trigger .pcr-button {
-            display: none !important;
-        }
-    </style>
+{{-- Page Css files --}}
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
+<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+<style>
+    .gradient-picker-trigger {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-image: url('/images/AddColor.svg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .gradient-picker-trigger .pcr-button {
+        display: none !important;
+    }
+
+    .selected-color-wrapper {
+        width: 28px;
+        height: 28px;
+    }
+
+    .selected-color-dot {
+        width: 100%;
+        height: 100%;
+        padding: 1px;
+        border-radius: 50%;
+        border: 2px solid #ccc;
+        box-sizing: border-box;
+        background-clip: content-box;
+    }
+
+    .selected-color-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+    }
+
+    .remove-color-btn {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #F4F6F6 !important;
+        color: #424746 !important;
+        border-radius: 5px;
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        line-height: 1;
+        padding: 1px;
+        display: none;
+    }
+
+    .selected-color-wrapper:hover .remove-color-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .gradient-edit-picker-trigger {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-image: url('/images/AddColor.svg') !important;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .gradient-edit-picker-trigger .pcr-button {
+        display: none !important;
+    }
+
+    /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
+    .type-block {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box;
+        margin-bottom: .75rem;
+    }
+
+    /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
+    .type-block>.d-flex {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    /* تأكد أن الحاوية اليسرى عمودية */
+    #left-column {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: .75rem;
+    }
+
+    /* لو محتاج تجاويف داخل البلوكات */
+    .upload-card {
+        box-sizing: border-box;
+    }
+</style>
 @endsection
 
 @section('page-style')
-    {{-- Page Css files --}}
-    <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+{{-- Page Css files --}}
+<link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 @endsection
 
 @section('content')
-    <!-- users list start -->
-    <section class="">
-        <div class="card">
-            <div class="card-body">
-                <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
-                    @csrf
-                    <div class="modal-body flex-grow-1">
-                        <div class="">
-                            <div class="form-group mb-2">
-                                <label for="templateName" class="label-text mb-1">Mockup Name</label>
-                                <input type="text" id="templateName" class="form-control" name="name"
-                                       placeholder="Mockup Name">
-                            </div>
+<!-- users list start -->
+<section class="">
+    <div class="card">
+        <div class="card-body">
+            <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
+                @csrf
+                <div class="modal-body flex-grow-1">
+                    <div class="position-relative text-center mb-2">
+                        <hr class="opacity-75" style="border: 1px solid #24B094;">
+                        <span
+                            class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                            style="color: #24B094">
+                            Mockup Details
+                        </span>
+                    </div>
+                    <div class="row">
+                        <div class="form-group mb-2 col-md-3">
+                            <input type="text" id="templateName" class="form-control" name="name"
+                                placeholder="Mockup Name">
+                        </div>
 
-                            <div class="form-group mb-2">
-                                <label for="mockup-type" class="label-text mb-1">Mockup Type</label>
-                                <div class="row">
-                                    @foreach($associatedData['types'] as $type)
-                                        <div class="col-md-4 mb-1">
-                                            <label class="radio-box">
-                                                <input class="form-check-input type-checkbox" type="checkbox"
-                                                       name="types[]"
-                                                       value="{{ $type->value }}"
-                                                       data-type-name="{{ strtolower($type->value->name) }}">
-                                                <span>{{ $type->value->label() }}</span>
-                                            </label>
-                                        </div>
-                                    @endforeach
+                        <div class="form-group mb-2 col-md-9">
+                            <div class="row">
+                                @foreach($associatedData['types'] as $type)
+                                <div class="col-md-4 mb-1">
+                                    <label class="radio-box">
+                                        <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
+                                            value="{{ $type->value }}"
+                                            data-type-name="{{ strtolower($type->value->name) }}">
+                                        <span>{{ $type->value->label() }}</span>
+                                    </label>
                                 </div>
+                                @endforeach
                             </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
+                        <div id="left-column" class="d-flex flex-column" style="width:60%;">
+                            <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
+                            <div id="fixed-block"></div>
 
-                            <div class="form-group mb-2">
-                                <label for="productsSelect" class="label-text mb-1">Product</label>
-                                <select id="productsSelect" name="category_id" class="form-select">
-                                    <option value="" disabled selected>Choose product</option>
-                                    @foreach($associatedData['products'] as $product)
-                                        <option value="{{ $product->id }}">
-                                            {{ $product->getTranslation('name', app()->getLocale()) }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                            <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
+                            <div id="fileInputsContainer"></div>
+                        </div>
+
+                        <!-- العمود اليمين: الـ editor / preview -->
+                        <div class="d-flex flex-column gap-2 justify-content-between">
+                            <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
+                                <label class="label-text">Mockup Editor (Front)</label>
+                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
                             </div>
+                            <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
+                                <label class="label-text">Mockup Editor (Back)</label>
+                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
 
-                            <div class="template-repeater row d-none" id="template-wrapper">
-                                <div data-repeater-list="templates">
-                                    <div data-repeater-item class="row template-item align-items-end">
-                                        <!-- TEMPLATE SELECT -->
-                                        <div class="form-group mb-2 col-8">
-                                            <label class="label-text mb-1">Template</label>
-                                            <select class="template-select" name="template_id" data-page="1"></select>
+                    <div class="form-group mb-2">
+                        <label for="productsSelect" class="label-text mb-1">Product</label>
+                        <select id="productsSelect" name="category_id" class="form-select">
+                            <option value="" disabled selected>Choose product</option>
+                            @foreach($associatedData['products'] as $product)
+                            <option value="{{ $product->id }}">
+                                {{ $product->getTranslation('name', app()->getLocale()) }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="template-repeater row d-none" id="template-wrapper">
+                        <div data-repeater-list="templates">
+                            <div data-repeater-item class="row template-item align-items-end">
+                                <!-- TEMPLATE SELECT -->
+                                <div class="form-group mb-2 col-8">
+                                    <label class="label-text mb-1">Template</label>
+                                    <select class="template-select" name="template_id" data-page="1"></select>
 
 
-                                            <div class="template-preview mt-25">
-                                                <img class="front-preview rounded-circle" style="width:40px;height:40px;display:none;">
-                                                <img class="back-preview rounded-circle" style="width:40px;height:40px;display:none;">
-                                            </div>
-                                        </div>
-
-                                        <!-- SHOW ON CANVAS BUTTON -->
-                                        <div class="form-group mb-2 col-4">
-                                            <button type="button" class="btn btn-primary w-100 show-template-canvas">
-                                                Show on Canvas
-                                            </button>
-                                        </div>
-
-                                        <!-- Hidden inputs for this template -->
-                                        <!-- FRONT -->
-                                        <input type="hidden" name="templates[][front_x]" class="template_x front">
-                                        <input type="hidden" name="templates[][front_y]" class="template_y front">
-                                        <input type="hidden" name="templates[][front_width]" class="template_width front">
-                                        <input type="hidden" name="templates[][front_height]" class="template_height front">
-                                        <input type="hidden" name="templates[][front_angle]" class="template_angle front">
-
-                                        <!-- BACK -->
-                                        <input type="hidden" name="templates[][back_x]" class="template_x back">
-                                        <input type="hidden" name="templates[][back_y]" class="template_y back">
-                                        <input type="hidden" name="templates[][back_width]" class="template_width back">
-                                        <input type="hidden" name="templates[][back_height]" class="template_height back">
-                                        <input type="hidden" name="templates[][back_angle]" class="template_angle back">
-
-                                        <!-- NONE -->
-                                        <input type="hidden" name="templates[][none_x]" class="template_x none">
-                                        <input type="hidden" name="templates[][none_y]" class="template_y none">
-                                        <input type="hidden" name="templates[][none_width]" class="template_width none">
-                                        <input type="hidden" name="templates[][none_height]" class="template_height none">
-                                        <input type="hidden" name="templates[][none_angle]" class="template_angle none">
-
-                                        <!-- DELETE BUTTON -->
-                                        <div class="col-12 text-end mt-2">
-                                            <button type="button" data-repeater-delete class="btn btn-sm btn-light-danger">
-                                                Remove Template
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <!-- ADD BUTTON -->
-                                <div class="row mt-1">
-                                    <div class="col-12">
-                                        <button type="button" data-repeater-create class="w-100 rounded-3 p-1 text-dark"
-                                                style="border: 2px dashed #CED5D4; background-color: #EBEFEF">
-                                            <i data-feather="plus"></i> Add New Template
-                                        </button>
+                                    <div class="template-preview mt-25">
+                                        <img class="front-preview rounded-circle"
+                                            style="width:40px;height:40px;display:none;">
+                                        <img class="back-preview rounded-circle"
+                                            style="width:40px;height:40px;display:none;">
                                     </div>
                                 </div>
+
+                                <!-- SHOW ON CANVAS BUTTON -->
+                                <div class="form-group mb-2 col-4">
+                                    <button type="button" class="btn btn-primary w-100 show-template-canvas">
+                                        Show on Canvas
+                                    </button>
+                                </div>
+
+                                <!-- Hidden inputs for this template -->
+                                <!-- FRONT -->
+                                <input type="hidden" name="templates[][front_x]" class="template_x front">
+                                <input type="hidden" name="templates[][front_y]" class="template_y front">
+                                <input type="hidden" name="templates[][front_width]" class="template_width front">
+                                <input type="hidden" name="templates[][front_height]" class="template_height front">
+                                <input type="hidden" name="templates[][front_angle]" class="template_angle front">
+
+                                <!-- BACK -->
+                                <input type="hidden" name="templates[][back_x]" class="template_x back">
+                                <input type="hidden" name="templates[][back_y]" class="template_y back">
+                                <input type="hidden" name="templates[][back_width]" class="template_width back">
+                                <input type="hidden" name="templates[][back_height]" class="template_height back">
+                                <input type="hidden" name="templates[][back_angle]" class="template_angle back">
+
+                                <!-- NONE -->
+                                <input type="hidden" name="templates[][none_x]" class="template_x none">
+                                <input type="hidden" name="templates[][none_y]" class="template_y none">
+                                <input type="hidden" name="templates[][none_width]" class="template_width none">
+                                <input type="hidden" name="templates[][none_height]" class="template_height none">
+                                <input type="hidden" name="templates[][none_angle]" class="template_angle none">
+
+                                <!-- DELETE BUTTON -->
+                                <div class="col-12 text-end mt-2">
+                                    <button type="button" data-repeater-delete class="btn btn-sm btn-light-danger">
+                                        Remove Template
+                                    </button>
+                                </div>
                             </div>
 
                         </div>
 
-                        <div class="col-md-12">
-                            <div id="fileInputsContainer" class="dynamic-upload-container mb-1"></div>
+                        <!-- ADD BUTTON -->
+                        <div class="row mt-1">
+                            <div class="col-12">
+                                <button type="button" data-repeater-create class="w-100 rounded-3 p-1 text-dark"
+                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF">
+                                    <i data-feather="plus"></i> Add New Template
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                        <div class="mt-2 d-none" id="editorFrontWrapper">
-                            <label class="label-text">Mockup Editor (Front)</label>
-                            <canvas id="mockupCanvasFront" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                        </div>
-
-                        <div class="mt-2 d-none" id="editorBackWrapper">
-                            <label class="label-text">Mockup Editor (Back)</label>
-                            <canvas id="mockupCanvasBack" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                        </div>
-
-                        <div class="mt-2 d-none" id="editorNoneWrapper">
-                            <label class="label-text">Mockup Editor (General)</label>
-                            <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                        </div>
-                    <div class="d-flex justify-content-end mt-2 ">
-                        <button type="button"
-                                class="btn btn-sm btn-primary d-none"
-                                id="saveTemplatePositionsBtn">
-                           Save Template Positions
-                        </button>
+                    <div class="col-md-12">
+                        <div id="fileInputsContainer" class="dynamic-upload-container mb-1"></div>
                     </div>
+                </div>
 
-                    <div class="mb-2">
-                        <label class="label-text mb-1 d-block">Colors</label>
-                        <div class="d-flex flex-wrap align-items-center gap-1">
-                            <button type="button" id="openColorPicker"
-                                    class="gradient-picker-trigger border"></button>
+                {{-- <div class="mt-2 d-none" id="editorBackWrapper">
+                    <label class="label-text">Mockup Editor (Back)</label>
+                    <canvas id="mockupCanvasBack" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                </div> --}}
 
-                            <span id="selected-colors"
-                                  class="d-flex gap-1 flex-wrap align-items-center"></span>
-                        </div>
-                        <div id="colorsInputContainer"></div>
+                <div class="mt-2 d-none" id="editorNoneWrapper">
+                    <label class="label-text">Mockup Editor (General)</label>
+                    <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                </div>
+                <div class="d-flex justify-content-end mt-2 ">
+                    <button type="button" class="btn btn-sm btn-primary d-none" id="saveTemplatePositionsBtn">
+                        Save Template Positions
+                    </button>
+                </div>
+
+                <div class="mb-2">
+                    <label class="label-text mb-1 d-block">Colors</label>
+                    <div class="d-flex flex-wrap align-items-center gap-1">
+                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+
+                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
                     </div>
+                    <div id="colorsInputContainer"></div>
+                </div>
 
-                    <div class="modal-footer border-top-0">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                            <span class="btn-text">Create</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
-                                  role="status" aria-hidden="true"></span>
-                        </button>
-                    </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                        <span class="btn-text">Create</span>
+                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                            aria-hidden="true"></span>
+                    </button>
+                </div>
 
-                </form>
-            </div>
+            </form>
         </div>
-        @include("modals.templates.template-modal")
-    </section>
-    <!-- users list ends -->
+    </div>
+    @include("modals.templates.template-modal")
+</section>
+<!-- users list ends -->
 @endsection
 
 @section('vendor-script')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
 
-    {{-- Vendor js files --}}
-    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+{{-- Vendor js files --}}
+<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
 
-    <script>
-        $(function () {
+<script>
+    $(function () {
             let nextPageUrl = null; // from pagination.next_page_url
 
             // When modal is about to open
@@ -493,10 +547,10 @@
 
 
         });
-    </script>
+</script>
 
-    <script>
-        // =========================
+<script>
+    // =========================
         // SELECT2 FORMATTER
         // =========================
         function formatTemplateOption(option) {
@@ -787,9 +841,9 @@
         bindCanvasUpdates(canvasFront, "front");
         bindCanvasUpdates(canvasBack, "back");
         bindCanvasUpdates(canvasNone, "none");
-    </script>
-    <script>
-        // Global handler for all ".show-template-canvas" clicks
+</script>
+<script>
+    // Global handler for all ".show-template-canvas" clicks
         document.addEventListener('click', function (e) {
             const btn = e.target.closest('.show-template-canvas');
             if (!btn) return;
@@ -839,10 +893,10 @@
                 return;
             }
         });
-    </script>
+</script>
 
-    <script>
-        const locale = "{{ app()->getLocale() }}";
+<script>
+    const locale = "{{ app()->getLocale() }}";
 
         window.updateTemplateVisibility = function () {
             const productSelect = document.getElementById('productsSelect');
@@ -929,9 +983,9 @@
             });
         };
 
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
             const productSelect = document.getElementById("productsSelect");
             productSelect?.addEventListener("change", () => {
                 updateTemplateVisibility();
@@ -978,9 +1032,9 @@
                 });
             }, 50);
         });
-    </script>
-    <script>
-        const checkboxes = document.querySelectorAll('.type-checkbox');
+</script>
+<script>
+    const checkboxes = document.querySelectorAll('.type-checkbox');
         const fileInputsContainer = document.getElementById('fileInputsContainer');
 
         function toggleCheckboxes() {
@@ -1026,13 +1080,16 @@
                 const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
 
                 const block = document.createElement('div');
-                block.classList.add('mb-3');
+                block.classList.add('type-block', );
                 block.id = `${type}-file-block`;  // ⬅ Important: uniform ID for removal
 
                 block.innerHTML = `
-            <label class="form-label label-text">${typeLabel} Base Image</label>
-            <input type="file" name="${type}_base_image" id="${type}-base-input"
-                   class="d-none" accept="image/*">
+            <div class="d-flex justify-content-between gap-4">
+                <div>
+                     <label class="form-label label-text">${typeLabel} Base Image</label>
+                     <input type="file" name="${type}_base_image" id="${type}-base-input"
+                        class="d-none" accept="image/*">
+                
 
             <div class="upload-card upload-area" data-input-id="${type}-base-input">
                 <div class="upload-content">
@@ -1041,8 +1098,10 @@
                     <div class="preview mt-1"></div>
                 </div>
             </div>
+            </div>
 
-            <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
+            <div>
+            <label class="form-label label-text">${typeLabel} Mask Image</label>
             <input type="file" name="${type}_mask_image" id="${type}-mask-input"
                    class="d-none" accept="image/*">
 
@@ -1053,9 +1112,14 @@
                     <div class="preview mt-1"></div>
                 </div>
             </div>
-        `;
+            </div>
 
-                fileInputsContainer.appendChild(block);
+            </div>
+        `;
+            const target = document.getElementById("fixed-block");
+            target.before(block);
+
+                // fileInputsContainer.appendChild(block);
             });
 
             feather.replace();
@@ -1144,10 +1208,10 @@
         }
 
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));
-    </script>
+</script>
 
-    <script>
-        $(document).ready(function () {
+<script>
+    $(document).ready(function () {
             handleAjaxFormSubmit("#addMockupForm", {
                 successMessage: "Mockup Created Successfully",
                 onSuccess: function () {
@@ -1313,5 +1377,5 @@
                 container.appendChild(hiddenInput);
             });
         }
-    </script>
+</script>
 @endsection
