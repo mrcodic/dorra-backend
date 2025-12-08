@@ -425,7 +425,6 @@
                     });
                 }
 
-
                 nextPageUrl = pagination.next || null;
 
                 if (nextPageUrl) {
@@ -605,13 +604,81 @@
             heightInput.value = obj.height * obj.scaleY;
             angleInput.value  = obj.angle || 0;
         }
+        function clearTemplateInputsForObject(obj, type) {
+            if (!obj?.templateItem) return;
 
+            const row = obj.templateItem;
+
+            const xInput      = row.querySelector(`.template_x.${type}`);
+            const yInput      = row.querySelector(`.template_y.${type}`);
+            const widthInput  = row.querySelector(`.template_width.${type}`);
+            const heightInput = row.querySelector(`.template_height.${type}`);
+            const angleInput  = row.querySelector(`.template_angle.${type}`);
+            const select      = row.querySelector('.template-select');
+
+            [xInput, yInput, widthInput, heightInput, angleInput].forEach(inp => {
+                if (inp) inp.value = '';
+            });
+
+            if (select) {
+                select.value = '';
+                if ($(select).data('select2')) {
+                    $(select).val(null).trigger('change');
+                }
+            }
+        }
+        function renderDeleteIcon(ctx, left, top, styleOverride, fabricObject) {
+            const size = 18; // حجم الأيقونة
+
+            ctx.save();
+
+            // خلفية دائرية
+            ctx.beginPath();
+            ctx.arc(left, top, size / 2, 0, Math.PI * 2, false);
+            ctx.fillStyle = "#ff4d4f"; // أحمر (لو عايز تغيّر براحتك)
+            ctx.fill();
+
+            // علامة X
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(left - 4, top - 4);
+            ctx.lineTo(left + 4, top + 4);
+            ctx.moveTo(left + 4, top - 4);
+            ctx.lineTo(left - 4, top + 4);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+        function addDeleteControl(obj, type) {
+            obj.controls.deleteControl = new fabric.Control({
+                x: 0.5,           // يمين فوق
+                y: -0.5,
+                offsetX: 0,
+                offsetY: 0,
+                cursorStyle: 'pointer',
+                cornerSize: 24,
+                mouseUpHandler: function (eventData, transform) {
+                    const target = transform.target;
+                    const canvas = target.canvas;
+
+                    // امسح قيم الحقول المرتبطة
+                    clearTemplateInputsForObject(target, type);
+
+                    // امسح الـ object نفسه
+                    canvas.remove(target);
+                    canvas.requestRenderAll();
+
+                    return true;
+                },
+                render: renderDeleteIcon
+            });
+        }
 
         function loadAndBind(canvas, designUrl, type, templateItem) {
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
-                // default placement (fallback)
                 img.set({
                     left: 150,
                     top: 150,
@@ -623,7 +690,7 @@
                 img.templateItem = templateItem || null;
                 img.templateType = type;
 
-                // ✅ If this design belongs to a repeater row, try to restore saved values
+                // 🔁 استرجاع القيم المحفوظة لو فيه templateItem
                 if (templateItem) {
                     const xInput      = templateItem.querySelector(`.template_x.${type}`);
                     const yInput      = templateItem.querySelector(`.template_y.${type}`);
@@ -638,7 +705,6 @@
                         const savedHeight = parseFloat(heightInput.value);
                         const savedAngle  = parseFloat(angleInput.value);
 
-                        // لو فيه قيم محفوظة نرجع لها بدل الـ 150/150
                         if (!isNaN(savedLeft))  img.left  = savedLeft;
                         if (!isNaN(savedTop))   img.top   = savedTop;
                         if (!isNaN(savedAngle)) img.angle = savedAngle;
@@ -652,14 +718,18 @@
                     }
                 }
 
+                // ✅ هنا نضيف أيقونة الـ delete فوق التصميم
+                addDeleteControl(img, type);
+
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.renderAll();
 
-                // أول مزامنة للحقول بعد اللود
+                // أول sync للحقول
                 syncTemplateInputs(img, type);
             });
         }
+
         function saveAllTemplatePositions() {
             // front
             if (canvasFront) {
